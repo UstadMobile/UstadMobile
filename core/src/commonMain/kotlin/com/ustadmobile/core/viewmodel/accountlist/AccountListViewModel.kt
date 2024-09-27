@@ -1,7 +1,9 @@
 package com.ustadmobile.core.viewmodel.accountlist
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.share.ShareAppUseCase
@@ -15,16 +17,20 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isGuestUser
 import com.ustadmobile.core.util.ext.isTemporary
 import com.ustadmobile.core.util.ext.navigateToLink
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
-import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,6 +40,7 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 /**
  *
@@ -70,7 +77,7 @@ class AccountListViewModel(
     private val startUserSessionUseCase: StartUserSessionUseCase = StartUserSessionUseCase(
         accountManager = di.direct.instance(),
     )
-): UstadViewModel(di, savedStateHandle, DEST_NAME) {
+) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val endpointFilter = savedStateHandle[ARG_FILTER_BY_LEARNINGSPACE]
 
@@ -98,16 +105,21 @@ class AccountListViewModel(
 
     private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
 
+    val presetRepo = apiUrlConfig.presetLearningSpaceUrl?.let {
+        di.on(LearningSpace(it)).direct.instance<UmAppDataLayer>().repository
+    }
+
     private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
         ?.toBoolean() ?: false
 
     init {
+
         _appUiState.value = AppUiState(
             userAccountIconVisible = false,
             navigationVisible = false,
-            title = if(savedStateHandle[UstadListViewModel.ARG_LISTMODE] == ListViewMode.PICKER.mode) {
+            title = if (savedStateHandle[UstadListViewModel.ARG_LISTMODE] == ListViewMode.PICKER.mode) {
                 systemImpl.getString(MR.strings.select_account)
-            }else {
+            } else {
                 systemImpl.getString(MR.strings.accounts)
             }
         )
@@ -135,8 +147,10 @@ class AccountListViewModel(
                         val isFilteredOutActiveAccount =
                             (activeAccountMode == ACTIVE_ACCOUNT_MODE_HEADER &&
                                     it.userSession.usUid == currentUserSessionUid)
-                        val isFilteredOutByEndpoint = (endpointFilter != null && it.learningSpace.url != endpointFilter)
-                        val isFilteredOutByDateOfBirth = (maxDateOfBirth > 0 && it.person.dateOfBirth > maxDateOfBirth)
+                        val isFilteredOutByEndpoint =
+                            (endpointFilter != null && it.learningSpace.url != endpointFilter)
+                        val isFilteredOutByDateOfBirth =
+                            (maxDateOfBirth > 0 && it.person.dateOfBirth > maxDateOfBirth)
 
                         !(isFilteredOutActiveAccount ||
                                 isFilteredOutByEndpoint ||
@@ -172,53 +186,76 @@ class AccountListViewModel(
             navController.navigateToLink(
                 link = ClazzListViewModel.DEST_NAME_HOME,
                 accountManager = accountManager,
-                openExternalLinkUseCase = { _, _ ->  },
+                openExternalLinkUseCase = { _, _ -> },
                 userCanSelectServer = apiUrlConfig.canSelectServer,
                 goOptions = UstadMobileSystemCommon.UstadGoOptions(
                     clearStack = true,
-                )
+                ),
+                repo = { di.on(it).direct.instance<UmAppDataLayer>().requireRepository() },
+                presetLearningSpaceUrl = apiUrlConfig.presetLearningSpaceUrl
             )
         }
     }
 
     fun onClickProfile() {
         val personUid = _uiState.value.headerAccount?.person?.personUid ?: return
-        navController.navigate(PersonDetailViewModel.DEST_NAME, mapOf(
-            ARG_ENTITY_UID to personUid.toString()
-        ))
+        navController.navigate(
+            PersonDetailViewModel.DEST_NAME, mapOf(
+                ARG_ENTITY_UID to personUid.toString()
+            )
+        )
     }
 
-    fun onClickAddAccount(){
+    fun onClickAddAccount() {
         val args = buildMap {
-            if(endpointFilter != null)
+            if (endpointFilter != null)
                 put(ARG_SERVER_URL, endpointFilter)
 
             putFromSavedStateIfPresent(listOf(ARG_NEXT, ARG_DONT_SET_CURRENT_SESSION))
 
             put(ARG_MAX_DATE_OF_BIRTH, savedStateHandle[ARG_MAX_DATE_OF_BIRTH] ?: "0")
         }
-        if(endpointFilter != null || !apiUrlConfig.canSelectServer) {
-            navController.navigate(
-                viewName = LoginViewModel.DEST_NAME,
-                args = args
-            )
-        }else {
-            //Go to site enter link
-            navController.navigate(
-                viewName = SiteEnterLinkViewModel.DEST_NAME,
-                args = args,
-            )
+
+        viewModelScope.launch {
+            if (presetRepo != null && presetRepo.siteDao()
+                    .getSiteAsync()?.registrationAllowed == false
+            ) {
+                val arg = buildMap {
+                    putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+                    put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, "existing")
+                    put(
+                        ARG_LEARNINGSPACE_URL,
+                        apiUrlConfig.presetLearningSpaceUrl.toString()
+                    )
+
+                }
+                navController.navigate(
+                    LoginViewModel.DEST_NAME,
+                    arg
+                )
+            } else {
+                navController.navigate(
+                    viewName = AddAccountSelectNewOrExistingViewModel.DEST_NAME,
+                    args = args,
+                )
+            }
         }
+
     }
 
     /**
      * Switch accounts
      */
     fun onClickAccount(sessionWithPersonAndLearningSpace: UserSessionWithPersonAndLearningSpace) {
+        val viewName = if (sessionWithPersonAndLearningSpace.person.isPersonalAccount) {
+            ContentEntryListViewModel.DEST_NAME_HOME
+        } else {
+            ClazzListViewModel.DEST_NAME_HOME
+        }
         startUserSessionUseCase(
             session = sessionWithPersonAndLearningSpace,
             navController = navController,
-            nextDest = savedStateHandle[ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME,
+            nextDest = savedStateHandle[ARG_NEXT] ?: viewName,
             dontSetCurrentSession = dontSetCurrentSession,
         )
     }
@@ -232,11 +269,11 @@ class AccountListViewModel(
 
     fun onClickOpenLicenses() {
         val launchUseCaseVal = launchOpenLicensesUseCase
-        if(launchUseCaseVal != null) {
+        if (launchUseCaseVal != null) {
             viewModelScope.launch {
                 launchUseCaseVal()
             }
-        }else {
+        } else {
             navController.navigate(OpenLicensesViewModel.DEST_NAME, emptyMap())
         }
     }

@@ -354,23 +354,32 @@ class UstadAccountManager(
         passkeyResult: PasskeyResult,
         person: Person,
         personPicture: PersonPicture?,
-    ) {
+    ) = withContext(Dispatchers.Default) {
         val learningSpace = LearningSpace(learningSpaceUrl)
 
         val savePassKeyUseCase: SavePersonPasskeyUseCase = di.on(learningSpace).direct.instance()
         savePassKeyUseCase.invoke(passkeyResult)
 
-        //Must ensure that the site object is loaded to get auth salt.
         val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
-            .repositoryOrLocalDb
-        getSiteFromDbOrLoadFromHttp(repo)
-        if(repo.personDao().findByUidAsync(person.personUid) == null) {
-            repo.personDao().insertAsync(person)
+            .requireRepository()
+        try {
+            getSiteFromDbOrLoadFromHttp(repo)
+        }catch (e:Exception){
+
         }
+
+
+
         val session = addSession(person, learningSpaceUrl, null)
+        repo.withDoorTransactionAsync {
+            if (repo.personDao().findByUidAsync(person.personUid) == null) {
+                repo.personDao().insertAsync(person)
+            }
+        }
+        val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
+
 
         currentUserSession = session
-
 
     }
 
@@ -536,13 +545,22 @@ class UstadAccountManager(
             removeActiveLearningSpace(session.learningSpace)
         }
     }
+
+    /**
+     *  with login with passkey ,it returns passKeySignInData , in the passKeySignInData there is
+     *  field userhandle , during creation of passkey we added the learning space url staring with @
+     *  so during login it return so endpointUrl we can get after @ , so with this url we can check in
+     *  that database where person is added.
+     */
     suspend fun loginWithPasskey(
         passKeySignInData: PassKeySignInData,
         currentServerUrl:String
-    ) = withContext(Dispatchers.Default){
+    ) : UmAccount = withContext(Dispatchers.Default){
         assertNotClosed()
+
         val userHandle = passKeySignInData.userHandle.base64StringToByteArray()
         val endpointUrl= userHandle.decodeToString().substringAfter("@")
+
         val loginResponse = httpClient.post {
             url("${endpointUrl.removeSuffix("/")}/api/passkey/verifypasskey")
             parameter("id", passKeySignInData.credentialId)
@@ -560,21 +578,25 @@ class UstadAccountManager(
         if(!passkeyVerifyResult.isVerified) {
             throw UnauthorizedException("Account not found")
         }
-        val repo: UmAppDatabase by di.on(LearningSpace(endpointUrl)).instance(tag = DoorTag.TAG_REPO)
+        val responseAccount=UmAccount(personUid = passkeyVerifyResult.personUid)
+        responseAccount.endpointUrl=currentServerUrl
+        val repo: UmAppDatabase = di.on(LearningSpace(endpointUrl)).direct.instance<UmAppDataLayer>()
+            .requireRepository()
 
         //Make sure that we fetch the person and personpicture into the database.
         val personAndPicture = repo.personDao().findByUidWithPicture(
             passkeyVerifyResult.personUid) ?: throw IllegalStateException("Cannot find person in repo/db")
         val personInDb = personAndPicture.person!! //Cannot be null based on query
+        responseAccount.isPersonalAccount=personInDb.isPersonalAccount
 
+       // val repoWithCurrentUrl: UmAppDatabase by di.on(LearningSpace(currentServerUrl)).instance(tag = DoorTag.TAG_REPO)
 
-        val repoWithCurrentUrl: UmAppDatabase by di.on(LearningSpace(currentServerUrl)).instance(tag = DoorTag.TAG_REPO)
+        getSiteFromDbOrLoadFromHttp(repo)
 
-        getSiteFromDbOrLoadFromHttp(repoWithCurrentUrl)
-
-        val newSession = addSession(personInDb, currentServerUrl, "")
+        val newSession = addSession(personInDb, currentServerUrl, null)
             currentUserSession = newSession
 
+        responseAccount
 
     }
 
@@ -621,7 +643,7 @@ class UstadAccountManager(
         val personAndPicture = dataLayer.repositoryOrLocalDb.personDao().findByUidWithPicture(
             responseAccount.personUid) ?: throw IllegalStateException("Cannot find person in repo/db")
         val personInDb = personAndPicture.person!! //Cannot be null based on query
-
+        responseAccount.isPersonalAccount=personInDb.isPersonalAccount
         getSiteFromDbOrLoadFromHttp(dataLayer.repositoryOrLocalDb)
 
         val newSession = addSession(personInDb, endpointUrl, password)

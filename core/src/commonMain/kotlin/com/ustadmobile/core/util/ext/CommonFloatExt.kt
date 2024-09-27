@@ -19,6 +19,6 @@ fun Float.toDisplayString(
     return if(round(this) == this) {
         strVal.substringBefore('.')
     }else {
-        this.roundTo(decimalPlaces).toString()
+        this.roundTo(decimalPlaces).toString().removeSuffix("0")
     }
 }

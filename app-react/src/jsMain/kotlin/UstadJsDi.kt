@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -181,6 +182,10 @@ internal fun ustadJsDi(
 
     bind<HttpClient>() with singleton {
         httpClient
+    }
+
+    bind<GetLocalAccountsSupportedUseCase>() with singleton {
+        GetLocalAccountsSupportedUseCase(false)
     }
 
     registerContextTranslator {

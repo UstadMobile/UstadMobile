@@ -165,7 +165,7 @@ val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
 val KTOR_SERVER_ROUTES = listOf(
     "/UmAppDatabase", "/config",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles"
+    "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles","/.well-known"
 )
 
 
@@ -298,6 +298,7 @@ fun Application.umRestApplication(
             allowHeader("X-nid")
             allowHeader("door-dbversion")
             allowHeader("door-node")
+            allowHeader("access-control-allow-origin")
             anyHost()
         }
     }
@@ -319,6 +320,9 @@ fun Application.umRestApplication(
     install(ConditionalHeaders)
 
     val dataDirPath = environment.config.absoluteDataDir()
+
+    val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
+
 
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
@@ -881,6 +885,7 @@ fun Application.umRestApplication(
     install(Routing) {
         val di by closestDI()
 
+
         prefixRoute(sitePrefix) {
             //addHostCheckIntercept()
             personAuthRegisterRoute()
@@ -892,6 +897,8 @@ fun Application.umRestApplication(
             SiteRoute()
 
             GetAppRoute()
+
+            staticFiles("/.well-known",wellKnownDir)
 
             route("config") {
                 route("api"){
@@ -996,12 +1003,11 @@ fun Application.umRestApplication(
                 )
             }
 
-            static("umapp") {
-                resources("umapp")
-                static("/") {
-                    defaultResource("umapp/index.html")
-                }
-            }
+            staticResources(
+                remotePath = "umapp",
+                basePackage = "umapp",
+                index = "index.html",
+            )
 
             staticResources(
                 remotePath = "staticfiles",

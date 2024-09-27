@@ -1975,10 +1975,29 @@
     <string name="existing_user">Existing user</string>
 
     <string name="personal_account">Personal Account</string>
+    <string name="signup">Sign-up</string>
+
     <string name="access_educational_content_download_offline">Access educational content and download for use offline for you, family members, etc.</string>
+
     <string name="join_learning_space">Join Learning Space</string>
+
     <string name="learning_space">Learning Space</string>
+
     <string name="individual">Individual</string>
+
     <string name="eg_for_your_school_organization">e.g. for your school/organization</string>
+
     <string name="new_learning_space">New learning space</string>
+    <string name="full_name">Full name</string>
+
+    <string name="which_profile_do_you_want_to_start">Which profile do you want to start with?</string>
+    <string name="create_passkey_for_faster_and_easier_signin">Create a passkey for faster, easier sign-in</string>
+    <string name="create_username_and_password">Create username and password</string>
+    <string name="create_local_account">Create local account</string>
+    <string name="create_passkey_for_faster_and_easier_signin">Create a passkey for faster, easier sign-in</string>
+    <string name="with_passkeys_no_complex_passwords_needed">With passkeys, you don\'t need to remember complex passwords. Instead, you can use your fingerprint, face, or screen to sign in.</string>
+    <string name="enter_link_manually">Enter link manually</string>
+    <string name="registration_not_allowed">Learning space does not allow new user registration</string>
+
+
 </resources>

@@ -27,11 +27,12 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.libuicompose.components.PickFileOptions
+import com.ustadmobile.libuicompose.components.PickType
 import com.ustadmobile.libuicompose.components.UstadPasswordField
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
+import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import com.ustadmobile.core.domain.passkey.PassKeySignInData
-import com.ustadmobile.libuicompose.util.passkey.SignInWithPasskey
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -51,7 +52,6 @@ fun LoginScreen(
         onUsernameValueChange = viewModel::onUsernameChanged,
         onPasswordValueChange = viewModel::onPasswordChanged,
         onSignInWithPasskey = viewModel::onSignInWithPassKey,
-        onClickSignUp = viewModel::onClickSignUp,
     )
 }
 
@@ -61,12 +61,14 @@ fun LoginScreen(
     onClickLogin: () -> Unit = {},
     onClickCreateAccount: () -> Unit = {},
     onClickConnectAsGuest: () -> Unit = {},
-    onClickSignUp: () -> Unit = {},
     onUsernameValueChange: (String) -> Unit = {},
     onPasswordValueChange: (String) -> Unit = {},
-    onSignInWithPasskey: (PassKeySignInData) -> Unit = {},
+    onSignInWithPasskey: () -> Unit = {},
 ) {
 
+    val filePickLauncher = rememberUstadFilePickLauncher { result ->
+
+    }
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -124,37 +126,20 @@ fun LoginScreen(
         ) {
             Text(stringResource(MR.strings.login))
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if(uiState.createAccountVisible) {
-            OutlinedButton(
-                onClick = onClickCreateAccount,
-                modifier = Modifier
-                    .testTag("create_account_button")
-                    .fillMaxWidth().defaultItemPadding(),
-                enabled = uiState.fieldsEnabled,
-            ) {
-                Text(stringResource(MR.strings.create_account))
-            }
-
+        if(uiState.isPersonalAccount) {
             Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedButton(
+                onClick = { filePickLauncher(PickFileOptions(pickType = PickType.FILE)) },
+                modifier = Modifier
+                    .testTag("restore_local_account")
+                    .defaultItemPadding()
+                    .fillMaxWidth(),
+            ) {
+                Text(stringResource(MR.strings.restore_local_account_title))
+            }
         }
 
-        SignInWithPasskey(
-            onSignInWithPasskey={
-                onSignInWithPasskey(it)
-            }
-        )
-        OutlinedButton(
-            onClick = onClickSignUp,
-            modifier = Modifier
-                .testTag("connect_as_guest_button")
-                .defaultItemPadding()
-                .fillMaxWidth(),
-        ) {
-            Text("Sign Up")
-        }
         Spacer(modifier = Modifier.height(10.dp))
         if(uiState.connectAsGuestVisible) {
             OutlinedButton(

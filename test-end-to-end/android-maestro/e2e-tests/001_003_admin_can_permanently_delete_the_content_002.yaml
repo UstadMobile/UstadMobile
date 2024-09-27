@@ -1,0 +1,52 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_003_admin_can_permanently_delete_the_content_002"
+  TESTNAME: "001_003_admin_can_permanently_delete_the_content_002"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow:
+    file: "../common/clear_login_and_add_content.yaml"
+    env:
+      TESTFILENAME: Epub_Content1.epub
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/screen_before_hiding_content"
+- longPressOn:
+    text: "E-book"
+- tapOn: "Delete"
+- assertNotVisible: "E-book"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/screen_after_deleting_content_from_library"
+
+# login to make sure the content is hidden
+#clear state and launch app
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "../common/select_site.yaml"
+#admin login
+- runFlow:
+    file: "../common/user_login.yaml"
+- tapOn: "Library"
+- assertNotVisible: "E-book"
+- tapOn: "Settings"
+- tapOn: "Deleted items"
+- tapOn:
+    text: "Delete permanently"
+    rightOf: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
+- tapOn: "Confirm"
+
+# login to make sure the content is hidden
+#clear state and launch app
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "../common/select_site.yaml"
+#admin login
+- runFlow:
+    file: "../common/user_login.yaml"
+- tapOn: "Library"
+- assertNotVisible: "E-book"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/screen_after_permenantly_deleting_content_from_library"

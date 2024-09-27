@@ -2,11 +2,13 @@ package com.ustadmobile.core.viewmodel.signup
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
-import com.ustadmobile.core.domain.passkey.PasskeyResult
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -15,16 +17,23 @@ import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.util.ext.appendSelectedAccount
+import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfileViewModel
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
+import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
 import com.ustadmobile.lib.db.entities.PersonPicture
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +43,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 
@@ -49,35 +59,27 @@ data class SignUpUiState(
 
     val registrationMode: Int = 0,
 
-    val usernameError: String? = null,
-
-    val passwordConfirmedError: String? = null,
-
-    val passwordError: String? = null,
-
-    val emailError: String? = null,
-
-    val confirmError: String? = null,
+    val firstName: String? = null,
 
     val dateOfBirthError: String? = null,
 
-    val parentContactError: String? = null,
-
     val genderError: String? = null,
 
-    val firstNameError: String? = null,
+    val fullNameError: String? = null,
 
-    val lastNameError: String? = null,
+    val isParent: Boolean = false,
 
-    val isParent: Boolean? = false,
+    val isTeacher: Boolean = false,
 
-    val isTeacher: Boolean? = false,
-
-    val showCreatePasskeyPrompt: Boolean? = false,
+    val passkeySupported: Boolean = true,
 
     val doorNodeId: String? = null,
 
-    val serverUrl_: String? = null
+    val serverUrl_: String? = null,
+
+    val showOtherOption: Boolean = true,
+
+    val isPersonalAccount: Boolean = false,
 ) {
 
 
@@ -91,21 +93,27 @@ class SignUpViewModel(
 
     private val _uiState: MutableStateFlow<SignUpUiState> = MutableStateFlow(SignUpUiState())
 
-    val createPasskeyUseCase: CreatePasskeyUseCase by di.instance()
+    private val createPasskeyUseCase: CreatePasskeyUseCase? by instanceOrNull()
 
+    private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
+
+    private var nextDestination: String =
+        savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
     val uiState: Flow<SignUpUiState> = _uiState.asStateFlow()
 
     private val apiUrlConfig: SystemUrlConfig by instance()
 
-    private val entityUid: Long
-        get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
+    private val getLocalAccountsSupportedUseCase: GetLocalAccountsSupportedUseCase by instance()
 
-    private val serverUrl = apiUrlConfig.newPersonalAccountsLearningSpaceUrl ?: "http://localhost"
+    private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]
+        ?: apiUrlConfig.newPersonalAccountsLearningSpaceUrl ?: "http://localhost"
+
     val addNewPersonUseCase: AddNewPersonUseCase = di.on(LearningSpace(serverUrl)).direct.instance()
 
     private val genderConfig: GenderConfig by instance()
 
+    //Run EnqueueSavePictureUseCase after the database transaction has finished.
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
     on(LearningSpace(serverUrl)).instance()
 
@@ -114,24 +122,57 @@ class SignUpViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         val title =
             systemImpl.getString(MR.strings.create_account)
+        viewModelScope.launch {
+            val person = savedStateHandle.getJson(
+                OtherSignUpOptionSelectionViewModel.ARG_PERSON, Person.serializer(),
+            ) ?: Person()
+            val personPicture = savedStateHandle.getJson(
+                OtherSignUpOptionSelectionViewModel.ARG_PERSON_PROFILE_PIC, PersonPicture.serializer(),
+            )
+            _uiState.update { prev ->
+                prev.copy(
+                    person = person,
+                    personPicture=personPicture,
+                    firstName = if (person.firstNames == "") {
+                        null
+                    }else{
+                        person.fullName()
+                    }
 
+
+                )
+            }
+        }
         _appUiState.update {
             AppUiState(
                 title = title,
+                hideAppBar =false,
+                navigationVisible = false,
                 userAccountIconVisible = false,
-                hideBottomNavigation = true,
             )
+        }
+        if (savedStateHandle[ARG_IS_PERSONAL_ACCOUNT] == "true") {
+            _uiState.update { prev ->
+                prev.copy(
+                    isPersonalAccount = true
+                )
+            }
+            nextDestination = ContentEntryListViewModel.DEST_NAME_HOME
         }
         _uiState.update { prev ->
             prev.copy(
                 genderOptions = genderConfig.genderMessageIdsAndUnset,
-                showCreatePasskeyPrompt = false,
-                person = Person(dateOfBirth = savedStateHandle[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong() ?: 0L),
-                serverUrl_ = serverUrl
+                person = Person(
+                    dateOfBirth = savedStateHandle[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong()
+                        ?: 0L,
+                    isPersonalAccount = _uiState.value.isPersonalAccount
+                ),
+                serverUrl_ = serverUrl,
+                passkeySupported = createPasskeyUseCase != null,
+                showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke(),
 
-            )
+                )
         }
-
     }
 
     fun onEntityChanged(entity: Person?) {
@@ -142,13 +183,9 @@ class SignUpViewModel(
                     prev.person?.gender,
                     entity?.gender, prev.genderError
                 ),
-                firstNameError = updateErrorMessageOnChange(
+                fullNameError = updateErrorMessageOnChange(
                     prev.person?.firstNames,
-                    entity?.firstNames, prev.firstNameError
-                ),
-                lastNameError = updateErrorMessageOnChange(
-                    prev.person?.lastName,
-                    entity?.lastName, prev.lastNameError
+                    entity?.firstNames, prev.fullNameError
                 ),
             )
         }
@@ -160,15 +197,15 @@ class SignUpViewModel(
     }
 
 
-    fun onParentCheckChanged(check: Boolean) {
+    fun onParentCheckChanged(checked: Boolean) {
         _uiState.update { prev ->
-            prev.copy(isParent = check)
+            prev.copy(isParent = checked)
         }
     }
 
-    fun onTeacherCheckChanged(check: Boolean) {
+    fun onTeacherCheckChanged(checked: Boolean) {
         _uiState.update { prev ->
-            prev.copy(isTeacher = check)
+            prev.copy(isTeacher = checked)
         }
     }
 
@@ -190,52 +227,45 @@ class SignUpViewModel(
     }
 
 
+    fun onFullNameValueChange(fullName: String) {
+        _uiState.update { prev ->
+            prev.copy(
+                firstName = fullName
+            )
+        }
+
+    }
+
     private fun SignUpUiState.hasErrors(): Boolean {
-        return firstNameError != null ||
-                lastNameError != null ||
+        return fullNameError != null ||
                 genderError != null
-
-    }
-
-    private fun validateUsername(username: String): Boolean {
-        var isValid = true
-
-        if (username.isNullOrEmpty()) {
-            isValid = false
-        }
-
-        if (isValid) {
-            if (username.contains(" ")) {
-                isValid = false
-            }
-        }
-
-        if (isValid) {
-            var usernameChars = username.toCharArray()
-
-            for (i in 1..<usernameChars.count()) {
-                if (usernameChars[i].isUpperCase()) {
-                    isValid = false
-                }
-            }
-        }
-
-        return isValid
     }
 
 
-    fun onSignUpWithPasskey() {
+    fun onClickedSignup() {
 
 
         loadingState = LoadingUiState.INDETERMINATE
+
+        // full name splitting into first name and last name
+        val fullName = _uiState.value.firstName?.trim()
+        val parts = fullName?.trim()?.split(" ", limit = 2)
+        val firstName = parts?.get(0)
+        val lastName = parts?.getOrElse(1) { "" }
+        onEntityChanged(
+            _uiState.value.person?.shallowCopy {
+                this.firstNames = firstName
+                this.lastName = lastName
+            }
+        )
+
         val savePerson = _uiState.value.person ?: return
 
         val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
 
         _uiState.update { prev ->
             prev.copy(
-                firstNameError = if (savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
-                lastNameError = if (savePerson.lastName.isNullOrEmpty()) requiredFieldMessage else null,
+                fullNameError = if (savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
                 genderError = if (savePerson.gender == GENDER_UNSET) requiredFieldMessage else null,
             )
         }
@@ -246,72 +276,42 @@ class SignUpViewModel(
         }
 
         viewModelScope.launch {
-            val passwordVal = _uiState.value.password
-//            val checkedUiState = _uiState.updateAndGet { prev ->
-//                prev.copy(
-//                    usernameError = if (savePerson.username.isNullOrEmpty()) {
-//                        requiredFieldMessage
-//                    } else {
-//                        null
-//                    },
-//                    passwordError = if (passwordVal.isNullOrEmpty()) {
-//                        requiredFieldMessage
-//                    } else {
-//                        null
-//                    },
-//
-//                    dateOfBirthError = if (savePerson.dateOfBirth == 0L) {
-//                        requiredFieldMessage
-//                    } else {
-//                        null
-//                    }
-//                )
-//            }
-//
-//            if (checkedUiState.hasErrors()) {
-//                loadingState = LoadingUiState.NOT_LOADING
-//                return@launch
-//            }
+
 
             try {
-
                 val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
                 savePerson.personUid = uid
-                Napier.e { "person uid $uid" }
-                val passkeyCreated = createPasskeyUseCase.invoke(
-                    CreatePasskeyParams
-                        (
-                        username = savePerson.firstNames.toString(),
-                        personUid = uid.toString(),
-                        doorNodeId = di.doorIdentityHashCode.toString(),
-                        usStartTime = systemTimeInMillis(),
-                        serverUrl = serverUrl,
-                        person = savePerson
-                    )
-                )
-                val result = passkeyCreated?.let {
-                    accountManager.registerWithPasskey(
-                        serverUrl,
-                        it,
-                        savePerson,
-                        _uiState.value.personPicture
-                    )
-                }
-                Napier.e { "passkeyuid $result" }
-                if (result != null) {
-//                    val personid = addNewPersonUseCase(
-//                        person = savePerson,
-//                        addedByPersonUid = activeUserPersonUid,
-//                        createPersonParentApprovalIfMinor = true,
-//                    )
-                    val personPictureVal = _uiState.value.personPicture
 
+                if (_uiState.value.passkeySupported ){
+                    val passkeyCreated = createPasskeyUseCase?.invoke(
+                        CreatePasskeyParams(
+                            username = savePerson.firstNames.toString(),
+                            personUid = uid.toString(),
+                            doorNodeId = di.doorIdentityHashCode.toString(),
+                            usStartTime = systemTimeInMillis(),
+                            serverUrl = serverUrl,
+                            person = savePerson
+                        )
+                    )
+                    passkeyCreated?.let {
+                        accountManager.registerWithPasskey(
+                            serverUrl,
+                            it,
+                            savePerson,
+                            _uiState.value.personPicture
+                        )
+                    }
+                    if (passkeyCreated == null) {
+                        snackDispatcher.showSnackBar(Snack(message = systemImpl.getString(MR.strings.sorry_something_went_wrong)))
+                        Napier.e { "Error occurred during creating passkey" }
+                        return@launch
+                    }
+                    val personPictureVal = _uiState.value.personPicture
                     if (personPictureVal != null) {
                         personPictureVal.personPictureUid = savePerson.personUid
                         personPictureVal.personPictureLct = systemTimeInMillis()
                         val personPictureUriVal = personPictureVal.personPictureUri
 
-                       // activeDb.personPictureDao().upsert(personPictureVal)
                         enqueueSavePictureUseCase(
                             entityUid = savePerson.personUid,
                             tableId = PersonPicture.TABLE_ID,
@@ -319,43 +319,111 @@ class SignUpViewModel(
                         )
 
                     }
+
+                    navigateToAppropriateScreen(savePerson)
+                } else {
+                    navController.navigate(SignupEnterUsernamePasswordViewModel.DEST_NAME,
+                        args = buildMap {
+                            putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                            put(
+                                OtherSignUpOptionSelectionViewModel.ARG_PERSON,
+                                json.encodeToString( Person.serializer(),savePerson)
+                            )
+                            put(
+                                OtherSignUpOptionSelectionViewModel.ARG_PERSON_PROFILE_PIC,
+                                json.encodeToString( PersonPicture.serializer(),_uiState.value.personPicture?: PersonPicture())
+                            )
+
+                            put(IS_PARENT,
+                                _uiState.value.isParent.toString()
+                            )
+                        }
+                    )
                 }
 
-                navController.navigate(AddChildProfileViewModel.DEST_NAME, emptyMap())
+
+
 
             } catch (e: Exception) {
-                if (e is IllegalStateException) {
-                    _uiState.update { prev ->
-                        prev.copy(usernameError = systemImpl.getString(MR.strings.person_exists))
-                    }
-                } else {
                     snackDispatcher.showSnackBar(
                         Snack(systemImpl.getString(MR.strings.login_network_error))
                     )
-                }
 
                 return@launch
             } finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
         }
-
-
     }
 
-    fun onPassKeyDataReceived(passkeyResult: PasskeyResult) {
+    private fun navigateToAppropriateScreen(savePerson: Person) {
 
+        if (_uiState.value.isParent) {
+            navController.navigate(AddChildProfilesViewModel.DEST_NAME,
+                args = buildMap {
+                    put(ARG_NEXT, nextDestination)
+                    putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                }
+            )
 
+        } else {
+
+            val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+            Napier.d { "AddSignUpPresenter: go to next destination: $nextDestination" }
+            navController.navigateToViewUri(
+                nextDestination.appendSelectedAccount(
+                    savePerson.personUid,
+                    LearningSpace(accountManager.activeLearningSpace.url)
+                ),
+                goOptions
+            )
+
+        }
     }
 
-    fun onPassKeyError(passkeyError: String) {
-        snackDispatcher.showSnackBar(
-            Snack(passkeyError)
+    fun onClickOtherOption() {
+        // full name splitting into first name and last name
+        val fullName = _uiState.value.firstName?.trim()
+        val parts = fullName?.trim()?.split(" ", limit = 2)
+        val firstName = parts?.get(0)
+        val lastName = parts?.getOrElse(1) { "" }
+        onEntityChanged(
+            _uiState.value.person?.shallowCopy {
+                this.firstNames = firstName
+                this.lastName = lastName
+            }
         )
-    }
-    fun onClickOtherOption(){
 
-        navController.navigate(AddChildProfileViewModel.DEST_NAME, emptyMap())
+        val savePerson = _uiState.value.person ?: return
+
+        val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
+
+        _uiState.update { prev ->
+            prev.copy(
+                fullNameError = if (savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
+                genderError = if (savePerson.gender == GENDER_UNSET) requiredFieldMessage else null,
+            )
+        }
+        if (_uiState.value.hasErrors()) {
+            return
+        }
+        navController.navigate(OtherSignUpOptionSelectionViewModel.DEST_NAME,
+            args = buildMap {
+                putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                put(
+                    OtherSignUpOptionSelectionViewModel.ARG_PERSON,
+                    json.encodeToString( Person.serializer(),savePerson)
+                )
+                put(
+                    OtherSignUpOptionSelectionViewModel.ARG_PERSON_PROFILE_PIC,
+                    json.encodeToString( PersonPicture.serializer(),_uiState.value.personPicture?: PersonPicture())
+                )
+
+                put(IS_PARENT,
+                    _uiState.value.isParent.toString()
+                )
+            }
+        )
 
     }
 
@@ -366,6 +434,23 @@ class SignUpViewModel(
         const val DEST_NAME = "SignUp"
 
         const val ARG_DATE_OF_BIRTH = "DateOfBirth"
+
+
+        const val ARG_IS_PERSONAL_ACCOUNT = "personalAccount"
+
+        const val ARG_NEW_OR_EXISTING_USER = "NewOrExistingUser"
+
+        val REGISTRATION_ARGS_TO_PASS = listOf(
+            UstadView.ARG_LEARNINGSPACE_URL,
+            SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON,
+            UstadView.ARG_POPUPTO_ON_FINISH,
+            ARG_DATE_OF_BIRTH,
+            ARG_REGISTRATION_MODE,
+            ARG_NEW_OR_EXISTING_USER,
+            ARG_IS_PERSONAL_ACCOUNT
+        )
+
+        const val SIGN_WITH_USERNAME_AND_PASSWORD = "SignupWithUsernameAndPassowrd"
 
 
     }

@@ -10,15 +10,32 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
+# add new course
 - runFlow:
-    file: "../common/create_course_with_1teacher_2students.yaml"
+    file: "../common/add_course.yaml"
     env:
-      TESTCOURSENAME: "Attendance Test"
-- runFlow: "../common/clear_state_and_get_started.yaml"
+      TESTCOURSENAME: "Test Course Block"
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "test"
+# add students to the course through bulk import using .csv file
+- runFlow:
+    file: "../common/student_bulk_upload_csv.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -28,8 +45,9 @@ env:
 - runFlow:
     file: "../common/record_attendance.yaml"
     env:
-      TESTCOURSENAME: "Attendance Test"
+      TESTCOURSENAME: "Test Course Block"
 - runFlow:
     file: "../common/edit_recorded_attendance.yaml"
     env:
-      TESTCOURSENAME: "Attendance Test"
+      TESTCOURSENAME: "Test Course Block"
+- assertVisible: "5 Present, 0 Partial, 1 Absent"

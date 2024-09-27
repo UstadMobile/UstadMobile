@@ -21,11 +21,12 @@ env:
 - longPressOn:
     text: "E-book"
 - tapOn: "Delete"
+- assertNotVisible: "E-book"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/screen_after_deleting_content_from_library"
 
 # login to make sure the content is hidden
 #clear state and launch app
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 #admin login
 - runFlow:
@@ -40,7 +41,7 @@ env:
 
 # login to make sure the content is restored
 #clear state and launch app
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 #admin login
 - runFlow:

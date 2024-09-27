@@ -1,6 +1,8 @@
 package com.ustadmobile.core.util.ext
 
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -16,6 +18,8 @@ import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_DONT_SET_CURRENT_SESSION
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -73,6 +77,8 @@ fun UstadNavController.navigateToLink(
     scope: CoroutineScope = GlobalScope,
     linkTarget: LinkTarget = LinkTarget.DEFAULT,
     dontSetCurrentSession: Boolean = false,
+    repo: ((LearningSpace) -> UmAppDatabase)? = null,
+    presetLearningSpaceUrl:String?=null
 ) : Job? {
     var learningSpaceUrl: String? = null
     var viewUri: String? = null
@@ -147,10 +153,30 @@ fun UstadNavController.navigateToLink(
                         ARG_DONT_SET_CURRENT_SESSION to dontSetCurrentSession.toString(),
                     )
 
-                    if(learningSpaceUrl != null)
-                        args[ARG_LEARNINGSPACE_URL] = learningSpaceUrl
+                    if(learningSpaceUrl != null) args[ARG_LEARNINGSPACE_URL] = learningSpaceUrl
 
-                    navigate(AddAccountSelectNewOrExistingViewModel.DEST_NAME, args.toMap(), goOptions)
+                    val presetRepo = presetLearningSpaceUrl?.let {presetUrl->
+                        repo?.let { it(LearningSpace(presetUrl)) }
+                    }
+
+                    if(presetRepo != null && presetRepo.siteDao().getSiteAsync()?.registrationAllowed == false) {
+                        val arg = buildMap {
+                            put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, "existing")
+                            put(
+                                ARG_LEARNINGSPACE_URL,
+                                presetLearningSpaceUrl.toString()
+                            )
+
+                        }
+                        navigate(
+                            LoginViewModel.DEST_NAME, arg
+                        )
+                    }else {
+                        navigate(
+                            viewName = AddAccountSelectNewOrExistingViewModel.DEST_NAME,
+                            args = args,
+                        )
+                    }
                 }
 
                 //else - go to the account manager

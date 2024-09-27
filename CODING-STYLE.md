@@ -19,6 +19,110 @@ The app follows an MVVM pattern as follows:
 All Kotlin code should follow [Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html). SQL queries should follow
 [SQLStyle.guide](https://www.sqlstyle.guide/).
 
+## Conventions
+
+All Kotlin code should follow [Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html)
+
+All SQL code shoud follow [SQLStyle.guide](https://www.sqlstyle.guide/)
+
+
+## General coding style
+
+#### Avoid terms that could be considered racist and/or discriminatory
+
+e.g. use:
+```
+primary, replica, allowlist, blocklist
+```
+
+Do not use:
+```
+master, slave, whitelist, blacklist
+```
+
+#### **Never, ever, shall thy ever use !! in production Kotlin code.** The !! operator is OK in unit tests, 
+but should never be used in non-test code.
+
+e.g. use:
+
+```
+val someEntityName = someEntity?.name
+if(someEntityName != null) {
+    //smart cast
+}
+```
+Do not do this:
+```
+if(someEntity?.name != null) {
+    println(someEntity!!.name!!)
+}
+```
+
+use:
+```
+memberVar = SomeEntity().apply {
+   someField = "aValue"
+}
+```
+
+Do not do this:
+```
+memberVar = SomeEntity()
+memberVar!!.someField = "aValue"
+```
+
+Do not use null checks that fail silently and would lead to code that doesn't behave as expect with no logging output or exception
+
+e.g.
+```
+somethingThatShouldntBeNullNow?.also {
+   it.doWork()
+}
+```
+This code will silently fail to do anything. A situation like this should normally throw an exception, and at a minimum MUST be logged.
+
+#### Never hardcode any literal values
+
+Any literal other than 0, 1, -1, true, false, or null. Any other literal value MUST be defined as a constant with a meaningful name.
+
+e.g. 
+Do not do this:
+```
+class MyClass {
+    val byteArray = ByteArray(8192)
+}
+```
+
+Do this:
+```
+class MyClass {
+    val byteArray = ByteArray(DEFAULT_BUFFER_SIZE) 
+
+    companion object {
+        const val DEFAULT_BUFFER_SIZE = 8192
+    }
+}
+
+```
+#### Don't repeat yourself
+
+Any code sequence more than one line should not be copied. Simple trivial functions may be top level or extension functions. Other code that needs to
+be reused should normally be turned into a domain usecase (as above).
+
+#### Cite references in comments where needed to understand or verify the code 
+
+If a section of code is following a particular official reference (e.g. Android, Kotlin, API specification), that is important to verifying that the code is correct, sensible, etc. then cite the reference in comments.
+
+
+## Use of AI tools
+
+AI generated code is prone to errors, and the code generated often looks like it _should_ be right, but
+isn't. AI tools should be used _only when the author is confident that they can inspect the generated
+code and spot such mistakes/errors_. All code must still adhere to this coding style and meet the
+requirements in [PULLREQUEST-CHECKLIST.md]. Sometimes it will be quicker to spend one hour writing
+something manually, rather than spending many more hours trying to debug the code the AI wrote in 
+30 seconds.
+
 ## View layer
 
 ### UiState classes
@@ -93,7 +197,11 @@ class PersonDetailViewModel: ViewModel {
 ### Screens
 
 Screens are written using Jetpack Compose for Android and the Kotlin/JS MUI wrapper for Javascript. 
-The screen function should use the UiState as an argument, 
+The screen function should use the UiState as an argument.
+
+Screens must use default margins and colors provided by the platform theme (Jetpack Compose or MUI) unless specifically noted otherwise. On Jetpack compose
+this is 16.dp between screen edge and components, and between components. ```ListItem``` already includes padding so it should not be added. Components other
+than ListItem should use ```Modifier.defaultItemPadding()``` for this.
 
 Android Jetpack Compose:
 ```
@@ -154,6 +262,7 @@ function PersonDetailScreenPreview(
     )
 )
 ```
+
 
 ## Domain Layer
 
@@ -259,54 +368,6 @@ returned on completion
 ARG_RESULT_DEST_KEY: The key (string) that will be used so that the screen which requested a value
 can recognise what kind of value is incoming. In this case this would be the ClazzEnrolment
 
-## Coding style
-
-Avoid terms that could be considered racist and/or discriminatory
-
-e.g. use:
-```
-primary, replica, allowlist, blocklist
-```
-
-Do not use:
-```
-master, slave, whitelist, blacklist
-```
-
-**Never, ever, shall thy ever use !! in production Kotlin code.** The !! operator is OK in unit tests, 
-but should never be used in non-test code.
-
-e.g. use:
-
-```
-val someEntityName = someEntity?.name
-if(someEntityName != null) {
-    //smart cast
-}
-```
-Do not do this:
-```
-if(someEntity?.name != null) {
-    println(someEntity!!.name!!)
-}
-```
-
-use:
-```
-memberVar = SomeEntity().apply {
-   someField = "aValue"
-}
-```
-
-Do not do this:
-```
-memberVar = SomeEntity()
-memberVar!!.someField = "aValue"
-```
-
-## Conventions
-
-All Kotlin code should follow [Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html)
 
 ### Spelling
 

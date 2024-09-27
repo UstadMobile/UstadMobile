@@ -10,11 +10,47 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
+# add new course
 - runFlow:
-    file: "../common/create_course_with_1teacher_1student.yaml"
+    file: "../common/add_course.yaml"
     env:
-      TESTCOURSENAME: "Test Course"
+      TESTCOURSENAME: "Test Course Block"
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "t1"
+      GENDER: "Female"
+      PASSWORD: "test"
+- runFlow:
+    file: "../common/add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      STUDENTFIRSTNAME: "Student"
+      STUDENTLASTNAME: "1"
+      USERNAME: "s1"
+      GENDER: "Female"
+      PASSWORD: "test"
+- back
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "test"
+- assertVisible: "Test Course Block"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "test"
+- assertVisible: "Test Course Block"

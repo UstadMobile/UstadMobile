@@ -1,31 +1,49 @@
 describe('WEB_007_001_admin_enable_or_disable_user_registration', () => {
- it('Start Ustad Test Server ', () => {
-  // Start Test Server
-    cy.ustadStartTestServer()
-})
-  it('Admin enable registration', () => {
 
-  // Admin user login
+it('Start Ustad Test Server ', () => {
+// Start Test Server
+    cy.ustadStartTestServer()
+ })
+
+it('Admin enable registration', () => {
+// Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
- cy.ustadEnableUserRegistration()
-  cy.get('#header_avatar').click()
-  cy.contains('Add another account').click()
-  cy.get('#create_account_button').should('be.visible')
+  cy.ustadEnableUserRegistration()
 })
-  it('Admin disable registration', () => {
-  // Admin user login
+
+it('Verify New user registration is enabled', () => {
+  cy.log('Clearing IndexedDB');
+  cy.clearIndexedDb('localhost_8087') // clearing index db
+  cy.visit('http://localhost:8087/', {timeout:60000})
+  cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').click();
+  cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date("2010-06-01"));
+  cy.contains('button','Next').click()
+  cy.contains('New Terms').should('be.visible')
+  cy.get('#accept_button').should('be.visible')
+})
+
+it('Admin disable registration', () => {
+// Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
   cy.get('#settings_button').click()
   cy.contains('Site').click()
   cy.contains('Edit').click()
- //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
+//https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
   cy.get('#terms_html_edit .ql-editor').as('editor')
-  cy.get('@editor').click().clear().type("null")
-  cy.get('#registration_allowed').click({force:true}) // disable the registration button
+  cy.get('@editor').click().clear()
+  cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('exist') //verified registration_allowed switch is on
+  cy.get('#registration_allowed').click()
+  cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('not.exist') //verified registration_allowed switch is off
   cy.get('#actionBarButton').click()
-  cy.contains('No').should('exist')
-  cy.get('#header_avatar').click()
-  cy.contains('Add another account').click()
-  cy.get('#create_account_button').should('not.exist')
+  cy.contains('Yes', { timeout: 5000 }).should('not.exist')
+  cy.contains('No', { timeout: 10000 }).should('exist')
+})
+
+it('Verify New user registration is disabled', () => {
+   cy.log('Clearing IndexedDB');
+    cy.clearIndexedDb('localhost_8087') // clearing index db
+    cy.visit('http://localhost:8087/', {timeout:60000})
+    cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').should('not.exist') // Verified new user registration is disabled
+    cy.get('input#username', { timeout: 10000 }).should('exist')
 })
 })

@@ -24,6 +24,7 @@ import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
+import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -50,6 +51,7 @@ import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyUseCaseImpl
+import com.ustadmobile.libuicompose.util.passkey.LoginWithPasskeyUseCaseImpl
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
@@ -115,7 +117,10 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         }
 
         bind<CreatePasskeyUseCase>() with singleton {
-            CreatePasskeyUseCaseImpl(applicationContext)
+            CreatePasskeyUseCaseImpl(this@AbstractAppActivity)
+        }
+        bind<LoginWithPasskeyUseCase>() with singleton {
+            LoginWithPasskeyUseCaseImpl(this@AbstractAppActivity)
         }
 
         constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with true

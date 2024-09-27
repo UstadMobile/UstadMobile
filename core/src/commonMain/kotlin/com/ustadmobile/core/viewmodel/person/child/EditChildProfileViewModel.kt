@@ -4,17 +4,15 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
-import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +20,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
-
 
 data class EditChildProfileUiState(
     val person: Person? = null,
@@ -47,7 +44,6 @@ class EditChildProfileViewModel(
     private val _uiState = MutableStateFlow(
         EditChildProfileUiState()
     )
-    private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
 
     val uiState: Flow<EditChildProfileUiState> = _uiState.asStateFlow()
 
@@ -61,19 +57,22 @@ class EditChildProfileViewModel(
     }
 
     init {
+        _uiState.update { prev ->
+            prev.copy(
+                genderOptions = genderConfig.genderMessageIdsAndUnset,
+            )
+        }
+
         _appUiState.update { prev ->
             prev.copy(
-
+                hideAppBar =false,
+                navigationVisible = false,
+                userAccountIconVisible = false,
                 title = systemImpl.getString(MR.strings.child_profile),
                 hideBottomNavigation = true,
             )
         }
-        _uiState.update { prev ->
-            prev.copy(
-                person = Person(),
-                genderOptions = genderConfig.genderMessageIdsAndUnset,
-            )
-        }
+
 
         _appUiState.update { prev ->
             prev.copy(
@@ -84,6 +83,27 @@ class EditChildProfileViewModel(
                 )
             )
         }
+        viewModelScope.launch {
+
+            loadEntity(
+                serializer = Person.serializer(),
+                makeDefault = {
+                    val newUid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
+                    Person(
+                        personUid = newUid,
+                        isPersonalAccount = true
+                    )
+                },
+                onLoadFromDb = { null },
+                uiUpdate = {
+                    _uiState.update { prev ->
+                        prev.copy(person = it)
+                    }
+                }
+            )
+
+        }
+
     }
 
     fun onEntityChanged(entity: Person?) {
@@ -136,36 +156,9 @@ class EditChildProfileViewModel(
             loadingState = LoadingUiState.NOT_LOADING
             return
         }
-        viewModelScope.launch {
 
-            try {
-                val personid = addNewPersonUseCase(
-                    person = savePerson,
-                    addedByPersonUid = activeUserPersonUid,
-                    createPersonParentApprovalIfMinor = true,
-                    accountType = PersonParentJoin.RELATIONSHIP_ACCOUNT_OWNER
-                )
 
-                navController.navigate(AddChildProfileViewModel.DEST_NAME, emptyMap())
-                Napier.e { "person uid $personid" }
-
-            } catch (e: Exception) {
-                if (e is IllegalStateException) {
-                    _uiState.update { prev ->
-                        prev.copy(firstNameError = systemImpl.getString(MR.strings.person_exists))
-                    }
-                } else {
-                    snackDispatcher.showSnackBar(
-                        Snack(systemImpl.getString(MR.strings.login_network_error))
-                    )
-                }
-
-                return@launch
-            } finally {
-                loadingState = LoadingUiState.NOT_LOADING
-            }
-        }
-
+        finishWithResult(_uiState.value.person)
     }
 
 

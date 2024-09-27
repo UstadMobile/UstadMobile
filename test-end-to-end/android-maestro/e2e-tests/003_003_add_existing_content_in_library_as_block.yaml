@@ -36,7 +36,6 @@ env:
       notVisible: "Downloads"
     file: "../common/redirect_to_downloads.yaml"
 - tapOn: "Epub_Content1.epub"
-
 - tapOn: "SAVE"
 #---------add course ---------#
 - runFlow:
@@ -53,7 +52,7 @@ env:
       USERNAME: "t1"
       GENDER: "Female"
       PASSWORD: "test"
-#--- add epub content already added by admin in library to course block----#
+#--- admin add epub content already in library to course block----#
 - repeat:
     while:
       notVisible: "Course"
@@ -67,7 +66,7 @@ env:
 - tapOn: "SAVE"
 
 # teacher add existing content in library to course as a content block
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"

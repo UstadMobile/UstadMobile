@@ -11,7 +11,7 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -38,7 +38,7 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
 # teacher add an assignment block
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -86,7 +86,7 @@ env:
 - assertNotVisible: "Done"
 - tapOn: "Save"
 # student submit assignment
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -118,7 +118,7 @@ env:
 - tapOn: "Submit"
 - assertVisible: "Submitted"
 # teacher view and mark the assignment submitted by student
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -160,7 +160,7 @@ env:
     direction: UP
 - assertVisible: "9.0/10.0 Points"
 # student able to view his grade
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -206,3 +206,59 @@ env:
       text: "Submission 1"
     direction: DOWN
 - assertVisible: "Submission 1"
+# teacher view and mark the assignment submitted by student
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "t1"
+      PASSWORD: "test"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- tapOn: "Submissions"
+- assertVisible: "Student 1"
+- tapOn: "Student 1"
+# assert that teacher able to view text submitted by student
+- assertVisible: "Assignment done by student 1"
+- assertVisible: "Submission 2"
+- assertVisible: "This is 2nd text assignment"
+- scrollUntilVisible:
+    element:
+      text: "Mark*"
+    direction: DOWN
+- tapOn: "Mark*"
+- inputText: "9.5"
+- hideKeyboard
+- tapOn: "Update grade"
+- scrollUntilVisible:
+    element:
+      text: "Result"
+    direction: UP
+- assertVisible: "9.5/10.0 Points"
+# student able to view his updated grade
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- assertVisible: "Marked"
+- scrollUntilVisible:
+    element:
+      text: "9.5/10.0 Points"
+    direction: DOWN
+- assertVisible: "9.5/10.0 Points"

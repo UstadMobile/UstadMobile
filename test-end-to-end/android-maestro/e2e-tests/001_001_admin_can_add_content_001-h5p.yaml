@@ -3,7 +3,6 @@ env:
   TESTNAME: "001_001_admin_can_add_content_001-h5p"
   TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_001-h5p"
 ---
-- clearState: com.toughra.ustadmobile
 - runFlow:
     file: "../common/startserver.yaml"
     env:
