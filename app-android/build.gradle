@@ -219,6 +219,7 @@ configurations.all {
 
 dependencies {
     implementation libs.androidx.profileinstaller
+    implementation project(':lib-systemdb')
     baselineProfile project(':app-android-baselineprofile')
     coreLibraryDesugaring libs.android.desugar.libs
 

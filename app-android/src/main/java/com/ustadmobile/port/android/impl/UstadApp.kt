@@ -201,7 +201,10 @@ import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 import rawhttp.core.RawHttp
 import com.toughra.ustadmobile.BuildConfig
+import com.ustadmobile.appconfigdb.SystemDb
+import com.ustadmobile.appconfigdb.SystemDbDataLayer
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
+import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
@@ -277,6 +280,12 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
         }
 
+        bind<SystemDbNodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
+            val settings: Settings = instance()
+            val contextIdentifier: String = sanitizeDbNameFromUrl(context.url)
+            SystemDbNodeIdAndAuth(nodeIdAndAuth =settings.getOrGenerateNodeIdAndAuth(contextIdentifier) )
+        }
+
         bind<SupportedLanguagesConfig>() with singleton {
             SupportedLanguagesConfig(
                 systemLocales = LocaleListCompat.getAdjustedDefault().let { localeList ->
@@ -338,6 +347,44 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         //Then use the same logic to create it as used for the main nodeidandauth
         //TODO: That will provide the SystemDb in the DI for the app client - then we can use
         // learningspaceinfo.findallaspagingsource etc. to list available learning spaces.
+
+        bind<SystemDb>() with scoped(LearningSpaceScope.Default).singleton {
+            val dbName = sanitizeDbNameFromUrl(context.url)
+            val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
+            DatabaseBuilder.databaseBuilder(
+                context = applicationContext,
+                dbClass =  SystemDb::class,
+                dbName = dbName,
+                nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId
+            ).addCallback(AddOfflineItemInactiveTriggersCallback())
+                .build()
+        }
+
+        bind<SystemDbDataLayer>() with scoped(LearningSpaceScope.Default).singleton {
+            val systemUrlConfig:SystemUrlConfig = instance()
+            val db: SystemDb = instance(tag = DoorTag.TAG_DB)
+            val repo: SystemDb? = if(!context.isLocal) {
+                val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
+                db.asRepository(
+                    RepositoryConfig.repositoryConfig(
+                        context = applicationContext,
+                        endpoint = "${systemUrlConfig.systemBaseUrl}",
+                        nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
+                        auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
+                        httpClient = instance(),
+                        okHttpClient = instance(),
+                        json = instance()
+                    )
+                )
+            }else {
+                null
+            }
+
+            SystemDbDataLayer(
+                localDb  = db,
+                repository = repo,
+            )
+        }
 
         bind<DbAndObservers>() with scoped(LearningSpaceScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
