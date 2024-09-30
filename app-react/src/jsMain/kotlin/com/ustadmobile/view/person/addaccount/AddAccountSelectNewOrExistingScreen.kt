@@ -88,6 +88,7 @@ val AddAccountSelectNewOrExistingComponent2 = FC<AddAccountSelectNewOrExistingPr
                 variant = ButtonVariant.outlined
                 fullWidth = true
                 +strings[MR.strings.new_user]
+                id="new_user"
             }
             Box {
                 sx {
@@ -99,6 +100,7 @@ val AddAccountSelectNewOrExistingComponent2 = FC<AddAccountSelectNewOrExistingPr
                 variant = ButtonVariant.outlined
                 fullWidth = true
                 +strings[MR.strings.existing_user]
+                id="existing_user"
             }
         }
     }
