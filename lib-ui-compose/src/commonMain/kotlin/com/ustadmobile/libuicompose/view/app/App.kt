@@ -145,7 +145,8 @@ fun App(
             bottomBar = {
                 //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#navigationbar
                 var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
-                if(useBottomBar && currentSession?.learningSpace?.isLocal != true && currentSession?.person?.isPersonalAccount !=true) {
+                if(useBottomBar && currentSession?.learningSpace?.isLocal != true &&
+                    currentSession?.person?.isPersonalAccount !=true) {
                     /**
                      * Set the selected item. Relying on onClick misses when the user switches accounts
                      * and goes back to the start screen (courses).
