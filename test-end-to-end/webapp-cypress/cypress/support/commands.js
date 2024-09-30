@@ -53,22 +53,18 @@ Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
       password,
     },
   })
- cy.wait(1000) //This wait helps the login screen to load
-
- cy.get('body').then((body) => {
-   // Check if the "Existing user" button is present
+  cy.wait(1000) //This wait helps the login screen to load
+  cy.get('body').then((body) => {
+// Check if the "Existing user" button is present
    if (body.find('#existing_user').length > 0) {
-     // User is on the "New user/Existing user" page
+// User is on the "New user/Existing user" page
      cy.log('User is on the New user/Existing user page');
-
-     // Click the "Existing user" button
      cy.get('#existing_user').click();
    } else {
-     // If the "Existing user" button is not found, user is on the login page
+// If the "Existing user" button is not found, user is on the login page
      cy.log('User is on the login page');
      }
      })
-
 
   cy.get('input#username', { timeout: 10000 }).should('exist').type(username) // 10 seconds
   cy.get('input#password').type(password)
