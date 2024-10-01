@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder
 
 import com.benasher44.uuid.uuid4
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.ext.resultDurationMillis
 import com.ustadmobile.core.domain.xapi.ext.resultProgressExtension
@@ -67,7 +67,7 @@ class NonInteractiveContentXapiStatementRecorderTest {
                     )
                 )
             },
-            endpoint = Endpoint("http://example.org/")
+            learningSpace = LearningSpace("http://example.org/")
         )
     }
 

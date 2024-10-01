@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.savelocaluris
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.io.ext.toDoorUri
 import com.ustadmobile.core.uri.UriHelper
@@ -30,7 +30,7 @@ import kotlinx.io.files.SystemFileSystem
  * is just a temporary uri (e.g. a user previewing a picture) or something to keep.
  */
 class SaveLocalUrisAsBlobsUseCaseJvm(
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val cache: UstadCache,
     private val uriHelper: UriHelper,
     private val tmpDir: Path,
@@ -67,7 +67,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
     ): List<SaveLocalUrisAsBlobsUseCase.SavedBlob> = withContext(Dispatchers.Default) {
         createTmpPathIfNeeded()
 
-        val endpointUrl = UrlKmp(endpoint.url)
+        val learningSpaceUrl = UrlKmp(learningSpace.url)
         val digester = Digester("MD5")
 
         //List of Pair (SaveLocalUriAsBlobItem to CacheEntryToStore)
@@ -81,7 +81,7 @@ class SaveLocalUrisAsBlobsUseCaseJvm(
 
             val sha256Base64 = transferResult.sha256.encodeBase64()
 
-            val blobUrl = endpointUrl.resolve("api/blob/" +
+            val blobUrl = learningSpaceUrl.resolve("api/blob/" +
                     UMURLEncoder.encodeUTF8(sha256Base64))
 
             val blobUrlStr = blobUrl.toString()

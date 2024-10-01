@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel
 
 import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -10,7 +11,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.*
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isDateOfBirthAnAdult
@@ -80,11 +81,22 @@ abstract class UstadViewModel(
     protected val activeUserPersonUid: Long
         get() = accountManager.currentUserSession.person.personUid
 
-    internal val activeDb: UmAppDatabase by on(accountManager.activeEndpoint)
+    internal val activeDataLayer: UmAppDataLayer by on(accountManager.activeLearningSpace).instance()
+
+    internal val activeDb: UmAppDatabase by on(accountManager.activeLearningSpace)
         .instance(tag = DoorTag.TAG_DB)
 
-    internal val activeRepo: UmAppDatabase by on(accountManager.activeEndpoint)
-        .instance(tag = DoorTag.TAG_REPO)
+    /**
+     * The repository will be null if this is a local only account (e.g. there is no server)
+     */
+    internal val activeRepo: UmAppDatabase?
+        get() = activeDataLayer.repository
+
+    /**
+     * Use the repository (if any as above), otherwise fallback to using the local database
+     */
+    internal val activeRepoWithFallback: UmAppDatabase
+        get() = activeDataLayer.repositoryOrLocalDb
 
     protected val navResultReturner: NavResultReturner by instance()
 
@@ -332,7 +344,9 @@ abstract class UstadViewModel(
         }
 
         return try {
-            val repoVal = onLoadFromDb?.invoke(activeRepo) ?: makeDefault()
+            val repoVal =  activeRepo?.let { repo ->
+                onLoadFromDb?.invoke(repo)
+            } ?: makeDefault()
             if(repoVal != null)
                 savedStateHandle.setJson(savedStateKey, serializer, repoVal)
             uiUpdate(repoVal)
@@ -362,7 +376,7 @@ abstract class UstadViewModel(
 
         viewModelScope.launch {
             try {
-                if(!activeRepo.localFirstThenRepoIfFalse(permissionCheck)) {
+                if(activeRepo?.localFirstThenRepoIfFalse(permissionCheck) == false) {
                     navController.navigate(
                         ErrorViewModel.DEST_NAME,
                         emptyMap(),
@@ -443,7 +457,7 @@ abstract class UstadViewModel(
         args: Map<String, String>,
         block: () -> Unit
     ) {
-        val apiUrlConfig: ApiUrlConfig by instance()
+        val apiUrlConfig: SystemUrlConfig by instance()
 
         if(
             accountManager.currentUserSession.person.let {
@@ -474,7 +488,7 @@ abstract class UstadViewModel(
         cbUid: Long = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
     ): XapiSessionEntity {
         val registrationUuid = uuid4()
-        val activityId = "${accountManager.activeEndpoint.url}ns/xapi/contentEntry/$contentEntryUid"
+        val activityId = "${accountManager.activeLearningSpace.url}ns/xapi/contentEntry/$contentEntryUid"
         val xxStringHasher: XXStringHasher = di.direct.instance()
 
         return XapiSessionEntity(
@@ -599,7 +613,7 @@ abstract class UstadViewModel(
          * Where the current user session is not changed, the next view needs to know which account
          * was selected (e.g. by UstadAccountManager, Login, Register, etc).
          */
-        const val ARG_SELECTED_ACCOUNT_ENDPOINT_URL = "selectedAccountEndpointUrl"
+        const val ARG_SELECTED_ACCOUNT_LEARNINGSPACE_URL = "selectedAccountEndpointUrl"
 
     }
 

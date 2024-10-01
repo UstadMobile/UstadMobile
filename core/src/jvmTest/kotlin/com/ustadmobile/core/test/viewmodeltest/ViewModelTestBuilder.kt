@@ -3,10 +3,11 @@ package com.ustadmobile.core.test.viewmodeltest
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.AuthManager
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
@@ -16,18 +17,21 @@ import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.UstadNavController
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.isLazyInitialized
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.util.test.nav.TestUstadSavedStateHandle
@@ -66,7 +70,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
     private lateinit var viewModelFactoryVar: TestViewModelFactory<T>
 
-    val endpointScope = EndpointScope()
+    val learningSpaceScope = LearningSpaceScope()
 
     /**
      * Temporary directory that can be used by a test. It will be deleted when the test is finished
@@ -85,17 +89,23 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     /**
      * Shorthand to get the active endpoint
      */
-    val activeEndpoint: Endpoint
-        get() = di.direct.instance<UstadAccountManager>().activeEndpoint
+    val activeLearningSpace: LearningSpace
+        get() = di.direct.instance<UstadAccountManager>().activeLearningSpace
 
     val accountManager: UstadAccountManager
         get() = di.direct.instance()
 
-    val activeDb: UmAppDatabase
-        get() = di.direct.on(activeEndpoint).instance(tag= DoorTag.TAG_DB)
+    val activeDataLayer: UmAppDataLayer
+        get() = di.direct.on(activeLearningSpace).instance()
 
-    val activeRepo: UmAppDatabase
-        get() = di.direct.on(activeEndpoint).instance(tag = DoorTag.TAG_REPO)
+    val activeDb: UmAppDatabase
+        get() = activeDataLayer.localDb
+
+    val activeRepo: UmAppDatabase?
+        get() = activeDataLayer.repository
+
+    val activeRepoWithFallback: UmAppDatabase
+        get() = activeDataLayer.repositoryOrLocalDb
 
     val systemImpl: UstadMobileSystemImpl
         get() = di.direct.instance()
@@ -121,8 +131,11 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
 
         bind<XapiJson>() with singleton { XapiJson() }
 
-        bind<ApiUrlConfig>() with singleton {
-            ApiUrlConfig(presetApiUrl = null)
+        bind<SystemUrlConfig>() with singleton {
+            SystemUrlConfig(
+                systemBaseUrl = "http://localhost:8087/",
+                passkeyRpId = "localhost",
+            )
         }
 
         bind<UstadAccountManager>() with singleton {
@@ -162,7 +175,7 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             }
         }
 
-        bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
+        bind<NodeIdAndAuth>() with scoped(learningSpaceScope).singleton {
             NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
         }
 
@@ -170,11 +183,11 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             Pbkdf2Params(iterations = 10000, keyLength = 512)
         }
 
-        bind<AuthManager>() with scoped(endpointScope).singleton {
+        bind<AuthManager>() with scoped(learningSpaceScope).singleton {
             AuthManager(context, di)
         }
 
-        bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
+        bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(learningSpaceScope).singleton {
             val dbUrl = "jdbc:sqlite::memory:"
             val nodeIdAndAuth: NodeIdAndAuth = instance()
             spy(
@@ -197,10 +210,27 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             }
         }
 
-        if(repoConfig.useDbAsRepo) {
-            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
-                instance(tag = DoorTag.TAG_DB)
+        bind<UmAppDataLayer>() with scoped(learningSpaceScope).singleton {
+            val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+
+            val repo = if(repoConfig.useDbAsRepo) {
+                db
+            }else if(!context.isLocal) {
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
+
+                spy(
+                    db.asRepository(
+                        repositoryConfig(
+                            Any(), UMFileUtil.joinPaths(context.url, "UmAppDatabase/"),
+                            nodeIdAndAuth.nodeId, nodeIdAndAuth.auth, instance(), instance()
+                        )
+                    )
+                )
+            }else {
+                null
             }
+
+            UmAppDataLayer(db, repo)
         }
 
         bind<SnackBarDispatcher>() with singleton {
@@ -223,10 +253,10 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             XXStringHasherCommonJvm()
         }
 
-        bind<AddNewPersonUseCase>() with scoped(endpointScope).singleton {
+        bind<AddNewPersonUseCase>() with scoped(learningSpaceScope).singleton {
             AddNewPersonUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
             )
         }
     }
@@ -264,20 +294,20 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
      * Sets the active session
      */
     suspend fun setActiveUser(
-        endpoint: Endpoint,
+        learningSpace: LearningSpace,
         person: Person = Person().apply {
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
         }
     ): Person {
-        val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+        val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
 
         val accountManager = di.direct.instance<UstadAccountManager>()
 
         db.withDoorTransactionAsync {
             val personInDb = db.insertPersonAndGroup(person)
-            val session = accountManager.addSession(personInDb, endpoint.url, "dummypassword")
+            val session = accountManager.addSession(personInDb, learningSpace.url, "dummypassword")
             accountManager.currentUserSession = session
         }
 

@@ -10,10 +10,16 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.provider
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpaceScope
+import com.ustadmobile.core.db.UmAppDataLayer
+import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseJvm
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
+import com.ustadmobile.core.domain.backup.JvmUnzipFileUseCase
+import com.ustadmobile.core.domain.backup.JvmZipFileUseCase
+import com.ustadmobile.core.domain.backup.UnzipFileUseCase
+import com.ustadmobile.core.domain.backup.ZipFileUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
@@ -79,6 +85,9 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
+import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
+import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -115,8 +124,8 @@ import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
-import com.ustadmobile.core.impl.config.AppConfig
-import com.ustadmobile.core.impl.config.AppConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
+import com.ustadmobile.core.impl.config.UstadBuildConfig
+import com.ustadmobile.core.impl.config.UstadBuildConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
 import com.ustadmobile.core.launchopenlicenses.LaunchOpenLicensesUseCaseJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
@@ -132,6 +141,12 @@ import org.kodein.di.singleton
 import java.io.File
 
 val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
+
+
+
+    bind<UnzipFileUseCase>() with singleton { JvmUnzipFileUseCase() }
+    bind<ZipFileUseCase>() with singleton { JvmZipFileUseCase() }
+
     bind<OpenExternalLinkUseCase>() with provider {
         OpenExternalLinkUseCaseJvm()
     }
@@ -175,11 +190,11 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         instance<ChunkedUploadClientUseCaseKtorImpl>()
     }
 
-    bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<SaveLocalUrisAsBlobsUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         val tmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
 
         SaveLocalUrisAsBlobsUseCaseJvm(
-            endpoint = context,
+            learningSpace = context,
             cache = instance(),
             uriHelper = instance(),
             tmpDir = Path(tmpDir.absolutePath),
@@ -188,31 +203,31 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<EnqueueBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<EnqueueBlobUploadClientUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         EnqueueBlobUploadClientUseCaseJvm(
             scheduler = instance(),
-            endpoint = context,
+            learningSpace = context,
             db = instance(tag = DoorTag.TAG_DB),
             cache = instance()
         )
     }
 
-    bind<BlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<BlobUploadClientUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         BlobUploadClientUseCaseJvm(
             chunkedUploadUseCase = on(context).instance(),
             httpClient = instance(),
             json = instance(),
             httpCache = instance(),
             db = on(context).instance(tag = DoorTag.TAG_DB),
-            repo = on(context).instance(tag = DoorTag.TAG_REPO),
-            endpoint = context,
+            repo = instance<UmAppDataLayer>().requireRepository(),
+            learningSpace = context,
         )
     }
 
-    bind<EnqueueSavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<EnqueueSavePictureUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         EnqueueSavePictureUseCaseJvm(
             scheduler = instance(),
-            endpoint = context
+            learningSpace = context
         )
     }
 
@@ -220,12 +235,12 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         CompressImageUseCaseJvm()
     }
 
-    bind<SavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<SavePictureUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         SavePictureUseCase(
             saveLocalUrisAsBlobUseCase = on(context).instance(),
             db = on(context).instance(tag = DoorTag.TAG_DB),
-            repo = on(context).instance(tag = DoorTag.TAG_REPO),
-            enqueueBlobUploadClientUseCase = on(context).instance(),
+            repo = instance<UmAppDataLayer>().repository,
+            enqueueBlobUploadClientUseCase = takeIf { !context.isLocal }?.on(context)?.instance(),
             compressImageUseCase = instance(),
             deleteUrisUseCase = instance(),
             getStoragePathForUrlUseCase = instance(),
@@ -244,26 +259,26 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<UpdateFailedTransferJobUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<UpdateFailedTransferJobUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         UpdateFailedTransferJobUseCase(
             db = instance(tag = DoorTag.TAG_DB)
         )
     }
 
-    bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         ContentEntryGetMetaDataFromUriUseCaseCommonJvm(
             importersManager = instance()
         )
     }
 
-    bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         SaveLocalUriAsBlobAndManifestUseCaseJvm(
             saveLocalUrisAsBlobsUseCase = instance(),
             mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
     }
 
-    bind<ImportContentEntryUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<ImportContentEntryUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         ImportContentEntryUseCase(
             db = instance(tag = DoorTag.TAG_DB),
             importersManager = instance(),
@@ -274,30 +289,30 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<CreateRetentionLocksForManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<CreateRetentionLocksForManifestUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         CreateRetentionLocksForManifestUseCaseCommonJvm(
             cache = instance()
         )
     }
 
-    bind<BlobDownloadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<BlobDownloadClientUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         BlobDownloadClientUseCaseCommonJvm(
             okHttpClient = instance(),
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().requireRepository(),
             httpCache = instance(),
         )
     }
 
-    bind<EnqueueBlobDownloadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<EnqueueBlobDownloadClientUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         EnqueueBlobDownloadClientUseCaseJvm(
             scheduler = instance(),
-            endpoint = context,
+            learningSpace = context,
             db = instance(tag = DoorTag.TAG_DB)
         )
     }
 
-    bind<ContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<ContentManifestDownloadUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         val cachePathsProvider: CachePathsProvider = instance()
 
         ContentManifestDownloadUseCase(
@@ -309,15 +324,15 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<EnqueueContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<EnqueueContentManifestDownloadUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         EnqueueContentManifestDownloadUseCaseJvm(
             scheduler = instance(),
-            endpoint = context,
+            learningSpace = context,
             db = instance(tag = DoorTag.TAG_DB),
         )
     }
 
-    bind<SetPasswordUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<SetPasswordUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         SetPasswordUseCaseCommonJvm(authManager = instance())
     }
 
@@ -331,23 +346,23 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<ResolveXapiLaunchHrefUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<ResolveXapiLaunchHrefUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         ResolveXapiLaunchHrefUseCase(
-            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             httpClient = instance(),
             json = instance(),
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             resumeOrStartXapiSessionUseCase  = instance(),
             getApiUrlUseCase = instance(),
             accountManager = instance(),
-            endpoint = context,
+            learningSpace = context,
         )
     }
 
-    bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<ResumeOrStartXapiSessionUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         ResumeOrStartXapiSessionUseCaseLocal(
             activeDb = instance(tag = DoorTag.TAG_DB),
-            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            activeRepo = instance<UmAppDataLayer>().repository,
             xxStringHasher = instance(),
         )
     }
@@ -356,7 +371,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         LaunchChromeUseCase(workingDir = ustadAppDataDir())
     }
 
-    bind<LaunchXapiUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<LaunchXapiUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         LaunchXapiUseCaseJvm(
             resolveXapiLaunchHrefUseCase = instance(),
             launchChromeUseCase = instance(),
@@ -364,14 +379,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<GetApiUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<GetApiUrlUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         GetApiUrlUseCaseEmbeddedServer(
             embeddedServer = instance(),
-            endpoint = context,
+            learningSpace = context,
         )
     }
 
-    bind<LaunchEpubUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<LaunchEpubUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         LaunchEpubUseCaseJvm(
             launchChromeUseCase = instance(),
             endpoint = context,
@@ -380,17 +395,17 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<ContentEntryVersionServerUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<ContentEntryVersionServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         ContentEntryVersionServerUseCase(
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
             okHttpClient = instance(),
             json = instance(),
             onlyIfCached = false,
         )
     }
 
-    bind<GetLocalUrlForContentUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<GetLocalUrlForContentUseCase>() with scoped(LearningSpaceScope.Default).provider {
         GetLocalUrlForContentUseCaseCommonJvm(getApiUrlUseCase = instance())
     }
 
@@ -407,91 +422,102 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<GetShowPoweredByUseCase>() with provider {
         GetShowPoweredByUseCase(
-            instance<AppConfig>()[KEY_CONFIG_SHOW_POWERED_BY]?.toBoolean() ?: false
+            instance<UstadBuildConfig>()[KEY_CONFIG_SHOW_POWERED_BY]?.toBoolean() ?: false
         )
+    }
+
+    bind<GetLocalAccountsSupportedUseCase>() with provider {
+        GetLocalAccountsSupportedUseCase(true)
     }
 
     bind<SetClipboardStringUseCase>() with provider {
         SetClipboardStringUseCaseJvm()
     }
 
-    bind<MoveContentEntriesUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<MoveContentEntriesUseCase>() with scoped(LearningSpaceScope.Default).provider {
         MoveContentEntriesUseCase(
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
             systemImpl = instance()
         )
     }
 
-    bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(LearningSpaceScope.Default).provider {
         DeleteContentEntryParentChildJoinUseCase(
-            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
 
-    bind<RestoreDeletedItemUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<RestoreDeletedItemUseCase>() with scoped(LearningSpaceScope.Default).provider {
         RestoreDeletedItemUseCase(
-            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
 
-    bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<DeletePermanentlyUseCase>() with scoped(LearningSpaceScope.Default).provider {
         DeletePermanentlyUseCase(
-            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
 
-    bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         MakeContentEntryAvailableOfflineUseCase(
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().requireRepository(),
             nodeIdAndAuth = instance(),
             enqueueContentManifestDownloadUseCase = instance(),
         )
     }
 
-    bind<CancelDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<CancelDownloadUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         CancelDownloadUseCaseJvm(
             scheduler = instance(),
-            endpoint = context,
+            learningSpace = context,
             db = instance(tag = DoorTag.TAG_DB),
         )
     }
 
-    bind<CloseProcessUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<CloseProcessUseCase>() with scoped(LearningSpaceScope.Default).provider {
         CloseProcessUseCaseJvm()
     }
 
-    bind<SaveAndUploadLocalUrisUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<SaveAndUploadLocalUrisUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         SaveAndUploadLocalUrisUseCase(
             saveLocalUrisAsBlobsUseCase = instance(),
-            enqueueBlobUploadClientUseCase = instance(),
+            enqueueBlobUploadClientUseCase = takeIf { !context.isLocal }?.instance(),
             activeDb = instance(tag = DoorTag.TAG_DB),
-            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            activeRepo = instance<UmAppDataLayer>().repository,
         )
     }
 
-    bind<CancelBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<CancelBlobUploadClientUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         CancelBlobUploadClientUseCaseJvm(
             scheduler = instance(),
-            endpoint = context,
+            learningSpace = context,
             db = instance(tag = DoorTag.TAG_DB),
         )
     }
 
-    bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<OpenBlobUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         OpenBlobUseCaseJvm(
             getStoragePathForUrlUseCase = instance(),
             rootTmpDir = instance(tag = DiTag.TAG_TMP_DIR)
         )
     }
 
-    bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<PasskeyRequestJsonUseCase>()  with provider {
+        PasskeyRequestJsonUseCase(
+            systemImpl = instance(),
+            json = instance()
+        )
+    }
+
+    bind<OpenBlobUiUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         OpenBlobUiUseCase(
             openBlobUseCase = instance(),
             systemImpl = instance(),
         )
     }
 
-    bind<BulkAddPersonsUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<BulkAddPersonsUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         BulkAddPersonsUseCaseImpl(
             addNewPersonUseCase = instance(),
             validateEmailUseCase = instance(),
@@ -499,11 +525,11 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             authManager = instance(),
             enrolUseCase = instance(),
             activeDb = instance(tag = DoorTag.TAG_DB),
-            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            activeRepo = instance<UmAppDataLayer>().repository,
         )
     }
 
-    bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         BulkAddPersonsFromLocalUriUseCaseCommonJvm(
             bulkAddPersonsUseCase = instance(),
             uriHelper = instance(),
@@ -515,26 +541,26 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     }
 
 
-    bind<CancelImportContentEntryUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<CancelImportContentEntryUseCase>() with scoped(LearningSpaceScope.Default).provider {
         CancelImportContentEntryUseCaseJvm(
             scheduler = instance(),
-            endpoint = context,
+            learningSpace = context,
         )
     }
 
-    bind<CancelRemoteContentEntryImportUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<CancelRemoteContentEntryImportUseCase>() with scoped(LearningSpaceScope.Default).provider {
         CancelRemoteContentEntryImportUseCase(
-            endpoint = context,
+            learningSpace = context,
             httpClient = instance(),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().requireRepository(),
         )
     }
 
-    bind<DismissRemoteContentEntryImportErrorUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<DismissRemoteContentEntryImportErrorUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         DismissRemoteContentEntryImportErrorUseCase(
-            endpoint = context,
+            learningSpace = context,
             httpClient = instance(),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().requireRepository(),
         )
     }
 
@@ -559,43 +585,43 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         XXHasher64FactoryCommonJvm()
     }
 
-    bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<StoreActivitiesUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         StoreActivitiesUseCase(
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
         )
     }
 
-    bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
+    bind<XapiStatementResource>() with scoped(LearningSpaceScope.Default).singleton {
         XapiStatementResource(
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
             xxHasher = instance(),
-            endpoint = context,
+            learningSpace = context,
             xapiJson = instance(),
             hasherFactory = instance(),
             storeActivitiesUseCase = instance(),
         )
     }
 
-    bind<SaveStatementOnClearUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<SaveStatementOnClearUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         SaveStatementOnClearUseCaseJvm(
             scheduler = instance(),
-            endpoint = context,
+            learningSpace = context,
             json = instance()
         )
     }
 
-    bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(EndpointScope.Default).singleton {
+    bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(LearningSpaceScope.Default).singleton {
         NonInteractiveContentXapiStatementRecorderFactory(
             saveStatementOnClearUseCase = instance(),
             saveStatementOnUnloadUseCase = null,
             xapiStatementResource = instance(),
-            endpoint = context,
+            learningSpace = context,
         )
     }
 
-    bind<XapiHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<XapiHttpServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         XapiHttpServerUseCase(
             statementResource = instance(),
             retrieveXapiStateUseCase = instance(),
@@ -605,58 +631,69 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             h5PUserDataEndpointUseCase = instance(),
             db = instance(tag = DoorTag.TAG_DB),
             xapiJson = instance(),
-            endpoint = context,
+            learningSpace = context,
             xxStringHasher = instance(),
         )
     }
 
-    bind<H5PUserDataEndpointUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<H5PUserDataEndpointUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         H5PUserDataEndpointUseCase(
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instanceOrNull(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
             xapiJson = instance(),
             xxStringHasher = instance(),
             xxHasher64Factory = instance(),
         )
     }
 
-    bind<StoreXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<StoreXapiStateUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         StoreXapiStateUseCase(
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
             xapiJson = instance(),
             xxHasher64Factory = instance(),
             xxStringHasher = instance(),
-            endpoint = context,
+            learningSpace = context,
         )
     }
 
-    bind<RetrieveXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<RetrieveXapiStateUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         RetrieveXapiStateUseCase(
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
             xapiJson = instance(),
             xxStringHasher = instance(),
             xxHasher64Factory = instance(),
         )
     }
 
-    bind<ListXapiStateIdsUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<ListXapiStateIdsUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         ListXapiStateIdsUseCase(
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
             xxStringHasher = instance(),
         )
     }
 
-    bind<DeleteXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<DeleteXapiStateUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         DeleteXapiStateUseCase(
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
             xxStringHasher = instance(),
             xxHasher64Factory = instance(),
-            endpoint = context,
+            learningSpace = context,
         )
+    }
+
+    bind<AddNewPersonUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+        AddNewPersonUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance<UmAppDataLayer>().repository,
+        )
+    }
+
+    bind<CreateNewLocalAccountUseCase>() with singleton {
+        CreateNewLocalAccountUseCase(di)
     }
 
 }

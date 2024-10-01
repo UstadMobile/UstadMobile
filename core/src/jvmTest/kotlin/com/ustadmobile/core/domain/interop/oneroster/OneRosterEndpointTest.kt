@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.interop.oneroster
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
@@ -49,7 +49,7 @@ class OneRosterEndpointTest {
 
     private lateinit var accountPerson: Person
 
-    private val endpoint = Endpoint("http://localhost:8087/")
+    private val learningSpace = LearningSpace("http://localhost:8087/")
 
     private val xxHasher = XXStringHasherCommonJvm()
 
@@ -58,7 +58,7 @@ class OneRosterEndpointTest {
         db = DatabaseBuilder.databaseBuilder(
             UmAppDatabase::class, "jdbc:sqlite::memory:", nodeId = 1L
         ).build()
-        oneRosterEndpoint = OneRosterEndpoint(db, null, endpoint, xxHasher, json)
+        oneRosterEndpoint = OneRosterEndpoint(db, null, learningSpace, xxHasher, json)
         runBlocking {
             accountPerson = Person().apply {
                 firstNames = "One"

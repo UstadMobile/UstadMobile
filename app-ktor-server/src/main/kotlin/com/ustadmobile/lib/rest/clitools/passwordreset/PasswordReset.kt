@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest.clitools.passwordreset
 
 import com.ustadmobile.core.account.AuthManager
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
@@ -28,8 +28,8 @@ fun main(args: Array<String>) {
         .setDefault("ustad-server.conf")
         .help("Server config file path")
 
-    parser.addArgument("-e", "--endpoint")
-        .help("Server endpoint url e.g. https://ustad.servername.com/")
+    parser.addArgument("-l", "--learningspace")
+        .help("Server learning sapce url e.g. https://ustad.servername.com/")
     parser.addArgument("-u", "--username")
         .required(true)
         .help("Username to reset password for")
@@ -53,15 +53,15 @@ fun main(args: Array<String>) {
 
     println("Loaded config")
 
-    val endpoint = if(conf.dbModeProperty() == CONF_DBMODE_SINGLETON) {
-        Endpoint("http://localhost/")
+    val learningSpace = if(conf.dbModeProperty() == CONF_DBMODE_SINGLETON) {
+        LearningSpace("http://localhost/")
     }else {
         val endpointArg = ns.getString("endpoint")
         if(endpointArg == null){
             println("ERROR: Configuration uses virtual hosting: but no endpoint specified")
             exitProcess(2)
         }
-        Endpoint(endpointArg)
+        LearningSpace(endpointArg)
     }
 
     val json = Json {
@@ -74,11 +74,11 @@ fun main(args: Array<String>) {
     }
 
 
-    val db: UmAppDatabase = di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
+    val db: UmAppDatabase = di.direct.on(learningSpace).instance(tag = DoorTag.TAG_DB)
     val person = db.personDao().findByUsername(ns.getString("username"))
 
     if(person != null) {
-        val authManager: AuthManager = di.direct.on(endpoint).instance()
+        val authManager: AuthManager = di.direct.on(learningSpace).instance()
         print("Please enter new password: ")
         val newPassword = readln().trim()
         runBlocking {

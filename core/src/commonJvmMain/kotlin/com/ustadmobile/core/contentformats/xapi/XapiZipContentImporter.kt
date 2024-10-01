@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats.xapi
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
@@ -36,7 +36,7 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 class XapiZipContentImporter(
-    endpoint: Endpoint,
+    learningSpace: LearningSpace,
     private val db: UmAppDatabase,
     private val cache: UstadCache,
     private val uriHelper: UriHelper,
@@ -44,7 +44,7 @@ class XapiZipContentImporter(
     private val tmpPath: Path,
     private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     private val compressListUseCase: CompressListUseCase,
-) : ContentImporter(endpoint) {
+) : ContentImporter(learningSpace) {
 
     val viewName: String
         get() = XapiContentViewModel.DEST_NAME

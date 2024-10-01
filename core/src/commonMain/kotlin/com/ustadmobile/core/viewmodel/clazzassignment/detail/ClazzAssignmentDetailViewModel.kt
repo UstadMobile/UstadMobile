@@ -31,9 +31,9 @@ class ClazzAssignmentDetailViewModel(
     private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0L
 
     init {
-        val assignmentFlow = activeRepo.clazzAssignmentDao()
+        val assignmentFlow = activeRepoWithFallback.clazzAssignmentDao()
             .findByUidAndClazzUidAsFlow(entityUidArg, clazzUid)
-        val permissionFlow = activeRepo.coursePermissionDao()
+        val permissionFlow = activeRepoWithFallback.coursePermissionDao()
             .personHasPermissionWithClazzPairAsFlow(
                 accountPersonUid = accountManager.currentAccount.personUid,
                 clazzUid = clazzUid,

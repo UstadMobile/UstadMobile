@@ -1,7 +1,7 @@
 package com.ustadmobile.view.accountlist
 
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
@@ -30,8 +30,8 @@ import web.window.window
 
 external interface AccountListProps: Props {
     var uiState: AccountListUiState
-    var onAccountListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit
-    var onDeleteListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit
+    var onAccountListItemClick: (UserSessionWithPersonAndLearningSpace) -> Unit
+    var onDeleteListItemClick: (UserSessionWithPersonAndLearningSpace) -> Unit
     var onClickOpenLicenses: () -> Unit
     var onAddItem: () -> Unit
     var onMyProfileClick: () -> Unit
@@ -39,15 +39,15 @@ external interface AccountListProps: Props {
 }
 
 external interface AccountListItemContentProps: Props{
-    var account: UserSessionWithPersonAndEndpoint
-    var onDeleteListItemClick: ((UserSessionWithPersonAndEndpoint?) -> Unit)?
+    var account: UserSessionWithPersonAndLearningSpace
+    var onDeleteListItemClick: ((UserSessionWithPersonAndLearningSpace?) -> Unit)?
     var showAccountEndpoint: Boolean
 }
 
 external interface AccountListItemProps: Props {
-    var onListItemClick: ((UserSessionWithPersonAndEndpoint) -> Unit)?
-    var account: UserSessionWithPersonAndEndpoint
-    var onDeleteListItemClick: ((UserSessionWithPersonAndEndpoint?) -> Unit)?
+    var onListItemClick: ((UserSessionWithPersonAndLearningSpace) -> Unit)?
+    var account: UserSessionWithPersonAndLearningSpace
+    var onDeleteListItemClick: ((UserSessionWithPersonAndLearningSpace?) -> Unit)?
     var showAccountEndpoint: Boolean
 }
 
@@ -109,7 +109,7 @@ private val AccountListItemContent = FC<AccountListItemContentProps> { props ->
                     sx{
                         paddingLeft = 5.px
                     }
-                    secondary = ReactNode(props.account.endpoint.url)
+                    secondary = ReactNode(props.account.learningSpace.url)
                 }
             }
         }
@@ -296,7 +296,7 @@ val AccountListScreen = FC<Props> {
 val AccountListScreenPreview = FC<Props> {
     AccountListComponent2{
         uiState = AccountListUiState(
-            headerAccount = UserSessionWithPersonAndEndpoint(
+            headerAccount = UserSessionWithPersonAndLearningSpace(
                 userSession = UserSession().apply {
                 },
                 person = Person().apply {
@@ -305,12 +305,12 @@ val AccountListScreenPreview = FC<Props> {
                     personUid = 9
                     username = "sara99"
                 },
-                endpoint = Endpoint(
+                learningSpace = LearningSpace(
                     url = "https://example.com"
                 )
             ),
             accountsList = listOf(
-                UserSessionWithPersonAndEndpoint(
+                UserSessionWithPersonAndLearningSpace(
                     userSession = UserSession().apply {
                     },
                     person = Person().apply {
@@ -319,11 +319,11 @@ val AccountListScreenPreview = FC<Props> {
                         personUid = 4
                         username = "ahmadi"
                     },
-                    endpoint = Endpoint(
+                    learningSpace = LearningSpace(
                         url = "https://example.com"
                     )
                 ),
-                UserSessionWithPersonAndEndpoint(
+                UserSessionWithPersonAndLearningSpace(
                     userSession = UserSession().apply {
                     },
                     person = Person().apply {
@@ -332,11 +332,11 @@ val AccountListScreenPreview = FC<Props> {
                         personUid = 5
                         username = "negin10"
                     },
-                    endpoint = Endpoint(
+                    learningSpace = LearningSpace(
                         url = "https://someweb.com"
                     )
                 ),
-                UserSessionWithPersonAndEndpoint(
+                UserSessionWithPersonAndLearningSpace(
                     userSession = UserSession().apply {
                     },
                     person = Person().apply {
@@ -345,7 +345,7 @@ val AccountListScreenPreview = FC<Props> {
                         personUid = 6
                         username = "ali01"
                     },
-                    endpoint = Endpoint(
+                    learningSpace = LearningSpace(
                         url = "https://thisisalink.org"
                     )
                 )

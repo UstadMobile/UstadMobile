@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.xapi.coursegroup
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiGroup
@@ -14,7 +14,7 @@ import com.ustadmobile.core.util.ext.toXapiAgent
  */
 class CreateXapiGroupForCourseGroupUseCase(
     private val repo: UmAppDatabase,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val stringHasher: XXStringHasher,
 )  {
 
@@ -40,7 +40,7 @@ class CreateXapiGroupForCourseGroupUseCase(
             )
 
         val membersAndPersonUids = groupMembers.mapNotNull { courseGroupMember ->
-            courseGroupMember.person?.toXapiAgent(endpoint)?.let {
+            courseGroupMember.person?.toXapiAgent(learningSpace)?.let {
                 Pair(it, courseGroupMember.courseGroupMember?.cgmPersonUid ?: 0)
             }
         }
@@ -48,7 +48,7 @@ class CreateXapiGroupForCourseGroupUseCase(
         return XapiGroupAndPersonUidMap(
             group = XapiGroup(
                 account = XapiAccount(
-                    homePage = endpoint.url,
+                    homePage = learningSpace.url,
                     name = "cgs-$groupSetUid-$groupNum"
                 ),
                 member = membersAndPersonUids.map { it.first }

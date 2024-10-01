@@ -8,13 +8,13 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import java.util.concurrent.TimeUnit
 
 class EnqueueContentManifestDownloadJobUseCaseAndroid(
     private val appContext: Context,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     db: UmAppDatabase
 ): AbstractEnqueueContentManifestDownloadUseCase(db) {
 
@@ -28,14 +28,14 @@ class EnqueueContentManifestDownloadJobUseCaseAndroid(
         )
 
         val jobData = Data.Builder()
-            .putString(DATA_ENDPOINT, endpoint.url)
+            .putString(DATA_LEARNINGSPACE, learningSpace.url)
             .putInt(DATA_JOB_UID, transferJob.tjUid)
             .putLong(DATA_CONTENTENTRYVERSION_UID, contentEntryVersionUid)
             .build()
 
         val workRequest = OneTimeWorkRequestBuilder<ContentManifestDownloadWorker>()
             .setInputData(jobData)
-            .addTag("offlineitem-${endpoint.url}-$offlineItemUid")
+            .addTag("offlineitem-${learningSpace.url}-$offlineItemUid")
             .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
             .setConstraints(
                 Constraints.Builder()
@@ -44,7 +44,7 @@ class EnqueueContentManifestDownloadJobUseCaseAndroid(
             ).build()
 
         WorkManager.getInstance(appContext).enqueueUniqueWork(
-            uniqueNameFor(endpoint, transferJob.tjUid),
+            uniqueNameFor(learningSpace, transferJob.tjUid),
             ExistingWorkPolicy.REPLACE, workRequest)
     }
 }

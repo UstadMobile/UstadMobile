@@ -51,8 +51,8 @@ external interface PdfContentScreenProps : Props{
  */
 val PdfContentComponent = FC<PdfContentScreenProps> { props ->
     val di = useRequiredContext(DIContext)
-    val endpoint = useMemo(dependencies = emptyArray()) {
-        di.direct.instance<UstadAccountManager>().activeEndpoint
+    val learningSpace = useMemo(dependencies = emptyArray()) {
+        di.direct.instance<UstadAccountManager>().activeLearningSpace
     }
 
     useWindowFocusedEffect { focused ->
@@ -60,7 +60,7 @@ val PdfContentComponent = FC<PdfContentScreenProps> { props ->
     }
 
     useMessageEffect<String> {
-        if(!endpoint.url.startsWith(it.origin, ignoreCase = true))
+        if(!learningSpace.url.startsWith(it.origin, ignoreCase = true))
             return@useMessageEffect
 
         //viewer.html will send a message in the form of pdf-pages:pageNum/numPages
@@ -82,7 +82,7 @@ val PdfContentComponent = FC<PdfContentScreenProps> { props ->
 
     props.uiState.pdfUrl?.also { pdfUrl ->
         UstadFullSizeIframe {
-            src = "${endpoint.url}umapp/pdf-js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}"
+            src = "${learningSpace.url}umapp/pdf-js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}"
             id = "pdf_js"
         }
     }

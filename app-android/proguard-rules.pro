@@ -102,3 +102,9 @@
 }
 
 # End XXHash rules
+
+#passkey
+-if class androidx.credentials.CredentialManager
+-keep class androidx.credentials.playservices.** {
+  *;
+}

@@ -43,7 +43,6 @@ val LoginScreen = FC<Props> {
     LoginComponent2 {
         this.uiState = uiState
         onClickLogin = viewModel::onClickLogin
-        onClickCreateAccount = viewModel::onClickCreateAccount
         onClickConnectAsGuest = viewModel::onClickConnectAsGuest
         onUsernameValueChange = viewModel::onUsernameChanged
         onPasswordValueChange = viewModel::onPasswordChanged
@@ -128,15 +127,6 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 id = "language_select"
             }
 
-
-            if(props.uiState.createAccountVisible) {
-                Button {
-                    id = "create_account_button"
-                    onClick = { props.onClickCreateAccount() }
-                    variant = ButtonVariant.outlined
-                    + strings[MR.strings.create_account].uppercase()
-                }
-            }
 
             if(props.uiState.connectAsGuestVisible) {
                 Button {

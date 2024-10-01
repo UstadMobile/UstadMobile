@@ -75,9 +75,9 @@ class PersonAccountEditViewModel(
 
     val uiState: Flow<PersonAccountEditUiState> = _uiState.asStateFlow()
 
-    private val authManager: AuthManager by on(accountManager.activeEndpoint).instance()
+    private val authManager: AuthManager by on(accountManager.activeLearningSpace).instance()
 
-    private val setPasswordUseCase: SetPasswordUseCase by on(accountManager.activeEndpoint).instance()
+    private val setPasswordUseCase: SetPasswordUseCase by on(accountManager.activeLearningSpace).instance()
 
     init {
         _appUiState.value = AppUiState(
@@ -219,11 +219,11 @@ class PersonAccountEditViewModel(
             if(entity.mode == MODE_CREATE_ACCOUNT) {
                 //This is a registration
                 try {
-                    val usernameCount = activeRepo.personDao().countUsername(entity.username)
+                    val usernameCount = activeRepoWithFallback.personDao().countUsername(entity.username)
                     if(usernameCount == 0) {
-                        activeRepo.withDoorTransactionAsync {
+                        activeRepoWithFallback.withDoorTransactionAsync {
                             authManager.setAuth(entityUidArg, entity.newPassword)
-                            val numChanges = activeRepo.personDao().updateUsername(
+                            val numChanges = activeRepoWithFallback.personDao().updateUsername(
                                 personUid = entityUidArg,
                                 username = entity.username,
                                 currentTime = systemTimeInMillis()

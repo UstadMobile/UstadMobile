@@ -140,7 +140,7 @@ class ClazzLogEditAttendanceViewModel(
             )
 
             launch {
-                val timeZone = activeRepo.clazzDao().getClazzTimeZoneByClazzUidAsync(
+                val timeZone = activeRepoWithFallback.clazzDao().getClazzTimeZoneByClazzUidAsync(
                     _uiState.value.currentClazzLog.clazzLogClazzUid
                 )
 
@@ -211,7 +211,7 @@ class ClazzLogEditAttendanceViewModel(
                 deserializer = ListSerializer(PersonAndClazzLogAttendanceRecord.serializer())
             )
             //If not in SavedState, then load from database, and put into savedStateHandle
-            ?: activeRepo.clazzLogAttendanceRecordDao().findByClazzAndTime(
+            ?: activeRepoWithFallback.clazzLogAttendanceRecordDao().findByClazzAndTime(
                 clazzLog.clazzLogClazzUid, clazzLog.clazzLogUid, clazzLog.logDate
             ).map {
                 if(it.attendanceRecord == null) {
@@ -363,9 +363,9 @@ class ClazzLogEditAttendanceViewModel(
                     attendanceRecordsToSave += logRecords
                 }
 
-                activeRepo.withDoorTransactionAsync {
-                    activeRepo.clazzLogDao().upsertListAsync(clazzLogsToSave)
-                    activeRepo.clazzLogAttendanceRecordDao().upsertListAsync(attendanceRecordsToSave)
+                activeRepoWithFallback.withDoorTransactionAsync {
+                    activeRepoWithFallback.clazzLogDao().upsertListAsync(clazzLogsToSave)
+                    activeRepoWithFallback.clazzLogAttendanceRecordDao().upsertListAsync(attendanceRecordsToSave)
                 }
             }
 

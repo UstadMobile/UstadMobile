@@ -79,7 +79,7 @@ class ClazzEnrolmentListViewModel(
 
             _uiState.whenSubscribed {
                 launch {
-                    val terminology = activeRepo.courseTerminologyDao()
+                    val terminology = activeRepoWithFallback.courseTerminologyDao()
                         .getTerminologyForClazz(argClazzUid)
                     _uiState.update { prev ->
                         prev.copy(courseTerminology = terminology)
@@ -102,7 +102,7 @@ class ClazzEnrolmentListViewModel(
                 launch {
                     canViewMembersFlow.distinctUntilChanged().collectLatest { canViewMembers ->
                         val enrolmentsListFlow = if(canViewMembers) {
-                            activeRepo.clazzEnrolmentDao().findAllEnrolmentsByPersonAndClazzUid(
+                            activeRepoWithFallback.clazzEnrolmentDao().findAllEnrolmentsByPersonAndClazzUid(
                                 personUid = argPersonUid,
                                 clazzUid = argClazzUid,
                             )
@@ -123,7 +123,7 @@ class ClazzEnrolmentListViewModel(
                 launch {
                     canViewMembersFlow.distinctUntilChanged().filter { it }.collectLatest { canViewMembers ->
                         if(canViewMembers) {
-                            val courseAndPersonName = activeRepo
+                            val courseAndPersonName = activeRepoWithFallback
                                 .clazzEnrolmentDao().getClazzNameAndPersonName(
                                     personUid = argPersonUid,
                                     clazzUid = argClazzUid,

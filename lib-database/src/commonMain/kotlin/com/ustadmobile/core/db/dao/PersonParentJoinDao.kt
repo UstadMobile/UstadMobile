@@ -13,6 +13,10 @@ import com.ustadmobile.lib.db.entities.*
 @Repository
 expect abstract class PersonParentJoinDao {
 
+
+    @Insert
+    abstract suspend fun insertListAsync(entityList: List<PersonParentJoin>)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(entity: PersonParentJoin): Long
 

@@ -3,6 +3,8 @@ package com.ustadmobile.entities
 import com.ustadmobile.core.components.NAVHOST_CLEARSTACK_VIEWNAME
 import com.ustadmobile.core.components.NavHostClearStackPlaceholder
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUserTypeViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
@@ -37,7 +39,7 @@ import com.ustadmobile.view.clazzenrolment.clazzmemberlist.ClazzMemberListScreen
 import com.ustadmobile.view.courseterminology.edit.CourseTerminologyEditScreen
 import com.ustadmobile.view.login.LoginScreen
 import com.ustadmobile.view.schedule.edit.ScheduleEditScreen
-import com.ustadmobile.view.siteenterlink.SiteEnterLinkScreen
+import com.ustadmobile.view.siteenterlink.LearningSpaceEnterLinkScreen
 import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMemberListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.view.clazzenrolment.edit.ClazzEnrolmentEditScreen
@@ -96,8 +98,14 @@ import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.view.dbexport.DbExportScreen
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
+import com.ustadmobile.core.viewmodel.person.child.EditChildProfileViewModel
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
+import com.ustadmobile.core.viewmodel.signup.SignupEnterUsernamePasswordViewModel
 import com.ustadmobile.view.accountlist.AccountListScreen
 import com.ustadmobile.view.person.accountedit.PersonAccountEditScreen
+import com.ustadmobile.view.person.child.AddChildProfilesScreen
+import com.ustadmobile.view.person.child.EditChildProfileScreen
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.view.contententry.importlink.ContentEntryImportLinkScreen
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
@@ -115,7 +123,7 @@ import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.view.epubcontent.EpubContentScreen
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.view.videocontent.VideoContentScreen
-import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkViewModel
 import com.ustadmobile.view.clazz.courseblockedit.CourseBlockEditScreen
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
 import com.ustadmobile.view.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditScreen
@@ -163,8 +171,14 @@ import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSele
 import com.ustadmobile.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
+import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import com.ustadmobile.view.clazz.gradebook.ClazzGradebookScreen
 import com.ustadmobile.mui.components.UstadChipsDemo
+import com.ustadmobile.view.person.addaccount.AddAccountSelectNewOrExistingScreen
+import com.ustadmobile.view.signup.SignUpScreen
+import com.ustadmobile.view.person.addaccount.AddAccountSelectNewOrExistingUserTypeScreen
+import com.ustadmobile.view.person.learningspacelist.LearningSpaceListScreen
+import com.ustadmobile.view.signup.SignUpEnterUsernamePasswordScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -190,9 +204,38 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(LoginViewModel.DEST_NAME, "Login Preview",
         LoginScreen
     ),
-    UstadScreen(SiteEnterLinkViewModel.DEST_NAME, "Site Enter Link Preview",
-        SiteEnterLinkScreen
+    UstadScreen(
+        AddAccountSelectNewOrExistingViewModel.DEST_NAME, "New Or Existing Account Selection",
+        AddAccountSelectNewOrExistingScreen
     ),
+    UstadScreen(LearningSpaceEnterLinkViewModel.DEST_NAME, "Site Enter Link Preview",
+        LearningSpaceEnterLinkScreen
+    ),
+    UstadScreen(
+        AddAccountSelectNewOrExistingUserTypeViewModel.DEST_NAME, "New Or Existing Account User Type",
+        AddAccountSelectNewOrExistingUserTypeScreen
+    ),
+    UstadScreen(
+        LearningSpaceListViewModel.DEST_NAME, "New Or Existing Account User Type",
+        LearningSpaceListScreen
+    ),
+    UstadScreen(
+        SignUpViewModel.DEST_NAME, "Sign Up Screen",
+        SignUpScreen
+    ),
+    UstadScreen(
+        SignupEnterUsernamePasswordViewModel.DEST_NAME, "SignUp Enter Username Password Screen",
+        SignUpEnterUsernamePasswordScreen
+    ),
+    UstadScreen(
+        AddChildProfilesViewModel.DEST_NAME, "Add Child Profiles Screen",
+        AddChildProfilesScreen
+    ),
+    UstadScreen(
+        EditChildProfileViewModel.DEST_NAME, "Edit Child Profile Screen",
+        EditChildProfileScreen
+    ),
+
     UstadScreen(
         ParentalConsentManagementViewModel.DEST_NAME, "Parental Consent Management Preview",
         ParentalConsentManagementScreen),

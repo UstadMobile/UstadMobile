@@ -85,3 +85,22 @@ a separate URL but share common content).
   content piece available offline, it will download all the resources listed in sitemap.xml that are
   not yet stored locally.
 
+# Learning Spaces
+
+Learning Spaces are to Ustad Mobile what a workspace is to Slack. Each space has its own users,
+classes, library, etc. Schools, projects, companies, etc can each have their own learning space. 
+Each Learning Space will have a specific URL.
+
+## Client side
+
+The client will have a separate instance of the main database (UmAppDatabase) for each learning 
+space. This is used for [scoped](https://kosi-libs.org/kodein/7.22/core/using-environment.html#scope)
+dependency injection.
+
+## Server side (virtual hosting)
+
+One server process (in one JVM instance) can host multiple learning spaces with minimal overhead. 
+HTTP requests are matched to the relevant learning space, and each learning space is mapped to a 
+separate database. [lib-systemdb](lib-systemdb/) is used to maintain a database of all learning 
+spaces available on the system.
+

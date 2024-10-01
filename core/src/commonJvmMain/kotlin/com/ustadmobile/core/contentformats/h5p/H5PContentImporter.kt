@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats.h5p
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
@@ -71,7 +71,7 @@ import java.util.zip.ZipInputStream
  *
  */
 class H5PContentImporter(
-    endpoint: Endpoint,
+    learningSpace: LearningSpace,
     private val db: UmAppDatabase,
     private val cache: UstadCache,
     private val uriHelper: UriHelper,
@@ -85,7 +85,7 @@ class H5PContentImporter(
             "/h5p/h5p-standalone-3.6.0.zip"
         ) ?: throw IllegalStateException("Could not open h5p standalone zip")
     },
-): ContentImporter(endpoint) {
+): ContentImporter(learningSpace) {
 
     override val importerId: Int
         get() = PLUGIN_ID
@@ -228,7 +228,7 @@ class H5PContentImporter(
                 }
             )
 
-            val entryId = "${endpoint.url}/ns/xapi/${jobItem.cjiContentEntryUid}"
+            val entryId = "${learningSpace.url}/ns/xapi/${jobItem.cjiContentEntryUid}"
             val tinCanXmlPath = Path(workTmpPath, "tincan.xml")
             fileSystem.sink(tinCanXmlPath).buffered().use {
                 it.writeString(

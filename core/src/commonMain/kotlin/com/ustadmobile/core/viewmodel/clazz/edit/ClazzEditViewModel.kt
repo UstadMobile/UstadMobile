@@ -5,6 +5,7 @@ import com.ustadmobile.core.domain.courseblockupdate.AddOrUpdateCourseBlockUseCa
 import com.ustadmobile.core.domain.courseblockupdate.UpdateCourseBlocksOnReorderOrCommitUseCase
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
@@ -13,7 +14,6 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyListViewModel
@@ -48,7 +48,6 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import io.github.aakira.napier.Napier
 import org.kodein.di.direct
-import org.kodein.di.instanceOrNull
 
 @Serializable
 data class ClazzEditUiState(
@@ -114,7 +113,7 @@ class ClazzEditViewModel(
         UpdateCourseBlocksOnReorderOrCommitUseCase(),
     private val saveContentEntryUseCase: SaveContentEntryUseCase = SaveContentEntryUseCase(
         db = di.onActiveEndpoint().direct.instance(tag = DoorTag.TAG_DB),
-        repo = di.onActiveEndpoint().direct.instanceOrNull(tag = DoorTag.TAG_REPO),
+        repo = di.onActiveEndpoint().direct.instance<UmAppDataLayer>().repository,
         enqueueSavePictureUseCase = di.onActiveEndpoint().direct.instance(),
     ),
     private val importContentUseCase: EnqueueContentEntryImportUseCase = di.onActiveEndpoint().direct.instance(),
@@ -187,7 +186,7 @@ class ClazzEditViewModel(
                                 clazzStartTime = systemTimeInMillis()
                                 clazzTimeZone = getDefaultTimeZoneId()
                                 clazzSchoolUid = savedStateHandle[UstadView.ARG_SCHOOL_UID]?.toLong() ?: 0L
-                                terminology = activeRepo.courseTerminologyDao()
+                                terminology = activeRepoWithFallback.courseTerminologyDao()
                                     .takeIf { clazzTerminologyUid != 0L }
                                     ?.findByUidAsync(clazzTerminologyUid)
                                 coursePicture = CoursePicture(
@@ -563,7 +562,7 @@ class ClazzEditViewModel(
                 if(entityUidArg == 0L) {
                     createNewClazzUseCase(initEntity)
                 }else {
-                    activeRepo.clazzDao().updateAsync(initEntity)
+                    activeRepoWithFallback.clazzDao().updateAsync(initEntity)
                 }
 
                 if(updateImage && coursePictureVal != null) {
@@ -577,8 +576,8 @@ class ClazzEditViewModel(
                     it.shallowCopy { scheduleClazzUid = clazzUid }
                 }
 
-                activeRepo.scheduleDao().upsertListAsync(schedulesToCommit)
-                activeRepo.scheduleDao().deactivateByUids(
+                activeRepoWithFallback.scheduleDao().upsertListAsync(schedulesToCommit)
+                activeRepoWithFallback.scheduleDao().deactivateByUids(
                     initState.clazzSchedules.findKeysNotInOtherList(schedulesToCommit) {
                         it.scheduleUid
                     }, systemTimeInMillis()
@@ -586,20 +585,20 @@ class ClazzEditViewModel(
 
                 val courseBlockModulesToCommit = updateCourseBlocksOnReorderOrCommitUseCase(
                     courseBlockListVal)
-                activeRepo.courseBlockDao().upsertListAsync(
+                activeRepoWithFallback.courseBlockDao().upsertListAsync(
                     courseBlockModulesToCommit.map { it.courseBlock }
                 )
-                activeRepo.courseBlockDao().deactivateByUids(
+                activeRepoWithFallback.courseBlockDao().deactivateByUids(
                     initState.courseBlockList.findKeysNotInOtherList(courseBlockModulesToCommit) {
                         it.courseBlock.cbUid
                     }, systemTimeInMillis()
                 )
 
                 val assignmentsToUpsert = courseBlockListVal.mapNotNull { it.assignment }
-                activeRepo.clazzAssignmentDao().upsertListAsync(assignmentsToUpsert)
+                activeRepoWithFallback.clazzAssignmentDao().upsertListAsync(assignmentsToUpsert)
                 val assignmentsToDeactivate = initState.courseBlockList.mapNotNull { it.assignment}
                     .findKeysNotInOtherList(assignmentsToUpsert) { it.caUid }
-                activeRepo.clazzAssignmentDao().takeIf { assignmentsToDeactivate.isNotEmpty() }
+                activeRepoWithFallback.clazzAssignmentDao().takeIf { assignmentsToDeactivate.isNotEmpty() }
                     ?.updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
 
                 val currentPeerReviewAllocations = courseBlockListVal.flatMap {
@@ -609,14 +608,14 @@ class ClazzEditViewModel(
                     it.assignmentPeerAllocations
                 }
 
-                activeRepo.peerReviewerAllocationDao().deactivateByUids(
+                activeRepoWithFallback.peerReviewerAllocationDao().deactivateByUids(
                     uidList = prevPeerReviewerAllocations.findKeysNotInOtherList(
                         otherList = currentPeerReviewAllocations,
                         key = { it.praUid }
                     ),
                     changeTime = systemTimeInMillis()
                 )
-                activeRepo.peerReviewerAllocationDao().upsertList(currentPeerReviewAllocations)
+                activeRepoWithFallback.peerReviewerAllocationDao().upsertList(currentPeerReviewAllocations)
 
                 //Run the ContentImport for any jobs where this is required.
                 courseBlockListVal.mapNotNull {
@@ -665,16 +664,6 @@ class ClazzEditViewModel(
                 )
             }
 
-            val entityTimeZone = TimeZone.of(entity.effectiveTimeZone)
-            val fromLocalDate = Clock.System.now().toLocalDateTime(entityTimeZone)
-                .toLocalMidnight()
-            val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()
-            clazzLogCreatorManager.requestClazzLogCreation(
-                entity.clazzUid,
-                accountManager.currentAccount.endpointUrl,
-                fromLocalDate.toInstant(entityTimeZone).toEpochMilliseconds(),
-                fromLocalDate.toLocalEndOfDay().toInstant(entityTimeZone).toEpochMilliseconds()
-            )
             Napier.d("onClickSave: done")
 
             finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)

@@ -54,13 +54,13 @@ class CourseDiscussionDetailViewModel(
     private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0L
 
     private val pagingSourceFactory : ListPagingSourceFactory<DiscussionPostWithDetails> = {
-        activeRepo.discussionPostDao().getTopLevelPostsByCourseBlockUid(courseBlockUid, false)
+        activeRepoWithFallback.discussionPostDao().getTopLevelPostsByCourseBlockUid(courseBlockUid, false)
     }
 
     init {
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.coursePermissionDao().personHasPermissionWithClazzPairAsFlow(
+                activeRepoWithFallback.coursePermissionDao().personHasPermissionWithClazzPairAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     clazzUid = clazzUid,
                     firstPermission = PermissionFlags.COURSE_VIEW,
@@ -87,7 +87,7 @@ class CourseDiscussionDetailViewModel(
                             )
                         }
 
-                        activeRepo.courseBlockDao().findByUidWithPictureAsFlow(courseBlockUid).collect {
+                        activeRepoWithFallback.courseBlockDao().findByUidWithPictureAsFlow(courseBlockUid).collect {
                             _uiState.update { prev ->
                                 prev.copy(courseBlock = it)
                             }
@@ -137,7 +137,7 @@ class CourseDiscussionDetailViewModel(
 
     fun onDeletePost(post: DiscussionPost) {
         viewModelScope.launch {
-            activeRepo.discussionPostDao().setDeletedAsync(
+            activeRepoWithFallback.discussionPostDao().setDeletedAsync(
                 uid = post.discussionPostUid, deleted = true, updateTime = systemTimeInMillis()
             )
             snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.deleted)))

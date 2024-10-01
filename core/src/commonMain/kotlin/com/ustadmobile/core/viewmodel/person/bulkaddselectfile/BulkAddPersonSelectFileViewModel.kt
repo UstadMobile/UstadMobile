@@ -81,7 +81,7 @@ class BulkAddPersonSelectFileViewModel(
     }
 
     fun onClickGetTemplate() {
-        val templatePath = accountManager.activeEndpoint.url +
+        val templatePath = accountManager.activeLearningSpace.url +
                 "staticfiles/bulkaddpersons/bulk-add-persons-template.csv"
 
         viewModelScope.launch {

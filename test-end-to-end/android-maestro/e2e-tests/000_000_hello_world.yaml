@@ -9,7 +9,13 @@ appId: com.toughra.ustadmobile
      TESTSERIAL: ${TESTSERIAL}
      TESTNAME: ${TESTNAME}
 - launchApp
-- tapOn: "GET STARTED"
+- tapOn: "Existing user"
+- runFlow:
+    when:
+      visible: "Personal"
+    commands:
+      - tapOn: "Join Learning Space"
+- tapOn: "Enter link manually"
 - tapOn: Site link
 - inputText: ${ENDPOINT}
 - hideKeyboard

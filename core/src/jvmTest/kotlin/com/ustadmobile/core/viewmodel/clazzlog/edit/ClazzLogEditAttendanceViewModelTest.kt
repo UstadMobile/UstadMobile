@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.clazzlog.edit
 
 import app.cash.turbine.test
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.schedule.generateUid
@@ -31,7 +31,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
 
-    private val testEndpoint = Endpoint("https://test.com/")
+    private val testLearningSpace = LearningSpace("https://test.com/")
 
     private val defaultEnroledNames = listOf("Bart Simpson", "Nelson Muntz", "Shelly Mackleberry",
         "Terri Mackleberry")
@@ -47,7 +47,7 @@ class ClazzLogEditAttendanceViewModelTest : AbstractMainDispatcherTest()  {
         block: suspend ViewModelTestBuilder<ClazzLogEditAttendanceViewModel>.(ClazzLogEditAttendanceViewModelTestContext) -> Unit
     ) {
         testViewModel {
-            val person = setActiveUser(testEndpoint)
+            val person = setActiveUser(testLearningSpace)
             val context = activeDb.withDoorTransactionAsync {
                 val clazz = Clazz().apply {
                     clazzName = "Test"

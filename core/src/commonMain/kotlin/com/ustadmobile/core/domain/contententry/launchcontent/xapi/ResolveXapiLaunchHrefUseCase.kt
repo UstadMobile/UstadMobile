@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.contententry.launchcontent.xapi
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
@@ -29,16 +29,18 @@ import kotlinx.serialization.json.Json
  * the launch Url, title, etc. This is used by LaunchXapiUseCase to determine the URL when launching
  * Xapi content in external systems (e.g. ChromeTabs, Chrome or other external browser on desktop,
  * and new window on JS) and XapiContentViewModel.
+ *
+ * @param activeRepoOrDb if the active account has a repository, then the repository, otherwise local db
  */
 class ResolveXapiLaunchHrefUseCase(
-    private val activeRepo: UmAppDatabase,
+    private val activeRepoOrDb: UmAppDatabase,
     private val httpClient: HttpClient,
     private val json: Json,
     private val xppFactory: XmlPullParserFactory,
     private val resumeOrStartXapiSessionUseCase: ResumeOrStartXapiSessionUseCase,
     private val getApiUrlUseCase: GetApiUrlUseCase,
     private val accountManager: UstadAccountManager,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
 ) {
 
     /**
@@ -61,7 +63,7 @@ class ResolveXapiLaunchHrefUseCase(
         //ContentEntryVersion is immutable, so if available in db, no need to go to repo which would
         //make an http request
         Napier.v { "Resolving xAPI url for contentEntryVersion $contentEntryVersionUid" }
-        val contentEntryVersion = activeRepo.localFirstThenRepoIfNull {
+        val contentEntryVersion = activeRepoOrDb.localFirstThenRepoIfNull {
             it.contentEntryVersionDao().findByUidAsync(contentEntryVersionUid)
         } ?: throw IllegalArgumentException("could not load contententryversion $contentEntryVersionUid")
 
@@ -93,7 +95,7 @@ class ResolveXapiLaunchHrefUseCase(
         val queryParams: Map<String, String> = mapOf(
             "endpoint" to getApiUrlUseCase("/api/xapi/"),
             "auth" to xapiSession.authorizationHeader(),
-            "actor" to json.encodeToString(XapiAgent.serializer(), xapiSession.agent(endpoint)),
+            "actor" to json.encodeToString(XapiAgent.serializer(), xapiSession.agent(learningSpace)),
             "registration" to xapiSession.registrationUuid.toString(),
             "activity_id" to xapiSession.xseRootActivityId,
         )

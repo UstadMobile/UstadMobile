@@ -2,8 +2,8 @@
 
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_SELECTED_ACCOUNT_ENDPOINT_URL
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_SELECTED_ACCOUNT_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_SELECTED_ACCOUNT_PERSON_UID
 import com.ustadmobile.door.ext.hexStringToByteArray
 import kotlin.text.Typography.ellipsis
@@ -85,11 +85,11 @@ fun String.appendQueryArgs(queryArgs: String): String {
  * Adds ARG_SELECTED_ACCOUNT_PERSON_UID and ARG_SELECTED_ACCOUNT_ENDPOINT_URL to the given string
  * Useful where ARG_NEXT needs to have the selected account information appended.
  */
-fun String.appendSelectedAccount(personUid: Long, endpoint: Endpoint) : String {
+fun String.appendSelectedAccount(personUid: Long, learningSpace: LearningSpace) : String {
     return appendQueryArgs(
         mapOf(
             ARG_SELECTED_ACCOUNT_PERSON_UID to personUid.toString(),
-            ARG_SELECTED_ACCOUNT_ENDPOINT_URL to endpoint.url,
+            ARG_SELECTED_ACCOUNT_LEARNINGSPACE_URL to learningSpace.url,
         )
     )
 }
@@ -206,4 +206,8 @@ fun String.firstNonWhiteSpaceChar(): Char? {
         this[index]
     else
         null
+}
+
+fun String?.ifNullOrBlank(defaultValue: () -> String): String {
+    return this?.ifBlank(defaultValue) ?: defaultValue()
 }

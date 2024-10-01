@@ -1,9 +1,7 @@
 package com.ustadmobile.core.viewmodel.person.edit
 
 import app.cash.turbine.test
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.years
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.MR
@@ -19,7 +17,7 @@ import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_PARENT_CONTACT
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_USERNAME
-import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.flow.doorFlow
@@ -29,6 +27,10 @@ import com.ustadmobile.lib.db.entities.SystemPermission
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.util.test.initNapierLog
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimePeriod
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import org.kodein.di.*
 import org.mockito.kotlin.*
 import kotlin.test.Test
@@ -42,7 +44,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
     @Suppress("SameParameterValue")
     private fun createMockAccountManager(serverUrl: String) : UstadAccountManager {
         return mock {
-            on { activeEndpoint }.thenReturn(Endpoint(serverUrl))
+            on { activeLearningSpace }.thenReturn(LearningSpace(serverUrl))
             on { currentAccount }.thenReturn(UmAccount(0L, "", "", serverUrl))
         }
     }
@@ -127,7 +129,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] = PersonEditViewModel.REGISTER_MODE_ENABLED.toString()
-                savedStateHandle[ARG_API_URL] = serverUrl
+                savedStateHandle[ARG_LEARNINGSPACE_URL] = serverUrl
                 PersonEditViewModel(di, savedStateHandle)
             }
 
@@ -162,7 +164,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
     fun givenPresenterCreatedInNonRegistrationMode_whenFormFilledAndClickSave_shouldSaveAPersonInDb() {
         initNapierLog()
         testViewModel<PersonEditViewModel> {
-            val activeUser = setActiveUser(activeEndpoint)
+            val activeUser = setActiveUser(activeLearningSpace)
             activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = activeUser.personUid,
@@ -187,7 +189,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
             viewModel.onClickSave()
 
-            val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+            val db = di.direct.on(activeLearningSpace).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
 
             db.doorFlow(arrayOf("Person")) {
@@ -200,10 +202,12 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenPresenterCreatedInRegisterMinorMode_whenFormFilledAndClickSave_thenShouldGoToWaitForParentScreen() {
-        val minorDateOfBirth = (DateTime.now() - 10.years).unixMillisLong
+        val minorDateOfBirth = Clock.System.now().minus(
+            DateTimePeriod(years = 10), TimeZone.currentSystemDefault()
+        ).toEpochMilliseconds()
 
         testViewModel<PersonEditViewModel> {
-            val accountManager = createMockAccountManager(activeEndpoint.url)
+            val accountManager = createMockAccountManager(activeLearningSpace.url)
 
             extendDi {
                 bind<UstadAccountManager>(overrides = true) with singleton {
@@ -214,7 +218,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] =
                     (PersonEditViewModel.REGISTER_MODE_ENABLED or PersonEditViewModel.REGISTER_MODE_MINOR).toString()
-                savedStateHandle[ARG_API_URL] = activeEndpoint.url
+                savedStateHandle[ARG_LEARNINGSPACE_URL] = activeLearningSpace.url
                 savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
                 PersonEditViewModel(di, savedStateHandle)
             }
@@ -241,7 +245,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
             }
 
 
-            val serverUrl = activeEndpoint.url
+            val serverUrl = activeLearningSpace.url
             verifyBlocking(accountManager, timeout(5000)) {
                 register(
                     argWhere { it.username == "janedoe" },
@@ -268,10 +272,12 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
     @Test
     fun givenPresenterCreatedInRegisterMinorMode_whenNoParentEmailGiven_thenShouldShowFieldRequiredError() {
-        val minorDateOfBirth = (DateTime.now() - 10.years).unixMillisLong
+        val minorDateOfBirth = Clock.System.now().minus(
+            DateTimePeriod(years = 10), TimeZone.currentSystemDefault()
+        ).toEpochMilliseconds()
 
         testViewModel<PersonEditViewModel> {
-            val accountManager = createMockAccountManager(activeEndpoint.url)
+            val accountManager = createMockAccountManager(activeLearningSpace.url)
 
             extendDi {
                 bind<UstadAccountManager>(overrides = true) with singleton {
@@ -282,7 +288,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
             viewModelFactory {
                 savedStateHandle[ARG_REGISTRATION_MODE] =
                     (PersonEditViewModel.REGISTER_MODE_ENABLED or PersonEditViewModel.REGISTER_MODE_MINOR).toString()
-                savedStateHandle[ARG_API_URL] = activeEndpoint.url
+                savedStateHandle[ARG_LEARNINGSPACE_URL] = activeLearningSpace.url
                 savedStateHandle[ARG_DATE_OF_BIRTH] = minorDateOfBirth.toString()
                 PersonEditViewModel(di, savedStateHandle)
             }
@@ -343,7 +349,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                 cancelAndIgnoreRemainingEvents()
             }
 
-            val db: UmAppDatabase = di.on(activeEndpoint).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+            val db: UmAppDatabase = di.on(activeLearningSpace).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             val personSavedInDb = db.personDao().findByUsername("newstudent")
             assertTrue(
                 db.personParentJoinDao().isMinorApproved(personSavedInDb?.personUid ?: 0L),
@@ -354,7 +360,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
     @Test
     fun givenInvalidPhoneNumberIncluded_whenSaved_shouldValidatePhoneNumberAndShowError() {
         testViewModel<PersonEditViewModel> {
-            val activeUser = setActiveUser(activeEndpoint)
+            val activeUser = setActiveUser(activeLearningSpace)
             activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = activeUser.personUid,
@@ -404,7 +410,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
     @Test
     fun givenValidPhoneNumberIncluded_whenSaved_shouldValidatePhoneNumberAndShowError() {
         testViewModel<PersonEditViewModel> {
-            val activeUser = setActiveUser(activeEndpoint)
+            val activeUser = setActiveUser(activeLearningSpace)
             activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = activeUser.personUid,

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.contententry.importcontent
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.usersession.ValidateUserSessionOnServerUseCase
 import io.github.aakira.napier.Napier
@@ -14,7 +14,7 @@ class CancelImportContentEntryServerUseCase(
     private val cancelImportContentEntryUseCase: CancelImportContentEntryUseCase,
     private val validateUserSessionOnServerUseCase: ValidateUserSessionOnServerUseCase,
     private val db: UmAppDatabase,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
 ) {
 
     suspend operator fun invoke(
@@ -39,7 +39,7 @@ class CancelImportContentEntryServerUseCase(
         Napier.d { "CancelImportContentEntryServerUseCase: requesting cancellation of #$cjiUid "}
 
         cancelImportContentEntryUseCase(cjiUid)
-        Napier.d { "CancelImportContentEntryServerUseCase: Canceled import #$cjiUid on ${endpoint.url}" }
+        Napier.d { "CancelImportContentEntryServerUseCase: Canceled import #$cjiUid on ${learningSpace.url}" }
     }
 
 }

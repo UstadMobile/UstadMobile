@@ -21,7 +21,7 @@ val DbExportScreen = FC<Props> {
     val coroutineScope = useCoroutineScope(dependencies = emptyArray())
     useEffect(dependencies = emptyArray()) {
         val accountManager: UstadAccountManager = di.direct.instance()
-        val activeDb: UmAppDatabase = di.direct.on(accountManager.activeEndpoint)
+        val activeDb: UmAppDatabase = di.direct.on(accountManager.activeLearningSpace)
             .instance(tag = DoorTag.TAG_DB)
 
         coroutineScope.launch {

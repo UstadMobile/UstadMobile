@@ -7,11 +7,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.ext.isDateOfBirthAMinor
+import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_SHOW_ACCEPT_BUTTON
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.datetime.Instant
 
@@ -23,7 +26,7 @@ data class RegisterAgeRedirectUiState(
 
     val dateOfBirthError: String? = null,
 
-)
+    )
 
 /**
  * This screen implements the "age neutral" screen requirement as per COPPA and Google Play policies.
@@ -40,7 +43,7 @@ data class RegisterAgeRedirectUiState(
 class RegisterAgeRedirectViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-): UstadViewModel(di, savedStateHandle, DEST_NAME) {
+) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(
         RegisterAgeRedirectUiState(
@@ -54,8 +57,13 @@ class RegisterAgeRedirectViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 navigationVisible = false,
-                title = systemImpl.getString(MR.strings.register),
+                title = systemImpl.getString(MR.strings.your_date_of_birth),
                 userAccountIconVisible = false,
+                actionBarButtonState = ActionBarButtonUiState(
+                    visible = true,
+                    text = systemImpl.getString(MR.strings.next),
+                    onClick = this::onClickNext
+                )
             )
         }
     }
@@ -64,21 +72,21 @@ class RegisterAgeRedirectViewModel(
         _uiState.update { prev ->
             prev.copy(
                 dateOfBirth = date,
-                dateOfBirthError = if(prev.dateOfBirth != date) null else prev.dateOfBirthError
+                dateOfBirthError = if (prev.dateOfBirth != date) null else prev.dateOfBirthError
             )
         }
     }
 
     fun onClickNext() {
         val date = _uiState.value.dateOfBirth
-        if(date == 0L) {
+        if (date == 0L) {
             _uiState.update { prev ->
                 prev.copy(dateOfBirthError = systemImpl.getString(MR.strings.field_required_prompt))
             }
             return
         }
 
-        if(date > (systemTimeInMillis() - (24 * MS_PER_HOUR))) {
+        if (date > (systemTimeInMillis() - (24 * MS_PER_HOUR))) {
             _uiState.update { prev ->
                 prev.copy(dateOfBirthError = systemImpl.getString(MR.strings.invalid))
             }
@@ -89,22 +97,21 @@ class RegisterAgeRedirectViewModel(
         val isMinor = dateOfBirthInstant.isDateOfBirthAMinor()
 
         val args = buildMap {
-            putFromSavedStateIfPresent(PersonEditViewModel.REGISTRATION_ARGS_TO_PASS)
+            putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+            put(ARG_SHOW_ACCEPT_BUTTON,true.toString())
 
-            val registrationMode = if(isMinor) {
-                PersonEditViewModel.REGISTER_MODE_ENABLED.or(PersonEditViewModel.REGISTER_MODE_MINOR)
-            }else {
-                PersonEditViewModel.REGISTER_MODE_ENABLED
-            }
-            put(PersonEditViewModel.ARG_REGISTRATION_MODE, registrationMode.toString())
+
             put(PersonEditViewModel.ARG_DATE_OF_BIRTH, date.toString())
         }
 
-        if(isMinor) {
-            navController.navigate(PersonEditViewModel.DEST_NAME_REGISTER, args)
-        }else {
+        if (isMinor) {
+            //not decided where to go
+            //navController.navigate(PersonEditViewModel.DEST_NAME_REGISTER, args)
+        } else {
             navController.navigate(SiteTermsDetailViewModel.DEST_NAME, args)
         }
+
+
     }
 
 

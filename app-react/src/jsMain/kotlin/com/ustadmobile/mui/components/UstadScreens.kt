@@ -31,11 +31,9 @@ import web.cssom.Auto
 import web.cssom.GridTemplateAreas
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.engine.js.Js
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
@@ -45,15 +43,15 @@ import mui.material.Snackbar
 import react.*
 import react.router.useLoaderData
 import ustadJsDi
-import web.location.location
-import web.url.URL
 import kotlin.random.Random
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
+import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.util.ext.deleteDatabaseAsync
 import mui.system.useMediaQuery
@@ -61,6 +59,9 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import react.router.useLocation
 import remix.run.router.LoaderFunctionArgs
+import web.cssom.atrule.maxWidth
+import web.cssom.atrule.width
+import web.cssom.px
 import web.dom.document
 import web.idb.indexedDB
 
@@ -87,11 +88,13 @@ val UstadScreensContext = createContext<UstadScreenContextData>()
 
 val UstadScreens = FC<Props> {
     val mobileMode = useMediaQuery("(max-width:960px)")
-    val appUiStateInstance = useState { AppUiState() }
     val location = useLocation()
+    val loaderData = useLoaderData() as UstadScreensLoaderData
+    val accountManager: UstadAccountManager = loaderData.di.direct.instance()
+    val currentSession by accountManager.currentUserSessionFlow.collectAsState(null)
+    val appUiStateInstance = useState { AppUiState() }
 
     var appUiState: AppUiState by appUiStateInstance
-    val loaderData = useLoaderData() as UstadScreensLoaderData
     var snack: Snack? by useState { null }
     val langConfig = useMemo(dependencies = emptyArray()) {
         loaderData.di.direct.instance<SupportedLanguagesConfig>()
@@ -168,7 +171,7 @@ val UstadScreens = FC<Props> {
                             onClickMenuIcon = {
                                 mobileMenuOpen = !mobileMenuOpen
                             }
-                            sidebarVisible = !mobileMode && appUiState.navigationVisible
+                            sidebarVisible = !mobileMode && appUiState.navigationVisible&& currentSession?.person?.isPersonalAccount !=true
                         }
 
                         //if (mobileMode) Menu() else Sidebar()
@@ -176,7 +179,7 @@ val UstadScreens = FC<Props> {
                         // then this seems to make react destroy the content component and create a
                         // completely new one, which we definitely do not want
                         Sidebar {
-                            visible = !mobileMode && appUiState.navigationVisible
+                            visible = !mobileMode && appUiState.navigationVisible && currentSession?.person?.isPersonalAccount !=true
                             selectedRootItemIndex = currentRootItemIndex
                         }
 
@@ -275,8 +278,6 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
         }
 
 
-        val ustadConfigHref = URL("ustad-config.json", location.href).href
-        val configJson: Map<String, String> = httpClient.get(ustadConfigHref).body()
         val jsStringsProvider = MR.stringsLoader.getOrLoad()
 
         val di = ustadJsDi(
@@ -284,7 +285,6 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
             dbNodeIdAndAuth = dbNodeIdAndAuth,
             json = json,
             httpClient = httpClient,
-            configMap = configJson,
             stringsProvider = jsStringsProvider,
         )
 

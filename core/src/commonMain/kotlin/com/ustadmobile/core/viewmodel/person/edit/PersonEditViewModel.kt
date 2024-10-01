@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.person.edit
 
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -13,7 +13,7 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -138,13 +138,13 @@ class PersonEditViewModel(
     private val registrationModeFlags = savedStateHandle[ARG_REGISTRATION_MODE]?.toInt()
         ?: REGISTER_MODE_NONE
 
-    private val apiUrlConfig: ApiUrlConfig by instance()
+    private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val entityUid: Long
         get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
-    private val serverUrl = savedStateHandle[UstadView.ARG_API_URL]
-        ?: apiUrlConfig.presetApiUrl ?: "http://localhost"
+    private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]
+        ?: apiUrlConfig.presetLearningSpaceUrl ?: "http://localhost"
 
     private val nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: systemImpl.getDefaultFirstDest()
 
@@ -155,7 +155,7 @@ class PersonEditViewModel(
     private val genderConfig : GenderConfig by instance()
 
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
-        on(accountManager.activeEndpoint).instance()
+        on(accountManager.activeLearningSpace).instance()
 
     private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
 
@@ -494,7 +494,7 @@ class PersonEditViewModel(
                     val registeredPerson = accountManager.register(
                         person = savePerson,
                         password = passwordVal,
-                        endpointUrl = serverUrl,
+                        learningSpaceUrl = serverUrl,
                         accountRegisterOptions = AccountRegisterOptions(
                             makeAccountActive = !registrationModeFlags.hasFlag(REGISTER_MODE_MINOR)
                                     && !dontSetCurrentSession,
@@ -518,7 +518,7 @@ class PersonEditViewModel(
                     }else {
                         navController.navigateToViewUri(
                             viewUri = nextDestination.appendSelectedAccount(
-                                registeredPerson.personUid, Endpoint(serverUrl)
+                                registeredPerson.personUid, LearningSpace(serverUrl)
                             ),
                             goOptions = UstadMobileSystemCommon.UstadGoOptions(
                                 clearStack = true
@@ -551,7 +551,7 @@ class PersonEditViewModel(
                     !Instant.fromEpochMilliseconds(
                         savedStateHandle[KEY_INIT_DATE_OF_BIRTH]?.toLong() ?: 0
                     ).isDateOfBirthAMinor() &&
-                    !activeRepo.personParentJoinDao().isMinorApproved(savePerson.personUid)
+                    !activeRepoWithFallback.personParentJoinDao().isMinorApproved(savePerson.personUid)
                 ) {
                     PersonParentJoin().apply {
                         ppjMinorPersonUid = savePerson.personUid
@@ -563,7 +563,7 @@ class PersonEditViewModel(
                     null
                 }
 
-                activeRepo.withDoorTransactionAsync {
+                activeRepoWithFallback.withDoorTransactionAsync {
                     if(entityUidArg == 0L) {
                         addNewPersonUseCase(
                             person = savePerson,
@@ -571,9 +571,9 @@ class PersonEditViewModel(
                             createPersonParentApprovalIfMinor = true,
                         )
                     }else {
-                        activeRepo.personDao().updateAsync(savePerson)
+                        activeRepoWithFallback.personDao().updateAsync(savePerson)
                         consentToUpsert?.also {
-                            activeRepo.personParentJoinDao().upsertAsync(it)
+                            activeRepoWithFallback.personParentJoinDao().upsertAsync(it)
                         }
                     }
                 }
@@ -668,7 +668,7 @@ class PersonEditViewModel(
          * acceptance to this screen (PersonEdit) in order to register.
          */
         val REGISTRATION_ARGS_TO_PASS = listOf(
-            UstadView.ARG_API_URL,
+            UstadView.ARG_LEARNINGSPACE_URL,
             SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON,
             UstadView.ARG_POPUPTO_ON_FINISH,
             ARG_NEXT,

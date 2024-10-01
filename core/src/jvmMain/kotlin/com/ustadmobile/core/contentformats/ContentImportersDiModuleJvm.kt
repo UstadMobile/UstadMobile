@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats
 
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
@@ -29,7 +29,7 @@ import java.io.File
  * ContentImporters module is shared between Desktop and Backend.
  */
 val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
-    bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {
+    bind<ContentImportersManager>() with scoped(LearningSpaceScope.Default).singleton {
         val cache: UstadCache = instance()
         val uriHelper: UriHelper = instance()
         val xml: XML = instance()
@@ -45,7 +45,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
             buildList {
                 add(
                     EpubContentImporterCommonJvm(
-                        endpoint = context,
+                        learningSpace = context,
                         cache = cache,
                         db = db,
                         uriHelper = uriHelper,
@@ -61,7 +61,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                 )
                 add(
                     XapiZipContentImporter(
-                        endpoint = context,
+                        learningSpace = context,
                         db = db,
                         cache = cache,
                         uriHelper = uriHelper,
@@ -73,7 +73,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                 )
                 add(
                     PdfContentImporterJvm(
-                        endpoint = context,
+                        learningSpace = context,
                         db = db,
                         cache= cache,
                         saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
@@ -87,7 +87,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
                 )
                 add(
                     H5PContentImporter(
-                        endpoint = context,
+                        learningSpace = context,
                         db = db,
                         cache = cache,
                         uriHelper = uriHelper,
@@ -100,7 +100,7 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
 
                 add(
                     VideoContentImporterCommonJvm(
-                        endpoint = context,
+                        learningSpace = context,
                         db = db,
                         cache = cache,
                         uriHelper = uriHelper,

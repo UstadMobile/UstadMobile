@@ -2,8 +2,8 @@ package com.ustadmobile.libuicompose.view.accountlist
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
 import com.ustadmobile.core.viewmodel.accountlist.AccountListUiState
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.UserSession
 fun AccountListScreenPreview(){
     AccountListScreen(
         uiState = AccountListUiState(
-            headerAccount = UserSessionWithPersonAndEndpoint(
+            headerAccount = UserSessionWithPersonAndLearningSpace(
                 userSession = UserSession().apply {
                 },
                 person = Person().apply {
@@ -23,12 +23,12 @@ fun AccountListScreenPreview(){
                     personUid = 9
                     username = "sara99"
                 },
-                endpoint = Endpoint(
+                learningSpace = LearningSpace(
                     url = "https://example.com"
                 )
             ),
             accountsList = listOf(
-                UserSessionWithPersonAndEndpoint(
+                UserSessionWithPersonAndLearningSpace(
                     userSession = UserSession().apply {
                     },
                     person = Person().apply {
@@ -37,11 +37,11 @@ fun AccountListScreenPreview(){
                         personUid = 4
                         username = "ahmadi"
                     },
-                    endpoint = Endpoint(
+                    learningSpace = LearningSpace(
                         url = "https://example.com"
                     )
                 ),
-                UserSessionWithPersonAndEndpoint(
+                UserSessionWithPersonAndLearningSpace(
                     userSession = UserSession().apply {
                     },
                     person = Person().apply {
@@ -50,11 +50,11 @@ fun AccountListScreenPreview(){
                         personUid = 5
                         username = "negin10"
                     },
-                    endpoint = Endpoint(
+                    learningSpace = LearningSpace(
                         url = "https://someweb.com"
                     )
                 ),
-                UserSessionWithPersonAndEndpoint(
+                UserSessionWithPersonAndLearningSpace(
                     userSession = UserSession().apply {
                     },
                     person = Person().apply {
@@ -63,7 +63,7 @@ fun AccountListScreenPreview(){
                         personUid = 6
                         username = "ali01"
                     },
-                    endpoint = Endpoint(
+                    learningSpace = LearningSpace(
                         url = "https://thisisalink.org"
                     )
                 )

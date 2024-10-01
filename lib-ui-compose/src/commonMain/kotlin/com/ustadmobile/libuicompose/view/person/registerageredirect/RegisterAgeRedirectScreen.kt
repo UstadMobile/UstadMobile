@@ -50,7 +50,6 @@ fun RegisterAgeRedirectScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
 
-        Text(stringResource(MR.strings.what_is_your_date_of_birth))
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -65,11 +64,6 @@ fun RegisterAgeRedirectScreen(
             onDone = onClickNext,
         )
 
-        Button(
-            onClick = onClickNext,
-            modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("next_button"),
-        ) {
-            Text(stringResource(MR.strings.next),)
-        }
+
     }
 }

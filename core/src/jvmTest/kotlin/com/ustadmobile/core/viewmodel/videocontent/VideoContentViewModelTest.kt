@@ -80,20 +80,20 @@ class VideoContentViewModelTest {
             val mockStatementResource = mock<XapiStatementResource>()
 
             extendDi {
-                bind<SaveStatementOnClearUseCase>() with scoped(endpointScope).singleton {
+                bind<SaveStatementOnClearUseCase>() with scoped(learningSpaceScope).singleton {
                     mockSaveOnClearUseCase
                 }
 
-                bind<XapiStatementResource>() with scoped(endpointScope).singleton {
+                bind<XapiStatementResource>() with scoped(learningSpaceScope).singleton {
                     mockStatementResource
                 }
 
-                bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(endpointScope).singleton {
+                bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(learningSpaceScope).singleton {
                     NonInteractiveContentXapiStatementRecorderFactory(
                         saveStatementOnClearUseCase = instance(),
                         saveStatementOnUnloadUseCase = null,
                         xapiStatementResource = instance(),
-                        endpoint = context,
+                        learningSpace = context,
                     )
                 }
             }

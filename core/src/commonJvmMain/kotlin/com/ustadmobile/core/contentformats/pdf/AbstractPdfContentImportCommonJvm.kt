@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats.pdf
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
@@ -29,7 +29,7 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.json.Json
 
 abstract class AbstractPdfContentImportCommonJvm(
-    endpoint: Endpoint,
+    learningSpace: LearningSpace,
     protected val cache: UstadCache,
     protected val uriHelper: UriHelper,
     protected val json: Json,
@@ -38,7 +38,7 @@ abstract class AbstractPdfContentImportCommonJvm(
     protected val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     protected val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
     protected val compressPdfUseCase: CompressPdfUseCase?,
-) : ContentImporter(endpoint){
+) : ContentImporter(learningSpace){
 
     override val importerId: Int = PLUGINID
     override val supportedMimeTypes: List<String>

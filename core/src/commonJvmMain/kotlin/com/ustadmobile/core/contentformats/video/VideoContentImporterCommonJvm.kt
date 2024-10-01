@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats.video
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.ContentImportProgressListener
 import com.ustadmobile.core.contentformats.ContentImporter
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
@@ -52,7 +52,7 @@ import java.io.File
  * https://github.com/caprica/vlcj-examples/blob/master/src/main/java/uk/co/caprica/vlcj/test/snapshot/SnapshotTest.java
  */
 class VideoContentImporterCommonJvm(
-    endpoint: Endpoint,
+    learningSpace: LearningSpace,
     private val cache: UstadCache,
     private val uriHelper: UriHelper,
     private val json: Json,
@@ -66,7 +66,7 @@ class VideoContentImporterCommonJvm(
     private val compressUseCase: CompressVideoUseCase? = null,
     private val extractVideoThumbnailUseCase: ExtractVideoThumbnailUseCase? = null,
     private val saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase? = null,
-) : ContentImporter(endpoint) {
+) : ContentImporter(learningSpace) {
 
 
     override val importerId: Int

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.saveandmanifest
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
 import com.ustadmobile.core.contentformats.pdf.AbstractPdfContentImportCommonJvm
 import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
@@ -68,18 +68,18 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
         )
     ) {
         try {
-            val endpoint = Endpoint("http://localhost:${serverNode.port}/")
+            val learningSpace = LearningSpace("http://localhost:${serverNode.port}/")
 
-            val importContentUseCase: ImportContentEntryUseCase = clientNode.di.on(endpoint)
+            val importContentUseCase: ImportContentEntryUseCase = clientNode.di.on(learningSpace)
                 .direct.instance()
 
             runBlocking {
-                val clientDb: UmAppDatabase = clientNode.di.direct.on(endpoint).instance(tag = DoorTag.TAG_DB)
+                val clientDb: UmAppDatabase = clientNode.di.direct.on(learningSpace).instance(tag = DoorTag.TAG_DB)
                 val jobUid = clientDb.contentEntryImportJobDao().insertJobItem(contentEntryImportJob)
 
                 val entryVersion = importContentUseCase(jobUid)
                 clientNode.waitForContentUploadCompletion(
-                    endpoint = endpoint,
+                    learningSpace = learningSpace,
                     contentEntryVersionUid = entryVersion.cevUid,
                     timeout = timeout
                 )
@@ -93,7 +93,7 @@ class SaveLocalUriAndManifestUploadIntegrationTest{
                  * otherwise any clients will not know that the ContentEntryVersion exists and it will
                  * not be possible to open
                  */
-                val serverDb: UmAppDatabase = serverNode.di.direct.on(endpoint)
+                val serverDb: UmAppDatabase = serverNode.di.direct.on(learningSpace)
                     .instance(tag = DoorTag.TAG_DB)
                 serverDb.doorFlow(arrayOf("ContentEntryVersion")) {
                     serverDb.contentEntryVersionDao().findByUidAsync(entryVersion.cevUid)

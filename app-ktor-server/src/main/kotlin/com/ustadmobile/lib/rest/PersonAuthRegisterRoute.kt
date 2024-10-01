@@ -119,7 +119,7 @@ fun Route.personAuthRegisterRoute() {
                 val appName = systemImpl.getString(MR.strings.app_name, mLangCode)
                 val linkArgs : Map<String, String> = mapOf(UstadView.ARG_ENTITY_UID to
                         mParentJoinVal.ppjUid.toString())
-                val linkUrl = (UMFileUtil.joinPaths(registerRequest.endpointUrl,
+                val linkUrl = (UMFileUtil.joinPaths(registerRequest.learningSpaceUrl,
                     LINK_ENDPOINT_VIEWNAME_DIVIDER) + ParentalConsentManagementViewModel.DEST_NAME)
                     .appendQueryArgs(linkArgs.toQueryString())
 

@@ -85,7 +85,7 @@ class ParentalConsentManagementViewModel(
     val uiState: Flow<ParentalConsentManagementUiState> = _uiState.asStateFlow()
 
     private val getLocaleForSiteTermsUseCase: GetLocaleForSiteTermsUseCase by
-        on(accountManager.activeEndpoint).instance()
+        on(accountManager.activeLearningSpace).instance()
 
     init {
         ifLoggedInElseNavigateToLoginWithNextDestSet(
@@ -129,7 +129,7 @@ class ParentalConsentManagementViewModel(
             }
 
             viewModelScope.launch {
-                val terms = activeRepo.siteTermsDao().findLatestByLanguage(
+                val terms = activeRepoWithFallback.siteTermsDao().findLatestByLanguage(
                     getLocaleForSiteTermsUseCase()
                 )
 
@@ -174,7 +174,7 @@ class ParentalConsentManagementViewModel(
 
         newState.parentJoinAndMinor?.personParentJoin?.also { personParentJoin ->
             viewModelScope.launch {
-                activeRepo.personParentJoinDao().updateAsync(personParentJoin)
+                activeRepoWithFallback.personParentJoinDao().updateAsync(personParentJoin)
             }
         }
 

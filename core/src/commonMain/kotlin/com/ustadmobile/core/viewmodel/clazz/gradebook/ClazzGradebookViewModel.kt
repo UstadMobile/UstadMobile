@@ -57,7 +57,7 @@ class ClazzGradebookViewModel(
 
     private val studentPagingSource: ListPagingSourceFactory<StudentAndBlockStatuses> = {
         ClazzGradebookPagingSource(
-            studentListPagingSource = activeRepo.clazzEnrolmentDao().findByClazzUidAndRoleForGradebook(
+            studentListPagingSource = activeRepoWithFallback.clazzEnrolmentDao().findByClazzUidAndRoleForGradebook(
                 clazzUid = clazzUid,
                 roleId = ClazzEnrolment.ROLE_STUDENT,
                 sortOrder = ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC,
@@ -77,7 +77,7 @@ class ClazzGradebookViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.courseBlockDao().findByClazzUidAsFlow(
+                    activeRepoWithFallback.courseBlockDao().findByClazzUidAsFlow(
                         clazzUid = clazzUid
                     ).distinctUntilChanged().collect { courseBlockList ->
                         _uiState.update { prev ->
@@ -90,7 +90,7 @@ class ClazzGradebookViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao().getClazzNameAsFlow(
+                    activeRepoWithFallback.clazzDao().getClazzNameAsFlow(
                         clazzUid = clazzUid
                     ).distinctUntilChanged().collect {
                         _appUiState.update { prev ->

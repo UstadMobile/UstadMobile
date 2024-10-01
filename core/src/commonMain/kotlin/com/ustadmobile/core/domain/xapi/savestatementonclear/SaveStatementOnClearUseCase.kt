@@ -23,7 +23,7 @@ interface SaveStatementOnClearUseCase {
 
     companion object {
 
-        const val KEY_ENDPOINT = "endpoint"
+        const val KEY_LEARNINGSPACE = "endpoint"
 
         const val KEY_STATEMENTS = "statements"
 

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.GUEST_PERSON
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.lib.db.entities.Person
@@ -47,9 +48,9 @@ class NavControllerExtTest {
     fun givenPlainViewUri_whenNavigateToLinkIsCalledWithoutForceAccountSelect_thenShouldNavigateToLinkDirectly() {
         val link = "ContentEntryList?parentUid=1234"
         mockAccountManager.stub {
-            on { currentUserSession }.thenReturn(UserSessionWithPersonAndEndpoint(
+            on { currentUserSession }.thenReturn(UserSessionWithPersonAndLearningSpace(
                 userSession = UserSession(),
-                endpoint = Endpoint("http://localhost:8087/"),
+                learningSpace = LearningSpace("http://localhost:8087/"),
                 person = Person()
             ))
         }
@@ -82,13 +83,13 @@ class NavControllerExtTest {
 
     @Test
     fun givenDeepLinkOnSameEndpointAsActiveAccount_whenNavigateToLinkCalledWithoutForceAccountSelect_thenShouldNavigateToLinkDirectly() {
-        val endpointUrl = "https://school.ustadmobile.app/"
-        val link = "${endpointUrl}umapp/#/ContentEntryList?parentUid=1234"
+        val learningSpaceUrl = "https://school.ustadmobile.app/"
+        val link = "${learningSpaceUrl}umapp/#/ContentEntryList?parentUid=1234"
         mockAccountManager.stub {
-            on { activeEndpoint }.thenReturn(Endpoint(endpointUrl))
-            on { currentUserSession }.thenReturn(UserSessionWithPersonAndEndpoint(
+            on { activeLearningSpace }.thenReturn(LearningSpace(learningSpaceUrl))
+            on { currentUserSession }.thenReturn(UserSessionWithPersonAndLearningSpace(
                 userSession = UserSession(),
-                endpoint = Endpoint(endpointUrl),
+                learningSpace = LearningSpace(learningSpaceUrl),
                 person = Person()
             ))
         }
@@ -104,13 +105,13 @@ class NavControllerExtTest {
 
     @Test
     fun givenDeepLinkOnSameEndpointAsActiveAccount_whenNavigateToLinkCalledWithForceAccountSelect_thenShouldNavigateToAccountList() {
-        val endpointUrl = "https://school.ustadmobile.app/"
-        val link = "${endpointUrl}umapp/#/ContentEntryList?parentUid=1234"
+        val learningSpaceUrl = "https://school.ustadmobile.app/"
+        val link = "${learningSpaceUrl}umapp/#/ContentEntryList?parentUid=1234"
         mockAccountManager.stub {
-            on { activeEndpoint }.thenReturn(Endpoint(endpointUrl))
-            on { currentUserSession }.thenReturn(UserSessionWithPersonAndEndpoint(
+            on { activeLearningSpace }.thenReturn(LearningSpace(learningSpaceUrl))
+            on { currentUserSession }.thenReturn(UserSessionWithPersonAndLearningSpace(
                 userSession = UserSession(),
-                endpoint = Endpoint(endpointUrl),
+                learningSpace = LearningSpace(learningSpaceUrl),
                 person = Person()
             ))
             onBlocking { activeSessionCount(any(), any()) }.thenReturn(1)
@@ -124,7 +125,7 @@ class NavControllerExtTest {
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
-            } && UMURLEncoder.decodeUTF8(args[AccountListViewModel.ARG_FILTER_BY_ENDPOINT]!!) == endpointUrl
+            } && UMURLEncoder.decodeUTF8(args[AccountListViewModel.ARG_FILTER_BY_LEARNINGSPACE]!!) == learningSpaceUrl
         }, any())
     }
 
@@ -132,21 +133,21 @@ class NavControllerExtTest {
     fun givenDeepLinkOnDifferentEndpointToActiveAccount_whenStoredAccountAvailableOnSameEndpoint_thenShouldNavigateToAccountListWithFilter() {
         val linkEndpointUrl = "https://school.ustadmobile.app/"
         val link = "${linkEndpointUrl}umapp/#/ContentEntryList?parentUid=1234"
-        val activeEndpointUrl = "https://mmu.ustadmobile.app/"
+        val activeLearningSpaceUrl = "https://mmu.ustadmobile.app/"
 
         mockAccountManager.stub {
-            on { activeEndpoint }.thenReturn(Endpoint(activeEndpointUrl))
+            on { activeLearningSpace }.thenReturn(LearningSpace(activeLearningSpaceUrl))
             onBlocking { activeSessionCount(any(), any()) }.thenAnswer {
                 1
             }
             on { currentUserSession }.thenReturn(
-                UserSessionWithPersonAndEndpoint(
+                UserSessionWithPersonAndLearningSpace(
                     userSession = UserSession().apply {
                         usSessionType= UserSession.TYPE_STANDARD
                         usStatus = UserSession.STATUS_ACTIVE
                     },
                     person = GUEST_PERSON,
-                    endpoint = Endpoint(activeEndpointUrl),
+                    learningSpace = LearningSpace(activeLearningSpaceUrl),
                 )
             )
         }
@@ -159,7 +160,7 @@ class NavControllerExtTest {
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
-            } && UMURLEncoder.decodeUTF8(args[AccountListViewModel.ARG_FILTER_BY_ENDPOINT]!!) == linkEndpointUrl
+            } && UMURLEncoder.decodeUTF8(args[AccountListViewModel.ARG_FILTER_BY_LEARNINGSPACE]!!) == linkEndpointUrl
         }, any())
     }
 
@@ -170,14 +171,14 @@ class NavControllerExtTest {
         val activeEndpointUrl = "https://mmu.ustadmobile.app/"
 
         mockAccountManager.stub {
-            on { activeEndpoint }.thenReturn(Endpoint(activeEndpointUrl))
+            on { activeLearningSpace }.thenReturn(LearningSpace(activeEndpointUrl))
             on { currentUserSession }.thenReturn(
-                UserSessionWithPersonAndEndpoint(
+                UserSessionWithPersonAndLearningSpace(
                     userSession = UserSession().apply {
                         usSessionType = UserSession.TYPE_TEMP_LOCAL or UserSession.TYPE_GUEST
                     },
                     person = GUEST_PERSON,
-                    endpoint = Endpoint(activeEndpointUrl)
+                    learningSpace = LearningSpace(activeEndpointUrl)
                 )
             )
             onBlocking { activeSessionCount(any(), any()) }.thenAnswer {
@@ -189,11 +190,11 @@ class NavControllerExtTest {
             mockNavController.navigateToLink(link, mockAccountManager, mockOpenLinkUseCase)
         }
 
-        verify(mockNavController, timeout(5000)).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args ->
+        verify(mockNavController, timeout(5000)).navigate(eq(AddAccountSelectNewOrExistingViewModel.DEST_NAME), argWhere { args ->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"
-            } && UMURLEncoder.decodeUTF8(args[UstadView.ARG_API_URL]!!) == linkEndpointUrl
+            } && UMURLEncoder.decodeUTF8(args[UstadView.ARG_LEARNINGSPACE_URL]!!) == linkEndpointUrl
         }, any())
     }
 
@@ -202,7 +203,7 @@ class NavControllerExtTest {
         val link = "ContentEntryList?parentUid=1234"
 
         mockAccountManager.stub {
-            on { activeEndpoint }.thenReturn(Endpoint(""))
+            on { activeLearningSpace }.thenReturn(LearningSpace(""))
             onBlocking { activeSessionCount(any(), any()) }.thenReturn(0)
         }
 
@@ -211,7 +212,7 @@ class NavControllerExtTest {
                 userCanSelectServer = false, forceAccountSelection = true)
         }
 
-        verify(mockNavController, timeout(5000)).navigate(eq(LoginViewModel.DEST_NAME), argWhere { args->
+        verify(mockNavController, timeout(5000)).navigate(eq(AddAccountSelectNewOrExistingViewModel.DEST_NAME), argWhere { args->
             UMURLEncoder.decodeUTF8(args[UstadView.ARG_NEXT]!!).let {
                 it.substringBefore("?") == "ContentEntryList" &&
                     UMFileUtil.parseURLQueryString(it)["parentUid"] == "1234"

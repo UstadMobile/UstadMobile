@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.xapi.savestatementonclear
 
 import com.benasher44.uuid.uuid4
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.serialization.builtins.ListSerializer
@@ -13,7 +13,7 @@ import org.quartz.TriggerKey
 
 class SaveStatementOnClearUseCaseJvm(
     private val scheduler: Scheduler,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val json: Json,
 ): SaveStatementOnClearUseCase {
 
@@ -26,7 +26,7 @@ class SaveStatementOnClearUseCaseJvm(
         )
 
         val quartzJob = JobBuilder.newJob(SaveStatementOnClearJob::class.java)
-            .usingJobData(SaveStatementOnClearUseCase.KEY_ENDPOINT, endpoint.url)
+            .usingJobData(SaveStatementOnClearUseCase.KEY_LEARNINGSPACE, learningSpace.url)
             .usingJobData(SaveStatementOnClearUseCase.KEY_STATEMENTS, statementJsonStr)
             .usingJobData(SaveStatementOnClearUseCase.KEY_XAPI_SESSION,
                 json.encodeToString(XapiSessionEntity.serializer(), xapiSession)

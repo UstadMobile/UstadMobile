@@ -1,6 +1,7 @@
 package com.ustadmobile.core.impl.di
 
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpaceScope
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseJs
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
@@ -35,6 +36,8 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
+import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCaseJs
@@ -72,10 +75,10 @@ import org.kodein.di.provider
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 
-fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs") {
+fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiModuleJs") {
     bind<EnqueueContentEntryImportUseCase>() with scoped(endpointScope).provider {
         EnqueueImportContentEntryUseCaseRemote(
-            endpoint = context,
+            learningSpace = context,
             httpClient = instance(),
             json = instance(),
         )
@@ -142,7 +145,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             saveLocalUrisAsBlobUseCase = instance(),
             enqueueBlobUploadClientUseCase = null,
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
             compressImageUseCase = CompressImageUseCaseJs(),
             deleteUrisUseCase = instance(),
         )
@@ -151,7 +154,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
     bind<SaveLocalUrisAsBlobsUseCase>() with scoped(endpointScope).singleton {
         SaveLocalUrisAsBlobUseCaseJs(
             chunkedUploadClientLocalUriUseCase = instance(),
-            endpoint = context,
+            learningSpace = context,
             json = instance(),
             db = instance(tag = DoorTag.TAG_DB),
         )
@@ -165,21 +168,28 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         )
     }
 
+    bind<PasskeyRequestJsonUseCase>() with provider {
+        PasskeyRequestJsonUseCase(
+            systemImpl = instance(),
+            json = instance()
+        )
+    }
+
     bind<SetPasswordUseCase>() with scoped(endpointScope).provider {
         SetPasswordUseCaseJs(
-            endpoint = context,
-            repo = instance(tag = DoorTag.TAG_REPO),
+            learningSpace = context,
+            repo = instance<UmAppDataLayer>().requireRepository(),
             httpClient = instance()
         )
     }
 
     bind<ResolveXapiLaunchHrefUseCase>() with scoped(endpointScope).provider {
         ResolveXapiLaunchHrefUseCase(
-            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             httpClient = instance(),
             json = instance(),
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
-            endpoint = context,
+            learningSpace = context,
             resumeOrStartXapiSessionUseCase = instance(),
             accountManager = instance(),
             getApiUrlUseCase = instance(),
@@ -196,9 +206,9 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
 
     bind<ResumeOrStartXapiSessionUseCase>() with scoped(endpointScope).singleton {
         ResumeOrStartXapiSessionUseCaseJs(
-            endpoint = context,
+            learningSpace = context,
             httpClient = instance(),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().requireRepository(),
             xapiJson = instance()
         )
     }
@@ -209,28 +219,28 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         )
     }
 
-    bind<MoveContentEntriesUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<MoveContentEntriesUseCase>() with scoped(LearningSpaceScope.Default).provider {
         MoveContentEntriesUseCase(
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
             systemImpl = instance()
         )
     }
 
-    bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(LearningSpaceScope.Default).provider {
         DeleteContentEntryParentChildJoinUseCase(
-            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
 
-    bind<RestoreDeletedItemUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<RestoreDeletedItemUseCase>() with scoped(LearningSpaceScope.Default).provider {
         RestoreDeletedItemUseCase(
-            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
 
-    bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<DeletePermanentlyUseCase>() with scoped(LearningSpaceScope.Default).provider {
         DeletePermanentlyUseCase(
-            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
 
@@ -242,39 +252,39 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
      * SaveAndUploadLocalUris - because saving the local uri as a blob does the upload itself  on JS,
      * there is no use of enqueueBlobUploadClientUseCase
      */
-    bind<SaveAndUploadLocalUrisUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<SaveAndUploadLocalUrisUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         SaveAndUploadLocalUrisUseCase(
             saveLocalUrisAsBlobsUseCase = instance(),
             enqueueBlobUploadClientUseCase = null,
             activeDb = instance(tag = DoorTag.TAG_DB),
-            activeRepo = instance(tag = DoorTag.TAG_REPO),
+            activeRepo = instance<UmAppDataLayer>().repository,
         )
     }
 
-    bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<OpenBlobUseCase>() with scoped(LearningSpaceScope.Default).provider {
         OpenBlobUseCaseJs()
     }
 
-    bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<OpenBlobUiUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         OpenBlobUiUseCase(
             openBlobUseCase = instance(),
             systemImpl = instance(),
         )
     }
 
-    bind<CancelRemoteContentEntryImportUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<CancelRemoteContentEntryImportUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         CancelRemoteContentEntryImportUseCase(
-            endpoint = context,
+            learningSpace = context,
             httpClient = instance(),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().requireRepository(),
         )
     }
 
-    bind<DismissRemoteContentEntryImportErrorUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<DismissRemoteContentEntryImportErrorUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         DismissRemoteContentEntryImportErrorUseCase(
-            endpoint = context,
+            learningSpace = context,
             httpClient = instance(),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().requireRepository(),
         )
     }
 
@@ -286,44 +296,51 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         XXHasher64FactoryJs()
     }
 
-    bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<StoreActivitiesUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         StoreActivitiesUseCase(
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
         )
     }
 
-    bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
+    bind<XapiStatementResource>() with scoped(LearningSpaceScope.Default).singleton {
         XapiStatementResource(
             db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repository,
             xxHasher = instance(),
-            endpoint = context,
+            learningSpace = context,
             xapiJson = instance(),
             hasherFactory = instance(),
             storeActivitiesUseCase = instance(),
         )
     }
 
-    bind<SaveStatementOnClearUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<SaveStatementOnClearUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         SaveStatementOnClearUseCaseJs(
             xapiStatementResource = instance(),
         )
     }
 
-    bind<SaveStatementOnUnloadUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<SaveStatementOnUnloadUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         SaveStatementOnUnloadUseCaseJs(
-            endpoint = context,
+            learningSpace = context,
             json = instance(),
         )
     }
 
-    bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(EndpointScope.Default).singleton {
+    bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(LearningSpaceScope.Default).singleton {
         NonInteractiveContentXapiStatementRecorderFactory(
             saveStatementOnClearUseCase = instance(),
             saveStatementOnUnloadUseCase = instance(),
             xapiStatementResource = instance(),
-            endpoint = context,
+            learningSpace = context,
+        )
+    }
+
+    bind<AddNewPersonUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+        AddNewPersonUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance<UmAppDataLayer>().repository,
         )
     }
 

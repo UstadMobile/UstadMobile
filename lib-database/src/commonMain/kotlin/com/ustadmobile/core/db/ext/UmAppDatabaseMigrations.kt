@@ -1,14 +1,18 @@
 package com.ustadmobile.core.db.ext
 
+import androidx.room.PrimaryKey
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.DoorDbType
+import com.ustadmobile.door.annotation.ReplicateEtag
+import com.ustadmobile.door.annotation.ReplicateLastModified
 import com.ustadmobile.door.migration.DoorMigration
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.CacheLockJoin
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.Message
+import com.ustadmobile.lib.db.entities.PersonPasskey.Companion.NOT_REVOKED
 import com.ustadmobile.lib.db.entities.UserSession
 
 
@@ -1623,7 +1627,27 @@ val MIGRATION_199_200 = DoorMigrationStatementList(199, 200) { db ->
 }
 
 
+val MIGRATION_200_201 = DoorMigrationStatementList(200, 201) { db ->
+    buildList {
+        if (db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS PersonPasskey (  ppPersonUid  INTEGER  NOT NULL , ppAttestationObj  TEXT , ppClientDataJson  TEXT , ppOriginString  TEXT , ppRpid  TEXT , ppId  TEXT , ppChallengeString  TEXT , ppPublicKey  TEXT , isRevoked  INTEGER  NOT NULL , ppPasskeyLct  INTEGER  NOT NULL , personPasskeyUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
 
+        } else {
+            add("CREATE TABLE IF NOT EXISTS PersonPasskey (  ppPersonUid  BIGINT  NOT NULL , ppAttestationObj  TEXT , ppClientDataJson  TEXT , ppOriginString  TEXT , ppRpid  TEXT , ppId  TEXT , ppChallengeString  TEXT , ppPublicKey  TEXT , isRevoked  INTEGER  NOT NULL , ppPasskeyLct  BIGINT  NOT NULL , personPasskeyUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+
+    }
+}
+
+val MIGRATION_201_202 = DoorMigrationStatementList(201, 202) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE Person ADD COLUMN isPersonalAccount INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE Person ADD COLUMN isPersonalAccount BOOL NOT NULL DEFAULT FALSE")
+        }
+    }
+}
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
@@ -1640,7 +1664,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
     MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
-    MIGRATION_199_200,
+    MIGRATION_199_200,MIGRATION_200_201,MIGRATION_201_202
 )
 
 

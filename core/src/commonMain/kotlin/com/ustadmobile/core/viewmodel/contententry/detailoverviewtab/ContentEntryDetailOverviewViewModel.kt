@@ -159,7 +159,7 @@ class ContentEntryDetailOverviewViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.contentEntryDao().findByContentEntryUidWithDetailsAsFlow(
+                    activeRepoWithFallback.contentEntryDao().findByContentEntryUidWithDetailsAsFlow(
                         contentEntryUid = entityUidArg,
                         clazzUid = clazzUid,
                         courseBlockUid = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
@@ -178,7 +178,7 @@ class ContentEntryDetailOverviewViewModel(
                         val parentTitle = if(parentEntryUid == ContentEntryListViewModel.LIBRARY_ROOT_CONTENT_ENTRY_UID) {
                             systemImpl.getString(MR.strings.library)
                         }else {
-                            activeRepo.localFirstThenRepoIfNull { db ->
+                            activeRepoWithFallback.localFirstThenRepoIfNull { db ->
                                 db.contentEntryDao().findTitleByUidAsync(parentEntryUid)
                             }
                         }
@@ -192,7 +192,7 @@ class ContentEntryDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeRepo.contentEntryVersionDao().findLatestByContentEntryUidAsFlow(
+                    activeRepoWithFallback.contentEntryVersionDao().findLatestByContentEntryUidAsFlow(
                         contentEntryUid = entityUidArg
                     ).collect{
                         _uiState.update { prev ->
@@ -245,7 +245,7 @@ class ContentEntryDetailOverviewViewModel(
                     try {
                         do {
                             val remoteImportJobsJson = httpClient.get(
-                                "${accountManager.activeEndpoint.url}api/contententryimportjob/importjobs"
+                                "${accountManager.activeLearningSpace.url}api/contententryimportjob/importjobs"
                             ) {
                                 parameter("contententryuid", entityUidArg.toString())
                                 header("cache-control", "no-store")
@@ -295,7 +295,7 @@ class ContentEntryDetailOverviewViewModel(
                 //remove CacheLockJoin(s) status to pending deletion so cache content becomes
                 // eligible for eviction as required.
                 offlineItemAndStateVal.readyForOffline -> {
-                    activeRepo.offlineItemDao().updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
+                    activeRepoWithFallback.offlineItemDao().updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
                 }
             }
         }
@@ -308,7 +308,7 @@ class ContentEntryDetailOverviewViewModel(
                 loadingState = LoadingUiState.INDETERMINATE
                 Napier.d("ContentEntryDetailOverviewViewModel: onClickOpen launched")
                 _uiState.update { it.copy(openButtonEnabled = false) }
-                val latestContentEntryVersion = activeRepo.localFirstThenRepoIfNull {
+                val latestContentEntryVersion = activeRepoWithFallback.localFirstThenRepoIfNull {
                     it.contentEntryVersionDao().findLatestVersionUidByContentEntryUidEntity(entityUidArg)
                 }
 

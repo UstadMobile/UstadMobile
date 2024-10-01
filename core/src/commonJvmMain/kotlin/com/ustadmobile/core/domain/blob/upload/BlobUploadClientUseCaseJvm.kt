@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.upload
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCase.Companion.BLOB_RESPONSE_HEADER_PREFIX
 import com.ustadmobile.core.domain.upload.ChunkInfo
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
@@ -48,7 +48,7 @@ class BlobUploadClientUseCaseJvm(
     private val json: Json,
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val chunkSize: Int = DEFAULT_CHUNK_SIZE,
 ): BlobUploadClientUseCase {
 
@@ -152,7 +152,7 @@ class BlobUploadClientUseCaseJvm(
     override suspend fun invoke(
         blobUrls: List<BlobTransferJobItem>,
         batchUuid: String,
-        endpoint: Endpoint,
+        learningSpace: LearningSpace,
         onProgress: (BlobTransferProgressUpdate) -> Unit,
         onStatusUpdate: (BlobTransferStatusUpdate) -> Unit,
     ) {
@@ -178,7 +178,7 @@ class BlobUploadClientUseCaseJvm(
 
         coroutineScope {
             val response: BlobUploadResponse = json.decodeFromString(
-                httpClient.post("${endpoint.url}api/blob/upload-init-batch") {
+                httpClient.post("${learningSpace.url}api/blob/upload-init-batch") {
                     contentType(ContentType.Application.Json)
                     setBodyJson(
                         json = json,
@@ -243,7 +243,7 @@ class BlobUploadClientUseCaseJvm(
             val jobs = (0..4).map {
                 asyncUploadItemsFromChannelProcessor(
                     channel = receiveChannel,
-                    remoteUrl = "${endpoint.url}api/blob/upload-batch-data",
+                    remoteUrl = "${learningSpace.url}api/blob/upload-batch-data",
                     batchUuid = batchUuid,
                     onProgress = onProgress,
                     onStatusUpdate = onStatusUpdate,
@@ -280,7 +280,7 @@ class BlobUploadClientUseCaseJvm(
                         }
                     },
                     batchUuid = batchUuid,
-                    endpoint = endpoint,
+                    learningSpace = learningSpace,
                     onProgress = transferJobItemStatusUpdater::onProgressUpdate,
                     onStatusUpdate = {
                         transferJobItemStatusUpdater.onStatusUpdate(it)

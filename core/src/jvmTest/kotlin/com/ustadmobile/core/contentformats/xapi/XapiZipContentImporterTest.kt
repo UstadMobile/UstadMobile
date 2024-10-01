@@ -1,7 +1,7 @@
 package com.ustadmobile.core.contentformats.xapi
 
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.ContentDispatcher
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
@@ -61,7 +61,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
 
     private lateinit var di: DI
 
-    private lateinit var endpointScope: EndpointScope
+    private lateinit var learningSpaceScope: LearningSpaceScope
 
     private lateinit var mockWebServer: MockWebServer
 
@@ -81,13 +81,13 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
 
     private lateinit var rootTmpPath: File
 
-    private lateinit var activeEndpoint: Endpoint
+    private lateinit var activeLearningSpace: LearningSpace
 
     private lateinit var compressListUseCase: CompressListUseCase
 
     @Before
     fun setup(){
-        endpointScope = EndpointScope()
+        learningSpaceScope = LearningSpaceScope()
         rootTmpPath = temporaryFolder.newFolder("xapi-import-tmp-root")
 
         di = DI {
@@ -95,8 +95,8 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
         }
 
         val accountManager: UstadAccountManager by di.instance()
-        db = di.on(accountManager.activeEndpoint).direct.instance(tag = DoorTag.TAG_DB)
-        activeEndpoint = accountManager.activeEndpoint
+        db = di.on(accountManager.activeLearningSpace).direct.instance(tag = DoorTag.TAG_DB)
+        activeLearningSpace = accountManager.activeLearningSpace
 
         mockWebServer = MockWebServer()
         mockWebServer.dispatcher = ContentDispatcher()
@@ -117,7 +117,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
         deleteUrisUseCase = DeleteUrisUseCaseCommonJvm(isTempFileCheckerUseCase)
 
         saveLocalUriAsBlobUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             cache = ustadCache,
             uriHelper = uriHelper,
             tmpDir = Path(rootTmpPath.absolutePath),
@@ -139,7 +139,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             "/com/ustadmobile/core/contenttype/ustad-tincan.zip")
 
         val xapiPlugin =  XapiZipContentImporter(
-            endpoint = Endpoint("http://localhost/dummy/"),
+            learningSpace = LearningSpace("http://localhost/dummy/"),
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -165,7 +165,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             "/com/ustadmobile/core/contenttype/ustad-tincan-invalid.zip")
 
         val xapiPlugin =  XapiZipContentImporter(
-            endpoint = Endpoint("http://localhost/dummy/"),
+            learningSpace = LearningSpace("http://localhost/dummy/"),
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -190,7 +190,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
         val tempFile = temporaryFolder.newFile()
         tempFile.writeText("Hello World")
         val xapiPlugin =  XapiZipContentImporter(
-            endpoint = Endpoint("http://localhost/dummy/"),
+            learningSpace = LearningSpace("http://localhost/dummy/"),
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -210,10 +210,10 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
         val tempFile = temporaryFolder.newFileFromResource(this::class.java,
             "/com/ustadmobile/core/contenttype/ustad-tincan.zip")
 
-        val endpoint = Endpoint("http://localhost/dummy/")
+        val learningSpace = LearningSpace("http://localhost/dummy/")
 
         val xapiPlugin =  XapiZipContentImporter(
-            endpoint = endpoint,
+            learningSpace = learningSpace,
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -232,7 +232,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             )
         }
 
-        val expectedUrlPrefix = "${endpoint.url}api/content/${result.cevUid}/"
+        val expectedUrlPrefix = "${learningSpace.url}api/content/${result.cevUid}/"
 
         val json : Json = di.direct.instance()
         val manifestResponse = ustadCache.retrieve(

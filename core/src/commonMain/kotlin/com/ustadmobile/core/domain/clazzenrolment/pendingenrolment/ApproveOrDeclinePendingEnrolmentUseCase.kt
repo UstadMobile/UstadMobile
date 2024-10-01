@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.EnrolmentRequest
 
 class ApproveOrDeclinePendingEnrolmentUseCase(
     private val db: UmAppDatabase,
-    private val repo: UmAppDatabase,
+    private val repo: UmAppDatabase?,
     private val enrolIntoCourseUseCase: EnrolIntoCourseUseCase,
 ): IApproveOrDeclinePendingEnrolmentRequestUseCase {
 
@@ -19,7 +19,7 @@ class ApproveOrDeclinePendingEnrolmentUseCase(
         val effectiveClazz = db.clazzDao().findByUidAsync(enrolmentRequest.erClazzUid)
             ?: throw IllegalStateException("Class does not exist")
 
-        repo.withDoorTransactionAsync {
+        (repo ?: db).withDoorTransactionAsync {
             val requestStatus = if(approved){
                 enrolIntoCourseUseCase(
                     enrolment = ClazzEnrolment(
@@ -34,7 +34,7 @@ class ApproveOrDeclinePendingEnrolmentUseCase(
                 EnrolmentRequest.STATUS_REJECTED
             }
 
-            repo.enrolmentRequestDao().updateStatus(
+            (repo ?: db).enrolmentRequestDao().updateStatus(
                 uid = enrolmentRequest.erUid,
                 status = requestStatus,
                 updateTime = systemTimeInMillis()

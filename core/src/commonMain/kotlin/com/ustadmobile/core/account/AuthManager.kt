@@ -1,15 +1,13 @@
 package com.ustadmobile.core.account
 
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.util.ext.*
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.STATUS_APPROVED
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 
@@ -28,25 +26,23 @@ import org.kodein.di.on
  * ALL auth related requests run through this manager.
  */
 class AuthManager(
-    internal val endpoint: Endpoint,
+    internal val learningSpace: LearningSpace,
     override val di: DI
 ) : DIAware {
 
-    private val db: UmAppDatabase by on(endpoint).instance(tag = DoorTag.TAG_DB)
-
-    private val repo: UmAppDatabase? by on(endpoint).instanceOrNull(tag = DoorTag.TAG_REPO)
+    private val dataLayer: UmAppDataLayer by on(learningSpace).instance()
 
     suspend fun authenticate(
         username: String,
         password: String
     ): AuthResult {
         val passwordDoubleHashed = doublePbkdf2Hash(password)
-        val personAuth2 = (repo ?: db).personAuth2Dao().findByUsername(username)
+        val personAuth2 = dataLayer.repositoryOrLocalDb.personAuth2Dao().findByUsername(username)
         val authMatch = personAuth2?.pauthAuth?.base64StringToByteArray()
             .contentEquals(passwordDoubleHashed)
 
         val authorizedPerson = if(authMatch) {
-            db.personDao().findByUidAsync(personAuth2?.pauthUid ?: 0L)
+            dataLayer.localDb.personDao().findByUidAsync(personAuth2?.pauthUid ?: 0L)
         }else {
             null
         }
@@ -55,7 +51,7 @@ class AuthManager(
         if(authorizedPerson != null &&
             Instant.fromEpochMilliseconds(authorizedPerson.dateOfBirth).isDateOfBirthAMinor()
         ) {
-            val parentJoins = db.personParentJoinDao().findByMinorPersonUid(authorizedPerson.personUid)
+            val parentJoins = dataLayer.localDb.personParentJoinDao().findByMinorPersonUid(authorizedPerson.personUid)
 
             if(!parentJoins.any { it.ppjStatus == STATUS_APPROVED }) {
                 return AuthResult(null, false,
@@ -68,7 +64,7 @@ class AuthManager(
 
     suspend fun setAuth(personUid: Long, password: String) {
         val encryptedPass = doublePbkdf2HashAsBase64(password)
-        (repo ?: db).personAuth2Dao().insertAsync(PersonAuth2().apply {
+        dataLayer.repositoryOrLocalDb.personAuth2Dao().insertAsync(PersonAuth2().apply {
             pauthUid = personUid
             pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
             pauthAuth = encryptedPass

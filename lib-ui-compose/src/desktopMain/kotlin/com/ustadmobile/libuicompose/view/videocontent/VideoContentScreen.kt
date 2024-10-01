@@ -54,7 +54,7 @@ fun VideoContentScreen(
     onCompleted: () ->  Unit,
 ) {
     val mediaSrc = uiState.firstMediaUri
-    val endpoint = uiState.endpoint
+    val endpoint = uiState.learningSpace
 
     VlcCheck {
         if(mediaSrc != null && endpoint != null) {

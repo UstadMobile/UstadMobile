@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.HttpClient
@@ -27,7 +27,7 @@ class TestSiteRoute {
 
     private lateinit var serverDi: DI
 
-    private lateinit var endpointScope: EndpointScope
+    private lateinit var learningSpaceScope: LearningSpaceScope
 
     @JvmField
     @Rule
@@ -35,14 +35,14 @@ class TestSiteRoute {
 
     @Before
     fun setup() {
-        endpointScope = EndpointScope()
+        learningSpaceScope = LearningSpaceScope()
         serverDi = DI {
             import(CommonJvmDiModule)
 
-            import(commonTestKtorDiModule(endpointScope))
+            import(commonTestKtorDiModule(learningSpaceScope))
 
             registerContextTranslator { _: ApplicationCall ->
-                Endpoint("localhost")
+                LearningSpace("localhost")
             }
         }
     }

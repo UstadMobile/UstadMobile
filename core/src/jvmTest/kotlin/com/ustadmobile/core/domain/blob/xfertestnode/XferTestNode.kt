@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.blob.xfertestnode
 
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
@@ -66,11 +66,11 @@ import kotlin.test.assertNotNull
 class XferTestNode(
     val temporaryFolder: TemporaryFolder,
     val name: String,
-    val dbUrl: (Endpoint) -> String = { "jdbc:sqlite::memory:" },
+    val dbUrl: (LearningSpace) -> String = { "jdbc:sqlite::memory:" },
     cacheDbUrl: String = "jdbc:sqlite::memory:",
 ) {
 
-    val endpointScope = EndpointScope()
+    val learningSpaceScope = LearningSpaceScope()
 
     val rootTmpDir = temporaryFolder.newFolder("$name-tmproot-server")
 
@@ -140,9 +140,9 @@ class XferTestNode(
                 okHttpClient
             }
 
-            bind<SaveLocalUrisAsBlobsUseCase>() with scoped(endpointScope).singleton {
+            bind<SaveLocalUrisAsBlobsUseCase>() with scoped(learningSpaceScope).singleton {
                 SaveLocalUrisAsBlobsUseCaseJvm(
-                    endpoint = context,
+                    learningSpace = context,
                     cache = httpCache,
                     uriHelper = uriHelper,
                     tmpDir = Path(rootTmpDir.absolutePath),
@@ -162,7 +162,7 @@ class XferTestNode(
                 uriHelper
             }
 
-            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(learningSpaceScope).singleton {
                 DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl(context), nodeId = 1L)
                     .build().also {
                         dbsToClose.add(it)
@@ -193,7 +193,7 @@ class XferTestNode(
                 )
             }
 
-            bind<CreateRetentionLocksForManifestUseCase>() with scoped(endpointScope).singleton {
+            bind<CreateRetentionLocksForManifestUseCase>() with scoped(learningSpaceScope).singleton {
                 CreateRetentionLocksForManifestUseCaseCommonJvm(
                     cache = instance(),
                 )

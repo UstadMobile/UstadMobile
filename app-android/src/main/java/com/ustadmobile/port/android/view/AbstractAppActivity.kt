@@ -16,12 +16,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.LearningSpaceScope
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
+import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
+import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
+import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -32,15 +36,13 @@ import com.ustadmobile.core.domain.share.ShareAppUseCase
 import com.ustadmobile.core.domain.share.ShareAppUseCaseAndroid
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.di.AndroidDomainDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderAndroid
 import com.ustadmobile.core.impl.nav.CommandFlowUstadNavController
 import com.ustadmobile.core.networkmanager.ConnectionManager
-import com.ustadmobile.core.schedule.ClazzLogCreatorManager
-import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ext.appendQueryArgs
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.UstadView
@@ -49,6 +51,8 @@ import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
+import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyUseCaseImpl
+import com.ustadmobile.libuicompose.util.passkey.LoginWithPasskeyUseCaseImpl
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
@@ -82,7 +86,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
     override val di by  DI.lazy {
         extend(appContextDi)
 
-        import(commonDomainDiModule(EndpointScope.Default))
+        import(commonDomainDiModule(LearningSpaceScope.Default))
         import(AndroidDomainDiModule(applicationContext))
 
 
@@ -112,9 +116,25 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 languagesConfig = instance()
             )
         }
+        bind<PasskeyRequestJsonUseCase>()  with provider {
+            PasskeyRequestJsonUseCase(
+                systemImpl = instance(),
+                json = instance()
+            )
+        }
 
-        bind<ClazzLogCreatorManager>() with singleton {
-            ClazzLogCreatorManagerAndroidImpl(applicationContext)
+
+        bind<CreatePasskeyUseCase>() with singleton {
+            CreatePasskeyUseCaseImpl(
+                context=this@AbstractAppActivity,
+                passkeyRequestJsonUseCase = instance()
+            )
+        }
+        bind<LoginWithPasskeyUseCase>() with singleton {
+            LoginWithPasskeyUseCaseImpl(
+                context=this@AbstractAppActivity,
+                passkeyRequestJsonUseCase = instance()
+            )
         }
 
         constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with true
@@ -125,25 +145,25 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
 
 
 
-        bind<MoveContentEntriesUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<MoveContentEntriesUseCase>() with scoped(LearningSpaceScope.Default).provider {
             MoveContentEntriesUseCase(
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
                 systemImpl = instance()
             )
         }
 
-        bind<CloseProcessUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<CloseProcessUseCase>() with scoped(LearningSpaceScope.Default).provider {
             CloseProcessUseCaseAndroid(this@AbstractAppActivity)
         }
 
-        bind<OpenBlobUiUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<OpenBlobUiUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             OpenBlobUiUseCase(
                 openBlobUseCase = instance(),
                 systemImpl = instance(),
             )
         }
 
-        bind<BulkAddPersonsUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<BulkAddPersonsUseCase>() with scoped(LearningSpaceScope.Default).provider {
             BulkAddPersonsUseCaseImpl(
                 addNewPersonUseCase = instance(),
                 validateEmailUseCase = instance(),
@@ -151,18 +171,18 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 authManager = instance(),
                 enrolUseCase = instance(),
                 activeDb = instance(tag = DoorTag.TAG_DB),
-                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                activeRepo = instance<UmAppDataLayer>().repository,
             )
         }
 
-        bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(LearningSpaceScope.Default).provider {
             BulkAddPersonsFromLocalUriUseCaseCommonJvm(
                 bulkAddPersonsUseCase = instance(),
                 uriHelper = instance(),
             )
         }
 
-        registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound") }
+        registerContextTranslator { call: NanoHttpdCall -> LearningSpace(call.urlParams["endpoint"] ?: "notfound") }
 
         onReady {
             instance<ConnectionManager>().start()
@@ -232,7 +252,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         val argAccountName = intent?.getStringExtra(UstadViewModel.ARG_ACCOUNT_NAME)
 
         if(uri != null) {
-            val apiUrlConfig: ApiUrlConfig = di.direct.instance()
+            val apiUrlConfig: SystemUrlConfig = di.direct.instance()
 
             commandFlowNavigator.navigateToLink(
                 link = uri,

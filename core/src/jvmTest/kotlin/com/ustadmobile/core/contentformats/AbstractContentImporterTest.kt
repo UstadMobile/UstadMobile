@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
@@ -50,7 +50,7 @@ abstract class AbstractContentImporterTest: AbstractMainDispatcherTest() {
     @Rule
     var ustadTestRule = UstadTestRule()
 
-    protected lateinit var activeEndpoint: Endpoint
+    protected lateinit var activeLearningSpace: LearningSpace
 
     protected lateinit var saveLocalUrisUseCase: SaveLocalUrisAsBlobsUseCase
 
@@ -84,7 +84,7 @@ abstract class AbstractContentImporterTest: AbstractMainDispatcherTest() {
         okHttpClient = newTestOkHttpClient(temporaryFolder, cache = ustadCache, json = json)
         httpClient = okHttpClient.newTestHttpClient(json)
 
-        activeEndpoint = Endpoint("http://localhost:8097/")
+        activeLearningSpace = LearningSpace("http://localhost:8097/")
 
 
         uriHelper = UriHelperJvm(
@@ -95,7 +95,7 @@ abstract class AbstractContentImporterTest: AbstractMainDispatcherTest() {
 
         //Strictly speaking should be mocked, in reality, it's easier to just use the real thing.
         saveLocalUrisUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             cache = ustadCache,
             uriHelper = uriHelper,
             tmpDir = Path(temporaryFolder.newFolder().absolutePath),

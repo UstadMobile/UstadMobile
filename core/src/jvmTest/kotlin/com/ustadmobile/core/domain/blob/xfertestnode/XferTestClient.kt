@@ -3,8 +3,8 @@ package com.ustadmobile.core.domain.blob.xfertestnode
 import app.cash.turbine.test
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
@@ -75,13 +75,13 @@ class XferTestClient(
                 }
             }
 
-            bind<ChunkedUploadClientUseCaseKtorImpl>() with scoped(node.endpointScope).singleton {
+            bind<ChunkedUploadClientUseCaseKtorImpl>() with scoped(node.learningSpaceScope).singleton {
                 ChunkedUploadClientUseCaseKtorImpl(
                     node.httpClient, node.uriHelper
                 )
             }
 
-            bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
+            bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
                 val settings: Settings = instance()
                 val contextIdentifier: String = sanitizeDbNameFromUrl(context.url)
                 settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
@@ -96,7 +96,7 @@ class XferTestClient(
                 )
             }
 
-            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(node.endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(node.learningSpaceScope).singleton {
                 val nodeIdAndAuth: NodeIdAndAuth = instance()
                 val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
                 db.asRepository(
@@ -114,7 +114,7 @@ class XferTestClient(
                 }
             }
 
-            bind<BlobUploadClientUseCase>() with scoped(node.endpointScope).singleton {
+            bind<BlobUploadClientUseCase>() with scoped(node.learningSpaceScope).singleton {
                 BlobUploadClientUseCaseJvm(
                     chunkedUploadUseCase = instance<ChunkedUploadClientUseCaseKtorImpl>(),
                     httpClient = node.httpClient,
@@ -122,26 +122,26 @@ class XferTestClient(
                     json = instance(),
                     db = instance(tag = DoorTag.TAG_DB),
                     repo = instance(tag = DoorTag.TAG_REPO),
-                    endpoint = context,
+                    learningSpace = context,
                     chunkSize = uploadChunkSize,
                 )
             }
 
-            bind<UpdateFailedTransferJobUseCase>() with scoped(node.endpointScope).singleton {
+            bind<UpdateFailedTransferJobUseCase>() with scoped(node.learningSpaceScope).singleton {
                 UpdateFailedTransferJobUseCase(db = instance(tag = DoorTag.TAG_DB))
             }
 
-            bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(node.endpointScope).singleton {
+            bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(node.learningSpaceScope).singleton {
                 SaveLocalUriAsBlobAndManifestUseCaseJvm(
                     saveLocalUrisAsBlobsUseCase = instance(),
                     mimeTypeHelper = FileMimeTypeHelperImpl(),
                 )
             }
 
-            bind<EnqueueBlobUploadClientUseCase>() with scoped(node.endpointScope).singleton {
+            bind<EnqueueBlobUploadClientUseCase>() with scoped(node.learningSpaceScope).singleton {
                 EnqueueBlobUploadClientUseCaseJvm(
                     scheduler = instance(),
-                    endpoint = context,
+                    learningSpace = context,
                     db = instance(tag = DoorTag.TAG_DB),
                     cache = instance()
                 )
@@ -149,7 +149,7 @@ class XferTestClient(
 
             import(ContentImportersDiModuleJvm)
 
-            bind<ImportContentEntryUseCase>() with scoped(node.endpointScope).singleton {
+            bind<ImportContentEntryUseCase>() with scoped(node.learningSpaceScope).singleton {
                 ImportContentEntryUseCase(
                     db = instance(tag = DoorTag.TAG_DB),
                     importersManager = instance(),
@@ -168,11 +168,11 @@ class XferTestClient(
 
 
     suspend fun waitForContentUploadCompletion(
-        endpoint: Endpoint,
+        learningSpace: LearningSpace,
         contentEntryVersionUid: Long,
         timeout: Int = 15,
     ) {
-        val db: UmAppDatabase = di.on(endpoint).direct.instance(tag = DoorTag.TAG_DB)
+        val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
         val transferJobFlow = db.doorFlow(arrayOf("TransferJob", "TransferJobItem")) {
             db.transferJobDao().findJobByEntityAndTableUid(
                 tableId = ContentEntryVersion.TABLE_ID,
