@@ -66,6 +66,8 @@ kotlin {
             dependencies {
                 api(libs.androidx.room.runtime)
                 api(libs.androidx.room.ktx)
+                api(libs.androidx.room.paging)
+                api(libs.androidx.paging.runtime)
             }
         }
 
