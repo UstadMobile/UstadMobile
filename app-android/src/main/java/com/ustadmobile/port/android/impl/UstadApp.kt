@@ -280,9 +280,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
         }
 
-        bind<SystemDbNodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
+        bind<SystemDbNodeIdAndAuth>() with singleton {
             val settings: Settings = instance()
-            val contextIdentifier: String = sanitizeDbNameFromUrl(context.url)
+            val systemUrlConfig:SystemUrlConfig = instance()
+            val contextIdentifier: String = sanitizeDbNameFromUrl(systemUrlConfig.systemBaseUrl)
             SystemDbNodeIdAndAuth(nodeIdAndAuth =settings.getOrGenerateNodeIdAndAuth(contextIdentifier) )
         }
 
@@ -348,8 +349,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         //TODO: That will provide the SystemDb in the DI for the app client - then we can use
         // learningspaceinfo.findallaspagingsource etc. to list available learning spaces.
 
-        bind<SystemDb>() with scoped(LearningSpaceScope.Default).singleton {
-            val dbName = sanitizeDbNameFromUrl(context.url)
+        bind<SystemDb>() with singleton {
+            val systemUrlConfig:SystemUrlConfig = instance()
+            val dbName = sanitizeDbNameFromUrl(systemUrlConfig.systemBaseUrl)
             val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
             DatabaseBuilder.databaseBuilder(
                 context = applicationContext,
@@ -360,15 +362,15 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .build()
         }
 
-        bind<SystemDbDataLayer>() with scoped(LearningSpaceScope.Default).singleton {
+        bind<SystemDbDataLayer>() with singleton {
             val systemUrlConfig:SystemUrlConfig = instance()
-            val db: SystemDb = instance(tag = DoorTag.TAG_DB)
-            val repo: SystemDb? = if(!context.isLocal) {
-                val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
-                db.asRepository(
+            val systemDbLayer: SystemDbDataLayer = instance<SystemDbDataLayer>()
+
+            val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
+            val repo: SystemDb? = systemDbLayer.repository?.asRepository(
                     RepositoryConfig.repositoryConfig(
                         context = applicationContext,
-                        endpoint = "${systemUrlConfig.systemBaseUrl}",
+                        endpoint = systemUrlConfig.systemBaseUrl,
                         nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
                         auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
                         httpClient = instance(),
@@ -376,12 +378,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                         json = instance()
                     )
                 )
-            }else {
-                null
-            }
+
 
             SystemDbDataLayer(
-                localDb  = db,
+                localDb  = systemDbLayer.localDb,
                 repository = repo,
             )
         }
