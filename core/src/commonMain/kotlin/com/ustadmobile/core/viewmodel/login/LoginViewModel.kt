@@ -38,6 +38,7 @@ import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
+import io.ktor.http.Url
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -315,12 +316,10 @@ class LoginViewModel(
     private fun onSignInWithPassKey() {
         viewModelScope.launch {
             try {
-
+               val domain= Url(serverUrl).host
                 loginWithPasskeyUseCase?.let {
                     val passKeySignInData = it.invoke(
-                        serverUrl.removePrefix("http://")
-                            .removePrefix("https://")
-                            .removeSuffix("/")
+                       domain
                     )
                     if (passKeySignInData != null) {
                         val account = accountManager.loginWithPasskey(passKeySignInData, serverUrl)
