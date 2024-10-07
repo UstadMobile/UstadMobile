@@ -364,24 +364,23 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<SystemDbDataLayer>() with singleton {
             val systemUrlConfig:SystemUrlConfig = instance()
-            val systemDbLayer: SystemDbDataLayer = instance<SystemDbDataLayer>()
+            val systemDb: SystemDb = instance<SystemDb>()
 
             val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
-            val repo: SystemDb? = systemDbLayer.repository?.asRepository(
-                    RepositoryConfig.repositoryConfig(
-                        context = applicationContext,
-                        endpoint = systemUrlConfig.systemBaseUrl,
-                        nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
-                        auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
-                        httpClient = instance(),
-                        okHttpClient = instance(),
-                        json = instance()
-                    )
+            val repo:SystemDb = systemDb.asRepository(
+                RepositoryConfig.repositoryConfig(
+                    context = applicationContext,
+                    endpoint = systemUrlConfig.systemBaseUrl,
+                    nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
+                    auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
+                    httpClient = instance(),
+                    okHttpClient = instance(),
+                    json = instance()
                 )
-
+            )
 
             SystemDbDataLayer(
-                localDb  = systemDbLayer.localDb,
+                localDb  = systemDb,
                 repository = repo,
             )
         }
