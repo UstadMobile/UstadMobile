@@ -205,6 +205,7 @@ import com.ustadmobile.appconfigdb.SystemDb
 import com.ustadmobile.appconfigdb.SystemDbDataLayer
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
+import com.ustadmobile.core.url.UrlKmp
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
@@ -370,7 +371,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             val repo:SystemDb = systemDb.asRepository(
                 RepositoryConfig.repositoryConfig(
                     context = applicationContext,
-                    endpoint = systemUrlConfig.systemBaseUrl,
+                    endpoint = UrlKmp(systemUrlConfig.systemBaseUrl).resolve("api/SystemDb/")
+                        .toString(),
                     nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
                     auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
                     httpClient = instance(),
