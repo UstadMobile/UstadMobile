@@ -37,6 +37,7 @@ fun LearningSpaceListScreen ( viewModel: LearningSpaceListViewModel
             uiState = uiState,
         refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickNext = viewModel::onClickNext,
+        onSelectLearningSpace = viewModel::onSelectLearningSpace,
     )
 }
 
@@ -44,8 +45,8 @@ fun LearningSpaceListScreen ( viewModel: LearningSpaceListViewModel
 fun LearningSpaceListScreen(
     uiState: LearningSpaceListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
-
     onClickNext: () -> Unit = {},
+    onSelectLearningSpace: (String) -> Unit = {},
 ) {
 
     val learningSpaceListPager = rememberDoorRepositoryPager(
@@ -55,7 +56,6 @@ fun LearningSpaceListScreen(
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
     )  {
         item {
             Spacer(Modifier.height(16.dp))
@@ -77,6 +77,7 @@ fun LearningSpaceListScreen(
         ){ learningSpace ->
             ListItem (
                 modifier = Modifier.clickable {
+                    onSelectLearningSpace(learningSpace?.lsiUrl ?: "")
                 },
                 headlineContent = {
                     Text(text = learningSpace?.lsiUrl ?: "")

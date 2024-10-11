@@ -7,9 +7,13 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkViewModel
 import kotlinx.coroutines.flow.*
@@ -68,7 +72,24 @@ class LearningSpaceListViewModel(
 
 
     }
+    fun onSelectLearningSpace(learningSpace:String) {
+        val viewName =if(savedStateHandle[SignUpViewModel.ARG_NEW_OR_EXISTING_USER]=="new"){
+            RegisterAgeRedirectViewModel.DEST_NAME
+        }else{
+            LoginViewModel.DEST_NAME
+        }
+        navController.navigate(
+            viewName,
+            args = buildMap {
+                putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+                    put(ARG_LEARNINGSPACE_URL, learningSpace)
 
+            }
+
+        )
+
+
+    }
 
     companion object {
 
