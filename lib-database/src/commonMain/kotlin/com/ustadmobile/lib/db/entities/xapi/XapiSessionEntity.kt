@@ -71,6 +71,9 @@ data class XapiSessionEntity(
 
     var xseContentEntryUid: Long = 0,
 
+    @ColumnInfo(defaultValue = "0")
+    var xseContentEntryVersionUid: Long = 0,
+
     var xseRootActivityId: String = "",
 
     var xseRootActivityUid: Long = 0,

@@ -1622,7 +1622,15 @@ val MIGRATION_199_200 = DoorMigrationStatementList(199, 200) { db ->
     }
 }
 
-
+val MIGRATION_200_201 = DoorMigrationStatementList(200, 201) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE XapiSessionEntity ADD COLUMN xseContentEntryVersionUid  INTEGER  NOT NULL  DEFAULT 0")
+        }else {
+            add("ALTER TABLE XapiSessionEntity ADD COLUMN xseContentEntryVersionUid  BIGINT  NOT NULL  DEFAULT 0")
+        }
+    }
+}
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1640,7 +1648,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
     MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
-    MIGRATION_199_200,
+    MIGRATION_199_200, MIGRATION_200_201,
 )
 
 
