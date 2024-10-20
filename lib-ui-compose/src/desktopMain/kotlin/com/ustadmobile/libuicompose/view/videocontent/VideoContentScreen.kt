@@ -53,12 +53,12 @@ fun VideoContentScreen(
     onPlayStateChanged: (VideoContentViewModel.MediaPlayState) -> Unit,
     onCompleted: () ->  Unit,
 ) {
-    val mediaSrc = uiState.firstMediaUri
-    val endpoint = uiState.endpoint
+    val mediaFirstUri = uiState.mediaContentInfo?.sources?.firstOrNull()?.uri
+    val mediaSrc = mediaFirstUri?.let { uiState.contentManifestMap?.get(it) }?.uri
+    val di = localDI()
 
     VlcCheck {
-        if(mediaSrc != null && endpoint != null) {
-            val di = localDI()
+        if(mediaSrc != null) {
             val getLocalUrlForContentUseCase: GetLocalUrlForContentUseCase = remember {
                 di.onActiveEndpoint().direct.instance()
             }
@@ -137,7 +137,6 @@ fun VideoContentScreen(
 
                 }
             }
-
         }
     }
 }

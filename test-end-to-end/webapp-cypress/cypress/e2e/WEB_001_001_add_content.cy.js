@@ -36,7 +36,5 @@ it('Admin user add content to the library', () => {
   cy.contains('Content_002').click()
   cy.ustadOpenH5pEpub('Content_002')
   cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
-
- // cy.ustadSaveLogs('WEB_001_001_add_content');
 })
 })

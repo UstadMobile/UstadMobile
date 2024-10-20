@@ -31,7 +31,8 @@ class ResumeOrStartXapiSessionUseCaseJs(
         activityId: String,
         clazzUid: Long,
         cbUid: Long,
-        contentEntryUid: Long
+        contentEntryUid: Long,
+        contentEntryVersionUid: Long,
     ): XapiSessionEntity {
         val result: XapiSessionEntity = httpClient.post(
             "${endpoint.url}api/xapi-ext/resumeOrStartSession"
@@ -43,6 +44,7 @@ class ResumeOrStartXapiSessionUseCaseJs(
             parameter("clazzUid", clazzUid.toString())
             parameter("cbUid", cbUid.toString())
             parameter("contentEntryUid", contentEntryUid.toString())
+            parameter("contentEntryVersionUid", contentEntryVersionUid.toString())
         }.body()
 
         return result
