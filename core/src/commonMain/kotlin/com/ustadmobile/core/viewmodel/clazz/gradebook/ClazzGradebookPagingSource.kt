@@ -30,6 +30,7 @@ class ClazzGradebookPagingSource(
     private val studentListPagingSource: PagingSource<Int, PersonAndClazzMemberListDetails>,
     private val db: UmAppDatabase,
     private val clazzUid: Long,
+    private val accountPersonUid: Long,
 ): DelegatedInvalidationPagingSource<Int, StudentAndBlockStatuses>(
     invalidationDelegate = studentListPagingSource
 ), PagingSourceWithHttpLoader<Int> {
@@ -63,7 +64,8 @@ class ClazzGradebookPagingSource(
         val blockResults = db.statementDao().findStatusForStudentsInClazz(
             clazzUid = clazzUid,
             studentPersonUids = (studentListResult as? PagingSourceLoadResultPage<Int, PersonAndClazzMemberListDetails>)
-                ?.data?.mapNotNull { it.person?.personUid } ?: emptyList()
+                ?.data?.mapNotNull { it.person?.personUid } ?: emptyList(),
+            accountPersonUid = accountPersonUid,
         )
 
         return when(studentListResult) {

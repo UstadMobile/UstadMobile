@@ -2,8 +2,10 @@ package com.ustadmobile.view.clazz.gradebook
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.util.ext.toDisplayString
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookUiState
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
+import com.ustadmobile.core.viewmodel.clazz.gradebook.maxScoreForBlock
 import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
@@ -27,7 +29,6 @@ import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
-import react.ReactNode
 import react.create
 import react.useRequiredContext
 import web.cssom.ClassName
@@ -83,6 +84,8 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
 
     //account for half of scrollbar height?
     val heightMargin = 4
+
+    val allCourseBlocks = props.uiState.courseBlocks.mapNotNull { it.block }
 
     VirtualList {
         style = jso {
@@ -149,10 +152,9 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                     //Progress blocks for each here.
                     props.uiState.courseBlocks.forEach { blockVal ->
                         ClazzGradebookCell {
-                            blockStatus = item?.blockStatuses?.firstOrNull {
-                                it.sCbUid == blockVal.block?.cbUid
-                            }
-                            block = blockVal.block
+                            blockUid = blockVal.block?.cbUid ?: 0L
+                            blockStatuses = item?.blockStatuses ?: emptyList()
+                            blocks = allCourseBlocks
                             width = COLUMN_WIDTH
                             height = COLUMN_HEIGHT
                         }
@@ -194,52 +196,65 @@ val ClazzGradebookComponent = FC<ClazzGradebookProps> { props ->
                 }
 
                 props.uiState.courseBlocks.forEach { block ->
-                    Box {
-                        sx {
-                            width = COLUMN_WIDTH.px
-                            height = headerRowHeight.px
-                            position = Position.relative
+                    Stack {
+                        direction = responsive(StackDirection.column)
+
+                        Box {
+                            sx {
+                                width = COLUMN_WIDTH.px
+                                height = headerRowHeight.px
+                                position = Position.relative
+                            }
+
+                            Stack {
+                                direction = responsive(StackDirection.row)
+
+                                sx {
+                                    transform = rotate((-90f).deg)
+                                    transformOrigin = TransformOrigin(
+                                        GeometryPosition.left, GeometryPosition.bottom
+                                    )
+                                    bottom = 4.px
+                                    left = 100.pct
+                                    textOverflow = TextOverflow.ellipsis
+                                    overflowInline = Overflow.clip
+                                    position = Position.absolute
+                                    width = headerRowHeight.px
+                                    height = COLUMN_WIDTH.px
+                                }
+
+                                ListItem {
+                                    ListItemIcon {
+                                        UstadBlockIcon {
+                                            title = block.block?.cbTitle ?: ""
+                                            courseBlock = block.block
+                                            contentEntry = block.contentEntry
+                                            pictureUri = block.thumbnailUri
+                                        }
+                                    }
+
+                                    ListItemText {
+                                        primary = div.create {
+                                            css {
+                                                useLineClamp(2)
+                                            }
+                                            + (block.block?.cbTitle ?: "")
+                                        }
+                                        primaryTypographyProps = jso {
+                                            component = div
+                                        }
+                                    }
+                                }
+                            }
                         }
 
-                        Stack {
-                            direction = responsive(StackDirection.row)
-
+                        Typography {
                             sx {
-                                transform = rotate((-90f).deg)
-                                transformOrigin = TransformOrigin(
-                                    GeometryPosition.left, GeometryPosition.bottom
-                                )
-                                bottom = 4.px
-                                left = 100.pct
-                                textOverflow = TextOverflow.ellipsis
-                                overflowInline = Overflow.clip
-                                position = Position.absolute
-                                width = headerRowHeight.px
-                                height = COLUMN_WIDTH.px
+                                textAlign = TextAlign.center
                             }
 
-                            ListItem {
-                                ListItemIcon {
-                                    UstadBlockIcon {
-                                        title = block.block?.cbTitle ?: ""
-                                        courseBlock = block.block
-                                        contentEntry = block.contentEntry
-                                        pictureUri = block.thumbnailUri
-                                    }
-                                }
-
-                                ListItemText {
-                                    primary = div.create {
-                                        css {
-                                            useLineClamp(2)
-                                        }
-                                        + block.block?.cbTitle ?: ""
-                                    }
-                                    primaryTypographyProps = jso {
-                                        component = div
-                                    }
-                                }
-                            }
+                            val blockMaxPts = props.uiState.courseBlocks.maxScoreForBlock(block)
+                            + "/${blockMaxPts?.toDisplayString() ?: "-"}"
                         }
                     }
                 }

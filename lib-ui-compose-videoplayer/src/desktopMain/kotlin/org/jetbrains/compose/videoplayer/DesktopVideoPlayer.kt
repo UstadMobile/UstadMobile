@@ -32,6 +32,7 @@ internal actual fun VideoPlayerImpl(
     val mediaPlayer = remember { mediaPlayerComponent.mediaPlayer() }
     mediaPlayer.emitProgressTo(progressState)
     mediaPlayer.setupVideoFinishHandler(onFinish)
+    //mediaPlayer.subpictures().setSubTitleUri()
 
     val factory = remember { { mediaPlayerComponent } }
     /* OR the following code and using SwingPanel(factory = { factory }, ...) */
