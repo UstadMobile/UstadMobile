@@ -79,7 +79,7 @@ fun ContentEntryEditScreen(
 ) {
     val fileLauncher = rememberUstadFilePickLauncher(
         fileExtensions = listOf("vtt"),
-        mimeTypes = listOf("text/vtt"),
+        mimeTypes = listOf(), //Android does not understand the mime type, so we can't use this filter
         onFileSelected = {
             onSubtitleFileSelected(it.uri, it.fileName)
         }
@@ -185,7 +185,7 @@ fun ContentEntryEditScreen(
                     Icon(Icons.Default.Subtitles, contentDescription = null)
                 },
                 headlineContent = {
-                    Text(it.title ?: "")
+                    Text(it.title)
                 },
                 trailingContent = {
                     IconButton(

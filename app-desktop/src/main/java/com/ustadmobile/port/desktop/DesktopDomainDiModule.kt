@@ -666,6 +666,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         GetSubtitleTrackFromUriUseCaseLocal(
             uriHelper = instance(),
             dispatcher = Dispatchers.IO,
+            supportedLanguagesConfig = instance(),
         )
     }
 

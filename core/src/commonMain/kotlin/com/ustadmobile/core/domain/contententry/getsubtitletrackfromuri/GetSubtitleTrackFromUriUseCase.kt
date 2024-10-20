@@ -11,6 +11,7 @@ interface GetSubtitleTrackFromUriUseCase {
     suspend operator fun invoke(
         subtitleTrackUri: DoorUri,
         filename: String,
+        locale: String? = null,
     ): SubtitleTrack
 
     companion object {
@@ -18,6 +19,8 @@ interface GetSubtitleTrackFromUriUseCase {
         const val VTT_MIME_TYPE = "text/vtt"
 
         const val PARAM_TRACK_FILENAME = "filename"
+
+        const val PARAM_LOCALE = "locale"
 
         const val VTT_HEADER_LINE = "WEBVTT"
     }

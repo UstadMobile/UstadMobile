@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest.domain.contententry.getsubtitletrackfromuri
 import com.ustadmobile.core.contentformats.media.SubtitleTrack
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase.Companion.PARAM_LOCALE
 import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase.Companion.PARAM_TRACK_FILENAME
 import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.tmpfiles.CreateTempUriUseCase
@@ -24,6 +25,8 @@ class GetSubtitleTrackFromUriServerUseCase(
         request: IHttpRequest
     ): SubtitleTrack {
         val filename = request.requireQueryParamOrThrow(PARAM_TRACK_FILENAME)
+        val locale = request.queryParam(PARAM_LOCALE)
+
         val trackText = request.requireBodyAsText()
 
         if(!trackText.startsWith(GetSubtitleTrackFromUriUseCase.VTT_HEADER_LINE, ignoreCase = true)) {
@@ -55,7 +58,7 @@ class GetSubtitleTrackFromUriServerUseCase(
             return SubtitleTrack(
                 uri = blobUrl,
                 mimeType = "text/vtt",
-                langCode = "en",//TODO,
+                langCode = locale,
                 title = filename,
             )
         }finally {

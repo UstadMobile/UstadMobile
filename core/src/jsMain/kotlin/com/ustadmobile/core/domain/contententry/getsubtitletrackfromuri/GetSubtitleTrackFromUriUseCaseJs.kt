@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.media.SubtitleTrack
+import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.door.DoorUri
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
@@ -19,11 +20,13 @@ class GetSubtitleTrackFromUriUseCaseJs(
     private val endpoint: Endpoint,
     private val httpClient: HttpClient,
     private val json: Json,
+    private val supportedLanguagesConfig: SupportedLanguagesConfig,
 ): GetSubtitleTrackFromUriUseCase {
 
     override suspend fun invoke(
         subtitleTrackUri: DoorUri,
-        filename: String
+        filename: String,
+        locale: String?,
     ): SubtitleTrack {
         val subtitleText = try {
             fetch(subtitleTrackUri.uri.toString()).blob().await().text().await()
@@ -36,6 +39,9 @@ class GetSubtitleTrackFromUriUseCaseJs(
             "${endpoint.url}api/contentupload/getsubtitletrack"
         ) {
             parameter(GetSubtitleTrackFromUriUseCase.PARAM_TRACK_FILENAME, filename)
+            parameter(GetSubtitleTrackFromUriUseCase.PARAM_LOCALE,
+                locale ?: supportedLanguagesConfig.displayedLocale)
+
             setBody(
                 TextContent(
                     text = subtitleText,

@@ -334,6 +334,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             endpoint = context,
             httpClient = instance(),
             json = instance(),
+            supportedLanguagesConfig = instance(),
         )
     }
 
