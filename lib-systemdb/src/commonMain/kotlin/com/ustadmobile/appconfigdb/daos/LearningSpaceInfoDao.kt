@@ -1,5 +1,6 @@
 package com.ustadmobile.appconfigdb.daos
 
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -20,6 +21,9 @@ expect abstract class LearningSpaceInfoDao {
     @Update
     abstract fun update(learningSpace: LearningSpaceInfo)
 
+    @Delete
+    abstract fun delete(learningSpace: LearningSpaceInfo)
+
     @Insert
     abstract fun insert(learningSpace: LearningSpaceInfo)
 
@@ -29,5 +33,21 @@ expect abstract class LearningSpaceInfoDao {
           FROM LearningSpaceInfo
     """)
     abstract fun findAllAsPagingSource(): PagingSource<Int, LearningSpaceInfo>
+
+
+    @Query("""
+       UPDATE LearningSpaceInfo
+       SET lsiUrl = :lsiUrl,
+           lsiName = :lsiName
+       WHERE lsiUrl = :lsiUrl
+    """)
+    abstract  fun updateLearningSpaceInfo(lsiUrl: String,lsiName: String)
+
+
+    @Query("""
+        DELETE FROM LearningSpaceInfo
+        WHERE lsiUrl = :lsiUrl
+    """)
+    abstract  fun deleteLearningSpaceInfo(lsiUrl:String)
 
 }
