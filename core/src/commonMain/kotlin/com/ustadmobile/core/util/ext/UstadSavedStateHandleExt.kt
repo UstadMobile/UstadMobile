@@ -7,3 +7,7 @@ fun UstadSavedStateHandle.setIfNoValueSetYet(key: String, value: String) {
         set(key, value)
     }
 }
+
+fun UstadSavedStateHandle.require(key: String): String {
+    return get(key) ?: throw IllegalArgumentException("SavedStateHandle: required key not found: $key")
+}

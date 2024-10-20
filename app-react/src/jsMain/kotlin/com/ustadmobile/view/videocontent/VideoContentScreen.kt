@@ -19,6 +19,7 @@ import web.cssom.vh
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
+import react.useMemo
 import web.html.HTMLVideoElement
 
 external interface VideoContentProps: Props {
@@ -49,12 +50,24 @@ val VideoContentComponent = FC<VideoContentProps> { props ->
         props.onUnload()
     }
 
+    val manifestUrlVal = props.uiState.manifestUrl
+    val firstSrcUrl = props.uiState.mediaContentInfo?.sources?.firstOrNull()?.uri
+    val contentManifestMap = props.uiState.contentManifestMap
+
+    val mediaSrc = useMemo(props.uiState.contentManifestMap, manifestUrlVal, firstSrcUrl) {
+        if(contentManifestMap != null && firstSrcUrl != null && manifestUrlVal != null) {
+            contentManifestMap.resolveUrl(manifestUrlVal, firstSrcUrl)
+        }else {
+            null
+        }
+    }
+
     Container {
         Stack {
             spacing = responsive(2)
             direction = responsive(StackDirection.column)
 
-            props.uiState.mediaSrc?.also { mediaSrc ->
+            mediaSrc?.also { mediaSrc ->
                 video {
                     src = mediaSrc
                     controls = true
@@ -82,6 +95,14 @@ val VideoContentComponent = FC<VideoContentProps> { props ->
                         marginLeft = Auto.auto
                         marginRight = Auto.auto
                     }
+
+                    props.uiState.mediaContentInfo?.subtitles?.forEach { subtitle ->
+                        UstadVideoContentSubtitleTrack {
+                            subtitleTrack = subtitle
+                            manifestUrl = props.uiState.manifestUrl
+                            manifestMap = props.uiState.contentManifestMap
+                        }
+                    }
                 }
             }
 
@@ -93,8 +114,6 @@ val VideoContentComponent = FC<VideoContentProps> { props ->
         }
 
     }
-
-
 }
 
 val VideoContentScreen = FC<Props> {

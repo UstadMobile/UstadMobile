@@ -18,6 +18,8 @@ import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJs
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCaseJs
 import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteContentEntryImportErrorUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
@@ -324,6 +326,15 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
             saveStatementOnUnloadUseCase = instance(),
             xapiStatementResource = instance(),
             endpoint = context,
+        )
+    }
+
+    bind<GetSubtitleTrackFromUriUseCase>() with scoped(EndpointScope.Default).singleton {
+        GetSubtitleTrackFromUriUseCaseJs(
+            endpoint = context,
+            httpClient = instance(),
+            json = instance(),
+            supportedLanguagesConfig = instance(),
         )
     }
 
