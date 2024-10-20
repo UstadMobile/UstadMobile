@@ -77,7 +77,7 @@ class XapiContentViewModelTest : AbstractMainDispatcherTest() {
 
                 bind<ResumeOrStartXapiSessionUseCase>() with scoped(endpointScope).singleton {
                     mock {
-                        onBlocking { invoke(any(), any(), any(), any(), any(), any()) }.thenReturn(
+                        onBlocking { invoke(any(), any(), any(), any(), any(), any(), any()) }.thenReturn(
                             XapiSessionEntity(
                                 xseAccountUsername = "admin",
 
