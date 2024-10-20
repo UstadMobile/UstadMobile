@@ -54,6 +54,8 @@ import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUr
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCaseLocal
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
@@ -122,6 +124,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import kotlinx.coroutines.Dispatchers
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import org.kodein.di.instance
@@ -656,6 +659,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             xxStringHasher = instance(),
             xxHasher64Factory = instance(),
             endpoint = context,
+        )
+    }
+
+    bind<GetSubtitleTrackFromUriUseCase>() with scoped(EndpointScope.Default).singleton {
+        GetSubtitleTrackFromUriUseCaseLocal(
+            uriHelper = instance(),
+            dispatcher = Dispatchers.IO,
+            supportedLanguagesConfig = instance(),
         )
     }
 

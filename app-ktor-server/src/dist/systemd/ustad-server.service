@@ -13,5 +13,8 @@ Type=exec
 ExecStart=/home/ustad/ustad-server/bin/ustad-server
 ExecStop=/bin/kill -15 $MAINPID
 
+Restart=always
+RestartSec=10
+
 [Install]
 WantedBy=multi-user.target

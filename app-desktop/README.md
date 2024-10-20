@@ -59,13 +59,20 @@ Napier, so can be very useful for diagnosing any edge case or hard to reproduce 
 
 Running in IDE:
 
-Clicking on the run button in the IDE directly **WILL NOT WORK** - it will not find the resource
-bundles required (probably due to the joys of Modular Java).
+Clicking on the run button that appears in the source code next to the main function  **WILL NOT WORK**, 
+it will not find the resource bundles required (probably due to the joys of Modular Java).
 
 Use ./gradlew app-desktop:run to run it. To debug, run the Gradle app-desktop:run task in debug
-mode in the IDE (this can be done by selecting the Gradle task from the Gradle pane on the right
-of Android Studio - select app-desktop -> tasks -> compose desktop -> run, then right click on run
-and select debug.
+mode in the IDE. There are two ways to do this:
+
+* Run anything shortcut: Hit the ctrl key twice. This brings up the run anything shortcut. Enter
+  ```gradlew app-desktop:run```. Hit enter to run the app. Then app-desktop will appear in the 
+  configurations dropdown (next to run and debug) in the top right. It can then be run or debugged.
+* Configurations menu:  
+![runtime configurations screenshot](doc-img/ide-configurations.png)  
+Click the configurations dropdown as above, click Edit Configurations, then click add. Select Gradle
+from the list of task types. In the run field enter ```app-desktop:run```. You can now use this
+configuration to run or debug the desktop version.
 
 Commits in Android Studio:
 
