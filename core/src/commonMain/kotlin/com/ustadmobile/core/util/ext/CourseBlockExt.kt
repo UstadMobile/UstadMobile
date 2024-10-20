@@ -13,3 +13,31 @@ fun CourseBlock.lastPossibleSubmissionTime(): Long {
         return cbDeadlineDate
 }
 
+
+/**
+ * Sum the max score if this block is a module
+ *
+ * @param allBlocks All CourseBlocks in the course.
+ * @return If the receiver CourseBlock is a module, then sum the max score for all blocks in the
+ * module. Otherwise, return the maxScore for the given block.
+ */
+fun CourseBlock.maxScoreSummedIfModule(
+    allBlocks: List<CourseBlock>
+): Float?{
+    if(cbType != CourseBlock.BLOCK_MODULE_TYPE)
+        return cbMaxPoints
+
+    var totalModPoints = 0f
+    var numModBlocks = 0
+    allBlocks.forEach { block ->
+        if(block.cbModuleParentBlockUid == cbUid) {
+            numModBlocks++
+            totalModPoints += (block.cbMaxPoints ?: 0f)
+        }
+    }
+
+    return if(numModBlocks > 0 && totalModPoints > 0)
+        totalModPoints
+    else
+        null
+}

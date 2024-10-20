@@ -5,14 +5,11 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.Repository
-import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.db.dao.xapi.StatementDao
-import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
-import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATUS_STATEMENTS_IS_FAILED_COMPLETION_CLAUSE
-import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.STATUS_STATEMENTS_IS_SUCCESSFUL_COMPLETION_CLAUSE
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
@@ -121,6 +118,76 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall(
+                functionName = "findAllCourseBlockByClazzUidAsFlow",
+                functionArgs = arrayOf(
+                    //When pulling over HTTP include inactive entities to ensure it gets updated on client db
+                    HttpServerFunctionParam(
+                        name = "includeInactive",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    ),
+                    HttpServerFunctionParam(
+                        name = "includeHidden",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "true",
+                    ),
+                    HttpServerFunctionParam(
+                        name = "hideUntilFilterTime",
+                        argType = HttpServerFunctionParam.ArgType.LITERAL,
+                        literalValue = "${UNSET_DISTANT_FUTURE}L",
+                    ),
+                )
+            ),
+            HttpServerFunctionCall(
+                functionName = "findStatusStatementsForStudentByClazzUid",
+                functionDao = StatementDao::class,
+            )
+        )
+    )
+    @Query("""
+        SELECT CourseBlock.*, ContentEntry.*, CourseBlockPicture.*, ContentEntryPicture2.*
+          FROM CourseBlock
+               LEFT JOIN ContentEntry
+                         ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+                            AND ContentEntry.contentEntryUid = CourseBlock.cbEntityUid
+               LEFT JOIN CourseBlockPicture
+                         ON CourseBlockPicture.cbpUid = CourseBlock.cbUid    
+               LEFT JOIN ContentEntryPicture2
+                         ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
+                            AND ContentEntryPicture2.cepUid = CourseBlock.cbEntityUid
+         WHERE CourseBlock.cbClazzUid = :clazzUid
+           AND (CAST(:includeInactive AS INTEGER) = 1 OR CourseBlock.cbActive)
+           AND (CAST(:includeHidden AS INTEGER) = 1 OR NOT CourseBlock.cbHidden)
+           AND (:hideUntilFilterTime >= CourseBlock.cbHideUntilDate)
+           AND (:hideUntilFilterTime >= COALESCE(
+                (SELECT CourseBlockParent.cbHideUntilDate
+                   FROM CourseBlock CourseBlockParent
+                  WHERE CourseBlockParent.cbUid = CourseBlock.cbModuleParentBlockUid), 0))
+           AND (CourseBlock.cbType != ${CourseBlock.BLOCK_EXTERNAL_APP})
+           AND :accountPersonUid = :accountPersonUid        
+      ORDER BY CourseBlock.cbIndex       
+    """)
+    abstract fun findAllCourseBlockByClazzUidAsFlow(
+        clazzUid: Long,
+        includeInactive: Boolean,
+        includeHidden: Boolean,
+        hideUntilFilterTime: Long,
+        accountPersonUid: Long,
+    ): Flow<List<CourseBlockAndDisplayDetails>>
+
+    /*
+     * Note: no need to pull enrolment entities: this is always used after a permission check that
+     * would pull those entities
+     */
+    @Deprecated("""
+        As of 2024-09-05 the client will use findAllCourseBlockByClazzUidAsFlow . This paging
+        source version will be kept for one more version to prevent backward compatibility issues,
+        after which it will be removed.
+    """)
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
                 functionName = "findAllCourseBlockByClazzUidAsPagingSource",
                 functionArgs = arrayOf(
                     //When pulling over HTTP include inactive entities to ensure it gets updated on client db
@@ -148,52 +215,8 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
         )
     )
     @Query("""
-        WITH StatusStatements AS (
-             SELECT StatementEntity.*
-                    $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
-        )
-        
         SELECT CourseBlock.*, ContentEntry.*, CourseBlockPicture.*, ContentEntryPicture2.*,
-               CourseBlock.cbUid NOT IN(:collapseList) AS expanded,
-               
-               --Begin BlockStatus fields
-               :accountPersonUid AS sPersonUid,
-               CourseBlock.cbUid AS sCbUid,
-               (SELECT MAX(StatusStatements.extensionProgress)
-                  FROM StatusStatements
-                 WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
-               ) AS sProgress,
-               (SELECT CASE
-                       -- If a successful completion statement exists, then count as success
-                       WHEN (SELECT EXISTS(
-                                    SELECT 1
-                                      FROM StatusStatements
-                                     WHERE StatusStatements.statementCbUid = CourseBlock.cbUid 
-                                       AND ($STATUS_STATEMENTS_IS_SUCCESSFUL_COMPLETION_CLAUSE)))
-                            THEN 1
-                       -- Else if a record exsits where      
-                       WHEN (SELECT EXISTS(
-                                    SELECT 1
-                                      FROM StatusStatements
-                                     WHERE StatusStatements.statementCbUid = CourseBlock.cbUid 
-                                       AND ($STATUS_STATEMENTS_IS_FAILED_COMPLETION_CLAUSE)))
-                            THEN 0
-                            
-                       ELSE NULL
-                       END                    
-               ) AS sIsSuccess,
-               (SELECT EXISTS(
-                       SELECT 1
-                         FROM StatusStatements
-                        WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
-                          AND CAST(StatusStatements.resultCompletion AS INTEGER) = 1)
-               ) AS sIsCompleted,
-               (SELECT MAX(StatusStatements.resultScoreScaled)
-                  FROM StatusStatements
-                 WHERE StatusStatements.statementCbUid = CourseBlock.cbUid
-               ) AS sScoreScaled
-               -- End block status fields
-               
+               CourseBlock.cbUid NOT IN(:collapseList) AS expanded
           FROM CourseBlock
                LEFT JOIN ContentEntry
                          ON CourseBlock.cbType = ${CourseBlock.BLOCK_CONTENT_TYPE}
@@ -212,7 +235,8 @@ expect abstract class CourseBlockDao : BaseDao<CourseBlock>, OneToManyJoinDao<Co
                 (SELECT CourseBlockParent.cbHideUntilDate
                    FROM CourseBlock CourseBlockParent
                   WHERE CourseBlockParent.cbUid = CourseBlock.cbModuleParentBlockUid), 0))
-           AND (CourseBlock.cbType != ${CourseBlock.BLOCK_EXTERNAL_APP})        
+           AND (CourseBlock.cbType != ${CourseBlock.BLOCK_EXTERNAL_APP}) 
+           AND :accountPersonUid = :accountPersonUid       
       ORDER BY CourseBlock.cbIndex       
     """)
     abstract fun findAllCourseBlockByClazzUidAsPagingSource(

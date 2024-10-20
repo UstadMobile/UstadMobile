@@ -44,8 +44,10 @@ import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttend
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
+import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
@@ -151,6 +153,8 @@ import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminolog
 import com.ustadmobile.libuicompose.view.deleteditem.list.DeletedItemListScreen
 import com.ustadmobile.libuicompose.view.epubcontent.EpubContentScreen
 import com.ustadmobile.libuicompose.view.clazzlog.edit.ClazzLogEditScreen
+import com.ustadmobile.libuicompose.view.contententry.getsubtitle.GetSubtitleScreen
+import com.ustadmobile.libuicompose.view.contententry.subtitleedit.SubtitleEditScreen
 import com.ustadmobile.libuicompose.view.interop.externalapppermissionrequest.ExternalAppPermissionRequestScreen
 import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationListScreen
 import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
@@ -778,6 +782,17 @@ fun AppNavHost(
                 }
             }
 
+            contentScene("/${SubtitleEditViewModel.DEST_NAME}") { backStackEntry ->
+                SubtitleEditScreen(
+                    appViewModel(backStackEntry, SubtitleEditViewModel::class, ::SubtitleEditViewModel)
+                )
+            }
+
+            contentScene("/${GetSubtitleViewModel.DEST_NAME}") { backStackEntry ->
+                GetSubtitleScreen(
+                    appViewModel(backStackEntry, GetSubtitleViewModel::class, ::GetSubtitleViewModel)
+                )
+            }
 
         }
     }

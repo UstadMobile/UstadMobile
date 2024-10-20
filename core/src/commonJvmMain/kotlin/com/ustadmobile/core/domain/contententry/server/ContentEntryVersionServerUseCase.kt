@@ -4,6 +4,7 @@ import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.contententry.ContentConstants
+import com.ustadmobile.core.domain.contententry.ContentManifestMap
 import com.ustadmobile.core.io.ext.bodyAsDecodedByteStream
 import com.ustadmobile.core.util.ext.removeHashSuffix
 import com.ustadmobile.core.util.ext.removeQueryStringSuffix
@@ -20,7 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import okhttp3.CacheControl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -51,22 +51,9 @@ class ContentEntryVersionServerUseCase(
     private val onlyIfCached: Boolean,
 ) {
 
-    /**
-     * @param entryMap Map of the path of a given ContentManifestEntry to the entry itself. Matching
-     *        uris which might be encoded won't work because there can be different valid ways e.g.
-     *        it is valid (if unusual) to encode plain ASCII etc.
-     */
-    data class ManifestAndMap(
-        val manifest: ContentManifest,
-        val entryMap: Map<String, ContentManifestEntry> = manifest.entries.associateBy {
-            UrlEncoderUtil.decode(it.uri)
-        }
-    )
-
-    private val manifestCache = Cache.Builder<Long, ManifestAndMap>()
+    private val manifestCache = Cache.Builder<Long, ContentManifestMap>()
         .maximumCacheSize(100)
         .build()
-
 
     private fun Request.Builder.applyCacheControl(): Request.Builder {
         return if(onlyIfCached)
@@ -97,16 +84,10 @@ class ContentEntryVersionServerUseCase(
             val manifest = json.decodeFromString(
                 ContentManifest.serializer(), manifestStr
             )
-            ManifestAndMap(manifest)
+            ContentManifestMap(manifest)
         }
 
-        val pathToLookup = pathInContentEntryVersion.removeQueryStringSuffix()
-            .removeHashSuffix()
-
-        manifest.entryMap[pathInContentEntryVersion]
-            ?: manifest.entryMap[pathToLookup]?.let {
-                if(it.ignoreQueryParams) it else null
-            }
+        manifest[pathInContentEntryVersion]
     }
 
     /**

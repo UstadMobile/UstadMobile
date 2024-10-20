@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_003-video"
-  TESTNAME: "001_001_admin_can_add_content_003-video"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_002_admin_add_invalid_content_gets_error_msg"
+  TESTNAME: "001_002_admin_add_invalid_content_gets_error_msg"
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
