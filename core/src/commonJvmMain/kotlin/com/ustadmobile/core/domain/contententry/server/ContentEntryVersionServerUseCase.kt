@@ -144,6 +144,11 @@ class ContentEntryVersionServerUseCase(
                 .build()
             val bodyDataUrlResponse = okHttpClient.newCall(bodyDataUrlRequest).execute()
 
+            Napier.v {
+                "ContentEntryVersionServerUseCase: Load $pathInContentEntryVersion from body url: " +
+                        "${entry.bodyDataUrl} "
+            }
+
             val entryHeaders = entry.responseHeaders
 
             /*
@@ -193,8 +198,9 @@ class ContentEntryVersionServerUseCase(
          * Content-encoding will be as set by the bodyDataUrl. See lib-cache
          * CacheStorageCompressionFilter kdoc.
          */
-        val BODY_DATA_URL_RESERVED_HEADER_NAMES = listOf("content-length",
-            "content-range", "content-encoding")
+        val BODY_DATA_URL_RESERVED_HEADER_NAMES = listOf(
+            "content-length", "content-range", "content-encoding"
+        )
 
     }
 
