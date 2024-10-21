@@ -63,8 +63,18 @@ fun main(args: Array<String>) {
         runBlocking {
             when(ns.getString("subparser_name")) {
                 "deletelearningspace" -> {
+                    val learningSpaceUrl = ns.getString("url")
+
+                    println("Are you sure you want to delete the learning space at URL: $learningSpaceUrl? (yes/no)")
+
+                    val userConfirmation = readLine()?.lowercase()
+                    if (userConfirmation != "yes") {
+                        println("Deletion cancelled.")
+                        return@runBlocking
+                    }
+
                     val request = DeleteLearningSpaceUseCase.DeleteLearningSpaceUseCase(
-                        url = ns.getString("url"),
+                        url = learningSpaceUrl,
                     )
 
                     val response = httpClient.post("${serverUrl}config/api/learningspaces/delete") {

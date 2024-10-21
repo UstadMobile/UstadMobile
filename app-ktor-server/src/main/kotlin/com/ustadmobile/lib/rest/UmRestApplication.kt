@@ -798,7 +798,8 @@ fun Application.umRestApplication(
         }
         bind<DeleteLearningSpaceUseCase>() with singleton {
             DeleteLearningSpaceUseCase(
-                learningSpaceServerRepo = instance()
+                learningSpaceServerRepo = instance(),
+                di = di,
             )
         }
 
