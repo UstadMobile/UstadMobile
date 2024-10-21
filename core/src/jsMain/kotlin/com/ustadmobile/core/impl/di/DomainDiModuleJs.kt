@@ -179,7 +179,7 @@ fun DomainDiModuleJs(endpointScope: EndpointScope) = DI.Module("DomainDiModuleJs
         ResolveXapiLaunchHrefUseCase(
             activeRepo = instance(tag = DoorTag.TAG_REPO),
             httpClient = instance(),
-            json = instance(),
+            json = instance<XapiJson>().json,
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             endpoint = context,
             resumeOrStartXapiSessionUseCase = instance(),
