@@ -35,6 +35,30 @@ Windows:
 $ gradlew app-android:assembleDebug
 ```
 
+### Login and signup with passkey
+If use server with https(eg. https://ustad.example.com) then need to Add support for Digital Asset 
+Links, need to generate assetlinks.json file. You can generate it from android studio from tools>
+app links assistant> create applink > open url mapping editor > from + option can add url then from
+Digital asset links file generator can generate that assetlinks.json file.
+You need to copy that json file and that json should return from this address eg.
+https://ustad.example.com/.well-known/assetlinks.json
+
+If using http server (local IP address) then you need to add this
+<intent-filter android:autoVerify="true">
+<action android:name="android.intent.action.VIEW" />
+<category android:name="android.intent.category.DEFAULT" /> 
+<category android:name="android.intent.category.BROWSABLE" />
+<data android:scheme="http" /> 
+<data 
+android:host="YOUR IP ADDRESS" 
+android:port="8087" /> 
+</intent-filter>
+
+inside AppActivity intent filter , replace host with your ip address. After that if your device is 
+below android 12 then use this command adb shell am compat enable 175408749 PACKAGE_NAME
+to support web address and above 12 you can manually verify from mobile in app info> set as default>
+supported web addresses > switch toggle on.
+
 ### Command line signing (for release APK) :
 
 This is required when you want to upload the app to Google Play or other app stores. This works
