@@ -37,8 +37,7 @@ expect abstract class LearningSpaceInfoDao {
 
     @Query("""
        UPDATE LearningSpaceInfo
-       SET lsiUrl = :lsiUrl,
-           lsiName = :lsiName
+       SET lsiName = :lsiName
        WHERE lsiUrl = :lsiUrl
     """)
     abstract  fun updateLearningSpaceInfo(lsiUrl: String,lsiName: String)
