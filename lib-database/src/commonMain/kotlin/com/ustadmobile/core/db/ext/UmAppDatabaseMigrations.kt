@@ -1642,11 +1642,14 @@ val MIGRATION_200_201 = DoorMigrationStatementList(200, 201) { db ->
 }
 val MIGRATION_201_202 = DoorMigrationStatementList(201, 202) { db ->
     buildList {
+        add("DROP TABLE ContentEntryImportJob")
         if(db.dbType() == DoorDbType.SQLITE) {
             add("CREATE TABLE IF NOT EXISTS ContentEntryImportJob (  sourceUri  TEXT , cjiOriginalFilename  TEXT , cjiContentEntryUid  INTEGER  NOT NULL , cjiParentContentEntryUid  INTEGER  NOT NULL , cjiContentEntryVersion  INTEGER  NOT NULL , cjiItemProgress  INTEGER  NOT NULL , cjiItemTotal  INTEGER  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiRecursiveStatus  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiParentCjiUid  INTEGER  NOT NULL , cjiStartTime  INTEGER  NOT NULL , cjiFinishTime  INTEGER  NOT NULL , cjiContentDeletedOnCancellation  INTEGER  NOT NULL , cjiCompressionLevel  INTEGER  NOT NULL  DEFAULT 3 , cjiError  TEXT , cjiErrorDismissed  INTEGER  NOT NULL , cjiOwnerPersonUid  INTEGER  NOT NULL , cjiParams  TEXT , cjiUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
         }else {
             add("CREATE TABLE IF NOT EXISTS ContentEntryImportJob (  sourceUri  TEXT , cjiOriginalFilename  TEXT , cjiContentEntryUid  BIGINT  NOT NULL , cjiParentContentEntryUid  BIGINT  NOT NULL , cjiContentEntryVersion  BIGINT  NOT NULL , cjiItemProgress  BIGINT  NOT NULL , cjiItemTotal  BIGINT  NOT NULL , cjiStatus  INTEGER  NOT NULL , cjiRecursiveStatus  INTEGER  NOT NULL , cjiPluginId  INTEGER  NOT NULL , cjiParentCjiUid  BIGINT  NOT NULL , cjiStartTime  BIGINT  NOT NULL , cjiFinishTime  BIGINT  NOT NULL , cjiContentDeletedOnCancellation  BOOL  NOT NULL , cjiCompressionLevel  INTEGER  NOT NULL  DEFAULT 3 , cjiError  TEXT , cjiErrorDismissed  BOOL  NOT NULL , cjiOwnerPersonUid  BIGINT  NOT NULL , cjiParams  TEXT , cjiUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
         }
+
+        add("CREATE INDEX index_ContentEntryImportJob_cjiContentEntryUid_cjiFinishTime ON ContentEntryImportJob (cjiContentEntryUid, cjiFinishTime)")
     }
 }
 
