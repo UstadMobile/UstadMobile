@@ -1,12 +1,17 @@
 package com.ustadmobile.libuicompose.view.videocontent
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.PauseCircleOutline
 import androidx.compose.material.icons.filled.PlayCircleOutline
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -16,20 +21,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCase
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentUiState
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
+import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.videoplayer.VideoPlayer
 import org.jetbrains.compose.videoplayer.rememberVideoPlayerState
 import org.kodein.di.compose.localDI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.time.Duration.Companion.seconds
+import com.ustadmobile.core.MR
 
 /**
  * See https://github.com/caprica/vlcj
@@ -56,6 +67,14 @@ fun VideoContentScreen(
     val mediaFirstUri = uiState.mediaContentInfo?.sources?.firstOrNull()?.uri
     val mediaSrc = mediaFirstUri?.let { uiState.contentManifestMap?.get(it) }?.uri
     val di = localDI()
+    val subtitles = uiState.mediaContentInfo?.subtitles
+    var subtitlesPopupExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    var subtitleUri: String? by remember {
+        mutableStateOf(null)
+    }
 
     VlcCheck {
         if(mediaSrc != null) {
@@ -65,6 +84,12 @@ fun VideoContentScreen(
 
             val url = remember(uiState.contentEntryVersionUid, mediaSrc) {
                 getLocalUrlForContentUseCase(uiState.contentEntryVersionUid, mediaSrc)
+            }
+
+            LaunchedEffect(Unit) {
+                subtitleUri = uiState.mediaContentInfo?.subtitles?.firstOrNull()?.let {
+                    getLocalUrlForContentUseCase(uiState.contentEntryVersionUid, it.uri)
+                }
             }
 
             val state = rememberVideoPlayerState()
@@ -101,8 +126,9 @@ fun VideoContentScreen(
                 VideoPlayer(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(fraction = 0.8f),
+                        .weight(1.0f),
                     url = url,
+                    subtitleUri = subtitleUri,
                     state = state,
                     onFinish = {
                         onCompleted()
@@ -135,6 +161,55 @@ fun VideoContentScreen(
                         )
                     }
 
+                    if(subtitles?.isNotEmpty() == true) {
+                        Box(
+                            modifier = Modifier.wrapContentSize(Alignment.TopStart)
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    subtitlesPopupExpanded = !subtitlesPopupExpanded
+                                }
+                            ) {
+                                Icon(Icons.Default.ClosedCaption, contentDescription = stringResource(MR.strings.subtitles))
+                            }
+
+                            DropdownMenu(
+                                expanded = subtitlesPopupExpanded,
+                                onDismissRequest = {
+                                    subtitlesPopupExpanded = false
+                                },
+                            ) {
+                                subtitles.forEach {
+                                    DropdownMenuItem(
+                                        text = { Text(it.title) },
+                                        onClick = {
+                                            subtitlesPopupExpanded = false
+                                            subtitleUri = getLocalUrlForContentUseCase(uiState.contentEntryVersionUid, it.uri)
+                                        },
+                                        modifier = Modifier.align(Alignment.End)
+                                    )
+                                }
+
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(MR.strings.none_key)) },
+                                    onClick =  {
+                                        subtitlesPopupExpanded = false
+                                        subtitleUri = null
+                                    }
+                                )
+                            }
+                        }
+
+                    }
+                }
+
+                if(!uiState.isFullScreen) {
+                    Box(modifier = Modifier.height(180.dp)) {
+                        Text(
+                            text = uiState.contentEntry?.description ?: "",
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }
