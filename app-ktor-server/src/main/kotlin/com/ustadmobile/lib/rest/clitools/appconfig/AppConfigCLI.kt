@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.rest.clitools.appconfig
 
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
+import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
+import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -64,7 +66,50 @@ fun main(args: Array<String>) {
 
         }
     }
+    parser.addSubparsers().also { subParsers ->
+        subParsers.title("subcommands")
+        subParsers.dest("subparser_name")
+        subParsers.addParser("updatelearningspace").also {
+            it.addArgument("-t", "--title")
+                .required(true)
+                .help("Learning Space title")
+            it.addArgument("-u", "--url")
+                .required(true)
+                .help("Learning Space url")
+            it.addArgument("-d", "--dburl")
+                .required(true)
+                .help("Database JDBC URL")
+            it.addArgument("-n", "--dbusername")
+                .setDefault("")
+                .help("Database username")
+            it.addArgument("-w", "--dbpassword")
+                .setDefault("")
+                .help("Database password")
+            it.addArgument("-a", "--adminuser")
+                .setDefault("admin")
+                .help("Username for learning space admin")
+            it.addArgument("-p", "--adminpassword")
+                .required(true)
+                .help("Initial password for learning space admin")
 
+        }
+    }
+    parser.addSubparsers().also { subParsers ->
+        subParsers.title("subcommands")
+        subParsers.dest("subparser_name")
+        subParsers.addParser("deletelearningspace").also {
+            it.addArgument("-u", "--url")
+                .required(true)
+                .help("Learning Space url")
+            it.addArgument("-a", "--adminuser")
+                .setDefault("admin")
+                .help("Username for learning space admin")
+            it.addArgument("-p", "--adminpassword")
+                .required(true)
+                .help("Initial password for learning space admin")
+
+        }
+    }
     val ns: Namespace
     try {
         ns = parser.parseArgs(args)
@@ -93,7 +138,50 @@ fun main(args: Array<String>) {
                     val responseText = response.bodyAsText()
                     println("Done: $responseText")
                 }
+                "deletelearningspace" -> {
+                    val learningSpaceUrl = ns.getString("url")
 
+                    println("Are you sure you want to delete the learning space at URL: $learningSpaceUrl? (yes/no)")
+
+                    val userConfirmation = readLine()?.lowercase()
+                    if (userConfirmation != "yes") {
+                        println("Deletion cancelled.")
+                        return@runBlocking
+                    }
+
+                    val request = DeleteLearningSpaceUseCase.DeleteLearningSpaceUseCase(
+                        url = learningSpaceUrl,
+                    )
+
+                    val response = httpClient.post("${serverUrl}config/api/learningspaces/delete") {
+                        headers["Authorization"] = "Basic ${("admin:$adminPassword").encodeBase64()}"
+
+                        contentType(ContentType.Application.Json)
+                        setBody(request)
+                    }
+                    val responseText = response.bodyAsText()
+                    println("Done: $responseText")
+                }
+                "updatelearningspace" -> {
+                    val request = UpdateLearningSpaceUseCase.UpdateLearningSpaceUseCase(
+                        url = ns.getString("url"),
+                        title = ns.getString("title"),
+                        dbUrl = ns.getString("dburl"),
+                        dbUsername = ns.getString("dbusername"),
+                        dbPassword = ns.getString("dbpassword"),
+                        adminUsername = ns.getString("adminuser"),
+                        adminPassword = ns.getString("adminpassword")
+                    )
+
+                    val response = httpClient.post("${serverUrl}config/api/learningspaces/update") {
+                        headers["Authorization"] = "Basic ${("admin:$adminPassword").encodeBase64()}"
+
+                        contentType(ContentType.Application.Json)
+                        setBody(request)
+                    }
+                    val responseText = response.bodyAsText()
+                    println("Done: $responseText")
+                }
                 else -> {
                     println("No such command")
                 }

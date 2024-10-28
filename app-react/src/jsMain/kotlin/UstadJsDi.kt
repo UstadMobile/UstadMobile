@@ -64,7 +64,7 @@ internal fun ustadJsDi(
 
     val learningSpaceUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Learning Space URL = $learningSpaceUrl (location.href = ${location.href}")
-
+    val isLearningSpace = js("_ustadIsLearningSpace") as Boolean
     bind<UstadBuildConfig>() with singleton {
         BuildConfigMap(
             buildMap {

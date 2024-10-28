@@ -24,6 +24,28 @@ expect abstract class LearningSpaceConfigDao {
     @Update
     abstract fun update(learningSpaceConfig: LearningSpaceConfig)
 
+
+    @Query(
+        """
+        UPDATE LearningSpaceConfig
+         SET lscDbUrl =
+                (CASE
+                 WHEN :dbUrl IS NOT NULL THEN :dbUrl
+                 ELSE lscDbUrl
+                 END),
+            lscDbUsername =
+                (CASE
+                 WHEN :dbUsername IS NOT NULL THEN :dbUsername
+                 ELSE lscDbUsername
+                 END),
+            lscDbPassword =
+                (CASE
+                 WHEN :dbPassword IS NOT NULL THEN :dbPassword
+                 ELSE lscDbPassword
+                 END)
+         WHERE lscUrl = :lscUrl
+     """)
+    abstract  fun updateLearningSpaceConfig(lscUrl: String,dbUrl: String,dbPassword: String,dbUsername: String)
     @Insert
     abstract fun insert(learningSpace: LearningSpaceConfig)
 }

@@ -49,4 +49,11 @@ expect abstract class LearningSpaceInfoDao {
     """)
     abstract  fun deleteLearningSpaceInfo(lsiUrl:String)
 
+    @Query(
+        """
+            SELECT LearningSpaceInfo.* FROM
+            LearningSpaceInfo  WHERE lsiUrl = :lsiUrl 
+        """
+    )
+    abstract  fun  getLearningSpace(lsiUrl:String):LearningSpaceInfo?
 }

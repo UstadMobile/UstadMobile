@@ -29,8 +29,17 @@ class LearningSpaceServerRepo(
 
     fun update(learningSpace: LearningSpaceConfigAndInfo) {
         systemDb.withDoorTransaction {
-            systemDb.learningSpaceInfoDao().updateLearningSpaceInfo(learningSpace.info.lsiUrl,learningSpace.info.lsiName)
+            systemDb.learningSpaceInfoDao().updateLearningSpaceInfo(learningSpace.info.lsiUrl,
+                learningSpace.info.lsiName)
+            systemDb.learningSpaceConfigDao().updateLearningSpaceConfig(
+                learningSpace.info.lsiUrl,
+                learningSpace.config.lscDbUrl,
+                learningSpace.config.lscDbPassword,
+                learningSpace.config.lscDbUsername
+            )
             learningSpaces[learningSpace.config.lscUrl] = learningSpace
+
+
         }
     }
 

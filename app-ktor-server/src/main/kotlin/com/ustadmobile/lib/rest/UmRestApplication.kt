@@ -127,6 +127,7 @@ import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyRou
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceApiRoute
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
+import com.ustadmobile.lib.rest.domain.learningspace.SystemConfigScriptRoute
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
@@ -925,10 +926,16 @@ fun Application.umRestApplication(
                             deleteLearningSpaceUseCase = di.direct.instance()
                         )
                     }
+
                 }
             }
 
             route("api") {
+                route("sysconfig") {
+                    SystemConfigScriptRoute(
+                        di = di
+                    )
+                }
                 route("SystemDb") {
                     SystemDb_KtorRoute(
                         serverConfig = DoorHttpServerConfig(
