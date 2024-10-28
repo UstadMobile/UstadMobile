@@ -17,11 +17,13 @@ data class Progress(
 @Composable
 fun VideoPlayer(
     url: String,
+    subtitleUri: String? = null,
     state: VideoPlayerState,
     modifier: Modifier = Modifier,
     onFinish: (() -> Unit)? = null
 ) = VideoPlayerImpl(
     url = url,
+    subtitleUri = subtitleUri,
     isResumed = state.isResumed,
     volume = state.volume,
     speed = state.speed,
@@ -35,6 +37,7 @@ fun VideoPlayer(
 @Composable
 internal expect fun VideoPlayerImpl(
     url: String,
+    subtitleUri: String? = null,
     isResumed: Boolean,
     volume: Float,
     speed: Float,
