@@ -26,7 +26,10 @@ var fieldsVisible = false
 * Ensure that logic and display are not mixed. Business logic should be in the ViewModel and/or domain UseCase, and the view
 should display it. The ViewModel should tell the view what to display, and receive events
 
-* Commented out code is not acceptable. Git is used to track revisions. Unused code must be deleted.
+* Commented out code is almost always not acceptable. Git is used to track revisions. Unused code must be deleted. The only exception is when there is a temporary situation in
+  which a certain section of code will be used again in the near future and can't be used right now due to some temporary bug/issue (e.g. in an upstream library, etc). In this case before any
+  commented out code there must be a comment with the date, name of the person leaving the commented out code, and an explanation of the temporary situation and when the commented out code is
+  expected to be used again.
 
 * If adding any third-party assets via any system other than Gradle dependencies you must check to ensure it is available under a compatible open license. If the license is not contained in the file itself, you must place a text file in the same directory in the source code with a link to its original URL and the license under which it is used.
 

@@ -46,6 +46,7 @@ fun Route.ResumeOrStartXapiSessionRoute(
                 clazzUid = queryParams.requireParamOrThrow("clazzUid").toLong(),
                 cbUid = queryParams.requireParamOrThrow("cbUid").toLong(),
                 contentEntryUid = queryParams.requireParamOrThrow("contentEntryUid").toLong(),
+                contentEntryVersionUid = queryParams.requireParamOrThrow("contentEntryVersionUid").toLong(),
             )
 
             call.respondText(json.encodeToString(xapiSessionResult), ContentType.Application.Json)

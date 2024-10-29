@@ -60,6 +60,8 @@ import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUr
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCaseLocal
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
@@ -107,6 +109,7 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
@@ -130,6 +133,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import kotlinx.coroutines.Dispatchers
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import org.kodein.di.instance
@@ -349,7 +353,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         ResolveXapiLaunchHrefUseCase(
             activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             httpClient = instance(),
-            json = instance(),
+            json = instance<XapiJson>().json,
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             resumeOrStartXapiSessionUseCase  = instance(),
             getApiUrlUseCase = instance(),
@@ -686,6 +690,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<CreateNewLocalAccountUseCase>() with singleton {
         CreateNewLocalAccountUseCase(di)
+    }
+
+    bind<GetSubtitleTrackFromUriUseCase>() with scoped(EndpointScope.Default).singleton {
+        GetSubtitleTrackFromUriUseCaseLocal(
+            uriHelper = instance(),
+            dispatcher = Dispatchers.IO,
+            supportedLanguagesConfig = instance(),
+        )
     }
 
 }

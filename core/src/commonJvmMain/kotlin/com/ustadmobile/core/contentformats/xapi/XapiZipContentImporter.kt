@@ -27,6 +27,8 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.headers.MimeTypeHelper
+import com.ustadmobile.libcache.headers.guessByExtensionFromFilename
 import com.ustadmobile.libcache.io.unzipTo
 import org.xmlpull.v1.XmlPullParserFactory
 import kotlinx.coroutines.*
@@ -44,7 +46,8 @@ class XapiZipContentImporter(
     private val tmpPath: Path,
     private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     private val compressListUseCase: CompressListUseCase,
-) : ContentImporter(learningSpace) {
+    private val mimeTypeHelper: MimeTypeHelper,
+    ) : ContentImporter(learningSpace) {
 
     val viewName: String
         get() = XapiContentViewModel.DEST_NAME
@@ -140,7 +143,9 @@ class XapiZipContentImporter(
         }
 
         val compressedEntries = compressListUseCase(
-            items = xapiZipEntries.map { it.toItemToCompress() },
+            items = xapiZipEntries.map {
+                it.toItemToCompress(mimeType = mimeTypeHelper.guessByExtensionFromFilename(it.name))
+            },
             params = compressParams,
             workDir = tmpPath,
             onProgress = {

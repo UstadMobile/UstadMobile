@@ -2000,4 +2000,8 @@
     <string name="registration_not_allowed">Learning space does not allow new user registration</string>
 
 
+    <string name="add_subtitles">Add subtitles</string>
+
+    <string name="edit_subtitles">Edit subtitles</string>
+
 </resources>

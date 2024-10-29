@@ -22,12 +22,15 @@ fun Response.toHttpdResponse() : NanoHTTPD.Response {
     }
 
     headers.names().forEach { headerName ->
-        /* Important: NanoHTTPD will duplicate the content-length and content-type headers (sigh).
-         * This is harmless. Unfortunately, if we don't put those on (and duplicate them), then
-         * NanoHTTPD will turn this into a chunked response and add (likely wrong)
-         * content-encoding.
+        /**
+         * NanoHTTPD will set the content-type and content-length headers itself
          */
-        response.addHeader(headerName, headers[headerName] ?: "")
+        if(
+            !headerName.equals("content-type", ignoreCase = true) &&
+            !headerName.equals("content-length", true)
+        ) {
+            response.addHeader(headerName, headers[headerName] ?: "")
+        }
     }
 
     return response
