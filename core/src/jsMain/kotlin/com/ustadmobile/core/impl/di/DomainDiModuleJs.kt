@@ -338,7 +338,7 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
         )
     }
 
-    bind<GetSubtitleTrackFromUriUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<GetSubtitleTrackFromUriUseCase>() with scoped(endpointScope).singleton {
         GetSubtitleTrackFromUriUseCaseJs(
             endpoint = context,
             httpClient = instance(),
