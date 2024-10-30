@@ -427,8 +427,11 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
             val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase= instance()
             val mimeTypeHelper: MimeTypeHelper = instance()
-            val enqueueContentEntryImportUseCase: EnqueueContentEntryImportUseCase = instance()
-            val allContentImporters = buildList {
+
+            //Note: non directory importers have to be separated out as part of avoiding a
+            //circular dependency between ContentImportersManager and DirectoryContentImporter
+            //See DirectoryContentImporter docs for details.
+            val nonDirectoryContentImporters = buildList {
                 add(
                     EpubContentImporterCommonJvm(
                         endpoint = context,
@@ -508,20 +511,17 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     )
                 )
             }
-            ContentImportersManager(
-                buildList {
-                    add(
-                        DirectoryContentImporter(
-                            endpoint = context,
-                            db = db,
-                            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
-                            contentImportersManager = ContentImportersManager(allContentImporters),
-                            enqueueContentEntryImportUseCase = enqueueContentEntryImportUseCase,
-                            uriHelper = uriHelper
-                        )
-                    )
-                }
+
+            val directoryContentImporter = DirectoryContentImporter(
+                endpoint = context,
+                db = db,
+                getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                otherContentImportersList = nonDirectoryContentImporters,
+                enqueueContentEntryImportUseCase = instance(),
+                uriHelper = uriHelper
             )
+
+            ContentImportersManager(nonDirectoryContentImporters + directoryContentImporter)
         }
 
         bind<CompressVideoUseCase>() with singleton {

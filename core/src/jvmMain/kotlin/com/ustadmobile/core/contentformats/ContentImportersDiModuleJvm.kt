@@ -44,94 +44,96 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
         val mimeTypeHelper: MimeTypeHelper = instance()
         val enqueueContentEntryImportUseCase: EnqueueContentEntryImportUseCase = instance()
 
-        ContentImportersManager(
-            buildList {
-                add(
-                    DirectoryContentImporter(
-                        endpoint = context,
-                        db = db,
-                        getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
-                        contentImportersManager = instance(),
-                        enqueueContentEntryImportUseCase = enqueueContentEntryImportUseCase,
-                        uriHelper = uriHelper
-                    )
+        //Note: non directory importers have to be separated out as part of avoiding a
+        //circular dependency between ContentImportersManager and DirectoryContentImporter
+        //See DirectoryContentImporter docs for details.
+        val nonDirectoryContentImporters = buildList {
+            add(
+                EpubContentImporterCommonJvm(
+                    endpoint = context,
+                    cache = cache,
+                    db = db,
+                    uriHelper = uriHelper,
+                    xml = xml,
+                    xhtmlFixer = xhtmlFixer,
+                    tmpPath = contentImportTmpPath,
+                    saveLocalUriAsBlobAndManifestUseCase =  saveAndManifestUseCase,
+                    json = instance(),
+                    getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                    compressListUseCase = instance(),
+                    saveLocalUrisAsBlobsUseCase = instance(),
                 )
-                add(
-                    EpubContentImporterCommonJvm(
-                        endpoint = context,
-                        cache = cache,
-                        db = db,
-                        uriHelper = uriHelper,
-                        xml = xml,
-                        xhtmlFixer = xhtmlFixer,
-                        tmpPath = contentImportTmpPath,
-                        saveLocalUriAsBlobAndManifestUseCase =  saveAndManifestUseCase,
-                        json = instance(),
-                        getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
-                        compressListUseCase = instance(),
-                        saveLocalUrisAsBlobsUseCase = instance(),
-                    )
+            )
+            add(
+                XapiZipContentImporter(
+                    endpoint = context,
+                    db = db,
+                    cache = cache,
+                    uriHelper = uriHelper,
+                    json = instance(),
+                    tmpPath = contentImportTmpPath,
+                    saveLocalUriAsBlobAndManifestUseCase =  saveAndManifestUseCase,
+                    compressListUseCase = instance(),
+                    mimeTypeHelper = instance(),
                 )
-                add(
-                    XapiZipContentImporter(
-                        endpoint = context,
-                        db = db,
-                        cache = cache,
-                        uriHelper = uriHelper,
-                        json = instance(),
-                        tmpPath = contentImportTmpPath,
-                        saveLocalUriAsBlobAndManifestUseCase =  saveAndManifestUseCase,
-                        compressListUseCase = instance(),
-                        mimeTypeHelper = instance(),
-                    )
-                )
-                add(
-                    PdfContentImporterJvm(
-                        endpoint = context,
-                        db = db,
-                        cache= cache,
-                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                        uriHelper = uriHelper,
-                        json = instance(),
-                        getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
-                        compressPdfUseCase = instanceOrNull(),
-                        saveLocalUriAsBlobUseCase = instance(),
-                        tmpPath = instance(tag = DiTag.TAG_TMP_DIR),
-                    ),
-                )
-                add(
-                    H5PContentImporter(
-                        endpoint = context,
-                        db = db,
-                        cache = cache,
-                        uriHelper = uriHelper,
-                        tmpPath = contentImportTmpPath,
-                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                        compressListUseCase = instance(),
-                        mimeTypeHelper = instance(),
-                        json = instance(),
-                    ),
-                )
+            )
+            add(
+                PdfContentImporterJvm(
+                    endpoint = context,
+                    db = db,
+                    cache= cache,
+                    saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                    uriHelper = uriHelper,
+                    json = instance(),
+                    getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                    compressPdfUseCase = instanceOrNull(),
+                    saveLocalUriAsBlobUseCase = instance(),
+                    tmpPath = instance(tag = DiTag.TAG_TMP_DIR),
+                ),
+            )
+            add(
+                H5PContentImporter(
+                    endpoint = context,
+                    db = db,
+                    cache = cache,
+                    uriHelper = uriHelper,
+                    tmpPath = contentImportTmpPath,
+                    saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                    compressListUseCase = instance(),
+                    mimeTypeHelper = instance(),
+                    json = instance(),
+                ),
+            )
 
-                add(
-                    VideoContentImporterCommonJvm(
-                        endpoint = context,
-                        db = db,
-                        cache = cache,
-                        uriHelper = uriHelper,
-                        validateVideoFileUseCase = instance(),
-                        json = instance(),
-                        tmpPath = contentImportTmpPath,
-                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                        getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
-                        mimeTypeHelper = mimeTypeHelper,
-                        compressUseCase = instanceOrNull(),
-                        extractVideoThumbnailUseCase = instanceOrNull(),
-                        saveLocalUrisAsBlobsUseCase = instanceOrNull(),
-                    )
+            add(
+                VideoContentImporterCommonJvm(
+                    endpoint = context,
+                    db = db,
+                    cache = cache,
+                    uriHelper = uriHelper,
+                    validateVideoFileUseCase = instance(),
+                    json = instance(),
+                    tmpPath = contentImportTmpPath,
+                    saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                    getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                    mimeTypeHelper = mimeTypeHelper,
+                    compressUseCase = instanceOrNull(),
+                    extractVideoThumbnailUseCase = instanceOrNull(),
+                    saveLocalUrisAsBlobsUseCase = instanceOrNull(),
                 )
-            }
+            )
+        }
+
+        val directoryContentImporter = DirectoryContentImporter(
+            endpoint = context,
+            db = db,
+            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+            otherContentImportersList = nonDirectoryContentImporters,
+            enqueueContentEntryImportUseCase = enqueueContentEntryImportUseCase,
+            uriHelper = uriHelper
         )
+
+        ContentImportersManager(nonDirectoryContentImporters + directoryContentImporter)
     }
 
 }

@@ -27,12 +27,20 @@ import kotlinx.coroutines.withContext
 /**
  * DirectoryContentImporter is a ContentImporter responsible for handling directory-based content.
  * It extracts metadata from directories and processes different content types.
+ *
+ * @param otherContentImportersList all other ContentImporters that are not DirectoryContentImporter
+ *        e.g. importers that would be used to process any files or subdirectories found in a directory.
+ *        Normally we would simply use contentImportersManager as a dependency, unfortunately, this
+ *        would result in a circular DI dependency where DirectoryContentImporter would depend on
+ *        ContentImportersManager and ContentImportersManager depends on DirectoryContentImporter
+ * @param contentImportersManagerFactory function to create a ContentImportersManager
  */
 class DirectoryContentImporter(
     endpoint: Endpoint,
     private val db: UmAppDatabase,
     private val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase,
-    private val contentImportersManager: ContentImportersManager,
+    private val otherContentImportersList: List<ContentImporter>,
+    private val contentImportersManagerFactory: (List<ContentImporter>) -> ContentImportersManager = ::ContentImportersManager,
     private val enqueueContentEntryImportUseCase: EnqueueContentEntryImportUseCase,
     private val uriHelper: UriHelper,
 ) : ContentImporter(endpoint) {
@@ -77,6 +85,10 @@ class DirectoryContentImporter(
             getStoragePathForUrlUseCase.getLocalUriIfRemote(jobItem.requireSourceAsDoorUri())
         val localDirectory = directoryUri.toFile()
         val entries = localDirectory.listFiles() ?: arrayOf()
+
+        val contentImportersManager = contentImportersManagerFactory(
+            otherContentImportersList + this@DirectoryContentImporter
+        )
 
         for (entry in entries) {
             // Extract metadata for the current file
