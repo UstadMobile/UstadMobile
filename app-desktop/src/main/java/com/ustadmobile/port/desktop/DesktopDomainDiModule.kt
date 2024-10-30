@@ -692,7 +692,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         CreateNewLocalAccountUseCase(di)
     }
 
-    bind<GetSubtitleTrackFromUriUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<GetSubtitleTrackFromUriUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         GetSubtitleTrackFromUriUseCaseLocal(
             uriHelper = instance(),
             dispatcher = Dispatchers.IO,
