@@ -144,6 +144,8 @@ data class ContentEntryVersion(
 
         const val TABLE_ID = 738
 
+        const val TYPE_DIRECTORY = "directory"
+
         const val SELECT_OFFLINE_ITEM_UID_FOR_NEW_CONTENT_ENTRY_VERSION_SQL = """
                  SELECT OfflineItem.oiUid
                    FROM OfflineItem

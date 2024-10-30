@@ -1,6 +1,7 @@
 package com.ustadmobile.core.contentformats
 
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.contentformats.directory.DirectoryContentImporter
 import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
@@ -10,6 +11,7 @@ import com.ustadmobile.core.contentformats.xapi.XapiZipContentImporter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
@@ -40,9 +42,20 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
         val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
         val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase = instance()
         val mimeTypeHelper: MimeTypeHelper = instance()
+        val enqueueContentEntryImportUseCase: EnqueueContentEntryImportUseCase = instance()
 
         ContentImportersManager(
             buildList {
+                add(
+                    DirectoryContentImporter(
+                        endpoint = context,
+                        db = db,
+                        getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                        contentImportersManager = instance(),
+                        enqueueContentEntryImportUseCase = enqueueContentEntryImportUseCase,
+                        uriHelper = uriHelper
+                    )
+                )
                 add(
                     EpubContentImporterCommonJvm(
                         endpoint = context,

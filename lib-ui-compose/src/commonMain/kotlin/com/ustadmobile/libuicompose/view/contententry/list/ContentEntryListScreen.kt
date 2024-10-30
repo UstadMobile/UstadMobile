@@ -1,7 +1,11 @@
 package com.ustadmobile.libuicompose.view.contententry.list
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Folder
@@ -15,22 +19,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.libuicompose.view.contententry.UstadContentEntryListItem
-import com.ustadmobile.libuicompose.components.ustadPagedItems
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
-import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListUiState
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.lib.db.composites.ContentEntryAndListDetail
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.components.UstadFileDropZone
 import com.ustadmobile.libuicompose.components.UstadFilePickResult
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -38,9 +39,13 @@ import com.ustadmobile.libuicompose.components.UstadListFilterChipsHeader
 import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
+import com.ustadmobile.libuicompose.components.rememberUstadFolderPickLauncher
+import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
+import com.ustadmobile.libuicompose.view.contententry.UstadContentEntryListItem
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +58,9 @@ fun ContentEntryListScreenForViewModel(
     val filePickLauncher = rememberUstadFilePickLauncher {
         viewModel.onImportFile(fileUri = it.uri, fileName = it.fileName)
     }
-
+    val folderPickLauncher = rememberUstadFolderPickLauncher {
+        viewModel.onImportFile(fileUri = it.uri, fileName = it.fileName)
+    }
     ContentEntryListScreen(
         uiState = uiState,
         onClickContentEntry = viewModel::onClickEntry,
@@ -65,6 +72,9 @@ fun ContentEntryListScreenForViewModel(
             filePickLauncher(UstadPickFileOpts())
         },
         onClickImportFromLink = viewModel::onClickImportFromLink,
+        onClickImportFolder = {
+            folderPickLauncher(UstadPickFileOpts())
+        },
         onSetSelected = viewModel::onSetSelected,
         onClickSelectThisFolder = viewModel::onClickSelectThisFolder,
         contextMenuItems = viewModel::createContextMenuItemsForEntry,
@@ -113,9 +123,20 @@ fun ContentEntryListScreenForViewModel(
                 }
             )
 
+            UstadBottomSheetOption(
+                modifier = Modifier.clickable {
+                    viewModel.onDismissCreateNewOptions()
+                    folderPickLauncher(UstadPickFileOpts())
+                },
+                headlineContent = {
+                    Text(stringResource(MR.strings.from_folder))
+                },
+                leadingContent = {
+                    Icon(Icons.Default.Folder, contentDescription = null)
+                }
+            )
         }
     }
-
 }
 
 @Composable
@@ -127,6 +148,7 @@ fun ContentEntryListScreen(
     onClickFilterChip: (MessageIdOption2) -> Unit = { },
     onClickImportFile: () -> Unit = { },
     onClickImportFromLink: () -> Unit = { },
+    onClickImportFolder: () -> Unit = { },
     onSetSelected: (entry: ContentEntryAndListDetail, selected: Boolean) -> Unit = { _, _ -> },
     onClickSelectThisFolder: () -> Unit = { },
     contextMenuItems: (ContentEntryAndListDetail) -> List<UstadContextMenuItem> = { emptyList() },

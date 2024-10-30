@@ -15,6 +15,7 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.contentformats.ContentImportersManager
+import com.ustadmobile.core.contentformats.directory.DirectoryContentImporter
 import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
 import com.ustadmobile.core.contentformats.pdf.PdfContentImporterAndroid
@@ -426,87 +427,97 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             val contentImportTmpPath = Path(tmpRoot.absolutePath, "contentimport")
             val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase= instance()
             val mimeTypeHelper: MimeTypeHelper = instance()
+            val enqueueContentEntryImportUseCase: EnqueueContentEntryImportUseCase = instance()
+            val allContentImporters = buildList {
+                add(
+                    EpubContentImporterCommonJvm(
+                        endpoint = context,
+                        cache = cache,
+                        db = db,
+                        uriHelper = uriHelper,
+                        xml = xml,
+                        xhtmlFixer = xhtmlFixer,
+                        tmpPath = contentImportTmpPath,
+                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                        json = instance(),
+                        getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                        compressListUseCase = instance(),
+                        saveLocalUrisAsBlobsUseCase = instance(),
+                    )
+                )
+                add(
+                    XapiZipContentImporter(
+                        endpoint = context,
+                        db = db,
+                        cache = cache,
+                        uriHelper = uriHelper,
+                        json = instance(),
+                        tmpPath = contentImportTmpPath,
+                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                        compressListUseCase = instance(),
+                        mimeTypeHelper = instance(),
+                    )
+                )
+                add(
+                    H5PContentImporter(
+                        endpoint = context,
+                        db = db,
+                        cache = cache,
+                        uriHelper = uriHelper,
+                        tmpPath = contentImportTmpPath,
+                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                        json = instance(),
+                        compressListUseCase = instance(),
+                        mimeTypeHelper = instance(),
+                        h5pInStream = {
+                            applicationContext.assets.open("h5p/h5p-standalone-3.6.0.zip",
+                                AssetManager.ACCESS_STREAMING)
+                        }
+                    ),
+                )
 
+                add(
+                    VideoContentImporterCommonJvm(
+                        endpoint = context,
+                        validateVideoFileUseCase = instance(),
+                        uriHelper = uriHelper,
+                        cache = cache,
+                        tmpPath = contentImportTmpPath,
+                        db = db,
+                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                        json = instance(),
+                        getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
+                        mimeTypeHelper = mimeTypeHelper,
+                        compressUseCase = instance(),
+                        extractVideoThumbnailUseCase = instance(),
+                        saveLocalUrisAsBlobsUseCase = instance(),
+                    )
+                )
+                add(
+                    PdfContentImporterAndroid(
+                        endpoint = context,
+                        cache = cache,
+                        uriHelper = uriHelper,
+                        db = db,
+                        saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
+                        getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
+                        json = instance(),
+                        appContext = applicationContext,
+                        tmpDir = File(contentImportTmpPath.toString()),
+                        saveLocalUriAsBlobUseCase = instance(),
+                    )
+                )
+            }
             ContentImportersManager(
                 buildList {
                     add(
-                        EpubContentImporterCommonJvm(
+                        DirectoryContentImporter(
                             endpoint = context,
-                            cache = cache,
                             db = db,
-                            uriHelper = uriHelper,
-                            xml = xml,
-                            xhtmlFixer = xhtmlFixer,
-                            tmpPath = contentImportTmpPath,
-                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                            json = instance(),
                             getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
-                            compressListUseCase = instance(),
-                            saveLocalUrisAsBlobsUseCase = instance(),
-                        )
-                    )
-                    add(
-                        XapiZipContentImporter(
-                            endpoint = context,
-                            db = db,
-                            cache = cache,
-                            uriHelper = uriHelper,
-                            json = instance(),
-                            tmpPath = contentImportTmpPath,
-                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                            compressListUseCase = instance(),
-                            mimeTypeHelper = instance(),
-                        )
-                    )
-
-                    add(
-                        H5PContentImporter(
-                            endpoint = context,
-                            db = db,
-                            cache = cache,
-                            uriHelper = uriHelper,
-                            tmpPath = contentImportTmpPath,
-                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                            json = instance(),
-                            compressListUseCase = instance(),
-                            mimeTypeHelper = instance(),
-                            h5pInStream = {
-                                applicationContext.assets.open("h5p/h5p-standalone-3.6.0.zip",
-                                    AssetManager.ACCESS_STREAMING)
-                            }
-                        ),
-                    )
-
-                    add(
-                        VideoContentImporterCommonJvm(
-                            endpoint = context,
-                            validateVideoFileUseCase = instance(),
-                            uriHelper = uriHelper,
-                            cache = cache,
-                            tmpPath = contentImportTmpPath,
-                            db = db,
-                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                            json = instance(),
-                            getStoragePathForUrlUseCase  = getStoragePathForUrlUseCase,
-                            mimeTypeHelper = mimeTypeHelper,
-                            compressUseCase = instance(),
-                            extractVideoThumbnailUseCase = instance(),
-                            saveLocalUrisAsBlobsUseCase = instance(),
-                        )
-                    )
-
-                    add(
-                        PdfContentImporterAndroid(
-                            endpoint = context,
-                            cache = cache,
-                            uriHelper = uriHelper,
-                            db = db,
-                            saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
-                            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
-                            json = instance(),
-                            appContext = applicationContext,
-                            tmpDir = File(contentImportTmpPath.toString()),
-                            saveLocalUriAsBlobUseCase = instance(),
+                            contentImportersManager = ContentImportersManager(allContentImporters),
+                            enqueueContentEntryImportUseCase = enqueueContentEntryImportUseCase,
+                            uriHelper = uriHelper
                         )
                     )
                 }
