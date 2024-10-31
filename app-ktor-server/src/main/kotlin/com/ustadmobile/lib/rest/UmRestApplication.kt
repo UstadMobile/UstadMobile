@@ -948,7 +948,9 @@ fun Application.umRestApplication(
             route("api") {
                 route("sysconfig") {
                     SystemConfigScriptRoute(
-                        di = di
+
+                         systemDb = di.direct.instance()
+
                     )
                 }
                 route("SystemDb") {

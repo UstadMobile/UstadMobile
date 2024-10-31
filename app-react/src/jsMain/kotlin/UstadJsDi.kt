@@ -61,10 +61,9 @@ internal fun ustadJsDi(
 ) = DI {
     import(commonDomainDiModule(LearningSpaceScope.Default))
     import(DomainDiModuleJs(LearningSpaceScope.Default))
-
     val learningSpaceUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Learning Space URL = $learningSpaceUrl (location.href = ${location.href}")
-    val isLearningSpace = js("_ustadIsLearningSpace") as Boolean
+    val isLearningSpace = js("_ustadLearningSpaceExists") as Boolean
     bind<UstadBuildConfig>() with singleton {
         BuildConfigMap(
             buildMap {
@@ -117,8 +116,9 @@ internal fun ustadJsDi(
     }
 
     bind<SystemUrlConfig>() with singleton {
+
         SystemUrlConfig.fromUstadBuildConfig(instance()).copy(
-            presetLearningSpaceUrl = learningSpaceUrl
+            presetLearningSpaceUrl = if (isLearningSpace) learningSpaceUrl else null
         )
     }
 

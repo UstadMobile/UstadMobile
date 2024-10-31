@@ -1,5 +1,6 @@
 package com.ustadmobile.test.http
 
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.util.SysPathUtil
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
@@ -12,6 +13,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.io.File
 import java.io.FileFilter
+import java.net.Socket
+import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -62,7 +65,7 @@ fun Application.testServerController() {
 
         log.info("Pulling file from device $deviceSerial $fromPath -> ${destFile.absolutePath}")
         ProcessBuilder(listOf(adbPath.absolutePath, "-s", deviceSerial, "pull",
-                fromPath, destFile.absolutePath))
+            fromPath, destFile.absolutePath))
             .start()
             .also {
                 it.waitFor(20, TimeUnit.SECONDS)
@@ -137,7 +140,7 @@ fun Application.testServerController() {
             testContentDir.listFiles(FileFilter {
                 it.isFile
             })?.forEach {
-               file(it.name)
+                file(it.name)
             }
 
             default("index.html")
@@ -212,7 +215,7 @@ fun Application.testServerController() {
 
             val serverArgs = call.application.environment.config
                 .propertyOrNull("ktor.testServer.command")?.getString()?.split(Regex("\\s+"))
-                    ?.toMutableList()
+                ?.toMutableList()
                 ?: throw IllegalArgumentException("No testServer command specified in configuration")
 
             //If the command is not an absolute path or relative path, then look in the PATH variable
@@ -227,6 +230,49 @@ fun Application.testServerController() {
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
+
+
+            val uri = URI(serverSiteUrl)
+            waitForPort(uri.host, uri.port)
+            val appConfigPath = call.application.environment.config
+                .propertyOrNull("ktor.testServer.createLearningSpaceCommand")?.getString()?.split(Regex("\\s+"))
+                ?.toMutableList()
+                ?: throw IllegalArgumentException("No testServer createLearningSpaceCommand specified in configuration")
+
+            appConfigPath[0] = SysPathUtil.findCommandInPath(appConfigPath[0])?.absolutePath
+
+                ?: throw IllegalArgumentException("Could not find server createLearningSpaceCommand in PATH ${appConfigPath[0]}")
+            val andminPassword=File("${serverDir.absolutePath}/data/admin.txt").readText()
+            val appConfigArgs = listOf(
+                appConfigPath[0],
+                "-classpath",appConfigPath[2],
+                appConfigPath[3],
+                "--password ${andminPassword}",
+                "newlearningspace ",
+                "--title newLearningSpace",
+                "--url $serverSiteUrl",
+                "--dburl jdbc:sqlite:${serverDir.absolutePath}/data/localhost.db",
+                "--adminuser admin",
+                "--adminpassword kgu5e5gyg"
+            )
+
+            val addingLearningSpaceProcess = ProcessBuilder(appConfigArgs)
+                .directory(serverDir)
+                .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                .redirectError(ProcessBuilder.Redirect.PIPE)
+                .start()
+            val output = addingLearningSpaceProcess.inputStream.bufferedReader().readText()
+            val errorOutput = addingLearningSpaceProcess.errorStream.bufferedReader().readText()
+
+            response += "learning space  " +
+                    "${appConfigPath[2]} <br/>"
+            response += "learning space  " +
+                    "${appConfigPath[3]} <br/>"
+
+            response += "learning space  " +
+                    "${output} <br/>"
+            response += "learning space  " +
+                    "${errorOutput} <br/>"
 
             response += "Started server process PID #${serverProcess?.pid()} " +
                     "${serverArgsWithSiteUrl.joinToString( " ")} " +
@@ -250,9 +296,9 @@ fun Application.testServerController() {
                     .start()
 
                 response += "Started video recording: ${recordArgs.joinToString(separator = " ")} " +
-                    "PID ${adbRecordProcess?.pid()} <br/>"
+                        "PID ${adbRecordProcess?.pid()} <br/>"
                 application.log.info("Started video recording: ${recordArgs.joinToString(separator = " ")} " +
-                    "PID ${adbRecordProcess?.pid()}")
+                        "PID ${adbRecordProcess?.pid()}")
             }
 
 
@@ -291,7 +337,7 @@ fun Application.testServerController() {
                 ?: throw IllegalStateException("Cannot find adb in path")
 
             val process = ProcessBuilder(listOf(adbCommand.absolutePath,
-                    "-s", deviceSerial, "shell", "rm", "/sdcard/Download/*"))
+                "-s", deviceSerial, "shell", "rm", "/sdcard/Download/*"))
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
@@ -352,4 +398,24 @@ fun Application.testServerController() {
         }
 
     }
+
+}
+fun waitForPort(
+    host: String,
+    port: Int,
+    interval: Long = 100,
+    timeout: Long = 5000,
+) {
+    val startTime = System.currentTimeMillis()
+    while(System.currentTimeMillis() - startTime < timeout) {
+        try {
+            Socket(host, port).close()
+            //Connection was successful if no exception thrown by now
+            return
+        }catch(e: Exception) {
+            Thread.sleep(interval)
+        }
+    }
+
+    throw IllegalStateException("Timeout!: waited for ${systemTimeInMillis() -  startTime}ms")
 }
