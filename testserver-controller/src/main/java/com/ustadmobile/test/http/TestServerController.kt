@@ -247,13 +247,13 @@ fun Application.testServerController() {
                 appConfigPath[0],
                 "-classpath",appConfigPath[2],
                 appConfigPath[3],
-                "--password ${andminPassword}",
-                "newlearningspace ",
-                "--title newLearningSpace",
-                "--url $serverSiteUrl",
-                "--dburl jdbc:sqlite:${serverDir.absolutePath}/data/localhost.db",
-                "--adminuser admin",
-                "--adminpassword kgu5e5gyg"
+                "--password", andminPassword,
+                "newlearningspace",
+                "--title", "newLearningSpace",
+                "--url", "$serverSiteUrl",
+                "--dburl", "jdbc:sqlite:${serverDir.absolutePath}/data/localhost.db",
+                "--adminuser","admin",
+                "--adminpassword","kgu5e5gyg"
             )
 
             val addingLearningSpaceProcess = ProcessBuilder(appConfigArgs)
