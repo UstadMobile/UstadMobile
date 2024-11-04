@@ -253,7 +253,7 @@ fun Application.testServerController() {
                 "--url", "$serverSiteUrl",
                 "--dburl", "jdbc:sqlite:${serverDir.absolutePath}/data/localhost.db",
                 "--adminuser","admin",
-                "--adminpassword","kgu5e5gyg"
+                "--adminpassword","testpass"
             )
 
             val addingLearningSpaceProcess = ProcessBuilder(appConfigArgs)
@@ -263,11 +263,6 @@ fun Application.testServerController() {
                 .start()
             val output = addingLearningSpaceProcess.inputStream.bufferedReader().readText()
             val errorOutput = addingLearningSpaceProcess.errorStream.bufferedReader().readText()
-
-            response += "learning space  " +
-                    "${appConfigPath[2]} <br/>"
-            response += "learning space  " +
-                    "${appConfigPath[3]} <br/>"
 
             response += "learning space  " +
                     "${output} <br/>"
