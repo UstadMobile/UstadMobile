@@ -9,6 +9,8 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.connectivitymonitor.ConnectivityMonitorJvm
 import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupController
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
+import com.ustadmobile.core.contentformats.directory.ListDirectoryUriUseCase
+import com.ustadmobile.core.contentformats.directory.ListDirectoryUriUseCaseJvmImpl
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.db.UmAppDatabase
@@ -177,6 +179,10 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
         }
     }
 
+    bind<ListDirectoryUriUseCase>() with singleton {
+        ListDirectoryUriUseCaseJvmImpl()
+    }
+
     bind<MimeTypeHelper>() with singleton {
         FileMimeTypeHelperImpl()
     }
@@ -252,7 +258,6 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
             )
             .build()
     }
-
 
     bind<HttpClient>() with singleton {
 

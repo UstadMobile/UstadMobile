@@ -16,6 +16,7 @@ import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentformats.directory.DirectoryContentImporter
+import com.ustadmobile.core.contentformats.directory.ListDirectoryUriUseCase
 import com.ustadmobile.core.contentformats.epub.EpubContentImporterCommonJvm
 import com.ustadmobile.core.contentformats.h5p.H5PContentImporter
 import com.ustadmobile.core.contentformats.pdf.PdfContentImporterAndroid
@@ -36,6 +37,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.directory.ListDirectoryUriUseCaseAndroidImpl
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
@@ -515,10 +517,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             val directoryContentImporter = DirectoryContentImporter(
                 endpoint = context,
                 db = db,
-                getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
                 otherContentImportersList = nonDirectoryContentImporters,
                 enqueueContentEntryImportUseCase = instance(),
-                uriHelper = uriHelper
+                listDirectoryUriUseCase = instance()
             )
 
             ContentImportersManager(nonDirectoryContentImporters + directoryContentImporter)
@@ -536,6 +537,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 appContext = applicationContext,
                 uriHelper = instance(),
             )
+        }
+
+        bind<ListDirectoryUriUseCase>() with singleton {
+            ListDirectoryUriUseCaseAndroidImpl(context = applicationContext)
         }
 
         bind<CompressImageUseCase>() with singleton {

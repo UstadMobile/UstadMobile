@@ -127,10 +127,9 @@ val ContentImportersDiModuleJvm = DI.Module("ContentImporters-Jvm"){
         val directoryContentImporter = DirectoryContentImporter(
             endpoint = context,
             db = db,
-            getStoragePathForUrlUseCase = getStoragePathForUrlUseCase,
             otherContentImportersList = nonDirectoryContentImporters,
             enqueueContentEntryImportUseCase = enqueueContentEntryImportUseCase,
-            uriHelper = uriHelper
+            listDirectoryUriUseCase = instance()
         )
 
         ContentImportersManager(nonDirectoryContentImporters + directoryContentImporter)
