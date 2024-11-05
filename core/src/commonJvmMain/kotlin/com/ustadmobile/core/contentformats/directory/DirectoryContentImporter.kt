@@ -17,6 +17,7 @@ import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.toFile
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -64,10 +65,10 @@ class DirectoryContentImporter(
                 try {
                     MetadataResult(
                         entry = ContentEntryWithLanguage().apply {
-                            title =
-                                originalFilename ?: uri.getFileName(this@DirectoryContentImporter)
+                            title = originalFilename ?: FILENAME
                             leaf = false
                             sourceUrl = uri.toString()
+                            contentTypeFlag = ContentEntry.TYPE_DIRECTORY
                         },
                         importerId = importerId,
                         originalFilename = originalFilename
@@ -111,7 +112,8 @@ class DirectoryContentImporter(
                         sourceUri = entry.uri.toString(),
                         cjiOriginalFilename = entry.fileName,
                         cjiPluginId = metadataResult.importerId,
-                        cjiParentContentEntryUid = jobItem.cjiContentEntryUid
+                        cjiParentContentEntryUid = jobItem.cjiContentEntryUid,
+                        cjiParentCjiUid = jobItem.cjiUid
                     )
                     enqueueContentEntryImportUseCase.invoke(contentJobItem)
                 } else {
@@ -126,13 +128,13 @@ class DirectoryContentImporter(
         val directoryContentEntryVersion = ContentEntryVersion(
             cevUid = db.doorPrimaryKeyManager.nextId(ContentEntryVersion.TABLE_ID),
             cevContentType = ContentEntryVersion.TYPE_DIRECTORY,
-            cevContentEntryUid = jobItem.cjiContentEntryUid,
-            cevManifestUrl = "",
         )
         directoryContentEntryVersion
     }
 
     companion object {
         const val PLUGINID = 202
+
+        const val FILENAME = "File Name"
     }
 }

@@ -214,6 +214,8 @@ open class ContentEntry() {
 
         const val TYPE_PDF = 8
 
+        const val TYPE_DIRECTORY = 9
+
         const val FLAG_IMPORTED = 1
 
         const val COMPLETION_CRITERIA_AUTOMATIC = 0

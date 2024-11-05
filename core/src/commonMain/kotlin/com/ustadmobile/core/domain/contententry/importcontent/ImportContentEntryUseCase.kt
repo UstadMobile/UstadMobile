@@ -7,7 +7,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.uuid.randomUuidAsString
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
@@ -72,6 +74,38 @@ class ImportContentEntryUseCase(
                     cjiUid = job.cjiUid,
                     status = JobStatus.RUNNING
                 )
+
+                // Check if cjiContentEntryUid is 0
+                Napier.v { "Checking cjiContentEntryUid: ${job.cjiContentEntryUid}" }
+                if (job.cjiContentEntryUid == 0L) {
+                    Napier.v { "Extracting metadata for new ContentEntry" }
+                    try {
+                        // Extract metadata to create a new ContentEntry
+                        val metadataResult = importer.extractMetadata(DoorUri.parse(job.sourceUri!!), job.cjiOriginalFilename)
+                        Napier.v { "Metadata extraction result: $metadataResult" }
+
+                        val newContentEntry = metadataResult?.entry ?: throw IllegalStateException("Failed to extract metadata")
+
+                        // Save the new ContentEntry to the database
+                        val contentEntryUid = db.contentEntryDao().insertAsync(newContentEntry)
+
+                        // Update job with the new ContentEntry UID
+                        job.cjiContentEntryUid = contentEntryUid
+                        Napier.v { "New ContentEntry UID: $contentEntryUid" }
+
+                        // If cjiParentContentEntryUid is not 0, create a join entry
+                        if (job.cjiParentContentEntryUid != 0L) {
+                            val parentChildJoin = ContentEntryParentChildJoin(
+                                cepcjParentContentEntryUid = job.cjiParentContentEntryUid,
+                                cepcjChildContentEntryUid = contentEntryUid
+                            )
+                            db.contentEntryParentChildJoinDao().insertAsync(parentChildJoin)
+                        }
+                    } catch (e: Exception) {
+                        Napier.e(e) { "Error during metadata extraction: ${e.message}" }
+                        throw e
+                    }
+                }
 
                 importer.importContent(
                     jobItem = job,

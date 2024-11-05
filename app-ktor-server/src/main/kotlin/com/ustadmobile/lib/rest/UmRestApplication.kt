@@ -4,6 +4,8 @@ import com.google.gson.Gson
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
+import com.ustadmobile.core.contentformats.directory.ListDirectoryUriUseCase
+import com.ustadmobile.core.contentformats.directory.ListDirectoryUriUseCaseJvmImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.domain.account.SetPasswordServerUseCase
@@ -347,6 +349,10 @@ fun Application.umRestApplication(
 
 
         bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
+
+        bind<ListDirectoryUriUseCase>() with singleton {
+            ListDirectoryUriUseCaseJvmImpl()
+        }
 
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
             val mainTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
