@@ -33,7 +33,7 @@ appId: com.toughra.ustadmobile
 - runFlow:
     file: "./user_login.yaml"
 - tapOn: "People"
-- tapOn: "Admin User"
+- tapOn: "Admin Person"
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add"
