@@ -4,6 +4,7 @@ import com.ustadmobile.appconfigdb.SystemDb
 import com.ustadmobile.appconfigdb.SystemDbDataLayer
 import com.ustadmobile.appconfigdb.entities.LearningSpaceInfo
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.RefreshCommand
@@ -38,6 +39,7 @@ class LearningSpaceListViewModel(
 
 
     private val impl: UstadMobileSystemImpl by instance()
+    private val goToLearningSpaceUseCase:GoToLearningSpaceUseCase by instance()
 
     val repo: SystemDb? = di.direct.instance<SystemDbDataLayer>().repository
 
@@ -78,15 +80,17 @@ class LearningSpaceListViewModel(
         }else{
             LoginViewModel.DEST_NAME
         }
-        navController.navigate(
-            viewName,
-            args = buildMap {
-                putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
-                    put(ARG_LEARNINGSPACE_URL, learningSpace)
+        val args = buildMap {
+            putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+            put(ARG_LEARNINGSPACE_URL, learningSpace)
 
-            }
-
-        )
+        }
+      goToLearningSpaceUseCase.invoke(
+          learningSpace,
+          navController,
+          args,
+          viewName
+          )
 
 
     }

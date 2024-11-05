@@ -84,6 +84,7 @@ val AddAccountSelectNewOrExistingComponent2 = FC<AddAccountSelectNewOrExistingPr
             }
 
             Button {
+                id = "new_user"
                 onClick = { props.onClickNewUser() }
                 variant = ButtonVariant.outlined
                 fullWidth = true
@@ -95,6 +96,7 @@ val AddAccountSelectNewOrExistingComponent2 = FC<AddAccountSelectNewOrExistingPr
                 }
             }
             Button {
+                id = "existing_user"
                 onClick = { props.onClickExistingUser() }
                 variant = ButtonVariant.outlined
                 fullWidth = true

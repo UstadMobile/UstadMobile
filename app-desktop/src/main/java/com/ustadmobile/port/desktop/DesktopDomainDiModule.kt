@@ -87,6 +87,8 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
+import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
+import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJvm
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
@@ -415,7 +417,9 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     bind<GetVersionUseCase>() with singleton {
         GetVersionUseCaseJvm()
     }
-
+    bind<GoToLearningSpaceUseCase>() with singleton {
+        GoToLearningSpaceUseCaseJvm()
+    }
     bind<LaunchOpenLicensesUseCase>() with singleton {
         LaunchOpenLicensesUseCaseJvm(
             launchChromeUseCase = instance(),
