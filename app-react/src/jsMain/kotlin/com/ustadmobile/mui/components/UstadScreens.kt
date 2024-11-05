@@ -45,24 +45,31 @@ import react.router.useLoaderData
 import ustadJsDi
 import kotlin.random.Random
 import com.ustadmobile.core.MR
+import web.cssom.None
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
 import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.hooks.useLaunchedEffect
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.util.ext.deleteDatabaseAsync
 import mui.system.useMediaQuery
 import org.kodein.di.direct
 import org.kodein.di.instance
+import emotion.react.css
+import react.dom.html.ReactHTML.div
 import react.router.useLocation
 import remix.run.router.LoaderFunctionArgs
-import web.cssom.atrule.maxWidth
-import web.cssom.atrule.width
-import web.cssom.px
+import kotlinx.coroutines.*
+import web.cssom.LengthType
+import web.cssom.PropertyName.Companion.display
 import web.dom.document
+import web.gpu.GPUVertexStepMode.Companion.instance
 import web.idb.indexedDB
 
 //Roughly as per components/Showcases on MUI-showcase #d71c6d1
@@ -107,9 +114,6 @@ val UstadScreens = FC<Props> {
     var mobileMenuOpen by useState(false)
 
     var currentRootItemIndex by useState { 0 }
-
-
-
     useEffect(location.pathname) {
         val pathIndex = ROOT_SCREENS.indexOfFirst {
             location.pathname == "/${it.key}"
@@ -135,11 +139,21 @@ val UstadScreens = FC<Props> {
             di = loaderData.di
             UstadLanguageConfigProvider {
                 languagesConfig = langConfig
+                val isRegistrationAllowed = js("_ustadRegistrationAllowed") as Boolean
+
+
 
                 QueryClientProvider {
                     client = tanstackQueryClient
 
                     Box {
+                        div{
+                            id ="registration_enabled"
+                            css {
+                                display = None.none
+                            }
+                            + "$isRegistrationAllowed"
+                        }
                         sx {
                             display = Display.grid
                             gridTemplateRows = array(
@@ -163,7 +177,7 @@ val UstadScreens = FC<Props> {
                         Header {
                             this.appUiState = appUiState
                             setAppBarHeight = {
-                                if(muiStateVar.appBarHeight != it) {
+                                if (muiStateVar.appBarHeight != it) {
                                     muiStateVar = muiStateVar.copy(appBarHeight = it)
                                 }
                             }
@@ -171,7 +185,8 @@ val UstadScreens = FC<Props> {
                             onClickMenuIcon = {
                                 mobileMenuOpen = !mobileMenuOpen
                             }
-                            sidebarVisible = !mobileMode && appUiState.navigationVisible&& currentSession?.person?.isPersonalAccount !=true
+                            sidebarVisible =
+                                !mobileMode && appUiState.navigationVisible && currentSession?.person?.isPersonalAccount != true
                         }
 
                         //if (mobileMode) Menu() else Sidebar()
@@ -179,7 +194,8 @@ val UstadScreens = FC<Props> {
                         // then this seems to make react destroy the content component and create a
                         // completely new one, which we definitely do not want
                         Sidebar {
-                            visible = !mobileMode && appUiState.navigationVisible && currentSession?.person?.isPersonalAccount !=true
+                            visible =
+                                !mobileMode && appUiState.navigationVisible && currentSession?.person?.isPersonalAccount != true
                             selectedRootItemIndex = currentRootItemIndex
                         }
 
@@ -210,8 +226,6 @@ val UstadScreens = FC<Props> {
     }
 
 
-
-
 }
 
 /**
@@ -237,9 +251,10 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
         UmAppDatabase::class,
         UmAppDatabaseJsImplementations, dbUrl = dbUrl,
         nodeId = dbNodeIdAndAuth.nodeId,
-        webWorkerPath = "./worker.sql-wasm.js")
+        webWorkerPath = "./worker.sql-wasm.js"
+    )
 
-    val dbBuilder =  DatabaseBuilder.databaseBuilder(builderOptions)
+    val dbBuilder = DatabaseBuilder.databaseBuilder(builderOptions)
         .addSyncCallback(dbNodeIdAndAuth)
         .addMigrations(*migrationList().toTypedArray())
         .addMigrations(MIGRATION_144_145_CLIENT)
@@ -255,7 +270,7 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
         @Suppress("LiftReturnOrAssignment") // We don't want the database to be closed after the block
         try {
             dbBuilt = dbBuilder.build()
-        }catch(e: Exception) {
+        } catch (e: Exception) {
             Napier.w("Exception building database - trying to clear")
             //Probably something with no migration path, clear and retry
             indexedDB.deleteDatabaseAsync(dbName)
