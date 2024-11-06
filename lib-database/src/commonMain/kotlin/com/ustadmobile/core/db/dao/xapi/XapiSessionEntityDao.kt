@@ -2,11 +2,14 @@ package com.ustadmobile.core.db.dao.xapi
 
 import androidx.room.Insert
 import androidx.room.Query
+import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -15,32 +18,20 @@ expect abstract class XapiSessionEntityDao {
     @Insert
     abstract suspend fun insertAsync(xapiSessionEntity: XapiSessionEntity)
 
-    @Query(
-        """
+    @Query("""
         SELECT XapiSessionEntity.*
           FROM XapiSessionEntity
          WHERE XapiSessionEntity.xseUid = :uid
-    """
-    )
+    """)
     abstract suspend fun findByUidAsync(uid: Long): XapiSessionEntity?
 
-    @Query(
-        """
-        SELECT XapiSessionEntity.*
-          FROM XapiSessionEntity
-    """
-    )
-    abstract suspend fun findSession(): XapiSessionEntity?
-
-    @Query(
-        """
+    @Query("""
         UPDATE XapiSessionEntity
            SET xseCompleted = :completed,
                xseLastMod = :time
          WHERE xseUid = :xseUid
 
-    """
-    )
+    """)
     abstract suspend fun updateLatestAsComplete(
         completed: Boolean,
         time: Long,
@@ -52,16 +43,14 @@ expect abstract class XapiSessionEntityDao {
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall(
                 functionName = "findMostRecentSessionByActorAndActivity"
-
             ),
             HttpServerFunctionCall(
-                functionName = "findByUidAndPersonUidAsync",
+                functionName ="findByUidAndPersonUidAsync",
                 functionDao = ActorDao::class,
             ),
         )
     )
-    @Query(
-        """
+    @Query("""
         SELECT XapiSessionEntity.*
           FROM XapiSessionEntity
          WHERE XapiSessionEntity.xseRootActivityUid = :xseRootActivityUid
@@ -73,8 +62,7 @@ expect abstract class XapiSessionEntityDao {
                  FROM ActorEntity
                 WHERE ActorEntity.actorUid = :actorUid
                   AND ActorEntity.actorPersonUid = :accountPersonUid)     
-    """
-    )
+    """)
     abstract suspend fun findMostRecentSessionByActorAndActivity(
         accountPersonUid: Long,
         actorUid: Long,
@@ -85,4 +73,34 @@ expect abstract class XapiSessionEntityDao {
 
 
 
+/*
+
+    @Query("""
+    SELECT Person.*,
+       (SELECT COUNT(XapiSessionEntity.xseUid)
+		  FROM XapiSessionEntity
+		 WHERE XapiSessionEntity.xseAccountPersonUid = Person.personUid
+		   AND XapiSessionEntity.xseContentEntryUid = :contentEntryUid) AS numberAttempts
+	FROM Person
+    LEFT JOIN PersonPicture ON Person.personUid = PersonPicture.personPictureUid
+    GROUP BY Person.personUid
+    HAVING numberAttempts >= 1
+""")
+    abstract suspend fun getAttemptList(contentEntryUid: Long): PagingSource<Int, PersonAndAttemptInfo>
+*/
+
+    @Query("""
+    SELECT Person.*, PersonPicture.*,
+           (SELECT COUNT(XapiSessionEntity.xseUid)
+            FROM XapiSessionEntity
+            WHERE XapiSessionEntity.xseAccountPersonUid = Person.personUid
+              AND XapiSessionEntity.xseContentEntryUid = :contentEntryUid) AS numberAttempts
+    FROM Person
+    LEFT JOIN PersonPicture 
+                ON PersonPicture.personPictureUid = Person.personUid
+               
+""")
+    abstract  fun getAttemptList(contentEntryUid: Long): PagingSource<Int, PersonAndAttemptInfo>
+
 }
+// WHERE numberAttempts >= 1
