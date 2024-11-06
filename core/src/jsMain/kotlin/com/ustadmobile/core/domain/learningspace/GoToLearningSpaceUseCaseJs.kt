@@ -19,7 +19,7 @@ class GoToLearningSpaceUseCaseJs(
         viewName:String
     ) {
         val makeLinkUseCase: MakeLinkUseCase by di.on(LearningSpace(url)).instance()
-       // makeLinkUseCase.invoke(document.location.href )
+    //   makeLinkUseCase.invoke(document)
 
     }
 }
