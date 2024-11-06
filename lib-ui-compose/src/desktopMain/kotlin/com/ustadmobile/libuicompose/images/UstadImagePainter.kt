@@ -14,6 +14,7 @@ val nameMap = mapOf(
     UstadImage.COURSE_BANNER_DEFAULT2 to "/img/course_banner_default2.webp",
     UstadImage.COURSE_BANNER_DEFAULT3 to "/img/course_banner_default3.webp",
     UstadImage.COURSE_BANNER_DEFAULT4 to "/img/course_banner_default4.webp",
+    UstadImage.ICON_PERSON to "/img/icon_person.xml"
 
 )
 @Composable
