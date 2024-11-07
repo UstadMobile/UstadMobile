@@ -44,7 +44,9 @@ fun Route.SystemConfigScriptRoute(
                             "var _ustadRegistrationAllowed = $isRegistrationAllowed;"
                 }
             } else {
-                call.respond(HttpStatusCode.ExpectationFailed, "Learning space not found.")
+                call.respondText(contentType = ContentType.Text.JavaScript) {
+                    "var _ustadLearningSpaceExists = false;"
+                }
             }
 
         } catch (e: Throwable) {

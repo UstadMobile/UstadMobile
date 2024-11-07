@@ -3,9 +3,13 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.StorageSettings
 import com.russhwolf.settings.set
 import com.ustadmobile.BuildConfigJs
+import com.ustadmobile.appconfigdb.SystemDb
+import com.ustadmobile.appconfigdb.SystemDbDataLayer
+import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJs
@@ -37,8 +41,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProviderJs
+import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
+import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -56,6 +64,7 @@ import web.url.URLSearchParams
 @OptIn(ExperimentalXmlUtilApi::class)
 internal fun ustadJsDi(
     dbBuilt: UmAppDatabase,
+    systemDbBuilt: SystemDb,
     dbNodeIdAndAuth: NodeIdAndAuth,
     json: Json,
     httpClient: HttpClient,
@@ -66,8 +75,6 @@ internal fun ustadJsDi(
     val learningSpaceUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Learning Space URL = $learningSpaceUrl (location.href = ${location.href}")
     val isLearningSpace = js("_ustadLearningSpaceExists") as Boolean
-    val isRegistrationAllowed = js("_ustadRegistrationAllowed") as Boolean
-    println("isRegistrationAllowed"+isRegistrationAllowed)
     bind<UstadBuildConfig>() with singleton {
         BuildConfigMap(
             buildMap {
@@ -142,7 +149,36 @@ internal fun ustadJsDi(
     bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
         dbNodeIdAndAuth
     }
+    bind<SystemDb>() with singleton {
+        systemDbBuilt
+    }
+    bind<SystemDbNodeIdAndAuth>() with singleton {
+        val settings: Settings = instance()
+        val contextIdentifier: String = sanitizeDbNameFromUrl(learningSpaceUrl)
+        SystemDbNodeIdAndAuth(nodeIdAndAuth =settings.getOrGenerateNodeIdAndAuth(contextIdentifier) )
+    }
 
+
+    bind<SystemDbDataLayer>() with singleton {
+        val systemDb: SystemDb = instance<SystemDb>()
+
+        val systemDbNodeIdAndAuth: SystemDbNodeIdAndAuth = instance()
+        val repo: SystemDb = systemDb.asRepository(
+            RepositoryConfig.repositoryConfig(
+                context = this,
+                endpoint = learningSpaceUrl+"api/SystemDb/",
+                nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
+                auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
+                httpClient = instance(),
+                json = instance()
+            )
+        )
+
+        SystemDbDataLayer(
+            localDb  = systemDb,
+            repository = repo,
+        )
+    }
     bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(LearningSpaceScope.Default).singleton {
         dbBuilt
     }
