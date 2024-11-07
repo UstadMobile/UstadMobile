@@ -42,7 +42,9 @@ class ContentEntryDetailAttemptsPersonListViewModel(
     ) {
         navController.navigate(
             viewName = ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME,
-            args = emptyMap()
+            args = mapOf(
+                UstadView.ARG_PERSON_UID to (entry.person?.personUid ?: 0).toString(),
+                UstadView.ARG_CONTENT_ENTRY_UID to entityUidArg.toString())
         )
     }
 
