@@ -1,5 +1,6 @@
 package com.ustadmobile.view.message.messagelist
 
+import com.ustadmobile.core.MR.strings.add
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.paging.RefreshCommand
@@ -13,6 +14,7 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.Message
+import com.ustadmobile.mui.components.SocialWarningListItem
 import com.ustadmobile.mui.components.UstadSendTextField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -21,11 +23,14 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import mui.material.Container
 import react.FC
+import react.Fragment
 import react.Props
+import react.ReactNode
 import react.create
 import react.useEffect
 import react.useRef
 import react.useState
+import web.animations.CompositeOperation.Companion.add
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
@@ -40,6 +45,8 @@ external interface MessageListScreenProps : Props {
     var onChangeNewMessageText: (String) -> Unit
 
     var onClickSend: () -> Unit
+
+    var onWarningDismiss: () -> Unit
 
 }
 
@@ -78,6 +85,24 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
         }
 
         content = virtualListContent {
+            reverseLayout = false
+
+            if (props.uiState.showSocialWarning) {
+                Fragment.create {
+                    SocialWarningListItem {
+                        cautions = listOf(
+                            "Avoid sharing personal information",
+                            "Report any inappropriate behavior",
+                            "Be respectful in interactions",
+                            "Stay cautious when engaging with others",
+                            "Think twice before sharing sensitive details"
+                        )
+                        onDismiss = props.onWarningDismiss
+                        onLearnMore = { /* Navigate to guidelines */ }
+                    }
+                }
+            }
+
             infiniteQueryPagingItemsList(
                 items = infiniteQueryResult,
                 key = { items, index -> items[index]?.messageUid?.toString() ?: "${items}_$index" }
@@ -146,5 +171,6 @@ val MessageListScreen = FC<Props> {
         uiState = uiStateVal
         onChangeNewMessageText = viewModel::onChangeNewMessageText
         onClickSend = viewModel::onClickSend
+        onWarningDismiss = viewModel::onWarningDismiss
     }
 }

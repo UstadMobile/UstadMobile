@@ -14,12 +14,15 @@ import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.UstadAssignmentSubmissionHeaderUiState
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpeningBlobState
 import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.viewmodel.clazz.launchSetTitleFromClazzUid
@@ -135,6 +138,8 @@ data class ClazzAssignmentDetailOverviewUiState(
     val openingFileSubmissionState: OpeningBlobState? = null,
 
     val showModerateOptions: Boolean = false,
+
+    val showSocialWarning: Boolean = true
 
 ) {
 
@@ -317,12 +322,18 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     private var openBlobJob: Job? = null
 
+    private val ustadAccountManager: UstadAccountManager by di.instance()
+    private val showSocialWarningUseCase: ShowSocialWarningUseCase by di.instance()
+    private val dismissSocialWarningUseCase: DismissSocialWarningUseCase by di.instance()
+
     init {
         _uiState.update { prev ->
             prev.copy(
                 activeUserPersonUid = activeUserPersonUid,
                 activeUserPersonName = accountManager.currentUserSession.person.fullName(),
                 activeUserPictureUri = accountManager.currentUserSession.personPicture?.personPictureUri,
+                showSocialWarning = showSocialWarningUseCase(ustadAccountManager.currentUserSession.person.username.toString())
+
             )
         }
 
@@ -429,6 +440,15 @@ class ClazzAssignmentDetailOverviewViewModel(
                 privateComments = privateCommentsPagingSourceFactory,
                 courseComments = courseCommentsPagingSourceFactory,
             )
+        }
+    }
+
+    fun onWarningDismiss() {
+        viewModelScope.launch {
+            dismissSocialWarningUseCase(ustadAccountManager.currentUserSession.person.username.toString())
+            _uiState.update { prev ->
+                prev.copy(showSocialWarning = false)
+            }
         }
     }
 
