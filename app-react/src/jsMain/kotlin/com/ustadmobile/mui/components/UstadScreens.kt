@@ -263,6 +263,7 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
     val systemDbNodeId = localStorage.getOrPut("${systemDbName}_nodeId") {
         Random.nextLong(0, Long.MAX_VALUE).toString()
     }.toLong()
+
     val systemDbNodeAuth = localStorage.getOrPut("${systemDbName}_nodeAuth") {
         randomUuid().toString()
     }
@@ -274,13 +275,14 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
         nodeId  = dbNodeIdAndAuth.nodeId,
         webWorkerPath = "./worker.sql-wasm.js"
     )
+
    val systemDbBuilderOptions= DatabaseBuilderOptions(
        SystemDb::class,
        SystemDbJsImplementations,
        dbUrl = systemDbUrl,
        nodeId = systemDbNodeIdAndAuth.nodeId,
        webWorkerPath = "./worker.sql-wasm.js?SystemDbUrl"
-)
+    )
     val systemDbBuilder =  DatabaseBuilder.databaseBuilder(systemDbBuilderOptions)
 
 
@@ -306,6 +308,7 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
             Napier.w("Exception building database - trying to clear")
             //Probably something with no migration path, clear and retry
             indexedDB.deleteDatabaseAsync(dbName)
+            indexedDB.deleteDatabaseAsync(systemDbName)
             localStorage.clear()
 
             //Try again
