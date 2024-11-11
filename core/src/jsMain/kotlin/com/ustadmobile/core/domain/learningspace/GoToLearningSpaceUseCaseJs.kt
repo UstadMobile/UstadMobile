@@ -3,12 +3,10 @@ package com.ustadmobile.core.domain.learningspace
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.impl.nav.UstadNavController
-import com.ustadmobile.core.util.ext.onActiveEndpoint
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
-import web.dom.document
-
+import web.location.location
 class GoToLearningSpaceUseCaseJs(
     val di:DI
 ):GoToLearningSpaceUseCase{
@@ -19,7 +17,9 @@ class GoToLearningSpaceUseCaseJs(
         viewName:String
     ) {
         val makeLinkUseCase: MakeLinkUseCase by di.on(LearningSpace(url)).instance()
-    //   makeLinkUseCase.invoke(document)
+        val finalUrl = makeLinkUseCase(viewName, args)
+       location.href=finalUrl
+
 
     }
 }

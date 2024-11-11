@@ -1,6 +1,8 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.MuiAppState
+import com.ustadmobile.appconfigdb.SystemDb
+import com.ustadmobile.appconfigdb.SystemDbJsImplementations
 import com.ustadmobile.core.components.DIModule
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
@@ -53,11 +55,14 @@ import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
+import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useLaunchedEffect
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SystemUrlConfig
+import com.ustadmobile.door.DoorDatabaseCallback
 import com.ustadmobile.util.ext.deleteDatabaseAsync
+import com.ustadmobile.util.resolveEndpoint
 import mui.system.useMediaQuery
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -71,6 +76,8 @@ import web.cssom.PropertyName.Companion.display
 import web.dom.document
 import web.gpu.GPUVertexStepMode.Companion.instance
 import web.idb.indexedDB
+import web.location.location
+import web.url.URLSearchParams
 
 //Roughly as per components/Showcases on MUI-showcase #d71c6d1
 
@@ -139,7 +146,7 @@ val UstadScreens = FC<Props> {
             di = loaderData.di
             UstadLanguageConfigProvider {
                 languagesConfig = langConfig
-                val isRegistrationAllowed = js("_ustadRegistrationAllowed") as Boolean
+
 
 
 
@@ -147,13 +154,19 @@ val UstadScreens = FC<Props> {
                     client = tanstackQueryClient
 
                     Box {
-                        div{
-                            id ="registration_enabled"
-                            css {
-                                display = None.none
+                        try {
+                            val isRegistrationAllowed = js("_ustadRegistrationAllowed") as Boolean
+                            div{
+                                id ="registration_enabled"
+                                css {
+                                    display = None.none
+                                }
+                                + "$isRegistrationAllowed"
                             }
-                            + "$isRegistrationAllowed"
+                        }catch (ex:Exception){
+                        Napier.e(ex.message.toString())
                         }
+
                         sx {
                             display = Display.grid
                             gridTemplateRows = array(
@@ -235,7 +248,6 @@ val UstadScreens = FC<Props> {
 val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> ->
     Napier.base(UstadAntilog())
     Napier.d("Index: Window.onLoad")
-
     val dbName = sanitizeDbNameFromUrl(window.location.origin)
     val dbUrl = "sqlite:$dbName"
     val nodeId = localStorage.getOrPut("${dbName}_nodeId") {
@@ -246,13 +258,33 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
     }
 
     val dbNodeIdAndAuth = NodeIdAndAuth(nodeId, nodeAuth)
+    val systemDbName = sanitizeDbNameFromUrl(window.location.origin)
+    val systemDbUrl = "sqlite:$systemDbName"
+    val systemDbNodeId = localStorage.getOrPut("${systemDbName}_nodeId") {
+        Random.nextLong(0, Long.MAX_VALUE).toString()
+    }.toLong()
+
+    val systemDbNodeAuth = localStorage.getOrPut("${systemDbName}_nodeAuth") {
+        randomUuid().toString()
+    }
+    val systemDbNodeIdAndAuth = NodeIdAndAuth(systemDbNodeId, systemDbNodeAuth)
 
     val builderOptions = DatabaseBuilderOptions(
         UmAppDatabase::class,
         UmAppDatabaseJsImplementations, dbUrl = dbUrl,
-        nodeId = dbNodeIdAndAuth.nodeId,
+        nodeId  = dbNodeIdAndAuth.nodeId,
         webWorkerPath = "./worker.sql-wasm.js"
     )
+
+   val systemDbBuilderOptions= DatabaseBuilderOptions(
+       SystemDb::class,
+       SystemDbJsImplementations,
+       dbUrl = systemDbUrl,
+       nodeId = systemDbNodeIdAndAuth.nodeId,
+       webWorkerPath = "./worker.sql-wasm.js?SystemDbUrl"
+    )
+    val systemDbBuilder =  DatabaseBuilder.databaseBuilder(systemDbBuilderOptions)
+
 
     val dbBuilder = DatabaseBuilder.databaseBuilder(builderOptions)
         .addSyncCallback(dbNodeIdAndAuth)
@@ -267,17 +299,22 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
     @OptIn(DelicateCoroutinesApi::class)
     GlobalScope.promise {
         lateinit var dbBuilt: UmAppDatabase
+        lateinit var systemDbBuilt: SystemDb
         @Suppress("LiftReturnOrAssignment") // We don't want the database to be closed after the block
         try {
             dbBuilt = dbBuilder.build()
+            systemDbBuilt = systemDbBuilder.build()
         } catch (e: Exception) {
             Napier.w("Exception building database - trying to clear")
             //Probably something with no migration path, clear and retry
             indexedDB.deleteDatabaseAsync(dbName)
+            indexedDB.deleteDatabaseAsync(systemDbName)
             localStorage.clear()
 
             //Try again
             dbBuilt = dbBuilder.build()
+            systemDbBuilt = systemDbBuilder.build()
+
         }
 
         val json = Json {
@@ -297,6 +334,7 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
 
         val di = ustadJsDi(
             dbBuilt = dbBuilt,
+            systemDbBuilt = systemDbBuilt,
             dbNodeIdAndAuth = dbNodeIdAndAuth,
             json = json,
             httpClient = httpClient,

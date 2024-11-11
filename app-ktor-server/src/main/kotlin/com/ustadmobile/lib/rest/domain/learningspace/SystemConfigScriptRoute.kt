@@ -33,20 +33,19 @@ fun Route.SystemConfigScriptRoute(
 
             val learningSpace = systemDb.learningSpaceInfoDao().getLearningSpace(baseUrl)
 
-            if (learningSpace != null) {
-
-
+            val (learningSpaceExists, registrationAllowed) = if (learningSpace != null) {
                 val di: DI by closestDI()
                 val db: UmAppDatabase by di.on(call).instance(tag = DoorTag.TAG_DB)
                 val isRegistrationAllowed = db.siteDao().getSiteAsync()?.registrationAllowed
-                call.respondText(contentType = ContentType.Text.JavaScript) {
-                    "var _ustadLearningSpaceExists = true;"+
-                            "var _ustadRegistrationAllowed = $isRegistrationAllowed;"
-                }
+                Pair(true, isRegistrationAllowed ?: false)
             } else {
-                call.respond(HttpStatusCode.ExpectationFailed, "Learning space not found.")
+                Pair(false, false)
             }
 
+            call.respondText(contentType = ContentType.Text.JavaScript) {
+                "var _ustadLearningSpaceExists = $learningSpaceExists;\n"+
+                "var _ustadRegistrationAllowed = $registrationAllowed;"
+            }
         } catch (e: Throwable) {
             Napier.d { "ustadLearningSpaceExistsErr:-  ${e.message}" }
             call.respond(HttpStatusCode.InternalServerError)
