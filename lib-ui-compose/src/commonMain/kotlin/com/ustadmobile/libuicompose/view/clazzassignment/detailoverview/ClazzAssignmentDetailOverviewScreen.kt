@@ -384,15 +384,13 @@ fun ClazzAssignmentDetailOverviewScreen(
 
         } //End section that is only for submitters
 
-        val cautionMessages = listOf(
-            "Avoid sharing personal information",
-            "Report any inappropriate behavior",
-            "Be respectful in interactions"
-        )
-
         if (uiState.showSocialWarning) {
             item(key = "social-warning") {
-                SocialWarningListItem(cautionMessages,
+                SocialWarningListItem(cautions = listOf(
+                    stringResource(MR.strings.social_warning_one),
+                    stringResource(MR.strings.social_warning_two),
+                    stringResource(MR.strings.social_warning_three)
+                ),
                     onDismiss = onWarningDismiss,
                     onLearnMore = { /* Navigate to guidelines */ })
             }

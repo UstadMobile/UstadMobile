@@ -53,6 +53,7 @@ import emotion.react.css
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import mui.system.sx
+import react.Fragment
 import react.dom.html.ReactHTML.input
 import react.useRef
 import react.useRequiredContext
@@ -428,15 +429,15 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
             if(props.uiState.showClassComments) {
 
+                val strings = useStringProvider()
+
                 if (props.uiState.showSocialWarning) {
-                    item(key = "social-warning") {
+                    Fragment.create {
                         SocialWarningListItem {
                             cautions = listOf(
-                                "Be respectful in your comments",
-                                "Keep feedback constructive and professional",
-                                "Follow academic discussion guidelines",
-                                "Report any inappropriate comments",
-                                "Think before you post"
+                                strings[MR.strings.social_warning_one],
+                                strings[MR.strings.social_warning_two],
+                                strings[MR.strings.social_warning_three],
                             )
                             onDismiss = props.onWarningDismiss
                             onLearnMore = { /* Navigate to guidelines */ }
