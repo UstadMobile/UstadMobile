@@ -275,7 +275,8 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             createRetentionLocksForManifestUseCase = instance(),
             httpClient = instance(),
             json = instance(),
-        )
+            repo = on(context).instance(tag = DoorTag.TAG_REPO),
+            )
     }
 
     bind<CreateRetentionLocksForManifestUseCase>() with scoped(EndpointScope.Default).singleton {

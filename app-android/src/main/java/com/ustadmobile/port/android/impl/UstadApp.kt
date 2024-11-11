@@ -700,7 +700,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 createRetentionLocksForManifestUseCase = instance(),
                 httpClient = instance(),
                 json = instance(),
-            )
+                repo = on(context).instance(tag = DoorTag.TAG_REPO),
+                )
         }
 
         bind<CreateRetentionLocksForManifestUseCase>() with scoped(EndpointScope.Default).singleton {

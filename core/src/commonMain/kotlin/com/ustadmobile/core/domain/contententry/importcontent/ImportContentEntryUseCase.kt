@@ -39,7 +39,8 @@ class ImportContentEntryUseCase(
     private val enqueueBlobUploadClientUseCase: EnqueueBlobUploadClientUseCase? = null,
     private val createRetentionLocksForManifestUseCase: CreateRetentionLocksForManifestUseCase? = null,
     private val httpClient: HttpClient? = null,
-) {
+    private val repo: UmAppDatabase,
+    ) {
 
     suspend operator fun invoke(
         contentEntryImportJobId: Long,
@@ -87,7 +88,7 @@ class ImportContentEntryUseCase(
                         val newContentEntry = metadataResult?.entry ?: throw IllegalStateException("Failed to extract metadata")
 
                         // Save the new ContentEntry to the database
-                        val contentEntryUid = db.contentEntryDao().insertAsync(newContentEntry)
+                        val contentEntryUid = repo.contentEntryDao().insertAsync(newContentEntry)
 
                         // Update job with the new ContentEntry UID
                         job.cjiContentEntryUid = contentEntryUid
@@ -99,7 +100,7 @@ class ImportContentEntryUseCase(
                                 cepcjParentContentEntryUid = job.cjiParentContentEntryUid,
                                 cepcjChildContentEntryUid = contentEntryUid
                             )
-                            db.contentEntryParentChildJoinDao().insertAsync(parentChildJoin)
+                            repo.contentEntryParentChildJoinDao().insertAsync(parentChildJoin)
                         }
                     } catch (e: Exception) {
                         Napier.e(e) { "Error during metadata extraction: ${e.message}" }
