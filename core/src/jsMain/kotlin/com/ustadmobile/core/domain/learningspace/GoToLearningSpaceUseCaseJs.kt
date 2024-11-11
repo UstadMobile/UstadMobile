@@ -18,7 +18,7 @@ class GoToLearningSpaceUseCaseJs(
     ) {
         val makeLinkUseCase: MakeLinkUseCase by di.on(LearningSpace(url)).instance()
         val finalUrl = makeLinkUseCase(viewName, args)
-       location.href=finalUrl
+       location.href=finalUrl.replace("/umapp", "")
 
 
     }

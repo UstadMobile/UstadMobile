@@ -61,7 +61,7 @@ class CreateLearningSpaceUseCase(
             person = Person(
                 username = request.adminUsername,
                 firstNames = "Admin",
-                lastName = "Person"
+                lastName = "User"
             ),
             systemPermissions = PermissionFlags.ALL,
         )

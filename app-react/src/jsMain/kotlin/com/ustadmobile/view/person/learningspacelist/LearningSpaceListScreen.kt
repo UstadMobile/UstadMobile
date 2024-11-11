@@ -10,6 +10,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.clazz.permissionlist.CoursePermissionListItem
@@ -29,6 +30,7 @@ import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
+import web.cssom.px
 
 
 external interface LearningSpaceListScreenProps : Props {
@@ -68,13 +70,14 @@ val LearningSpaceListComponent2 = FC<LearningSpaceListScreenProps> { props ->
         }
 
     }
+    val muiAppState = useMuiAppState()
     VirtualList {
-//        style = jso {
-//            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
-//            width = 100.pct
-//            contain = Contain.strict
-//            overflowY = Overflow.scroll
-//        }
+        style = jso {
+            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            width = 100.pct
+            contain = Contain.strict
+            overflowY = Overflow.scroll
+     }
 
 
         content = virtualListContent {
@@ -86,7 +89,7 @@ val LearningSpaceListComponent2 = FC<LearningSpaceListScreenProps> { props ->
                     key = "1"
                     ListItemButton {
                         onClick = {
-                            props.onClickNext()
+                            learningSpace?.lsiUrl?.let { it1 -> props.onSelectLearningSpace(it1) }
                         }
 
 

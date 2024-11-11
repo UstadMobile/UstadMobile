@@ -351,8 +351,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 dbClass =  SystemDb::class,
                 dbName = dbName,
                 nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId
-            ).addCallback(AddOfflineItemInactiveTriggersCallback())
-                .build()
+            ).build()
         }
 
         bind<SystemDbDataLayer>() with singleton {
