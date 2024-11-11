@@ -4,6 +4,9 @@
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
+    <string name="social_warning_one">"Avoid sharing personal information"</string>
+    <string name="social_warning_two">"Report any inappropriate behavior"</string>
+    <string name="social_warning_three">"Be respectful in interactions"</string>
     <string name="got_it">Got it</string>
     <string name="learn_more">Learn more</string>
     <string name="be_careful_interacting_online">Be careful interacting online and in-app!</string>
