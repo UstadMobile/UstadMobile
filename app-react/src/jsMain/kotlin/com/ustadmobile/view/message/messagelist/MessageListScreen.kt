@@ -1,7 +1,9 @@
 package com.ustadmobile.view.message.messagelist
 
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.MR.strings.add
 import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.paging.ListPagingSource
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListUiState
@@ -87,15 +89,15 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
         content = virtualListContent {
             reverseLayout = false
 
+            val strings = useStringProvider()
+
             if (props.uiState.showSocialWarning) {
                 Fragment.create {
                     SocialWarningListItem {
                         cautions = listOf(
-                            "Avoid sharing personal information",
-                            "Report any inappropriate behavior",
-                            "Be respectful in interactions",
-                            "Stay cautious when engaging with others",
-                            "Think twice before sharing sensitive details"
+                            strings[MR.strings.social_warning_one],
+                            strings[MR.strings.social_warning_two],
+                            strings[MR.strings.social_warning_three],
                         )
                         onDismiss = props.onWarningDismiss
                         onLearnMore = { /* Navigate to guidelines */ }

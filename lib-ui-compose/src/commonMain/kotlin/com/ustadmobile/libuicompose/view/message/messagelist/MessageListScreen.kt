@@ -13,6 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.paging.compose.itemKey
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListUiState
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.libuicompose.components.LazyColumnVerticalScrollbar
@@ -24,6 +25,7 @@ import com.ustadmobile.libuicompose.util.rememberDateFormat
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import com.ustadmobile.libuicompose.components.SocialWarningListItem
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -77,17 +79,13 @@ fun MessageListScreen(
                 modifier = Modifier.fillMaxSize().scrollBarPadding()
             ) {
 
-                val cautionMessages = listOf(
-                    "Avoid sharing personal information",
-                    "Report any inappropriate behavior",
-                    "Be respectful in interactions",
-                    "Stay cautious when engaging with others",
-                    "Think twice before sharing sensitive details"
-                )
-
                 if (uiState.showSocialWarning) {
                     item(key = "social-warning") {
-                        SocialWarningListItem(cautionMessages,onDismiss = onWarningDismiss,
+                        SocialWarningListItem(cautions = listOf(
+                            stringResource(MR.strings.social_warning_one),
+                            stringResource(MR.strings.social_warning_two),
+                            stringResource(MR.strings.social_warning_three)
+                        ),onDismiss = onWarningDismiss,
                             onLearnMore = { /* Navigate to guidelines */ })
                     }
                 }

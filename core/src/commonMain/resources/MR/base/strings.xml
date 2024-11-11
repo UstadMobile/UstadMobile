@@ -4,6 +4,9 @@
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
+    <string name="social_warning_one">"Avoid sharing personal information"</string>
+    <string name="social_warning_two">"Report any inappropriate behavior"</string>
+    <string name="social_warning_three">"Be respectful in interactions"</string>
     <string name="share_app">Share app</string>
     <string name="send_apk_file">Send app file (APK)</string>
     <string name="send_app_link">Share app store link</string>
