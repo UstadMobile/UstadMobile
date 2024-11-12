@@ -1,5 +1,7 @@
 package com.ustadmobile.mui.components
 
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.hooks.useStringProvider
 import mui.icons.material.Circle
 import mui.icons.material.Warning
 import mui.material.Button
@@ -17,7 +19,6 @@ import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
-import web.cssom.Color
 import web.cssom.px
 
 external interface SocialWarningProps : Props {
@@ -27,25 +28,23 @@ external interface SocialWarningProps : Props {
 }
 
 val SocialWarningListItem = FC<SocialWarningProps> { props ->
+
+    val strings = useStringProvider()
+
     Paper {
         sx {
-            marginBottom = 16.px
-            backgroundColor = Color("rgba(0, 0, 0, 0.02)")
+            marginBottom = 2.px  // spacing unit as it's about layout, not theming
         }
 
         // Warning header with icon and buttons
         ListItem {
             ListItemIcon {
-                Warning {  // Make sure this is imported from mui.icons.material
-                    sx {
-                        color = Color("#d32f2f")
-                    }
-                }
+                Warning()  // Using default theme color
             }
 
             ListItemText {
-                primary = ReactNode("Be Careful")
-                secondary = ReactNode("Please be mindful when interacting with others")
+                primary = ReactNode(strings[MR.strings.be_careful],
+                )
             }
 
             // Action buttons
@@ -56,13 +55,13 @@ val SocialWarningListItem = FC<SocialWarningProps> { props ->
                 Button {
                     variant = ButtonVariant.text
                     onClick = { props.onDismiss?.invoke() }
-                    +"Got it"
+                    + strings[MR.strings.got_it]
                 }
 
                 Button {
                     variant = ButtonVariant.text
                     onClick = { props.onLearnMore?.invoke() }
-                    +"Learn more"
+                    + strings[MR.strings.learn_more]
                 }
             }
         }
@@ -74,12 +73,7 @@ val SocialWarningListItem = FC<SocialWarningProps> { props ->
             props.cautions.forEach { message ->
                 ListItem {
                     ListItemIcon {
-                        Circle {  // Make sure this is imported from mui.icons.material
-                            sx {
-                                color = Color("rgba(0, 0, 0, 0.38)")
-                                fontSize = 8.px
-                            }
-                        }
+                        Circle()  // Using default theme sizing and color
                     }
                     ListItemText {
                         primary = ReactNode(message)
@@ -89,6 +83,5 @@ val SocialWarningListItem = FC<SocialWarningProps> { props ->
         }
     }
 }
-
 
 

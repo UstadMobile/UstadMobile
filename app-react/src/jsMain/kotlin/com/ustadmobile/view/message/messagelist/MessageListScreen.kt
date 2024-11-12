@@ -1,7 +1,6 @@
 package com.ustadmobile.view.message.messagelist
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.MR.strings.add
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.paging.ListPagingSource
@@ -27,12 +26,10 @@ import mui.material.Container
 import react.FC
 import react.Fragment
 import react.Props
-import react.ReactNode
 import react.create
 import react.useEffect
 import react.useRef
 import react.useState
-import web.animations.CompositeOperation.Companion.add
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
