@@ -75,19 +75,17 @@ class ImportContentEntryUseCase(
                     cjiUid = job.cjiUid,
                     status = JobStatus.RUNNING
                 )
-
                 // Check if cjiContentEntryUid is 0
                 Napier.v { "Checking cjiContentEntryUid: ${job.cjiContentEntryUid}" }
                 if (job.cjiContentEntryUid == 0L) {
                     Napier.v { "Extracting metadata for new ContentEntry" }
                     try {
                         // Extract metadata to create a new ContentEntry
-                        val metadataResult = importer.extractMetadata(DoorUri.parse(job.sourceUri!!), job.cjiOriginalFilename)
-                        Napier.v { "Metadata extraction result: $metadataResult" }
+                        val parsedUri = DoorUri.parse(job.sourceUri!!)
+                        val metadataResult = importer.extractMetadata(parsedUri, job.cjiOriginalFilename)
 
                         val newContentEntry = metadataResult?.entry ?: throw IllegalStateException("Failed to extract metadata")
-
-                        // Save the new ContentEntry to the database
+                        // Save the new ContentEntry to the repo
                         val contentEntryUid = repo.contentEntryDao().insertAsync(newContentEntry)
 
                         // Update job with the new ContentEntry UID
@@ -136,7 +134,6 @@ class ImportContentEntryUseCase(
 
             throw e
         }
-
         db.contentEntryVersionDao().insertAsync(contentEntryVersionEntity)
 
         val enqueueBlobUploadClientUseCaseVal = enqueueBlobUploadClientUseCase

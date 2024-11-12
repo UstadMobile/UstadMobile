@@ -6,6 +6,8 @@ import com.russhwolf.settings.Settings
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
+import com.ustadmobile.core.contentformats.directory.ListDirectoryUriUseCase
+import com.ustadmobile.core.contentformats.directory.ListDirectoryUriUseCaseJvmImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCaseJvm
@@ -14,6 +16,8 @@ import com.ustadmobile.core.domain.blob.upload.BlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.upload.EnqueueBlobUploadClientUseCaseJvm
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
+import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.ImportContentEntryUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.upload.DEFAULT_CHUNK_SIZE
@@ -35,6 +39,7 @@ import org.kodein.di.bind
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import org.kodein.di.provider
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import org.quartz.Scheduler
@@ -149,6 +154,19 @@ class XferTestClient(
 
             import(ContentImportersDiModuleJvm)
 
+            bind<EnqueueContentEntryImportUseCase>() with scoped(EndpointScope.Default).provider {
+                EnqueueImportContentEntryUseCaseJvm(
+                    db = instance(tag = DoorTag.TAG_DB),
+                    scheduler = instance(),
+                    endpoint = context,
+                    enqueueRemoteImport = null
+                )
+            }
+
+            bind<ListDirectoryUriUseCase>() with singleton {
+                ListDirectoryUriUseCaseJvmImpl()
+            }
+
             bind<ImportContentEntryUseCase>() with scoped(node.endpointScope).singleton {
                 ImportContentEntryUseCase(
                     db = instance(tag = DoorTag.TAG_DB),
@@ -157,6 +175,7 @@ class XferTestClient(
                     createRetentionLocksForManifestUseCase = instance(),
                     httpClient = node.httpClient,
                     json = instance(),
+                    repo = on(context).instance(tag = DoorTag.TAG_REPO)
                 )
             }
 
