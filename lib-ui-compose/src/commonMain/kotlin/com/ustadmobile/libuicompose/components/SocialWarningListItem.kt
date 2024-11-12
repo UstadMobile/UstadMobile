@@ -20,6 +20,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.ustadmobile.core.MR
+import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
 fun SocialWarningListItem(
@@ -43,7 +45,7 @@ fun SocialWarningListItem(
             },
             headlineContent = {
                 Text(
-                    "Be Careful",
+                    stringResource(MR.strings.be_careful),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -51,10 +53,10 @@ fun SocialWarningListItem(
             trailingContent = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = onDismiss) {
-                        Text("Got it")
+                        Text( stringResource(MR.strings.got_it))
                     }
                     TextButton(onClick = onLearnMore) {
-                        Text("Learn more")
+                        Text( stringResource(MR.strings.learn_more))
                     }
                 }
             }
