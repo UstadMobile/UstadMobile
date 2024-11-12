@@ -2,6 +2,9 @@ package com.ustadmobile.port.desktop
 
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
+import com.ustadmobile.appconfigdb.SystemDb
+import com.ustadmobile.appconfigdb.SystemDbDataLayer
+import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -53,6 +56,7 @@ import com.ustadmobile.core.impl.locale.StringProviderJvm
 import com.ustadmobile.core.schedule.initQuartzDb
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
+import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getCommandFile
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
@@ -398,7 +402,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         val contextDataDir: File = on(context).instance(tag = DiTag.TAG_CONTEXT_DATA_ROOT)
         val dbUrl = "jdbc:sqlite:${contextDataDir.absolutePath}/UmAppDatabase.db"
         val nodeIdAndAuth: NodeIdAndAuth = instance()
-
+        Napier.i("db url for UmAppDatabase"+dbUrl)
         val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl, nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
             .addMigrations(*migrationList().toTypedArray())
@@ -417,6 +421,51 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
                 db = db,
                 cache = cache,
             )
+        )
+    }
+
+    bind<SystemDbNodeIdAndAuth>() with singleton {
+        val settings: Settings = instance()
+        val systemUrlConfig:SystemUrlConfig = instance()
+        val contextIdentifier: String = sanitizeDbNameFromUrl(systemUrlConfig.systemBaseUrl)
+        SystemDbNodeIdAndAuth(nodeIdAndAuth =settings.getOrGenerateNodeIdAndAuth(contextIdentifier) )
+    }
+
+    bind<SystemDb>() with singleton {
+        val systemUrlConfig:SystemUrlConfig = instance()
+        val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
+        val dataDir: File = instance(tag = TAG_DATA_DIR)
+        Napier.i("db url for systemdb"+dataDir.absolutePath)
+        val dbUrl = "jdbc:sqlite:${dataDir.absolutePath}/localhost_/SystemDb.db"
+         Napier.i("db url for systemdb"+dbUrl)
+        DatabaseBuilder.databaseBuilder(
+            dbUrl = dbUrl,
+            dbClass =  SystemDb::class,
+            nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId
+        ).build()
+    }
+
+    bind<SystemDbDataLayer>() with singleton {
+        val systemUrlConfig:SystemUrlConfig = instance()
+        val systemDb: SystemDb = instance<SystemDb>()
+
+        val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
+        val repo: SystemDb = systemDb.asRepository(
+            RepositoryConfig.repositoryConfig(
+                context = context,
+                endpoint = UrlKmp(systemUrlConfig.systemBaseUrl).resolve("api/SystemDb/")
+                    .toString(),
+                nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
+                auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
+                httpClient = instance(),
+                okHttpClient = instance(),
+                json = instance()
+            )
+        )
+
+        SystemDbDataLayer(
+            localDb  = systemDb,
+            repository = repo,
         )
     }
 
