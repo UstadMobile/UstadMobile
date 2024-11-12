@@ -1,0 +1,4 @@
+package com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab
+
+class ContentEntryDetailAttemptsStatementListViewModel {
+}
