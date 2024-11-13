@@ -112,8 +112,7 @@ expect abstract class XapiSessionEntityDao {
                                    FROM StatementEntity
                                  WHERE XapiSessionEntity.xseRegistrationHi = StatementEntity.statementIdHi
                                       AND XapiSessionEntity.xseRegistrationLo = StatementEntity.statementIdLo
-AND Statement.resultSuccess = successful
-                )) as sessionSuccesful
+                )) 
                FROM XapiSessionEntity
                WHERE XapiSessionEntity.xseContentEntryUid = :contentEntryUid
                AND XapiSessionEntity.xseAccountPersonUid = :personUid

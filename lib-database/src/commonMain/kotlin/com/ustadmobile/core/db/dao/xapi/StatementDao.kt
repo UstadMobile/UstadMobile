@@ -279,6 +279,14 @@ expect abstract class StatementDao {
         accountPersonUid: Long,
         actorUid: Long,
     ): StatementEntity?
+    @Query("""
+    
+        SELECT * FROM StatementEntity
+        
+               WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+               AND StatementEntity.statementActorPersonUid = :personUid
 
+""")
+    abstract  fun getStatementList(contentEntryUid: Long, personUid: Long): PagingSource<Int, StatementEntity>
 
 }
