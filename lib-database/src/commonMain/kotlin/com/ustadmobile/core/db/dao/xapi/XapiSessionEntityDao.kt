@@ -69,23 +69,6 @@ expect abstract class XapiSessionEntityDao {
     ): XapiSessionEntity?
 
 
-
-/*
-
-    @Query("""
-    SELECT Person.*,
-       (SELECT COUNT(XapiSessionEntity.xseUid)
-		  FROM XapiSessionEntity
-		 WHERE XapiSessionEntity.xseAccountPersonUid = Person.personUid
-		   AND XapiSessionEntity.xseContentEntryUid = :contentEntryUid) AS numberAttempts
-	FROM Person
-    LEFT JOIN PersonPicture ON Person.personUid = PersonPicture.personPictureUid
-    GROUP BY Person.personUid
-    HAVING numberAttempts >= 1
-""")
-    abstract suspend fun getAttemptList(contentEntryUid: Long): PagingSource<Int, PersonAndAttemptInfo>
-*/
-
     @Query("""
     SELECT Person.*, PersonPicture.*,
            (SELECT COUNT(XapiSessionEntity.xseUid)
