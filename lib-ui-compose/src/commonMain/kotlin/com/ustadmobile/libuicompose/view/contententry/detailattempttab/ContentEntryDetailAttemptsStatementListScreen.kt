@@ -18,46 +18,46 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.paging.RefreshCommand
-import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
-
-import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
+import com.ustadmobile.libuicompose.view.contententry.detailattempttab.ContentEntryDetailAttemptsSessionListScreen
 import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun ContentEntryDetailAttemptsStatementScreen(
+fun ContentEntryDetailAttemptsStatementListScreen(
     viewModel: ContentEntryDetailAttemptsStatementListViewModel
 ) {
     // Collect the personName from the ViewModel
     val uiState = viewModel.uiState.collectAsState(ContentEntryDetailAttemptsStatementListUiState())
+    ContentEntryDetailAttemptsStatementListScreen(
+        uiState = uiState.value,
+        refreshCommandFlow = viewModel.refreshCommandFlow,
 
+        )
 
 }
 
 @Composable
-fun ContentEntryDetailAttemptsStatementListViewModel(
+fun ContentEntryDetailAttemptsStatementListScreen(
     uiState: ContentEntryDetailAttemptsStatementListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
-    onClickEntry: (StatementEntity) -> Unit = {},
 ) {
-    val attemptsSessionListPager =
+    val attemptsStatementListPager =
         rememberDoorRepositoryPager(uiState.attemptsStatementList, refreshCommandFlow)
-    val attemptsSessionListItems = attemptsSessionListPager.lazyPagingItems
+    val attemptsStatementListItems = attemptsStatementListPager.lazyPagingItems
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ){
         ustadPagedItems(
-            pagingItems = attemptsSessionListItems,
+            pagingItems = attemptsStatementListItems,
             key = {it.statementIdHi }
-        )  { attemptsSessionListItems ->
+        )  { attemptsStatementListItems ->
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {
-                    attemptsSessionListItems?.also(onClickEntry)
                 },
                 leadingContent = {
                     // Add an icon in the leading content
@@ -69,7 +69,7 @@ fun ContentEntryDetailAttemptsStatementListViewModel(
                 },
                 headlineContent = {
                     androidx.compose.material3.Text(
-                        text = if (attemptsSessionListItems?.resultCompletion == true) {
+                        text = if (attemptsStatementListItems?.resultCompletion == true) {
                             "Completed"
                         } else {
                             "Incomplete"
