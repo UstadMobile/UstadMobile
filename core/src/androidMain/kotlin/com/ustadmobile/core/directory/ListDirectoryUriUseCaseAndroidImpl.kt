@@ -8,14 +8,9 @@ import com.ustadmobile.core.util.ext.toDocumentFileIncludingSubpath
 import com.ustadmobile.door.DoorUri
 
 /**
- * DocumentFile URIs on Android are more difficult - and as per docs:
- *
- * "Each document has a unique identifier within that provider. This identifier is an opaque
- * implementation detail of the provider, and as such it must not be parsed."
- *
- * When the user selects a directory from the provider, then a URI is returned for the selected
- * directory. The subfolder URIs returned by DocumentFile cannot be used to lookup a corresponding
- * DocumentFile
+ * DocumentFile URIs on Android are more difficult - only the root Uri that we receive via
+ * ACTION_OPEN_DOCUMENT_TREE will work with DocumentFile.fromTreeUri . See
+ * com.ustadmobile.core.util.ext.UriExt for additional notes on the workaround approach.
  */
 class ListDirectoryUriUseCaseAndroidImpl(private val context: Context) : ListDirectoryUriUseCase {
 

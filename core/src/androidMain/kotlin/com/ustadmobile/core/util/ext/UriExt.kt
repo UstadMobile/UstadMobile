@@ -14,6 +14,16 @@ package com.ustadmobile.core.util.ext
  * subpath appended in the Uri fragment e.g. content://some/path/selected#subfolder1%2Fsubfolder2 .
  * It is possible to use this to lookup a DocumentFile by using DocumentFile.fromTreeUri and then
  * following the subpath via DocumentFile.listFiles .
+ *
+ * As per:
+ * https://developer.android.com/reference/androidx/documentfile/provider/DocumentFile
+ *
+ * "Each document has a unique identifier within that provider. This identifier is an opaque
+ * implementation detail of the provider, and as such it must not be parsed."
+ *
+ * When the user selects a directory from the provider, then a URI is returned for the selected
+ * directory. The subfolder URIs returned by DocumentFile cannot be used to lookup a corresponding
+ * DocumentFile, hence the need for these functions.
  */
 
 import android.content.Context
