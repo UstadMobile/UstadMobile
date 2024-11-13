@@ -1,38 +1,61 @@
 package com.ustadmobile.core.directory
 
 import android.content.Context
-import androidx.documentfile.provider.DocumentFile
-import com.ustadmobile.core.contentformats.directory.InvalidDirectoryUriException
+import android.net.Uri
 import com.ustadmobile.core.contentformats.directory.ListDirectoryUriUseCase
+import com.ustadmobile.core.util.ext.appendSubTreePath
+import com.ustadmobile.core.util.ext.toDocumentFileIncludingSubpath
 import com.ustadmobile.door.DoorUri
 
+/**
+ * DocumentFile URIs on Android are more difficult - and as per docs:
+ *
+ * "Each document has a unique identifier within that provider. This identifier is an opaque
+ * implementation detail of the provider, and as such it must not be parsed."
+ *
+ * When the user selects a directory from the provider, then a URI is returned for the selected
+ * directory. The subfolder URIs returned by DocumentFile cannot be used to lookup a corresponding
+ * DocumentFile
+ */
 class ListDirectoryUriUseCaseAndroidImpl(private val context: Context) : ListDirectoryUriUseCase {
 
     override fun invoke(directoryUri: String): List<ListDirectoryUriUseCase.ListDirectoryItem> {
-        val documentFile = DocumentFile.fromTreeUri(context, android.net.Uri.parse(directoryUri))
-        return listDirectoryContent(documentFile)
-    }
+        val documentFile = Uri.parse(directoryUri).toDocumentFileIncludingSubpath(context)
 
+        return documentFile.listFiles().mapNotNull {
+            val nameVal = it.name
 
-    private fun listDirectoryContent(documentFile: DocumentFile?): List<ListDirectoryUriUseCase.ListDirectoryItem> {
-        if (documentFile == null || !documentFile.isDirectory) {
-            throw InvalidDirectoryUriException("The provided URI is not a valid directory.")
-        }
-        return documentFile.listFiles().map {
-            ListDirectoryUriUseCase.ListDirectoryItem(
-                uri = DoorUri(it.uri),
-                fileName = it.name ?: FILENAME
-            )
+            when {
+                it.isDirectory && nameVal != null -> {
+                    ListDirectoryUriUseCase.ListDirectoryItem(
+                        uri = DoorUri(Uri.parse(directoryUri).appendSubTreePath(nameVal)),
+                        fileName = nameVal,
+                    )
+                }
+
+                it.isFile -> {
+                    ListDirectoryUriUseCase.ListDirectoryItem(
+                        uri = DoorUri(it.uri),
+                        fileName = nameVal ?: UNKNOWN_FILENAME
+                    )
+                }
+
+                else -> {
+                    null
+                }
+            }
         }
     }
 
     override fun isDirectory(directoryUri: String): Boolean {
-        val uri = android.net.Uri.parse(directoryUri)
-        val documentFile = DocumentFile.fromTreeUri(context, uri)
-        return documentFile?.isDirectory == true
+        try {
+            return invoke(directoryUri).isNotEmpty()
+        }catch(e: Throwable) {
+            return false
+        }
     }
 
     companion object {
-        const val FILENAME = "filename"
+        const val UNKNOWN_FILENAME = "unknown"
     }
 }

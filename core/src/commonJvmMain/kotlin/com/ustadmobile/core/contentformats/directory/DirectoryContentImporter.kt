@@ -7,23 +7,15 @@ import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
-import com.ustadmobile.core.domain.cachestoragepath.getLocalUriIfRemote
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
-import com.ustadmobile.core.uri.UriHelper
-import com.ustadmobile.core.util.ext.displayFilename
-import com.ustadmobile.core.util.ext.requireSourceAsDoorUri
 import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
-import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
@@ -61,6 +53,7 @@ class DirectoryContentImporter(
      */
     override suspend fun extractMetadata(uri: DoorUri, originalFilename: String?): MetadataResult? =
         withContext(Dispatchers.IO) {
+            Napier.v("DirectoryContentImporter: Uri=$uri originalFilename=$originalFilename")
             if (listDirectoryUriUseCase.isDirectory(uri.toString())) {
                 try {
                     MetadataResult(
@@ -91,7 +84,7 @@ class DirectoryContentImporter(
         jobItem: ContentEntryImportJob,
         progressListener: ContentImportProgressListener
     ): ContentEntryVersion = withContext(Dispatchers.IO) {
-
+        val importLogPrefix = "DirectoryContentImporter(#${jobItem.cjiUid} - ${jobItem.sourceUri}):"
         // List all files within the directory URI
         val fileUris = listDirectoryUriUseCase(jobItem.sourceUri.toString())
 
@@ -107,6 +100,7 @@ class DirectoryContentImporter(
                     entry.fileName
                 )
                 if (metadataResult != null) {
+                    Napier.v("$importLogPrefix Enqueuing job item uri=${entry.uri} filename=${entry.fileName}")
                     // Enqueue job item for files that have metadata
                     val contentJobItem = ContentEntryImportJob(
                         sourceUri = entry.uri.toString(),
@@ -117,10 +111,10 @@ class DirectoryContentImporter(
                     )
                     enqueueContentEntryImportUseCase.invoke(contentJobItem)
                 } else {
-                    Napier.w("Unsupported file type or failed to extract metadata for: ${entry}")
+                    Napier.w("$importLogPrefix Unsupported file type or failed to extract metadata for: ${entry}")
                 }
             } catch (e: Throwable) {
-                Napier.w("Exception For Entry: ${entry}", e)
+                Napier.e("$importLogPrefix Exception For Entry: ${entry}", e)
             }
         }
 

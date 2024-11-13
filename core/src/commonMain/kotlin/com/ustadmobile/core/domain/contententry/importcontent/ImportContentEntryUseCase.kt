@@ -40,7 +40,7 @@ class ImportContentEntryUseCase(
     private val createRetentionLocksForManifestUseCase: CreateRetentionLocksForManifestUseCase? = null,
     private val httpClient: HttpClient? = null,
     private val repo: UmAppDatabase,
-    ) {
+) {
 
     suspend operator fun invoke(
         contentEntryImportJobId: Long,
@@ -137,11 +137,13 @@ class ImportContentEntryUseCase(
         db.contentEntryVersionDao().insertAsync(contentEntryVersionEntity)
 
         val enqueueBlobUploadClientUseCaseVal = enqueueBlobUploadClientUseCase
-        if(enqueueBlobUploadClientUseCaseVal != null && httpClient != null) {
+        val manifestUrl = contentEntryVersionEntity.cevManifestUrl
+
+        //Upload the entry if there is an upload client (e.g. this is running on mobile or desktop)
+        // and there is a manifest url (e.g. this is a ContentEntry leaf node).
+        if(enqueueBlobUploadClientUseCaseVal != null && httpClient != null && manifestUrl != null) {
             //Because the entry was imported just now, it will be in the cache. This will still
             //work offline.
-            val manifestUrl = contentEntryVersionEntity.cevManifestUrl
-                ?: throw IllegalStateException("imported entry has no manifest url")
             val manifest: ContentManifest = json.decodeFromString(
                 httpClient.get(manifestUrl).bodyAsDecodedText())
             val locksCreated = createRetentionLocksForManifestUseCase?.invoke(
