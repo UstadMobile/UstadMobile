@@ -935,6 +935,14 @@ fun AppNavHost(
                     )
                 )
             }
+            contentScene("/${ContentEntryDetailAttemptsStatementListViewModel.DEST_NAME}") { backStackEntry ->
+                ContentEntryDetailAttemptsStatementListScreen(
+                    appViewModel(
+                        backStackEntry, ContentEntryDetailAttemptsStatementListViewModel::class,
+                        ::ContentEntryDetailAttemptsStatementListViewModel
+                    )
+                )
+            }
         }
     }
 }
