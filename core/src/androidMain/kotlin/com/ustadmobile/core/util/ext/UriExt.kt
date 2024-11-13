@@ -18,6 +18,7 @@ package com.ustadmobile.core.util.ext
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toFile
 import androidx.documentfile.provider.DocumentFile
 
 private const val SUBTREE_FRAGMENT_PREFIX = "_ustadSubTreePath="
@@ -25,10 +26,11 @@ private const val SUBTREE_FRAGMENT_PREFIX = "_ustadSubTreePath="
 /**
  * Add a subtree path to the fragment of thhe given Uri.
  *
- * @param subTreePath the subtree path to add to the Uri
+ * @param subTreePath the subtree path to add to the Uri fragment
+ *
  * @return a new Uri where the subtree path is added to the fragment
  */
-fun Uri.addSubTreePath(subTreePath: String): Uri {
+fun Uri.withSubTreePathFragment(subTreePath: String): Uri {
     return this.buildUpon()
         .fragment("${this.fragment ?: ""}$SUBTREE_FRAGMENT_PREFIX$subTreePath")
         .build()
@@ -72,10 +74,16 @@ fun Uri.extractSubTreePath(): Pair<Uri, String?> {
 fun Uri.toDocumentFileIncludingSubpath(
     context: Context,
 ): DocumentFile {
-    val (treeUri, subTreePath) = extractSubTreePath()
-    var documentFile = DocumentFile.fromTreeUri(
-        context, treeUri
-    ) ?: throw IllegalArgumentException("$treeUri is not a tree uri")
+    val (baseUri, subTreePath) = extractSubTreePath()
+
+    /*
+     * Normally the base will be a tree Uri. Testing may use a file Uri.
+     */
+    var documentFile = if(baseUri.scheme == "file") {
+        DocumentFile.fromFile(baseUri.toFile())
+    }else {
+        DocumentFile.fromTreeUri(context, baseUri)
+    } ?: throw IllegalArgumentException("$baseUri is not a tree uri")
 
     subTreePath?.split("/")?.filter { it.isNotEmpty() }?.forEach {  subPathComponent ->
         documentFile = documentFile.listFiles().first { it.name == subPathComponent }
@@ -91,5 +99,5 @@ fun Uri.toDocumentFileIncludingSubpath(
  */
 fun Uri.appendSubTreePath(subfolder: String): Uri {
     val (treeUri, subPath) = extractSubTreePath()
-    return treeUri.addSubTreePath("${subPath ?: ""}/$subfolder")
+    return treeUri.withSubTreePathFragment("${subPath ?: ""}/$subfolder")
 }
