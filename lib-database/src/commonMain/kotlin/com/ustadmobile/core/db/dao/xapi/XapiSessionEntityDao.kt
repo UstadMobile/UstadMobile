@@ -8,6 +8,7 @@ import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -94,9 +95,26 @@ expect abstract class XapiSessionEntityDao {
     FROM Person
     LEFT JOIN PersonPicture 
                 ON PersonPicture.personPictureUid = Person.personUid
+    WHERE numberAttempts >= 1
                
 """)
     abstract  fun getAttemptList(contentEntryUid: Long): PagingSource<Int, PersonAndAttemptInfo>
 
+    @Query("""
+    
+        SELECT XapiSessionEntity.*,
+         (SELECT EXISTS(
+                              SELECT *
+                                   FROM StatementEntity
+                                 WHERE XapiSessionEntity.xseRegistrationHi = StatementEntity.statementIdHi
+                                      AND XapiSessionEntity.xseRegistrationLo = StatementEntity.statementIdLo
+AND Statement.resultSuccess = successful
+                )) as sessionSuccesful
+               FROM XapiSessionEntity
+               WHERE XapiSessionEntity.xseContentEntryUid = :contentEntryUid
+               AND XapiSessionEntity.xseAccountPersonUid = :personUid
+
+""")
+    abstract  fun getSessionList(contentEntryUid: Long, personUid: Long): PagingSource<Int, StatementEntity>
 }
-// WHERE numberAttempts >= 1
+//
