@@ -8,6 +8,7 @@ import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -15,7 +16,7 @@ import org.kodein.di.DI
  data class ContentEntryDetailAttemptsSessionListUiState(
      val personName: String = "",
      val contentEntryTitle:String="",
-     val attemptsSessionList: () -> PagingSource<Int, StatementEntity> = { EmptyPagingSource() },
+     val attemptsSessionList: () -> PagingSource<Int, XapiSessionEntity> = { EmptyPagingSource() },
      val personUid:Long=0
      )
 
@@ -27,10 +28,10 @@ class ContentEntryDetailAttemptsSessionListViewModel(
     private val entityUidArg = savedStateHandle[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
 
     private val argPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
-    private fun getAttemptsSessionListAsPagingSource(contentEntryUid: Long, personUid: Long) : PagingSource<Int, StatementEntity>  {
+    private fun getAttemptsSessionListAsPagingSource(contentEntryUid: Long, personUid: Long) : PagingSource<Int, XapiSessionEntity>  {
         return activeRepo.xapiSessionEntityDao().getSessionList(contentEntryUid,personUid)
     }
-    private val attemptsSessionListPagingSource: ListPagingSourceFactory<StatementEntity> = {
+    private val attemptsSessionListPagingSource: ListPagingSourceFactory<XapiSessionEntity> = {
 
         getAttemptsSessionListAsPagingSource(contentEntryUid=entityUidArg,personUid=argPersonUid )
     }
@@ -59,7 +60,7 @@ class ContentEntryDetailAttemptsSessionListViewModel(
         }
     }
     fun onClickEntry(
-        entry: StatementEntity
+        entry: XapiSessionEntity
     ) {
         navController.navigate(
             viewName = ContentEntryDetailAttemptsStatementListViewModel.DEST_NAME,
