@@ -21,6 +21,7 @@ import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentE
 import com.ustadmobile.lib.db.PersonAndSessionInfo
 import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
+import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
@@ -51,7 +52,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
 fun ContentEntryDetailAttemptsSessionListScreen(
     uiState: ContentEntryDetailAttemptsSessionListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
-    onClickEntry: (StatementEntity) -> Unit = {},
+    onClickEntry: (XapiSessionEntity) -> Unit = {},
 ) {
     val attemptsSessionListPager =
         rememberDoorRepositoryPager(uiState.attemptsSessionList, refreshCommandFlow)
@@ -62,7 +63,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
     ){
         ustadPagedItems(
             pagingItems = attemptsSessionListItems,
-            key = {it.statementIdHi }
+            key = {it.xseAccountPersonUid }
         )  { attemptsSessionListItems ->
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {
@@ -78,11 +79,8 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                 },
                 headlineContent = {
                     androidx.compose.material3.Text(
-                        text = if (attemptsSessionListItems?.resultCompletion == true) {
-                            "Completed"
-                        } else {
-                            "Incomplete"
-                        }
+                        text =  attemptsSessionListItems?.xseAccountUsername?:"NA"
+
                     )
                 },
 

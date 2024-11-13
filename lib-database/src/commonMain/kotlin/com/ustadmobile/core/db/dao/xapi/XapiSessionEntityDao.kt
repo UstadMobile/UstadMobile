@@ -97,6 +97,6 @@ expect abstract class XapiSessionEntityDao {
                AND XapiSessionEntity.xseAccountPersonUid = :personUid
 
 """)
-    abstract  fun getSessionList(contentEntryUid: Long, personUid: Long): PagingSource<Int, StatementEntity>
+    abstract  fun getSessionList(contentEntryUid: Long, personUid: Long): PagingSource<Int, XapiSessionEntity>
 }
 //
