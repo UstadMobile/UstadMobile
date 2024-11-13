@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.app
 
+import ContentEntryDetailAttemptsStatementListScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +44,7 @@ import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
@@ -902,6 +904,14 @@ fun AppNavHost(
                     appViewModel(
                         backStackEntry, ContentEntryDetailAttemptsSessionListViewModel::class,
                         ::ContentEntryDetailAttemptsSessionListViewModel
+                    )
+                )
+            }
+            contentScene("/${ContentEntryDetailAttemptsStatementListViewModel.DEST_NAME}") { backStackEntry ->
+                ContentEntryDetailAttemptsStatementListScreen(
+                    appViewModel(
+                        backStackEntry, ContentEntryDetailAttemptsStatementListViewModel::class,
+                        ::ContentEntryDetailAttemptsStatementListViewModel
                     )
                 )
             }
