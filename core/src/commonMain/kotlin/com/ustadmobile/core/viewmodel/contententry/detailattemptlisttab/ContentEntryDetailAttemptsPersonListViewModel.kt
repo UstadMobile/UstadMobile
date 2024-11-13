@@ -5,10 +5,8 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
-import com.ustadmobile.core.viewmodel.clazzenrolment.list.ClazzEnrolmentListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
-import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 
@@ -58,6 +56,6 @@ class ContentEntryDetailAttemptsPersonListViewModel(
 
 
     companion object {
-        const val DEST_NAME = "ContentEntryDetailAttemptList"
+        const val DEST_NAME = "ContentEntryDetailAttemptsPersonList"
     }
 }
