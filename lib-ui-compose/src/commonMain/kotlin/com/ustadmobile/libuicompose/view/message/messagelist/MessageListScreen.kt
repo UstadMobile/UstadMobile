@@ -82,9 +82,9 @@ fun MessageListScreen(
                 if (uiState.showSocialWarning) {
                     item(key = "social-warning") {
                         SocialWarningListItem(cautions = listOf(
-                            stringResource(MR.strings.social_warning_one),
-                            stringResource(MR.strings.social_warning_two),
-                            stringResource(MR.strings.social_warning_three)
+                            stringResource(MR.strings.social_warning_no_personal_info),
+                            stringResource(MR.strings.social_warning_report_behavior),
+                            stringResource(MR.strings.social_warning_respect_others)
                         ),onDismiss = onWarningDismiss,
                             onLearnMore = { /* Navigate to guidelines */ })
                     }

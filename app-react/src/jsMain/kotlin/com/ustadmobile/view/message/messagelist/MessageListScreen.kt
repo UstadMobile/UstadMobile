@@ -92,9 +92,9 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
                 Fragment.create {
                     SocialWarningListItem {
                         cautions = listOf(
-                            strings[MR.strings.social_warning_one],
-                            strings[MR.strings.social_warning_two],
-                            strings[MR.strings.social_warning_three],
+                            strings[MR.strings.social_warning_no_personal_info],
+                            strings[MR.strings.social_warning_report_behavior],
+                            strings[MR.strings.social_warning_respect_others],
                         )
                         onDismiss = props.onWarningDismiss
                         onLearnMore = { /* Navigate to guidelines */ }
