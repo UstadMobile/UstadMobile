@@ -23,14 +23,29 @@ class ContentEntryDetailAttemptsStatementListViewModel(
     di, savedStateHandle, ContentEntryDetailAttemptsStatementListUiState(), destinationName) {
 
     private val entityUidArg = savedStateHandle[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
-
     private val argPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
-    private fun getAttemptsStatementListAsPagingSource(contentEntryUid: Long, personUid: Long) : PagingSource<Int, StatementEntity>  {
-        return activeRepo.statementDao().getStatementList(contentEntryUid,personUid)
+    private val statementHi = savedStateHandle[statementIdHi]?.toLong()?:0
+    private val statementLo = savedStateHandle[statementIdLo]?.toLong()?:0
+
+    private fun getAttemptsStatementListAsPagingSource(
+        contentEntryUid: Long,
+        personUid: Long,
+        statementHi: Long,
+        statementLo: Long
+    ) : PagingSource<Int, StatementEntity>  {
+        return activeRepo.statementDao().getStatementList(
+            contentEntryUid,personUid,
+            statementHi,
+            statementLo
+        )
     }
     private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementEntity> = {
-
-        getAttemptsStatementListAsPagingSource(contentEntryUid=entityUidArg,personUid=argPersonUid )
+        getAttemptsStatementListAsPagingSource(
+            contentEntryUid =entityUidArg,
+            personUid =argPersonUid,
+            statementHi = statementHi,
+            statementLo = statementLo
+        )
     }
 init {
     viewModelScope.launch {
@@ -55,6 +70,9 @@ init {
 }
     companion object {
         const val DEST_NAME = "ContentEntryDetailAttemptsStatementList"
+        const val statementIdHi="statementIdHi"
+        const val statementIdLo="statementIdLo"
+
     }
 
     override fun onUpdateSearchResult(searchText: String) {
