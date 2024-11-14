@@ -18,9 +18,7 @@ import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.db.PersonAndSessionInfo
 import com.ustadmobile.lib.db.composites.BlockStatus
-import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndRelated
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
@@ -282,11 +280,15 @@ expect abstract class StatementDao {
     @Query("""
     
         SELECT * FROM StatementEntity
-        
-               WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
-               AND StatementEntity.statementActorPersonUid = :personUid
+               WHERE StatementEntity.statementIdHi = :statementHi
+               AND StatementEntity.statementIdLo = :statementLo
 
 """)
-    abstract  fun getStatementList(contentEntryUid: Long, personUid: Long): PagingSource<Int, StatementEntity>
+    abstract  fun getStatementList(
+        contentEntryUid: Long,
+        personUid: Long,
+        statementHi: Long,
+        statementLo: Long
+    ): PagingSource<Int, StatementEntity>
 
 }

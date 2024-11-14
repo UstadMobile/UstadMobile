@@ -54,7 +54,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
     ){
         ustadPagedItems(
             pagingItems = attemptsStatementListItems,
-            key = {it.statementIdHi }
+            key = {it.statementLct}
         )  { attemptsStatementListItems ->
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {
@@ -81,7 +81,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                     // Supporting text
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = "date",
+                            text = attemptsStatementListItems?.resultDuration.toString(),
                         )
                         // Additional text below supporting text
                         Text(

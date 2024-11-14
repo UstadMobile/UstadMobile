@@ -52,7 +52,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
 fun ContentEntryDetailAttemptsSessionListScreen(
     uiState: ContentEntryDetailAttemptsSessionListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
-    onClickEntry: (XapiSessionEntity) -> Unit = {},
+    onClickEntry: (StatementEntity) -> Unit = {},
 ) {
     val attemptsSessionListPager =
         rememberDoorRepositoryPager(uiState.attemptsSessionList, refreshCommandFlow)
@@ -63,7 +63,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
     ){
         ustadPagedItems(
             pagingItems = attemptsSessionListItems,
-            key = {it.xseAccountPersonUid }
+            key = {it.statementLct }
         )  { attemptsSessionListItems ->
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {
@@ -78,9 +78,12 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                     )
                 },
                 headlineContent = {
-                    androidx.compose.material3.Text(
-                        text =  attemptsSessionListItems?.xseAccountUsername?:"NA"
-
+                    Text(
+                        text = if (attemptsSessionListItems?.resultCompletion == true) {
+                            "Completed"
+                        } else {
+                            "Incomplete"
+                        }
                     )
                 },
 

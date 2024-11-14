@@ -88,19 +88,16 @@ expect abstract class XapiSessionEntityDao {
     abstract  fun getAttemptList(contentEntryUid: Long): PagingSource<Int, PersonAndAttemptInfo>
 
     @Query("""
-    
-        SELECT XapiSessionEntity.*,
-         (SELECT EXISTS(
-                              SELECT *
-                                   FROM StatementEntity
-                                 WHERE XapiSessionEntity.xseRegistrationHi = StatementEntity.statementIdHi
-                                      AND XapiSessionEntity.xseRegistrationLo = StatementEntity.statementIdLo
-                )) 
-               FROM XapiSessionEntity
-               WHERE XapiSessionEntity.xseContentEntryUid = :contentEntryUid
-               AND XapiSessionEntity.xseAccountPersonUid = :personUid
-
+SELECT *FROM StatementEntity
+WHERE StatementEntity.statementActorPersonUid = :personUid
+And StatementEntity.statementContentEntryUid=:contentEntryUid
+AND ROWID IN (
+    SELECT MIN(ROWID)
+    FROM StatementEntity
+    WHERE StatementEntity.statementActorPersonUid = :personUid
+    GROUP BY StatementEntity.statementIdHi, StatementEntity.statementIdLo
+)
 """)
-    abstract  fun getSessionList(contentEntryUid: Long, personUid: Long): PagingSource<Int, XapiSessionEntity>
+    abstract  fun getSessionList(contentEntryUid: Long, personUid: Long): PagingSource<Int, StatementEntity>
 }
 //
