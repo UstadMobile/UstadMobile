@@ -7,9 +7,9 @@
     <string name="be_careful">"Be Careful"</string>
     <string name="got_it">"Got it"</string>
     <string name="learn_more">"Learn more"</string>
-    <string name="social_warning_one">"Avoid sharing personal information"</string>
-    <string name="social_warning_two">"Report any inappropriate behavior"</string>
-    <string name="social_warning_three">"Be respectful in interactions"</string>
+    <string name="social_warning_no_personal_info">"Avoid sharing personal information"</string>
+    <string name="social_warning_report_behavior">"Report any inappropriate behavior"</string>
+    <string name="social_warning_respect_others">"Be respectful in interactions"</string>
     <string name="share_app">Share app</string>
     <string name="send_apk_file">Send app file (APK)</string>
     <string name="send_app_link">Share app store link</string>
