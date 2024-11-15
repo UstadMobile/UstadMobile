@@ -70,7 +70,7 @@ fun SocialWarningListItem(
                 leadingContent = {
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(12.dp)
                             .background(
                                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                                 shape = CircleShape
