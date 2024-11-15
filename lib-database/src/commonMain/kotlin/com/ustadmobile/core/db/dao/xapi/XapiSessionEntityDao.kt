@@ -55,6 +55,8 @@ expect abstract class XapiSessionEntityDao {
           FROM XapiSessionEntity
          WHERE XapiSessionEntity.xseRootActivityUid = :xseRootActivityUid
            AND XapiSessionEntity.xseActorUid = :actorUid
+           AND XapiSessionEntity.xseContentEntryVersionUid = :contentEntryVersionUid
+           AND XapiSessionEntity.xseClazzUid = :clazzUid
            AND EXISTS(
                SELECT 1
                  FROM ActorEntity
@@ -65,6 +67,8 @@ expect abstract class XapiSessionEntityDao {
         accountPersonUid: Long,
         actorUid: Long,
         xseRootActivityUid: Long,
+        contentEntryVersionUid: Long,
+        clazzUid: Long,
     ): XapiSessionEntity?
 
 

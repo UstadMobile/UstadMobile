@@ -68,6 +68,8 @@ abstract class AbstractContentImporterTest: AbstractMainDispatcherTest() {
 
     protected lateinit var compressListUseCase: CompressListUseCase
 
+    protected val mimeTypeHelper = FileMimeTypeHelperImpl()
+
     @BeforeTest
     fun setup() {
         rootTmpFolder = temporaryFolder.newFolder("video-import-test")

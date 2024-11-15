@@ -32,6 +32,8 @@ import com.ustadmobile.lib.db.entities.ContentEntryImportJob
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.headers.MimeTypeHelper
+import com.ustadmobile.libcache.headers.guessByExtensionFromFilename
 import com.ustadmobile.libcache.io.unzipTo
 import io.github.aakira.napier.Napier
 import io.ktor.util.escapeHTML
@@ -80,6 +82,7 @@ class H5PContentImporter(
     private val saveLocalUriAsBlobAndManifestUseCase: SaveLocalUriAsBlobAndManifestUseCase,
     private val compressListUseCase: CompressListUseCase,
     private val fileSystem: FileSystem = SystemFileSystem,
+    private val mimeTypeHelper: MimeTypeHelper,
     private val h5pInStream: () -> InputStream = {
         this::class.java.getResourceAsStream(
             "/h5p/h5p-standalone-3.6.0.zip"
@@ -177,7 +180,9 @@ class H5PContentImporter(
             }
 
             val compressedEntries = compressListUseCase(
-                items = h5pZipEntries.map { it.toItemToCompress() },
+                items = h5pZipEntries.map {
+                    it.toItemToCompress(mimeType = mimeTypeHelper.guessByExtensionFromFilename(it.name))
+                },
                 params = params,
                 workDir = workTmpPath,
                 onProgress = {
@@ -216,14 +221,18 @@ class H5PContentImporter(
 
             val h5pStandAloneManifestEntries = saveLocalUriAsBlobAndManifestUseCase(
                 items = h5pStandAloneUnzippedEntries.map { unzippedEntry ->
+                    val mimeType = mimeTypeHelper.guessByExtensionFromFilename(unzippedEntry.name)
+
                     SaveLocalUriAsBlobAndManifestUseCase.SaveLocalUriAsBlobAndManifestItem(
                         blobItem = SaveLocalUrisAsBlobsUseCase.SaveLocalUriAsBlobItem(
                             localUri = unzippedEntry.path.toDoorUri().toString(),
                             entityUid = contentEntryVersionUid,
                             tableId = ContentEntryVersion.TABLE_ID,
                             deleteLocalUriAfterSave = true,
+                            mimeType = mimeType,
                         ),
                         manifestUri = unzippedEntry.name,
+                        manifestMimeType = mimeType,
                     )
                 }
             )

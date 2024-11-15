@@ -21,8 +21,6 @@ import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_KEY
-import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_VIEWNAME
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.errors.ErrorViewModel
@@ -601,6 +599,18 @@ abstract class UstadViewModel(
          */
         const val ARG_SELECTED_ACCOUNT_ENDPOINT_URL = "selectedAccountEndpointUrl"
 
+        /**
+         * When navigating from one screen to another for purposes of returning a result,
+         * this specifies the viewname to which the result should be returned.
+         */
+        const val ARG_RESULT_DEST_VIEWNAME = "result_viewname"
+
+        /**
+         * When navigating from one screen to another for purposes of returning a result,
+         * this specifies the key name in the savedstate of the viewname into which the
+         * result will be saved as JSON.
+         */
+        const val ARG_RESULT_DEST_KEY = "result_key"
     }
 
 }
