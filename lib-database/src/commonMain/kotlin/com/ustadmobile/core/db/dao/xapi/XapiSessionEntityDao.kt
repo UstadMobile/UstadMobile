@@ -10,7 +10,6 @@ import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
-import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
