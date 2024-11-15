@@ -11,7 +11,6 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
 import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
-import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
@@ -30,9 +29,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
         uiState = uiState,
         refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickEntry = viewModel::onClickEntry,
-
         )
-
 }
 
 @Composable
@@ -40,7 +37,6 @@ fun ContentEntryDetailAttemptsPersonListScreen(
     uiState: ContentEntryDetailAttemptsPersonListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
     onClickEntry: (PersonAndAttemptInfo) -> Unit = {},
-
     ) {
     val attemptsPersonListPager =
         rememberDoorRepositoryPager(uiState.attemptsPersonList, refreshCommandFlow)
@@ -63,7 +59,6 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                 },
                 supportingContent = {
                     androidx.compose.material3.Text(text = "")
-
                 },
                 leadingContent = {
                     UstadPersonAvatar(
@@ -74,15 +69,4 @@ fun ContentEntryDetailAttemptsPersonListScreen(
             )
         }
     }
-
-    /*
-                       LinearProgressIndicator(
-                            progress = 0.8f,
-                            modifier = Modifier
-                                .fillMaxWidth() // Fill the width of the parent
-                                .height(4.dp) // Set height of the progress bar
-                                .padding(start = 120.dp, end = 100.dp)
-                        )
-                    }*/
-
 }

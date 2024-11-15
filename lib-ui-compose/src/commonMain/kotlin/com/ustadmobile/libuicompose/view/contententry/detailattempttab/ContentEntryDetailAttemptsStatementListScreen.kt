@@ -1,8 +1,5 @@
 import androidx.compose.runtime.Composable
-import com.ustadmobile.core.contentformats.epub.ncx.Text
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
-
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,8 +9,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-
-import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -23,21 +18,18 @@ import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
-import com.ustadmobile.libuicompose.view.contententry.detailattempttab.ContentEntryDetailAttemptsSessionListScreen
 import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun ContentEntryDetailAttemptsStatementListScreen(
     viewModel: ContentEntryDetailAttemptsStatementListViewModel
 ) {
-    // Collect the personName from the ViewModel
     val uiState = viewModel.uiState.collectAsState(ContentEntryDetailAttemptsStatementListUiState())
     ContentEntryDetailAttemptsStatementListScreen(
         uiState = uiState.value,
         refreshCommandFlow = viewModel.refreshCommandFlow,
 
         )
-
 }
 
 @Composable
@@ -51,20 +43,19 @@ fun ContentEntryDetailAttemptsStatementListScreen(
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
-    ){
+    ) {
         ustadPagedItems(
             pagingItems = attemptsStatementListItems,
-            key = {it.statementLct}
-        )  { attemptsStatementListItems ->
+            key = { it.statementLct }
+        ) { attemptsStatementListItems ->
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {
                 },
                 leadingContent = {
-                    // Add an icon in the leading content
                     Icon(
-                        imageVector = Icons.Filled.Check, // Tick (check) icon
-                        contentDescription = "Icon", // Description for accessibility
-                        modifier = Modifier.padding(end = 8.dp) // Add padding between icon and text
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = "Icon",
+                        modifier = Modifier.padding(end = 8.dp)
                     )
                 },
                 headlineContent = {
@@ -78,12 +69,10 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                 },
 
                 supportingContent = {
-                    // Supporting text
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = attemptsStatementListItems?.resultDuration.toString(),
                         )
-                        // Additional text below supporting text
                         Text(
                             text = "100%",
                             modifier = Modifier.padding(top = 4.dp) // Add spacing between the texts
