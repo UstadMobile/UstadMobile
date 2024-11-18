@@ -163,14 +163,13 @@ import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSele
 import com.ustadmobile.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
-import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
-import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.view.clazz.gradebook.ClazzGradebookScreen
 import com.ustadmobile.mui.components.UstadChipsDemo
 import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsPersonListScreen
-import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsSessionListScreen
 import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsStatementListScreen
+import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsPersonListScreen
+
 
 import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
 import com.ustadmobile.view.contententry.getsubtitle.GetSubtitleScreen
@@ -419,6 +418,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(BulkAddPersonRunImportViewModel.DEST_NAME, "BulkAddPersonRunImport", BulkAddPersonRunImportScreen),
     UstadScreen(ClazzGradebookViewModel.DEST_NAME, "ClazzProgressReport", ClazzGradebookScreen),
     UstadScreen("UstadChipsDemo", "UstadChipsDemo", UstadChipsDemo),
+    UstadScreen(GetSubtitleViewModel.DEST_NAME, "GetSubtitle", GetSubtitleScreen),
+    UstadScreen(SubtitleEditViewModel.DEST_NAME, "SubtitleEdit", SubtitleEditScreen),
 )
 
 //Here as per the MUI showcase template
