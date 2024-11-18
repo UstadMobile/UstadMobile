@@ -165,10 +165,12 @@ import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunIm
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.view.clazz.gradebook.ClazzGradebookScreen
 import com.ustadmobile.mui.components.UstadChipsDemo
 import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsPersonListScreen
 import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsSessionListScreen
+import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsStatementListScreen
 
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
@@ -254,6 +256,11 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME,
         "ContentEntryDetailAttemptsSessionList",
         ContentEntryDetailAttemptsSessionListScreen
+    ),
+    UstadScreen(
+        ContentEntryDetailAttemptsStatementListViewModel.DEST_NAME,
+        "ContentEntryDetailAttemptsStatementList",
+        ContentEntryDetailAttemptsStatementListScreen
     ),
     UstadScreen(HolidayCalendarEditViewModel.DEST_NAME, "HolidayCalendarEdit Preview",
         HolidayCalendarEditPreview),
