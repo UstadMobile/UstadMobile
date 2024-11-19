@@ -72,6 +72,7 @@ expect abstract class XapiSessionEntityDao {
     ): XapiSessionEntity?
 
 
+    @HttpAccessible
     @Query("""
     SELECT Person.*, PersonPicture.*,
            (SELECT COUNT(XapiSessionEntity.xseUid)
@@ -86,6 +87,7 @@ expect abstract class XapiSessionEntityDao {
 """)
     abstract  fun getAttemptList(contentEntryUid: Long): PagingSource<Int, PersonAndAttemptInfo>
 
+    @HttpAccessible
     @Query("""
 SELECT *FROM StatementEntity
 WHERE StatementEntity.statementActorPersonUid = :personUid

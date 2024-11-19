@@ -1,6 +1,7 @@
 package com.ustadmobile.view.contententry.detailattemptstab
 
 import app.cash.paging.PagingSourceLoadResult
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.RefreshCommand
@@ -11,6 +12,7 @@ import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
+import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -35,22 +37,17 @@ import web.cssom.pct
 
 
 external interface ContentEntryDetailAttemptsPersonListProps: Props {
-
     var uiState: ContentEntryDetailAttemptsPersonListUiState
     var refreshCommandFlow: Flow<RefreshCommand>?
     var onListItemClick: (PersonAndAttemptInfo) -> Unit
 
 }
-
-
 val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
 
     val viewModel = useUstadViewModel { di, savedStateHandle ->
         ContentEntryDetailAttemptsPersonListViewModel(di, savedStateHandle)
     }
-
     val uiState by viewModel.uiState.collectAsState(ContentEntryDetailAttemptsPersonListUiState())
-
 
     val contentEntryDetailAttemptsPersonListComponent2 = FC<ContentEntryDetailAttemptsPersonListProps>
     { props ->
@@ -59,13 +56,13 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
             pagingSourceFactory = props.uiState.attemptsPersonList,
             refreshCommandFlow = (props.refreshCommandFlow ?: emptyFlow())
         )
+        println("remoteMediatorResult: $remoteMediatorResult")
 
-        val infiniteQueryResult : UseInfiniteQueryResult
-        <PagingSourceLoadResult<Int, PersonAndAttemptInfo>, Throwable> = usePagingSource(
-            remoteMediatorResult.pagingSourceFactory, true, 50
+        val infiniteQueryResult: UseInfiniteQueryResult<PagingSourceLoadResult<Int, PersonAndAttemptInfo>, Throwable> = usePagingSource(
+            remoteMediatorResult.pagingSourceFactory, true, 150
         )
-        val muiAppState = useMuiAppState()
 
+        val muiAppState = useMuiAppState()
         VirtualList {
             style = jso {
                 height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
@@ -73,9 +70,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                 contain = Contain.strict
                 overflowY = Overflow.scroll
             }
-
             content = virtualListContent {
-
                 infiniteQueryPagingItems(
                     items = infiniteQueryResult,
                     key = { it.person?.personUid?.toString() ?: "0" }
@@ -92,10 +87,12 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                 }
                             }
                             ListItemText {
-                                primary = ReactNode(attemptsPersonListItems?.person?.fullName() ?: "")
+                                primary = ReactNode(attemptsPersonListItems?.person?.fullName()?:"")
                             }
                         }
                     }
+                }?: run {
+                    println("No person data found")
                 }
             }
 

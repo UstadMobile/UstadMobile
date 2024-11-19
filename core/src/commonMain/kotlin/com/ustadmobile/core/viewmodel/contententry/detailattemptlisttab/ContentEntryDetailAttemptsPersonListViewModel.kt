@@ -22,7 +22,10 @@ class ContentEntryDetailAttemptsPersonListViewModel(
     protected val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
     private fun getAttemptsPersonListAsPagingSource(contentEntryUid: Long) : PagingSource<Int, PersonAndAttemptInfo>  {
-        return activeRepo.xapiSessionEntityDao().getAttemptList(contentEntryUid)
+        //return activeRepo.xapiSessionEntityDao().getAttemptList(contentEntryUid)
+        val pagingSource = activeRepo.xapiSessionEntityDao().getAttemptList(contentEntryUid)
+        println("Fetched paging source: $pagingSource")
+        return pagingSource
     }
     private val attemptsPersonListPagingSource: ListPagingSourceFactory<PersonAndAttemptInfo> = {
 
@@ -34,6 +37,7 @@ class ContentEntryDetailAttemptsPersonListViewModel(
                 attemptsPersonList = attemptsPersonListPagingSource,
             )
         }
+        println("Attemptsdata ${_uiState.value}")
     }
     fun onClickEntry(
         entry: PersonAndAttemptInfo
