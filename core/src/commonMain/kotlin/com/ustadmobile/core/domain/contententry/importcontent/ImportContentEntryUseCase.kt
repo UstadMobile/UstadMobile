@@ -40,7 +40,7 @@ class ImportContentEntryUseCase(
     private val createRetentionLocksForManifestUseCase: CreateRetentionLocksForManifestUseCase? = null,
     private val httpClient: HttpClient? = null,
     private val repo: UmAppDatabase,
-    ) {
+) {
 
     suspend operator fun invoke(
         contentEntryImportJobId: Long,
@@ -75,19 +75,17 @@ class ImportContentEntryUseCase(
                     cjiUid = job.cjiUid,
                     status = JobStatus.RUNNING
                 )
-
                 // Check if cjiContentEntryUid is 0
                 Napier.v { "Checking cjiContentEntryUid: ${job.cjiContentEntryUid}" }
                 if (job.cjiContentEntryUid == 0L) {
                     Napier.v { "Extracting metadata for new ContentEntry" }
                     try {
                         // Extract metadata to create a new ContentEntry
-                        val metadataResult = importer.extractMetadata(DoorUri.parse(job.sourceUri!!), job.cjiOriginalFilename)
-                        Napier.v { "Metadata extraction result: $metadataResult" }
+                        val parsedUri = DoorUri.parse(job.sourceUri!!)
+                        val metadataResult = importer.extractMetadata(parsedUri, job.cjiOriginalFilename)
 
                         val newContentEntry = metadataResult?.entry ?: throw IllegalStateException("Failed to extract metadata")
-
-                        // Save the new ContentEntry to the database
+                        // Save the new ContentEntry to the repo
                         val contentEntryUid = repo.contentEntryDao().insertAsync(newContentEntry)
 
                         // Update job with the new ContentEntry UID
@@ -136,15 +134,16 @@ class ImportContentEntryUseCase(
 
             throw e
         }
-
         db.contentEntryVersionDao().insertAsync(contentEntryVersionEntity)
 
         val enqueueBlobUploadClientUseCaseVal = enqueueBlobUploadClientUseCase
-        if(enqueueBlobUploadClientUseCaseVal != null && httpClient != null) {
+        val manifestUrl = contentEntryVersionEntity.cevManifestUrl
+
+        //Upload the entry if there is an upload client (e.g. this is running on mobile or desktop)
+        // and there is a manifest url (e.g. this is a ContentEntry leaf node).
+        if(enqueueBlobUploadClientUseCaseVal != null && httpClient != null && manifestUrl != null) {
             //Because the entry was imported just now, it will be in the cache. This will still
             //work offline.
-            val manifestUrl = contentEntryVersionEntity.cevManifestUrl
-                ?: throw IllegalStateException("imported entry has no manifest url")
             val manifest: ContentManifest = json.decodeFromString(
                 httpClient.get(manifestUrl).bodyAsDecodedText())
             val locksCreated = createRetentionLocksForManifestUseCase?.invoke(
