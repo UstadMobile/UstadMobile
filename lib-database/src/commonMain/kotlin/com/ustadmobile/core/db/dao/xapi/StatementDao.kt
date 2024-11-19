@@ -277,6 +277,8 @@ expect abstract class StatementDao {
         accountPersonUid: Long,
         actorUid: Long,
     ): StatementEntity?
+
+    @HttpAccessible
     @Query("""
     
         SELECT * FROM StatementEntity
