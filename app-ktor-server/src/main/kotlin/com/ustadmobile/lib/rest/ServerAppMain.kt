@@ -1,10 +1,13 @@
 package com.ustadmobile.lib.rest
 
+import com.ustadmobile.lib.rest.clitools.appconfig.main
 import com.ustadmobile.lib.rest.mediahelpers.MissingMediaProgramsException
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.netty.handler.codec.http.HttpServerCodec
+import com.ustadmobile.lib.rest.clitools.appconfig.main as appConfigMain
+
 
 /**
  * This server app is provided to increase the acceptable length of a url. This is needed if queries
@@ -22,6 +25,12 @@ class ServerAppMain {
 
         @JvmStatic
         fun main(args: Array<String>) {
+
+            if (args.contains("newlearningspace")) {
+                appConfigMain(args)
+                return
+            }
+
             val siteUrlArgIndex = args.indexOfFirst { it == "--siteUrl" || it == "-u" }
             val siteUrlArg = if(siteUrlArgIndex >= 0) {
                 args.getOrNull(siteUrlArgIndex + 1)

@@ -193,7 +193,7 @@ it in app-ktor-server/data/singleton/admin.txt .
 This will run the REST API which is required by the Android and web apps. It will not include the 
 web client app itself. To use the web client app in the browser, you must build/run it (as below).
 
-3. adding learnig space ustad-appconfig.sh script:
+* __Step 5: adding learning space ustad-appconfig.sh script:
 
 ```
 # Linux
@@ -208,14 +208,15 @@ $ ustad-appconfig.bat --password admin_password newlearningspace  -
 --dburl jdbc:sqlite:Your_system_path/UstadMobile/app-ktor-server/data/localhost.db
 --adminpassword any_password
 ```
-After server runs successfully you need to add the learnng space
+
+After server runs successfully you need to add the learning space
 (here admin_password is password present in admin.txt file ,Your_system_path is path of the project
 folder and any_password is password for the particular learning space)
 
 to show learning space list add base url in com.ustadmobile.system.systemBaseUrl=your_url
 in buildconfig.default.properties
 
-* __Step 5: Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
+* __Step 6: Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
 Android app, [app-react](app-react/) for the web app.
 
 Note: If self-registration is enabled, you must add an email server configuration to the 
