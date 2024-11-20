@@ -85,5 +85,3 @@ env:
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/h5p_content_download_and_open"
 - tapOn: "Close tab"
 - tapOn: "Back"
-# clear the downloads
-- evalScript: ${http.get(CONTROLSERVER + "cleardownloads?test-file-name=" + "test_folder"+"&device=" + TESTSERIAL)}
