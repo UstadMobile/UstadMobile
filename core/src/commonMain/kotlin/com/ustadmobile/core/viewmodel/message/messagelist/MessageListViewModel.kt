@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.message.messagelist
 
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -42,8 +43,12 @@ class MessageListViewModel(
     private val otherPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0L
 
     private val ustadAccountManager: UstadAccountManager by di.instance()
+
     private val showSocialWarningUseCase: ShowSocialWarningUseCase by di.instance()
+
     private val dismissSocialWarningUseCase: DismissSocialWarningUseCase by di.instance()
+
+    private val openExternalLinkUseCase: OpenExternalLinkUseCase by di.instance()
 
     private val pagingSourceFactory: () -> PagingSource<Int, Message> = {
         activeRepo.messageDao().messagesFromOtherUserAsPagingSource(
@@ -94,6 +99,10 @@ class MessageListViewModel(
         }
     }
 
+    fun onLearnMoreClicked(url: String) {
+        openExternalLinkUseCase(url, OpenExternalLinkUseCase.Companion.LinkTarget.BLANK)
+    }
+
     override fun onUpdateSearchResult(searchText: String) {
         TODO("Not yet implemented")
     }
@@ -128,6 +137,7 @@ class MessageListViewModel(
             }
         }
     }
+
 
     companion object {
 

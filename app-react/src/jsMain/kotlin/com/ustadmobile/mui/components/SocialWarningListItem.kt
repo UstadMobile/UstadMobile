@@ -2,86 +2,75 @@ package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
-import mui.icons.material.Circle
-import mui.icons.material.Warning
+import js.objects.jso
+import mui.material.Box
+import mui.icons.material.Warning as WarningIcon
 import mui.material.Button
 import mui.material.ButtonVariant
-import mui.material.Divider
-import mui.material.List
 import mui.material.ListItem
 import mui.material.ListItemIcon
 import mui.material.ListItemText
-import mui.material.Paper
-import mui.material.Stack
-import mui.material.StackDirection
-import mui.system.responsive
-import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
+import web.cssom.AlignItems
+import web.cssom.Display
+import web.cssom.FlexDirection
+import web.cssom.JustifyContent
 import web.cssom.px
+import web.window.WindowTarget
+import web.window.window
 
 external interface SocialWarningProps : Props {
-    var cautions: List<String>
     var onDismiss: () -> Unit
-    var onLearnMore: () -> Unit
 }
 
 val SocialWarningListItem = FC<SocialWarningProps> { props ->
 
     val strings = useStringProvider()
 
-    Paper {
-        sx {
-            marginBottom = 2.px  // spacing unit as it's about layout, not theming
+    ListItem {
+        ListItemIcon {
+            WarningIcon()
         }
 
-        // Warning header with icon and buttons
-        ListItem {
-            ListItemIcon {
-                Warning()  // Using default theme color
+        Box {
+            sx = jso {
+                display = Display.flex
+                flexDirection = FlexDirection.column
+                alignItems = AlignItems.start
             }
 
             ListItemText {
-                primary = ReactNode(strings[MR.strings.be_careful],
-                )
+                primary = ReactNode(strings[MR.strings.be_careful_interacting_online])
+                secondary = ReactNode(strings[MR.strings.be_careful_not_to_share])
             }
 
-            // Action buttons
-            Stack {
-                direction = responsive(StackDirection.row)
-                spacing = responsive(1)
-
-                Button {
-                    variant = ButtonVariant.text
-                    onClick = { props.onDismiss?.invoke() }
-                    + strings[MR.strings.got_it]
+            Box {
+                sx = jso {
+                    display = Display.flex
+                    flexDirection = FlexDirection.row
+                    gap = 12.px
+                    marginTop = 12.px
                 }
 
                 Button {
                     variant = ButtonVariant.text
-                    onClick = { props.onLearnMore?.invoke() }
-                    + strings[MR.strings.learn_more]
+                    onClick = { props.onDismiss() }
+                    +strings[MR.strings.got_it]
                 }
-            }
-        }
 
-        Divider()
-
-        // Caution messages list
-        List {
-            props.cautions.forEach { message ->
-                ListItem {
-                    ListItemIcon {
-                        Circle()  // Using default theme sizing and color
+                Button {
+                    variant = ButtonVariant.text
+                    onClick = {
+                        window.open(
+                            "https://beinternetawesome.withgoogle.com",
+                            WindowTarget._blank
+                        )
                     }
-                    ListItemText {
-                        primary = ReactNode(message)
-                    }
+                    +strings[MR.strings.learn_more]
                 }
             }
         }
     }
 }
-
-

@@ -431,16 +431,10 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
 
                 val strings = useStringProvider()
 
-                if (props.uiState.showSocialWarning) {
+                if(props.uiState.showSocialWarning) {
                     Fragment.create {
                         SocialWarningListItem {
-                            cautions = listOf(
-                                strings[MR.strings.social_warning_no_personal_info],
-                                strings[MR.strings.social_warning_report_behavior],
-                                strings[MR.strings.social_warning_respect_others],
-                            )
                             onDismiss = props.onWarningDismiss
-                            onLearnMore = { /* Navigate to guidelines */ }
                         }
                     }
                 }

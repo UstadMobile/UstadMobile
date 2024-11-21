@@ -13,7 +13,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.paging.compose.itemKey
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListUiState
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.libuicompose.components.LazyColumnVerticalScrollbar
@@ -25,7 +24,6 @@ import com.ustadmobile.libuicompose.util.rememberDateFormat
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import com.ustadmobile.libuicompose.components.SocialWarningListItem
-import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -36,14 +34,14 @@ fun MessageListScreen(
     viewModel: MessageListViewModel
 ) {
     val uiState: MessageListUiState by viewModel.uiState.collectAsStateWithLifecycle(
-        MessageListUiState(), Dispatchers.Main.immediate
-    )
+        MessageListUiState(), Dispatchers.Main.immediate)
 
     MessageListScreen(
         uiState = uiState,
         onChangeNewMessageText = viewModel::onChangeNewMessageText,
         onClickSend = viewModel::onClickSend,
         onWarningDismiss = viewModel::onWarningDismiss,
+        onLearnMore = { viewModel.onLearnMoreClicked("https://beinternetawesome.withgoogle.com") }
     )
 }
 
@@ -52,8 +50,9 @@ fun MessageListScreen(
     uiState: MessageListUiState,
     onChangeNewMessageText: (String) -> Unit = { },
     onClickSend: () -> Unit = { },
-    onWarningDismiss: () -> Unit = { },
-) {
+    onWarningDismiss: () -> Unit = {},
+    onLearnMore: () -> Unit = { },
+){
 
     val mediatorResult = rememberDoorRepositoryPager(
         uiState.messages, rememberEmptyFlow()
@@ -81,32 +80,30 @@ fun MessageListScreen(
 
                 if (uiState.showSocialWarning) {
                     item(key = "social-warning") {
-                        SocialWarningListItem(cautions = listOf(
-                            stringResource(MR.strings.social_warning_no_personal_info),
-                            stringResource(MR.strings.social_warning_report_behavior),
-                            stringResource(MR.strings.social_warning_respect_others)
-                        ),onDismiss = onWarningDismiss,
-                            onLearnMore = { /* Navigate to guidelines */ })
+                        SocialWarningListItem(
+                            onDismiss = onWarningDismiss,
+                            onLearnMore = onLearnMore
+                        )
                     }
                 }
 
                 items(
                     count = lazyPagingItems.itemCount,
-                    key = lazyPagingItems.itemKey { it.messageUid },
-                ) { index ->
+                    key = lazyPagingItems.itemKey { it.messageUid  },
+                ) {  index ->
                     /*
                      * When there is a new message, if the user is at the bottom of the list go to the
                      * latest item automatically.
                      */
                     val message = lazyPagingItems[index]
-                    val previousMessage = if (lazyPagingItems.itemCount > index + 1) {
+                    val previousMessage = if(lazyPagingItems.itemCount > index + 1) {
                         lazyPagingItems[index + 1]
-                    } else {
+                    }else {
                         null
                     }
 
                     LaunchedEffect(itemCount) {
-                        if (index == 1) {
+                        if(index == 1) {
                             coroutineScope.launch {
                                 lazyListState.scrollToItem(0)
                             }
