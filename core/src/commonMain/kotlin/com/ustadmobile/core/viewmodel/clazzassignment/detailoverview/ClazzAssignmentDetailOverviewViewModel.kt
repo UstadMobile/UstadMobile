@@ -453,8 +453,8 @@ class ClazzAssignmentDetailOverviewViewModel(
         }
     }
 
-    fun onLearnMoreClicked(url: String) {
-        openExternalLinkUseCase(url, OpenExternalLinkUseCase.Companion.LinkTarget.BLANK)
+    fun onLearnMoreClicked() {
+        openExternalLinkUseCase(SOCIAL_WARNING_WEB_URL, OpenExternalLinkUseCase.Companion.LinkTarget.BLANK)
     }
 
     /**
@@ -755,6 +755,8 @@ class ClazzAssignmentDetailOverviewViewModel(
         const val KEY_SUBMISSION_HTML = "submissionHtml"
 
         const val DEST_NAME = "CourseAssignmentDetailOverviewView"
+
+        const val SOCIAL_WARNING_WEB_URL = "https://beinternetawesome.withgoogle.com"
 
     }
 }

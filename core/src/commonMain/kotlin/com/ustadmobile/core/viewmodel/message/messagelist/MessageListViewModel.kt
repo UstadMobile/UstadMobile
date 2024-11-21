@@ -99,8 +99,8 @@ class MessageListViewModel(
         }
     }
 
-    fun onLearnMoreClicked(url: String) {
-        openExternalLinkUseCase(url, OpenExternalLinkUseCase.Companion.LinkTarget.BLANK)
+    fun onLearnMoreClicked() {
+        openExternalLinkUseCase(SOCIAL_WARNING_WEB_URL, OpenExternalLinkUseCase.Companion.LinkTarget.BLANK)
     }
 
     override fun onUpdateSearchResult(searchText: String) {
@@ -142,6 +142,8 @@ class MessageListViewModel(
     companion object {
 
         const val DEST_NAME = "MessageList"
+
+        const val SOCIAL_WARNING_WEB_URL = "https://beinternetawesome.withgoogle.com"
 
     }
 
