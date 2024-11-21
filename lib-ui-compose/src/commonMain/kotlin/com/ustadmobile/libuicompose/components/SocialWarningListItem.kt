@@ -1,14 +1,10 @@
 package com.ustadmobile.libuicompose.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Divider
@@ -25,7 +21,6 @@ import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
 fun SocialWarningListItem(
-    cautions: List<String>,
     onDismiss: () -> Unit,
     onLearnMore: () -> Unit
 ) {
@@ -45,48 +40,30 @@ fun SocialWarningListItem(
             },
             headlineContent = {
                 Text(
-                    stringResource(MR.strings.be_careful),
+                    text = stringResource(MR.strings.be_careful_interacting_online),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            supportingContent = {
+                Text(
+                    text = stringResource(MR.strings.be_careful_not_to_share),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             trailingContent = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = onDismiss) {
-                        Text( stringResource(MR.strings.got_it))
+                        Text(text = stringResource(MR.strings.got_it))
                     }
                     TextButton(onClick = onLearnMore) {
-                        Text( stringResource(MR.strings.learn_more))
+                        Text(text = stringResource(MR.strings.learn_more))
                     }
                 }
             }
         )
 
         Divider(modifier = Modifier.padding(vertical = 8.dp))
-
-        // Dynamic caution messages
-        cautions.forEach { message ->
-            ListItem(
-                leadingContent = {
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                                shape = CircleShape
-                            )
-                    )
-                },
-                headlineContent ={},
-                supportingContent = {
-                    Text(
-                        message,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            )
-            Divider()
-        }
     }
 }

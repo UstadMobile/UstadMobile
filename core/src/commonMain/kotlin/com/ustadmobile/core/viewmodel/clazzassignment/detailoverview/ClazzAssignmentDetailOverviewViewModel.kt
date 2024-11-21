@@ -21,6 +21,7 @@ import com.ustadmobile.core.domain.blob.openblob.OpeningBlobState
 import com.ustadmobile.core.domain.blob.upload.CancelBlobUploadClientUseCase
 import com.ustadmobile.core.domain.blob.saveandupload.SaveAndUploadLocalUrisUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.util.ext.onActiveEndpoint
@@ -325,6 +326,7 @@ class ClazzAssignmentDetailOverviewViewModel(
     private val ustadAccountManager: UstadAccountManager by di.instance()
     private val showSocialWarningUseCase: ShowSocialWarningUseCase by di.instance()
     private val dismissSocialWarningUseCase: DismissSocialWarningUseCase by di.instance()
+    private val openExternalLinkUseCase: OpenExternalLinkUseCase by di.instance()
 
     init {
         _uiState.update { prev ->
@@ -333,7 +335,6 @@ class ClazzAssignmentDetailOverviewViewModel(
                 activeUserPersonName = accountManager.currentUserSession.person.fullName(),
                 activeUserPictureUri = accountManager.currentUserSession.personPicture?.personPictureUri,
                 showSocialWarning = showSocialWarningUseCase(ustadAccountManager.currentUserSession.person.username.toString())
-
             )
         }
 
@@ -450,6 +451,10 @@ class ClazzAssignmentDetailOverviewViewModel(
                 prev.copy(showSocialWarning = false)
             }
         }
+    }
+
+    fun onLearnMoreClicked(url: String) {
+        openExternalLinkUseCase(url, OpenExternalLinkUseCase.Companion.LinkTarget.BLANK)
     }
 
     /**
