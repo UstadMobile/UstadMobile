@@ -4,12 +4,10 @@
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
-    <string name="be_careful">Be Careful</string>
     <string name="got_it">Got it</string>
     <string name="learn_more">Learn more</string>
-    <string name="social_warning_no_personal_info">Avoid sharing personal information</string>
-    <string name="social_warning_report_behavior">Report any inappropriate behavior</string>
-    <string name="social_warning_respect_others">Be respectful in interactions</string>
+    <string name="be_careful_interacting_online">Be careful interacting online and in-app!</string>
+    <string name="be_careful_not_to_share">Be careful not to share any real world information unless you are completely sure who you are interacting with. Never agree to meet anyone you don't know in real life without your parent or guardian.</string>
     <string name="got_it">Got it</string>
     <string name="learn_more">Learn more</string>
     <string name="be_careful_interacting_online">Be careful interacting online and in-app!</string>
