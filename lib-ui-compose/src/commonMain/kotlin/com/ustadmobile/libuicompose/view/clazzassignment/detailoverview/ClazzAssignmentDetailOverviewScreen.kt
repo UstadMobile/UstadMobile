@@ -107,7 +107,7 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse,
         onDeleteComment = viewModel::onDeleteComment,
         onWarningDismiss = viewModel::onWarningDismiss,
-        onLearnMore = { viewModel.onLearnMoreClicked("https://beinternetawesome.withgoogle.com") }
+        onLearnMore = viewModel::onLearnMoreClicked,
     )
 }
 

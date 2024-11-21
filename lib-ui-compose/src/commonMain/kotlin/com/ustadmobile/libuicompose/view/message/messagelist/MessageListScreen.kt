@@ -41,7 +41,7 @@ fun MessageListScreen(
         onChangeNewMessageText = viewModel::onChangeNewMessageText,
         onClickSend = viewModel::onClickSend,
         onWarningDismiss = viewModel::onWarningDismiss,
-        onLearnMore = { viewModel.onLearnMoreClicked("https://beinternetawesome.withgoogle.com") }
+        onLearnMore = viewModel::onLearnMoreClicked,
     )
 }
 
