@@ -184,6 +184,11 @@ val KTOR_SERVER_ROUTES = listOf(
 fun LearningSpace.sanitizedUrlForPaths() = sanitizeDbNameFromUrl(url)
 
 @Suppress("unused") // This is used as the KTOR server main module via application.conf
+//TODO: When the application starts :  write a file to data directory with the port and host e.g.
+//the url
+//TODO: When server stops: remove the file: e.g.
+// https://api.ktor.io/older/2.3.12/ktor-server/ktor-server-core/io.ktor.server.engine/add-shutdown-hook.html
+// use serverappmain
 fun Application.umRestApplication(
     dbModeOverride: String? = null,
 ) {
@@ -194,20 +199,6 @@ fun Application.umRestApplication(
     val dbMode = dbModeOverride ?:  appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 
     val ktorAppHome = ktorAppHomeDir()
-
-//    if(dbMode != CONF_DBMODE_VIRTUALHOST && siteUrl.isNullOrBlank()) {
-//        val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
-//            !it.isLoopback
-//        }.flatMap { netInterface ->
-//            netInterface.inetAddresses.toList().filter { it !is Inet6Address }
-//        }.firstOrNull()?.let { "http://${it.hostAddress}:${appConfig.port}/"} ?: ""
-//
-//        throw SiteConfigException("ERROR: Site URL is not set. You MUST specify the site url e.g. $likelyAddr \n" +
-//                "Please specify using the url parameter in command line e.g. add " +
-//                "--siteUrl $likelyAddr \n" +
-//                "to the command you are running or \n" +
-//                "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
-//    }
 
     val mediaInfoFile = SysPathUtil.findCommandInPath(
         commandName = "mediainfo",

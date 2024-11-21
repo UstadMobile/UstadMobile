@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.rest.clitools.appconfig
+package com.ustadmobile.lib.rest.clitools.manageserver
 
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
@@ -15,15 +15,90 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.encodeBase64
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import net.sourceforge.argparse4j.ArgumentParsers
-import net.sourceforge.argparse4j.inf.ArgumentParserException
+import net.sourceforge.argparse4j.inf.FeatureControl
 import net.sourceforge.argparse4j.inf.Namespace
+import net.sourceforge.argparse4j.inf.Subparsers
 import kotlin.system.exitProcess
 
-fun main(args: Array<String>) {
-    val parser = ArgumentParsers.newFor("AppConfig").build()
-        .defaultHelp(true)
-        .description("Ustad AppConfig Manager CLI")
+internal fun Subparsers.addNewLearningSpaceParser() {
+    addParser("newlearningspace").also {
+        it.help("Add a new learning space")
+        it.addArgument("-s", "--server")
+            .setDefault("http://localhost:8087/")
+            .help(FeatureControl.SUPPRESS)
+
+        it.addArgument("-t", "--title")
+            .required(true)
+            .help("Learning space title")
+        it.addArgument("-u", "--url")
+            .required(true)
+            .help("Learning space url eg. https://schoolname.examples.org/. " +
+                    "This must match the url as a user would enter it into their browser.")
+        it.addArgument("-d", "--dburl")
+            .required(true)
+            .help("Learning space database JDBC URL")
+        it.addArgument("-n", "--dbusername")
+            .setDefault("")
+            .help("Learning space database username")
+        it.addArgument("-w", "--dbpassword")
+            .setDefault("")
+            .help("Learning space database admin user e.g. admin")
+        it.addArgument("-a", "--adminuser")
+            .setDefault("admin")
+            .help("Learning space initial admin username e.g. admin")
+        it.addArgument("-p", "--adminpassword")
+            .required(true)
+            .help("Initial password for learning space admin")
+    }
+}
+
+
+internal fun Subparsers.addUpdateLearningSpaceSubcommand() {
+    addParser("updatelearningspace").also {
+        it.help("Update an existing learning space")
+        it.addArgument("-t", "--title")
+            .required(true)
+            .help("Learning Space title")
+        it.addArgument("-u", "--url")
+            .required(true)
+            .help("Learning Space url")
+        it.addArgument("-d", "--dburl")
+            .required(true)
+            .help("Database JDBC URL")
+        it.addArgument("-n", "--dbusername")
+            .setDefault("")
+            .help("Database username")
+        it.addArgument("-w", "--dbpassword")
+            .setDefault("")
+            .help("Database password")
+        it.addArgument("-a", "--adminuser")
+            .setDefault("admin")
+            .help("Username for learning space admin")
+        it.addArgument("-p", "--adminpassword")
+            .required(true)
+            .help("Initial password for learning space admin")
+
+    }
+}
+
+internal fun Subparsers.addDeleteLearningSpaceSubcommand() {
+    addParser("deletelearningspace").also {
+        it.help("Delete an existing learning space")
+        it.addArgument("-u", "--url")
+            .required(true)
+            .help("Learning Space url")
+        it.addArgument("-a", "--adminuser")
+            .setDefault("admin")
+            .help("Username for learning space admin")
+        it.addArgument("-p", "--adminpassword")
+            .required(true)
+            .help("Initial password for learning space admin")
+
+    }
+}
+
+
+fun main(ns: Namespace) {
 
     val json = Json { encodeDefaults = true }
     val httpClient = HttpClient(OkHttp) {
@@ -32,87 +107,7 @@ fun main(args: Array<String>) {
         }
     }
 
-    parser.addArgument("-s", "--server")
-        .setDefault("http://localhost:8087/")
-    parser.addArgument("-a", "--password")
-        .required(true)
-        .help("System admin password")
-
-    parser.addSubparsers().also { subParsers ->
-        subParsers.title("subcommands")
-        subParsers.dest("subparser_name")
-        subParsers.addParser("newlearningspace").also {
-            it.addArgument("-t", "--title")
-                .required(true)
-                .help("Learning Space title")
-            it.addArgument("-u", "--url")
-                .required(true)
-                .help("Learning Space url")
-            it.addArgument("-d", "--dburl")
-                .required(true)
-                .help("Database JDBC URL")
-            it.addArgument("-n", "--dbusername")
-                .setDefault("")
-                .help("Database username")
-            it.addArgument("-w", "--dbpassword")
-                .setDefault("")
-                .help("Database password")
-            it.addArgument("-a", "--adminuser")
-                .setDefault("admin")
-                .help("Username for learning space admin")
-            it.addArgument("-p", "--adminpassword")
-                .required(true)
-                .help("Initial password for learning space admin")
-
-        }
-    }
-    parser.addSubparsers().also { subParsers ->
-        subParsers.title("subcommands")
-        subParsers.dest("subparser_name")
-        subParsers.addParser("updatelearningspace").also {
-            it.addArgument("-t", "--title")
-                .required(true)
-                .help("Learning Space title")
-            it.addArgument("-u", "--url")
-                .required(true)
-                .help("Learning Space url")
-            it.addArgument("-d", "--dburl")
-                .required(true)
-                .help("Database JDBC URL")
-            it.addArgument("-n", "--dbusername")
-                .setDefault("")
-                .help("Database username")
-            it.addArgument("-w", "--dbpassword")
-                .setDefault("")
-                .help("Database password")
-            it.addArgument("-a", "--adminuser")
-                .setDefault("admin")
-                .help("Username for learning space admin")
-            it.addArgument("-p", "--adminpassword")
-                .required(true)
-                .help("Initial password for learning space admin")
-
-        }
-    }
-    parser.addSubparsers().also { subParsers ->
-        subParsers.title("subcommands")
-        subParsers.dest("subparser_name")
-        subParsers.addParser("deletelearningspace").also {
-            it.addArgument("-u", "--url")
-                .required(true)
-                .help("Learning Space url")
-            it.addArgument("-a", "--adminuser")
-                .setDefault("admin")
-                .help("Username for learning space admin")
-            it.addArgument("-p", "--adminpassword")
-                .required(true)
-                .help("Initial password for learning space admin")
-
-        }
-    }
-    val ns: Namespace
     try {
-        ns = parser.parseArgs(args)
         val serverUrl = ns.getString("server")
         val adminPassword = ns.getString("password")
 
@@ -187,9 +182,6 @@ fun main(args: Array<String>) {
                 }
             }
         }
-    }catch(e: ArgumentParserException) {
-        parser.handleError(e)
-        exitProcess(1)
     }catch(e: Throwable) {
         System.err.println("Error: ${e.message}")
         e.printStackTrace()

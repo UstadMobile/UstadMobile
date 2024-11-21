@@ -1,17 +1,23 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.lib.rest.clitools.appconfig.main
+import com.ustadmobile.lib.rest.clitools.manageserver.addDeleteLearningSpaceSubcommand
+import com.ustadmobile.lib.rest.clitools.manageserver.addNewLearningSpaceParser
+import com.ustadmobile.lib.rest.clitools.manageserver.addUpdateLearningSpaceSubcommand
 import com.ustadmobile.lib.rest.mediahelpers.MissingMediaProgramsException
+import io.ktor.server.engine.addShutdownHook
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.netty.handler.codec.http.HttpServerCodec
-import com.ustadmobile.lib.rest.clitools.appconfig.main as appConfigMain
+import net.sourceforge.argparse4j.ArgumentParsers
+import net.sourceforge.argparse4j.helper.HelpScreenException
+import net.sourceforge.argparse4j.inf.ArgumentParserException
+import net.sourceforge.argparse4j.inf.Namespace
+import com.ustadmobile.lib.rest.clitools.manageserver.main as manageServerMain
 
 
 /**
- * This server app is provided to increase the acceptable length of a url. This is needed if queries
- * get very long - e.g. concatenating a long list of containerentryfile uids.
+ * ServerAppMain provides the command line entry point
  */
 class ServerAppMain {
 
@@ -23,47 +29,72 @@ class ServerAppMain {
 
         const val MAX_CHUNK_SIZE = 4096
 
-        @JvmStatic
-        fun main(args: Array<String>) {
+        const val CMD_RUN_SERVER = "runserver"
 
-            if (args.contains("newlearningspace")) {
-                appConfigMain(args)
-                return
-            }
+        private fun Array<String>.argsAfterFirst(): Array<String> {
+            return toList().subList(1, size).toTypedArray()
+        }
 
-            val siteUrlArgIndex = args.indexOfFirst { it == "--siteUrl" || it == "-u" }
-            val siteUrlArg = if(siteUrlArgIndex >= 0) {
-                args.getOrNull(siteUrlArgIndex + 1)
-            }else {
-                null
-            }
-
-            val environmentArgs = if(siteUrlArg != null) {
-                args + arrayOf("-P:ktor.ustad.siteUrl=$siteUrlArg")
-            }else {
-                args
-            }
-
+        private fun runServerMain(args: Array<String>) {
             try {
-                embeddedServer(Netty, commandLineEnvironment(environmentArgs)) {
+                embeddedServer(Netty, commandLineEnvironment(args)) {
                     //Increase these timeouts to allow for ServerSentEvents which keep the client waiting
                     requestReadTimeoutSeconds = 600
                     responseWriteTimeoutSeconds = 600
-                    httpServerCodec= {
+                    httpServerCodec = {
                         HttpServerCodec(MAX_INITIAL_LINE_LENGTH, MAX_HEADER_SIZE, MAX_CHUNK_SIZE)
                     }
+                }.also {
+                    it.addShutdownHook {
+                        //TODO: delete the temporary file with url
+                    }
                 }.start(true)
-            }catch(e: SiteConfigException) {
+            } catch (e: SiteConfigException) {
                 System.err.println(e.message)
-            }catch(e: MissingMediaProgramsException) {
+            } catch (e: MissingMediaProgramsException) {
                 System.err.println("Required media programs (e.g. MediaInfo, Handbrake CLI, Sox, etc.) were not found.")
                 System.err.println(e.message ?: "")
                 System.err.println("See the README for more information")
-            }catch(e: Throwable) {
+            } catch (e: Throwable) {
                 e.printStackTrace()
             }
         }
 
+        @JvmStatic
+        fun main(args: Array<String>) {
+            val parser = ArgumentParsers.newFor("ustad-server").build()
+            val subparsers = parser.addSubparsers()
+                .title("subcommands")
+                .description("valid subcommands")
+                .dest("subparser_name")
+                .help("additional help")
+                .metavar("COMMAND")
+            subparsers.addParser(CMD_RUN_SERVER).help("Run the Ustad HTTP server")
+            subparsers.addNewLearningSpaceParser()
+            subparsers.addUpdateLearningSpaceSubcommand()
+            subparsers.addDeleteLearningSpaceSubcommand()
+
+            val ns: Namespace?
+            try {
+                ns = parser.takeIf { args.isNotEmpty() }?.parseArgs(args)
+                val subCommand = ns?.getString("subparser_name") ?: CMD_RUN_SERVER
+
+                when {
+                    subCommand == CMD_RUN_SERVER -> {
+                        runServerMain(args.argsAfterFirst())
+                    }
+
+                    else -> {
+                        manageServerMain(
+                            ns ?: throw IllegalStateException("if args were empty would have run server")
+                        )
+                    }
+                }
+            } catch (e: ArgumentParserException) {
+                parser.handleError(e)
+                System.exit(if(e is HelpScreenException) 0 else 1)
+            }
+        }
     }
 
 }
