@@ -6,6 +6,7 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
+import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
@@ -18,20 +19,42 @@ expect abstract class XapiSessionEntityDao {
     @Insert
     abstract suspend fun insertAsync(xapiSessionEntity: XapiSessionEntity)
 
-    @Query("""
+    @Query(
+        """
         SELECT XapiSessionEntity.*
           FROM XapiSessionEntity
          WHERE XapiSessionEntity.xseUid = :uid
-    """)
+         AND XapiSessionEntity.xseContentEntryUid = :contentEntryUid
+    """
+    )
+    abstract suspend fun findByUidForContentAsync(uid: Long, contentEntryUid: Long): XapiSessionEntity?
+
+    @Query(
+        """
+        SELECT XapiSessionEntity.*
+          FROM XapiSessionEntity
+         WHERE XapiSessionEntity.xseUid = :uid
+    """
+    )
     abstract suspend fun findByUidAsync(uid: Long): XapiSessionEntity?
 
-    @Query("""
+    @Query(
+        """
+        SELECT XapiSessionEntity.*
+          FROM XapiSessionEntity
+    """
+    )
+    abstract suspend fun findSession(): XapiSessionEntity?
+
+    @Query(
+        """
         UPDATE XapiSessionEntity
            SET xseCompleted = :completed,
                xseLastMod = :time
          WHERE xseUid = :xseUid
 
-    """)
+    """
+    )
     abstract suspend fun updateLatestAsComplete(
         completed: Boolean,
         time: Long,
@@ -43,14 +66,16 @@ expect abstract class XapiSessionEntityDao {
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall(
                 functionName = "findMostRecentSessionByActorAndActivity"
+
             ),
             HttpServerFunctionCall(
-                functionName ="findByUidAndPersonUidAsync",
+                functionName = "findByUidAndPersonUidAsync",
                 functionDao = ActorDao::class,
             ),
         )
     )
-    @Query("""
+    @Query(
+        """
         SELECT XapiSessionEntity.*
           FROM XapiSessionEntity
          WHERE XapiSessionEntity.xseRootActivityUid = :xseRootActivityUid
@@ -60,7 +85,8 @@ expect abstract class XapiSessionEntityDao {
                  FROM ActorEntity
                 WHERE ActorEntity.actorUid = :actorUid
                   AND ActorEntity.actorPersonUid = :accountPersonUid)     
-    """)
+    """
+    )
     abstract suspend fun findMostRecentSessionByActorAndActivity(
         accountPersonUid: Long,
         actorUid: Long,
@@ -68,8 +94,19 @@ expect abstract class XapiSessionEntityDao {
     ): XapiSessionEntity?
 
 
-    @HttpAccessible
-    @Query("""
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall(
+                functionName = "getAttemptList"
+            ),
+            HttpServerFunctionCall(
+                functionName = "findByUidForContentAsync"
+            )
+        )
+    )
+    @Query(
+        """
     SELECT Person.*, PersonPicture.*,
            (SELECT COUNT(XapiSessionEntity.xseUid)
             FROM XapiSessionEntity
@@ -80,11 +117,13 @@ expect abstract class XapiSessionEntityDao {
                 ON PersonPicture.personPictureUid = Person.personUid
     WHERE numberAttempts >= 1
                
-""")
-    abstract  fun getAttemptList(contentEntryUid: Long): PagingSource<Int, PersonAndAttemptInfo>
+"""
+    )
+    abstract fun getAttemptList(contentEntryUid: Long): PagingSource<Int, PersonAndAttemptInfo>
 
     @HttpAccessible
-    @Query("""
+    @Query(
+        """
 SELECT *FROM StatementEntity
 WHERE StatementEntity.statementActorPersonUid = :personUid
 And StatementEntity.statementContentEntryUid=:contentEntryUid
@@ -94,7 +133,11 @@ AND ROWID IN (
     WHERE StatementEntity.statementActorPersonUid = :personUid
     GROUP BY StatementEntity.statementIdHi, StatementEntity.statementIdLo
 )
-""")
-    abstract  fun getSessionList(contentEntryUid: Long, personUid: Long): PagingSource<Int, StatementEntity>
+"""
+    )
+    abstract fun getSessionList(
+        contentEntryUid: Long,
+        personUid: Long
+    ): PagingSource<Int, StatementEntity>
 }
 //

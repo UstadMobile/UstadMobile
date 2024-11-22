@@ -70,7 +70,8 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                 contain = Contain.strict
                 overflowY = Overflow.scroll
             }
-            content = virtualListContent {
+            content =
+                virtualListContent {
                 infiniteQueryPagingItems(
                     items = infiniteQueryResult,
                     key = { it.person?.personUid?.toString() ?: "0" }
