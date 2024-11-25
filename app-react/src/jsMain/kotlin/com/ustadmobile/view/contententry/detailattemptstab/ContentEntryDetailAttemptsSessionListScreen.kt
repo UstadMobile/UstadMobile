@@ -52,10 +52,6 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
 
     val uiState by viewModel.uiState.collectAsState(ContentEntryDetailAttemptsSessionListUiState())
 
-
-    val appState by viewModel.appUiState.collectAsState(AppUiState())
-
-
     val contentEntryDetailAttemptsSessionListComponent2 =
         FC<ContentEntryDetailAttemptsSessionListProps>
         { props ->
