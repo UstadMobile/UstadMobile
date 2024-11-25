@@ -52,6 +52,8 @@ import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorJvm
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumberUtilJvm
+import com.ustadmobile.core.domain.tmpfiles.CreateTempUriUseCase
+import com.ustadmobile.core.domain.tmpfiles.CreateTempUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -120,6 +122,8 @@ import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.log.NapierDoorLogger
+import com.ustadmobile.lib.rest.api.contentupload.GetSubtitleTrackServerRoute
+import com.ustadmobile.lib.rest.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriServerUseCase
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
@@ -480,6 +484,12 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<CreateTempUriUseCase>() with singleton {
+            CreateTempUriUseCaseCommonJvm(
+                rootTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
+            )
+        }
+
         bind<SetPasswordUseCase>() with scoped(EndpointScope.Default).singleton {
             SetPasswordUseCaseCommonJvm(
                 authManager = instance()
@@ -769,6 +779,14 @@ fun Application.umRestApplication(
             GetApiUrlUseCaseDirect(context)
         }
 
+        bind<GetSubtitleTrackFromUriServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            GetSubtitleTrackFromUriServerUseCase(
+                saveLocalUrisAsBlobsUseCase = instance(),
+                createTempUriUseCase = instance(),
+                deleteUrisUseCase = instance(),
+            )
+        }
+
         try {
             appConfig.config("mail")
 
@@ -905,6 +923,9 @@ fun Application.umRestApplication(
 
                 route("contentupload") {
                     ContentUploadRoute()
+                    GetSubtitleTrackServerRoute(
+                        getSubtitleTrackServerUseCase = { call -> di.on(call).direct.instance() }
+                    )
                 }
 
                 route("import") {

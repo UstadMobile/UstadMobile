@@ -3,6 +3,7 @@
 package com.ustadmobile.libuicompose.view.videocontent
 
 import android.net.Uri
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaItem.SubtitleConfiguration
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.okhttp.OkHttpDataSource
@@ -31,6 +34,8 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
+import com.ustadmobile.core.contentformats.media.MediaContentInfo
+import com.ustadmobile.core.domain.contententry.ContentManifestMap
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentUiState
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import kotlinx.coroutines.delay
@@ -57,22 +62,15 @@ actual fun VideoContentScreen(
 }
 
 /**
- * See
- * https://medium.com/@munbonecci/how-to-display-videos-using-exoplayer-on-android-with-jetpack-compose-1fb4d57778f4
  *
- * Full screen - can use
- * https://developer.android.com/develop/ui/views/layout/immersive
- *
- * Click listener can be set using
- *
- * https://developer.android.com/reference/androidx/media3/ui/PlayerView#setFullscreenButtonClickListener(androidx.media3.ui.PlayerView.FullscreenButtonClickListener)
- *
- * ... which should make the button appear.
+ * Could sideload extra subtitles as per :
+ * https://developer.android.com/media/media3/exoplayer/media-items#sideloading-subtitle-tracks
  */
 @OptIn(UnstableApi::class)
 @Composable
 fun ExoPlayerView(
-    mediaSrc: String,
+    contentManifestMap: ContentManifestMap,
+    mediaContentInfo: MediaContentInfo,
     onSetFullScreen: (Boolean) -> Unit,
     onPlayStateChanged: (VideoContentViewModel.MediaPlayState) -> Unit,
     onComplete: () -> Unit,
@@ -94,8 +92,6 @@ fun ExoPlayerView(
     var isPlayingVar by remember {
         mutableStateOf(false)
     }
-
-
 
     val fullScreenListener: PlayerView.FullscreenButtonClickListener = remember(onSetFullScreen) {
         PlayerView.FullscreenButtonClickListener {
@@ -137,8 +133,43 @@ fun ExoPlayerView(
         }
     }
 
-    val mediaSource = remember(mediaSrc) {
-        MediaItem.fromUri(Uri.parse(mediaSrc))
+    val firstMediaSrc = mediaContentInfo.sources.firstOrNull()
+    val mediaDataUrl = remember(contentManifestMap, firstMediaSrc) {
+        firstMediaSrc?.let {
+            contentManifestMap[it.uri]?.bodyDataUrl
+        }
+    }
+
+    val subtitleConfigs = remember(mediaDataUrl) {
+        mediaContentInfo.subtitles.mapNotNull { subtitle ->
+            val bodyDataUrl = contentManifestMap[subtitle.uri]?.bodyDataUrl
+            if (bodyDataUrl != null) {
+                SubtitleConfiguration.Builder(Uri.parse(bodyDataUrl))
+                    .setMimeType(subtitle.mimeType)
+                    .also {
+                        subtitle.langCode?.also { lang -> it.setLanguage(lang) }
+                    }
+                    .setLabel(subtitle.title)
+                    .build()
+            } else {
+                Log.w(
+                    "VideoContentScreen",
+                    "Could not find body data url for subtitle: ${subtitle.uri}"
+                )
+                null
+            }
+        }
+    }
+
+    val mediaSource = remember(mediaDataUrl) {
+        MediaItem.Builder()
+            .setUri(mediaDataUrl)
+            .apply {
+                if(subtitleConfigs.isNotEmpty()) {
+                    setSubtitleConfigurations(subtitleConfigs)
+                }
+            }
+            .build()
     }
 
     LaunchedEffect(mediaSource) {
@@ -156,6 +187,7 @@ fun ExoPlayerView(
         factory = { ctx ->
             PlayerView(ctx).apply {
                 player = exoPlayer
+                setShowSubtitleButton(subtitleConfigs.isNotEmpty())
                 setFullscreenButtonClickListener(fullScreenListener)
             }
         },
@@ -170,14 +202,13 @@ fun VideoContentScreen(
     onPlayStateChanged: (VideoContentViewModel.MediaPlayState) -> Unit = { },
     onComplete: () -> Unit,
 ) {
-    //val mediaSrc = uiState.mediaSrc
-    val mediaSrc = uiState.mediaDataUrl
-    val mimeType = uiState.mediaMimeType
+    val mediaContentMap = uiState.contentManifestMap
+    val mediaContentInfo = uiState.mediaContentInfo
 
-
-    if(mediaSrc != null && mimeType != null) {
+    if(mediaContentMap != null && mediaContentInfo != null) {
         ExoPlayerView(
-            mediaSrc  = mediaSrc,
+            contentManifestMap = mediaContentMap,
+            mediaContentInfo = mediaContentInfo,
             modifier = Modifier.fillMaxWidth().let {
                 if(uiState.isFullScreen) it.fillMaxHeight() else it.height(200.dp)
             },

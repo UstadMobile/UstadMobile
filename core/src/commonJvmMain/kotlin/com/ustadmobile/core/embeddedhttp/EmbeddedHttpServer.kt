@@ -34,6 +34,20 @@ class EmbeddedHttpServer(
     }
 
     /**
+     * If, for some reason, we have stored text content that is not gzipped, the default result is
+     * as follows:
+     *  i) our response will have a "content-encoding: identity" header
+     *  ii) NanoHTTPD will gzip it and then add a "content-encoding: gzip" header
+     *  iii) The response now has conflicting headers and won't be understood by the browser
+     *
+     * Almost all the time if something should be gzipped, this will have already been done when
+     * storing in the UstadCache.
+     */
+    override fun useGzipWhenAccepted(r: Response): Boolean {
+        return false
+    }
+
+    /**
      *
      */
     fun endpointUrl(

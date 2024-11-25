@@ -147,6 +147,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             tmpPath = Path(rootTmpPath.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             compressListUseCase = compressListUseCase,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
 
         val metadata = runBlocking {
@@ -173,6 +174,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             tmpPath = Path(rootTmpPath.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             compressListUseCase = compressListUseCase,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
 
         runBlocking {
@@ -198,6 +200,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             tmpPath = Path(rootTmpPath.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             compressListUseCase = compressListUseCase,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
         runBlocking {
             assertNull(xapiPlugin.extractMetadata(tempFile.toDoorUri(), "file.zip"))
@@ -221,6 +224,7 @@ class XapiZipContentImporterTest :AbstractMainDispatcherTest() {
             tmpPath = Path(rootTmpPath.absolutePath),
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
             compressListUseCase = compressListUseCase,
+            mimeTypeHelper = FileMimeTypeHelperImpl(),
         )
 
         val result = runBlocking {

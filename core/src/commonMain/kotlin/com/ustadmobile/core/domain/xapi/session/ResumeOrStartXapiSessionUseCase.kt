@@ -14,6 +14,14 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
  */
 interface ResumeOrStartXapiSessionUseCase {
 
+    /**
+     * @param contentEntryVersionUid Content created by authoring tools (including Articulate) can
+     * crash when data from a previous version of the content is loaded by a new version (where the
+     * new version of the content has the same activity id as the old version). This is poor error
+     * handling on the part of the authoring tool output, but there's not much we can do about that.
+     * Hence we only consider sessions to resume where that session was created for the same
+     * contentEntryVersionUid. See UstadMobile Github Issue #970 for further info.
+     */
     suspend operator fun invoke(
         accountPersonUid: Long,
         actor: XapiActor,
@@ -21,6 +29,7 @@ interface ResumeOrStartXapiSessionUseCase {
         clazzUid: Long,
         cbUid: Long,
         contentEntryUid: Long,
+        contentEntryVersionUid: Long,
     ) : XapiSessionEntity
 
 }
