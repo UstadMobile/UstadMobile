@@ -130,6 +130,7 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
@@ -967,6 +968,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<ValidateEmailUseCase>() with provider {
             ValidateEmailUseCase()
+        }
+
+        bind<ValidateUsernameUseCase>() with provider {
+            ValidateUsernameUseCase()
         }
 
         bind<CancelRemoteContentEntryImportUseCase>() with scoped(EndpointScope.Default).singleton {

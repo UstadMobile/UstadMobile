@@ -8,6 +8,7 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -151,6 +152,8 @@ class PersonEditViewModel(
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase by instance()
 
     private val validateEmailUseCase = ValidateEmailUseCase()
+
+    private val validateUsernameUseCase = ValidateUsernameUseCase()
 
     private val genderConfig : GenderConfig by instance()
 
@@ -356,29 +359,7 @@ class PersonEditViewModel(
     }
 
     private fun validateUsername(username: String): Boolean {
-        var isValid = true
-
-        if (username.isNullOrEmpty()){
-            isValid = false
-        }
-
-        if (isValid){
-            if (username.contains(" ")){
-                isValid = false
-            }
-        }
-
-        if (isValid){
-            var usernameChars = username.toCharArray()
-
-            for(i in 1..<usernameChars.count()){
-                if(usernameChars[i].isUpperCase()){
-                    isValid = false
-                }
-            }
-        }
-
-        return isValid
+        return validateUsernameUseCase(username) != null
     }
 
     fun onNationalPhoneNumSetChanged(phoneNumSet: Boolean) {
@@ -410,7 +391,7 @@ class PersonEditViewModel(
         _uiState.update { prev ->
             prev.copy(
                 usernameError = if(isRegistrationMode && !validateUsername(savePerson.username ?: "")) {
-                    systemImpl.getString(MR.strings.invalid)
+                    systemImpl.getString(MR.strings.invalid_username)
                 }else {
                     null
                 },

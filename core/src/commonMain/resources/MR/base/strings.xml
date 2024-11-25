@@ -776,6 +776,7 @@
     %2$s is replaced with the server url - e.g. Logged in as admin on https://app.ustadmobile.com/ -->
     <string name="logged_in_as">Logged in as  %1$s on %2$s</string>
     <string name="person_exists">Person already exist, pick another username</string>
+    <string name="invalid_username">Username must use only letters, numbers, '.', or '_', and be 3–15 characters.</string>
     <string name="incorrect_current_password">Current password incorrect</string>
     <string name="sel_question_type_free_text">Free text</string>
     <string name="sel_question_type_multiple_choice">Multiple choice</string>

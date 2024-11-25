@@ -8,6 +8,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -74,6 +75,8 @@ class LoginViewModel(
     private val apiUrlConfig: ApiUrlConfig by instance()
 
     private var verifiedSite: Site? = null
+
+    private val validateUsernameUseCase = ValidateUsernameUseCase()
 
     private val setLanguageUseCase: SetLanguageUseCase by instance()
 
@@ -196,13 +199,24 @@ class LoginViewModel(
         val username = _uiState.value.username
         val password = _uiState.value.password
 
+        val validatedUsername = validateUsernameUseCase(username)
+        if (validatedUsername == null) {
+            _uiState.update { prev ->
+                prev.copy(
+                    fieldsEnabled = true,
+                    usernameError = impl.getString(MR.strings.invalid_username),
+                )
+            }
+            return
+        }
+
         if(username.isNotEmpty() && password.isNotEmpty()){
             loadingState = LoadingUiState.INDETERMINATE
             viewModelScope.launch {
                 var errorMessage: String? = null
                 try {
                     val account = accountManager.login(
-                        username = username.trim(),
+                        username = validatedUsername.trim(),
                         password = password.trim(),
                         endpointUrl = serverUrl,
                         maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L,
