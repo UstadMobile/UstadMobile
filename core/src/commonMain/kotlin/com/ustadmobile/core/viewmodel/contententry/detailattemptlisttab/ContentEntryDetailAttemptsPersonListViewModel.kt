@@ -6,30 +6,35 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
+import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 
 data class ContentEntryDetailAttemptsPersonListUiState(
-    val attemptsPersonList: () -> PagingSource<Int, PersonAndAttemptInfo> = { EmptyPagingSource() },
+    val attemptsPersonList: () -> PagingSource<Int, StatementAndPersonAndPicture> =
+        { EmptyPagingSource() },
 )
 
 class ContentEntryDetailAttemptsPersonListViewModel(
-    di: DI, savedStateHandle: UstadSavedStateHandle, destinationName: String = DEST_NAME, )
-    : UstadListViewModel<ContentEntryDetailAttemptsPersonListUiState>(
-    di, savedStateHandle, ContentEntryDetailAttemptsPersonListUiState(), destinationName) {
+    di: DI, savedStateHandle: UstadSavedStateHandle, destinationName: String = DEST_NAME,
+) : UstadListViewModel<ContentEntryDetailAttemptsPersonListUiState>(
+    di, savedStateHandle, ContentEntryDetailAttemptsPersonListUiState(), destinationName
+) {
 
     protected val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
-    private fun getAttemptsPersonListAsPagingSource(contentEntryUid: Long) :
-            PagingSource<Int, PersonAndAttemptInfo>  {
-        val pagingSource = activeRepo.xapiSessionEntityDao().getAttemptList(contentEntryUid)
-        println("Fetched paging source: $pagingSource")
+    private fun getAttemptsPersonListAsPagingSource(contentEntryUid: Long):
+            PagingSource<Int, StatementAndPersonAndPicture> {
+        val pagingSource =
+            activeRepo.xapiSessionEntityDao().findPersonsWithAttempts(contentEntryUid)
         return pagingSource
     }
-    private val attemptsPersonListPagingSource: ListPagingSourceFactory<PersonAndAttemptInfo> = {
-        getAttemptsPersonListAsPagingSource(contentEntryUid = entityUidArg )
-    }
+
+    private val attemptsPersonListPagingSource: ListPagingSourceFactory<StatementAndPersonAndPicture> =
+        {
+            getAttemptsPersonListAsPagingSource(contentEntryUid = entityUidArg)
+        }
+
     init {
         _uiState.update { prev ->
             prev.copy(
@@ -37,14 +42,16 @@ class ContentEntryDetailAttemptsPersonListViewModel(
             )
         }
     }
+
     fun onClickEntry(
-        entry: PersonAndAttemptInfo
+        entry: StatementAndPersonAndPicture
     ) {
         navController.navigate(
             viewName = ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME,
             args = mapOf(
                 UstadView.ARG_PERSON_UID to (entry.person?.personUid ?: 0).toString(),
-                UstadView.ARG_CONTENT_ENTRY_UID to entityUidArg.toString())
+                UstadView.ARG_CONTENT_ENTRY_UID to entityUidArg.toString()
+            )
         )
     }
 

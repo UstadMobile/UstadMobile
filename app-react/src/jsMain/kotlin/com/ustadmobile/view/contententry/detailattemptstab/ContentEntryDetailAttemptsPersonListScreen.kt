@@ -12,6 +12,7 @@ import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
+import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -39,7 +40,7 @@ import web.cssom.pct
 external interface ContentEntryDetailAttemptsPersonListProps: Props {
     var uiState: ContentEntryDetailAttemptsPersonListUiState
     var refreshCommandFlow: Flow<RefreshCommand>?
-    var onListItemClick: (PersonAndAttemptInfo) -> Unit
+    var onListItemClick: (StatementAndPersonAndPicture) -> Unit
 
 }
 val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
@@ -58,7 +59,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
         )
         println("remoteMediatorResult: $remoteMediatorResult")
 
-        val infiniteQueryResult: UseInfiniteQueryResult<PagingSourceLoadResult<Int, PersonAndAttemptInfo>, Throwable> = usePagingSource(
+        val infiniteQueryResult: UseInfiniteQueryResult<PagingSourceLoadResult<Int, StatementAndPersonAndPicture>, Throwable> = usePagingSource(
             remoteMediatorResult.pagingSourceFactory, true, 150
         )
 
@@ -83,7 +84,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                             }
                             ListItemIcon {
                                 UstadPersonAvatar {
-                                    pictureUri = attemptsPersonListItems?.personPicture?.personPictureThumbnailUri
+                                    pictureUri = attemptsPersonListItems?.picture?.personPictureThumbnailUri
                                     personName = attemptsPersonListItems?.person?.fullName()
                                 }
                             }
