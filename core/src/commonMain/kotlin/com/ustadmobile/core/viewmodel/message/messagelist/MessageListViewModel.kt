@@ -144,8 +144,6 @@ class MessageListViewModel(
 
         const val DEST_NAME = "MessageList"
 
-        const val SOCIAL_WARNING_WEB_URL = "https://beinternetawesome.withgoogle.com"
-
     }
 
 }
