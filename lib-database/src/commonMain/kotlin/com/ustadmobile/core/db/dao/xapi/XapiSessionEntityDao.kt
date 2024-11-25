@@ -9,6 +9,7 @@ import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
+import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 
@@ -18,16 +19,6 @@ expect abstract class XapiSessionEntityDao {
 
     @Insert
     abstract suspend fun insertAsync(xapiSessionEntity: XapiSessionEntity)
-
-    @Query(
-        """
-        SELECT XapiSessionEntity.*
-          FROM XapiSessionEntity
-         WHERE XapiSessionEntity.xseUid = :uid
-         AND XapiSessionEntity.xseContentEntryUid = :contentEntryUid
-    """
-    )
-    abstract suspend fun findByUidForContentAsync(uid: Long, contentEntryUid: Long): XapiSessionEntity?
 
     @Query(
         """
@@ -104,9 +95,6 @@ expect abstract class XapiSessionEntityDao {
             HttpServerFunctionCall(
                 functionName = "getAttemptList"
             ),
-            HttpServerFunctionCall(
-                functionName = "findByUidForContentAsync"
-            )
         )
     )
     @Query(
@@ -128,20 +116,39 @@ expect abstract class XapiSessionEntityDao {
     @HttpAccessible
     @Query(
         """
-SELECT *FROM StatementEntity
-WHERE StatementEntity.statementActorPersonUid = :personUid
-And StatementEntity.statementContentEntryUid=:contentEntryUid
-AND ROWID IN (
-    SELECT MIN(ROWID)
+    SELECT *FROM StatementEntity
+    WHERE StatementEntity.statementActorPersonUid = :personUid
+    And StatementEntity.statementContentEntryUid=:contentEntryUid
+    AND ROWID IN 
+    (SELECT MIN(ROWID)
     FROM StatementEntity
     WHERE StatementEntity.statementActorPersonUid = :personUid
-    GROUP BY StatementEntity.statementIdHi, StatementEntity.statementIdLo
-)
+    GROUP BY StatementEntity.statementIdHi, StatementEntity.statementIdLo)
 """
     )
     abstract fun getSessionList(
         contentEntryUid: Long,
         personUid: Long
     ): PagingSource<Int, StatementEntity>
+
+
+    @HttpAccessible
+    @Query("""
+       SELECT StatementEntity.*, Person.*, PersonPicture.*
+       FROM StatementEntity
+       JOIN Person
+            ON Person.personUid = StatementEntity.statementActorPersonUid
+       LEFT JOIN PersonPicture
+            ON PersonPicture.personPictureUid = Person.personUid 
+       WHERE (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN (
+           SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+             FROM StatementEntity
+            WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+              AND StatementEntity.statementActorPersonUid = Person.personUid
+         ORDER BY StatementEntity.resultDuration DESC      
+            LIMIT 1 
+       )
+""")
+abstract   fun findPersonsWithAttempts(contentEntryUid: Long):
+            PagingSource<Int, StatementAndPersonAndPicture>
 }
-//

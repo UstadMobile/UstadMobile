@@ -11,6 +11,7 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
 import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
+import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
@@ -36,7 +37,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
 fun ContentEntryDetailAttemptsPersonListScreen(
     uiState: ContentEntryDetailAttemptsPersonListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
-    onClickEntry: (PersonAndAttemptInfo) -> Unit = {},
+    onClickEntry: (StatementAndPersonAndPicture) -> Unit = {},
     ) {
     val attemptsPersonListPager =
         rememberDoorRepositoryPager(uiState.attemptsPersonList, refreshCommandFlow)
@@ -62,7 +63,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                 },
                 leadingContent = {
                     UstadPersonAvatar(
-                        pictureUri = attemptsPersonListItems?.personPicture?.personPictureThumbnailUri,
+                        pictureUri = attemptsPersonListItems?.picture?.personPictureThumbnailUri,
                         personName = attemptsPersonListItems?.person?.fullName(),
                     )
                 }

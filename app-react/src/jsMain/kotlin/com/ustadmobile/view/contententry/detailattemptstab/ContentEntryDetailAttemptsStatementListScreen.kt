@@ -3,7 +3,6 @@ package com.ustadmobile.view.contententry.detailattemptstab
 
 import app.cash.paging.PagingSourceLoadResult
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
@@ -36,11 +35,8 @@ import web.cssom.pct
 
 
 external interface ContentEntryDetailAttemptsStatementListProps: Props {
-
     var uiState: ContentEntryDetailAttemptsStatementListUiState
     var refreshCommandFlow: Flow<RefreshCommand>?
-  //  var onListItemClick: (StatementEntity) -> Unit
-
 }
 
 
@@ -82,15 +78,15 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                 ) { attemptsStatementListItems ->
                     ListItem.create {
                         ListItemButton{
-                        /*    onClick = {
-                                attemptsStatementListItems?.also { props.onListItemClick(it) }
-                            }*/
                             ListItemIcon {
                                 UstadBlankIcon()
                             }
                             ListItemText {
-                                primary = ReactNode(attemptsStatementListItems?.resultCompletion.toString()?:"")
-                            }
+                                primary = ReactNode(
+                                    attemptsStatementListItems?.resultCompletion?.let {
+                                        if (it) "Complete" else "Incomplete"
+                                    } ?: "Incomplete"
+                                )                            }
                         }
                     }
                 }
@@ -106,7 +102,6 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
     contentEntryDetailAttemptsStatementListComponent2 {
         this.uiState = uiState
         refreshCommandFlow = viewModel.refreshCommandFlow
-      //  onListItemClick = viewModel::onClickEntry
 
     }
 
