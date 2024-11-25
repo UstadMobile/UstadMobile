@@ -24,6 +24,7 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase.Companion.SOCIAL_WARNING_WEB_URL
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.viewmodel.clazz.launchSetTitleFromClazzUid
@@ -755,8 +756,5 @@ class ClazzAssignmentDetailOverviewViewModel(
         const val KEY_SUBMISSION_HTML = "submissionHtml"
 
         const val DEST_NAME = "CourseAssignmentDetailOverviewView"
-
-        const val SOCIAL_WARNING_WEB_URL = "https://beinternetawesome.withgoogle.com"
-
     }
 }

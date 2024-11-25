@@ -7,6 +7,7 @@ class ShowSocialWarningUseCase(
 ) {
     companion object {
         private const val SOCIAL_WARNING_DISMISSED_PREFIX = "dismissed-social-warning-"
+        const val SOCIAL_WARNING_WEB_URL = "https://beinternetawesome.withgoogle.com"
     }
 
     operator fun invoke(username: String): Boolean {

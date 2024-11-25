@@ -28,48 +28,55 @@ fun SocialWarningListItem(
     onDismiss: () -> Unit,
     onLearnMore: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = Icons.Default.Warning,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = stringResource(MR.strings.be_careful_interacting_online),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        Text(
-            text = stringResource(MR.strings.be_careful_not_to_share),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 8.dp)
-        )
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(MR.strings.got_it))
+    ListItem(
+        headlineContent = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(MR.strings.be_careful_interacting_online),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
-            TextButton(onClick = onLearnMore) {
-                Text(text = stringResource(MR.strings.learn_more))
+        },
+        supportingContent = {
+            Column {
+                Text(
+                    text = stringResource(MR.strings.be_careful_not_to_share),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text(
+                            text = stringResource(MR.strings.got_it),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                    TextButton(onClick = onLearnMore) {
+                        Text(
+                            text = stringResource(MR.strings.learn_more),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
             }
         }
-    }
+    )
 }

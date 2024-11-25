@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase.Companion.SOCIAL_WARNING_WEB_URL
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -142,8 +143,6 @@ class MessageListViewModel(
     companion object {
 
         const val DEST_NAME = "MessageList"
-
-        const val SOCIAL_WARNING_WEB_URL = "https://beinternetawesome.withgoogle.com"
 
     }
 
