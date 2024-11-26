@@ -89,8 +89,6 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                             }
                         }
                     }
-                }?: run {
-                    println("No person data found")
                 }
             }
 
