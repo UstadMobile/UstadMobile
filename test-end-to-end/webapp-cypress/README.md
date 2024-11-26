@@ -5,7 +5,7 @@ These are end-to-end tests for the web version of the app built using [Cypress](
 Requirements:
 
 * Install Node and NPM as per [NPM official docs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm). 
-  This is tested using NPM9 and 10 and Node 18.
+  This is tested using NPM10 and Node 18.
 * Install Cypress dependencies as [Cypress docs](https://docs.cypress.io/guides/continuous-integration/introduction#Dependencies)
 * Build the app-ktor-server and testserver-controller (inc) e.g.
   
@@ -23,3 +23,7 @@ Running:
 ```
 ./run-cypress-test.sh
 ```
+
+Optional args:
+
+* --spec specname (as found in e2e directory, without the .cy.js suffix e.g. ```--spec WEB_001_001_add_content```)

@@ -88,6 +88,7 @@ class ResolveXapiLaunchHrefUseCase(
             clazzUid = clazzUid,
             cbUid = cbUid,
             contentEntryUid = contentEntryVersion.cevContentEntryUid,
+            contentEntryVersionUid = contentEntryVersionUid,
         )
 
         val queryParams: Map<String, String> = mapOf(

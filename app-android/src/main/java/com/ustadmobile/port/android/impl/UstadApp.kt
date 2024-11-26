@@ -79,6 +79,8 @@ import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCaseLocal
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
@@ -453,6 +455,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             compressListUseCase = instance(),
+                            mimeTypeHelper = instance(),
                         )
                     )
 
@@ -466,6 +469,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
                             compressListUseCase = instance(),
+                            mimeTypeHelper = instance(),
                             h5pInStream = {
                                 applicationContext.assets.open("h5p/h5p-standalone-3.6.0.zip",
                                     AssetManager.ACCESS_STREAMING)
@@ -758,7 +762,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             ResolveXapiLaunchHrefUseCase(
                 activeRepo = instance(tag = DoorTag.TAG_REPO),
                 httpClient = instance(),
-                json = instance(),
+                json = instance<XapiJson>().json,
                 xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
                 endpoint = context,
                 accountManager = instance(),
@@ -1085,6 +1089,15 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 saveStatementOnUnloadUseCase = null,
                 xapiStatementResource = instance(),
                 endpoint = context,
+            )
+        }
+
+
+        bind<GetSubtitleTrackFromUriUseCase>() with scoped(EndpointScope.Default).singleton {
+            GetSubtitleTrackFromUriUseCaseLocal(
+                uriHelper = instance(),
+                dispatcher = Dispatchers.IO,
+                supportedLanguagesConfig = instance(),
             )
         }
 
