@@ -2,7 +2,6 @@ package com.ustadmobile.view.contententry.detailattemptstab
 
 import app.cash.paging.PagingSourceLoadResult
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
