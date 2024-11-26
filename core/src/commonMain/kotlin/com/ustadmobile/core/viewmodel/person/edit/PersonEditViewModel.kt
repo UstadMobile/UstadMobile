@@ -358,10 +358,6 @@ class PersonEditViewModel(
             phoneNumError != null
     }
 
-    private fun validateUsername(username: String): Boolean {
-        return validateUsernameUseCase(username) != null
-    }
-
     fun onNationalPhoneNumSetChanged(phoneNumSet: Boolean) {
         _uiState.takeIf { it.value.nationalPhoneNumSet != phoneNumSet }?.update { prev ->
             prev.copy(nationalPhoneNumSet = phoneNumSet)
@@ -390,7 +386,7 @@ class PersonEditViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                usernameError = if(isRegistrationMode && !validateUsername(savePerson.username ?: "")) {
+                usernameError = if (isRegistrationMode && validateUsernameUseCase(savePerson.username ?: "") == null) {
                     systemImpl.getString(MR.strings.invalid_username)
                 }else {
                     null
