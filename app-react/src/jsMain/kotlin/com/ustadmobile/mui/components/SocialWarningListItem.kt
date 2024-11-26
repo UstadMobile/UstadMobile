@@ -21,6 +21,10 @@ import web.window.WindowTarget
 import web.window.window
 import mui.icons.material.Warning as WarningIcon
 
+private const val SOCIAL_WARNING_WEB_URL = "https://beinternetawesome.withgoogle.com"
+private const val BUTTON_STACK_GAP_PX = 12
+private const val CONTENT_MARGIN_TOP_PX = 12
+
 external interface SocialWarningProps : Props {
     var onDismiss: () -> Unit
 }
@@ -45,8 +49,8 @@ val SocialWarningListItem = FC<SocialWarningProps> { props ->
                 Stack {
                     direction = responsive(StackDirection.row)
                     sx = jso {
-                        gap = 12.px
-                        marginTop = 12.px
+                        gap = BUTTON_STACK_GAP_PX.px
+                        marginTop = CONTENT_MARGIN_TOP_PX.px
                     }
 
                     Button {
@@ -59,7 +63,7 @@ val SocialWarningListItem = FC<SocialWarningProps> { props ->
                         variant = ButtonVariant.text
                         onClick = {
                             window.open(
-                                "https://beinternetawesome.withgoogle.com",
+                                SOCIAL_WARNING_WEB_URL,
                                 WindowTarget._blank
                             )
                         }
