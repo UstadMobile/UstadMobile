@@ -83,7 +83,12 @@ This code will silently fail to do anything. A situation like this should normal
 
 #### Never hardcode any literal values
 
-Any literal other than 0, 1, -1, true, false, or null. Any other literal value MUST be defined as a constant with a meaningful name.
+The following can be hardcoded:
+* 0, 1, -1, true, false, null, "" (empty string)
+* Strings less than 64 characters where the string is defined as part of an external specification that we are implementing. 
+
+Any other literal must not be hardcoded and there should be only one constant value defined for a given purpose (such that if this value needs 
+changed in future, it should only need changed in one place).
 
 e.g. 
 Do not do this:
