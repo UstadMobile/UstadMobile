@@ -1,6 +1,7 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase.Companion.SOCIAL_WARNING_WEB_URL
 import com.ustadmobile.core.hooks.useStringProvider
 import js.objects.jso
 import mui.material.Button
@@ -20,8 +21,6 @@ import web.cssom.px
 import web.window.WindowTarget
 import web.window.window
 import mui.icons.material.Warning as WarningIcon
-
-private const val SOCIAL_WARNING_WEB_URL = "https://beinternetawesome.withgoogle.com"
 private const val BUTTON_STACK_GAP_PX = 12
 private const val CONTENT_MARGIN_TOP_PX = 12
 
