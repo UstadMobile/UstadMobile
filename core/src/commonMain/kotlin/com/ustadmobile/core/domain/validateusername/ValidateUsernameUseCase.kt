@@ -5,9 +5,9 @@ class ValidateUsernameUseCase {
 
     /**
      * Validates a username according to the following rules:
-     * - Must not contain spaces, numbers, or special characters except . and _
+     * - Must not contain spaces, tabs, or banned special characters like !@#$%^&*()
      * - Non-English Unicode characters are allowed
-     * - Cannot be empty
+     * - Must be 3–15 characters long after trimming
      *
      * @param username The username string to validate
      * @return The valid username (trimmed) if valid, or null if invalid
@@ -15,12 +15,16 @@ class ValidateUsernameUseCase {
     operator fun invoke(username: String): String? {
         val trimmed = username.trim()
 
-        // Must not be empty
-        if (trimmed.isEmpty()) return null
+        if (trimmed.length !in 3..15) {
+            return null // Username must be between 3 and 15 characters
+        }
 
-        // Regex: Allows letters, . and _; disallows spaces and numbers
-        val regex = "^[\\p{L}._]+\$".toRegex()
+        val bannedCharacters = "!@#$%^&*()[]{}|\\:;\"'<>,?/+=`~\t\n\r "
 
-        return if (regex.matches(trimmed)) trimmed else null
+        if (trimmed.any { it in bannedCharacters }) {
+            return null
+        }
+
+        return trimmed
     }
 }
