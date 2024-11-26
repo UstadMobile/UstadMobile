@@ -6,14 +6,14 @@ in both production and development environment. It is built as KTOR server.
 
 # Development running:
 
-2. Build and run using the runserver.sh script:
+2. Build and run server locally:
 
 ```
 # Linux
-$ ./runserver.sh --siteUrl http://your.ip.address:8087/
+$ ./gradlew app-ktor-server:run --args='runserver'
 
 #Windows
-$ runserver.bat --siteUrl http://your.ip.address:8087/
+$ gradlew app-ktor-server:run --args='runserver'
 ```
 
 Where your.ip.address is your IP address or a domain/host URL that points to your system. 
@@ -45,25 +45,10 @@ The port can be set using the command line as per KTOR server standard options, 
 The application can be debugged using the same as any other standalone JAR using JWDP. In Android
 Studio or IntelliJ, Go to  run, debug, configurations and then add a "remote" configuration.
 
-3. adding learnig space ustad-appconfig.sh script:
-
+* __Step 5: Add a learning space__:
 ```
-# Linux
-$ ./ustad-appconfig.sh --password admin_password newlearningspace  
---title exampleTitle --url http://your.ip.address:8087/
- --dburl jdbc:sqlite:Your_system_path/UstadMobile/app-ktor-server/data/localhost.db
---adminpassword any_password
-
-#Windows
-$ ustad-appconfig.bat --password admin_password newlearningspace  -
--title exampleTitle --url http://your.ip.address:8087/
---dburl jdbc:sqlite:Your_system_path/UstadMobile/app-ktor-server/data/localhost.db
---adminpassword any_password
+./gradlew app-ktor-server:run --args='newlearningspace --url http://your.ip.address:8087/ --title learningspacetitle'
 ```
-After server runs successfully you need to add the learnng space
-(here admin_password is password present in admin.txt file ,Your_system_path is path of the project
-folder and any_password is password for the particular learning space)
-
 to show learning space list add base url in com.ustadmobile.system.systemBaseUrl=your_url
 in buildconfig.default.properties
 

@@ -184,11 +184,6 @@ val KTOR_SERVER_ROUTES = listOf(
 fun LearningSpace.sanitizedUrlForPaths() = sanitizeDbNameFromUrl(url)
 
 @Suppress("unused") // This is used as the KTOR server main module via application.conf
-//TODO: When the application starts :  write a file to data directory with the port and host e.g.
-//the url
-//TODO: When server stops: remove the file: e.g.
-// https://api.ktor.io/older/2.3.12/ktor-server/ktor-server-core/io.ktor.server.engine/add-shutdown-hook.html
-// use serverappmain
 fun Application.umRestApplication(
     dbModeOverride: String? = null,
 ) {
@@ -321,8 +316,13 @@ fun Application.umRestApplication(
     val dataDirPath = environment.config.absoluteDataDir()
 
     val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
-
-
+    val serverProperties = Properties().apply {
+        setProperty("port", environment.config.port.toString())
+        setProperty("dataDir", dataDirPath.absolutePath)
+    }
+    File(dataDirPath, "server.properties").outputStream().use { output ->
+        serverProperties.store(output,null)
+    }
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
     }
