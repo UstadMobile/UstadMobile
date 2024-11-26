@@ -205,6 +205,10 @@ if(System.getenv("DOORDB_POSTGRES_PASSWORD") != null) {
     ext.buildConfigProperties["doordb_postgres_password"] = System.getenv("DOORDB_POSTGRES_PASSWORD")
 }
 
+if(System.getenv("MATOMO_URL") != null) {
+    ext.buildConfigProperties["android.matomo.url"] = System.getenv("MATOMO_URL")
+}
+
 //Find stable updates only as per https://github.com/ben-manes/gradle-versions-plugin
 def isNonStable = { String version ->
     def hasPreReleaseKeywords = ["BETA", "ALPHA", "RC"].any { it -> version.toUpperCase().contains(it)}

@@ -141,6 +141,9 @@ android {
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + rootProject.ext.buildConfigProperties["android.acra.user"] + "\""
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + rootProject.ext.buildConfigProperties["android.acra.auth"] + "\""
 
+        buildConfigField "String", "MATOMO_URL", "\"" + rootProject.ext.buildConfigProperties["android.matomo.url"] + "\""
+        buildConfigField "int", "MATOMO_SITE_ID", rootProject.ext.buildConfigProperties["android.matomo.siteId"]
+
         //see https://proandroiddev.com/current-issues-with-kotlin-multiplatform-and-how-to-fix-them-5ae62822a546
         packagingOptions {
             pickFirst "META-INF/io.netty.versions.properties"
@@ -337,6 +340,9 @@ dependencies {
     implementation libs.androidx.core.splashscreen
 
     implementation libs.rawhttp.core
+
+    //Matomo
+    implementation libs.matomo.android
 
 
     androidTestImplementation libs.androidx.test.runner

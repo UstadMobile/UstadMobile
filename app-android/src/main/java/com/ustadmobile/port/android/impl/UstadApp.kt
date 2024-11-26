@@ -166,6 +166,8 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.APPCONFIG_KEY_PRESET_LANG
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
+import com.ustadmobile.core.matomo.AnalyticsTracker
+import com.ustadmobile.core.matomo.MatomoAnalytics
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
 import com.ustadmobile.core.util.ext.appMetaData
@@ -179,6 +181,7 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import com.ustadmobile.port.android.matomo.MatomoApp
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -199,15 +202,29 @@ import org.acra.config.httpSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
+import org.matomo.sdk.Matomo
+import org.matomo.sdk.TrackMe
+import org.matomo.sdk.Tracker
+import org.matomo.sdk.TrackerBuilder
+import org.matomo.sdk.extra.DimensionQueue
+import org.matomo.sdk.extra.DownloadTracker
+import org.matomo.sdk.extra.TrackHelper
 import rawhttp.core.RawHttp
 
-class UstadApp : Application(), DIAware, ImageLoaderFactory{
+class UstadApp : MatomoApp(), DIAware, ImageLoaderFactory{
 
 
     data class DbAndObservers(
         val db: UmAppDatabase,
         val updateCacheLockJoinUseCase: UpdateCacheLockJoinUseCase,
     )
+
+    override fun onCreateTrackerConfig(): TrackerBuilder {
+        // Access the Matomo URL and site ID from BuildConfig
+        val matomoUrl = BuildConfig.MATOMO_URL
+        val siteId = BuildConfig.MATOMO_SITE_ID
+        return TrackerBuilder.createDefault(matomoUrl, siteId)
+    }
 
     private val Context.httpPersistentFilesDir: File
         get() = File(filesDir, "httpfiles")
@@ -234,6 +251,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     )
                 )
                 .build()
+        }
+
+        bind<AnalyticsTracker>() with singleton {
+            MatomoAnalytics(getTracker())
         }
 
         bind<HttpClient>() with singleton {
@@ -1109,7 +1130,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
     override fun onCreate() {
         super.onCreate()
         Napier.base(DebugAntilog())
-
+        onInitTracker()
         val metadataPresetLang = appMetaData?.getString(APPCONFIG_KEY_PRESET_LANG)
 
         if(!metadataPresetLang.isNullOrEmpty()) {
@@ -1151,6 +1172,22 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     httpMethod = HttpSender.Method.POST
                 }
             }
+        }
+    }
+
+    private fun onInitTracker() {
+        val tracker = getTracker()
+
+        // Track this app install; this triggers only once per app version.
+        TrackHelper.track().download().identifier(DownloadTracker.Extra.ApkChecksum(this)).with(tracker)
+
+        // Dimension Queue setup
+        val dimensionQueue = DimensionQueue(tracker)
+        dimensionQueue.add(0, "test") // Sends next time something is tracked
+
+        // Add tracking callback
+        tracker.addTrackingCallback { trackMe: TrackMe? ->
+            trackMe
         }
     }
 
