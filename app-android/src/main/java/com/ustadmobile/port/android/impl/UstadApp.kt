@@ -181,7 +181,6 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
-import com.ustadmobile.port.android.matomo.MatomoApp
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -208,10 +207,11 @@ import org.matomo.sdk.Tracker
 import org.matomo.sdk.TrackerBuilder
 import org.matomo.sdk.extra.DimensionQueue
 import org.matomo.sdk.extra.DownloadTracker
+import org.matomo.sdk.extra.MatomoApplication
 import org.matomo.sdk.extra.TrackHelper
 import rawhttp.core.RawHttp
 
-class UstadApp : MatomoApp(), DIAware, ImageLoaderFactory{
+class UstadApp : MatomoApplication(), DIAware, ImageLoaderFactory{
 
 
     data class DbAndObservers(
@@ -219,12 +219,6 @@ class UstadApp : MatomoApp(), DIAware, ImageLoaderFactory{
         val updateCacheLockJoinUseCase: UpdateCacheLockJoinUseCase,
     )
 
-    override fun onCreateTrackerConfig(): TrackerBuilder {
-        // Access the Matomo URL and site ID from BuildConfig
-        val matomoUrl = BuildConfig.MATOMO_URL
-        val siteId = BuildConfig.MATOMO_SITE_ID
-        return TrackerBuilder.createDefault(matomoUrl, siteId)
-    }
 
     private val Context.httpPersistentFilesDir: File
         get() = File(filesDir, "httpfiles")
@@ -254,7 +248,7 @@ class UstadApp : MatomoApp(), DIAware, ImageLoaderFactory{
         }
 
         bind<AnalyticsTracker>() with singleton {
-            MatomoAnalytics(getTracker())
+            MatomoAnalytics(tracker)
         }
 
         bind<HttpClient>() with singleton {
@@ -1145,6 +1139,12 @@ class UstadApp : MatomoApp(), DIAware, ImageLoaderFactory{
         GlobalScope.launch(Dispatchers.IO) {
             di.direct.instance<EmbeddedHttpServer>().start()
         }
+    }
+
+    override fun onCreateTrackerConfig(): TrackerBuilder {
+        val matomoUrl = BuildConfig.MATOMO_URL
+        val siteId = BuildConfig.MATOMO_SITE_ID
+        return TrackerBuilder.createDefault(matomoUrl, siteId)
     }
 
     /**
