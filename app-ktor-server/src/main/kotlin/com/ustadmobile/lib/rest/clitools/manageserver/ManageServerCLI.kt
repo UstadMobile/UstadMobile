@@ -94,16 +94,6 @@ internal fun Subparsers.addDeleteLearningSpaceSubcommand() {
 
 
 fun main(ns: Namespace) {
-    val title = ns.getString("title") ?: run {
-        println("Enter the learning space title:")
-        val input = readlnOrNull()
-        if (input.isNullOrBlank()) {
-            println("Error: Title is required.")
-            exitProcess(1)
-        } else {
-            input
-        }
-    }
     val json = Json { encodeDefaults = true }
     val httpClient = HttpClient(OkHttp) {
         install(ContentNegotiation) {

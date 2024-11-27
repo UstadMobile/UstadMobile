@@ -320,14 +320,15 @@ fun Application.umRestApplication(
         setProperty("port", environment.config.port.toString())
         setProperty("dataDir", dataDirPath.absolutePath)
     }
-    File(dataDirPath, "server.properties").outputStream().use { output ->
-        serverProperties.store(output,null)
-    }
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
     }
 
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
+
+    File(dataDirPath, "server.properties").outputStream().use { output ->
+        serverProperties.store(output, null)
+    }
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
