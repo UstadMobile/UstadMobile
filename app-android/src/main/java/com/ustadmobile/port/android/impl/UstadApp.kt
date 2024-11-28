@@ -247,10 +247,6 @@ class UstadApp : MatomoApplication(), DIAware, ImageLoaderFactory{
                 .build()
         }
 
-        bind<AnalyticsTracker>() with singleton {
-            MatomoAnalytics(tracker)
-        }
-
         bind<HttpClient>() with singleton {
             HttpClient(OkHttp) {
 
@@ -1124,7 +1120,6 @@ class UstadApp : MatomoApplication(), DIAware, ImageLoaderFactory{
     override fun onCreate() {
         super.onCreate()
         Napier.base(DebugAntilog())
-        onInitTracker()
         val metadataPresetLang = appMetaData?.getString(APPCONFIG_KEY_PRESET_LANG)
 
         if(!metadataPresetLang.isNullOrEmpty()) {
@@ -1139,6 +1134,7 @@ class UstadApp : MatomoApplication(), DIAware, ImageLoaderFactory{
         GlobalScope.launch(Dispatchers.IO) {
             di.direct.instance<EmbeddedHttpServer>().start()
         }
+        onInitTracker()
     }
 
     override fun onCreateTrackerConfig(): TrackerBuilder {
@@ -1176,10 +1172,13 @@ class UstadApp : MatomoApplication(), DIAware, ImageLoaderFactory{
     }
 
     private fun onInitTracker() {
-        val tracker = getTracker()
-
         // Track this app install; this triggers only once per app version.
         TrackHelper.track().download().identifier(DownloadTracker.Extra.ApkChecksum(this)).with(tracker)
+
+        // Add a test track event
+        TrackHelper.track()
+            .event("Test", "App Initialized")
+            .with(tracker)
 
         // Dimension Queue setup
         val dimensionQueue = DimensionQueue(tracker)

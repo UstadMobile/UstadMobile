@@ -3,6 +3,7 @@ package com.ustadmobile.libuicompose.view.app
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,6 +17,7 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.matomo.AnalyticsTracker
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
@@ -185,6 +187,22 @@ fun AppNavHost(
     navCommandFlow: Flow<NavCommand>? = null,
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
+    val di = localDI()
+
+    val analyticsTracker: AnalyticsTracker = remember { di.direct.instance() }
+
+    val currentLocation by navigator.currentEntry.collectAsState(null)
+
+    LaunchedEffect(currentLocation) {
+        currentLocation?.path?.let { path ->
+            // Trigger event tracking
+            println("Navigated to: $path")
+            analyticsTracker.trackScreen(
+                path = path,
+                title = path
+            )
+        }
+    }
     val popCommandFlow = remember {
         MutableSharedFlow<PopNavCommand>(
             replay = 1,
@@ -254,8 +272,6 @@ fun AppNavHost(
             }
         }
     }
-
-    val di = localDI()
 
     val navControllerUriHandler = remember {
         NavControllerUriHandler(

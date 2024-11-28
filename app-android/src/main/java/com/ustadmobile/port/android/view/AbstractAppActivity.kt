@@ -38,6 +38,8 @@ import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderAndroid
 import com.ustadmobile.core.impl.nav.CommandFlowUstadNavController
+import com.ustadmobile.core.matomo.AnalyticsTracker
+import com.ustadmobile.core.matomo.MatomoAnalytics
 import com.ustadmobile.core.networkmanager.ConnectionManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
@@ -65,6 +67,8 @@ import org.kodein.di.registerContextTranslator
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import org.kodein.di.with
+import org.matomo.sdk.Tracker
+import org.matomo.sdk.extra.MatomoApplication
 
 abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
 
@@ -72,6 +76,9 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
 
     //Used to execute navigation when a link is received via OnNewIntent
     protected val commandFlowNavigator = CommandFlowUstadNavController()
+
+    private val tracker: Tracker
+        get() = (application as MatomoApplication).tracker
 
     /**
      * The default initial route (Compose Navigation) to use. This can be overriden on activities
@@ -85,6 +92,9 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         import(commonDomainDiModule(EndpointScope.Default))
         import(AndroidDomainDiModule(applicationContext))
 
+        bind<AnalyticsTracker>() with singleton {
+            MatomoAnalytics(tracker)
+        }
 
         bind<ShareAppUseCase>() with singleton { ShareAppUseCaseAndroid(this@AbstractAppActivity) }
 
