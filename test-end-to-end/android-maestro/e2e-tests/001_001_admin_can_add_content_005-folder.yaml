@@ -37,6 +37,7 @@ env:
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
 - tapOn: "Folder"
+# verify PDF content inside folder working as expected
 - tapOn: "Document"
 - extendedWaitUntil:
     notVisible: "Importing"
@@ -48,6 +49,7 @@ env:
 - assertVisible: "PDF PAGE"
 - tapOn: "Back"
 - tapOn: "Back"
+# verify VIDEO content inside folder working as expected
 - tapOn: "Video"
 - tapOn: Open
 - tapOn: "Play"
@@ -62,6 +64,7 @@ env:
     visible: "Folder"
     timeout: 60000
 - tapOn: "Folder"
+# verify Epub content inside folder working as expected
 - extendedWaitUntil:
     visible: "E-book"
     timeout: 60000
