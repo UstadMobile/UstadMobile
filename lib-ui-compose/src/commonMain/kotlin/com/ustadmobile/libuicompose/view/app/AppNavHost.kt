@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavCommand
@@ -18,6 +19,7 @@ import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.matomo.AnalyticsTracker
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
@@ -188,18 +190,24 @@ fun AppNavHost(
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
     val di = localDI()
-
     val analyticsTracker: AnalyticsTracker = remember { di.direct.instance() }
-
+    val makeLinkUseCase: MakeLinkUseCase by di.onActiveEndpoint().instance()
     val currentLocation by navigator.currentEntry.collectAsState(null)
 
     LaunchedEffect(currentLocation) {
-        currentLocation?.path?.let { path ->
+        currentLocation?.let { location ->
+            val destinationName = location.path.substringAfterLast("/")
+            val args = location.queryString?.map?.mapNotNull { (key, valueList) ->
+                valueList.firstOrNull()?.let { firstValue ->
+                    key to firstValue
+                }
+            }?.toMap() ?: emptyMap()
+            val shareableLink = makeLinkUseCase(destinationName, args)
+
             // Trigger event tracking
-            println("Navigated to: $path")
             analyticsTracker.trackScreen(
-                path = path,
-                title = path
+                path = shareableLink,
+                title = location.path
             )
         }
     }
