@@ -195,20 +195,6 @@ fun Application.umRestApplication(
 
     val ktorAppHome = ktorAppHomeDir()
 
-//    if(dbMode != CONF_DBMODE_VIRTUALHOST && siteUrl.isNullOrBlank()) {
-//        val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
-//            !it.isLoopback
-//        }.flatMap { netInterface ->
-//            netInterface.inetAddresses.toList().filter { it !is Inet6Address }
-//        }.firstOrNull()?.let { "http://${it.hostAddress}:${appConfig.port}/"} ?: ""
-//
-//        throw SiteConfigException("ERROR: Site URL is not set. You MUST specify the site url e.g. $likelyAddr \n" +
-//                "Please specify using the url parameter in command line e.g. add " +
-//                "--siteUrl $likelyAddr \n" +
-//                "to the command you are running or \n" +
-//                "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
-//    }
-
     val mediaInfoFile = SysPathUtil.findCommandInPath(
         commandName = "mediainfo",
         manuallySpecifiedLocation = appConfig.commandFileProperty("mediainfo"),
@@ -330,13 +316,19 @@ fun Application.umRestApplication(
     val dataDirPath = environment.config.absoluteDataDir()
 
     val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
-
-
+    val serverProperties = Properties().apply {
+        setProperty("port", environment.config.port.toString())
+        setProperty("dataDir", dataDirPath.absolutePath)
+    }
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
     }
 
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
+
+    File(dataDirPath, "server.properties").outputStream().use { output ->
+        serverProperties.store(output, null)
+    }
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 

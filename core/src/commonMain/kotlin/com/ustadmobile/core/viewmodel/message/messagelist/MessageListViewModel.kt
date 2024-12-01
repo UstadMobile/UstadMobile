@@ -1,6 +1,11 @@
 package com.ustadmobile.core.viewmodel.message.messagelist
 
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase.Companion.SOCIAL_WARNING_WEB_URL
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -17,13 +22,15 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 data class MessageListUiState(
     val messages: () -> PagingSource<Int, Message> = { EmptyPagingSource() },
     val activePersonUid: Long = 0,
     val newMessageText: String = "",
     val dayOfWeekStrings: Map<DayOfWeek, String> = emptyMap(),
-    val localDateTimeNow: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    val localDateTimeNow: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+    val showSocialWarning: Boolean = true
 )
 
 class MessageListViewModel(
@@ -35,6 +42,14 @@ class MessageListViewModel(
 ) {
 
     private val otherPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0L
+
+    private val ustadAccountManager: UstadAccountManager by di.instance()
+
+    private val showSocialWarningUseCase: ShowSocialWarningUseCase by di.instance()
+
+    private val dismissSocialWarningUseCase: DismissSocialWarningUseCase by di.instance()
+
+    private val openExternalLinkUseCase: OpenExternalLinkUseCase by di.instance()
 
     private val pagingSourceFactory: () -> PagingSource<Int, Message> = {
         activeRepoWithFallback.messageDao().messagesFromOtherUserAsPagingSource(
@@ -58,7 +73,8 @@ class MessageListViewModel(
                     systemImpl.getString(it.dayStringResource)
                 },
                 messages = pagingSourceFactory,
-                activePersonUid = activeUserPersonUid
+                activePersonUid = activeUserPersonUid,
+                showSocialWarning = showSocialWarningUseCase(ustadAccountManager.currentUserSession.person.username.toString())
             )
         }
 
@@ -72,10 +88,21 @@ class MessageListViewModel(
                     }
                 }
             }
-
         }
     }
 
+    fun onWarningDismiss() {
+        viewModelScope.launch {
+            dismissSocialWarningUseCase(ustadAccountManager.currentUserSession.person.username.toString())
+            _uiState.update { prev ->
+                prev.copy(showSocialWarning = false)
+            }
+        }
+    }
+
+    fun onLearnMoreClicked() {
+        openExternalLinkUseCase(SOCIAL_WARNING_WEB_URL, OpenExternalLinkUseCase.Companion.LinkTarget.BLANK)
+    }
 
     override fun onUpdateSearchResult(searchText: String) {
         TODO("Not yet implemented")

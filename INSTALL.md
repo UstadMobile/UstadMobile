@@ -110,6 +110,27 @@ non-alphanumeric character will be replaced with _.
 
 When using the virtual hosting mode, siteUrl is NOT set.
 
+#Linux
+```
+$ ./ustad-appconfig.sh --password admin_password newlearningspace  
+--title exampleTitle --url http://schoolname1.example.org/
+--dburl jdbc:sqlite:Your_system_path/UstadMobile/app-ktor-server/data/localhost.db
+--adminpassword any_password
+```
+#Windows
+```
+$ ustad-appconfig.bat --password admin_password newlearningspace  -
+-title exampleTitle --url http://schoolname1.example.org/
+--dburl jdbc:sqlite:Your_system_path/UstadMobile/app-ktor-server/data/localhost.db
+--adminpassword any_password
+```
+After server runs successfully you need to add the learning space
+(here admin_password is password present in admin.txt file ,Your_system_path is path of the project
+folder and any_password is password for the particular learning space)
+
+to show learning space list add base url in com.ustadmobile.system.systemBaseUrl=your_url
+in buildconfig.default.properties
+
 #### Email configuration
 
 If your site will allow self-registration (which can be enabled by the admin user through settings

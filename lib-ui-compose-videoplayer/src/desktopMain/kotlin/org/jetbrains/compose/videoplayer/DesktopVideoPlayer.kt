@@ -19,6 +19,7 @@ import kotlin.math.roundToInt
 @Composable
 internal actual fun VideoPlayerImpl(
     url: String,
+    subtitleUri: String?,
     isResumed: Boolean,
     volume: Float,
     speed: Float,
@@ -32,7 +33,6 @@ internal actual fun VideoPlayerImpl(
     val mediaPlayer = remember { mediaPlayerComponent.mediaPlayer() }
     mediaPlayer.emitProgressTo(progressState)
     mediaPlayer.setupVideoFinishHandler(onFinish)
-    //mediaPlayer.subpictures().setSubTitleUri()
 
     val factory = remember { { mediaPlayerComponent } }
     /* OR the following code and using SwingPanel(factory = { factory }, ...) */
@@ -59,6 +59,21 @@ internal actual fun VideoPlayerImpl(
             mediaPlayer.fullScreen().toggle()
         }
     }
+    LaunchedEffect(subtitleUri) {
+        /*
+         * Where the subtitles are not null, use the setSubTitleUri function which will add the
+         * subtitle track and select it.
+         *
+         * Where the subtitles are null, use setTrack -1 as per the Javadoc to turn any subtitles
+         * off (even if they were loaded previously).
+         */
+        if(subtitleUri != null) {
+            mediaPlayer.subpictures().setSubTitleUri(subtitleUri)
+        }else {
+            mediaPlayer.subpictures().setTrack(-1)
+        }
+    }
+
     DisposableEffect(Unit) { onDispose(mediaPlayer::release) }
     SwingPanel(
         factory = factory,

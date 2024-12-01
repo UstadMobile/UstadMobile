@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.test.clientservertest.clientServerIntegrationTest
 import com.ustadmobile.core.test.savedStateOf
 import com.ustadmobile.core.test.use
@@ -35,6 +36,7 @@ class ClazzAssignmentIntegrationTest: AbstractMainDispatcherTest() {
 
     @Test
     fun givenCourseAndAssignmentCreated_whenStudentSubmits_thenTeacherCanMarkAndStudentCanSeeMarkGiven() {
+
         val teacherMarkIssued = 5.0f
         initNapierLog()
         clientServerIntegrationTest {

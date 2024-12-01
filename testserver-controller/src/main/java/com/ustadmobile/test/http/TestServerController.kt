@@ -2,6 +2,7 @@ package com.ustadmobile.test.http
 
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.util.SysPathUtil
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
@@ -30,7 +31,9 @@ const val TEST_FILE_NAME_PARAM = "test-file-name"
 
 const val DEST_PARAM = "dest"
 
-
+fun main(args: Array<String>) {
+    io.ktor.server.netty.EngineMain.main(args)
+}
 @Suppress("BlockingMethodInNonBlockingContext", "unused", "SdCardPath")
 fun Application.testServerController() {
 
@@ -231,43 +234,48 @@ fun Application.testServerController() {
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
 
+          try {
+              val uri = URI(serverSiteUrl)
+              waitForPort(uri.host, uri.port)
+              val appConfigPath = call.application.environment.config
+                  .propertyOrNull("ktor.testServer.createLearningSpaceCommand")?.getString()?.split(Regex("\\s+"))
+                  ?.toMutableList()
+                  ?: throw IllegalArgumentException("No testServer createLearningSpaceCommand specified in configuration")
 
-            val uri = URI(serverSiteUrl)
-            waitForPort(uri.host, uri.port)
-            val appConfigPath = call.application.environment.config
-                .propertyOrNull("ktor.testServer.createLearningSpaceCommand")?.getString()?.split(Regex("\\s+"))
-                ?.toMutableList()
-                ?: throw IllegalArgumentException("No testServer createLearningSpaceCommand specified in configuration")
+              appConfigPath[0] = SysPathUtil.findCommandInPath(appConfigPath[0])?.absolutePath
 
-            appConfigPath[0] = SysPathUtil.findCommandInPath(appConfigPath[0])?.absolutePath
+                  ?: throw IllegalArgumentException("Could not find server createLearningSpaceCommand in PATH ${appConfigPath[0]}")
+              val andminPassword=File("${serverDir.absolutePath}/data/admin.txt").readText()
+              val appConfigArgs = listOf(
+                  appConfigPath[0],
+                  "-classpath",appConfigPath[2],
+                  appConfigPath[3],
+                  "--password", andminPassword,
+                  "newlearningspace",
+                  "--title", "newLearningSpace",
+                  "--url", "$serverSiteUrl",
+                  "--dburl",  "jdbc:sqlite:${serverDir.absolutePath}/data/${sanitizeDbNameFromUrl(serverSiteUrl)}.db",
+                  "--adminuser","admin",
+                  "--adminpassword","testpass"
+              )
 
-                ?: throw IllegalArgumentException("Could not find server createLearningSpaceCommand in PATH ${appConfigPath[0]}")
-            val andminPassword=File("${serverDir.absolutePath}/data/admin.txt").readText()
-            val appConfigArgs = listOf(
-                appConfigPath[0],
-                "-classpath",appConfigPath[2],
-                appConfigPath[3],
-                "--password", andminPassword,
-                "newlearningspace",
-                "--title", "newLearningSpace",
-                "--url", "$serverSiteUrl",
-                "--dburl", "jdbc:sqlite:${serverDir.absolutePath}/data/localhost.db",
-                "--adminuser","admin",
-                "--adminpassword","testpass"
-            )
+              val addingLearningSpaceProcess = ProcessBuilder(appConfigArgs)
+                  .directory(serverDir)
+                  .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                  .redirectError(ProcessBuilder.Redirect.PIPE)
+                  .start()
+              val output = addingLearningSpaceProcess.inputStream.bufferedReader().readText()
+              val errorOutput = addingLearningSpaceProcess.errorStream.bufferedReader().readText()
 
-            val addingLearningSpaceProcess = ProcessBuilder(appConfigArgs)
-                .directory(serverDir)
-                .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                .redirectError(ProcessBuilder.Redirect.PIPE)
-                .start()
-            val output = addingLearningSpaceProcess.inputStream.bufferedReader().readText()
-            val errorOutput = addingLearningSpaceProcess.errorStream.bufferedReader().readText()
+              response += "learning space  " +
+                      "${output} <br/>"
+              response += "learning space  " +
+                      "${errorOutput} <br/>"
 
-            response += "learning space  " +
-                    "${output} <br/>"
-            response += "learning space  " +
-                    "${errorOutput} <br/>"
+          }catch (e:Exception){
+              response += "learning space  Error " +
+                      "${e.message} <br/>"
+          }
 
             response += "Started server process PID #${serverProcess?.pid()} " +
                     "${serverArgsWithSiteUrl.joinToString( " ")} " +
@@ -332,7 +340,7 @@ fun Application.testServerController() {
                 ?: throw IllegalStateException("Cannot find adb in path")
 
             val process = ProcessBuilder(listOf(adbCommand.absolutePath,
-                "-s", deviceSerial, "shell", "rm", "/sdcard/Download/*"))
+                    "-s", deviceSerial, "shell", "rm", "-r", "/sdcard/Download/*"))
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()

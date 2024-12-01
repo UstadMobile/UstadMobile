@@ -53,6 +53,7 @@ import emotion.react.css
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import mui.system.sx
+import react.Fragment
 import react.dom.html.ReactHTML.input
 import react.useRef
 import react.useRequiredContext
@@ -105,6 +106,8 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
     var onClickSubmissionFile: (CourseAssignmentSubmissionFileAndTransferJob) -> Unit
 
     var onDeleteComment: (Comments) -> Unit
+
+    var onWarningDismiss: () -> Unit
 
 }
 
@@ -425,6 +428,17 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
             }
 
             if(props.uiState.showClassComments) {
+
+                val strings = useStringProvider()
+
+                if(props.uiState.showSocialWarning) {
+                    Fragment.create {
+                        SocialWarningListItem {
+                            onDismiss = props.onWarningDismiss
+                        }
+                    }
+                }
+
                 //Course comments
                 item(key = "course_comments_header_item") {
                     ListItem.create {
@@ -551,5 +565,6 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse
         onClickSubmissionFile = viewModel::onOpenSubmissionFile
         onDeleteComment = viewModel::onDeleteComment
+        onWarningDismiss = viewModel::onWarningDismiss
     }
 }

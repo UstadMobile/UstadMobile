@@ -129,7 +129,7 @@ Further details: see the [Java website](https://www.java.com/en/download/help/pa
 __VLC__
 Download and install from [https://www.videolan.org/](https://www.videolan.org/). Make sure to choose
 a 64bit version (using a non-64bit version will fail). VLC is used by the Desktop version to play 
-videos via VLCJ.
+videos via [VLCJ](https://github.com/caprica/vlcj).
 
 __MediaInfo__
 Download and install such that the MediaInfo command is in the PATH. This can be done using winget:
@@ -163,8 +163,6 @@ installed using winget:
 winget install -e --id ArtifexSoftware.GhostScript
 ```
 
-
-
 * __Step 3: Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
 https://github.com/UstadMobile/UstadMobile.git and wait for the project to import. Switch to the
   dev-mvvm-primary branch (Menu: Git - Branches - search for dev-mvvm-primary - checkout ).
@@ -173,27 +171,29 @@ https://github.com/UstadMobile/UstadMobile.git and wait for the project to impor
 
 Linux/MacOS:
 ```
-$ ./runserver.sh --siteUrl http://your.ip.address:8087/
+./gradlew app-ktor-server:run
 ```
 
 Windows:
 ```
-$ runserver.bat --siteUrl http://your.ip.address:8087/
+gradlew app-ktor-server:run
 ```
 
-The siteUrl parameter must match the address that you use to access the system (e.g. in the browser
-or when entering the link on the Android app). 
+* __Step 5: Add a learning space__:
 
-As above, your.ip.address is your IP address (e.g. 192.168.1.2). If the siteUrl changes and the old 
-site url is inaccessible, then this may make content uploaded before the change inaccessible.
+Each server hosts one (or more) learning spaces. Each learning space has its own users, classes,
+content library, etc. One learning space could be dedicated to a particular school, institution, 
+project, etc. For development/testing you can use your IP address. __DO NOT__ use localhost because
+this won't work on Android (an Android emulator or device will see itself as localhost).
 
-This will start the server on port 8087. The admin password will be randomly generated - you can find
-it in app-ktor-server/data/singleton/admin.txt .
+These can be created as subdomains e.g. learningspace1.example.org, 
+learningspace2.example.org, etc. 
 
-This will run the REST API which is required by the Android and web apps. It will not include the 
-web client app itself. To use the web client app in the browser, you must build/run it (as below).
+```
+./gradlew app-ktor-server:run --args='newlearningspace --url http://your.ip.address:8087/ --title learningspacetitle'
+```
 
-* __Step 5: Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
+* __Step 6: Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
 Android app, [app-react](app-react/) for the web app.
 
 Note: If self-registration is enabled, you must add an email server configuration to the 

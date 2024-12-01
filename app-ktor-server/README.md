@@ -6,14 +6,14 @@ in both production and development environment. It is built as KTOR server.
 
 # Development running:
 
-2. Build and run using the runserver.sh script:
+2. Build and run server locally:
 
 ```
 # Linux
-$ ./runserver.sh --siteUrl http://your.ip.address:8087/
+$ ./gradlew app-ktor-server:run --args='runserver'
 
 #Windows
-$ runserver.bat --siteUrl http://your.ip.address:8087/
+$ gradlew app-ktor-server:run --args='runserver'
 ```
 
 Where your.ip.address is your IP address or a domain/host URL that points to your system. 
@@ -44,6 +44,13 @@ The port can be set using the command line as per KTOR server standard options, 
 
 The application can be debugged using the same as any other standalone JAR using JWDP. In Android
 Studio or IntelliJ, Go to  run, debug, configurations and then add a "remote" configuration.
+
+* __Step 5: Add a learning space__:
+```
+./gradlew app-ktor-server:run --args='newlearningspace --url http://your.ip.address:8087/ --title learningspacetitle'
+```
+to show learning space list add base url in com.ustadmobile.system.systemBaseUrl=your_url
+in buildconfig.default.properties
 
 See [INSTALL.md](../INSTALL.md) for recommendations on production configuration.
 
