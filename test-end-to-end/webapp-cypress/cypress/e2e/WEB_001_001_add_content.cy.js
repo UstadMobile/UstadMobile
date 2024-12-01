@@ -12,6 +12,7 @@ it('Admin user add content to the library', () => {
  // Add H5p File
   cy.ustadAddContentToLibrary('../test-files/content/H5p_Content.h5p','Content_001')
   cy.contains('Content_001').click()
+  cy.contains("#courseblock_title", "Content_001").should("be.visible")
   cy.contains("Importing", { timeout: 20000 }).should("not.exist") //In case importing
   cy.ustadOpenH5P("Content_001")
   cy.ustadGetH5pBody().find(".h5p-question-check-answer.h5p-joubelui-button","Check").should("be.visible")

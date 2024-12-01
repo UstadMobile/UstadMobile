@@ -13,6 +13,7 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTimeFormatter
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.Message
+import com.ustadmobile.mui.components.SocialWarningListItem
 import com.ustadmobile.mui.components.UstadSendTextField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -21,6 +22,7 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import mui.material.Container
 import react.FC
+import react.Fragment
 import react.Props
 import react.create
 import react.useEffect
@@ -40,6 +42,8 @@ external interface MessageListScreenProps : Props {
     var onChangeNewMessageText: (String) -> Unit
 
     var onClickSend: () -> Unit
+
+    var onWarningDismiss: () -> Unit
 
 }
 
@@ -78,6 +82,14 @@ private val MessageListScreenComponent2 = FC<MessageListScreenProps> { props ->
         }
 
         content = virtualListContent {
+            reverseLayout = false
+
+            if(props.uiState.showSocialWarning) {
+                SocialWarningListItem {
+                    onDismiss = props.onWarningDismiss
+                }
+            }
+
             infiniteQueryPagingItemsList(
                 items = infiniteQueryResult,
                 key = { items, index -> items[index]?.messageUid?.toString() ?: "${items}_$index" }
@@ -146,5 +158,6 @@ val MessageListScreen = FC<Props> {
         uiState = uiStateVal
         onChangeNewMessageText = viewModel::onChangeNewMessageText
         onClickSend = viewModel::onClickSend
+        onWarningDismiss = viewModel::onWarningDismiss
     }
 }

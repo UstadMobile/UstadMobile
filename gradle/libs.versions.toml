@@ -84,7 +84,7 @@ commons-io = "2.15.0"
 androidx-annotation = "1.7.1"
 androidx-work = "2.9.0"
 klock = "2.4.13"
-acra = "5.11.3"
+acra = "5.12.0"
 androidx-datastore = "1.0.0"
 # Dependencies of Aztec: Versions must be fixed to ensure that they point to versions available
 # on mavenCentral after jcenter shutdown.

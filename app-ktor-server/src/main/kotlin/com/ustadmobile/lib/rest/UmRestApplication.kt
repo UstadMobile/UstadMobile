@@ -445,8 +445,8 @@ fun Application.umRestApplication(
                 db = instance(tag = DoorTag.TAG_DB),
                 importersManager = instance(),
                 json = instance(),
-                repo = on(context).instance(tag = DoorTag.TAG_REPO),
-                )
+                repo = null,
+            )
         }
 
         bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {

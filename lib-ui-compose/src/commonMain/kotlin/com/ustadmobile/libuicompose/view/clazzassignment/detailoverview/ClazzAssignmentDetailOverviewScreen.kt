@@ -42,6 +42,7 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.clazzassignment.averageMark
 import com.ustadmobile.core.viewmodel.clazzassignment.detailoverview.ClazzAssignmentDetailoverviewSubmissionUiState
 import com.ustadmobile.lib.db.composites.CourseAssignmentSubmissionFileAndTransferJob
+import com.ustadmobile.libuicompose.components.SocialWarningListItem
 import com.ustadmobile.libuicompose.components.UstadCourseBlockHeader
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadOpeningBlobInfoBottomSheet
@@ -105,6 +106,8 @@ fun ClazzAssignmentDetailOverviewScreen(viewModel: ClazzAssignmentDetailOverview
         onSendSubmissionFile = if(!isDesktop()) viewModel::onSendSubmissionFile else null,
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse,
         onDeleteComment = viewModel::onDeleteComment,
+        onWarningDismiss = viewModel::onWarningDismiss,
+        onLearnMore = viewModel::onLearnMoreClicked,
     )
 }
 
@@ -129,6 +132,8 @@ fun ClazzAssignmentDetailOverviewScreen(
     onSendSubmissionFile: ((CourseAssignmentSubmissionFileAndTransferJob) -> Unit)? = null,
     onToggleSubmissionExpandCollapse: (CourseAssignmentSubmission) -> Unit = { },
     onDeleteComment: (Comments) -> Unit = { },
+    onWarningDismiss: () -> Unit = {},
+    onLearnMore: () -> Unit = { },
 ){
     val refreshCommandFlow = rememberEmptyFlow<RefreshCommand>()
 

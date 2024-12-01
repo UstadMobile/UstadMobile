@@ -9,6 +9,8 @@ import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.AppConfig
@@ -66,6 +68,18 @@ internal fun ustadJsDi(
 
     val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Api URL = $apiUrl (location.href = ${location.href}")
+
+    bind<ShowSocialWarningUseCase>() with singleton {
+        ShowSocialWarningUseCase(
+            settings = instance()
+        )
+    }
+
+    bind<DismissSocialWarningUseCase>() with singleton {
+        DismissSocialWarningUseCase(
+            settings = instance()
+        )
+    }
 
     bind<AppConfig>() with singleton {
         AppConfigMap(configMap)
