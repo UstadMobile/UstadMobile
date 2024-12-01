@@ -17,6 +17,8 @@ import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.UstadBuildConfig
@@ -86,6 +88,22 @@ internal fun ustadJsDi(
                     BuildConfigJs.NEW_PERSONAL_ACCOUNT_LEARNING_SPACE_URL)
             }
         )
+    }
+
+    bind<ShowSocialWarningUseCase>() with singleton {
+        ShowSocialWarningUseCase(
+            settings = instance()
+        )
+    }
+
+    bind<DismissSocialWarningUseCase>() with singleton {
+        DismissSocialWarningUseCase(
+            settings = instance()
+        )
+    }
+
+    bind<AppConfig>() with singleton {
+        AppConfigMap(configMap)
     }
 
     bind<GenderConfig>() with singleton {

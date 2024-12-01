@@ -116,6 +116,8 @@ import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.domain.storage.CachePathsProviderAndroid
 import com.ustadmobile.core.domain.storage.GetAndroidSdCardDirUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
@@ -261,6 +263,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 }
 
             }
+        }
+
+        bind<ShowSocialWarningUseCase>() with singleton {
+            ShowSocialWarningUseCase(
+                settings = instance()
+            )
+        }
+
+        bind<DismissSocialWarningUseCase>() with singleton {
+            DismissSocialWarningUseCase(
+                settings = instance()
+            )
         }
 
         bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {

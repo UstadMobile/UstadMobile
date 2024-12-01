@@ -340,7 +340,7 @@ fun Application.testServerController() {
                 ?: throw IllegalStateException("Cannot find adb in path")
 
             val process = ProcessBuilder(listOf(adbCommand.absolutePath,
-                "-s", deviceSerial, "shell", "rm", "/sdcard/Download/*"))
+                    "-s", deviceSerial, "shell", "rm", "-r", "/sdcard/Download/*"))
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()

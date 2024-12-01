@@ -102,6 +102,8 @@ import com.ustadmobile.core.domain.process.CloseProcessUseCaseJvm
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseJvm
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -147,10 +149,17 @@ import java.io.File
 
 val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
+    bind<ShowSocialWarningUseCase>() with singleton {
+        ShowSocialWarningUseCase(
+            settings = instance()
+        )
+    }
 
-
-    bind<UnzipFileUseCase>() with singleton { JvmUnzipFileUseCase() }
-    bind<ZipFileUseCase>() with singleton { JvmZipFileUseCase() }
+    bind<DismissSocialWarningUseCase>() with singleton {
+        DismissSocialWarningUseCase(
+            settings = instance()
+        )
+    }
 
     bind<OpenExternalLinkUseCase>() with provider {
         OpenExternalLinkUseCaseJvm()
