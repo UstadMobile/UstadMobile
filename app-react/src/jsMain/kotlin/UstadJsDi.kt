@@ -9,7 +9,6 @@ import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJs
@@ -43,11 +42,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProviderJs
-import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
-import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
@@ -100,10 +97,6 @@ internal fun ustadJsDi(
         DismissSocialWarningUseCase(
             settings = instance()
         )
-    }
-
-    bind<AppConfig>() with singleton {
-        AppConfigMap(configMap)
     }
 
     bind<GenderConfig>() with singleton {

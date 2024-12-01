@@ -34,7 +34,10 @@ class ServerAppMain {
         const val CMD_RUN_SERVER = "runserver"
 
         private fun Array<String>.argsAfterFirst(): Array<String> {
-            return toList().subList(1, size).toTypedArray()
+            return if(isNotEmpty())
+                toList().subList(1, size).toTypedArray()
+            else
+                this
         }
 
         private fun runServerMain(args: Array<String>) {
