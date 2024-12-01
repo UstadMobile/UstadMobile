@@ -53,7 +53,6 @@ import emotion.react.css
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import mui.system.sx
-import react.Fragment
 import react.dom.html.ReactHTML.input
 import react.useRef
 import react.useRequiredContext
@@ -428,14 +427,9 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
             }
 
             if(props.uiState.showClassComments) {
-
-                val strings = useStringProvider()
-
                 if(props.uiState.showSocialWarning) {
-                    Fragment.create {
-                        SocialWarningListItem {
-                            onDismiss = props.onWarningDismiss
-                        }
+                    SocialWarningListItem.create {
+                        onDismiss = props.onWarningDismiss
                     }
                 }
 

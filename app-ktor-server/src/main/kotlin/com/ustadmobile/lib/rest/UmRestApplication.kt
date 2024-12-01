@@ -176,6 +176,11 @@ val KTOR_SERVER_ROUTES = listOf(
     "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles","/.well-known"
 )
 
+/**
+ * The default javascript development server (e.g. webpack) server
+ */
+const val DEFAULT_JS_DEV_SERVER = "http://localhost:8080/"
+
 
 /**
  * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
@@ -194,6 +199,8 @@ fun Application.umRestApplication(
     val dbMode = dbModeOverride ?:  appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 
     val ktorAppHome = ktorAppHomeDir()
+
+    val isRunningFromSource = ktorAppSourceDir() != null
 
     val mediaInfoFile = SysPathUtil.findCommandInPath(
         commandName = "mediainfo",
@@ -864,7 +871,16 @@ fun Application.umRestApplication(
     }
 
     val jsDevServer = appConfig.propertyOrNull("ktor.ustad.jsDevServer")?.getString()
-    if(jsDevServer != null) {
+
+    /*
+     * Use the devserver mode when:
+     *  a) there is an explicitly set development server to connect wtih
+     *  b) the server is being run from source
+     */
+    if(
+        jsDevServer?.isNotBlank() == true || (isRunningFromSource && jsDevServer == null)
+    ) {
+        val effectiveJsDevServer = jsDevServer ?: DEFAULT_JS_DEV_SERVER
         install(io.ktor.server.websocket.WebSockets)
 
         val effectiveKtorServerRoutes = if(sitePrefix != null) {
@@ -885,16 +901,10 @@ fun Application.umRestApplication(
                 }
             }
 
-            //If the request is not using the correct url as per system config, reject it and finish
-//            if(!context.urlMatchesConfig()) {
-//                call.respondRequestUrlNotMatchingSiteConfUrl()
-//                return@intercept finish()
-//            }
-
             //If the request is not matching any API route, then use the reverse proxy to send the
             // request to the javascript development server.
             if(!effectiveKtorServerRoutes.any { requestUri.startsWith(it) }) {
-                call.respondReverseProxy(jsDevServer)
+                call.respondReverseProxy(effectiveJsDevServer)
                 return@intercept finish()
             }
         }

@@ -8,12 +8,24 @@ fun ApplicationConfig.dbModeProperty(): String {
     return propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 }
 
+/**
+ * Find the ktor server app source directory if/when the server is being run from source (e.g. via
+ * gradlew command).
+ */
+fun ktorAppSourceDir(): File? {
+    val userDirFile = File(System.getProperty("user.dir"))
+    return if(File(userDirFile, "settings.gradle").exists()) {
+        File(userDirFile, "app-ktor-server")
+    }else {
+        null
+    }
+}
 /*
  *  Find the ktor server app home directory.
  */
 fun ktorAppHomeDir(): File {
     val appHomeProp = System.getProperty("app_home")
-    val userDirFile = File(System.getProperty("user.dir"))
+    val sourceDir: File? =  ktorAppSourceDir()
 
     return when {
         /*
@@ -28,14 +40,12 @@ fun ktorAppHomeDir(): File {
          * directory, then the app home directory is (current-working-directory)/app-ktor-server .
          * This will be the case when running via the IDE (by clicking run/debug on ServerAppMain).
          */
-        File(userDirFile, "settings.gradle").exists() -> {
-            File(userDirFile, "app-ktor-server")
-        }
+        sourceDir != null -> sourceDir
 
         /*
          * Else use the current working directory
          */
-        else -> userDirFile
+        else -> File(System.getProperty("user.dir"))
     }
 }
 
