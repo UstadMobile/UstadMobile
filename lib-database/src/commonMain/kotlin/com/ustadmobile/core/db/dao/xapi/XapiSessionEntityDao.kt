@@ -87,6 +87,32 @@ expect abstract class XapiSessionEntityDao {
         clazzUid: Long,
     ): XapiSessionEntity?
 
+    @HttpAccessible
+    @Query("""
+       SELECT StatementEntity.*, Person.*, PersonPicture.*,
+       (
+          SELECT COUNT(*)
+          FROM StatementEntity se
+          WHERE se.statementActorPersonUid = Person.personUid
+          AND se.resultCompletion = 1
+          AND se.statementContentEntryUid = :contentEntryUid
+       ) AS numberOfAttempts
+       FROM StatementEntity
+       JOIN Person
+            ON Person.personUid = StatementEntity.statementActorPersonUid
+       LEFT JOIN PersonPicture
+            ON PersonPicture.personPictureUid = Person.personUid 
+       WHERE StatementEntity.resultCompletion = 1 
+       AND (StatementEntity.statementIdHi, StatementEntity.statementIdLo) = (
+           SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+             FROM StatementEntity
+            WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+              AND StatementEntity.statementActorPersonUid = Person.personUid
+              AND StatementEntity.resultCompletion = 1
+       )
+""")
+    abstract   fun getSessionList(contentEntryUid: Long):
+            PagingSource<Int, StatementAndPersonAndPicture>
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
@@ -121,11 +147,11 @@ expect abstract class XapiSessionEntityDao {
     AND ROWID IN 
     (SELECT MIN(ROWID)
     FROM StatementEntity
-    WHERE StatementEntity.statementActorPersonUid = :personUid
+    WHERE StatementEntity.resultCompletion=1 AND StatementEntity.statementActorPersonUid = :personUid
     GROUP BY StatementEntity.statementIdHi, StatementEntity.statementIdLo)
 """
     )
-    abstract fun getSessionList(
+    abstract fun getSessionListDummy(
         contentEntryUid: Long,
         personUid: Long
     ): PagingSource<Int, StatementEntity>
@@ -147,16 +173,15 @@ expect abstract class XapiSessionEntityDao {
        LEFT JOIN PersonPicture
             ON PersonPicture.personPictureUid = Person.personUid 
        WHERE StatementEntity.resultCompletion = 1 
-       AND (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN (
+       AND (StatementEntity.statementIdHi, StatementEntity.statementIdLo) = (
            SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
              FROM StatementEntity
             WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
               AND StatementEntity.statementActorPersonUid = Person.personUid
               AND StatementEntity.resultCompletion = 1
-         ORDER BY StatementEntity.resultDuration DESC      
-            LIMIT 1 
        )
 """)
 abstract   fun findPersonsWithAttempts(contentEntryUid: Long):
             PagingSource<Int, StatementAndPersonAndPicture>
+
 }

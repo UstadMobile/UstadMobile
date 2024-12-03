@@ -23,6 +23,8 @@ class ContentEntryDetailAttemptsPersonListViewModel(
 
     protected val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
+
+
     private fun getAttemptsPersonListAsPagingSource(contentEntryUid: Long):
             PagingSource<Int, StatementAndPersonAndPicture> {
         val pagingSource =
@@ -50,7 +52,7 @@ class ContentEntryDetailAttemptsPersonListViewModel(
             viewName = ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME,
             args = mapOf(
                 UstadView.ARG_PERSON_UID to (entry.person?.personUid ?: 0).toString(),
-                UstadView.ARG_CONTENT_ENTRY_UID to entityUidArg.toString()
+                UstadView.ARG_CONTENT_ENTRY_UID to entityUidArg.toString(),
             )
         )
     }
