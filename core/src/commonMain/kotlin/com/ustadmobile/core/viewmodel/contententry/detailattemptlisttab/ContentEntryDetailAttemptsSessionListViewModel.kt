@@ -8,7 +8,6 @@ import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
-import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -34,7 +33,7 @@ class ContentEntryDetailAttemptsSessionListViewModel(
 
     private fun getAttemptsSessionListAsPagingSource(contentEntryUid: Long, personUid: Long)
             : PagingSource<Int, StatementAndPersonAndPicture> {
-        return activeRepo.xapiSessionEntityDao().getSessionList(contentEntryUid)
+        return activeRepo.xapiSessionEntityDao().getSessionList(contentEntryUid,personUid)
     }
 
     private val attemptsSessionListPagingSource: ListPagingSourceFactory<StatementAndPersonAndPicture> = {
