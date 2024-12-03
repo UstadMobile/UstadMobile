@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -15,7 +16,7 @@ import org.kodein.di.DI
 data class ContentEntryDetailAttemptsSessionListUiState(
     val personName: String = "",
     val contentEntryTitle: String = "",
-    val attemptsSessionList: () -> PagingSource<Int, StatementEntity> = { EmptyPagingSource() },
+    val attemptsSessionList: () -> PagingSource<Int, StatementAndPersonAndPicture> = { EmptyPagingSource() },
     val personUid: Long = 0
 )
 
@@ -28,13 +29,15 @@ class ContentEntryDetailAttemptsSessionListViewModel(
     private val entityUidArg = savedStateHandle[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
 
     private val argPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
+   // private val statementIdHi: Int =savedStateHandle[UstadView.ARG_STATEMENT_ID_HI]?.toInt()?:0
+  //  private val statementIdLo: Int =savedStateHandle[UstadView.ARG_STATEMENT_ID_LO]?.toInt()?:0
 
     private fun getAttemptsSessionListAsPagingSource(contentEntryUid: Long, personUid: Long)
-            : PagingSource<Int, StatementEntity> {
-        return activeRepo.xapiSessionEntityDao().getSessionList(contentEntryUid, personUid)
+            : PagingSource<Int, StatementAndPersonAndPicture> {
+        return activeRepo.xapiSessionEntityDao().getSessionList(contentEntryUid)
     }
 
-    private val attemptsSessionListPagingSource: ListPagingSourceFactory<StatementEntity> = {
+    private val attemptsSessionListPagingSource: ListPagingSourceFactory<StatementAndPersonAndPicture> = {
         getAttemptsSessionListAsPagingSource(
             contentEntryUid = entityUidArg,
             personUid = argPersonUid
@@ -63,23 +66,20 @@ class ContentEntryDetailAttemptsSessionListViewModel(
     }
 
     fun onClickEntry(
-        entry: StatementEntity
+        entry: StatementAndPersonAndPicture
     ) {
         navController.navigate(
             viewName = ContentEntryDetailAttemptsStatementListViewModel.DEST_NAME,
             args = mapOf(
                 UstadView.ARG_PERSON_UID to argPersonUid.toString(),
                 UstadView.ARG_CONTENT_ENTRY_UID to entityUidArg.toString(),
-                statementIdHi to entry.statementIdHi.toString(),
-                statementIdLo to entry.statementIdLo.toString(),
             )
         )
     }
 
     companion object {
         const val DEST_NAME = "ContentEntryDetailAttemptsSessionList"
-        const val statementIdHi = "statementIdHi"
-        const val statementIdLo = "statementIdLo"
+
     }
 
     override fun onUpdateSearchResult(searchText: String) {
