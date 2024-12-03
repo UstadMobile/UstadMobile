@@ -12,4 +12,7 @@ data class StatementAndPersonAndPicture(
     var statement: StatementEntity? = null,
     @Embedded
     var picture: PersonPicture? = null,
+
+    var numberOfAttempts:Int=0
+
 )
