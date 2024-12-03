@@ -181,6 +181,8 @@ val KTOR_SERVER_ROUTES = listOf(
  */
 const val DEFAULT_JS_DEV_SERVER = "http://localhost:8080/"
 
+const val SERVER_PROPERTIES_KEY_PORT = "port"
+
 
 /**
  * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
@@ -268,6 +270,14 @@ fun Application.umRestApplication(
         manuallySpecifiedLocation = appConfig.commandFileProperty("gs"),
     )
 
+    val serverProperties = Properties().apply {
+        setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
+    }
+
+    ktorServerPropertiesFile().writer().use { serverPropWriter ->
+        serverProperties.store(serverPropWriter, null)
+    }
+
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
 
     val json = Json {
@@ -323,22 +333,14 @@ fun Application.umRestApplication(
     val dataDirPath = environment.config.absoluteDataDir()
 
     val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
-    val serverProperties = Properties().apply {
-        setProperty("port", environment.config.port.toString())
-        setProperty("dataDir", dataDirPath.absolutePath)
-    }
+
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
     }
 
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
-    File(dataDirPath, "server.properties").outputStream().use { output ->
-        serverProperties.store(output, null)
-    }
-
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
-
 
     di {
         import(
@@ -803,6 +805,7 @@ fun Application.umRestApplication(
             CreateLearningSpaceUseCase(
                 xxStringHasher = instance(),
                 learningSpaceServerRepo = instance(),
+                serverDataDir  = environment.config.absoluteDataDir(),
                 di = di,
             )
         }
@@ -870,17 +873,24 @@ fun Application.umRestApplication(
         }
     }
 
-    val jsDevServer = appConfig.propertyOrNull("ktor.ustad.jsDevServer")?.getString()
+    val jsDevServerProp = appConfig.propertyOrNull("ktor.ustad.jsDevServer")?.getString()
 
     /*
      * Use the devserver mode when:
      *  a) there is an explicitly set development server to connect wtih
      *  b) the server is being run from source
+     *
+     * See comments on the jsDevServer property in application.conf for expected behavior
      */
-    if(
-        jsDevServer?.isNotBlank() == true || (isRunningFromSource && jsDevServer == null)
+    val jsDevServer = if(
+        jsDevServerProp?.isNotBlank() == true || (isRunningFromSource && jsDevServerProp == null)
     ) {
-        val effectiveJsDevServer = jsDevServer ?: DEFAULT_JS_DEV_SERVER
+        jsDevServerProp ?: DEFAULT_JS_DEV_SERVER
+    }else {
+        null
+    }
+
+    if(jsDevServer != null) {
         install(io.ktor.server.websocket.WebSockets)
 
         val effectiveKtorServerRoutes = if(sitePrefix != null) {
@@ -904,7 +914,7 @@ fun Application.umRestApplication(
             //If the request is not matching any API route, then use the reverse proxy to send the
             // request to the javascript development server.
             if(!effectiveKtorServerRoutes.any { requestUri.startsWith(it) }) {
-                call.respondReverseProxy(effectiveJsDevServer)
+                call.respondReverseProxy(jsDevServer)
                 return@intercept finish()
             }
         }
@@ -1075,7 +1085,8 @@ fun Application.umRestApplication(
                 webSocketProxyRoute(jsDevServer)
             }else {
                 route("/"){
-                    get{
+                    get {
+                        call.response.cacheControl(CacheControl.NoStore(null))
                         call.respondRedirect("umapp/")
                     }
                 }

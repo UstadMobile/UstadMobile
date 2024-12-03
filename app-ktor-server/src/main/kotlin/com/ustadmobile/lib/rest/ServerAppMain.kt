@@ -3,7 +3,7 @@ package com.ustadmobile.lib.rest
 import com.ustadmobile.lib.rest.clitools.manageserver.addDeleteLearningSpaceSubcommand
 import com.ustadmobile.lib.rest.clitools.manageserver.addNewLearningSpaceParser
 import com.ustadmobile.lib.rest.clitools.manageserver.addUpdateLearningSpaceSubcommand
-import com.ustadmobile.lib.rest.ext.ktorAppHomeDir
+import com.ustadmobile.lib.rest.ext.ktorServerPropertiesFile
 import com.ustadmobile.lib.rest.mediahelpers.MissingMediaProgramsException
 import io.ktor.server.engine.addShutdownHook
 import io.ktor.server.engine.commandLineEnvironment
@@ -14,7 +14,6 @@ import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.helper.HelpScreenException
 import net.sourceforge.argparse4j.inf.ArgumentParserException
 import net.sourceforge.argparse4j.inf.Namespace
-import java.io.File
 import com.ustadmobile.lib.rest.clitools.manageserver.main as manageServerMain
 
 
@@ -51,7 +50,7 @@ class ServerAppMain {
                     }
                 }.also {
                     it.addShutdownHook {
-                        File("${ktorAppHomeDir().absolutePath}/data", "server.properties").delete()
+                        ktorServerPropertiesFile().delete()
                     }
                 }.start(true)
             } catch (e: SiteConfigException) {

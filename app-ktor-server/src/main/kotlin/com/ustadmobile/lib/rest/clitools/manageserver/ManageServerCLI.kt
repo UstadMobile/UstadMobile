@@ -1,10 +1,11 @@
 package com.ustadmobile.lib.rest.clitools.manageserver
 
+import com.ustadmobile.lib.rest.SERVER_PROPERTIES_KEY_PORT
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.ext.ktorAppHomeDir
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.lib.rest.ext.ktorServerPropertiesFile
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -21,6 +22,7 @@ import net.sourceforge.argparse4j.inf.FeatureControl
 import net.sourceforge.argparse4j.inf.Namespace
 import net.sourceforge.argparse4j.inf.Subparsers
 import java.io.File
+import java.util.Properties
 import kotlin.system.exitProcess
 
 internal fun Subparsers.addNewLearningSpaceParser() {
@@ -45,10 +47,12 @@ internal fun Subparsers.addNewLearningSpaceParser() {
         it.addArgument("-w", "--dbpassword")
             .setDefault("")
             .help("Learning space database admin user e.g. admin")
-        it.addArgument("-a", "--adminuser")
+        it.addArgument("-a", "--adminusername")
             .setDefault("admin")
-            .help("Learning space initial admin username e.g. admin")
-
+            .help("Learning space initial admin username (default admin)")
+        it.addArgument("-p", "--adminpassword")
+            .help("Learning space initial admin password")
+            .required(true)
     }
 }
 
@@ -100,37 +104,49 @@ fun main(ns: Namespace) {
             json(json = json)
         }
     }
-    val dataDir = File("${ktorAppHomeDir().absolutePath}/data")
-    val siteFile = File(dataDir, "server.properties")
-    val adminPassword = File(dataDir, "admin.txt").readText().trim()
-    val dbUrl = ns.getString("dburl") ?:
-    "jdbc:sqlite:$dataDir/${sanitizeDbNameFromUrl(ns.getString("url"))}.db"
 
-    if (!dataDir.exists() || !siteFile.exists()) {
+    val dataDir = File("${ktorAppHomeDir().absolutePath}/data")
+    val serverPropertiesFile = ktorServerPropertiesFile()
+
+    if(!serverPropertiesFile.exists()) {
+        println("Error: Server is not running: server.properties does not exist")
+        exitProcess(1)
+    }
+
+    val serverProperties = Properties()
+    serverPropertiesFile.reader().use { serverPropertiesReader ->
+        serverProperties.load(serverPropertiesReader)
+    }
+
+    val port = serverProperties.getProperty(SERVER_PROPERTIES_KEY_PORT)
+
+    val systemConfigAuth = File(dataDir, "admin.txt").readText().trim()
+    val dbUrl = ns.getString("dburl")
+
+    if (!dataDir.exists() || !serverPropertiesFile.exists()) {
         println("Error: Server is not running.")
         exitProcess(1)
     }
 
     try {
-        val serverUrl = ns.getString("server")
-
         runBlocking {
+            val serverUrl = "http://localhost:$port/"
 
             when(ns.getString("subparser_name")) {
                 "newlearningspace" -> {
                     val request = CreateLearningSpaceUseCase.CreateLearningSpaceRequest(
                         url = ns.getString("url"),
                         title = ns.getString("title"),
-                        dbUrl = dbUrl,
+                        dbUrl = ns.getString("dburl"),
                         dbUsername = ns.getString("dbusername"),
                         dbPassword = ns.getString("dbpassword"),
-                        adminUsername = ns.getString("adminuser"),
-                        adminPassword = adminPassword
+                        adminUsername = ns.getString("adminusername"),
+                        adminPassword = ns.getString("adminpassword")
                     )
                     println(request)
 
                     val response = httpClient.post("${serverUrl}config/api/learningspaces/create") {
-                        headers["Authorization"] = "Basic ${("admin:$adminPassword").encodeBase64()}"
+                        headers["Authorization"] = "Basic ${("admin:$systemConfigAuth").encodeBase64()}"
 
                         contentType(ContentType.Application.Json)
                         setBody(request)
@@ -154,7 +170,7 @@ fun main(ns: Namespace) {
                     )
 
                     val response = httpClient.post("${serverUrl}config/api/learningspaces/delete") {
-                        headers["Authorization"] = "Basic ${("admin:$adminPassword").encodeBase64()}"
+                        headers["Authorization"] = "Basic ${("admin:$systemConfigAuth").encodeBase64()}"
 
                         contentType(ContentType.Application.Json)
                         setBody(request)
@@ -169,12 +185,12 @@ fun main(ns: Namespace) {
                         dbUrl = dbUrl,
                         dbUsername = ns.getString("dbusername"),
                         dbPassword = ns.getString("dbpassword"),
-                        adminUsername = ns.getString("adminuser"),
-                        adminPassword = adminPassword
+                        adminUsername = ns.getString("adminusername"),
+                        adminPassword = systemConfigAuth
                     )
 
                     val response = httpClient.post("${serverUrl}config/api/learningspaces/update") {
-                        headers["Authorization"] = "Basic ${("admin:$adminPassword").encodeBase64()}"
+                        headers["Authorization"] = "Basic ${("admin:$systemConfigAuth").encodeBase64()}"
 
                         contentType(ContentType.Application.Json)
                         setBody(request)

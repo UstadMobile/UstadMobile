@@ -190,7 +190,7 @@ These can be created as subdomains e.g. learningspace1.example.org,
 learningspace2.example.org, etc. 
 
 ```
-./gradlew app-ktor-server:run --args='newlearningspace --url http://your.ip.address:8087/ --title learningspacetitle'
+./gradlew app-ktor-server:run --args='newlearningspace --url http://your.ip.address:8087/ --title learningspacetitle --adminpassword adminpassword'
 ```
 
 * __Step 6: Build/run the Android and/or web client version__ : see [app-android](app-android/) for the

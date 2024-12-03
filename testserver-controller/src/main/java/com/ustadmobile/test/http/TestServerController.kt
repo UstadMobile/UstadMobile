@@ -2,7 +2,6 @@ package com.ustadmobile.test.http
 
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.util.SysPathUtil
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
@@ -52,7 +51,7 @@ fun Application.testServerController() {
         File(it)
     } ?: File(".")
 
-    val serverSiteUrl = environment.config.property("siteUrl").getString()
+    val learningSpaceUrl = environment.config.property("learningSpaceUrl").getString()
 
     if(adbPath == null || !adbPath.exists()) {
         throw IllegalStateException("ERROR: ADB path does not exist")
@@ -101,8 +100,22 @@ fun Application.testServerController() {
         }
     }
 
-    val serverDir = File("app-ktor-server")
-    val testFilesDir = File("test-end-to-end", "test-files")
+    val userDir = File(System.getProperty("user.dir"))
+
+    val rootSrcDir = when {
+        userDir.name == "testserver-controller" -> userDir.parentFile
+        File(userDir, "setting.gradle").exists() -> userDir
+        else -> {
+            val exception = IllegalStateException(
+                "ERROR: Server dir does not exist! testServerManager working directory MUST be the " +
+                        "root directory of the source code or testserver-controller directory")
+            println(exception.message)
+            throw exception
+        }
+    }
+
+    val serverDir = File(rootSrcDir, "app-ktor-server")
+    val testFilesDir = File(File(rootSrcDir, "test-end-to-end"), "test-files")
     val testContentDir = File(testFilesDir, "content")
     log.info("TEST FILES: ${testContentDir.absolutePath}")
 
@@ -227,43 +240,33 @@ fun Application.testServerController() {
                     ?: throw IllegalArgumentException("Could not find server command in PATH ${serverArgs[0]}")
             }
 
-            val serverArgsWithSiteUrl = serverArgs + "-P:ktor.ustad.siteUrl=$serverSiteUrl"
-            serverProcess = ProcessBuilder(serverArgsWithSiteUrl)
+            serverProcess = ProcessBuilder(serverArgs)
                 .directory(serverDir)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
 
           try {
-              val uri = URI(serverSiteUrl)
+              val uri = URI(learningSpaceUrl)
               waitForPort(uri.host, uri.port)
-              val appConfigPath = call.application.environment.config
-                  .propertyOrNull("ktor.testServer.createLearningSpaceCommand")?.getString()?.split(Regex("\\s+"))
-                  ?.toMutableList()
-                  ?: throw IllegalArgumentException("No testServer createLearningSpaceCommand specified in configuration")
+              val createLearningSpaceCommandArgs = buildList {
+                  addAll(serverArgs)
+                  add("newlearningspace")
+                  add("--title")
+                  add("TestLearningSpace")
+                  add("--url")
+                  add(learningSpaceUrl)
+                  add("--adminpassword")
+                  add("testpass")
+              }
 
-              appConfigPath[0] = SysPathUtil.findCommandInPath(appConfigPath[0])?.absolutePath
-
-                  ?: throw IllegalArgumentException("Could not find server createLearningSpaceCommand in PATH ${appConfigPath[0]}")
-              val andminPassword=File("${serverDir.absolutePath}/data/admin.txt").readText()
-              val appConfigArgs = listOf(
-                  appConfigPath[0],
-                  "-classpath",appConfigPath[2],
-                  appConfigPath[3],
-                  "--password", andminPassword,
-                  "newlearningspace",
-                  "--title", "newLearningSpace",
-                  "--url", "$serverSiteUrl",
-                  "--dburl",  "jdbc:sqlite:${serverDir.absolutePath}/data/${sanitizeDbNameFromUrl(serverSiteUrl)}.db",
-                  "--adminuser","admin",
-                  "--adminpassword","testpass"
-              )
-
-              val addingLearningSpaceProcess = ProcessBuilder(appConfigArgs)
+              val addingLearningSpaceProcess = ProcessBuilder(createLearningSpaceCommandArgs)
                   .directory(serverDir)
                   .redirectOutput(ProcessBuilder.Redirect.PIPE)
                   .redirectError(ProcessBuilder.Redirect.PIPE)
                   .start()
+              addingLearningSpaceProcess.waitFor()
+
               val output = addingLearningSpaceProcess.inputStream.bufferedReader().readText()
               val errorOutput = addingLearningSpaceProcess.errorStream.bufferedReader().readText()
 
@@ -278,7 +281,7 @@ fun Application.testServerController() {
           }
 
             response += "Started server process PID #${serverProcess?.pid()} " +
-                    "${serverArgsWithSiteUrl.joinToString( " ")} " +
+                    "${serverArgs.joinToString( " ")} " +
                     "(workingDir=${serverDir.absolutePath}<br/>"
 
             if(adbRecordEnabled) {
@@ -407,7 +410,7 @@ fun waitForPort(
     host: String,
     port: Int,
     interval: Long = 100,
-    timeout: Long = 5000,
+    timeout: Long = 15_000,
 ) {
     val startTime = System.currentTimeMillis()
     while(System.currentTimeMillis() - startTime < timeout) {

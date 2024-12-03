@@ -91,6 +91,19 @@ Learning Spaces are to Ustad Mobile what a workspace is to Slack. Each space has
 classes, library, etc. Schools, projects, companies, etc can each have their own learning space. 
 Each Learning Space will have a specific URL.
 
+In the ideal world the client app would not be linked to any specific server URL at compile time.
+However:
+
+* Deep links on Android 12+ [must be verified](https://developer.android.com/training/app-links/verify-android-applinks), 
+  and the domains (or subdomain pattern) for links to verify must be in AndroidManifest.xml file
+* Passkeys also require the app to be associated with the domain using the same link verification
+  procedure.
+
+Hence the app will use a System Base Url (set in buildconfig properties) that provides a list of
+learning spaces. The user can still be allowed to enter a learning space URL manually, however,
+only learning spaces that are included within the verified app links will be able to open deep links
+and use passkeys.
+
 ## Client side
 
 The client will have a separate instance of the main database (UmAppDatabase) for each learning 

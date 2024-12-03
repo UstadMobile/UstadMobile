@@ -45,7 +45,13 @@ expect abstract class LearningSpaceConfigDao {
                  END)
          WHERE lscUrl = :lscUrl
      """)
-    abstract  fun updateLearningSpaceConfig(lscUrl: String,dbUrl: String,dbPassword: String,dbUsername: String)
+    abstract  fun updateLearningSpaceConfig(
+        lscUrl: String,
+        dbUrl: String,
+        dbPassword: String?,
+        dbUsername: String?,
+    )
+
     @Insert
     abstract fun insert(learningSpace: LearningSpaceConfig)
 }
