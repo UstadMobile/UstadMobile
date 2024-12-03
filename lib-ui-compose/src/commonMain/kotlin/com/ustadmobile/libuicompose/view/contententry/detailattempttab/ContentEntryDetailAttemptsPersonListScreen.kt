@@ -1,12 +1,20 @@
 package com.ustadmobile.libuicompose.view.contententry.detailattempttab
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
@@ -58,7 +66,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                     )
                 },
                 supportingContent = {
-                    androidx.compose.material3.Text(text = "")
+                    androidx.compose.material3.Text(text = "${attemptsPersonListItems?.numberOfAttempts.toString()} attempts")
                 },
                 leadingContent = {
                     UstadPersonAvatar(
@@ -67,6 +75,33 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                     )
                 }
             )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                LinearProgressIndicator(
+                    progress = attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f,
+                    modifier = Modifier.weight(0.7f).padding(start=12.dp),
+                )
+                Text(
+                    text = "${((attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f) * 100).toInt()}% Completion",
+                    modifier = Modifier.padding(start = 8.dp).weight(0.3f),
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                LinearProgressIndicator(
+                    progress = ((attemptsPersonListItems?.statement?.resultScoreRaw ?: 0f) / (attemptsPersonListItems?.statement?.resultScoreMax ?: 1f)),
+                    modifier = Modifier.weight(0.7f).padding(start=12.dp),
+                )
+                Text(
+                    text = "${(((attemptsPersonListItems?.statement?.resultScoreRaw ?: 0f) / (attemptsPersonListItems?.statement?.resultScoreMax ?: 1f)) * 100).toInt()}% Score",
+                    modifier = Modifier.padding(start = 8.dp).weight(0.3f),
+                )
+            }
         }
     }
 }
