@@ -37,8 +37,9 @@ internal fun Subparsers.addNewLearningSpaceParser() {
             .help("Learning space title")
         it.addArgument("-u", "--url")
             .required(true)
-            .help("Learning space url eg. https://schoolname.examples.org/. " +
-                    "This must match the url as a user would enter it into their browser.")
+            .help("The URL for users to access the learning space via \n" +
+                    "the browser or mobile/desktop apps. If you are using a reverse proxy (as recommended)" +
+                    "this URL must be the URL as it would be entered by the user, not the ProxyPass parameter.")
         it.addArgument("-d", "--dburl")
             .help("Learning space database JDBC URL")
         it.addArgument("-n", "--dbusername")
@@ -51,7 +52,8 @@ internal fun Subparsers.addNewLearningSpaceParser() {
             .setDefault("admin")
             .help("Learning space initial admin username (default admin)")
         it.addArgument("-p", "--adminpassword")
-            .help("Learning space initial admin password")
+            .help("Learning space initial admin password (the default username for the initial admin " +
+                    "user will be admin unless set otherwise.")
             .required(true)
     }
 }

@@ -83,9 +83,25 @@ class ServerAppMain {
                 ns = parser.takeIf { args.isNotEmpty() }?.parseArgs(args)
                 val subCommand = ns?.getString("subparser_name") ?: CMD_RUN_SERVER
 
+                /*
+                 * The application script templates (in src/scripttemplates) will set the default
+                 * path to the KTOR (Hocon) configuration file using the app_config system property.
+                 *
+                 * When this is set it should be passed to the KTOR embedded server as if it was
+                 * added as a command line argument.
+                 */
+                val configSysProp = System.getProperty("app_config")
+                val configArgs = if(
+                    configSysProp != null && !(args.contains("-c") || args.contains("-config"))
+                ) {
+                    arrayOf("-config", configSysProp)
+                }else {
+                    arrayOf()
+                }
+
                 when {
                     subCommand == CMD_RUN_SERVER -> {
-                        runServerMain(args.argsAfterFirst())
+                        runServerMain(args.argsAfterFirst() + configArgs)
                     }
 
                     else -> {

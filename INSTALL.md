@@ -11,7 +11,9 @@ been most extensively tested on Ubuntu Linux.
 
 Download from GitHub releases [https://www.github.com/UstadMobile/UstadMobile/releases](https://www.github.com/UstadMobile/UstadMobile/releases) or
 build ustad-server.zip from source as per the __Production build__ procedure in 
-[app-ktor-server/README.md](app-ktor-server/README.md).
+[app-ktor-server/README.md](app-ktor-server/README.md). If you want to use the Android app you'll
+need to download the APK file from [https://www.github.com/UstadMobile/UstadMobile/releases](https://www.github.com/UstadMobile/UstadMobile/releases) or
+build the APK from source as per the procedure in [app-android/README.md](app-android/README.md).
 
 ### 2. Install server requirements:
 
@@ -55,81 +57,42 @@ winget install -e --id HandBrake.HandBrake.CLI
 
 ### 3. Unzip ustad-server.zip and start server
 
-Unzip ustad-server.zip. 
+Unzip ustad-server.zip .
 
-#### Single learning space system configuration
-
-Open the ustad-server.conf file and set the siteUrl property to the url that 
-will be used to access the site e.g. https://ustad.yourdomain.com/ (e.g. using a reverse proxy setup
-with Apache or Nginx in a production setup) or http://your.ip.address:8087/ (for testing/evaluation).
-e.g.
+You can run the server directly:
 ```
-ktor {
-    ..
-    ustad {
-        # Uncomment the siteUrl line found here to set the siteUrl
-        siteUrl = "http://192.168.1.2:8087/"
-        ..
-    }
-}        
+$ unzip-path/bin/ustad-server
+```
+_Or_ run as a system service on Linux (automatically starts on boot). Set the paths and username in 
+systemd/ustad-server.service and then run:
+```
+$ cp unzip-path/systemd/ustad-server.service /etc/systemd/system/
+$ sudo systemctl daemon-reload
+$ sudo systemctl start ustad-server
+$ sudo systemctl enable ustad-server
+# Check status
+$ sudo systemctl status ustad-server
 ```
 
-#### Multi learning space system (virtual hosting) configuration
+### 4. Add one or more learning spaces
 
-The Ustad server supports running multiple subdomains (e.g. schoolname1.example.org, schoolname2.example.org),
-where each subdomain has a separate learning space (classes, users, content, etc) in a single JVM
-(to significantly reduce memory/space overhead). Each learning space has its own database
-(Postgres or SQLite). The server will then use a separate database for each learning space, and select
-the database to use for a request based on the virtual host name.
-
-This can be setup by setting dbmode to virtualhost and using (hostname) in the database url such that
-each virtual host maps to a different database:
+Learning Spaces are to Ustad Mobile what a workspace is to Slack. Each space has its own users,
+classes, library, etc. Schools, projects, companies, etc can each have their own learning space.
+Each Learning Space will have a specific URL. Each Learning Space has its own database (Postgres or
+SQLite).
 
 ```
-ktor {
-  ..
-  ustad {
-    ..
-    dbmode = virtualhost
-    ..
-    database {
-       ..
-       # For SQLite 
-       url = "jdbc:sqlite:(datadir)/(hostname)/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000&recursive_triggers=true"
-       ..
-       
-       # For Postgres - the username/password must be granted permission on all databases to be used
-       url = "jdbc:postgresql:///ustad_(hostname)"
-       ..
-    }
-  }
-}
+$ unzip-path/bin/ustad-server newlearningspace --url https://schoolname.example.org[:port]/ \
+  --title learningspacetitle \
+  --adminpassword adminpassword
 ```
-(hostname) will be automatically replaced with the hostname based on the incoming request - any
-non-alphanumeric character will be replaced with _.
-
-When using the virtual hosting mode, siteUrl is NOT set.
-
-#Linux
-```
-$ ./ustad-appconfig.sh --password admin_password newlearningspace  
---title exampleTitle --url http://schoolname1.example.org/
---dburl jdbc:sqlite:Your_system_path/UstadMobile/app-ktor-server/data/localhost.db
---adminpassword any_password
-```
-#Windows
-```
-$ ustad-appconfig.bat --password admin_password newlearningspace  -
--title exampleTitle --url http://schoolname1.example.org/
---dburl jdbc:sqlite:Your_system_path/UstadMobile/app-ktor-server/data/localhost.db
---adminpassword any_password
-```
-After server runs successfully you need to add the learning space
-(here admin_password is password present in admin.txt file ,Your_system_path is path of the project
-folder and any_password is password for the particular learning space)
-
-to show learning space list add base url in com.ustadmobile.system.systemBaseUrl=your_url
-in buildconfig.default.properties
+Required arguments:
+* ```--url``` the URL for users to access the learning space via 
+    the browser or mobile/desktop apps. If you are using a reverse proxy (as recommended)
+    this URL must be the URL as it would be entered by the user, not the ProxyPass parameter.
+* ```--title``` Learning space title
+* ```--adminpassword``` Learning space initial admin password (the default username for the initial admin
+  user will be admin unless set otherwise.
 
 #### Email configuration
 
@@ -138,39 +101,6 @@ after logging in), you must configure the email section of the config file. The 
 Privacy Protection Act requires obtaining of parental consent, which is done by requesting a parental
 email address. Uncomment the mail section in ustad-server.conf and add an email account that can be
 used to send email.
-
-#### Running the server
-
-After setting the siteUrl (if not using virtual hosting) in the configuration file 
-(and email config if required), start the server:
-
-Linux/MacOS:
-```
-cd /path/to/unzipped/ustad-server/
-./bin/ustad-server
-```
-Where /path/to/unzipped/ is where you unzipped ustad-server.zip
-
-Windows
-```
-cd C:\User\me\path\to\unzipped\ustad-server
-.\bin\ustad-server
-```
-Where C:\User\me\path\to\unzipped\ is where you unzipped ustad-server.zip
-
-This starts the server on the default port (8087). You can now open a browser, and use the url
-you specified as the siteUrl.
-
-If you are running a single learning space system, the random password will be automatically generated
-in ```data/singleton/admin.txt``` as soon as the server starts.
-
-If you are running a multiple learning space system, the random password will be generated in
-```data/(hostname)/admin.txt``` when the system is accessed for the first time. You might need to
-access the site (e.g. open https://subdomain.example.org/ ) in your browser and login using any 
-username/password to trigger this.
-
-A random admin password will be generated automatically. It will be placed in
-**data/singleton/admin.txt**.
 
 ### 4. Install the APK and connect to server
 
@@ -184,7 +114,6 @@ When the app prompts you for a link, you should enter the link using the IP addr
 e.g. http://192.168.0.10:8087/ where 192.168.0.10 is the IP address of the PC running the server.
 Using localhost on an Android device or emulator will **NOT** work. If you are using an Android
 emulator, you can use 10.0.2.2 which always points to the Android emulator host device.
-
 
 ## Customize server configuration (optional)
 

@@ -89,7 +89,8 @@ a separate URL but share common content).
 
 Learning Spaces are to Ustad Mobile what a workspace is to Slack. Each space has its own users,
 classes, library, etc. Schools, projects, companies, etc can each have their own learning space. 
-Each Learning Space will have a specific URL.
+Each Learning Space will have a specific URL. Each Learning Space has its own database (Postgres or
+SQLite).
 
 In the ideal world the client app would not be linked to any specific server URL at compile time.
 However:
