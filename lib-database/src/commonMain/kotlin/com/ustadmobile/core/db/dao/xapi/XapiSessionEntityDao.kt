@@ -107,11 +107,11 @@ expect abstract class XapiSessionEntityDao {
            SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
              FROM StatementEntity
             WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
-              AND StatementEntity.statementActorPersonUid = Person.personUid
+              AND StatementEntity.statementActorPersonUid = :personUid
               AND StatementEntity.resultCompletion = 1
        )
 """)
-    abstract   fun getSessionList(contentEntryUid: Long):
+    abstract   fun getSessionList(contentEntryUid: Long, personUid: Long):
             PagingSource<Int, StatementAndPersonAndPicture>
 
     @HttpAccessible(
