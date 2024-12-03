@@ -10,6 +10,7 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.provider
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseJvm
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
@@ -81,6 +82,8 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
+import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCase
+import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCaseJvmImpl
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -198,6 +201,12 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             endpoint = context,
             db = instance(tag = DoorTag.TAG_DB),
             cache = instance()
+        )
+    }
+    bind<RecordMatomoTrackingUseCase>()  with singleton {
+        RecordMatomoTrackingUseCaseJvmImpl(
+            scheduler = instance(),
+            endpoint = Endpoint(" http://192.168.20.2/matomo"),
         )
     }
 

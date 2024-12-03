@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
+import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCase
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavCommand
@@ -18,7 +19,6 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.matomo.AnalyticsTracker
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
@@ -190,7 +190,7 @@ fun AppNavHost(
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
     val di = localDI()
-    val analyticsTracker: AnalyticsTracker = remember { di.direct.instance() }
+    val recordMatomoTrackingUseCase: RecordMatomoTrackingUseCase by di.instance()
     val makeLinkUseCase: MakeLinkUseCase by di.onActiveEndpoint().instance()
     val currentLocation by navigator.currentEntry.collectAsState(null)
 
@@ -205,7 +205,7 @@ fun AppNavHost(
             val shareableLink = makeLinkUseCase(destinationName, args)
 
             // Trigger event tracking
-            analyticsTracker.trackScreen(
+            recordMatomoTrackingUseCase.invoke(
                 path = shareableLink,
                 title = location.path
             )

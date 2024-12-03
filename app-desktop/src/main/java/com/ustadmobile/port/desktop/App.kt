@@ -212,6 +212,7 @@ fun main() {
                     httpFetcher(client = httpClient)
                 }
             }
+//            val recordMatomoTrackingUseCase: RecordMatomoTrackingUseCase = di.direct.instance()
 
             LaunchedEffect(Unit) {
                 di.direct.instance<EmbeddedHttpServer>().also {
@@ -239,6 +240,15 @@ fun main() {
                     PreComposeApp {
                         val navigator = rememberNavigator()
                         val currentDestination by navigator.currentEntry.collectAsState(null)
+
+//                        LaunchedEffect(currentDestination?.path) {
+//                            currentDestination?.path?.let { path ->
+//                                recordMatomoTrackingUseCase.invoke(
+//                                    path = path,
+//                                    title = "Navigated to $path"
+//                                )
+//                            }
+//                        }
 
                         /**
                          * Set the selected item. Relying on onClick misses when the user switches accounts

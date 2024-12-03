@@ -22,6 +22,8 @@ import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
+import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCase
+import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCaseAndroidImpl
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -38,8 +40,6 @@ import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderAndroid
 import com.ustadmobile.core.impl.nav.CommandFlowUstadNavController
-import com.ustadmobile.core.matomo.AnalyticsTracker
-import com.ustadmobile.core.matomo.MatomoAnalytics
 import com.ustadmobile.core.networkmanager.ConnectionManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
@@ -92,8 +92,8 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         import(commonDomainDiModule(EndpointScope.Default))
         import(AndroidDomainDiModule(applicationContext))
 
-        bind<AnalyticsTracker>() with singleton {
-            MatomoAnalytics(tracker)
+        bind<RecordMatomoTrackingUseCase>() with singleton {
+            RecordMatomoTrackingUseCaseAndroidImpl(tracker)
         }
 
         bind<ShareAppUseCase>() with singleton { ShareAppUseCaseAndroid(this@AbstractAppActivity) }

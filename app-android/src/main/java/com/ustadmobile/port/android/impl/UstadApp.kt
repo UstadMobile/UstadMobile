@@ -166,8 +166,6 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.APPCONFIG_KEY_PRESET_LANG
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
-import com.ustadmobile.core.matomo.AnalyticsTracker
-import com.ustadmobile.core.matomo.MatomoAnalytics
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
 import com.ustadmobile.core.util.ext.appMetaData
@@ -201,9 +199,7 @@ import org.acra.config.httpSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
-import org.matomo.sdk.Matomo
 import org.matomo.sdk.TrackMe
-import org.matomo.sdk.Tracker
 import org.matomo.sdk.TrackerBuilder
 import org.matomo.sdk.extra.DimensionQueue
 import org.matomo.sdk.extra.DownloadTracker
