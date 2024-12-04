@@ -164,7 +164,7 @@ expect abstract class XapiSessionEntityDao {
           SELECT COUNT(*)
           FROM StatementEntity se
           WHERE se.statementActorPersonUid = Person.personUid
-          AND se.resultCompletion = 1
+          AND se.completionOrProgress = 1
           AND se.statementContentEntryUid = :contentEntryUid
        ) AS numberOfAttempts
        FROM StatementEntity
@@ -172,13 +172,13 @@ expect abstract class XapiSessionEntityDao {
             ON Person.personUid = StatementEntity.statementActorPersonUid
        LEFT JOIN PersonPicture
             ON PersonPicture.personPictureUid = Person.personUid 
-       WHERE StatementEntity.resultCompletion = 1 
+       WHERE StatementEntity.completionOrProgress = 1 
        AND (StatementEntity.statementIdHi, StatementEntity.statementIdLo) = (
            SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
              FROM StatementEntity
             WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
               AND StatementEntity.statementActorPersonUid = Person.personUid
-              AND StatementEntity.resultCompletion = 1
+              AND StatementEntity.completionOrProgress = 1
        )
 """)
 abstract   fun findPersonsWithAttempts(contentEntryUid: Long):
