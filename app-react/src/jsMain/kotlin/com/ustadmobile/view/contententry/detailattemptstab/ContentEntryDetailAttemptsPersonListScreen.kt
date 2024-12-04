@@ -18,19 +18,29 @@ import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import mui.material.Container
+import mui.material.LinearProgress
+import mui.material.LinearProgressVariant
 import mui.material.ListItem
 import mui.material.ListItemButton
 import mui.material.ListItemIcon
 import mui.material.ListItemText
+import mui.material.Stack
+import mui.material.StackDirection
+import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
 import react.create
 import tanstack.react.query.UseInfiniteQueryResult
+import web.cssom.AlignContent
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
+import web.cssom.Position
+import web.cssom.VerticalAlign
 import web.cssom.pct
+import web.cssom.px
 
 
 external interface ContentEntryDetailAttemptsPersonListProps: Props {
@@ -74,20 +84,81 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                     key = { it.person?.personUid?.toString() ?: "0" }
                 ) { attemptsPersonListItems ->
                     ListItem.create {
-                        ListItemButton{
-                            onClick = {
-                                attemptsPersonListItems?.also { props.onListItemClick(it) }
+                        Stack {
+                            direction = responsive(StackDirection.column)
+                            ListItemButton {
+                                onClick = {
+                                    attemptsPersonListItems?.also { props.onListItemClick(it) }
+                                }
+
+                                ListItemIcon {
+                                    UstadPersonAvatar {
+                                        pictureUri =
+                                            attemptsPersonListItems?.picture?.personPictureThumbnailUri
+                                        personName = attemptsPersonListItems?.person?.fullName()
+                                    }
+                                }
+                                ListItemText {
+                                    primary =
+                                        ReactNode(attemptsPersonListItems?.person?.fullName() ?: "")
+                                    secondary = ReactNode(
+                                        "${attemptsPersonListItems?.numberOfAttempts.toString()} attempts"
+                                            ?: "0 attempts"
+                                    )
+                                }
+
+
+
                             }
-                            ListItemIcon {
-                                UstadPersonAvatar {
-                                    pictureUri = attemptsPersonListItems?.picture?.personPictureThumbnailUri
-                                    personName = attemptsPersonListItems?.person?.fullName()
+                            Stack {
+                                direction = responsive(StackDirection.row)
+                                LinearProgress {
+                                    sx {
+                                        width = 500.px
+                                        height = 4.px
+
+                                    }
+                                    variant = LinearProgressVariant.determinate
+                                    value =
+                                        attemptsPersonListItems?.statement?.resultScoreScaled?.times(
+                                            100
+                                        )?.toInt() ?: 0 // Convert scaled score to percentage
+                                }
+                                ListItemText {
+                                    primary = ReactNode("${((attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f) * 100).toInt()}% Completion")
+                                    sx {
+                                        verticalAlign= VerticalAlign.middle
+                                        marginLeft = 8.px // Adds some space between the progress bar and text
+                                        paddingTop = 1.px // Adjust vertical padding if needed
+                                    }
                                 }
                             }
-                            ListItemText {
-                                primary = ReactNode(attemptsPersonListItems?.person?.fullName()?:"")
+                            Stack {
+                                direction = responsive(StackDirection.row)
+                                LinearProgress {
+                                    sx {
+                                        width = 500.px
+                                        height = 4.px
+                                        marginTop= 8.px
+                                    }
+                                    variant = LinearProgressVariant.determinate
+                                    value =
+                                        attemptsPersonListItems?.statement?.resultScoreScaled?.times(
+                                            100
+                                        )?.toInt() ?: 0 // Convert scaled score to percentage
+                                }
+                                ListItemText {
+                                    primary = ReactNode("${(((attemptsPersonListItems?.statement?.resultScoreRaw ?: 0f) / (attemptsPersonListItems?.statement?.resultScoreMax ?: 1f)) * 100).toInt()}% Score")
+                                    sx {
+                                       verticalAlign= VerticalAlign.middle
+                                        marginLeft = 8.px // Adds some space between the progress bar and text
+                                        paddingTop = 1.px // Adjust vertical padding if needed
+                                    }
+                                }
                             }
+
                         }
+
                     }
                 }
             }
