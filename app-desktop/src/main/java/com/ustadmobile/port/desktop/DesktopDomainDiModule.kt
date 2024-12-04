@@ -10,7 +10,6 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.provider
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseJvm
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
@@ -123,8 +122,10 @@ import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.config.AppConfig
 import com.ustadmobile.core.impl.config.AppConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
+import com.ustadmobile.core.impl.config.AppConfig.Companion.MATOMO_API_URL
 import com.ustadmobile.core.launchopenlicenses.LaunchOpenLicensesUseCaseJvm
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
@@ -204,9 +205,10 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
     bind<RecordMatomoTrackingUseCase>()  with singleton {
+        val appConfig = instance<AppConfig>()
         RecordMatomoTrackingUseCaseJvmImpl(
             scheduler = instance(),
-            endpoint = Endpoint(" http://192.168.20.2/matomo"),
+            endpoint = appConfig[MATOMO_API_URL]?.toNullIfBlank() ?:""
         )
     }
 

@@ -15,6 +15,9 @@ import kotlinx.coroutines.withContext
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.quartz.JobExecutionContext
+import java.awt.Dimension
+import java.awt.Toolkit
+import java.util.Locale
 
 class MatomoTrackingJob : InterruptableCoroutineJob() {
 
@@ -25,6 +28,9 @@ class MatomoTrackingJob : InterruptableCoroutineJob() {
         val path = jobDataMap.getString(RecordMatomoTrackingUseCaseJvmImpl.DATA_PATH)
         val endpoint =
             Endpoint(jobDataMap.getString(RecordMatomoTrackingUseCaseJvmImpl.DATA_ENDPOINT))
+        val resolution = getScreenResolution()
+        val lang = Locale.getDefault().language
+        val device = System.getProperty("os.name")
 
         if (endpoint.url.isBlank()) {
             Napier.e("MatomoTrackingCoroutineJob: Missing endpoint. Cannot track $screenName at $path.")
@@ -41,6 +47,10 @@ class MatomoTrackingJob : InterruptableCoroutineJob() {
                 parameter(APIV, API_VERSION)
                 parameter(RAND, (1..1_000_000).random().toString())
                 parameter(ID, generateVisitorId())
+                parameter(RES, resolution)
+                parameter(LANG, lang)
+                parameter(UA, device)
+
             }
             if (response.status.value != 200) {
                 val body = response.body<String>()
@@ -67,6 +77,12 @@ class MatomoTrackingJob : InterruptableCoroutineJob() {
             .joinToString("")
     }
 
+    private fun getScreenResolution(): String {
+        val toolkit: Toolkit = Toolkit.getDefaultToolkit()
+        val screenSize: Dimension = toolkit.screenSize
+        return "${screenSize.width}x${screenSize.height}"
+    }
+
     companion object {
         const val ID_SITE = "1"
         const val REQ_REC = "1"
@@ -79,5 +95,8 @@ class MatomoTrackingJob : InterruptableCoroutineJob() {
         const val APIV = "apiv"
         const val RAND = "rand"
         const val ID = "_id"
+        const val RES = "res"
+        const val LANG = "lang"
+        const val UA = "ua"
     }
 }

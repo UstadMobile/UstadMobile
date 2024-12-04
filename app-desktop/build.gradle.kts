@@ -53,6 +53,8 @@ tasks.withType<Jar> {
         attributes["com-ustadmobile-showpoweredbymsg"] = buildConfigProps?.getProperty("com.ustadmobile.showpoweredbymsg") ?: ""
 
         attributes["com-ustadmobile-apiurl"] = buildConfigProps?.getProperty("com.ustadmobile.apiurl") ?: ""
+
+        attributes["com-matomo-url"] = buildConfigProps?.getProperty("com.matomo.url") ?: ""
     }
 }
 

@@ -24,6 +24,8 @@ interface AppConfig {
 
         const val KEY_API_URL = "com.ustadmobile.apiurl"
 
+        const val MATOMO_API_URL = "com.matomo.url"
+
     }
 
 }

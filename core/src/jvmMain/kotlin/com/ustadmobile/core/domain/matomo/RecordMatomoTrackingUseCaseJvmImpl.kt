@@ -1,9 +1,6 @@
 package com.ustadmobile.core.domain.matomo
 
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupController
-import com.ustadmobile.core.domain.blob.upload.AbstractEnqueueBlobUploadClientUseCase
-import com.ustadmobile.core.domain.blob.upload.AbstractEnqueueBlobUploadClientUseCase.Companion
 import org.quartz.JobBuilder
 import org.quartz.Scheduler
 import org.quartz.TriggerBuilder
@@ -11,22 +8,19 @@ import org.quartz.TriggerKey
 
 class RecordMatomoTrackingUseCaseJvmImpl(
     private val scheduler: Scheduler,
-    private val endpoint: Endpoint,
+    private val endpoint: String,
 ) : RecordMatomoTrackingUseCase {
 
     override suspend fun invoke(screenName: String, path: String) {
-        // Prepare Quartz job
         val quartzJob = JobBuilder.newJob(MatomoTrackingJob::class.java)
             .usingJobData(DATA_SCREEN_NAME, screenName)
             .usingJobData(DATA_PATH, path)
-            .usingJobData(DATA_ENDPOINT, endpoint.url)
+            .usingJobData(DATA_ENDPOINT, endpoint)
             .build()
 
-        // Create a unique trigger key
         val triggerKey = triggerKeyFor(screenName, path,endpoint)
         scheduler.unscheduleJob(triggerKey)
 
-        // Create a Quartz trigger
         val jobTrigger = TriggerBuilder.newTrigger()
             .withIdentity(triggerKey)
             .startNow()
@@ -40,8 +34,8 @@ class RecordMatomoTrackingUseCaseJvmImpl(
         const val DATA_PATH = "path"
         const val DATA_ENDPOINT = "endpoint"
 
-        fun triggerKeyFor(screenName: String, path: String, endpoint: Endpoint): TriggerKey {
-            val endpointUrl = endpoint.url.take(100) // Truncate URL to 100 characters
+        fun triggerKeyFor(screenName: String, path: String, endpoint: String): TriggerKey {
+            val endpointUrl = endpoint.take(100) // Truncate URL to 100 characters
             val screenNameHash = screenName.hashCode().toString()
             val pathHash = path.hashCode().toString()
 
@@ -50,6 +44,5 @@ class RecordMatomoTrackingUseCaseJvmImpl(
                 ConnectivityTriggerGroupController.TRIGGERKEY_CONNECTIVITY_REQUIRED_GROUP
             )
         }
-
     }
 }
