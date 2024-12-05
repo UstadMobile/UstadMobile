@@ -43,12 +43,13 @@ import web.cssom.pct
 import web.cssom.px
 
 
-external interface ContentEntryDetailAttemptsPersonListProps: Props {
+external interface ContentEntryDetailAttemptsPersonListProps : Props {
     var uiState: ContentEntryDetailAttemptsPersonListUiState
     var refreshCommandFlow: Flow<RefreshCommand>?
     var onListItemClick: (StatementAndPersonAndPicture) -> Unit
 
 }
+
 val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
 
     val viewModel = useUstadViewModel { di, savedStateHandle ->
@@ -56,118 +57,115 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
     }
     val uiState by viewModel.uiState.collectAsState(ContentEntryDetailAttemptsPersonListUiState())
 
-    val contentEntryDetailAttemptsPersonListComponent2 = FC<ContentEntryDetailAttemptsPersonListProps>
-    { props ->
+    val contentEntryDetailAttemptsPersonListComponent2 =
+        FC<ContentEntryDetailAttemptsPersonListProps>
+        { props ->
 
-        val remoteMediatorResult = useDoorRemoteMediator(
-            pagingSourceFactory = props.uiState.attemptsPersonList,
-            refreshCommandFlow = (props.refreshCommandFlow ?: emptyFlow())
-        )
-        println("remoteMediatorResult: $remoteMediatorResult")
+            val remoteMediatorResult = useDoorRemoteMediator(
+                pagingSourceFactory = props.uiState.attemptsPersonList,
+                refreshCommandFlow = (props.refreshCommandFlow ?: emptyFlow())
+            )
+            println("remoteMediatorResult: $remoteMediatorResult")
 
-        val infiniteQueryResult: UseInfiniteQueryResult<PagingSourceLoadResult<Int, StatementAndPersonAndPicture>, Throwable> = usePagingSource(
-            remoteMediatorResult.pagingSourceFactory, true, 150
-        )
+            val infiniteQueryResult: UseInfiniteQueryResult<PagingSourceLoadResult<Int, StatementAndPersonAndPicture>, Throwable> =
+                usePagingSource(
+                    remoteMediatorResult.pagingSourceFactory, true, 150
+                )
 
-        val muiAppState = useMuiAppState()
-        VirtualList {
-            style = jso {
-                height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
-                width = 100.pct
-                contain = Contain.strict
-                overflowY = Overflow.scroll
-            }
-            content =
-                virtualListContent {
-                infiniteQueryPagingItems(
-                    items = infiniteQueryResult,
-                    key = { it.person?.personUid?.toString() ?: "0" }
-                ) { attemptsPersonListItems ->
-                    ListItem.create {
-                        Stack {
-                            direction = responsive(StackDirection.column)
-                            ListItemButton {
-                                onClick = {
-                                    attemptsPersonListItems?.also { props.onListItemClick(it) }
-                                }
+            val muiAppState = useMuiAppState()
+            VirtualList {
+                style = jso {
+                    height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+                    width = 100.pct
+                    contain = Contain.strict
+                    overflowY = Overflow.scroll
+                }
+                content =
+                    virtualListContent {
+                        infiniteQueryPagingItems(
+                            items = infiniteQueryResult,
+                            key = { it.person?.personUid?.toString() ?: "0" }
+                        ) { attemptsPersonListItems ->
+                            ListItem.create {
+                                Stack {
+                                    direction = responsive(StackDirection.column)
+                                    ListItemButton {
+                                        onClick = {
+                                            attemptsPersonListItems?.also { props.onListItemClick(it) }
+                                        }
 
-                                ListItemIcon {
-                                    UstadPersonAvatar {
-                                        pictureUri =
-                                            attemptsPersonListItems?.picture?.personPictureThumbnailUri
-                                        personName = attemptsPersonListItems?.person?.fullName()
+                                        ListItemIcon {
+                                            UstadPersonAvatar {
+                                                pictureUri =
+                                                    attemptsPersonListItems?.picture?.personPictureThumbnailUri
+                                                personName =
+                                                    attemptsPersonListItems?.person?.fullName()
+                                            }
+                                        }
+                                        ListItemText {
+                                            primary =
+                                                ReactNode(
+                                                    attemptsPersonListItems?.person?.fullName()
+                                                        ?: ""
+                                                )
+                                            secondary = ReactNode(
+                                                "${attemptsPersonListItems?.numberOfAttempts.toString()} attempts"
+                                                    ?: "0 attempts"
+                                            )
+                                        }
+
+
                                     }
-                                }
-                                ListItemText {
-                                    primary =
-                                        ReactNode(attemptsPersonListItems?.person?.fullName() ?: "")
-                                    secondary = ReactNode(
-                                        "${attemptsPersonListItems?.numberOfAttempts.toString()} attempts"
-                                            ?: "0 attempts"
-                                    )
-                                }
+                                    Stack {
+                                        direction = responsive(StackDirection.row)
+                                        LinearProgress {
+                                            sx {
+                                                width = 500.px
+                                                height = 4.px
 
+                                            }
+                                            variant = LinearProgressVariant.determinate
+                                            // Set value based on whether extensionProgress is not null
+                                            value =
+                                                attemptsPersonListItems?.statement?.extensionProgress?.let {
+                                                    it.toFloat()  // If extensionProgress is not null, use it
+                                                }
+                                                    ?: (attemptsPersonListItems?.statement?.resultScoreScaled?.times(
+                                                        100
+                                                    )
+                                                        ?.toInt()
+                                                        ?: 0) // Otherwise, use resultScoreScaled
+                                        }
+                                        ListItemText {
+                                            primary = ReactNode(
+                                                attemptsPersonListItems?.statement?.extensionProgress?.let {
+                                                    // If extensionProgress is not null, show its value as percentage
+                                                    "${(it)}% Completion"
+                                                }
+                                                    ?: // If extensionProgress is null, fall back to resultScoreScaled
+                                                    "${((attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f) * 100).toInt()}% Score"
+                                            )
+                                            sx {
+                                                verticalAlign = VerticalAlign.middle
+                                                marginLeft =
+                                                    8.px // Adds some space between the progress bar and text
+                                                paddingTop =
+                                                    1.px // Adjust vertical padding if needed
+                                            }
+                                        }
+                                    }
 
+                                }
 
                             }
-                            Stack {
-                                direction = responsive(StackDirection.row)
-                                LinearProgress {
-                                    sx {
-                                        width = 500.px
-                                        height = 4.px
-
-                                    }
-                                    variant = LinearProgressVariant.determinate
-                                    value =
-                                        attemptsPersonListItems?.statement?.resultScoreScaled?.times(
-                                            100
-                                        )?.toInt() ?: 0 // Convert scaled score to percentage
-                                }
-                                ListItemText {
-                                    primary = ReactNode("${((attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f) * 100).toInt()}% Completion")
-                                    sx {
-                                        verticalAlign= VerticalAlign.middle
-                                        marginLeft = 8.px // Adds some space between the progress bar and text
-                                        paddingTop = 1.px // Adjust vertical padding if needed
-                                    }
-                                }
-                            }
-                            Stack {
-                                direction = responsive(StackDirection.row)
-                                LinearProgress {
-                                    sx {
-                                        width = 500.px
-                                        height = 4.px
-                                        marginTop= 8.px
-                                    }
-                                    variant = LinearProgressVariant.determinate
-                                    value =
-                                        attemptsPersonListItems?.statement?.resultScoreScaled?.times(
-                                            100
-                                        )?.toInt() ?: 0 // Convert scaled score to percentage
-                                }
-                                ListItemText {
-                                    primary = ReactNode("${((attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f) * 100).toInt()}%% Score")
-                                    sx {
-                                       verticalAlign= VerticalAlign.middle
-                                        marginLeft = 8.px // Adds some space between the progress bar and text
-                                        paddingTop = 1.px // Adjust vertical padding if needed
-                                    }
-                                }
-                            }
-
                         }
-
                     }
+
+                Container {
+                    VirtualListOutlet()
                 }
             }
-
-            Container {
-                VirtualListOutlet()
-            }
         }
-    }
 
 
     contentEntryDetailAttemptsPersonListComponent2 {
