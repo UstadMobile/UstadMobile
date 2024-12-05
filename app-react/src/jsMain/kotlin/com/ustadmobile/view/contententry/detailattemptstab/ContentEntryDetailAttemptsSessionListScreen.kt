@@ -136,9 +136,12 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                     }
                                     ListItemText {
                                         secondary = ReactNode(
-                                            "${((attemptsSessionListItems?.statement?.extensionProgress ?: 0f) * 100).toInt()}% Completion"
+                                            "${((attemptsSessionListItems?.statement?.resultScoreScaled ?: 0f) * 100).toInt()}% Completion"
                                         )
+
+
                                     }
+
                                 }
                                 ListItemButton {
                                     ListItemIcon {
@@ -149,7 +152,7 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                     }
                                     ListItemText {
                                         secondary = ReactNode(
-                                            "${((attemptsSessionListItems?.statement?.resultScoreScaled ?: 0f) * 100).toInt()} Score"                                        )
+                                            "${(attemptsSessionListItems?.statement?.resultScoreRaw)?.toInt()}/${(attemptsSessionListItems?.statement?.resultScoreMax)?.toInt()} Score"                                        )
 
 
                                     }
