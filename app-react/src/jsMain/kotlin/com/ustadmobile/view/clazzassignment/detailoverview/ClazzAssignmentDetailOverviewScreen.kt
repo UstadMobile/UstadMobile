@@ -106,6 +106,8 @@ external interface ClazzAssignmentDetailOverviewScreenProps : Props {
 
     var onDeleteComment: (Comments) -> Unit
 
+    var onWarningDismiss: () -> Unit
+
 }
 
 private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDetailOverviewScreenProps> { props ->
@@ -425,6 +427,12 @@ private val ClazzAssignmentDetailOverviewScreenComponent2 = FC<ClazzAssignmentDe
             }
 
             if(props.uiState.showClassComments) {
+                if(props.uiState.showSocialWarning) {
+                    SocialWarningListItem.create {
+                        onDismiss = props.onWarningDismiss
+                    }
+                }
+
                 //Course comments
                 item(key = "course_comments_header_item") {
                     ListItem.create {
@@ -551,5 +559,6 @@ val ClazzAssignmentDetailOverviewScreen = FC<Props> {
         onToggleSubmissionExpandCollapse = viewModel::onToggleSubmissionExpandCollapse
         onClickSubmissionFile = viewModel::onOpenSubmissionFile
         onDeleteComment = viewModel::onDeleteComment
+        onWarningDismiss = viewModel::onWarningDismiss
     }
 }
