@@ -80,7 +80,9 @@ class ServerAppMain {
 
             val ns: Namespace?
             try {
-                ns = parser.takeIf { args.isNotEmpty() }?.parseArgs(args)
+                ns = parser.takeIf {
+                    args.isNotEmpty() && args.firstOrNull() != CMD_RUN_SERVER
+                }?.parseArgs(args)
                 val subCommand = ns?.getString("subparser_name") ?: CMD_RUN_SERVER
 
                 /*

@@ -883,7 +883,7 @@ fun Application.umRestApplication(
      * See comments on the jsDevServer property in application.conf for expected behavior
      */
     val jsDevServer = if(
-        jsDevServerProp?.isNotBlank() == true || (isRunningFromSource && jsDevServerProp == null)
+        jsDevServerProp?.isNotBlank() == true  || (isRunningFromSource && jsDevServerProp == null)
     ) {
         jsDevServerProp ?: DEFAULT_JS_DEV_SERVER
     }else {

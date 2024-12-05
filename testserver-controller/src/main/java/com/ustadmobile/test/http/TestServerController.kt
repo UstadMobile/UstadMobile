@@ -104,7 +104,7 @@ fun Application.testServerController() {
 
     val rootSrcDir = when {
         userDir.name == "testserver-controller" -> userDir.parentFile
-        File(userDir, "setting.gradle").exists() -> userDir
+        File(userDir, "settings.gradle").exists() -> userDir
         else -> {
             val exception = IllegalStateException(
                 "ERROR: Server dir does not exist! testServerManager working directory MUST be the " +
@@ -240,7 +240,11 @@ fun Application.testServerController() {
                     ?: throw IllegalArgumentException("Could not find server command in PATH ${serverArgs[0]}")
             }
 
-            serverProcess = ProcessBuilder(serverArgs)
+            serverProcess = ProcessBuilder(
+                    //Should use the bundled Javascript client app, not webpack server, which
+                    //would otherwise happen by default because we are running from a source directory
+                    serverArgs + arrayOf("runserver", "-P:ktor.ustad.jsDevServer=")
+                )
                 .directory(serverDir)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)

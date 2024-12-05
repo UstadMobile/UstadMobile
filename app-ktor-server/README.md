@@ -10,16 +10,12 @@ in both production and development environment. It is built as KTOR server.
 
 ```
 # Linux
-$ ./gradlew app-ktor-server:run --args='runserver'
+$ ./gradlew app-ktor-server:run
 
 #Windows
-$ gradlew app-ktor-server:run --args='runserver'
+$ gradlew app-ktor-server:run
 ```
 
-Where your.ip.address is your IP address or a domain/host URL that points to your system. 
-
-You may set the siteUrl in the configuration file instead of specifying this on the command line.
-Copy the default config file:
 ```
 # Linux
 cd app-ktor-server
@@ -29,9 +25,6 @@ cp src/main/resources/application.conf ./ustad-server.conf
 cd app-ktor-server
 copy src\main\resources\application.conf .\ustad-server.conf
 ```
-Then modify ustad-server.conf to set the siteUrl or other options.
-
-Run ./runserver.sh --help to see options
 
 You can also run the server by using the Java command directly:
 ```
