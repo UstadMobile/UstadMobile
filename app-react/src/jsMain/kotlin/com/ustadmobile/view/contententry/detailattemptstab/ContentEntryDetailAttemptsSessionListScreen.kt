@@ -179,10 +179,7 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                                 }
                                             }
                                         )
-
-
                                     }
-
                                 }
                             }
                         }
