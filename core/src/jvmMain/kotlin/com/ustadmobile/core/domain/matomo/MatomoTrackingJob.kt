@@ -30,7 +30,9 @@ class MatomoTrackingJob : InterruptableCoroutineJob() {
             Endpoint(jobDataMap.getString(RecordMatomoTrackingUseCaseJvmImpl.DATA_ENDPOINT))
         val resolution = getScreenResolution()
         val lang = Locale.getDefault().language
-        val device = System.getProperty("os.name")
+        val osName = System.getProperty("os.name") ?: "Unknown OS"
+        val osVersion = System.getProperty("os.version") ?: "Unknown Version"
+        val osArch = System.getProperty("os.arch") ?: "Unknown Architecture"
 
         if (endpoint.url.isBlank()) {
             Napier.e("MatomoTrackingCoroutineJob: Missing endpoint. Cannot track $screenName at $path.")
@@ -49,8 +51,7 @@ class MatomoTrackingJob : InterruptableCoroutineJob() {
                 parameter(ID, generateVisitorId())
                 parameter(RES, resolution)
                 parameter(LANG, lang)
-                parameter(UA, device)
-
+                parameter(UA, "($osName $osVersion; $osArch)")
             }
             if (response.status.value != 200) {
                 val body = response.body<String>()
