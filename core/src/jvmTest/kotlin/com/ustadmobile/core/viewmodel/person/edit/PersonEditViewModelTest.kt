@@ -60,6 +60,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
             viewModel.uiState.test(timeout = 5.seconds) {
                 val state = awaitItem()
                 viewModel.onEntityChanged(state.person?.shallowCopy {
+                    username="user12"
                     firstNames = "Test"
                     lastName = "User"
                     gender = Person.GENDER_FEMALE
