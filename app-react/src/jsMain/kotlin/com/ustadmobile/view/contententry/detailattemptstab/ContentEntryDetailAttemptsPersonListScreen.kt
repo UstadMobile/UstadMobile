@@ -148,7 +148,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                         )?.toInt() ?: 0 // Convert scaled score to percentage
                                 }
                                 ListItemText {
-                                    primary = ReactNode("${(((attemptsPersonListItems?.statement?.resultScoreRaw ?: 0f) / (attemptsPersonListItems?.statement?.resultScoreMax ?: 1f)) * 100).toInt()}% Score")
+                                    primary = ReactNode("${((attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f) * 100).toInt()}%% Score")
                                     sx {
                                        verticalAlign= VerticalAlign.middle
                                         marginLeft = 8.px // Adds some space between the progress bar and text

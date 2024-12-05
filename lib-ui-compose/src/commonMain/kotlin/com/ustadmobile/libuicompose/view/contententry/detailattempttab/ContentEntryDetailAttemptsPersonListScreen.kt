@@ -79,26 +79,18 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val progressValue = attemptsPersonListItems?.statement?.extensionProgress?.toFloat()
+                    ?: attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f
                 LinearProgressIndicator(
-                    progress = attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f,
+                    progress = progressValue,
                     modifier = Modifier.weight(0.7f).padding(start=12.dp),
                 )
                 Text(
-                    text = "${((attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f) * 100).toInt()}% Completion",
-                    modifier = Modifier.padding(start = 8.dp).weight(0.3f),
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                LinearProgressIndicator(
-                    progress = ((attemptsPersonListItems?.statement?.resultScoreRaw ?: 0f) / (attemptsPersonListItems?.statement?.resultScoreMax ?: 1f)),
-                    modifier = Modifier.weight(0.7f).padding(start=12.dp),
-                )
-                Text(
-                    text = "${(((attemptsPersonListItems?.statement?.resultScoreRaw ?: 0f) / (attemptsPersonListItems?.statement?.resultScoreMax ?: 1f)) * 100).toInt()}% Score",
+                    text = when {
+                        attemptsPersonListItems?.statement?.extensionProgress != null ->
+                            "${(attemptsPersonListItems.statement?.extensionProgress ?: 0f)}% Completion"
+                        else ->"${((attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f) * 100).toInt()}% Score"
+                    },
                     modifier = Modifier.padding(start = 8.dp).weight(0.3f),
                 )
             }
