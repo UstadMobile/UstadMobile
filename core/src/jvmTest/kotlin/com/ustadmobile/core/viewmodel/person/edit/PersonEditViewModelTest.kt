@@ -55,12 +55,11 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                 PersonEditViewModel(di, savedStateHandle)
             }
 
-            viewModel.uiState.assertItemReceived { it.fieldsEnabled && it.person != null }
-
+            val systemImpl: UstadMobileSystemImpl = di.direct.instance()
             viewModel.uiState.test(timeout = 5.seconds) {
-                val state = awaitItem()
+                val state = awaitItemWhere { it.fieldsEnabled && it.person != null }
+
                 viewModel.onEntityChanged(state.person?.shallowCopy {
-                    username="user12"
                     firstNames = "Test"
                     lastName = "User"
                     gender = Person.GENDER_FEMALE
@@ -68,14 +67,11 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
                 viewModel.onClickSave()
 
-                val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-
                 val stateAfterSave = awaitItemWhere { it.usernameError != null }
-                assertEquals(systemImpl.getString(MR.strings.invalid), stateAfterSave.usernameError,
-                    "Username error set")
+                assertEquals(systemImpl.getString(MR.strings.invalid_username),
+                    stateAfterSave.usernameError)
                 assertEquals(systemImpl.getString(MR.strings.field_required_prompt),
-                    stateAfterSave.passwordError,
-                    "Password error set")
+                    stateAfterSave.passwordError)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -94,6 +90,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
             viewModel.uiState.test(timeout =1000.seconds) {
                 val state = awaitItem()
                 viewModel.onEntityChanged(state.person?.shallowCopy {
+                    username = "a"
                     firstNames = "Test"
                     lastName = "User"
                     gender = Person.GENDER_FEMALE
