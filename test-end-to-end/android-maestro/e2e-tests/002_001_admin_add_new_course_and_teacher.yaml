@@ -25,32 +25,32 @@ env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       TEACHERFIRSTNAME: "Teacher"
       TEACHERLASTNAME: "1"
-      USERNAME: "t1"
+      USERNAME: "teach1"
       GENDER: "Female"
-      PASSWORD: "test"
+      PASSWORD: "testt1"
 - runFlow:
     file: "../common/add_new_student_inside_course.yaml"
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       STUDENTFIRSTNAME: "Student"
       STUDENTLASTNAME: "1"
-      USERNAME: "s1"
+      USERNAME: "stud1"
       GENDER: "Female"
-      PASSWORD: "test"
+      PASSWORD: "tests1"
 - back
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - assertVisible: "Test Course Block"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "s1"
-      PASSWORD: "test"
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
 - assertVisible: "Test Course Block"
