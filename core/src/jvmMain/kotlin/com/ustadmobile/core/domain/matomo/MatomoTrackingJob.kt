@@ -19,7 +19,27 @@ import java.awt.Dimension
 import java.awt.Toolkit
 import java.util.Locale
 
+/**
+ * A Quartz job for asynchronously tracking Matomo analytics events.
+ *
+ * This job collects metadata about the user's environment (e.g., screen resolution, OS details) and sends
+ * a tracking request to the Matomo server endpoint. It uses Ktor's `HttpClient` to make the network request
+ * and retries the job in case of failure, leveraging Quartz's scheduling and retry mechanisms.
+ *
+ * The job uses `InterruptableCoroutineJob`, allowing it to run suspendable tasks within Quartz.
+ */
+
 class MatomoTrackingJob : InterruptableCoroutineJob() {
+
+    /**
+     * Executes the tracking job asynchronously.
+     *
+     * Collects relevant data (e.g., screen name, path, endpoint, resolution, language, OS info),
+     * builds a request to the Matomo server, and submits the tracking data. If the request fails,
+     * it schedules a retry with a default maximum retry limit.
+     *
+     * @param context The `JobExecutionContext` provided by Quartz, containing job-specific data and scheduler context.
+     */
 
     override suspend fun executeAsync(context: JobExecutionContext) {
         val di = context.scheduler.di
@@ -71,6 +91,13 @@ class MatomoTrackingJob : InterruptableCoroutineJob() {
         }
     }
 
+    /**
+     * Generates a random visitor ID for tracking purposes.
+     *
+     * The ID is a 16-character string consisting of hexadecimal digits.
+     *
+     * @return A random visitor ID.
+     */
     private fun generateVisitorId(): String {
         return (1..16)
             .map { ('a'..'f') + ('0'..'9') }
@@ -78,6 +105,14 @@ class MatomoTrackingJob : InterruptableCoroutineJob() {
             .joinToString("")
     }
 
+    /**
+     * Retrieves the screen resolution of the device.
+     *
+     * The resolution is obtained using the Java `Toolkit` class, which provides the width and height
+     * of the primary display in pixels.
+     *
+     * @return A string representation of the screen resolution in the format "widthxheight" (e.g., "1920x1080").
+     */
     private fun getScreenResolution(): String {
         val toolkit: Toolkit = Toolkit.getDefaultToolkit()
         val screenSize: Dimension = toolkit.screenSize

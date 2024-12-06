@@ -6,11 +6,32 @@ import org.quartz.Scheduler
 import org.quartz.TriggerBuilder
 import org.quartz.TriggerKey
 
+/**
+ * JVM-specific implementation of the `RecordMatomoTrackingUseCase` interface.
+ *
+ * This implementation utilizes the Quartz Scheduler library to schedule and execute
+ * Matomo tracking jobs. It is designed for use in environments where asynchronous and
+ * deferred tracking of analytics events is needed, such as desktop or server-side platforms.
+ *
+ * @param scheduler An instance of Quartz `Scheduler` used to schedule and manage tracking jobs.
+ * @param endpoint The Matomo server endpoint URL where the tracking data will be sent.
+ */
 class RecordMatomoTrackingUseCaseJvmImpl(
     private val scheduler: Scheduler,
     private val endpoint: String,
 ) : RecordMatomoTrackingUseCase {
 
+    /**
+     * Tracks a Matomo event by scheduling a Quartz job for asynchronous execution.
+     *
+     * This method creates a `MatomoTrackingJob` with the provided screen name and path,
+     * associates it with a unique trigger key, and schedules it for immediate execution.
+     * If a job with the same trigger key already exists, it is unscheduled to avoid duplicates.
+     *
+     * @param screenName The title or identifier of the screen or feature being tracked.
+     * @param path The URL or relative path of the screen being tracked.
+     *
+     */
     override suspend fun invoke(screenName: String, path: String) {
         val quartzJob = JobBuilder.newJob(MatomoTrackingJob::class.java)
             .usingJobData(DATA_SCREEN_NAME, screenName)
@@ -18,7 +39,7 @@ class RecordMatomoTrackingUseCaseJvmImpl(
             .usingJobData(DATA_ENDPOINT, endpoint)
             .build()
 
-        val triggerKey = triggerKeyFor(screenName, path,endpoint)
+        val triggerKey = triggerKeyFor(screenName, path, endpoint)
         scheduler.unscheduleJob(triggerKey)
 
         val jobTrigger = TriggerBuilder.newTrigger()
