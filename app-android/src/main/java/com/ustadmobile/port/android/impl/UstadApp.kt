@@ -1187,12 +1187,12 @@ class UstadApp : MatomoApplication(), DIAware, ImageLoaderFactory{
 
         // Add a test track event
         TrackHelper.track()
-            .event("Test", "App Initialized")
+            .event("UstadApp", "App Initialized")
             .with(tracker)
 
         // Dimension Queue setup
         val dimensionQueue = DimensionQueue(tracker)
-        dimensionQueue.add(0, "test") // Sends next time something is tracked
+        dimensionQueue.add(0, "UstadApp is tracked")
 
         // Add tracking callback
         tracker.addTrackingCallback { trackMe: TrackMe? ->
