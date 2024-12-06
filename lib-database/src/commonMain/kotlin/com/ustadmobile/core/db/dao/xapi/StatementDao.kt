@@ -281,44 +281,24 @@ expect abstract class StatementDao {
 
     @HttpAccessible
     @Query("""
-        SELECT 
-    StatementEntity.*, 
-    Person.*, 
-    PersonPicture.*, 
-    VerbEntity.*,
-    
-    (
-        SELECT COUNT(*)
-        FROM StatementEntity se
-        WHERE se.statementActorPersonUid = Person.personUid
-        AND se.completionOrProgress = 1
-        AND se.statementContentEntryUid = :contentEntryUid
-    ) AS numberOfAttempts
+     SELECT 
+    StatementEntity.*,
+    VerbEntity.*
 FROM StatementEntity
-JOIN Person
-    ON Person.personUid = StatementEntity.statementActorPersonUid
-LEFT JOIN PersonPicture
-    ON PersonPicture.personPictureUid = Person.personUid 
 JOIN VerbEntity
-    ON VerbEntity.verbUid = StatementEntity.statementVerbUid
-WHERE StatementEntity.completionOrProgress = 1
+    ON VerbEntity.verbUid = :statementVerbUid
 AND (StatementEntity.statementIdHi, StatementEntity.statementIdLo) = (
     SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
     FROM StatementEntity
     WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
-    AND StatementEntity.statementActorPersonUid = Person.personUid 
-    AND StatementEntity.completionOrProgress = 1
+    AND StatementEntity.statementActorPersonUid = :personUid
 )
-
-        
 
 """)
     abstract  fun getStatementList(
         contentEntryUid: Long,
         personUid: Long,
-        statementHi: Long,
-        statementLo: Long,
-        agrVerbUid: Long
+        statementVerbUid: Long
     ): PagingSource<Int, StatementAndPersonAndPicture>
 
 }

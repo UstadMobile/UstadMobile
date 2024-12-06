@@ -26,10 +26,8 @@ class ContentEntryDetailAttemptsSessionListViewModel(
 ) {
 
     private val entityUidArg = savedStateHandle[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
-
     private val argPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
-   // private val statementIdHi: Int =savedStateHandle[UstadView.ARG_STATEMENT_ID_HI]?.toInt()?:0
-  //  private val statementIdLo: Int =savedStateHandle[UstadView.ARG_STATEMENT_ID_LO]?.toInt()?:0
+
 
     private fun getAttemptsSessionListAsPagingSource(contentEntryUid: Long, personUid: Long)
             : PagingSource<Int, StatementAndPersonAndPicture> {
