@@ -10,6 +10,7 @@ import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -57,7 +58,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
         )
 
         val infiniteQueryResult : UseInfiniteQueryResult
-        <PagingSourceLoadResult<Int, StatementEntity>, Throwable> = usePagingSource(
+        <PagingSourceLoadResult<Int, StatementAndPersonAndPicture>, Throwable> = usePagingSource(
             remoteMediatorResult.pagingSourceFactory, true, 50
         )
         val muiAppState = useMuiAppState()
@@ -74,7 +75,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
 
                 infiniteQueryPagingItems(
                     items = infiniteQueryResult,
-                    key = { it.statementLct.toString()}
+                    key = { it.person?.personUid?.toString() ?: "0" }
                 ) { attemptsStatementListItems ->
                     ListItem.create {
                         ListItemButton{
@@ -83,10 +84,10 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                             }
                             ListItemText {
                                 primary = ReactNode(
-                                    attemptsStatementListItems?.resultCompletion?.let {
-                                        if (it) "Complete" else "Incomplete"
-                                    } ?: "Incomplete"
-                                )                            }
+                                    attemptsStatementListItems?.verb?.verbUrlId.toString()
+
+                                )
+                            }
                         }
                     }
                 }

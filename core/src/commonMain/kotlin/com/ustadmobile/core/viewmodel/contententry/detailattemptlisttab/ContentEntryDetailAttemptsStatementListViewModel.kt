@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -14,7 +15,7 @@ import org.kodein.di.DI
 
 
 data class ContentEntryDetailAttemptsStatementListUiState(
-    val attemptsStatementList: () -> PagingSource<Int, StatementEntity> = { EmptyPagingSource() },
+    val attemptsStatementList: () -> PagingSource<Int, StatementAndPersonAndPicture> = { EmptyPagingSource() },
 )
 
 class ContentEntryDetailAttemptsStatementListViewModel(
@@ -25,6 +26,8 @@ class ContentEntryDetailAttemptsStatementListViewModel(
 
     private val entityUidArg = savedStateHandle[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
     private val argPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
+    private val agrVerbUid = savedStateHandle[UstadView.ARG_VERB_UID]?.toLong() ?: 0
+
     private val statementHi = savedStateHandle[statementIdHi]?.toLong() ?: 0
     private val statementLo = savedStateHandle[statementIdLo]?.toLong() ?: 0
 
@@ -33,15 +36,15 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         personUid: Long,
         statementHi: Long,
         statementLo: Long
-    ): PagingSource<Int, StatementEntity> {
+    ): PagingSource<Int, StatementAndPersonAndPicture> {
         return activeRepo.statementDao().getStatementList(
             contentEntryUid, personUid,
             statementHi,
-            statementLo
+            statementLo,agrVerbUid
         )
     }
 
-    private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementEntity> = {
+    private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementAndPersonAndPicture> = {
         getAttemptsStatementListAsPagingSource(
             contentEntryUid = entityUidArg,
             personUid = argPersonUid,

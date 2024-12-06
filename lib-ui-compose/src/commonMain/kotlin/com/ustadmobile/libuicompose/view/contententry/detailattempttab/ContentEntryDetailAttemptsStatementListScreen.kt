@@ -46,7 +46,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
     ) {
         ustadPagedItems(
             pagingItems = attemptsStatementListItems,
-            key = { it.statementLct }
+            key = { it.person?.personUid ?: -1 }
         ) { attemptsStatementListItems ->
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {
@@ -60,18 +60,14 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                 },
                 headlineContent = {
                     androidx.compose.material3.Text(
-                        text = if (attemptsStatementListItems?.resultCompletion == true) {
-                            "Completed"
-                        } else {
-                            "Incomplete"
-                        }
+                        text = attemptsStatementListItems?.verb?.verbUrlId.toString()
                     )
                 },
 
                 supportingContent = {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = attemptsStatementListItems?.resultDuration.toString(),
+                            text = attemptsStatementListItems?.verb?.verbUrlId.toString(),
                         )
                         Text(
                             text = "100%",
