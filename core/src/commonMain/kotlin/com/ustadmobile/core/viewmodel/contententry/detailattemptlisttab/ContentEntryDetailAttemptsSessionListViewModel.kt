@@ -72,6 +72,7 @@ class ContentEntryDetailAttemptsSessionListViewModel(
             args = mapOf(
                 UstadView.ARG_PERSON_UID to argPersonUid.toString(),
                 UstadView.ARG_CONTENT_ENTRY_UID to entityUidArg.toString(),
+                UstadView.ARG_VERB_UID to entry.statement?.statementVerbUid.toString()
             )
         )
     }

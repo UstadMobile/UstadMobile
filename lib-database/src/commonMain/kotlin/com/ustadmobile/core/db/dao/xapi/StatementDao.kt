@@ -19,6 +19,7 @@ import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.BlockStatus
+import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndRelated
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
@@ -280,17 +281,44 @@ expect abstract class StatementDao {
 
     @HttpAccessible
     @Query("""
+        SELECT 
+    StatementEntity.*, 
+    Person.*, 
+    PersonPicture.*, 
+    VerbEntity.*,
     
-        SELECT * FROM StatementEntity
-               WHERE StatementEntity.statementIdHi = :statementHi
-               AND StatementEntity.statementIdLo = :statementLo
+    (
+        SELECT COUNT(*)
+        FROM StatementEntity se
+        WHERE se.statementActorPersonUid = Person.personUid
+        AND se.completionOrProgress = 1
+        AND se.statementContentEntryUid = :contentEntryUid
+    ) AS numberOfAttempts
+FROM StatementEntity
+JOIN Person
+    ON Person.personUid = StatementEntity.statementActorPersonUid
+LEFT JOIN PersonPicture
+    ON PersonPicture.personPictureUid = Person.personUid 
+JOIN VerbEntity
+    ON VerbEntity.verbUid = StatementEntity.statementVerbUid
+WHERE StatementEntity.completionOrProgress = 1
+AND (StatementEntity.statementIdHi, StatementEntity.statementIdLo) = (
+    SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+    FROM StatementEntity
+    WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+    AND StatementEntity.statementActorPersonUid = Person.personUid 
+    AND StatementEntity.completionOrProgress = 1
+)
+
+        
 
 """)
     abstract  fun getStatementList(
         contentEntryUid: Long,
         personUid: Long,
         statementHi: Long,
-        statementLo: Long
-    ): PagingSource<Int, StatementEntity>
+        statementLo: Long,
+        agrVerbUid: Long
+    ): PagingSource<Int, StatementAndPersonAndPicture>
 
 }

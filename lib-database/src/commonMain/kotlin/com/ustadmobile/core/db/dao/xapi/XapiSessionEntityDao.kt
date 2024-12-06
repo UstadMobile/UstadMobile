@@ -89,27 +89,36 @@ expect abstract class XapiSessionEntityDao {
 
     @HttpAccessible
     @Query("""
-       SELECT StatementEntity.*, Person.*, PersonPicture.*,
-       (
-          SELECT COUNT(*)
-          FROM StatementEntity se
-          WHERE se.statementActorPersonUid = Person.personUid
-          AND se.resultCompletion = 1
-          AND se.statementContentEntryUid = :contentEntryUid
-       ) AS numberOfAttempts
-       FROM StatementEntity
-       JOIN Person
-            ON Person.personUid = StatementEntity.statementActorPersonUid
-       LEFT JOIN PersonPicture
-            ON PersonPicture.personPictureUid = Person.personUid 
-       WHERE StatementEntity.resultCompletion = 1 
-       AND (StatementEntity.statementIdHi, StatementEntity.statementIdLo) = (
-           SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
-             FROM StatementEntity
-            WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
-              AND StatementEntity.statementActorPersonUid = :personUid
-              AND StatementEntity.resultCompletion = 1
-       )
+       
+SELECT 
+    StatementEntity.*, 
+    Person.*, 
+    PersonPicture.*, 
+    VerbEntity.*,
+    
+    (
+        SELECT COUNT(*)
+        FROM StatementEntity se
+        WHERE se.statementActorPersonUid = Person.personUid
+        AND se.completionOrProgress = 1
+        AND se.statementContentEntryUid = :contentEntryUid
+    ) AS numberOfAttempts
+FROM StatementEntity
+JOIN Person
+    ON Person.personUid = StatementEntity.statementActorPersonUid
+LEFT JOIN PersonPicture
+    ON PersonPicture.personPictureUid = Person.personUid 
+JOIN VerbEntity
+    ON VerbEntity.verbUid = StatementEntity.statementVerbUid
+WHERE StatementEntity.completionOrProgress = 1
+AND (StatementEntity.statementIdHi, StatementEntity.statementIdLo) = (
+    SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+    FROM StatementEntity
+    WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+    AND StatementEntity.statementActorPersonUid = Person.personUid 
+    AND StatementEntity.completionOrProgress = 1
+)
+
 """)
     abstract   fun getSessionList(contentEntryUid: Long, personUid: Long):
             PagingSource<Int, StatementAndPersonAndPicture>
