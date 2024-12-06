@@ -8,7 +8,6 @@ import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
-import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -26,32 +25,30 @@ class ContentEntryDetailAttemptsStatementListViewModel(
 
     private val entityUidArg = savedStateHandle[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
     private val argPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
-    private val agrVerbUid = savedStateHandle[UstadView.ARG_VERB_UID]?.toLong() ?: 0
-
-    private val statementHi = savedStateHandle[statementIdHi]?.toLong() ?: 0
-    private val statementLo = savedStateHandle[statementIdLo]?.toLong() ?: 0
+    private val agrStatementVerbUid =
+        savedStateHandle[UstadView.ARG_STATEMENT_VERB_UID]?.toLong() ?: 0
 
     private fun getAttemptsStatementListAsPagingSource(
         contentEntryUid: Long,
         personUid: Long,
-        statementHi: Long,
-        statementLo: Long
-    ): PagingSource<Int, StatementAndPersonAndPicture> {
+        statementVerbUid: Long,
+
+        ): PagingSource<Int, StatementAndPersonAndPicture> {
         return activeRepo.statementDao().getStatementList(
             contentEntryUid, personUid,
-            statementHi,
-            statementLo,agrVerbUid
+            statementVerbUid
         )
     }
 
-    private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementAndPersonAndPicture> = {
-        getAttemptsStatementListAsPagingSource(
-            contentEntryUid = entityUidArg,
-            personUid = argPersonUid,
-            statementHi = statementHi,
-            statementLo = statementLo
-        )
-    }
+    private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementAndPersonAndPicture> =
+        {
+            getAttemptsStatementListAsPagingSource(
+                contentEntryUid = entityUidArg,
+                personUid = argPersonUid,
+                statementVerbUid = agrStatementVerbUid
+
+            )
+        }
 
     init {
         viewModelScope.launch {

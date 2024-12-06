@@ -66,7 +66,7 @@ interface UstadView {
         const val ARG_PARENT_ENTRY_TITLE = "parentTitle"
 
         const val ARG_CONTENT_ENTRY_UID = "entryid"
-        const val ARG_VERB_UID= "verUid"
+        const val ARG_STATEMENT_VERB_UID= "statementVerUid"
 
 
         const val ARG_STATEMENT_ID_HI = "statementIdHi"
