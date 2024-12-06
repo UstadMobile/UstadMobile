@@ -1678,6 +1678,22 @@ val MIGRATION_203_204 = DoorMigrationStatementList(203, 204) { db ->
         }
     }
 }
+val MIGRATION_204_205 = DoorMigrationStatementList(204, 205) { db ->
+    buildList {
+        if (db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ClazzEnrolment ADD COLUMN clazzEnrolmentInviteUid INTEGER NOT NULL DEFAULT 0")
+            add("ALTER TABLE ClazzInvite ADD COLUMN inviteStatus INTEGER NOT NULL DEFAULT 0")
+
+            add("CREATE TABLE IF NOT EXISTS ClazzInvite (ciUid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ciPersonUid INTEGER NOT NULL, ciRoleId INTEGER NOT NULL, ciClazzUid INTEGER NOT NULL, inviteType INTEGER NOT NULL DEFAULT 1, inviteContact TEXT, inviteToken TEXT, inviteStatus INTEGER NOT NULL DEFAULT 0, inviteLct INTEGER NOT NULL)")
+        } else {
+            add("ALTER TABLE ClazzEnrolment ADD COLUMN clazzEnrolmentInviteUid INTEGER NOT NULL DEFAULT 0")
+            add("ALTER TABLE ClazzInvite ADD COLUMN inviteStatus BIGINT NOT NULL DEFAULT 0")
+
+
+            add("CREATE TABLE IF NOT EXISTS ClazzInvite (ciUid BIGINT PRIMARY KEY AUTOINCREMENT NOT NULL, ciPersonUid BIGINT NOT NULL, ciRoleId BIGINT NOT NULL, ciClazzUid BIGINT NOT NULL, inviteType INTEGER NOT NULL DEFAULT 1, inviteContact TEXT, inviteToken TEXT, inviteStatus INTEGER NOT NULL DEFAULT 0, inviteLct BIGINT NOT NULL)")
+        }
+    }
+}
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
@@ -1695,7 +1711,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
     MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
     MIGRATION_199_200, MIGRATION_200_201, MIGRATION_201_202, MIGRATION_202_203,
-    MIGRATION_203_204,
+    MIGRATION_203_204,MIGRATION_204_205
 )
 
 
