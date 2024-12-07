@@ -895,20 +895,20 @@ fun Application.umRestApplication(
             SendSmsUseCaseHttp(di)
         }
 
-        bind<SendEmailUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<SendEmailUseCase>() with scoped(LearningSpaceScope.Default).provider {
             SendEmailUseCase(NotificationSender(di))
         }
         bind<SendSmsUseCase>() with singleton {
             SendSmsUseCase(di)
         }
-        bind<ProcessInviteUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<ProcessInviteUseCase>() with scoped(LearningSpaceScope.Default).provider {
             ProcessInviteUseCase(
                 sendEmailUseCase = instance(),
                 sendSmsUseCase = instance(),
                 sendMessageUseCase = instance(),
                 checkContactTypeUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
-                endpoint = context,
+                learningSpace = context,
                 repo = null
                 )
         }
@@ -1043,8 +1043,6 @@ fun Application.umRestApplication(
                         }
                     )
                 }
-                route("passkey"){
-
                 route("inviteuser") {
                     ProcessInviteRoute(
                         useCase = { call ->
@@ -1052,6 +1050,7 @@ fun Application.umRestApplication(
                         }
                     )
                 }
+                route("passkey"){
 
                     VerifySignInWithPasskeyRoute(
                         useCase = { call ->

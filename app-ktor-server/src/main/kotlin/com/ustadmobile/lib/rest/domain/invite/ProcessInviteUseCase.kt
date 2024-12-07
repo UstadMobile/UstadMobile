@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest.domain.invite
 
 import com.benasher44.uuid.uuid4
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.invite.CheckContactTypeUseCase
 import com.ustadmobile.core.util.UstadUrlComponents
@@ -31,7 +31,7 @@ class ProcessInviteUseCase(
     private val sendMessageUseCase: SendMessageUseCase,
     private val checkContactTypeUseCase: CheckContactTypeUseCase,
     private val db: UmAppDatabase,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val repo: UmAppDatabase?,
 ) {
     data class InviteResult(
@@ -74,7 +74,7 @@ class ProcessInviteUseCase(
 
                 invites.forEach { invite ->
                     val inviteLink =
-                        UstadUrlComponents(endpoint.url, ClazzInviteViewModel.DEST_NAME, "inviteCode=${invite.inviteToken}").fullUrl()
+                        UstadUrlComponents(learningSpace.url, ClazzInviteViewModel.DEST_NAME, "inviteCode=${invite.inviteToken}").fullUrl()
 
                     when (invite.inviteType) {
                         1 -> {

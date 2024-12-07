@@ -94,7 +94,7 @@ fun commonDomainDiModule(endpointScope: LearningSpaceScope) = DI.Module("CommonD
     bind<ContactToServerUseCase>() with scoped(endpointScope).provider {
         ContactToServerUseCase(
             httpClient = instance(),
-            endpoint = context,
+            learningSpace = context,
             json = instance()
         )
     }

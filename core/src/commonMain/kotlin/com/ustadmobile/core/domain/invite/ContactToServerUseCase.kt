@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.invite
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.setBodyJson
 import io.github.aakira.napier.Napier
@@ -23,7 +23,7 @@ import kotlinx.serialization.encodeToString
  */
 class ContactToServerUseCase(
     private val httpClient: HttpClient,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val json: Json
 ) {
     suspend operator fun invoke(
@@ -34,7 +34,7 @@ class ContactToServerUseCase(
     ):String {
         try {
 
-          val respose=  httpClient.post("${endpoint.url}api/inviteuser/sendcontacts") {
+          val respose=  httpClient.post("${learningSpace.url}api/inviteuser/sendcontacts") {
                 contentType(ContentType.Application.Json)
                 setBodyJson(
                     json = json,
