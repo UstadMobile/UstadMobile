@@ -1,8 +1,9 @@
 package com.ustadmobile.lib.rest.dimodules
 
+import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
-import com.ustadmobile.appconfigdb.SystemDb
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -36,7 +37,7 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.rest.InsertDefaultSiteCallback
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
-import com.ustadmobile.lib.rest.domain.systemconfig.sysconfiginit.GenerateSystemConfigAuthCallback
+import com.ustadmobile.lib.rest.domain.systemconfig.sysconfiginit.GenerateSystemConfigAuthUseCase
 import com.ustadmobile.lib.rest.sanitizedUrlForPaths
 import io.github.aakira.napier.Napier
 import io.ktor.server.config.*
@@ -48,6 +49,7 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import com.ustadmobile.systemdb.sqlite.SystemDb
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -129,14 +131,27 @@ fun makeJvmBackendDiModule(
         Pbkdf2AuthenticateUseCase(encryptUseCase = instance())
     }
 
+    bind<GenerateSystemConfigAuthUseCase>() with singleton {
+        GenerateSystemConfigAuthUseCase(encryptor = instance(), dataDirPath = dataDirPath)
+    }
+
     bind<SystemDb>() with singleton {
-        DatabaseBuilder.databaseBuilder(
-            dbClass = SystemDb::class,
-            dbUrl = "jdbc:sqlite:${config.absoluteDataDir().absolutePath}/system.db",
-            nodeId = 1L
-        ).addCallback(
-            GenerateSystemConfigAuthCallback(encryptor = instance(), dataDirPath = dataDirPath)
-        ).build()
+        val dbFile = File(config.absoluteDataDir(), "system.db")
+        val dbFileExists = dbFile.exists()
+
+        val driver: SqlDriver = JdbcSqliteDriver(
+            url = "jdbc:sqlite:${dbFile.absolutePath}"
+        )
+
+        if(!dbFileExists) {
+            SystemDb.Schema.create(driver)
+        }
+
+        SystemDb(driver).also {
+            if(!dbFileExists) {
+                instance<GenerateSystemConfigAuthUseCase>().invoke(it)
+            }
+        }
     }
 
     bind<UstadMobileSystemImpl>() with singleton {
@@ -164,13 +179,13 @@ fun makeJvmBackendDiModule(
 
         val nodeIdAndAuth: NodeIdAndAuth = instance()
 
-        if(learningSpace.config.lscDbUrl.startsWith("jdbc:postgresql"))
+        if(learningSpace.config.dbUrl.startsWith("jdbc:postgresql"))
             Class.forName("org.postgresql.Driver")
 
         val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-            dbUrl = learningSpace.config.lscDbUrl,
-            dbUsername = learningSpace.config.lscDbUsername,
-            dbPassword = learningSpace.config.lscDbPassword,
+            dbUrl = learningSpace.config.dbUrl,
+            dbUsername = learningSpace.config.dbUsername,
+            dbPassword = learningSpace.config.dbPassword,
             nodeId = nodeIdAndAuth.nodeId,
         )
             .addSyncCallback(nodeIdAndAuth)

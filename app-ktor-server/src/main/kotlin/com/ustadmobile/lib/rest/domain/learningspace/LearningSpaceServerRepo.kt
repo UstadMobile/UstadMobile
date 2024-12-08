@@ -1,8 +1,11 @@
 package com.ustadmobile.lib.rest.domain.learningspace
 
-import com.ustadmobile.appconfigdb.SystemDb
-import com.ustadmobile.appconfigdb.composites.LearningSpaceConfigAndInfo
-import com.ustadmobile.door.ext.withDoorTransaction
+import com.ustadmobile.appconfigdb.adapters.asEntity
+import com.ustadmobile.appconfigdb.adapters.asLearningSpaceConfigAndInfo
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.systemdb.model.LearningSpaceConfigAndInfo
+import com.ustadmobile.systemdb.model.LearningSpaceInfo
+import com.ustadmobile.systemdb.sqlite.SystemDb
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -11,14 +14,17 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class LearningSpaceServerRepo(
     private val systemDb: SystemDb,
+    private val xxStringHasher: XXStringHasher,
 ) {
 
     private val learningSpaces: MutableMap<String, LearningSpaceConfigAndInfo> = ConcurrentHashMap()
 
     init {
         learningSpaces.putAll(
-            systemDb.learningSpaceConfigDao().findAllLearningSpaceConfigAndInfo().associateBy {
-                it.config.lscUrl
+            systemDb.learningSpaceQueries.selectAll().executeAsList().map {
+                it.asLearningSpaceConfigAndInfo()
+            }.associateBy {
+                it.config.url
             }
         )
     }
@@ -28,34 +34,25 @@ class LearningSpaceServerRepo(
     }
 
     fun update(learningSpace: LearningSpaceConfigAndInfo) {
-        systemDb.withDoorTransaction {
-            systemDb.learningSpaceInfoDao().updateLearningSpaceInfo(learningSpace.info.lsiUrl,
-                learningSpace.info.lsiName)
-            systemDb.learningSpaceConfigDao().updateLearningSpaceConfig(
-                learningSpace.info.lsiUrl,
-                learningSpace.config.lscDbUrl,
-                learningSpace.config.lscDbPassword,
-                learningSpace.config.lscDbUsername
-            )
-            learningSpaces[learningSpace.config.lscUrl] = learningSpace
-
-
-        }
+        systemDb.learningSpaceQueries.update(
+            name = learningSpace.info.name,
+            description = learningSpace.info.description,
+            uid = xxStringHasher.hash(learningSpace.info.url)
+        )
     }
 
     fun delete(learningSpaceUrl:String) {
-        systemDb.withDoorTransaction {
-            systemDb.learningSpaceInfoDao().deleteLearningSpaceInfo(learningSpaceUrl)
-        }
+        TODO("Update")
     }
 
     fun add(learningSpace: LearningSpaceConfigAndInfo) {
-        systemDb.withDoorTransaction {
-            systemDb.learningSpaceConfigDao().insert(learningSpace.config)
-            systemDb.learningSpaceInfoDao().insert(learningSpace.info)
-            learningSpaces[learningSpace.config.lscUrl] = learningSpace
-        }
+        systemDb.learningSpaceQueries.insertFullObject(
+            learningSpace.asEntity(xxStringHasher.hash(learningSpace.info.url))
+        )
+    }
 
+    fun getAll(): List<LearningSpaceInfo> {
+        return learningSpaces.values.map { it.info }
     }
 
 }

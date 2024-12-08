@@ -2,8 +2,6 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.ustadmobile.appconfigdb.SystemDb
-import com.ustadmobile.appconfigdb.SystemDb_KtorRoute
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
@@ -130,6 +128,7 @@ import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryIm
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyRoute
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceApiRoute
+import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceClientRoute
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
 import com.ustadmobile.lib.rest.domain.learningspace.SystemConfigScriptRoute
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
@@ -142,6 +141,7 @@ import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOn
 import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
+import com.ustadmobile.systemdb.sqlite.SystemDb
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -822,7 +822,7 @@ fun Application.umRestApplication(
         }
 
         bind<LearningSpaceServerRepo>() with singleton {
-            LearningSpaceServerRepo(systemDb = instance())
+            LearningSpaceServerRepo(systemDb = instance(), xxStringHasher = instance())
         }
 
         try {
@@ -960,18 +960,14 @@ fun Application.umRestApplication(
             route("api") {
                 route("sysconfig") {
                     SystemConfigScriptRoute(
-                         systemDb = di.direct.instance(),
+                        systemDb = di.direct.instance(),
+                        xxStringHasher = di.direct.instance()
                     )
                 }
-                route("SystemDb") {
-                    SystemDb_KtorRoute(
-                        serverConfig = DoorHttpServerConfig(
-                            json = json,
-                            logger = NapierDoorLogger(),
-                        ),
-                        dbCallAdapter = {
-                            di.direct.instance()
-                        }
+
+                route("learningspace") {
+                    LearningSpaceClientRoute(
+                        learningSpaceServerRepo = di.direct.instance()
                     )
                 }
 

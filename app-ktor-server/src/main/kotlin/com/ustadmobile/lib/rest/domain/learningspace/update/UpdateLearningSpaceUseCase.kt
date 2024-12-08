@@ -1,9 +1,10 @@
 package com.ustadmobile.lib.rest.domain.learningspace.update
 
-import com.ustadmobile.appconfigdb.composites.LearningSpaceConfigAndInfo
-import com.ustadmobile.appconfigdb.entities.LearningSpaceConfig
-import com.ustadmobile.appconfigdb.entities.LearningSpaceInfo
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
+import com.ustadmobile.systemdb.model.LearningSpaceConfig
+import com.ustadmobile.systemdb.model.LearningSpaceConfigAndInfo
+import com.ustadmobile.systemdb.model.LearningSpaceInfo
 import kotlinx.serialization.Serializable
 
 class UpdateLearningSpaceUseCase(
@@ -26,14 +27,16 @@ class UpdateLearningSpaceUseCase(
         learningSpaceServerRepo.update(
             LearningSpaceConfigAndInfo(
                 config = LearningSpaceConfig(
-                    lscUrl = request.url,
-                    lscDbUrl = request.dbUrl,
-                    lscDbUsername = request.dbUsername,
-                    lscDbPassword = request.dbPassword,
+                    url = request.url,
+                    dbUrl = request.dbUrl,
+                    dbUsername = request.dbUsername,
+                    dbPassword = request.dbPassword,
                 ),
                 info = LearningSpaceInfo(
-                    lsiUrl = request.url,
-                    lsiName = request.title,
+                    url = request.url,
+                    name = request.title,
+                    description = request.title,
+                    lastModified = systemTimeInMillis(),
                 )
             )
         )

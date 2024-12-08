@@ -208,7 +208,6 @@ import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.appconfigdb.SystemDb
 import com.ustadmobile.appconfigdb.SystemDbDataLayer
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
 import com.ustadmobile.core.url.UrlKmp
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{

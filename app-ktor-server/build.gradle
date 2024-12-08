@@ -138,7 +138,9 @@ dependencies {
     implementation libs.vlcj
 
     implementation project(":lib-ihttp-ktor-server")
-    implementation project(':lib-systemdb')
+    implementation project(":lib-systemdb-model")
+    implementation project(':lib-systemdb-sqldelight')
+    implementation libs.sqldelight.sqlite.driver.jvm
 
     //test
     testImplementation project(":lib-test-common")

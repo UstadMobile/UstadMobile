@@ -300,12 +300,12 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
     @OptIn(DelicateCoroutinesApi::class)
     GlobalScope.promise {
         lateinit var dbBuilt: UmAppDatabase
-        lateinit var systemDbBuilt: SystemDb
         try {
             dbBuilt = dbBuilder.build()
-            systemDbBuilt = systemDbBuilder.build()
+            Napier.d("Built UmAppDatabase")
         } catch (e: Exception) {
-            Napier.w("Exception building database - trying to clear")
+            Napier.w("Exception building database - trying to clear", e)
+
             //Probably something with no migration path, clear and retry
             indexedDB.deleteDatabaseAsync(dbName)
             indexedDB.deleteDatabaseAsync(systemDbName)

@@ -4,7 +4,6 @@ import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
 import com.ustadmobile.appconfigdb.SystemDb
 import com.ustadmobile.appconfigdb.SystemDbDataLayer
-import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params

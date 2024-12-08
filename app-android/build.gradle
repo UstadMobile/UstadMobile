@@ -219,7 +219,7 @@ configurations.all {
 
 dependencies {
     implementation libs.androidx.profileinstaller
-    implementation project(':lib-systemdb')
+    implementation project(':lib-systemdb-sqldelight')
     baselineProfile project(':app-android-baselineprofile')
     coreLibraryDesugaring libs.android.desugar.libs
 

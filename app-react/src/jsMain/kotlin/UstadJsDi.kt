@@ -5,7 +5,6 @@ import com.russhwolf.settings.set
 import com.ustadmobile.BuildConfigJs
 import com.ustadmobile.appconfigdb.SystemDb
 import com.ustadmobile.appconfigdb.SystemDbDataLayer
-import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase

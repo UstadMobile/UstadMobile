@@ -1,0 +1,38 @@
+
+CREATE TABLE LearningSpaceEntity (
+    lsUid INTEGER PRIMARY KEY NOT NULL,
+    lsUrl TEXT NOT NULL,
+    lsName TEXT NOT NULL,
+    lsDescription TEXT NOT NULL,
+    lsLastModified INTEGER NOT NULL DEFAULT 0,
+    lsDbUrl TEXT NOT NULL,
+    lsDbUsername TEXT,
+    lsDbPassword TEXT
+);
+
+selectAll:
+SELECT *
+FROM LearningSpaceEntity;
+
+insertFullObject:
+INSERT INTO LearningSpaceEntity(lsUid, lsUrl, lsName, lsDescription, lsLastModified, lsDbUrl, lsDbUsername, lsDbPassword)
+VALUES ?;
+
+update:
+UPDATE LearningSpaceEntity
+   SET lsName = (CASE
+                WHEN :name IS NOT NULL THEN :name
+                ELSE lsName
+                END),
+       lsDescription = (CASE
+                        WHEN :description IS NOT NULL THEN :description
+                        ELSE lsDescription
+                        END)
+ WHERE lsUid = :uid;
+
+findByUid:
+SELECT LearningSpaceEntity.*
+  FROM LearningSpaceEntity
+ WHERE lsUid = :uid;
+
+

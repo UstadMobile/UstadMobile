@@ -49,10 +49,10 @@ fun LearningSpaceListScreen(
     onSelectLearningSpace: (String) -> Unit = {},
 ) {
 
-    val learningSpaceListPager = rememberDoorRepositoryPager(
-        uiState.learningSpaceList, refreshCommandFlow
-    )
-    val learningSpaceListItems = learningSpaceListPager.lazyPagingItems
+//    val learningSpaceListPager = rememberDoorRepositoryPager(
+//        uiState.learningSpaceList, refreshCommandFlow
+//    )
+//    val learningSpaceListItems = learningSpaceListPager.lazyPagingItems
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -70,17 +70,19 @@ fun LearningSpaceListScreen(
 
             )
         }
-        Napier.e { "learningSpaceListItems "+learningSpaceListItems.itemCount }
-        ustadPagedItems(
-            pagingItems = learningSpaceListItems,
-            key = { Pair(1, it.lsiUid) }
-        ){ learningSpace ->
+
+        items(
+            count = uiState.learningSpaces.size,
+            key = { Pair(1, uiState.learningSpaces[it].lsiUid) }
+        ){ index ->
+            val learningSpace = uiState.learningSpaces[index]
+
             ListItem (
                 modifier = Modifier.clickable {
-                    onSelectLearningSpace(learningSpace?.lsiUrl ?: "")
+                    onSelectLearningSpace(learningSpace.lsiUrl)
                 },
                 headlineContent = {
-                    Text(text = learningSpace?.lsiUrl ?: "")
+                    Text(text = learningSpace.lsiUrl)
                 }
             )
         }
