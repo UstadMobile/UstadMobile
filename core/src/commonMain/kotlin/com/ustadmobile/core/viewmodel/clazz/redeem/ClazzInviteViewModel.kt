@@ -1,5 +1,6 @@
 package com.ustadmobile.core.viewmodel.clazz.redeem
 
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.invite.ClazzRedeemUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.Snack
@@ -31,12 +32,13 @@ class ClazzInviteViewModel(
 
     val uiState: Flow<InviteRedeemUiState> = _uiState.asStateFlow()
 
-    private val clazzRedeemUseCase: ClazzRedeemUseCase by on(accountManager.activeLearningSpace.url).instance()
+    private val clazzRedeemUseCase: ClazzRedeemUseCase by on(LearningSpace(accountManager.activeLearningSpace.url)).instance()
 
     private val argInviteCode = savedStateHandle[ARG_INVITE_CODE]
         ?: throw IllegalArgumentException("no invite code")
 
     init {
+        println("napapap  ${accountManager.currentAccount.endpointUrl}")
         _appUiState.update { prev ->
             prev.copy(
                 hideBottomNavigation = true,

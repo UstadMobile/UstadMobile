@@ -16,13 +16,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.sqlite.SQLiteException
 
 
 /**
- * UseCase to send invite link to contacts link username , email and sms , contacts receive as link then these contact are
- * are checked by CheckContactTypeUseCase to find valid contacts , then it store in clazzinvite db and each contact sent to particular
- * contact channel
+ * UseCase to send invite link to contacts link username , email and sms , contacts receive as
+ * link then these contact are checked by CheckContactTypeUseCase to find valid contacts ,
+ * then it store in clazzinvite db and each contact sent to particular contact channel
  */
 
 class ProcessInviteUseCase(
@@ -34,6 +35,7 @@ class ProcessInviteUseCase(
     private val learningSpace: LearningSpace,
     private val repo: UmAppDatabase?,
 ) {
+    @Serializable
     data class InviteResult(
         val inviteSent: String
     )
@@ -74,7 +76,8 @@ class ProcessInviteUseCase(
 
                 invites.forEach { invite ->
                     val inviteLink =
-                        UstadUrlComponents(learningSpace.url, ClazzInviteViewModel.DEST_NAME, "inviteCode=${invite.inviteToken}").fullUrl()
+                        UstadUrlComponents(learningSpace.url, ClazzInviteViewModel.DEST_NAME,
+                            "inviteCode=${invite.inviteToken}").fullUrl()
 
                     when (invite.inviteType) {
                         1 -> {

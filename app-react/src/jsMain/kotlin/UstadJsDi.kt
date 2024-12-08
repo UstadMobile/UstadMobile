@@ -9,7 +9,9 @@ import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.invite.ClazzRedeemUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJs
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
@@ -274,6 +276,14 @@ internal fun ustadJsDi(
     }
     bind<GetShowPoweredByUseCase>() with singleton {
         GetShowPoweredByUseCase(BuildConfigJs.APP_UI_SHOW_POWERED_BY.toBoolean())
+    }
+
+    bind<ClazzRedeemUseCase>() with scoped(LearningSpaceScope.Default).provider {
+        ClazzRedeemUseCase(
+            enrolIntoCourseUseCase = instance(),
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
+        )
     }
 
     bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(LearningSpaceScope.Default).provider {

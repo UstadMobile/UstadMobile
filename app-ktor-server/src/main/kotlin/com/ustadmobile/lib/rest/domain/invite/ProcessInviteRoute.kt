@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest.domain.invite
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.domain.invite.ContactUploadRequest
 import com.ustadmobile.lib.rest.NotificationSender
+import com.ustadmobile.lib.rest.domain.invite.ProcessInviteUseCase.InviteResult
 import io.github.aakira.napier.Napier
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -24,6 +25,7 @@ fun Route.ProcessInviteRoute(
 
         val request: ContactUploadRequest = call.receive()
         try {
+            useCase.invoke(call)
 
             val response = useCase(call).invoke(
                 contacts = request.contacts,
@@ -31,13 +33,13 @@ fun Route.ProcessInviteRoute(
                 role = request.role,
                 clazzUid = request.clazzUid
             )
+            Napier.d { "ProcessInvite response:-  ${response}" }
 
             call.respond(response)
-
         } catch (e: UnauthorizedException) {
             call.respond(HttpStatusCode.Unauthorized)
         } catch (e: Throwable) {
-            Napier.d { "requestReceived:-  ${e.message}" }
+            Napier.d { "ProcessInvite Ex:-  ${e.message}" }
             call.respond(HttpStatusCode.InternalServerError)
         }
     }

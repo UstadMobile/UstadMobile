@@ -123,11 +123,4 @@ fun commonDomainDiModule(endpointScope: LearningSpaceScope) = DI.Module("CommonD
             stringHasher = instance(),
         )
     }
-    bind<ClazzRedeemUseCase>() with scoped(endpointScope).provider {
-        ClazzRedeemUseCase(
-            enrolIntoCourseUseCase = instance(),
-            db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
-        )
-    }
 }

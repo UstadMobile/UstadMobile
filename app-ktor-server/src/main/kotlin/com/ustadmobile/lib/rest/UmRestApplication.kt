@@ -408,7 +408,7 @@ fun Application.umRestApplication(
 
             InitialContext().apply {
                 bindDataSourceIfNotExisting("quartzds", dbProperties)
-                initQuartzDb("java:/comp/env/jdbc/quartzds")
+           //     initQuartzDb("java:/comp/env/jdbc/quartzds")
             }
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
@@ -917,7 +917,7 @@ fun Application.umRestApplication(
         }
 
         onReady {
-            instance<Scheduler>().start()
+           // instance<Scheduler>().start()
             instance<SystemDb>()
 
             Runtime.getRuntime().addShutdownHook(Thread{
