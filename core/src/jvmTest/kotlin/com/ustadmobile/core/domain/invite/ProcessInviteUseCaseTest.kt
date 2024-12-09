@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.invite
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactChip
 import com.ustadmobile.lib.rest.domain.invite.ProcessInviteUseCase
@@ -19,9 +19,10 @@ class ProcessInviteUseCaseTest {
 
     private lateinit var sendEmailUseCase: SendEmailUseCase
     private lateinit var sendSmsUseCase: SendSmsUseCase
+    private lateinit var checkContactTypeUseCase: CheckContactTypeUseCase
     private lateinit var sendMessageUseCase: SendMessageUseCase
     private lateinit var db: UmAppDatabase
-    private lateinit var endpoint: Endpoint
+    private lateinit var endpoint: LearningSpace
     private lateinit var processInviteUseCase: ProcessInviteUseCase
     private lateinit var di: DI
 
@@ -32,15 +33,19 @@ class ProcessInviteUseCaseTest {
         sendEmailUseCase = mock()
         sendSmsUseCase = mock()
         sendMessageUseCase = mock()
+        checkContactTypeUseCase = mock()
         db = mock()
+        repo = mock()
         endpoint = mock()
 
         processInviteUseCase = ProcessInviteUseCase(
             sendEmailUseCase,
             sendSmsUseCase,
             sendMessageUseCase,
+            checkContactTypeUseCase,
             db,
-            endpoint
+            endpoint,
+            repo
         )
     }
 
@@ -48,9 +53,9 @@ class ProcessInviteUseCaseTest {
     fun given_contacts_when_invoked_then_will_insert_invites_and_return_use_case_names() =
         runBlocking {
             val contacts = listOf(
-                InviteViaContactChip("email@example.com", true, 1),
-                InviteViaContactChip("911234567890", true, 2),
-                InviteViaContactChip("internal@Message", true, 3),
+               "email@example.com",
+                "911234567890",
+                "internal@Message",
             )
             val clazzUid = 1L
             val role = 2L
@@ -62,6 +67,6 @@ class ProcessInviteUseCaseTest {
 
             val result = processInviteUseCase.invoke(contacts, clazzUid, role, personUid)
 
-            assertEquals(listOf("sendEmailUseCase", "sendSmsUseCase", "sendMessageUseCase"), result)
+            assertEquals(ProcessInviteUseCase.InviteResult("invitation sent"), result)
         }
 }
