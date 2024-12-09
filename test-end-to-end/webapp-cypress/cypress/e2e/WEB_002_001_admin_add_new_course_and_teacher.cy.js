@@ -13,25 +13,25 @@ it('Admin user create a course and add members to the course', () => {
  //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
-  cy.ustadAddNewPerson('Teacher','002_001','Female')
+  cy.ustadAddNewPerson('Teacher','1','Female')
  //Add a student
   cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','002_001','Male')
+  cy.ustadAddNewPerson('Student','1','Male')
   cy.contains("button","Members").should('be.visible')
  // Add account for teacher
-  cy.contains("Teacher 002_001").click()
+  cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacher21','test1234')
+  cy.ustadCreateUserAccount('teach1','testt1')
  //Add account for student
-  cy.contains("Student 002_001").click()
+  cy.contains("Student 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student21','test1234')
+  cy.ustadCreateUserAccount('stud1','tests1')
 
 })
 
 it('Teacher able to login to the app', () => {
  // Teacher Login
-  cy.ustadClearDbAndLogin('teacher21','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
   cy.contains("Courses").should('be.visible')  // Assertion to check the user logged in successfully
 })
 })
