@@ -88,7 +88,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                 )
                 Text(
                     text = when {
-                        attemptsPersonListItems?.isCompleted == true ->
+                        attemptsPersonListItems?.maxProgress !=null ->
                             "${(attemptsPersonListItems.maxProgress?: 0f)}% Completion"
                         else ->"${((attemptsPersonListItems?.maxScore ?: 0f) * 100).toInt()}% Score"
                     },
