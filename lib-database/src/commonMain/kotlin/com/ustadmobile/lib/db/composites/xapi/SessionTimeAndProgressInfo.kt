@@ -9,4 +9,6 @@ data class SessionTimeAndProgressInfo(
     var timeStarted: Long = 0,
     var maxProgress: Int? = null,
     var maxScore: Float? = null,
+    var isCompleted: Boolean = false,
+    var isSuccessful: Boolean? = null,
 )
