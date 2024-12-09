@@ -119,6 +119,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                     }
                                     Stack {
                                         direction = responsive(StackDirection.row)
+
                                         LinearProgress {
                                             sx {
                                                 width = 500.px
