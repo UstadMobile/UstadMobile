@@ -19,7 +19,8 @@ import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.BlockStatus
-import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
+import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
+import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndRelated
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
@@ -281,24 +282,57 @@ expect abstract class StatementDao {
 
     @HttpAccessible
     @Query("""
-     SELECT 
-    StatementEntity.*,
-    VerbEntity.*
-FROM StatementEntity
-JOIN VerbEntity
-    ON VerbEntity.verbUid = :statementVerbUid
-AND (StatementEntity.statementIdHi, StatementEntity.statementIdLo) = (
-    SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
-    FROM StatementEntity
-    WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
-    AND StatementEntity.statementActorPersonUid = :personUid
-)
-
+     SELECT Person.*, PersonPicture.*,
+            (SELECT COUNT(*)
+               FROM (SELECT DISTINCT StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo
+                       FROM StatementEntity
+                      WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                        AND StatementEntity.statementActorPersonUid = Person.personUid
+                    ) AS DistinctRegistrations) AS numAttempts
+       FROM Person
+            LEFT JOIN PersonPicture
+                 ON PersonPicture.personPictureUid = Person.personUid
+      WHERE Person.personUid IN
+            (SELECT DISTINCT StatementEntity.statementActorPersonUid
+               FROM StatementEntity
+              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid)       
 """)
-    abstract  fun getStatementList(
+    abstract fun findPersonsWithAttempts(
+        contentEntryUid: Long
+    ): PagingSource<Int, PersonAndPictureAndNumAttempts>
+
+
+    @Query("""
+          WITH DistinctRegistrationUids(contextRegistrationHi, contextRegistrationLo) AS (
+               SELECT DISTINCT StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo
+                          FROM StatementEntity
+                         WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                           AND StatementEntity.statementActorPersonUid = :personUid)
+                         
+        SELECT (SELECT MIN(StatementEntity.timestamp)
+                  FROM StatementEntity
+                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+               ) AS timeStarted,
+                   (SELECT MAX(StatementEntity.extensionProgress)
+                  FROM StatementEntity
+                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                   AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                ) AS maxProgress,
+               (SELECT MAX(StatementEntity.resultScoreScaled)
+                  FROM StatementEntity
+                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                   AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                ) AS maxScore
+          FROM DistinctRegistrationUids       
+    """)
+    abstract fun findSessionsByPersonAndContent(
         contentEntryUid: Long,
-        personUid: Long,
-        statementVerbUid: Long
-    ): PagingSource<Int, StatementAndPersonAndPicture>
+        personUid: Long
+    ): PagingSource<Int, SessionTimeAndProgressInfo>
+
+
 
 }
