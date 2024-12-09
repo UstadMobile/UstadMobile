@@ -22,6 +22,7 @@ import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndRelated
+import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
@@ -309,7 +310,9 @@ expect abstract class StatementDao {
                          WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
                            AND StatementEntity.statementActorPersonUid = :personUid)
                          
-        SELECT (SELECT MIN(StatementEntity.timestamp)
+        SELECT DistinctRegistrationUids.contextRegistrationHi AS contextRegistrationHi,
+               DistinctRegistrationUids.contextRegistrationLo AS contextRegistrationLo,
+               (SELECT MIN(StatementEntity.timestamp)
                   FROM StatementEntity
                  WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
                    AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
@@ -334,5 +337,25 @@ expect abstract class StatementDao {
     ): PagingSource<Int, SessionTimeAndProgressInfo>
 
 
+    @HttpAccessible
+    @Query("""
+        SELECT StatementEntity.*, VerbEntity.*, VerbLangMapEntry.*
+          FROM StatementEntity
+               LEFT JOIN VerbEntity
+                         ON StatementEntity.statementVerbUid = VerbEntity.verbUid
+               LEFT JOIN VerbLangMapEntry 
+                         ON (VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash) = 
+                            (SELECT VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash
+                               FROM VerbLangMapEntry
+                              WHERE VerbLangMapEntry.vlmeVerbUid = VerbEntity.verbUid
+                           ORDER BY VerbLangMapEntry.vlmeLastModified DESC
+                              LIMIT 1)
+         WHERE StatementEntity.contextRegistrationHi = :registrationHi
+           AND StatementEntity.contextRegistrationLo = :registrationLo                        
+    """)
+    abstract fun findStatementsBySession(
+        registrationHi: Long,
+        registrationLo: Long,
+    ): PagingSource<Int, StatementEntityAndVerb>
 
 }
