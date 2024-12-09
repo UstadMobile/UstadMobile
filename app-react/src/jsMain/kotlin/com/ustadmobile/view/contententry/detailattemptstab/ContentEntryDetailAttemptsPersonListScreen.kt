@@ -85,7 +85,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                     virtualListContent {
                         infiniteQueryPagingItems(
                             items = infiniteQueryResult,
-                            key = { it.contextRegistrationHi }
+                            key = { it.person.personUid.toString() }
                         ) { attemptsPersonListItems ->
                             ListItem.create {
                                 Stack {

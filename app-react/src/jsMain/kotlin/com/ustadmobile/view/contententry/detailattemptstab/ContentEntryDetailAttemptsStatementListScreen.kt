@@ -11,6 +11,7 @@ import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
+import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -58,7 +59,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
         )
 
         val infiniteQueryResult : UseInfiniteQueryResult
-        <PagingSourceLoadResult<Int, StatementAndPersonAndPicture>, Throwable> = usePagingSource(
+        <PagingSourceLoadResult<Int, StatementEntityAndVerb>, Throwable> = usePagingSource(
             remoteMediatorResult.pagingSourceFactory, true, 50
         )
         val muiAppState = useMuiAppState()
@@ -75,7 +76,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
 
                 infiniteQueryPagingItems(
                     items = infiniteQueryResult,
-                    key = { it.person?.personUid?.toString() ?: "0" }
+                    key = { it.statementEntity?.statementLct.toString()}
                 ) { attemptsStatementListItems ->
                     ListItem.create {
                         ListItemButton{
