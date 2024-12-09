@@ -55,6 +55,10 @@ tasks.withType<Jar> {
         attributes["com-ustadmobile-apiurl"] = buildConfigProps?.getProperty("com.ustadmobile.apiurl") ?: ""
 
         attributes["com-matomo-url"] = buildConfigProps?.getProperty("com.matomo.url") ?: ""
+        attributes["com-ustadmobile-system-systemBaseUrl"] = buildConfigProps?.getProperty("com.ustadmobile.system.systemBaseUrl") ?: ""
+        attributes["com-ustadmobile-system-passkeyRpId"] = buildConfigProps?.getProperty("com.ustadmobile.system.passkeyRpId") ?: ""
+        attributes["com-ustadmobile-system-presetLsUrl"] = buildConfigProps?.getProperty("com.ustadmobile.system.presetLsUrl") ?: ""
+        attributes["com-ustadmobile-system-newPersonalAccountsLsUrl"] = buildConfigProps?.getProperty("com.ustadmobile.system.newPersonalAccountsLsUrl") ?: ""
     }
 }
 

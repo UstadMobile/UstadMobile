@@ -1,6 +1,5 @@
 package com.ustadmobile.core.viewmodel.courseterminology.list
 
-import app.cash.paging.PagingSourceLoadParamsRefresh
 import app.cash.turbine.test
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.loadFirstList
@@ -22,8 +21,8 @@ class CourseTerminologyListViewModelTest : AbstractMainDispatcherTest() {
                 CourseTerminologyListViewModel(di, savedStateHandle)
             }
 
-            val terminologyRepo = spy(activeRepo.courseTerminologyDao())
-            activeRepo.stub {
+            val terminologyRepo = spy(activeRepoWithFallback.courseTerminologyDao())
+            activeRepoWithFallback.stub {
                 on { courseTerminologyDao() }.thenReturn(terminologyRepo)
             }
 

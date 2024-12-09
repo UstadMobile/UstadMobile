@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats.pdf
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
@@ -33,7 +33,7 @@ import javax.imageio.ImageIO
  * Potential compression: see https://gist.github.com/farhan-raza/6b2f5c95c9bbd2dcb035cc3176ecbd2b
  */
 class PdfContentImporterJvm(
-    endpoint: Endpoint,
+    learningSpace: LearningSpace,
     cache: UstadCache,
     uriHelper: UriHelper,
     db: UmAppDatabase,
@@ -44,7 +44,7 @@ class PdfContentImporterJvm(
     private val saveLocalUriAsBlobUseCase: SaveLocalUrisAsBlobsUseCase? = null,
     private val tmpPath: File? = null,
 ) : AbstractPdfContentImportCommonJvm(
-    endpoint = endpoint,
+    learningSpace = learningSpace,
     cache = cache,
     uriHelper = uriHelper,
     db = db,

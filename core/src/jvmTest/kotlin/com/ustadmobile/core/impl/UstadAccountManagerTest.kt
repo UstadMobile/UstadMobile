@@ -7,10 +7,11 @@ import com.ustadmobile.core.account.*
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ACTIVE_SESSION_PREFKEY
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_ENDPOINTS_WITH_ACTIVE_SESSION
+import com.ustadmobile.core.db.UmAppDataLayer
 import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
@@ -131,7 +132,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     lateinit var mockSettings: Settings
 
-    lateinit var apiUrlConfig: ApiUrlConfig
+    lateinit var systemUrlConfig: SystemUrlConfig
 
     lateinit var mockWebServer: MockWebServer
 
@@ -141,7 +142,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     private lateinit var di: DI
 
-    private lateinit var endpointScope: EndpointScope
+    private lateinit var learningSpaceScope: LearningSpaceScope
 
     private lateinit var json: Json
 
@@ -151,7 +152,10 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
     @Before
     fun setup() {
-        apiUrlConfig = ApiUrlConfig("http://app.ustadmobile.com/")
+        systemUrlConfig = SystemUrlConfig(
+            "http://app.ustadmobile.com/", "app.ustadmobile.com",
+            presetLearningSpaceUrl = "http://app.ustadmobile.com/"
+        )
         mockSettings = mock { }
 
         mockWebServer = MockWebServer().also {
@@ -161,7 +165,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
             it.dispatcher = mockDispatcher
         }
 
-        endpointScope = EndpointScope()
+        learningSpaceScope = LearningSpaceScope()
 
         json = Json { encodeDefaults = true }
 
@@ -169,21 +173,21 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
             randomUuid().toString())
 
         di = DI {
-            bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
+            bind<NodeIdAndAuth>() with scoped(learningSpaceScope).singleton {
                 nodeIdAndAuth
             }
 
-            bind<AuthManager>() with scoped(endpointScope).singleton {
+            bind<AuthManager>() with scoped(learningSpaceScope).singleton {
                 AuthManager(context, di)
             }
 
-            bind<ApiUrlConfig>() with singleton { apiUrlConfig }
+            bind<SystemUrlConfig>() with singleton { systemUrlConfig }
 
             bind<Pbkdf2Params>() with singleton {
                 Pbkdf2Params(iterations = 10000, keyLength = 512)
             }
 
-            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(endpointScope).singleton {
+            bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(learningSpaceScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 DatabaseBuilder.databaseBuilder(
                     UmAppDatabase::class, "jdbc:sqlite:build/tmp/$dbName.sqlite",
@@ -193,15 +197,19 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
                     .clearAllTablesAndResetNodeId(nodeIdAndAuth.nodeId)
             }
 
-            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = DoorTag.TAG_DB).asRepository(
-                    RepositoryConfig.repositoryConfig(
-                        Any(), "${context.url}UmAppDatabase/", nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
-                        instance(), instance()
-                    ) {
+            bind<UmAppDataLayer>() with scoped(learningSpaceScope).singleton {
+                val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
-                    }
-                ))
+                val repo = spy(
+                    db.asRepository(
+                        RepositoryConfig.repositoryConfig(
+                            Any(), "${context.url}UmAppDatabase/", nodeIdAndAuth.nodeId, nodeIdAndAuth.auth,
+                            instance(), instance()
+                        )
+                    )
+                )
+
+                UmAppDataLayer(localDb = db, repository = repo)
             }
 
             bind<OkHttpClient>() with singleton {
@@ -230,13 +238,13 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         }
 
 
-        repo = di.on(Endpoint(mockServerUrl)).direct.instance(tag = DoorTag.TAG_REPO)
+        repo = di.on(LearningSpace(mockServerUrl)).direct.instance<UmAppDataLayer>().requireRepository()
         repo.siteDao().insert(Site().apply {
             siteUid = 10042
             siteLct = systemTimeInMillis()
             authSalt = randomString(20)
         })
-        db = di.on(Endpoint(mockServerUrl)).direct.instance(tag = DoorTag.TAG_DB)
+        db = di.on(LearningSpace(mockServerUrl)).direct.instance(tag = DoorTag.TAG_DB)
     }
 
     private fun Person.createTestUserSession(repo: UmAppDatabase): UserSession {
@@ -255,7 +263,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
         val accountManager = UstadAccountManager(mockSettings, di)
         val activeAccount = accountManager.currentAccount
         Assert.assertEquals("Initial account has personUid = 0", 0L, activeAccount.personUid)
-        Assert.assertEquals("Initial account uses default apiUrl",
+        Assert.assertEquals("Initial account uses default presetLsUrl",
                 "http://app.ustadmobile.com/", activeAccount.endpointUrl)
     }
 
@@ -297,7 +305,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
         argumentCaptor<String> {
             verify(mockSettings).putString(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture())
-            val accountSaved = json.decodeFromString(UserSessionWithPersonAndEndpoint.serializer(),
+            val accountSaved = json.decodeFromString(UserSessionWithPersonAndLearningSpace.serializer(),
                 firstValue)
             Assert.assertEquals("Saved account as active", loggedInAccount.personUid,
                     accountSaved.person.personUid)
@@ -331,8 +339,8 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
             }
         }
 
-        val savedSessionWithPersonAndEndpoint = UserSessionWithPersonAndEndpoint(savedSession,
-            savedPerson, Endpoint(mockServerUrl))
+        val savedSessionWithPersonAndEndpoint = UserSessionWithPersonAndLearningSpace(savedSession,
+            savedPerson, LearningSpace(mockServerUrl))
 
         mockSettings.stub {
             on {
@@ -340,7 +348,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
             }.thenReturn(mockServerUrl)
             on {
                 getStringOrNull(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY))
-            }.thenReturn(json.encodeToString(UserSessionWithPersonAndEndpoint.serializer(),
+            }.thenReturn(json.encodeToString(UserSessionWithPersonAndLearningSpace.serializer(),
                 savedSessionWithPersonAndEndpoint))
         }
 
@@ -367,7 +375,7 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
         argumentCaptor<String> {
             verify(mockSettings).putString(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture())
-            val accountSaved = json.decodeFromString(UserSessionWithPersonAndEndpoint.serializer(),
+            val accountSaved = json.decodeFromString(UserSessionWithPersonAndLearningSpace.serializer(),
                 firstValue)
             Assert.assertEquals("Saved account as active", loggedInAccount.personUid,
                     accountSaved.person.personUid)
@@ -457,17 +465,17 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
             joePersonSession.usUid = repo.userSessionDao().insertSession(joePersonSession)
         }
 
-        val activeUserSession = UserSessionWithPersonAndEndpoint(bobPersonSession, bobPerson,
-            Endpoint(mockServerUrl))
+        val activeUserSession = UserSessionWithPersonAndLearningSpace(bobPersonSession, bobPerson,
+            LearningSpace(mockServerUrl))
 
-        val joePersonSessionWithPersonAndEndpoint = UserSessionWithPersonAndEndpoint(joePersonSession,
-            joePerson, Endpoint(mockServerUrl))
+        val joePersonSessionWithPersonAndEndpoint = UserSessionWithPersonAndLearningSpace(joePersonSession,
+            joePerson, LearningSpace(mockServerUrl))
 
         mockSettings.stub {
             on {
                 getStringOrNull(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY))
             }.thenReturn(
-                json.encodeToString(UserSessionWithPersonAndEndpoint.serializer(),
+                json.encodeToString(UserSessionWithPersonAndLearningSpace.serializer(),
                     activeUserSession))
             on {
                 getStringOrNull(eq(ACCOUNTS_ACTIVE_ENDPOINT_PREFKEY))
@@ -496,12 +504,12 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
 
         argumentCaptor<String> {
             verify(mockSettings).putString(eq(ACCOUNTS_ACTIVE_SESSION_PREFKEY), capture())
-            val accountSaved = json.decodeFromString(UserSessionWithPersonAndEndpoint.serializer(),
+            val accountSaved = json.decodeFromString(UserSessionWithPersonAndLearningSpace.serializer(),
                 firstValue)
             Assert.assertEquals("Saved account as active matches username",
                 accountSaved.person.username, "joe")
             Assert.assertEquals("Saved account on expected endpoint", mockServerUrl,
-                accountSaved.endpoint.url)
+                accountSaved.learningSpace.url)
         }
     }
 

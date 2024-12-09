@@ -83,7 +83,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
         ?: throw IllegalArgumentException("No ClazzUid provided")
 
     private val pagingSourceFactory: ListPagingSourceFactory<AssignmentSubmitterSummary> = {
-        activeRepo.clazzAssignmentDao().getAssignmentSubmitterSummaryListForAssignment(
+        activeRepoWithFallback.clazzAssignmentDao().getAssignmentSubmitterSummaryListForAssignment(
             assignmentUid = argEntityUid,
             clazzUid = argClazzUid,
             accountPersonUid = activeUserPersonUid,
@@ -108,7 +108,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
 
         viewModelScope.launch {
             launch {
-                val terminology = activeRepo.courseTerminologyDao()
+                val terminology = activeRepoWithFallback.courseTerminologyDao()
                     .getTerminologyForAssignment(argEntityUid)
                 _uiState.update { prev ->
                     prev.copy(
@@ -119,7 +119,7 @@ class ClazzAssignmentDetailSubmissionsTabViewModel(
 
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.clazzAssignmentDao().getProgressSummaryForAssignment(
+                    activeRepoWithFallback.clazzAssignmentDao().getProgressSummaryForAssignment(
                         assignmentUid = argEntityUid,
                         clazzUid = argClazzUid,
                         accountPersonUid = activeUserPersonUid,

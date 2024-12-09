@@ -28,6 +28,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.libuicompose.components.UstadPasswordField
+import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
@@ -48,6 +49,7 @@ fun LoginScreen(
         onClickConnectAsGuest = viewModel::onClickConnectAsGuest,
         onUsernameValueChange = viewModel::onUsernameChanged,
         onPasswordValueChange = viewModel::onPasswordChanged,
+        onSignInWithPasskey = viewModel::onSignInWithPassKey,
     )
 }
 
@@ -59,6 +61,7 @@ fun LoginScreen(
     onClickConnectAsGuest: () -> Unit = {},
     onUsernameValueChange: (String) -> Unit = {},
     onPasswordValueChange: (String) -> Unit = {},
+    onSignInWithPasskey: () -> Unit = {},
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize(),
@@ -108,7 +111,6 @@ fun LoginScreen(
         )
 
         Spacer(modifier = Modifier.height(10.dp))
-
         Text(text = uiState.errorMessage ?: "")
 
         Button(
@@ -118,23 +120,21 @@ fun LoginScreen(
         ) {
             Text(stringResource(MR.strings.login))
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if(uiState.createAccountVisible) {
-            OutlinedButton(
-                onClick = onClickCreateAccount,
-                modifier = Modifier
-                    .testTag("create_account_button")
-                    .fillMaxWidth().defaultItemPadding(),
-                enabled = uiState.fieldsEnabled,
-            ) {
-                Text(stringResource(MR.strings.create_account))
-            }
-
+        if(uiState.isPersonalAccount) {
             Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedButton(
+                onClick = { },
+                modifier = Modifier
+                    .testTag("restore_local_account")
+                    .defaultItemPadding()
+                    .fillMaxWidth(),
+            ) {
+                Text(stringResource(MR.strings.restore_local_account_title))
+            }
         }
 
+        Spacer(modifier = Modifier.height(10.dp))
         if(uiState.connectAsGuestVisible) {
             OutlinedButton(
                 onClick = onClickConnectAsGuest,

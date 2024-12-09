@@ -1,8 +1,8 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.components.DIContext
 import com.ustadmobile.core.hooks.collectAsState
@@ -74,12 +74,12 @@ val Header = FC<HeaderProps> { props ->
 
     val appDi = useRequiredContext(DIContext)
     val accountManager: UstadAccountManager = appDi.di.direct.instance()
-    val currentSession: UserSessionWithPersonAndEndpoint by accountManager.currentUserSessionFlow
+    val currentSession: UserSessionWithPersonAndLearningSpace by accountManager.currentUserSessionFlow
         .collectAsState(
-            UserSessionWithPersonAndEndpoint(
+            UserSessionWithPersonAndLearningSpace(
                 userSession = UserSession(),
                 person = Person(),
-                endpoint = Endpoint("")
+                learningSpace = LearningSpace("")
             )
         )
 

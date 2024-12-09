@@ -3,26 +3,31 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.StorageSettings
 import com.russhwolf.settings.set
 import com.ustadmobile.BuildConfigJs
+import com.ustadmobile.appconfigdb.SystemDb
+import com.ustadmobile.appconfigdb.SystemDbDataLayer
+import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
 import com.ustadmobile.core.account.*
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
+import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJs
+import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.impl.*
-import com.ustadmobile.core.impl.config.ApiUrlConfig
-import com.ustadmobile.core.impl.config.AppConfig
-import com.ustadmobile.core.impl.config.AppConfigMap
+import com.ustadmobile.core.impl.config.SystemUrlConfig
+import com.ustadmobile.core.impl.config.UstadBuildConfig
+import com.ustadmobile.core.impl.config.BuildConfigMap
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_LOCALE
 import com.ustadmobile.core.impl.di.DomainDiModuleJs
 import com.ustadmobile.core.impl.di.commonDomainDiModule
-import com.ustadmobile.core.schedule.ClazzLogCreatorManager
-import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJs
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -37,9 +42,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProviderJs
+import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.util.ext.toNullIfBlank
-import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -57,17 +63,29 @@ import web.url.URLSearchParams
 @OptIn(ExperimentalXmlUtilApi::class)
 internal fun ustadJsDi(
     dbBuilt: UmAppDatabase,
+    systemDbBuilt: SystemDb,
     dbNodeIdAndAuth: NodeIdAndAuth,
     json: Json,
     httpClient: HttpClient,
-    configMap: Map<String, String>,
     stringsProvider: JsStringProvider,
 ) = DI {
-    import(commonDomainDiModule(EndpointScope.Default))
-    import(DomainDiModuleJs(EndpointScope.Default))
-
-    val apiUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
-    console.log("Api URL = $apiUrl (location.href = ${location.href}")
+    import(commonDomainDiModule(LearningSpaceScope.Default))
+    import(DomainDiModuleJs(LearningSpaceScope.Default))
+    val learningSpaceUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
+    console.log("Learning Space URL = $learningSpaceUrl (location.href = ${location.href}")
+    val isLearningSpace = js("_ustadLearningSpaceExists") as Boolean
+    bind<UstadBuildConfig>() with singleton {
+        BuildConfigMap(
+            buildMap {
+                put(UstadBuildConfig.KEY_SYSTEM_URL, BuildConfigJs.SYSTEM_URL)
+                put(UstadBuildConfig.KEY_PASSKEY_RP_ID, BuildConfigJs.PASSKEY_RP_ID)
+                put(UstadBuildConfig.KEY_PRESET_LEARNING_SPACE_URL,
+                    BuildConfigJs.PRESET_LEARNING_SPACE_URL)
+                put(UstadBuildConfig.KEY_NEW_PERSONAL_ACCOUNT_LEARNING_SPACE_URL,
+                    BuildConfigJs.NEW_PERSONAL_ACCOUNT_LEARNING_SPACE_URL)
+            }
+        )
+    }
 
     bind<ShowSocialWarningUseCase>() with singleton {
         ShowSocialWarningUseCase(
@@ -81,10 +99,6 @@ internal fun ustadJsDi(
         )
     }
 
-    bind<AppConfig>() with singleton {
-        AppConfigMap(configMap)
-    }
-
     bind<GenderConfig>() with singleton {
         GenderConfig(
             genderConfigStr = BuildConfigJs.APP_UI_GOPTS.toNullIfBlank() ?: GenderConfig.DEFAULT_GENDER_OPTIONS
@@ -93,9 +107,6 @@ internal fun ustadJsDi(
 
     bind<Settings>() with singleton {
         StorageSettings().also {
-            //We don't use onboarding on the web, so mark this as completed
-            it[OnBoardingViewModel.PREF_TAG] = "true"
-
             /*
              * Check if there is a preset default language, and apply if not already actioned
              */
@@ -126,8 +137,11 @@ internal fun ustadJsDi(
         )
     }
 
-    bind<ApiUrlConfig>() with singleton {
-        ApiUrlConfig(apiUrl)
+    bind<SystemUrlConfig>() with singleton {
+
+        SystemUrlConfig.fromUstadBuildConfig(instance()).copy(
+            presetLearningSpaceUrl = if (isLearningSpace) learningSpaceUrl else null
+        )
     }
 
     bind<UstadMobileSystemImpl>() with singleton {
@@ -143,15 +157,44 @@ internal fun ustadJsDi(
         UstadAccountManager(settings = instance(), di = di)
     }
 
-    bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
+    bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
         dbNodeIdAndAuth
     }
+    bind<SystemDb>() with singleton {
+        systemDbBuilt
+    }
+    bind<SystemDbNodeIdAndAuth>() with singleton {
+        val settings: Settings = instance()
+        val contextIdentifier: String = sanitizeDbNameFromUrl(learningSpaceUrl)
+        SystemDbNodeIdAndAuth(nodeIdAndAuth =settings.getOrGenerateNodeIdAndAuth(contextIdentifier) )
+    }
 
-    bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
+
+    bind<SystemDbDataLayer>() with singleton {
+        val systemDb: SystemDb = instance<SystemDb>()
+
+        val systemDbNodeIdAndAuth: SystemDbNodeIdAndAuth = instance()
+        val repo: SystemDb = systemDb.asRepository(
+            RepositoryConfig.repositoryConfig(
+                context = this,
+                endpoint = learningSpaceUrl+"api/SystemDb/",
+                nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
+                auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
+                httpClient = instance(),
+                json = instance()
+            )
+        )
+
+        SystemDbDataLayer(
+            localDb  = systemDb,
+            repository = repo,
+        )
+    }
+    bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(LearningSpaceScope.Default).singleton {
         dbBuilt
     }
 
-    bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
+    bind<UmAppDataLayer>() with scoped(LearningSpaceScope.Default).singleton {
         val nodeIdAndAuth: NodeIdAndAuth = instance()
         val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
         val repositoryConfig =  RepositoryConfig.repositoryConfig(
@@ -162,7 +205,10 @@ internal fun ustadJsDi(
         ){
 
         }
-        db.asRepository(repositoryConfig)
+        UmAppDataLayer(
+            localDb = db,
+            repository = db.asRepository(repositoryConfig)
+        )
     }
 
     constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with false
@@ -189,11 +235,15 @@ internal fun ustadJsDi(
         httpClient
     }
 
-    registerContextTranslator {
-            account: UmAccount -> Endpoint(account.endpointUrl)
+    bind<GetLocalAccountsSupportedUseCase>() with singleton {
+        GetLocalAccountsSupportedUseCase(false)
     }
 
-    bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
+    registerContextTranslator {
+            account: UmAccount -> LearningSpace(account.endpointUrl)
+    }
+
+    bind<AuthManager>() with scoped(LearningSpaceScope.Default).singleton {
         AuthManager(context, di)
     }
 
@@ -203,8 +253,6 @@ internal fun ustadJsDi(
 
         Pbkdf2Params(numIterations, keyLength)
     }
-
-    bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerJs() }
 
     bind<Json>() with singleton {
         json
@@ -221,17 +269,19 @@ internal fun ustadJsDi(
     bind<GetVersionUseCase>() with singleton {
         GetVersionUseCaseJs()
     }
-
+    bind<GoToLearningSpaceUseCase>() with singleton {
+        GoToLearningSpaceUseCaseJs(di)
+    }
     bind<GetShowPoweredByUseCase>() with singleton {
         GetShowPoweredByUseCase(BuildConfigJs.APP_UI_SHOW_POWERED_BY.toBoolean())
     }
 
-    bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(EndpointScope.Default).provider {
+    bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(LearningSpaceScope.Default).provider {
         BulkAddPersonsFromLocalUriUseCaseJs(
             httpClient = instance(),
-            endpoint = context,
+            learningSpace = context,
             json = instance(),
-            repo = instance(tag = DoorTag.TAG_REPO),
+            repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
 

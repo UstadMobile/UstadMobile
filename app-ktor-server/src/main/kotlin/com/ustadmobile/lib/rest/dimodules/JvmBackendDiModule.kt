@@ -2,11 +2,13 @@ package com.ustadmobile.lib.rest.dimodules
 
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
+import com.ustadmobile.appconfigdb.SystemDb
 import com.ustadmobile.core.account.AuthManager
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_SERVER
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
@@ -21,6 +23,8 @@ import com.ustadmobile.core.domain.cachelock.Migrate131to132AddRetainActiveUriTr
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.message.AddOutgoingReplicationForMessageTriggerCallback
+import com.ustadmobile.core.domain.pbkdf2.Pbkdf2AuthenticateUseCase
+import com.ustadmobile.core.domain.pbkdf2.Pbkdf2EncryptUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -31,12 +35,11 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.rest.InsertDefaultSiteCallback
-import com.ustadmobile.lib.rest.ext.dbModeProperty
-import com.ustadmobile.lib.rest.ext.initAdminUser
-import com.ustadmobile.lib.rest.identifier
+import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
+import com.ustadmobile.lib.rest.domain.systemconfig.sysconfiginit.GenerateSystemConfigAuthCallback
+import com.ustadmobile.lib.rest.sanitizedUrlForPaths
 import io.github.aakira.napier.Napier
 import io.ktor.server.config.*
-import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import java.io.File
 import com.ustadmobile.lib.rest.ext.absoluteDataDir
@@ -80,12 +83,10 @@ data class DbAndObservers(
 fun makeJvmBackendDiModule(
     config: ApplicationConfig,
     json: Json,
-    contextScope: EndpointScope = EndpointScope.Default,
+    contextScope: LearningSpaceScope = LearningSpaceScope.Default,
 ) = DI.Module("JvmBackendDiModule") {
     val dataDirPath = config.absoluteDataDir()
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
-
-    val dbMode = config.dbModeProperty()
 
     bind<Json>() with singleton {
         json
@@ -94,7 +95,7 @@ fun makeJvmBackendDiModule(
     bind<XapiJson>() with singleton { XapiJson() }
 
     bind<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT) with scoped(contextScope).singleton {
-        File(dataDirPath, context.identifier(dbMode)).also {
+        File(dataDirPath, context.sanitizedUrlForPaths()).also {
             it.takeIf { !it.exists() }?.mkdirs()
         }
     }
@@ -122,6 +123,22 @@ fun makeJvmBackendDiModule(
         )
     }
 
+    bind<Pbkdf2EncryptUseCase>() with singleton { Pbkdf2EncryptUseCase() }
+
+    bind<Pbkdf2AuthenticateUseCase>() with singleton {
+        Pbkdf2AuthenticateUseCase(encryptUseCase = instance())
+    }
+
+    bind<SystemDb>() with singleton {
+        DatabaseBuilder.databaseBuilder(
+            dbClass = SystemDb::class,
+            dbUrl = "jdbc:sqlite:${config.absoluteDataDir().absolutePath}/system.db",
+            nodeId = 1L
+        ).addCallback(
+            GenerateSystemConfigAuthCallback(encryptor = instance(), dataDirPath = dataDirPath)
+        ).build()
+    }
+
     bind<UstadMobileSystemImpl>() with singleton {
         UstadMobileSystemImpl(
             settings = instance(),
@@ -130,13 +147,7 @@ fun makeJvmBackendDiModule(
     }
 
     bind<AuthManager>() with scoped(contextScope).singleton {
-        AuthManager(context, di).also { authManager ->
-            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
-            runBlocking {
-                db.initAdminUser(context, authManager, di,
-                    config.propertyOrNull("ktor.ustad.adminpass")?.getString())
-            }
-        }
+        AuthManager(context, di)
     }
 
     bind<Pbkdf2Params>() with singleton {
@@ -148,18 +159,18 @@ fun makeJvmBackendDiModule(
 
     bind<DbAndObservers>() with scoped(contextScope).singleton {
         instance<File>(DiTag.TAG_CONTEXT_DATA_ROOT) //Ensure data dir for context is created
+        val learningSpace = instance<LearningSpaceServerRepo>().findByUrl(context.url)
+            ?: throw IllegalStateException("No learning space found for url: ${context.url}")
 
-        val dbHostName = context.identifier(dbMode, "UmAppDatabase")
         val nodeIdAndAuth: NodeIdAndAuth = instance()
-        val dbUrl = config.property("ktor.database.url").getString()
-            .replace("(hostname)", dbHostName)
-            .replace("(datadir)", config.absoluteDataDir().absolutePath)
-        if(dbUrl.startsWith("jdbc:postgresql"))
+
+        if(learningSpace.config.lscDbUrl.startsWith("jdbc:postgresql"))
             Class.forName("org.postgresql.Driver")
+
         val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-            dbUrl = dbUrl,
-            dbUsername = config.propertyOrNull("ktor.database.user")?.getString(),
-            dbPassword = config.propertyOrNull("ktor.database.password")?.getString(),
+            dbUrl = learningSpace.config.lscDbUrl,
+            dbUsername = learningSpace.config.lscDbUsername,
+            dbPassword = learningSpace.config.lscDbPassword,
             nodeId = nodeIdAndAuth.nodeId,
         )
             .addSyncCallback(nodeIdAndAuth)
@@ -189,7 +200,7 @@ fun makeJvmBackendDiModule(
                 db = db,
                 httpClient = instance(),
                 json = instance(),
-                endpoint = context,
+                learningSpace = context,
                 createRetentionLocksForManifestUseCase = CreateRetentionLocksForManifestUseCaseCommonJvm(
                     cache = cache,
                 ),
@@ -202,9 +213,13 @@ fun makeJvmBackendDiModule(
         instance<DbAndObservers>().db
     }
 
-    bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
+    bind<UmAppDataLayer>() with scoped(contextScope).singleton {
+        UmAppDataLayer(localDb = instance(tag = DoorTag.TAG_DB), repository = null)
+    }
+
+    bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
         val settings: Settings = instance()
-        val contextIdentifier: String = context.identifier(dbMode)
+        val contextIdentifier: String = context.sanitizedUrlForPaths()
         settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
     }
 

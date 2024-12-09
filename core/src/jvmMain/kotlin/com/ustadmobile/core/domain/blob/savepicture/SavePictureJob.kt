@@ -1,9 +1,9 @@
 package com.ustadmobile.core.domain.blob.savepicture
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import org.quartz.Job
 import org.quartz.JobExecutionContext
-import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Companion.DATA_ENDPOINT
+import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Companion.DATA_LEARNINGSPACE
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Companion.DATA_TABLE_ID
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Companion.DATA_ENTITY_UID
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase.Companion.DATA_LOCAL_URI
@@ -21,12 +21,12 @@ class SavePictureJob: Job {
         val di = context.scheduler.di
         val jobDataMap = context.jobDetail.jobDataMap
 
-        val endpoint = Endpoint(jobDataMap.getString(DATA_ENDPOINT))
+        val learningSpace = LearningSpace(jobDataMap.getString(DATA_LEARNINGSPACE))
         val tableId = jobDataMap.getInt(DATA_TABLE_ID)
         val entityUid = jobDataMap.getLong(DATA_ENTITY_UID)
         val pictureUri = jobDataMap.getString(DATA_LOCAL_URI)
 
-        val savePictureUseCase: SavePictureUseCase = di.on(endpoint).direct.instance()
+        val savePictureUseCase: SavePictureUseCase = di.on(learningSpace).direct.instance()
         runBlocking {
             try {
                 savePictureUseCase(

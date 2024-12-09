@@ -2,6 +2,8 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.ustadmobile.appconfigdb.SystemDb
+import com.ustadmobile.appconfigdb.SystemDb_KtorRoute
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
@@ -125,7 +127,17 @@ import com.ustadmobile.door.log.NapierDoorLogger
 import com.ustadmobile.lib.rest.api.contentupload.GetSubtitleTrackServerRoute
 import com.ustadmobile.lib.rest.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriServerUseCase
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
+import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyRoute
+import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyUseCase
+import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceApiRoute
+import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
+import com.ustadmobile.lib.rest.domain.learningspace.SystemConfigScriptRoute
+import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
+import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
+import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
+import com.ustadmobile.lib.rest.domain.matomo.MatomoConfigRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
+import com.ustadmobile.lib.rest.domain.systemconfig.verifyauth.VerifySystemConfigAuthUseCase
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
 import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
 import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
@@ -136,8 +148,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import org.kodein.di.ktor.closestDI
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery
-import java.net.Inet6Address
-import java.net.NetworkInterface
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -162,24 +172,24 @@ val REQUIRED_EXTERNAL_COMMANDS = emptyList<String>()
  * other url will be sent to the JS dev proxy
  */
 val KTOR_SERVER_ROUTES = listOf(
-    "/UmAppDatabase",
+    "/UmAppDatabase", "/config",
     "/ContainerEntryList", "/ContainerEntryFile", "/auth", "/ContainerMount",
-    "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles"
+    "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles","/.well-known"
 )
+
+/**
+ * The default javascript development server (e.g. webpack) server
+ */
+const val DEFAULT_JS_DEV_SERVER = "http://localhost:8080/"
+
+const val SERVER_PROPERTIES_KEY_PORT = "port"
 
 
 /**
  * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
  * containers, etc).
  */
-fun Endpoint.identifier(
-    dbMode: String,
-    singletonName: String = CONF_DBMODE_SINGLETON
-) = if(dbMode == CONF_DBMODE_SINGLETON) {
-    singletonName
-}else {
-    sanitizeDbNameFromUrl(url)
-}
+fun LearningSpace.sanitizedUrlForPaths() = sanitizeDbNameFromUrl(url)
 
 @Suppress("unused") // This is used as the KTOR server main module via application.conf
 fun Application.umRestApplication(
@@ -187,27 +197,13 @@ fun Application.umRestApplication(
 ) {
     val appConfig = environment.config
 
-    val siteUrl = environment.config.propertyOrNull(CONF_KEY_SITE_URL)?.getString()
-
     val sitePrefix = environment.config.propertyOrNull(CONF_KEY_URL_PREFIX)?.getString()
 
     val dbMode = dbModeOverride ?:  appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 
     val ktorAppHome = ktorAppHomeDir()
 
-    if(dbMode != CONF_DBMODE_VIRTUALHOST && siteUrl.isNullOrBlank()) {
-        val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
-            !it.isLoopback
-        }.flatMap { netInterface ->
-            netInterface.inetAddresses.toList().filter { it !is Inet6Address }
-        }.firstOrNull()?.let { "http://${it.hostAddress}:${appConfig.port}/"} ?: ""
-
-        throw SiteConfigException("ERROR: Site URL is not set. You MUST specify the site url e.g. $likelyAddr \n" +
-                "Please specify using the url parameter in command line e.g. add " +
-                "--siteUrl $likelyAddr \n" +
-                "to the command you are running or \n" +
-                "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
-    }
+    val isRunningFromSource = ktorAppSourceDir() != null
 
     val mediaInfoFile = SysPathUtil.findCommandInPath(
         commandName = "mediainfo",
@@ -275,6 +271,14 @@ fun Application.umRestApplication(
         manuallySpecifiedLocation = appConfig.commandFileProperty("gs"),
     )
 
+    val serverProperties = Properties().apply {
+        setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
+    }
+
+    ktorServerPropertiesFile().writer().use { serverPropWriter ->
+        serverProperties.store(serverPropWriter, null)
+    }
+
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
 
     val json = Json {
@@ -306,6 +310,7 @@ fun Application.umRestApplication(
             allowHeader("X-nid")
             allowHeader("door-dbversion")
             allowHeader("door-node")
+            allowHeader("access-control-allow-origin")
             anyHost()
         }
     }
@@ -328,6 +333,8 @@ fun Application.umRestApplication(
 
     val dataDirPath = environment.config.absoluteDataDir()
 
+    val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
+
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
     }
@@ -335,7 +342,6 @@ fun Application.umRestApplication(
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
-
 
     di {
         import(
@@ -348,14 +354,14 @@ fun Application.umRestApplication(
 
         bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
 
-        bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
+        bind<File>(tag = TAG_UPLOAD_DIR) with scoped(LearningSpaceScope.Default).singleton {
             val mainTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
-            File(mainTmpDir, context.identifier(dbMode)).also {
+            File(mainTmpDir, context.sanitizedUrlForPaths()).also {
                 it.takeIf { !it.exists() }?.mkdirs()
             }
         }
 
-        bind<NodeIdAuthCache>() with scoped(EndpointScope.Default).singleton {
+        bind<NodeIdAuthCache>() with scoped(LearningSpaceScope.Default).singleton {
             instance<UmAppDatabase>(tag = DoorTag.TAG_DB).nodeIdAuthCache
         }
 
@@ -405,7 +411,7 @@ fun Application.umRestApplication(
             File(dataDirPath, "tmp")
         }
 
-        bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(EndpointScope.Default).singleton {
+        bind<File>(tag = DiTag.TAG_FILE_UPLOAD_TMP_DIR) with scoped(LearningSpaceScope.Default).singleton {
             val mainTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
 
             File(mainTmpDir, UPLOAD_TMP_SUBDIR).also {
@@ -414,7 +420,7 @@ fun Application.umRestApplication(
             }
         }
 
-        bind<ContentEntryGetMetadataServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<ContentEntryGetMetadataServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             val uploadDir: File = instance(DiTag.TAG_FILE_UPLOAD_TMP_DIR)
             ContentEntryGetMetadataServerUseCase(
                 uploadDir = uploadDir,
@@ -423,7 +429,7 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<BlobUploadServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<BlobUploadServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             BlobUploadServerUseCase(
                 httpCache = instance(),
                 tmpDir = Path(
@@ -434,7 +440,7 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<ImportContentEntryUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<ImportContentEntryUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             ImportContentEntryUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 importersManager = instance(),
@@ -442,10 +448,10 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<SaveLocalUrisAsBlobsUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
             SaveLocalUrisAsBlobsUseCaseJvm(
-                endpoint = context,
+                learningSpace = context,
                 cache = instance(),
                 uriHelper = instance(),
                 tmpDir = Path(
@@ -455,14 +461,14 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             SaveLocalUriAsBlobAndManifestUseCaseJvm(
                 saveLocalUrisAsBlobsUseCase = instance(),
                 mimeTypeHelper = instance(),
             )
         }
 
-        bind<ContentEntryVersionServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<ContentEntryVersionServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             ContentEntryVersionServerUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
@@ -471,7 +477,12 @@ fun Application.umRestApplication(
                 onlyIfCached = true,
             )
         }
-
+        bind<VerifySignInWithPasskeyUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            VerifySignInWithPasskeyUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = null,
+            )
+        }
         bind<IsTempFileCheckerUseCase>() with singleton {
             IsTempFileCheckerUseCaseJvm(
                 tmpRootDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
@@ -484,26 +495,25 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<SetPasswordUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            SetPasswordUseCaseCommonJvm(
+                authManager = instance()
+            )
+        }
         bind<CreateTempUriUseCase>() with singleton {
             CreateTempUriUseCaseCommonJvm(
                 rootTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
             )
         }
 
-        bind<SetPasswordUseCase>() with scoped(EndpointScope.Default).singleton {
-            SetPasswordUseCaseCommonJvm(
-                authManager = instance()
-            )
-        }
-
-        bind<ValidateUserSessionOnServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<ValidateUserSessionOnServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             ValidateUserSessionOnServerUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 nodeIdAuthCache = instance(),
             )
         }
 
-        bind<SetPasswordServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<SetPasswordServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             SetPasswordServerUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 setPasswordUseCase = instance(),
@@ -519,11 +529,11 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<EnqueueContentEntryImportUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<EnqueueContentEntryImportUseCase>() with scoped(LearningSpaceScope.Default).provider {
             EnqueueImportContentEntryUseCaseJvm(
                 db = instance(tag = DoorTag.TAG_DB),
                 scheduler = instance(),
-                endpoint = context,
+                learningSpace = context,
                 enqueueRemoteImport = null
             )
         }
@@ -576,14 +586,14 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<AddNewPersonUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<AddNewPersonUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             AddNewPersonUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
             )
         }
 
-        bind<BulkAddPersonsUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<BulkAddPersonsUseCase>() with scoped(LearningSpaceScope.Default).provider {
             BulkAddPersonsUseCaseImpl(
                 addNewPersonUseCase = instance(),
                 validateEmailUseCase  = instance(),
@@ -609,21 +619,21 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<EnrolIntoCourseUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<EnrolIntoCourseUseCase>() with scoped(LearningSpaceScope.Default).provider {
             EnrolIntoCourseUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
             )
         }
 
-        bind<VerifyClientUserSessionUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<VerifyClientUserSessionUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             VerifyClientUserSessionUseCase(
                 nodeIdAndAuthCache = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
             )
         }
 
-        bind<EnqueueBulkAddPersonServerUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<EnqueueBulkAddPersonServerUseCase>() with scoped(LearningSpaceScope.Default).provider {
             EnqueueBulkAddPersonServerUseCase(
                 verifyClientSessionUseCase = instance(),
                 enqueueBulkAddPersonUseCase = instance(),
@@ -631,31 +641,31 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<EnqueueBulkAddPersonUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<EnqueueBulkAddPersonUseCase>() with scoped(LearningSpaceScope.Default).provider {
             EnqueueBulkAddPersonUseCase(
                 scheduler = instance(),
-                endpoint = context,
+                learningSpace = context,
                 tmpDir = instance(tag = DiTag.TAG_TMP_DIR),
             )
         }
 
-        bind<BulkAddPersonStatusMap>() with scoped(EndpointScope.Default).singleton {
+        bind<BulkAddPersonStatusMap>() with scoped(LearningSpaceScope.Default).singleton {
             BulkAddPersonStatusMap()
         }
 
-        bind<CancelImportContentEntryUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<CancelImportContentEntryUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             CancelImportContentEntryUseCaseJvm(
                 scheduler = instance(),
-                endpoint = context,
+                learningSpace = context,
             )
         }
 
-        bind<CancelImportContentEntryServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<CancelImportContentEntryServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             CancelImportContentEntryServerUseCase(
                 cancelImportContentEntryUseCase = instance(),
                 validateUserSessionOnServerUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
-                endpoint = context,
+                learningSpace = context,
             )
         }
 
@@ -684,26 +694,26 @@ fun Application.umRestApplication(
             XXHasher64FactoryCommonJvm()
         }
 
-        bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<StoreActivitiesUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             StoreActivitiesUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
             )
         }
 
-        bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
+        bind<XapiStatementResource>() with scoped(LearningSpaceScope.Default).singleton {
             XapiStatementResource(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
                 xxHasher = instance(),
-                endpoint = context,
+                learningSpace = context,
                 xapiJson = instance(),
                 hasherFactory = instance(),
                 storeActivitiesUseCase = instance(),
             )
         }
 
-        bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<ResumeOrStartXapiSessionUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             ResumeOrStartXapiSessionUseCaseLocal(
                 activeDb = instance(tag = DoorTag.TAG_DB),
                 activeRepo = null,
@@ -711,7 +721,7 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<XapiHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<XapiHttpServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             XapiHttpServerUseCase(
                 statementResource = instance(),
                 storeXapiStateUseCase = instance(),
@@ -721,12 +731,12 @@ fun Application.umRestApplication(
                 h5PUserDataEndpointUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 xapiJson = instance(),
-                endpoint = context,
+                learningSpace = context,
                 xxStringHasher = instance(),
             )
         }
 
-        bind<H5PUserDataEndpointUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<H5PUserDataEndpointUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             H5PUserDataEndpointUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
@@ -736,18 +746,18 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<StoreXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<StoreXapiStateUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             StoreXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
                 xapiJson = instance(),
                 xxHasher64Factory = instance(),
                 xxStringHasher = instance(),
-                endpoint = context,
+                learningSpace = context,
             )
         }
 
-        bind<RetrieveXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<RetrieveXapiStateUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             RetrieveXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
@@ -757,7 +767,7 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<ListXapiStateIdsUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<ListXapiStateIdsUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             ListXapiStateIdsUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
@@ -765,26 +775,55 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<DeleteXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<DeleteXapiStateUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             DeleteXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
-                endpoint = context,
+                learningSpace = context,
             )
         }
 
-        bind<GetApiUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<GetApiUrlUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             GetApiUrlUseCaseDirect(context)
         }
-
-        bind<GetSubtitleTrackFromUriServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<GetSubtitleTrackFromUriServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             GetSubtitleTrackFromUriServerUseCase(
                 saveLocalUrisAsBlobsUseCase = instance(),
                 createTempUriUseCase = instance(),
                 deleteUrisUseCase = instance(),
             )
+        }
+        bind<VerifySystemConfigAuthUseCase>() with singleton {
+            VerifySystemConfigAuthUseCase(
+                systemDb = instance(),
+                pbkdf2AuthenticateUseCase = instance()
+            )
+        }
+
+        bind<CreateLearningSpaceUseCase>() with singleton {
+            CreateLearningSpaceUseCase(
+                xxStringHasher = instance(),
+                learningSpaceServerRepo = instance(),
+                serverDataDir  = environment.config.absoluteDataDir(),
+                di = di,
+            )
+        }
+        bind<UpdateLearningSpaceUseCase>() with singleton {
+            UpdateLearningSpaceUseCase(
+                learningSpaceServerRepo = instance()
+            )
+        }
+        bind<DeleteLearningSpaceUseCase>() with singleton {
+            DeleteLearningSpaceUseCase(
+                learningSpaceServerRepo = instance(),
+                di = di,
+            )
+        }
+
+        bind<LearningSpaceServerRepo>() with singleton {
+            LearningSpaceServerRepo(systemDb = instance())
         }
 
         try {
@@ -814,29 +853,13 @@ fun Application.umRestApplication(
         }
 
         registerContextTranslator { call: ApplicationCall ->
-            call.callEndpoint
+            call.callLearningSpace
         }
 
         onReady {
-            if(dbMode == CONF_DBMODE_SINGLETON && siteUrl != null) {
-                val endpoint = Endpoint(siteUrl)
-                val passwordFile = di.on(endpoint).direct.instance<File>(tag = DiTag.TAG_ADMIN_PASS_FILE)
-
-                /**
-                 * Eager initialization only if the initial admin password needs generated. This
-                 * avoids potential issue with startup script if this server starts before postgres
-                 * is ready.
-                 */
-                if(!passwordFile.exists()) {
-                    //Generate the admin username/password etc.
-                    di.on(endpoint).direct.instance<AuthManager>()
-
-                    val db: UmAppDatabase by di.on(endpoint).instance(tag = DoorTag.TAG_DB)
-                    println("init db: $db")
-                }
-            }
-
             instance<Scheduler>().start()
+            instance<SystemDb>()
+
             Runtime.getRuntime().addShutdownHook(Thread{
                 instance<Scheduler>().shutdown()
             })
@@ -851,7 +874,23 @@ fun Application.umRestApplication(
         }
     }
 
-    val jsDevServer = appConfig.propertyOrNull("ktor.ustad.jsDevServer")?.getString()
+    val jsDevServerProp = appConfig.propertyOrNull("ktor.ustad.jsDevServer")?.getString()
+
+    /*
+     * Use the devserver mode when:
+     *  a) there is an explicitly set development server to connect wtih
+     *  b) the server is being run from source
+     *
+     * See comments on the jsDevServer property in application.conf for expected behavior
+     */
+    val jsDevServer = if(
+        jsDevServerProp?.isNotBlank() == true  || (isRunningFromSource && jsDevServerProp == null)
+    ) {
+        jsDevServerProp ?: DEFAULT_JS_DEV_SERVER
+    }else {
+        null
+    }
+
     if(jsDevServer != null) {
         install(io.ktor.server.websocket.WebSockets)
 
@@ -873,12 +912,6 @@ fun Application.umRestApplication(
                 }
             }
 
-            //If the request is not using the correct url as per system config, reject it and finish
-            if(!context.urlMatchesConfig()) {
-                call.respondRequestUrlNotMatchingSiteConfUrl()
-                return@intercept finish()
-            }
-
             //If the request is not matching any API route, then use the reverse proxy to send the
             // request to the javascript development server.
             if(!effectiveKtorServerRoutes.any { requestUri.startsWith(it) }) {
@@ -893,21 +926,57 @@ fun Application.umRestApplication(
      * in UstadAppReactProxy
      */
     install(Routing) {
+        val di by closestDI()
+
+
         prefixRoute(sitePrefix) {
-            addHostCheckIntercept()
+            //addHostCheckIntercept()
             personAuthRegisterRoute()
             route("UmAppDatabase") {
                 UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json, logger = NapierDoorLogger())) { call ->
-                    val di: DI by call.closestDI()
                     di.on(call).direct.instance(tag = DoorTag.TAG_DB)
                 }
             }
+
             SiteRoute()
 
             GetAppRoute()
 
+            staticFiles("/.well-known",wellKnownDir)
+
+            route("config") {
+                route("api"){
+                    route("learningspaces") {
+                        LearningSpaceApiRoute(
+                            verifySystemConfigAuthUseCase = di.direct.instance(),
+                            createLearningSpaceUseCase = di.direct.instance(),
+                            updateLearningSpaceUseCase = di.direct.instance(),
+                            deleteLearningSpaceUseCase = di.direct.instance()
+                        )
+                    }
+
+                }
+            }
+
             route("api") {
-                val di: DI by closestDI()
+                route("sysconfig") {
+                    SystemConfigScriptRoute(
+                         systemDb = di.direct.instance(),
+                    )
+                }
+                route("SystemDb") {
+                    SystemDb_KtorRoute(
+                        serverConfig = DoorHttpServerConfig(
+                            json = json,
+                            logger = NapierDoorLogger(),
+                        ),
+                        dbCallAdapter = {
+                            di.direct.instance()
+                        }
+                    )
+                }
+                route("matomo") {
+                    MatomoConfigRoute()
 
                 route("account"){
                     SetPasswordRoute(
@@ -916,7 +985,14 @@ fun Application.umRestApplication(
                         }
                     )
                 }
+                route("passkey"){
 
+                    VerifySignInWithPasskeyRoute(
+                        useCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+                }
                 route("pbkdf2"){
                     Pbkdf2Route()
                 }
@@ -1012,7 +1088,8 @@ fun Application.umRestApplication(
                 webSocketProxyRoute(jsDevServer)
             }else {
                 route("/"){
-                    get{
+                    get {
+                        call.response.cacheControl(CacheControl.NoStore(null))
                         call.respondRedirect("umapp/")
                     }
                 }

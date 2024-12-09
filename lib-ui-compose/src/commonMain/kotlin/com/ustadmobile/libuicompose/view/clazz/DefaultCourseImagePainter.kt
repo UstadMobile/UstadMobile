@@ -7,6 +7,11 @@ import com.ustadmobile.libuicompose.images.UstadImage
 import com.ustadmobile.libuicompose.images.ustadAppImagePainter
 
 private val courseImages = listOf(
+    UstadImage.ONBOARDING_INDIVIDUAL,
+    UstadImage.ONBOARDING_EXISTING,
+    UstadImage.ONBOARDING_ADD_ORG,
+    UstadImage.INDIVIDUAL_NEW_ACCOUNT,
+    UstadImage.INDIVIDUAL_RESTORE_ACCOUNT,
     UstadImage.COURSE_BANNER_DEFAULT0,
     UstadImage.COURSE_BANNER_DEFAULT1,
     UstadImage.COURSE_BANNER_DEFAULT2,

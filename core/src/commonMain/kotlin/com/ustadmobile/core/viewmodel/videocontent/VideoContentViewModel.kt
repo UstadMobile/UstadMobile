@@ -1,5 +1,6 @@
 package com.ustadmobile.core.viewmodel.videocontent
 
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.media.MediaContentInfo
 import com.ustadmobile.core.domain.contententry.ContentManifestMap
@@ -28,6 +29,9 @@ data class VideoContentUiState(
 
     val contentEntryVersionUid: Long = 0,
 
+    val learningSpace: LearningSpace? = null,
+
+    val mediaSrc: String? = null,
     val manifestUrl: String? = null,
 
     val contentManifestMap: ContentManifestMap? = null,
@@ -80,7 +84,7 @@ class VideoContentViewModel(
         }
 
         viewModelScope.launch {
-            val contentEntryVersion = activeRepo.contentEntryVersionDao()
+            val contentEntryVersion = activeRepoWithFallback.contentEntryVersionDao()
                 .findByUidAsync(entityUidArg) ?: return@launch
 
             launch {
@@ -97,6 +101,7 @@ class VideoContentViewModel(
                 _uiState.update { prev ->
                     prev.copy(
                         contentEntryVersionUid = entityUidArg,
+                        learningSpace = accountManager.activeLearningSpace,
                         mediaContentInfo = mediaInfo,
                         manifestUrl = contentEntryVersion.cevManifestUrl!!,
                         contentManifestMap = ContentManifestMap(manifest),
@@ -105,7 +110,7 @@ class VideoContentViewModel(
             }
 
             launch {
-                val contentEntry = activeRepo.contentEntryDao().findByUidAsync(
+                val contentEntry = activeRepoWithFallback.contentEntryDao().findByUidAsync(
                     contentEntryVersion.cevContentEntryUid)
                 _uiState.update { prev ->
                     prev.copy(contentEntry = contentEntry)

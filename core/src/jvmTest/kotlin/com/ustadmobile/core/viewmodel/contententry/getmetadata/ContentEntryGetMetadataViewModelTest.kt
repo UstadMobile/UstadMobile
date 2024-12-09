@@ -43,7 +43,7 @@ class ContentEntryGetMetadataViewModelTest: AbstractMainDispatcherTest() {
 
         testViewModel<ContentEntryGetMetadataViewModel> {
             extendDi {
-                bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(endpointScope).provider {
+                bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(learningSpaceScope).provider {
                     mockContentEntryGetMetaDataFromUriUseCase
                 }
             }
@@ -59,7 +59,7 @@ class ContentEntryGetMetadataViewModelTest: AbstractMainDispatcherTest() {
                 invoke(
                     contentUri = eq(DoorUri.parse(argUri)),
                     fileName = anyOrNull(),
-                    endpoint = any(),
+                    learningSpace = any(),
                     onProgress = any(),
                 )
             }
@@ -79,7 +79,7 @@ class ContentEntryGetMetadataViewModelTest: AbstractMainDispatcherTest() {
 
         testViewModel<ContentEntryGetMetadataViewModel> {
             extendDi {
-                bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(endpointScope).provider {
+                bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(learningSpaceScope).provider {
                     mockContentEntryGetMetaDataFromUriUseCase
                 }
             }
@@ -102,7 +102,7 @@ class ContentEntryGetMetadataViewModelTest: AbstractMainDispatcherTest() {
                 invoke(
                     contentUri = eq(DoorUri.parse(argUri)),
                     fileName = anyOrNull(),
-                    endpoint = any(),
+                    learningSpace = any(),
                     onProgress = any(),
                 )
             }

@@ -1,10 +1,12 @@
 package com.ustadmobile.core.viewmodel.parentalconsentmanagement
 
 import app.cash.turbine.test
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.test.viewmodeltest.ViewModelTestBuilder
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.door.ext.DoorTag
@@ -20,6 +22,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import org.junit.Test
 import org.kodein.di.bind
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.scoped
 import kotlin.test.assertEquals
@@ -40,7 +43,7 @@ class ParentalConsentManagementViewModelTest : AbstractMainDispatcherTest(){
         block: suspend ViewModelTestBuilder<ParentalConsentManagementViewModel>.(ParentalConsentTestContext) -> Unit
     ) {
         testViewModel<ParentalConsentManagementViewModel> {
-            val parentPerson = setActiveUser(activeEndpoint, Person().apply {
+            val parentPerson = setActiveUser(activeLearningSpace, Person().apply {
                 firstNames = "Pit"
                 lastName = "The Older"
                 username = "pittheolder"
@@ -48,10 +51,10 @@ class ParentalConsentManagementViewModelTest : AbstractMainDispatcherTest(){
             })
 
             extendDi {
-                bind<GetLocaleForSiteTermsUseCase>() with scoped(endpointScope).provider {
+                bind<GetLocaleForSiteTermsUseCase>() with scoped(learningSpaceScope).provider {
                     GetLocaleForSiteTermsUseCase(
                         supportedLangConfig = instance(),
-                        repo = on(context).instance(tag = DoorTag.TAG_REPO)
+                        repo = on(context).instance<UmAppDataLayer>().repositoryOrLocalDb,
                     )
                 }
             }

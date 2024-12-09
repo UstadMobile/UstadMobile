@@ -1,6 +1,6 @@
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.lib.db.entities.Person
@@ -23,12 +23,12 @@ fun Person.isGuestUser() : Boolean {
  * account - homepage is endpoint.url
  * account name is the personuid.
  */
-fun Person.toXapiAgent(endpoint: Endpoint): XapiAgent {
+fun Person.toXapiAgent(learningSpace: LearningSpace): XapiAgent {
     return XapiAgent(
         name = personFullName(),
         account = XapiAccount(
             name = username ?: personUid.toString(),
-            homePage = endpoint.url,
+            homePage = learningSpace.url,
         )
     )
 }

@@ -32,7 +32,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
             "/com/ustadmobile/core/contentformats/fill-in-the-blank-withmetadata.h5p")
 
         val h5pPlugin = H5PContentImporter(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -58,7 +58,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
         invalidH5pFile.writeText("Hello world")
 
         val h5pPlugin = H5PContentImporter(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -84,7 +84,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
         val notH5p = temporaryFolder.newFile()
 
         val h5pPlugin = H5PContentImporter(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -106,7 +106,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
             "/com/ustadmobile/core/contentformats/fill-in-the-blank-withmetadata.h5p")
 
         val h5pPlugin = H5PContentImporter(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             uriHelper = uriHelper,
@@ -126,7 +126,7 @@ class H5PContentImporterTest : AbstractContentImporterTest() {
             )
         }
 
-        val expectedUrlPrefix = "${activeEndpoint.url}api/content/${result.cevUid}/"
+        val expectedUrlPrefix = "${activeLearningSpace.url}api/content/${result.cevUid}/"
         val manifestResponse = ustadCache.retrieve(
             iRequestBuilder("$expectedUrlPrefix$MANIFEST_NAME")
         )

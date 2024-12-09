@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.interop.oneroster.model
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.interop.timestamp.format8601Timestamp
 import com.ustadmobile.core.domain.interop.timestamp.parse8601Timestamp
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
@@ -36,7 +36,7 @@ data class LineItem(
 )
 
 fun CourseBlock.toOneRosterLineItem(
-    endpoint: Endpoint,
+    learningSpace: LearningSpace,
     json: Json,
 ): LineItem {
     return LineItem(
@@ -48,7 +48,7 @@ fun CourseBlock.toOneRosterLineItem(
         assignDate = format8601Timestamp(cbHideUntilDate),
         dueDate = format8601Timestamp(cbDeadlineDate),
         `class` = GUIDRef(
-            href = "${endpoint.url}umapp/#/CourseDetail?entityUid=$cbSourcedId",
+            href = "${learningSpace.url}umapp/#/CourseDetail?entityUid=$cbSourcedId",
             sourcedId = cbClazzSourcedId ?: cbClazzUid.toString(),
             type = GuidRefType.clazz
         ),
