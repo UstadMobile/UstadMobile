@@ -51,7 +51,11 @@ class ClazzInviteViewModel(
     fun processDecision(isAccepting:Boolean) {
         viewModelScope.launch {
 
-            val result = clazzRedeemUseCase.invoke(argInviteCode,isAccepting)
+            val result = clazzRedeemUseCase.invoke(
+                argInviteCode,
+                isAccepting,
+                accountManager.currentAccount.personUid
+            )
             if (result.isCodeRedeem) {
                 snackDispatcher.showSnackBar(Snack(result.message))
             } else {

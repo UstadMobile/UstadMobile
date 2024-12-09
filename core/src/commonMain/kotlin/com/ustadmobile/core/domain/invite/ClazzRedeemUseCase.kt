@@ -12,7 +12,8 @@ class ClazzRedeemUseCase(
 ) {
     suspend operator fun invoke(
         inviteCode: String,
-        isAccepting:Boolean
+        isAccepting: Boolean,
+        personUid: Long
     ): ClazzRedeemResult {
         val effectiveDb = (repo ?: db)
         val clazzInviteWithTimeZone = effectiveDb.clazzInviteDao().findClazzInviteEntityForInviteToken(inviteCode)
@@ -32,7 +33,7 @@ class ClazzRedeemUseCase(
                     enrolIntoCourseUseCase.invoke(
                         enrolment = ClazzEnrolment(
                             clazzUid = clazzInvite.ciClazzUid,
-                            personUid = clazzInvite.ciPersonUid,
+                            personUid = personUid,
                             role = clazzInvite.ciRoleId.toInt()
                         ), timeZoneId = clazzInviteWithTimeZone.timeZone ?: "UTC"
                     )
