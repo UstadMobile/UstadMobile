@@ -1,0 +1,82 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_010_content_attempt_list_test"
+  TESTNAME: "001_010_content_attempt_list_test"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow:
+    file: "../common/clear_login_and_add_content.yaml"
+    env:
+      TESTFILENAME: Video_Content.mp4
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- tapOn: "Video"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 20000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 20000
+# add new course
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course Block"
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "teach1"
+      GENDER: "Female"
+      PASSWORD: "testt1"
+- runFlow:
+    file: "../common/add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      STUDENTFIRSTNAME: "Student"
+      STUDENTLASTNAME: "1"
+      USERNAME: "stud1"
+      GENDER: "Female"
+      PASSWORD: "tests1"
+- back
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- assertVisible: "Test Course Block"
+- tapOn: "Library"
+- tapOn: "Video"
+- tapOn: Open
+- tapOn: "Play"
+- extendedWaitUntil:
+    visible: "Play"
+    timeout: 20000
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "admin"
+      PASSWORD: "testpass"
+- tapOn: "Library"
+- tapOn: "Video"
+- tapOn: "Attempts"
+- assertVisible: "Progress bar is visible" #change needed
+- tapOn: "Student 1"
+- assertVisible: "Completed is visible" #change needed
+- assertVisible: "Completion time" #change needed
+- assertVisible: "Completed %" #change needed
+- assertVisible: "Completion score" #change needed
