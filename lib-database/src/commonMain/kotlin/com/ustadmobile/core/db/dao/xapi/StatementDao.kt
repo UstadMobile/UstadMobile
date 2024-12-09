@@ -289,7 +289,32 @@ expect abstract class StatementDao {
                        FROM StatementEntity
                       WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
                         AND StatementEntity.statementActorPersonUid = Person.personUid
-                    ) AS DistinctRegistrations) AS numAttempts
+                    ) AS DistinctRegistrations) AS numAttempts,
+            (SELECT EXISTS(
+                    SELECT 1
+                      FROM StatementEntity
+                     WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                       AND StatementEntity.statementActorPersonUid = Person.personUid
+                       AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                       AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1)) AS isCompleted,
+            (SELECT CASE
+                    WHEN EXISTS(
+                         SELECT 1
+                           FROM StatementEntity
+                          WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                            AND StatementEntity.statementActorPersonUid = Person.personUid
+                            AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                            AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 1
+                    WHEN EXISTS(
+                         SELECT 1
+                           FROM StatementEntity
+                          WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                            AND StatementEntity.statementActorPersonUid = Person.personUid
+                            AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                            AND StatementEntity.resultSuccess IS NOT NULL
+                            AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 0
+                    ELSE NULL
+                    END) AS isSuccessful
        FROM Person
             LEFT JOIN PersonPicture
                  ON PersonPicture.personPictureUid = Person.personUid
@@ -328,7 +353,33 @@ expect abstract class StatementDao {
                  WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
                    AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
                    AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
-                ) AS maxScore
+                ) AS maxScore,
+               (SELECT EXISTS(
+                       SELECT 1 
+                         FROM StatementEntity
+                        WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                          AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                          AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                          AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
+               )) AS isCompleted,
+               (SELECT CASE 
+                       WHEN EXISTS(
+                            SELECT 1 
+                              FROM StatementEntity
+                             WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                               AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                               AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                               AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 1
+                       WHEN EXISTS(
+                            SELECT 1 
+                              FROM StatementEntity
+                             WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                               AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                               AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                               AND StatementEntity.resultSuccess IS NOT NULL
+                               AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0) THEN 0
+                       ELSE NULL
+                       END) AS isSuccessful
           FROM DistinctRegistrationUids       
     """)
     abstract fun findSessionsByPersonAndContent(

@@ -12,4 +12,6 @@ data class PersonAndPictureAndNumAttempts(
     @Embedded
     var picture: PersonPicture? = null,
     var numAttempts: Int = 0,
+    var isCompleted: Boolean = false,
+    var isSuccessful: Boolean? = null,
 )
