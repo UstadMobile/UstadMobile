@@ -14,4 +14,6 @@ data class PersonAndPictureAndNumAttempts(
     var numAttempts: Int = 0,
     var isCompleted: Boolean = false,
     var isSuccessful: Boolean? = null,
+    var maxScore: Float? = null,
+    var maxProgress: Int? = null,
 )

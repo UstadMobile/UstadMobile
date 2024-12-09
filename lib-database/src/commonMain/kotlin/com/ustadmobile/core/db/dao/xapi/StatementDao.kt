@@ -314,7 +314,17 @@ expect abstract class StatementDao {
                             AND StatementEntity.resultSuccess IS NOT NULL
                             AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 0
                     ELSE NULL
-                    END) AS isSuccessful
+                    END) AS isSuccessful,
+            (SELECT MAX(StatementEntity.extensionProgress)
+               FROM StatementEntity
+              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                AND StatementEntity.statementActorPersonUid = Person.personUid
+                AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1) AS maxProgress,
+            (SELECT MAX(StatementEntity.resultScoreScaled)
+               FROM StatementEntity
+              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                AND StatementEntity.statementActorPersonUid = Person.personUid
+                AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1) AS maxScore    
        FROM Person
             LEFT JOIN PersonPicture
                  ON PersonPicture.personPictureUid = Person.personUid
