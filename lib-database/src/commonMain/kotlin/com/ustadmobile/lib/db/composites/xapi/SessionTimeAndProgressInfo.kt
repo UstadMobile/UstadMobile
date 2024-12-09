@@ -4,6 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SessionTimeAndProgressInfo(
+    var contextRegistrationHi: Long = 0,
+    var contextRegistrationLo: Long = 0,
     var timeStarted: Long = 0,
     var maxProgress: Int? = null,
     var maxScore: Float? = null,
