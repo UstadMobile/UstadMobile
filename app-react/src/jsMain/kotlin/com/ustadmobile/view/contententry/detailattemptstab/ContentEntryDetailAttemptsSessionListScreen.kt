@@ -95,7 +95,7 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
 
                     infiniteQueryPagingItems(
                         items = infiniteQueryResult,
-                        key = { it.contextRegistrationHi.toLong() ?: -1 }
+                        key = { it.contextRegistrationHi.toString() }
                     ) { attemptsSessionListItems ->
                         ListItem.create {
 

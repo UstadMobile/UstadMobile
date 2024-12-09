@@ -239,7 +239,7 @@ class VirtualListContentScope internal constructor() {
 
     fun <T: Any> infiniteQueryPagingItems(
         items: UseInfiniteQueryResult<PagingSourceLoadResult<Int, T>, Throwable>,
-        key: (item: SessionTimeAndProgressInfo) -> Long,
+        key: (item: T) -> String,
         itemToNode: (item: T?) -> ReactNode
     ) {
         infiniteQueryPagingItemsIndexed(
