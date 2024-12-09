@@ -46,7 +46,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
     ) {
         ustadPagedItems(
             pagingItems = attemptsStatementListItems,
-            key = { it.person?.personUid ?: -1 }
+            key = { it.statementEntity?.statementIdHi ?: -1 }
         ) { attemptsStatementListItems ->
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {

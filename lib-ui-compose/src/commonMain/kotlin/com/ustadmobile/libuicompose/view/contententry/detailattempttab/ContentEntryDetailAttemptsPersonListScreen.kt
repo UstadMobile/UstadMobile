@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
+import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
@@ -44,7 +45,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
 fun ContentEntryDetailAttemptsPersonListScreen(
     uiState: ContentEntryDetailAttemptsPersonListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
-    onClickEntry: (StatementAndPersonAndPicture) -> Unit = {},
+    onClickEntry: (PersonAndPictureAndNumAttempts) -> Unit = {},
     ) {
     val attemptsPersonListPager =
         rememberDoorRepositoryPager(uiState.attemptsPersonList, refreshCommandFlow)
@@ -66,7 +67,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                     )
                 },
                 supportingContent = {
-                    androidx.compose.material3.Text(text = "${attemptsPersonListItems?.numberOfAttempts.toString()} attempts")
+                    androidx.compose.material3.Text(text = "${attemptsPersonListItems?.numAttempts.toString()} attempts")
                 },
                 leadingContent = {
                     UstadPersonAvatar(
@@ -79,17 +80,17 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val progressValue = attemptsPersonListItems?.statement?.extensionProgress?.toFloat()
-                    ?: attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f
+                val progressValue = attemptsPersonListItems?.maxProgress?.toFloat()
+                    ?: attemptsPersonListItems?.maxScore ?: 0f
                 LinearProgressIndicator(
                     progress = progressValue,
                     modifier = Modifier.weight(0.7f).padding(start=12.dp),
                 )
                 Text(
                     text = when {
-                        attemptsPersonListItems?.statement?.extensionProgress != null ->
-                            "${(attemptsPersonListItems.statement?.extensionProgress ?: 0f)}% Completion"
-                        else ->"${((attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f) * 100).toInt()}% Score"
+                        attemptsPersonListItems?.isCompleted == true ->
+                            "${(attemptsPersonListItems.maxProgress?: 0f)}% Completion"
+                        else ->"${((attemptsPersonListItems?.maxScore ?: 0f) * 100).toInt()}% Score"
                     },
                     modifier = Modifier.padding(start = 8.dp).weight(0.3f),
                 )

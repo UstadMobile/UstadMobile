@@ -6,12 +6,13 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 
 data class ContentEntryDetailAttemptsPersonListUiState(
-    val attemptsPersonList: () -> PagingSource<Int, StatementAndPersonAndPicture> =
+    val attemptsPersonList: () -> PagingSource<Int, PersonAndPictureAndNumAttempts> =
         { EmptyPagingSource() },
 )
 
@@ -26,13 +27,13 @@ class ContentEntryDetailAttemptsPersonListViewModel(
 
 
     private fun getAttemptsPersonListAsPagingSource(contentEntryUid: Long):
-            PagingSource<Int, StatementAndPersonAndPicture> {
+            PagingSource<Int, PersonAndPictureAndNumAttempts> {
         val pagingSource =
-            activeRepo.xapiSessionEntityDao().findPersonsWithAttempts(contentEntryUid)
+            activeRepo.statementDao().findPersonsWithAttempts(contentEntryUid)
         return pagingSource
     }
 
-    private val attemptsPersonListPagingSource: ListPagingSourceFactory<StatementAndPersonAndPicture> =
+    private val attemptsPersonListPagingSource: ListPagingSourceFactory<PersonAndPictureAndNumAttempts> =
         {
             getAttemptsPersonListAsPagingSource(contentEntryUid = entityUidArg)
         }
@@ -46,7 +47,7 @@ class ContentEntryDetailAttemptsPersonListViewModel(
     }
 
     fun onClickEntry(
-        entry: StatementAndPersonAndPicture
+        entry: PersonAndPictureAndNumAttempts
     ) {
         navController.navigate(
             viewName = ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME,

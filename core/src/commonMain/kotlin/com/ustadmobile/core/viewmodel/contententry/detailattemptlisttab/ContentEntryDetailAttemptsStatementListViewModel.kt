@@ -8,13 +8,14 @@ import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
+import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 
 data class ContentEntryDetailAttemptsStatementListUiState(
-    val attemptsStatementList: () -> PagingSource<Int, StatementAndPersonAndPicture> = { EmptyPagingSource() },
+    val attemptsStatementList: () -> PagingSource<Int, StatementEntityAndVerb> = { EmptyPagingSource() },
 )
 
 class ContentEntryDetailAttemptsStatementListViewModel(
@@ -25,28 +26,25 @@ class ContentEntryDetailAttemptsStatementListViewModel(
 
     private val entityUidArg = savedStateHandle[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
     private val argPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
-    private val agrStatementVerbUid =
-        savedStateHandle[UstadView.ARG_STATEMENT_VERB_UID]?.toLong() ?: 0
+    private val argContextRegistrationIdHi = savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_HI]?.toLong() ?: 0
+    private val argContextRegistrationIdLo = savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_LO]?.toLong() ?: 0
 
     private fun getAttemptsStatementListAsPagingSource(
-        contentEntryUid: Long,
-        personUid: Long,
-        statementVerbUid: Long,
+        contextRegistrationHi: Long,
+        contextRegistrationLo: Long,
 
-        ): PagingSource<Int, StatementAndPersonAndPicture> {
-        return activeRepo.statementDao().getStatementList(
-            contentEntryUid, personUid,
-            statementVerbUid
+
+        ): PagingSource<Int, StatementEntityAndVerb> {
+        return activeRepo.statementDao().findStatementsBySession(
+            contextRegistrationHi,contextRegistrationLo
         )
     }
 
-    private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementAndPersonAndPicture> =
+    private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementEntityAndVerb> =
         {
             getAttemptsStatementListAsPagingSource(
-                contentEntryUid = entityUidArg,
-                personUid = argPersonUid,
-                statementVerbUid = agrStatementVerbUid
-
+                contextRegistrationHi = argContextRegistrationIdHi,
+                contextRegistrationLo =  argContextRegistrationIdLo
             )
         }
 
@@ -70,8 +68,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
 
     companion object {
         const val DEST_NAME = "ContentEntryDetailAttemptsStatementList"
-        const val statementIdHi = "statementIdHi"
-        const val statementIdLo = "statementIdLo"
+
 
     }
 
