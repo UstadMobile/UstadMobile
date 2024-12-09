@@ -69,8 +69,8 @@ interface UstadView {
         const val ARG_STATEMENT_VERB_UID= "statementVerUid"
 
 
-        const val ARG_STATEMENT_ID_HI = "statementIdHi"
-        const val ARG_STATEMENT_ID_LO = "statementIdLo"
+        const val ARG_CONTEXT_REGISTRATION_ID_HI = "contextRegistrationIdHi"
+        const val ARG_CONTEXT_REGISTRATION_ID_LO = "contextRegistrationIdLo"
 
 
         const val ARG_LEARNER_GROUP_UID = "learnerGroupUid"

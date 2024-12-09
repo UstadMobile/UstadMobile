@@ -11,6 +11,7 @@ import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
+import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -52,7 +53,7 @@ external interface ContentEntryDetailAttemptsSessionListProps : Props {
 
     var uiState: ContentEntryDetailAttemptsSessionListUiState
     var refreshCommandFlow: Flow<RefreshCommand>?
-    var onListItemClick: (StatementAndPersonAndPicture) -> Unit
+    var onListItemClick: (SessionTimeAndProgressInfo) -> Unit
 
 }
 
@@ -76,7 +77,7 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
             )
 
             val infiniteQueryResult: UseInfiniteQueryResult
-            <PagingSourceLoadResult<Int, StatementAndPersonAndPicture>, Throwable> =
+            <PagingSourceLoadResult<Int, SessionTimeAndProgressInfo>, Throwable> =
                 usePagingSource(
                     remoteMediatorResult.pagingSourceFactory, true, 50
                 )
@@ -94,7 +95,7 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
 
                     infiniteQueryPagingItems(
                         items = infiniteQueryResult,
-                        key = { it.person?.personUid?.toString() ?: "0" }
+                        key = { it.contextRegistrationHi.toLong() ?: -1 }
                     ) { attemptsSessionListItems ->
                         ListItem.create {
 
@@ -110,24 +111,29 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                         attemptsSessionListItems?.also { props.onListItemClick(it) }
                                     }
                                     ListItemIcon {
-                                        when {
-                                            // If extensionProgress is null, check resultSuccess
-                                            attemptsSessionListItems?.statement?.extensionProgress == null -> {
-                                                if (attemptsSessionListItems?.statement?.resultSuccess == true) {
-                                                    Check()
-                                                } else {
-                                                    Close()
-                                                }
-                                            }
-                                            // If extensionProgress is not null, check if it's 100 or not
-                                            attemptsSessionListItems?.statement?.extensionProgress == 100 -> {
-                                                Check()
-                                            }
-                                            // If extensionProgress is not 100, display Close
-                                            else -> {
-                                                Close()
-                                            }
-                                        }
+
+                                        Close()
+
+                                    }
+
+                                    ListItemText {
+                                        primary =
+                                            ReactNode(
+                                                "Passed"
+                                            )
+
+                                    }
+
+
+                                }
+                                ListItemButton {
+                                    onClick = {
+                                        attemptsSessionListItems?.also { props.onListItemClick(it) }
+                                    }
+                                    ListItemIcon {
+
+                                        Close()
+
                                     }
 
                                     ListItemText {
@@ -135,20 +141,13 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                             ReactNode(
                                                 when {
                                                     // If extensionProgress is null, check the resultSuccess value
-                                                    attemptsSessionListItems?.statement?.extensionProgress == null -> {
-                                                        if (attemptsSessionListItems?.statement?.resultSuccess == true) {
-                                                            "Passed"
-                                                        } else {
-                                                            "Failed"
-                                                        }
+                                                    attemptsSessionListItems?.maxProgress == null -> {
+                                                        "${attemptsSessionListItems?.maxScore}"
                                                     }
-                                                    // If extensionProgress is not null, check if it equals 100
-                                                    attemptsSessionListItems?.statement?.extensionProgress == 100 -> {
-                                                        "Completed"
-                                                    }
+
                                                     // If extensionProgress is not null and less than 100
                                                     else -> {
-                                                        "Incomplete"
+                                                        "${attemptsSessionListItems?.maxProgress}"
                                                     }
                                                 }
                                             )
@@ -157,30 +156,84 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
 
 
                                 }
-                                ListItemButton {
-                                    ListItemIcon {
 
-                                        Star()
-                                        sx {
-                                            padding = theme.spacing(1, 1, 1, 5)
-                                        }
-                                    }
-                                    ListItemText {
-                                        secondary = ReactNode(
-                                            when {
-                                                attemptsSessionListItems?.statement?.extensionProgress == null -> {
-                                                    // If extensionProgress is null, show Score
-                                                    "${(attemptsSessionListItems?.statement?.resultScoreRaw)?.toInt()}/${(attemptsSessionListItems?.statement?.resultScoreMax)?.toInt()} Score"
-                                                }
 
-                                                else -> {
-                                                    // If extensionProgress is not null, show Completion
-                                                    "${attemptsSessionListItems?.statement?.extensionProgress}% Completion"
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
+                                /*  ListItemButton {
+                                      onClick = {
+                                          attemptsSessionListItems?.also { props.onListItemClick(it) }
+                                      }
+                                      ListItemIcon {
+                                          when {
+                                              // If extensionProgress is null, check resultSuccess
+                                              attemptsSessionListItems?.statement?.extensionProgress == null -> {
+                                                  if (attemptsSessionListItems?.statement?.resultSuccess == true) {
+                                                      Check()
+                                                  } else {
+                                                      Close()
+                                                  }
+                                              }
+                                              // If extensionProgress is not null, check if it's 100 or not
+                                              attemptsSessionListItems?.statement?.extensionProgress == 100 -> {
+                                                  Check()
+                                              }
+                                              // If extensionProgress is not 100, display Close
+                                              else -> {
+                                                  Close()
+                                              }
+                                          }
+                                      }
+
+                                      ListItemText {
+                                          primary =
+                                              ReactNode(
+                                                  when {
+                                                      // If extensionProgress is null, check the resultSuccess value
+                                                      attemptsSessionListItems?.statement?.extensionProgress == null -> {
+                                                          if (attemptsSessionListItems?.statement?.resultSuccess == true) {
+                                                              "Passed"
+                                                          } else {
+                                                              "Failed"
+                                                          }
+                                                      }
+                                                      // If extensionProgress is not null, check if it equals 100
+                                                      attemptsSessionListItems?.statement?.extensionProgress == 100 -> {
+                                                          "Completed"
+                                                      }
+                                                      // If extensionProgress is not null and less than 100
+                                                      else -> {
+                                                          "Incomplete"
+                                                      }
+                                                  }
+                                              )
+
+                                      }
+
+
+                                  }
+                                  ListItemButton {
+                                      ListItemIcon {
+
+                                          Star()
+                                          sx {
+                                              padding = theme.spacing(1, 1, 1, 5)
+                                          }
+                                      }
+                                      ListItemText {
+                                          secondary = ReactNode(
+                                              when {
+                                                  attemptsSessionListItems?.statement?.extensionProgress == null -> {
+                                                      // If extensionProgress is null, show Score
+                                                      "${(attemptsSessionListItems?.statement?.resultScoreRaw)?.toInt()}/${(attemptsSessionListItems?.statement?.resultScoreMax)?.toInt()} Score"
+                                                  }
+
+                                                  else -> {
+                                                      // If extensionProgress is not null, show Completion
+                                                      "${attemptsSessionListItems?.statement?.extensionProgress}% Completion"
+                                                  }
+                                              }
+                                          )
+                                      }
+                                  }*/
                             }
                         }
                     }

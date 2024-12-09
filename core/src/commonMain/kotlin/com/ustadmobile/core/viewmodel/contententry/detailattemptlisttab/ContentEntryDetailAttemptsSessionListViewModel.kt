@@ -8,6 +8,7 @@ import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
+import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -15,7 +16,7 @@ import org.kodein.di.DI
 data class ContentEntryDetailAttemptsSessionListUiState(
     val personName: String = "",
     val contentEntryTitle: String = "",
-    val attemptsSessionList: () -> PagingSource<Int, StatementAndPersonAndPicture> = { EmptyPagingSource() },
+    val attemptsSessionList: () -> PagingSource<Int, SessionTimeAndProgressInfo> = { EmptyPagingSource() },
     val personUid: Long = 0
 )
 
@@ -29,15 +30,18 @@ class ContentEntryDetailAttemptsSessionListViewModel(
     private val argPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
 
 
+
+
     private fun getAttemptsSessionListAsPagingSource(contentEntryUid: Long, personUid: Long)
-            : PagingSource<Int, StatementAndPersonAndPicture> {
-        return activeRepo.xapiSessionEntityDao().getSessionList(contentEntryUid,personUid)
+            : PagingSource<Int, SessionTimeAndProgressInfo> {
+        return activeRepo.statementDao().findSessionsByPersonAndContent(contentEntryUid,personUid)
     }
 
-    private val attemptsSessionListPagingSource: ListPagingSourceFactory<StatementAndPersonAndPicture> = {
+    private val attemptsSessionListPagingSource: ListPagingSourceFactory<SessionTimeAndProgressInfo> = {
         getAttemptsSessionListAsPagingSource(
             contentEntryUid = entityUidArg,
-            personUid = argPersonUid
+            personUid = argPersonUid,
+
         )
     }
 
@@ -63,15 +67,16 @@ class ContentEntryDetailAttemptsSessionListViewModel(
     }
 
     fun onClickEntry(
-        entry: StatementAndPersonAndPicture
+        entry: SessionTimeAndProgressInfo
     ) {
         navController.navigate(
             viewName = ContentEntryDetailAttemptsStatementListViewModel.DEST_NAME,
             args = mapOf(
                 UstadView.ARG_PERSON_UID to argPersonUid.toString(),
                 UstadView.ARG_CONTENT_ENTRY_UID to entityUidArg.toString(),
-                UstadView.ARG_VERB_UID to entry.statement?.statementVerbUid.toString()
-            )
+                UstadView.ARG_CONTEXT_REGISTRATION_ID_HI to entry.contextRegistrationHi.toString(),
+                UstadView.ARG_CONTEXT_REGISTRATION_ID_LO to entry.contextRegistrationLo.toString(),
+                )
         )
     }
 

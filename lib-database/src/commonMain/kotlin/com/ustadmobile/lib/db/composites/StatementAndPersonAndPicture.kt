@@ -20,3 +20,4 @@ data class StatementAndPersonAndPicture(
     var verb:VerbEntity?=null
 
 )
+

@@ -9,6 +9,7 @@ import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -46,7 +47,7 @@ import web.cssom.px
 external interface ContentEntryDetailAttemptsPersonListProps : Props {
     var uiState: ContentEntryDetailAttemptsPersonListUiState
     var refreshCommandFlow: Flow<RefreshCommand>?
-    var onListItemClick: (StatementAndPersonAndPicture) -> Unit
+    var onListItemClick: (PersonAndPictureAndNumAttempts) -> Unit
 
 }
 
@@ -67,7 +68,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
             )
             println("remoteMediatorResult: $remoteMediatorResult")
 
-            val infiniteQueryResult: UseInfiniteQueryResult<PagingSourceLoadResult<Int, StatementAndPersonAndPicture>, Throwable> =
+            val infiniteQueryResult: UseInfiniteQueryResult<PagingSourceLoadResult<Int, PersonAndPictureAndNumAttempts>, Throwable> =
                 usePagingSource(
                     remoteMediatorResult.pagingSourceFactory, true, 150
                 )
@@ -84,7 +85,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                     virtualListContent {
                         infiniteQueryPagingItems(
                             items = infiniteQueryResult,
-                            key = { it.person?.personUid?.toString() ?: "0" }
+                            key = { it.contextRegistrationHi }
                         ) { attemptsPersonListItems ->
                             ListItem.create {
                                 Stack {
@@ -109,7 +110,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                                         ?: ""
                                                 )
                                             secondary = ReactNode(
-                                                "${attemptsPersonListItems?.numberOfAttempts.toString()} attempts"
+                                                "${attemptsPersonListItems?.numAttempts.toString()} attempts"
                                                     ?: "0 attempts"
                                             )
                                         }
@@ -127,23 +128,22 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                             variant = LinearProgressVariant.determinate
                                             // Set value based on whether extensionProgress is not null
                                             value =
-                                                attemptsPersonListItems?.statement?.extensionProgress?.let {
-                                                    it.toFloat()  // If extensionProgress is not null, use it
+                                                attemptsPersonListItems?.maxProgress?.let {
+                                                    it  // If extensionProgress is not null, use it
                                                 }
-                                                    ?: (attemptsPersonListItems?.statement?.resultScoreScaled?.times(
+                                                    ?: (attemptsPersonListItems?.maxScore?.times(
                                                         100
                                                     )
-                                                        ?.toInt()
                                                         ?: 0) // Otherwise, use resultScoreScaled
                                         }
                                         ListItemText {
                                             primary = ReactNode(
-                                                attemptsPersonListItems?.statement?.extensionProgress?.let {
+                                                attemptsPersonListItems?.maxProgress?.let {
                                                     // If extensionProgress is not null, show its value as percentage
                                                     "${(it)}% Completion"
                                                 }
                                                     ?: // If extensionProgress is null, fall back to resultScoreScaled
-                                                    "${((attemptsPersonListItems?.statement?.resultScoreScaled ?: 0f) * 100).toInt()}% Score"
+                                                    "${((attemptsPersonListItems?.maxScore ?: 0f) * 100).toInt()}% Score"
                                             )
                                             sx {
                                                 verticalAlign = VerticalAlign.middle

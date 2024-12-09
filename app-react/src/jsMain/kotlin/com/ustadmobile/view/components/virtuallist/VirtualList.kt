@@ -2,6 +2,7 @@ package com.ustadmobile.view.components.virtuallist
 
 import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
+import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import js.objects.Object
 import js.objects.jso
 import react.*
@@ -238,7 +239,7 @@ class VirtualListContentScope internal constructor() {
 
     fun <T: Any> infiniteQueryPagingItems(
         items: UseInfiniteQueryResult<PagingSourceLoadResult<Int, T>, Throwable>,
-        key: (item: T) -> String,
+        key: (item: SessionTimeAndProgressInfo) -> Long,
         itemToNode: (item: T?) -> ReactNode
     ) {
         infiniteQueryPagingItemsIndexed(

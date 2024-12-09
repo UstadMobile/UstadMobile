@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.min
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListUiState
 import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
+import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.ustadPagedItems
@@ -48,7 +49,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
 fun ContentEntryDetailAttemptsSessionListScreen(
     uiState: ContentEntryDetailAttemptsSessionListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
-    onClickEntry: (StatementAndPersonAndPicture) -> Unit = {},
+    onClickEntry: (SessionTimeAndProgressInfo) -> Unit = {},
 ) {
     val attemptsSessionListPager =
         rememberDoorRepositoryPager(uiState.attemptsSessionList, refreshCommandFlow)
@@ -59,15 +60,45 @@ fun ContentEntryDetailAttemptsSessionListScreen(
     ) {
         ustadPagedItems(
             pagingItems = attemptsSessionListItems,
-            key = { it.person?.personUid ?: -1 }
+            key = { it.contextRegistrationHi.toInt() ?: -1 }
         ) { attemptsSessionListItems ->
-            val resultScore = attemptsSessionListItems?.statement?.resultScoreScaled ?: 0f
-            val percentage = (resultScore * 100).toInt()
-            val resultDuration = attemptsSessionListItems?.statement?.resultDuration?.toInt()?:0
-            val minutes = resultDuration / 60
-            val seconds = resultDuration % 60
-
             androidx.compose.material3.ListItem(
+                modifier = Modifier.clickable {
+                    attemptsSessionListItems?.also(onClickEntry)
+                },
+                leadingContent = {
+                    // Choose the appropriate icon based on the condition
+                    Icon(
+                        imageVector =
+                          Icons.Filled.Close
+                        ,
+                        contentDescription =
+                          "Icon"
+                        ,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                },
+                headlineContent = {
+                    androidx.compose.material3.Text(
+                        text =
+                       " ${attemptsSessionListItems?.maxScore}",
+
+
+                    )
+                },
+                supportingContent = {
+                    androidx.compose.material3.Text(
+                        text =
+                        " ${attemptsSessionListItems?.maxProgress}",
+
+
+                        )
+
+                }
+
+            )
+
+       /*     androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {
                     attemptsSessionListItems?.also(onClickEntry)
                 },
@@ -149,7 +180,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
 
                 }
 
-            )
+            )*/
         }
     }
 }
