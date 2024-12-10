@@ -135,6 +135,7 @@ import com.ustadmobile.lib.rest.domain.learningspace.SystemConfigScriptRoute
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
+import com.ustadmobile.lib.rest.domain.matomo.MatomoConfigRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.systemconfig.verifyauth.VerifySystemConfigAuthUseCase
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
@@ -962,6 +963,9 @@ fun Application.umRestApplication(
                     SystemConfigScriptRoute(
                          systemDb = di.direct.instance(),
                     )
+                }
+                route("matomo") {
+                    MatomoConfigRoute()
                 }
                 route("SystemDb") {
                     SystemDb_KtorRoute(
