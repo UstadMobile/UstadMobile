@@ -61,18 +61,34 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                 headlineContent = {
                     androidx.compose.material3.Text(
                         text = attemptsStatementListItems?.verb?.verbUrlId.toString()
+                            .substringAfterLast("/").replaceFirstChar { it.uppercaseChar() }
                     )
                 },
 
                 supportingContent = {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = attemptsStatementListItems?.verb?.verbUrlId.toString(),
+                            text = if (attemptsStatementListItems?.statementEntity?.extensionProgress == null) {
+                                if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
+                                    "${
+                                        attemptsStatementListItems?.statementEntity?.resultScoreRaw?.toInt()
+                                            .toString()
+                                    }/${
+                                        attemptsStatementListItems?.statementEntity?.resultScoreMax?.toInt()
+                                            .toString()
+                                    } Score"
+                                } else {
+                                    "-"
+                                }
+
+                            } else {
+                                "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
+                            }
                         )
-                        Text(
-                            text = "100%",
-                            modifier = Modifier.padding(top = 4.dp) // Add spacing between the texts
-                        )
+                        /*      Text(
+                                  text = "100%",
+                                  modifier = Modifier.padding(top = 4.dp) // Add spacing between the texts
+                              )*/
                     }
                 }
             )
