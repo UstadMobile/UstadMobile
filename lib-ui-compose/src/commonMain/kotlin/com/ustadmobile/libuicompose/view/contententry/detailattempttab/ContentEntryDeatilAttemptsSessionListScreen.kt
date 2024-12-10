@@ -62,43 +62,10 @@ fun ContentEntryDetailAttemptsSessionListScreen(
             pagingItems = attemptsSessionListItems,
             key = { it.contextRegistrationHi.toInt() ?: -1 }
         ) { attemptsSessionListItems ->
+
+
+
             androidx.compose.material3.ListItem(
-                modifier = Modifier.clickable {
-                    attemptsSessionListItems?.also(onClickEntry)
-                },
-                leadingContent = {
-                    // Choose the appropriate icon based on the condition
-                    Icon(
-                        imageVector =
-                          Icons.Filled.Close
-                        ,
-                        contentDescription =
-                          "Icon"
-                        ,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                },
-                headlineContent = {
-                    androidx.compose.material3.Text(
-                        text =
-                       " ${attemptsSessionListItems?.maxScore}",
-
-
-                    )
-                },
-                supportingContent = {
-                    androidx.compose.material3.Text(
-                        text =
-                        " ${attemptsSessionListItems?.maxProgress}",
-
-
-                        )
-
-                }
-
-            )
-
-       /*     androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {
                     attemptsSessionListItems?.also(onClickEntry)
                 },
@@ -107,22 +74,22 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                     Icon(
                         imageVector = when {
                             // If extensionProgress is null, check resultSuccess
-                            attemptsSessionListItems?.statement?.extensionProgress == null -> {
-                                if (attemptsSessionListItems?.statement?.resultSuccess == true) Icons.Filled.Check
+                            attemptsSessionListItems?.isSuccessful!= null -> {
+                                if (attemptsSessionListItems?.isSuccessful== true) Icons.Filled.Check
                                 else Icons.Filled.Close
                             }
                             // If extensionProgress is not null, check its value
-                            attemptsSessionListItems?.statement?.extensionProgress == 100 -> Icons.Filled.Check
+                            attemptsSessionListItems?.isCompleted==true -> Icons.Filled.Check
                             else -> Icons.Filled.Close
                         },
                         contentDescription = when {
                             // If extensionProgress is null, check resultSuccess
-                            attemptsSessionListItems?.statement?.extensionProgress == null -> {
-                                if (attemptsSessionListItems?.statement?.resultSuccess == true) "Success"
+                            attemptsSessionListItems?.isSuccessful != null -> {
+                                if (attemptsSessionListItems?.isSuccessful == true) "Success"
                                 else "Failure"
                             }
                             // If extensionProgress is 100, set as Completed
-                            attemptsSessionListItems?.statement?.extensionProgress == 100 -> "Completed"
+                            attemptsSessionListItems?.isCompleted==true-> "Completed"
                             else -> "Incomplete"
                         },
                         modifier = Modifier.padding(end = 8.dp)
@@ -131,17 +98,17 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                 headlineContent = {
                     androidx.compose.material3.Text(
                         text = when {
-                            attemptsSessionListItems?.statement?.extensionProgress == null -> {
+                            attemptsSessionListItems?.isSuccessful != null -> {
                                 // If extensionProgress is  null, check resultSuccess
                                 when {
-                                    attemptsSessionListItems?.statement?.resultSuccess == true -> "Passed"
-                                    attemptsSessionListItems?.statement?.resultSuccess == false -> "Failed"
+                                    attemptsSessionListItems?.isSuccessful == true -> "Passed"
+                                    attemptsSessionListItems?.isSuccessful == false -> "Failed"
                                     else -> "" // Default if resultSuccess is null
                                 }
                             }
                             else -> {
 
-                                if (attemptsSessionListItems?.statement?.extensionProgress == 100) {
+                                if (attemptsSessionListItems?.isCompleted==true) {
                                     "Completed"
                                 } else {
                                     "Incomplete"
@@ -164,13 +131,13 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                             )
                             Text(
                                 text = when {
-                                    attemptsSessionListItems?.statement?.extensionProgress == null -> {
+                                    attemptsSessionListItems?.maxScore!= null -> {
                                         // If extensionProgress is null, show the score text
-                                        "${(attemptsSessionListItems?.statement?.resultScoreRaw)?.toInt()}/${(attemptsSessionListItems?.statement?.resultScoreMax)?.toInt()} Score"
+                                        "${((attemptsSessionListItems?.maxScore ?: 0f) * 100).toInt()}% Score"
                                     }
                                     else -> {
                                         // If extensionProgress is not null, show the completion text
-                                        "${(attemptsSessionListItems.statement?.extensionProgress)}% Completion"
+                                        "${(attemptsSessionListItems?.maxProgress)}% Completion"
                                     }
                                 }
                             )
@@ -180,7 +147,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
 
                 }
 
-            )*/
+            )
         }
     }
 }
