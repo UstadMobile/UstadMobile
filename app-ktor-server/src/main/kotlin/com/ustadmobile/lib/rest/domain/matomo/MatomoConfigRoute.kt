@@ -15,7 +15,6 @@ fun Route.MatomoConfigRoute() {
         try {
             call.respondText(contentType = ContentType.Text.JavaScript) {
                 """
-                console.log("Matomo tracking initialized");
                 var _paq = window._paq = window._paq || [];
                 _paq.push(['setDocumentTitle', "Home"]);
                 _paq.push(['trackPageView']);

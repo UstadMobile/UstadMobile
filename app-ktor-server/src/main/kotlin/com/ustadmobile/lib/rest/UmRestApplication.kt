@@ -199,7 +199,8 @@ fun Application.umRestApplication(
 
     val sitePrefix = environment.config.propertyOrNull(CONF_KEY_URL_PREFIX)?.getString()
 
-    val dbMode = dbModeOverride ?:  appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
+    val dbMode = dbModeOverride ?: appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString()
+    ?: CONF_DBMODE_SINGLETON
 
     val ktorAppHome = ktorAppHomeDir()
 
@@ -218,34 +219,42 @@ fun Application.umRestApplication(
 
     val soxCommand = CompressAudioUseCaseSox.findSox()
 
-    if(mediaInfoFile == null || !mediaInfoFile.exists()) {
-        throw MissingMediaProgramsException("Cannot find mediainfo command you must install it: \n" +
-                "On Ubuntu: apt-get install mediainfo\n" +
-                "On Windows: winget install -e --id MediaArea.MediaInfo")
+    if (mediaInfoFile == null || !mediaInfoFile.exists()) {
+        throw MissingMediaProgramsException(
+            "Cannot find mediainfo command you must install it: \n" +
+                    "On Ubuntu: apt-get install mediainfo\n" +
+                    "On Windows: winget install -e --id MediaArea.MediaInfo"
+        )
     }
 
-    if(handBrakeCliCommand == null) {
-        throw MissingMediaProgramsException("Cannot find HandBrakeCLI or version is less than 1.6\n" +
-                "On Ubuntu 23.04+: apt-get-install handbrake-cli\n" +
-                "On Ubuntu (pre 23.04): apt-get install flatpak, download HandBrakeCLI from handbrake.fr, " +
-                "flatpak install /path/where/downloaded/HandBrakeCLI-1.7.3-x86_64.flatpak" +
-                "on Windows: winget install -e --id HandBrake.HandBrake.CLI")
+    if (handBrakeCliCommand == null) {
+        throw MissingMediaProgramsException(
+            "Cannot find HandBrakeCLI or version is less than 1.6\n" +
+                    "On Ubuntu 23.04+: apt-get-install handbrake-cli\n" +
+                    "On Ubuntu (pre 23.04): apt-get install flatpak, download HandBrakeCLI from handbrake.fr, " +
+                    "flatpak install /path/where/downloaded/HandBrakeCLI-1.7.3-x86_64.flatpak" +
+                    "on Windows: winget install -e --id HandBrake.HandBrake.CLI"
+        )
     }
 
-    if(soxCommand == null) {
-        throw MissingMediaProgramsException("Cannot find SoX" +
-                "On Ubuntu: apt-get install sox libsox-fmt-all\n" +
-                "On Windows: Download and install from SoX website: https://sourceforge.net/projects/sox/files/sox/14.4.2/")
+    if (soxCommand == null) {
+        throw MissingMediaProgramsException(
+            "Cannot find SoX" +
+                    "On Ubuntu: apt-get install sox libsox-fmt-all\n" +
+                    "On Windows: Download and install from SoX website: https://sourceforge.net/projects/sox/files/sox/14.4.2/"
+        )
     }
 
-    if(!NativeDiscovery().discover()) {
-        throw MissingMediaProgramsException("Cannot find VLC.\n" +
-                "On Ubuntu: apt-get install vlc\n" +
-                "On Windows: Download and install a **64bit** version from videolan.org")
+    if (!NativeDiscovery().discover()) {
+        throw MissingMediaProgramsException(
+            "Cannot find VLC.\n" +
+                    "On Ubuntu: apt-get install vlc\n" +
+                    "On Windows: Download and install a **64bit** version from videolan.org"
+        )
     }
 
     val commandsDir = File(ktorAppHome, "commands")
-    val mpg123Command = if(isWindowsOs()) {
+    val mpg123Command = if (isWindowsOs()) {
         val extraSearchPaths = listOf("mpg123", "mpg123-1.32.6-x86").map { commandSubDir ->
             File(commandsDir, commandSubDir).absolutePath
         }.joinToString(separator = File.pathSeparator)
@@ -254,14 +263,16 @@ fun Application.umRestApplication(
             commandName = "mpg123",
             extraSearchPaths = extraSearchPaths,
         ).also {
-            if(it == null) {
-                throw MissingMediaProgramsException("Cannot find mpg123. This is required on Windows.\n" +
-                        "Download it from https://www.mpg123.de/download/win32/1.32.6/\n" +
-                        "Then unzip into ${commandsDir.absolutePath}, or put it anywhere in your" +
-                        "PATH environment variable, or manually specify location using ustad-server.conf")
+            if (it == null) {
+                throw MissingMediaProgramsException(
+                    "Cannot find mpg123. This is required on Windows.\n" +
+                            "Download it from https://www.mpg123.de/download/win32/1.32.6/\n" +
+                            "Then unzip into ${commandsDir.absolutePath}, or put it anywhere in your" +
+                            "PATH environment variable, or manually specify location using ustad-server.conf"
+                )
             }
         }
-    }else {
+    } else {
         null
     }
 
@@ -288,11 +299,14 @@ fun Application.umRestApplication(
 
     //Check for required external commands
     REQUIRED_EXTERNAL_COMMANDS.forEach { command ->
-        if(!SysPathUtil.commandExists(command,
-                manuallySpecifiedLocation = appConfig.commandFileProperty(command))
+        if (!SysPathUtil.commandExists(
+                command,
+                manuallySpecifiedLocation = appConfig.commandFileProperty(command)
+            )
         ) {
-            val message = "FATAL ERROR: Required external command \"$command\" not found in path or " +
-                   "manually specified location does not exist. Please set it in application.conf"
+            val message =
+                "FATAL ERROR: Required external command \"$command\" not found in path or " +
+                        "manually specified location does not exist. Please set it in application.conf"
             Napier.e(message)
             throw IllegalStateException(message)
         }
@@ -333,7 +347,7 @@ fun Application.umRestApplication(
 
     val dataDirPath = environment.config.absoluteDataDir()
 
-    val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
+    val wellKnownDir = environment.config.fileProperty("ktor.ustad.wellKnownDir", "well-known")
 
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
@@ -341,7 +355,8 @@ fun Application.umRestApplication(
 
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
-    val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
+    val apiKey =
+        environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
     di {
         import(
@@ -415,7 +430,7 @@ fun Application.umRestApplication(
             val mainTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
 
             File(mainTmpDir, UPLOAD_TMP_SUBDIR).also {
-                if(!it.exists())
+                if (!it.exists())
                     it.mkdirs()
             }
         }
@@ -433,7 +448,10 @@ fun Application.umRestApplication(
             BlobUploadServerUseCase(
                 httpCache = instance(),
                 tmpDir = Path(
-                    File(instance<File>(tag = DiTag.TAG_TMP_DIR), "blob-uploads-tmp").absolutePath.toString()
+                    File(
+                        instance<File>(tag = DiTag.TAG_TMP_DIR),
+                        "blob-uploads-tmp"
+                    ).absolutePath.toString()
                 ),
                 json = instance(),
                 saveLocalUrisAsBlobsUseCase = instance(),
@@ -596,7 +614,7 @@ fun Application.umRestApplication(
         bind<BulkAddPersonsUseCase>() with scoped(LearningSpaceScope.Default).provider {
             BulkAddPersonsUseCaseImpl(
                 addNewPersonUseCase = instance(),
-                validateEmailUseCase  = instance(),
+                validateEmailUseCase = instance(),
                 validatePhoneNumUseCase = instance(),
                 authManager = instance(),
                 enrolUseCase = instance(),
@@ -806,7 +824,7 @@ fun Application.umRestApplication(
             CreateLearningSpaceUseCase(
                 xxStringHasher = instance(),
                 learningSpaceServerRepo = instance(),
-                serverDataDir  = environment.config.absoluteDataDir(),
+                serverDataDir = environment.config.absoluteDataDir(),
                 di = di,
             )
         }
@@ -830,8 +848,10 @@ fun Application.umRestApplication(
             appConfig.config("mail")
 
             bind<MailProperties>() with singleton {
-                MailProperties(appConfig.property("mail.from").getString(),
-                    appConfig.toProperties(MailProperties.SMTP_PROPS))
+                MailProperties(
+                    appConfig.property("mail.from").getString(),
+                    appConfig.toProperties(MailProperties.SMTP_PROPS)
+                )
             }
 
             bind<NotificationSender>() with singleton {
@@ -839,7 +859,7 @@ fun Application.umRestApplication(
             }
 
             bind<Authenticator>() with singleton {
-                object: Authenticator() {
+                object : Authenticator() {
                     override fun getPasswordAuthentication(): PasswordAuthentication {
                         return PasswordAuthentication(
                             appConfig.property("mail.user").getString(),
@@ -848,7 +868,7 @@ fun Application.umRestApplication(
                     }
                 }
             }
-        }catch(e: Exception) {
+        } catch (e: Exception) {
             Napier.w("WARNING: Email sending not configured")
         }
 
@@ -860,7 +880,7 @@ fun Application.umRestApplication(
             instance<Scheduler>().start()
             instance<SystemDb>()
 
-            Runtime.getRuntime().addShutdownHook(Thread{
+            Runtime.getRuntime().addShutdownHook(Thread {
                 instance<Scheduler>().shutdown()
             })
         }
@@ -883,38 +903,38 @@ fun Application.umRestApplication(
      *
      * See comments on the jsDevServer property in application.conf for expected behavior
      */
-    val jsDevServer = if(
-        jsDevServerProp?.isNotBlank() == true  || (isRunningFromSource && jsDevServerProp == null)
+    val jsDevServer = if (
+        jsDevServerProp?.isNotBlank() == true || (isRunningFromSource && jsDevServerProp == null)
     ) {
         jsDevServerProp ?: DEFAULT_JS_DEV_SERVER
-    }else {
+    } else {
         null
     }
 
-    if(jsDevServer != null) {
+    if (jsDevServer != null) {
         install(io.ktor.server.websocket.WebSockets)
 
-        val effectiveKtorServerRoutes = if(sitePrefix != null) {
+        val effectiveKtorServerRoutes = if (sitePrefix != null) {
             KTOR_SERVER_ROUTES.map { UMFileUtil.joinPaths(sitePrefix, it) }
-        }else {
+        } else {
             KTOR_SERVER_ROUTES
         }
 
         intercept(ApplicationCallPipeline.Setup) {
             val requestUri = call.request.uri.let {
-                if(it.startsWith("//")) {
+                if (it.startsWith("//")) {
                     //This is an edge case with the ContainerFetcher. The ContainerFetcher uses //
                     // at the start of a URI. This workaround will be removed when ContainerFetcher
                     // is removed and replaced with Retriever.
                     it.removePrefix("/")
-                }else {
+                } else {
                     it
                 }
             }
 
             //If the request is not matching any API route, then use the reverse proxy to send the
             // request to the javascript development server.
-            if(!effectiveKtorServerRoutes.any { requestUri.startsWith(it) }) {
+            if (!effectiveKtorServerRoutes.any { requestUri.startsWith(it) }) {
                 call.respondReverseProxy(jsDevServer)
                 return@intercept finish()
             }
@@ -933,7 +953,12 @@ fun Application.umRestApplication(
             //addHostCheckIntercept()
             personAuthRegisterRoute()
             route("UmAppDatabase") {
-                UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json, logger = NapierDoorLogger())) { call ->
+                UmAppDatabase_KtorRoute(
+                    DoorHttpServerConfig(
+                        json = json,
+                        logger = NapierDoorLogger()
+                    )
+                ) { call ->
                     di.on(call).direct.instance(tag = DoorTag.TAG_DB)
                 }
             }
@@ -942,10 +967,10 @@ fun Application.umRestApplication(
 
             GetAppRoute()
 
-            staticFiles("/.well-known",wellKnownDir)
+            staticFiles("/.well-known", wellKnownDir)
 
             route("config") {
-                route("api"){
+                route("api") {
                     route("learningspaces") {
                         LearningSpaceApiRoute(
                             verifySystemConfigAuthUseCase = di.direct.instance(),
@@ -961,8 +986,11 @@ fun Application.umRestApplication(
             route("api") {
                 route("sysconfig") {
                     SystemConfigScriptRoute(
-                         systemDb = di.direct.instance(),
+                        systemDb = di.direct.instance(),
                     )
+                }
+                route("matomo") {
+                    MatomoConfigRoute()
                 }
                 route("SystemDb") {
                     SystemDb_KtorRoute(
@@ -975,152 +1003,151 @@ fun Application.umRestApplication(
                         }
                     )
                 }
-                route("matomo") {
-                    MatomoConfigRoute()
 
-                route("account"){
-                    SetPasswordRoute(
-                        useCase = { call ->
-                            di.on(call).direct.instance()
+
+                    route("account") {
+                        SetPasswordRoute(
+                            useCase = { call ->
+                                di.on(call).direct.instance()
+                            }
+                        )
+                    }
+                    route("passkey") {
+
+                        VerifySignInWithPasskeyRoute(
+                            useCase = { call ->
+                                di.on(call).direct.instance()
+                            }
+                        )
+                    }
+                    route("pbkdf2") {
+                        Pbkdf2Route()
+                    }
+
+                    route("contentupload") {
+                        ContentUploadRoute()
+                        GetSubtitleTrackServerRoute(
+                            getSubtitleTrackServerUseCase = { call -> di.on(call).direct.instance() }
+                        )
+                    }
+
+                    route("import") {
+                        ContentEntryImportRoute()
+                    }
+
+                    route("blob") {
+                        BlobUploadServerRoute(
+                            useCase = { call ->
+                                di.on(call).direct.instance()
+                            }
+                        )
+
+                        CacheRoute(
+                            cache = di.direct.instance()
+                        )
+                    }
+
+                    route("content") {
+                        ContentEntryVersionRoute(
+                            useCase = { call -> di.on(call).direct.instance() }
+                        )
+                    }
+
+                    route("contententryimportjob") {
+                        ContentEntryImportJobRoute(
+                            json = di.direct.instance(),
+                            dbFn = { call -> di.on(call).direct.instance(tag = DoorTag.TAG_DB) },
+                            cancelImportContentEntryServerUseCase = { call -> di.on(call).direct.instance() }
+                        )
+                    }
+
+                    route("person") {
+                        route("bulkadd") {
+                            BulkAddPersonRoute(
+                                enqueueBulkAddPersonServerUseCase = { call -> di.on(call).direct.instance() },
+                                bulkAddPersonStatusMap = { call -> di.on(call).direct.instance() },
+                                json = json,
+                            )
                         }
-                    )
-                }
-                route("passkey"){
+                    }
 
-                    VerifySignInWithPasskeyRoute(
-                        useCase = { call ->
-                            di.on(call).direct.instance()
-                        }
-                    )
-                }
-                route("pbkdf2"){
-                    Pbkdf2Route()
-                }
+                    /**
+                     * Xapi-Ext contains non-standard xapi endpoint services that we use internally;
+                     * specfically SaveStatementOnUnload and StartHttpXapiSession
+                     */
+                    route("xapi-ext") {
+                        SaveStatementOnUnloadRoute(
+                            statementResource = { call -> di.on(call).direct.instance() },
+                            json = json,
+                        )
 
-                route("contentupload") {
-                    ContentUploadRoute()
-                    GetSubtitleTrackServerRoute(
-                        getSubtitleTrackServerUseCase = { call -> di.on(call).direct.instance() }
-                    )
-                }
+                        ResumeOrStartXapiSessionRoute(
+                            resumeOrStartXapiSessionUseCase = { call -> di.on(call).direct.instance() },
+                            verifyClientUserSessionUseCase = { call -> di.on(call).direct.instance() },
+                            json = json,
+                        )
+                    }
 
-                route("import") {
-                    ContentEntryImportRoute()
-                }
-
-                route("blob") {
-                    BlobUploadServerRoute(
-                        useCase = { call ->
-                            di.on(call).direct.instance()
-                        }
-                    )
+                    route("xapi/{pathSegments...}") {
+                        XapiRoute(
+                            xapiHttpServerUseCase = { call -> di.on(call).direct.instance() }
+                        )
+                    }
 
                     CacheRoute(
                         cache = di.direct.instance()
                     )
                 }
 
-                route("content") {
-                    ContentEntryVersionRoute(
-                        useCase = { call -> di.on(call).direct.instance() }
-                    )
-                }
-
-                route("contententryimportjob"){
-                    ContentEntryImportJobRoute(
-                        json = di.direct.instance(),
-                        dbFn = { call -> di.on(call).direct.instance(tag = DoorTag.TAG_DB) },
-                        cancelImportContentEntryServerUseCase = { call -> di.on(call).direct.instance() }
-                    )
-                }
-
-                route("person") {
-                    route("bulkadd") {
-                        BulkAddPersonRoute(
-                            enqueueBulkAddPersonServerUseCase = { call -> di.on(call).direct.instance() },
-                            bulkAddPersonStatusMap = { call -> di.on(call).direct.instance() },
-                            json = json,
-                        )
-                    }
-                }
-
-                /**
-                 * Xapi-Ext contains non-standard xapi endpoint services that we use internally;
-                 * specfically SaveStatementOnUnload and StartHttpXapiSession
-                 */
-                route("xapi-ext") {
-                    SaveStatementOnUnloadRoute(
-                        statementResource = { call -> di.on(call).direct.instance() },
-                        json = json,
-                    )
-
-                    ResumeOrStartXapiSessionRoute(
-                        resumeOrStartXapiSessionUseCase = { call -> di.on(call).direct.instance() },
-                        verifyClientUserSessionUseCase  = { call -> di.on(call).direct.instance() },
-                        json = json,
-                    )
-                }
-
-                route("xapi/{pathSegments...}") {
-                    XapiRoute(
-                        xapiHttpServerUseCase = { call -> di.on(call).direct.instance() }
-                    )
-                }
-
-                CacheRoute(
-                    cache = di.direct.instance()
+                staticResources(
+                    remotePath = "umapp",
+                    basePackage = "umapp",
+                    index = "index.html",
                 )
-            }
 
-            staticResources(
-                remotePath = "umapp",
-                basePackage = "umapp",
-                index = "index.html",
-            )
+                staticResources(
+                    remotePath = "staticfiles",
+                    basePackage = "staticfiles"
+                )
 
-            staticResources(
-                remotePath = "staticfiles",
-                basePackage = "staticfiles"
-            )
-
-            //Handle default route when running behind proxy
-            if(!jsDevServer.isNullOrBlank()) {
-                webSocketProxyRoute(jsDevServer)
-            }else {
-                route("/"){
-                    get {
-                        call.response.cacheControl(CacheControl.NoStore(null))
-                        call.respondRedirect("umapp/")
+                //Handle default route when running behind proxy
+                if (!jsDevServer.isNullOrBlank()) {
+                    webSocketProxyRoute(jsDevServer)
+                } else {
+                    route("/") {
+                        get {
+                            call.response.cacheControl(CacheControl.NoStore(null))
+                            call.respondRedirect("umapp/")
+                        }
                     }
                 }
             }
         }
-    }
 
-    //Tell anyone looking that the server is up/running and where to find logs
-    // As per logback.xml
-    val logDir = System.getProperty("logs_dir") ?: "./log/"
-    val printableServerUrl = if(dbMode == CONF_DBMODE_VIRTUALHOST) {
-        "*:${appConfig.port}"
-    }else {
-        appConfig.siteUrl()
-    }
+        //Tell anyone looking that the server is up/running and where to find logs
+        // As per logback.xml
+        val logDir = System.getProperty("logs_dir") ?: "./log/"
+        val printableServerUrl = if (dbMode == CONF_DBMODE_VIRTUALHOST) {
+            "*:${appConfig.port}"
+        } else {
+            appConfig.siteUrl()
+        }
 
-    println("Ustad server is running on $printableServerUrl . Logging to $logDir .")
-    println()
-    println("You can connect the Android client to this address as per README.md .")
-    println()
-    if(jsDevServer != null) {
-        println("Javascript development mode is enabled. If you want to use the web client in a browser, you must run: ")
-        println("./gradlew app-react:jsRun")
-        println("Then open $printableServerUrl in your browser. See app-react/README.md for more details.")
-    }else if(this::class.java.getResource("/umapp/index.html") != null) {
-        println(" This build includes the web client, you can access it by opening $printableServerUrl in your browser.")
-    }else {
-        println(" This build does not include the web client and Javascript dev mode is not enabled.")
-        println(" If you want to use the web client in a browser, please see app-react/README.md .")
+        println("Ustad server is running on $printableServerUrl . Logging to $logDir .")
+        println()
+        println("You can connect the Android client to this address as per README.md .")
+        println()
+        if (jsDevServer != null) {
+            println("Javascript development mode is enabled. If you want to use the web client in a browser, you must run: ")
+            println("./gradlew app-react:jsRun")
+            println("Then open $printableServerUrl in your browser. See app-react/README.md for more details.")
+        } else if (this::class.java.getResource("/umapp/index.html") != null) {
+            println(" This build includes the web client, you can access it by opening $printableServerUrl in your browser.")
+        } else {
+            println(" This build does not include the web client and Javascript dev mode is not enabled.")
+            println(" If you want to use the web client in a browser, please see app-react/README.md .")
+        }
+        println()
+        println("Use [Ctrl+C] to stop.")
     }
-    println()
-    println("Use [Ctrl+C] to stop.")
-}
 
