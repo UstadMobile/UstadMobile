@@ -38,9 +38,9 @@ class ParseInviteUseCaseTest {
     }
 
     @Test
-    fun givenValidPhone_whenInvoke_thenReturnTrue() = runBlocking {
+    fun givenValidUsername_whenInvoke_thenReturnTrue() = runBlocking {
 
-        val result = parseInviteUseCase.invoke("+911234567890")
+        val result = parseInviteUseCase.invoke("nik@1")
         assertEquals(1, result.size)
         assertEquals(true, result[0].isValid)
     }
@@ -48,11 +48,11 @@ class ParseInviteUseCaseTest {
     @Test
     fun givenMixedInput_whenInvoke_thenReturnMixedResults() = runBlocking {
 
-        val text = "valid.email@example.com,  +911234567890"
+        val text = "valid.email@example.com,  nik"
         val result = parseInviteUseCase.invoke(text)
 
         assertEquals(2, result.size)
         assertEquals(true, result[0].isValid)
-        assertEquals(true, result[1].isValid)
+        assertEquals(false, result[1].isValid)
     }
 }
