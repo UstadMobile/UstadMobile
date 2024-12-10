@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.xapi.state
 
 import com.benasher44.uuid.uuidFrom
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.ext.agent
@@ -37,7 +37,7 @@ class DeleteXapiStateUseCase(
     private val repo: UmAppDatabase?,
     private val xxStringHasher: XXStringHasher,
     private val xxHasher64Factory: XXHasher64Factory,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
 ) {
 
     class AddXapiStateAddTriggersCallback(): DoorDatabaseCallbackStatementList {
@@ -134,7 +134,7 @@ class DeleteXapiStateUseCase(
         val registrationUuid = request.registration?.let { uuidFrom(it) }
 
         val requestActorUid = request.agent.identifierHash(xxStringHasher)
-        val sessionActorUid = session.agent(endpoint).identifierHash(xxStringHasher)
+        val sessionActorUid = session.agent(learningSpace).identifierHash(xxStringHasher)
 
         if(requestActorUid != sessionActorUid)
                 throw HttpApiException(403, "Forbidden: Agent does not match session")

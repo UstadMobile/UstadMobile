@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.xfertestnode
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.cachelock.CreateCacheLocksForActiveContentEntryVersionUseCase
@@ -64,7 +64,7 @@ class XferTestServer(
         di = DI {
             extend(node.di)
 
-            bind<BlobUploadServerUseCase>() with scoped(node.endpointScope).singleton {
+            bind<BlobUploadServerUseCase>() with scoped(node.learningSpaceScope).singleton {
                 val rootTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
                 BlobUploadServerUseCase(
                     httpCache = instance(),
@@ -74,12 +74,12 @@ class XferTestServer(
                 )
             }
 
-            bind<CreateCacheLocksForActiveContentEntryVersionUseCase>() with scoped(node.endpointScope).singleton {
+            bind<CreateCacheLocksForActiveContentEntryVersionUseCase>() with scoped(node.learningSpaceScope).singleton {
                 CreateCacheLocksForActiveContentEntryVersionUseCase(
                     db = instance(tag = DoorTag.TAG_DB),
                     json = instance(),
                     httpClient = instance(),
-                    endpoint = context,
+                    learningSpace = context,
                     createRetentionLocksForManifestUseCase = instance()
                 ).also {
                     diToClose.add(it)
@@ -87,12 +87,12 @@ class XferTestServer(
             }
 
             registerContextTranslator { call: ApplicationCall ->
-                Endpoint(call.request.headers.asIHttpHeaders().clientProtocolAndHost())
+                LearningSpace(call.request.headers.asIHttpHeaders().clientProtocolAndHost())
             }
 
             onReady {
-                val testEndpoint = Endpoint("http://localhost:$port/")
-                on(testEndpoint).instance<CreateCacheLocksForActiveContentEntryVersionUseCase>()
+                val testLearningSpace = LearningSpace("http://localhost:$port/")
+                on(testLearningSpace).instance<CreateCacheLocksForActiveContentEntryVersionUseCase>()
             }
         }
 

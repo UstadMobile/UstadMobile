@@ -132,12 +132,12 @@ class PersonDetailViewModel(
         }
 
         viewModelScope.launch {
-            val entityFlow = activeRepo.personDao().findByUidWithDisplayDetailsFlow(
+            val entityFlow = activeRepoWithFallback.personDao().findByUidWithDisplayDetailsFlow(
                 personUid = entityUidArg,
                 accountPersonUid = activeUserPersonUid,
             )
 
-            val viewAndEditPermissionFlow = activeRepo.systemPermissionDao()
+            val viewAndEditPermissionFlow = activeRepoWithFallback.systemPermissionDao()
                 .personHasEditAndViewPermissionForPersonAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     otherPersonUid = entityUidArg

@@ -10,8 +10,8 @@ class GenderConfig(
     genderConfigStr: String = DEFAULT_GENDER_OPTIONS,
 ) {
 
-    constructor(appConfig: AppConfig): this(
-        appConfig[AppConfig.KEY_GENDER_CONFIG]?.toNullIfBlank() ?: DEFAULT_GENDER_OPTIONS
+    constructor(appConfig: UstadBuildConfig): this(
+        appConfig[UstadBuildConfig.KEY_GENDER_CONFIG]?.toNullIfBlank() ?: DEFAULT_GENDER_OPTIONS
     )
 
     private val genderOptions = genderConfigStr.split(",")

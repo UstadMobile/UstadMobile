@@ -1,9 +1,10 @@
 package com.ustadmobile.core.test.clientservertest
 
 import com.ustadmobile.core.account.AuthManager
-import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.door.ext.DoorTag
@@ -20,7 +21,7 @@ import org.kodein.di.on
 class ClientServerTestClient(
     val clientNum: Int,
     val di: DI,
-    val diEndpointScope: EndpointScope,
+    val diEndpointScope: LearningSpaceScope,
     private val serverDi: DI,
     val serverUrl: String,
 ) {
@@ -38,10 +39,10 @@ class ClientServerTestClient(
         password: String = "test",
     ): UmAccount {
         //put the person
-        val serverDb: UmAppDatabase = serverDi.direct.on(Endpoint(serverUrl)).instance(tag = DoorTag.TAG_DB)
+        val serverDb: UmAppDatabase = serverDi.direct.on(LearningSpace(serverUrl)).instance(tag = DoorTag.TAG_DB)
         val addNewPersonUseCase = AddNewPersonUseCase(serverDb, null)
         val newPersonUid = addNewPersonUseCase(person)
-        val serverAuthManager: AuthManager = serverDi.direct.on(Endpoint(serverUrl)).instance()
+        val serverAuthManager: AuthManager = serverDi.direct.on(LearningSpace(serverUrl)).instance()
         serverAuthManager.setAuth(newPersonUid, password)
         return login(person.username ?: "", password)
     }
@@ -54,8 +55,8 @@ class ClientServerTestClient(
     fun close() {
         diEndpointScope.activeEndpointUrls.forEach {
             di.direct.instance<UstadAccountManager>().close()
-            di.on(Endpoint(it)).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_REPO).close()
-            di.on(Endpoint(it)).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB).close()
+            di.on(LearningSpace(it)).direct.instance<UmAppDataLayer>().repository?.close()
+            di.on(LearningSpace(it)).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB).close()
         }
     }
 

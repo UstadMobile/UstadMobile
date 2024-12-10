@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.xapi.model
 
 import com.benasher44.uuid.uuidFrom
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.xapi.XapiException
 import com.ustadmobile.core.domain.xapi.ext.resultProgressExtension
 import com.ustadmobile.core.domain.xapi.xapiRequireDurationOrNullAsLong
@@ -88,7 +88,7 @@ fun XapiStatement.toEntities(
     knownActorUidToPersonUidMap: Map<Long, Long>,
     exactJson: String?,
     isSubStatement: Boolean = false,
-    endpoint: Endpoint,
+    learningSpace: LearningSpace,
 ): List<StatementEntities> {
     val statementUuid = id?.let { uuidFrom(it) } ?: throw IllegalArgumentException("id is null")
     if(isSubStatement && `object` is XapiStatement)
@@ -119,7 +119,7 @@ fun XapiStatement.toEntities(
                 statementIdHi = statementUuid.mostSignificantBits,
                 statementIdLo = statementUuid.leastSignificantBits,
                 statementActorPersonUid = if(
-                    actor.account?.homePage == endpoint.url &&
+                    actor.account?.homePage == learningSpace.url &&
                     actor.account?.name == xapiSession.xseAccountUsername
                 ) {
                     xapiSession.xseAccountPersonUid
@@ -185,7 +185,7 @@ fun XapiStatement.toEntities(
         xapiSession = xapiSession,
         knownActorUidToPersonUidMap = knownActorUidToPersonUidMap,
         parentStatementUuid = statementUuid,
-        endpoint = endpoint,
+        learningSpace = learningSpace,
     )
 
 }

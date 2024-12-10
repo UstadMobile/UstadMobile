@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.interop
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
 import com.ustadmobile.core.util.ext.clientUrl
@@ -59,24 +59,24 @@ class UstadHttpOverIpcServer : AbstractHttpOverIpcServer(){
 
 
         val requestUrl = request.clientUrl()
-        val endpointUrl = requestUrl.substringBefore("/api/").requirePostfix("/")
+        val learningSpaceUrl = requestUrl.substringBefore("/api/").requirePostfix("/")
 
         //now find the endpoint for this request
-        if(endpointUrl !in accountManager.activeEndpoints.map { it.url }) {
-            return rawHttp.newRawHttpStringResponse(400, "Bad request: no endpoint $endpointUrl")
+        if(learningSpaceUrl !in accountManager.activeLearningSpaces.map { it.url }) {
+            return rawHttp.newRawHttpStringResponse(400, "Bad request: no endpoint $learningSpaceUrl")
         }
 
 
         val apiName = requestUrl.substringAfter("/api/").substringBefore("/")
 
-        val endpoint = Endpoint(endpointUrl)
+        val learningSpace = LearningSpace(learningSpaceUrl)
         val simpleTextRequest = request.asISimpleTextRequest()
 
         return runBlocking {
             try {
                 when(apiName) {
                     "oneroster" -> {
-                        val oneRosterEndpoint: OneRosterHttpServerUseCase = di.on(endpoint).direct
+                        val oneRosterEndpoint: OneRosterHttpServerUseCase = di.on(learningSpace).direct
                             .instance()
                         oneRosterEndpoint(simpleTextRequest).toRawResponse(rawHttp)
                     }

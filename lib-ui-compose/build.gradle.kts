@@ -62,6 +62,8 @@ kotlin {
                 implementation(libs.volley)
                 implementation(libs.aztec)
 
+                implementation(libs.credentials)
+                implementation(libs.credentialsplay)
                 implementation(libs.android.material)
                 implementation(libs.libphonenumber.android)
                 implementation(libs.autolink)

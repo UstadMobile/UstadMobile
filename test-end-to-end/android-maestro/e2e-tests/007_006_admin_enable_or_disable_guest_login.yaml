@@ -1,0 +1,41 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/007_006_admin_enable_or_disable_guest_login"
+  TESTNAME:  "007_006_admin_enable_or_disable_guest_login"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "../common/select_site.yaml"
+#admin enable user registration
+- runFlow:
+    file: "../common/user_login.yaml"
+- runFlow:
+    file: "../common/enable_guest_login.yaml"
+- assertVisible: "Yes"
+- runFlow:
+    file: "../common/guest_login.yaml"
+
+#admin disable user registration
+
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+- tapOn: "Library"
+- tapOn: "Settings"
+- tapOn: "Site"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Guest login enabled"
+- tapOn: "Save"
+- assertNotVisible: "Yes"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "../common/select_site.yaml"
+- assertNotVisible: "Connect as Guest"

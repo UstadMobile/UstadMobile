@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.account
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorDatabaseRepository
@@ -14,7 +14,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
 
 class SetPasswordUseCaseJs(
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val repo: UmAppDatabase,
     private val httpClient: HttpClient,
 ) : SetPasswordUseCase{
@@ -28,7 +28,7 @@ class SetPasswordUseCaseJs(
     ) {
         val repo = repo as? DoorDatabaseRepository ?: throw IllegalArgumentException()
         try {
-            val result = httpClient.post("${endpoint.url}api/account/setpassword") {
+            val result = httpClient.post("${learningSpace.url}api/account/setpassword") {
                 doorNodeIdHeader(repo)
                 parameter("nodeActiveUserUid", activeUserPersonUid)
                 parameter("personUid", personUid.toString())

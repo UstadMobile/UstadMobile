@@ -109,7 +109,7 @@ interface UstadView {
         /**
          * The argument is the Api Url (e.g. the endpoint).
          */
-        const val ARG_API_URL = "serverUrl"
+        const val ARG_LEARNINGSPACE_URL = "learningSpaceUrl"
 
         /**
          * Can be used with any Android intent to provide a link to open within the app.

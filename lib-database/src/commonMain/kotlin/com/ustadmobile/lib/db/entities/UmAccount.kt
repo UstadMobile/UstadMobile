@@ -9,7 +9,8 @@ data class UmAccount(var personUid: Long,
                      var endpointUrl: String = "",
                      var firstName: String? = null,
                      var lastName: String ? = null,
-                     var admin: Boolean = false){
+                     var admin: Boolean = false,
+                     var isPersonalAccount: Boolean = false){
     fun toPerson(): Person {
         val account = this
         return Person().apply {
@@ -18,6 +19,7 @@ data class UmAccount(var personUid: Long,
             firstNames = account.firstName
             lastName = account.lastName
             admin = account.admin
+            isPersonalAccount = account.isPersonalAccount
         }
     }
 }

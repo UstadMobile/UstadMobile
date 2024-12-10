@@ -1,5 +1,6 @@
 package com.ustadmobile.test.http
 
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.util.SysPathUtil
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
@@ -12,6 +13,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.io.File
 import java.io.FileFilter
+import java.net.Socket
+import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -27,7 +30,9 @@ const val TEST_FILE_NAME_PARAM = "test-file-name"
 
 const val DEST_PARAM = "dest"
 
-
+fun main(args: Array<String>) {
+    io.ktor.server.netty.EngineMain.main(args)
+}
 @Suppress("BlockingMethodInNonBlockingContext", "unused", "SdCardPath")
 fun Application.testServerController() {
 
@@ -46,7 +51,7 @@ fun Application.testServerController() {
         File(it)
     } ?: File(".")
 
-    val serverSiteUrl = environment.config.property("siteUrl").getString()
+    val learningSpaceUrl = environment.config.property("learningSpaceUrl").getString()
 
     if(adbPath == null || !adbPath.exists()) {
         throw IllegalStateException("ERROR: ADB path does not exist")
@@ -62,7 +67,7 @@ fun Application.testServerController() {
 
         log.info("Pulling file from device $deviceSerial $fromPath -> ${destFile.absolutePath}")
         ProcessBuilder(listOf(adbPath.absolutePath, "-s", deviceSerial, "pull",
-                fromPath, destFile.absolutePath))
+            fromPath, destFile.absolutePath))
             .start()
             .also {
                 it.waitFor(20, TimeUnit.SECONDS)
@@ -95,8 +100,22 @@ fun Application.testServerController() {
         }
     }
 
-    val serverDir = File("app-ktor-server")
-    val testFilesDir = File("test-end-to-end", "test-files")
+    val userDir = File(System.getProperty("user.dir"))
+
+    val rootSrcDir = when {
+        userDir.name == "testserver-controller" -> userDir.parentFile
+        File(userDir, "settings.gradle").exists() -> userDir
+        else -> {
+            val exception = IllegalStateException(
+                "ERROR: Server dir does not exist! testServerManager working directory MUST be the " +
+                        "root directory of the source code or testserver-controller directory")
+            println(exception.message)
+            throw exception
+        }
+    }
+
+    val serverDir = File(rootSrcDir, "app-ktor-server")
+    val testFilesDir = File(File(rootSrcDir, "test-end-to-end"), "test-files")
     val testContentDir = File(testFilesDir, "content")
     log.info("TEST FILES: ${testContentDir.absolutePath}")
 
@@ -137,7 +156,7 @@ fun Application.testServerController() {
             testContentDir.listFiles(FileFilter {
                 it.isFile
             })?.forEach {
-               file(it.name)
+                file(it.name)
             }
 
             default("index.html")
@@ -212,7 +231,7 @@ fun Application.testServerController() {
 
             val serverArgs = call.application.environment.config
                 .propertyOrNull("ktor.testServer.command")?.getString()?.split(Regex("\\s+"))
-                    ?.toMutableList()
+                ?.toMutableList()
                 ?: throw IllegalArgumentException("No testServer command specified in configuration")
 
             //If the command is not an absolute path or relative path, then look in the PATH variable
@@ -221,15 +240,52 @@ fun Application.testServerController() {
                     ?: throw IllegalArgumentException("Could not find server command in PATH ${serverArgs[0]}")
             }
 
-            val serverArgsWithSiteUrl = serverArgs + "-P:ktor.ustad.siteUrl=$serverSiteUrl"
-            serverProcess = ProcessBuilder(serverArgsWithSiteUrl)
+            serverProcess = ProcessBuilder(
+                    //Should use the bundled Javascript client app, not webpack server, which
+                    //would otherwise happen by default because we are running from a source directory
+                    serverArgs + arrayOf("runserver", "-P:ktor.ustad.jsDevServer=")
+                )
                 .directory(serverDir)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
 
+          try {
+              val uri = URI(learningSpaceUrl)
+              waitForPort(uri.host, uri.port)
+              val createLearningSpaceCommandArgs = buildList {
+                  addAll(serverArgs)
+                  add("newlearningspace")
+                  add("--title")
+                  add("TestLearningSpace")
+                  add("--url")
+                  add(learningSpaceUrl)
+                  add("--adminpassword")
+                  add("testpass")
+              }
+
+              val addingLearningSpaceProcess = ProcessBuilder(createLearningSpaceCommandArgs)
+                  .directory(serverDir)
+                  .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                  .redirectError(ProcessBuilder.Redirect.PIPE)
+                  .start()
+              addingLearningSpaceProcess.waitFor()
+
+              val output = addingLearningSpaceProcess.inputStream.bufferedReader().readText()
+              val errorOutput = addingLearningSpaceProcess.errorStream.bufferedReader().readText()
+
+              response += "learning space  " +
+                      "${output} <br/>"
+              response += "learning space  " +
+                      "${errorOutput} <br/>"
+
+          }catch (e:Exception){
+              response += "learning space  Error " +
+                      "${e.message} <br/>"
+          }
+
             response += "Started server process PID #${serverProcess?.pid()} " +
-                    "${serverArgsWithSiteUrl.joinToString( " ")} " +
+                    "${serverArgs.joinToString( " ")} " +
                     "(workingDir=${serverDir.absolutePath}<br/>"
 
             if(adbRecordEnabled) {
@@ -250,9 +306,9 @@ fun Application.testServerController() {
                     .start()
 
                 response += "Started video recording: ${recordArgs.joinToString(separator = " ")} " +
-                    "PID ${adbRecordProcess?.pid()} <br/>"
+                        "PID ${adbRecordProcess?.pid()} <br/>"
                 application.log.info("Started video recording: ${recordArgs.joinToString(separator = " ")} " +
-                    "PID ${adbRecordProcess?.pid()}")
+                        "PID ${adbRecordProcess?.pid()}")
             }
 
 
@@ -352,4 +408,24 @@ fun Application.testServerController() {
         }
 
     }
+
+}
+fun waitForPort(
+    host: String,
+    port: Int,
+    interval: Long = 100,
+    timeout: Long = 15_000,
+) {
+    val startTime = System.currentTimeMillis()
+    while(System.currentTimeMillis() - startTime < timeout) {
+        try {
+            Socket(host, port).close()
+            //Connection was successful if no exception thrown by now
+            return
+        }catch(e: Exception) {
+            Thread.sleep(interval)
+        }
+    }
+
+    throw IllegalStateException("Timeout!: waited for ${systemTimeInMillis() -  startTime}ms")
 }

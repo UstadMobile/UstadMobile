@@ -2,7 +2,7 @@ package com.ustadmobile.core.domain.xapi
 
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.ext.agent
 import com.ustadmobile.core.domain.xapi.ext.insertOrUpdateActorsIfNameChanged
@@ -31,7 +31,7 @@ class XapiStatementResource(
     private val db: UmAppDatabase,
     repo: UmAppDatabase?,
     private val xxHasher: XXStringHasher,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     xapiJson: XapiJson,
     private val hasherFactory: XXHasher64Factory,
     private val storeActivitiesUseCase: StoreActivitiesUseCase,
@@ -54,7 +54,7 @@ class XapiStatementResource(
         statements: List<XapiStatement>,
         xapiSession: XapiSessionEntity,
     ): StatementStoreResult {
-        val sessionActorUid = xapiSession.agent(endpoint).identifierHash(xxHasher)
+        val sessionActorUid = xapiSession.agent(learningSpace).identifierHash(xxHasher)
 
         //Ensure the known actor uid to person uid map has the person uid for the session actor uid
         val knownActorUidToPersonUidMap = xapiSession.knownActorUidToPersonUidsMap(json).let {
@@ -78,7 +78,7 @@ class XapiStatementResource(
                 authority = XapiAgent(
                     account = XapiAccount(
                         name = xapiSession.xseAccountUsername,
-                        homePage = endpoint.url,
+                        homePage = learningSpace.url,
                     )
                 )
             )
@@ -92,7 +92,7 @@ class XapiStatementResource(
                 hasherFactory = hasherFactory,
                 json = json,
                 isSubStatement = false,
-                endpoint = endpoint,
+                learningSpace = learningSpace,
             )
         }
 

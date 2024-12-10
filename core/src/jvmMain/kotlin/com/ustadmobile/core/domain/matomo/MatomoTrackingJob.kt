@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.matomo
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.blob.InterruptableCoroutineJob
 import com.ustadmobile.core.util.ext.di
 import com.ustadmobile.core.util.ext.scheduleRetryOrThrow
@@ -47,7 +47,7 @@ class MatomoTrackingJob : InterruptableCoroutineJob() {
         val screenName = jobDataMap.getString(RecordMatomoTrackingUseCaseJvmImpl.DATA_SCREEN_NAME)
         val path = jobDataMap.getString(RecordMatomoTrackingUseCaseJvmImpl.DATA_PATH)
         val endpoint =
-            Endpoint(jobDataMap.getString(RecordMatomoTrackingUseCaseJvmImpl.DATA_ENDPOINT))
+            LearningSpace(jobDataMap.getString(RecordMatomoTrackingUseCaseJvmImpl.DATA_ENDPOINT))
         val resolution = getScreenResolution()
         val lang = Locale.getDefault().language
         val osName = System.getProperty("os.name") ?: "Unknown OS"

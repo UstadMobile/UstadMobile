@@ -46,7 +46,7 @@ class ContentEntryGetMetadataViewModel(
             try {
                 val metadataResult = contentEntryGetMetaDataFromUriUseCase(
                     contentUri = DoorUri.parse(uriArg),
-                    endpoint = accountManager.activeEndpoint,
+                    learningSpace = accountManager.activeLearningSpace,
                     fileName = fileName,
                     onProgress = {
                         _uiState.update { prev ->

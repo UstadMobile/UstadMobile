@@ -1,9 +1,10 @@
 package com.ustadmobile.core.viewmodel.clazzenrolment.edit
 
 import app.cash.turbine.test
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.MAX_VALID_DATE
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -40,7 +41,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
 
-    val endpoint = Endpoint("https://app.test.com/")
+    val learningSpace = LearningSpace("https://app.test.com/")
 
     @Suppress("unused")
     class ClazzEnrolmentEditTestContext(
@@ -60,15 +61,15 @@ class ClazzEnrolmentEditViewModelTest : AbstractMainDispatcherTest()  {
     ) {
         testViewModel {
             extendDi {
-                bind<EnrolIntoCourseUseCase>() with scoped(endpointScope).singleton {
+                bind<EnrolIntoCourseUseCase>() with scoped(learningSpaceScope).singleton {
                     EnrolIntoCourseUseCase(
                         db = instance(tag = DoorTag.TAG_DB),
-                        repo = instance(tag = DoorTag.TAG_REPO),
+                        repo = instance<UmAppDataLayer>().repository
                     )
                 }
             }
 
-            val activeUserPerson = setActiveUser(endpoint)
+            val activeUserPerson = setActiveUser(learningSpace)
 
             val context = activeDb.withDoorTransactionAsync {
                 val clazzUid = activeDb.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.assignment.submitmark
 
 import com.benasher44.uuid.uuid4
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
@@ -56,7 +56,7 @@ import kotlinx.serialization.json.Json
  */
 class SubmitMarkUseCase(
     private val repo: UmAppDatabase,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val createXapiGroupUseCase: CreateXapiGroupForCourseGroupUseCase,
     private val xapiStatementResource: XapiStatementResource,
     private val xxStringHasher: XXStringHasher,
@@ -86,7 +86,7 @@ class SubmitMarkUseCase(
         val (instructorActor: XapiActor, instructorActorToPersonUidMap) = if(
             assignment.caGroupUid == 0L || assignment.caMarkingType == ClazzAssignment.MARKED_BY_COURSE_LEADER
         ) {
-            val activeUserPersonXapiAgent = activeUserPerson.toXapiAgent(endpoint)
+            val activeUserPersonXapiAgent = activeUserPerson.toXapiAgent(learningSpace)
             activeUserPersonXapiAgent to mapOf(
                 activeUserPersonXapiAgent.identifierHash(xxStringHasher) to activeUserPerson.personUid
             )
@@ -101,7 +101,7 @@ class SubmitMarkUseCase(
         }
 
         val (statementActor: XapiActor, actorToPersonUidMap) = if(assignment.caGroupUid == 0L) {
-            val stmtActor = (repo.personDao().findByUidAsync(submitterUid)?.toXapiAgent(endpoint)
+            val stmtActor = (repo.personDao().findByUidAsync(submitterUid)?.toXapiAgent(learningSpace)
                 ?: throw IllegalStateException("Could not find person for $submitterUid"))
             stmtActor to mapOf(
                 stmtActor.identifierHash(xxStringHasher) to submitterUid
@@ -132,7 +132,7 @@ class SubmitMarkUseCase(
 
         val activityId = UstadUrlComponents(
             viewName = ClazzAssignmentDetailViewModel.DEST_NAME,
-            endpoint = endpoint.url,
+            learningSpace = learningSpace.url,
             queryString = mapOf(
                 ARG_CLAZZUID to clazzUid.toString(),
                 ARG_ENTITY_UID to assignment.caUid.toString(),

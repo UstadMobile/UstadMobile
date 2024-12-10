@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.xapi.coursegroup
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
@@ -27,7 +27,7 @@ class CreateXapiGroupForCourseGroupUseCaseTest {
 
     private lateinit var stringHasher: XXStringHasher
 
-    private val endpoint = Endpoint("http://example.com/")
+    private val learningSpace = LearningSpace("http://example.com/")
 
     @BeforeTest
     fun setup() {
@@ -112,7 +112,7 @@ class CreateXapiGroupForCourseGroupUseCaseTest {
             )
             db.clazzAssignmentDao().insertAsync(assignment)
 
-            val useCase = CreateXapiGroupForCourseGroupUseCase(db, endpoint, stringHasher)
+            val useCase = CreateXapiGroupForCourseGroupUseCase(db, learningSpace, stringHasher)
             val result = useCase(
                 groupSetUid = courseGroupSet.cgsUid,
                 groupNum = 1,

@@ -2,11 +2,11 @@ package com.ustadmobile.core.viewmodel.clazz.edit
 
 import app.cash.turbine.test
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
-import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.ext.awaitItemWhere
@@ -31,7 +31,7 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
         initNapierLog()
         testViewModel<ClazzEditViewModel> {
-            val user = setActiveUser(activeEndpoint)
+            val user = setActiveUser(activeLearningSpace)
 
             viewModelFactory {
                 ClazzEditViewModel(di, savedStateHandle)
@@ -45,21 +45,18 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
             )
 
             extendDi {
-                bind<CreateNewClazzUseCase>() with scoped(endpointScope).singleton {
+                bind<CreateNewClazzUseCase>() with scoped(learningSpaceScope).singleton {
                     CreateNewClazzUseCase(
-                        repoOrDb = instance(tag = DoorTag.TAG_REPO)
+                        repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
                     )
                 }
 
-                bind<ClazzLogCreatorManager>() with singleton {
+
+                bind<EnqueueContentEntryImportUseCase>() with scoped(learningSpaceScope).singleton {
                     mock { }
                 }
 
-                bind<EnqueueContentEntryImportUseCase>() with scoped(endpointScope).singleton {
-                    mock { }
-                }
-
-                bind<EnqueueSavePictureUseCase>() with scoped(endpointScope).singleton {
+                bind<EnqueueSavePictureUseCase>() with scoped(learningSpaceScope).singleton {
                     mock { }
                 }
             }
@@ -79,7 +76,7 @@ class ClazzEditViewModelTest : AbstractMainDispatcherTest() {
 
                 readyAppUiState.actionBarButtonState.onClick()
 
-                val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+                val db = di.direct.on(activeLearningSpace).instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
                 db.doorFlow(arrayOf("Clazz")) {
                     db.clazzDao().findAll()

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.upload
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.io.ext.readSha256
 import com.ustadmobile.core.util.ext.encodeBase64
@@ -54,7 +54,7 @@ class BlobUploadServerUseCaseTest {
 
     private lateinit var batchUuid: UUID
 
-    private lateinit var endpoint: Endpoint
+    private lateinit var learningSpace: LearningSpace
 
     private lateinit var saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase
 
@@ -70,7 +70,7 @@ class BlobUploadServerUseCaseTest {
         val filesToUpload = (1..3).map {
             temporaryFolder.newFileFromResource(javaClass, "/com/ustadmobile/core/container/testfile${it}.png")
         }
-        endpoint = Endpoint("https://endpoint.com/")
+        learningSpace = LearningSpace("https://endpoint.com/")
         val urlPrefix = "https://endpoint.com/api/blob/"
 
         batchUuid = UUID.randomUUID()

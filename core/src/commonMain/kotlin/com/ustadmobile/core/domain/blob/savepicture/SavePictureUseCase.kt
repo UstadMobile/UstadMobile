@@ -35,14 +35,14 @@ import io.github.aakira.napier.Napier
  * 3) Directly update the image path for the entity on the repository.
  *
  * @param enqueueBlobUploadClientUseCase on platforms where a separate upload is required (e.g.
- *        Android and Desktop). On the web, SaveLocalUriAsBlob does the uploads itself, so no
+ *        Android and Desktop for non-local accounts). On the web, SaveLocalUriAsBlob does the uploads itself, so no
  *        upload client is required.
  */
 class SavePictureUseCase(
     private val saveLocalUrisAsBlobUseCase: SaveLocalUrisAsBlobsUseCase,
     private val enqueueBlobUploadClientUseCase: EnqueueBlobUploadClientUseCase?,
     private val db: UmAppDatabase,
-    private val repo: UmAppDatabase,
+    private val repo: UmAppDatabase?,
     private val compressImageUseCase: CompressImageUseCase,
     private val deleteUrisUseCase: DeleteUrisUseCase,
     private val getStoragePathForUrlUseCase: GetStoragePathForUrlUseCase? = null,
@@ -191,8 +191,8 @@ class SavePictureUseCase(
                     batchUuid = randomUuidAsString(),
                 )
             }else {
-                //No upload needed, directly update repo
-                repo.imageDaoForTable(tableId)?.updateUri(
+                //No upload needed, directly update uri
+                (repo ?: db).imageDaoForTable(tableId)?.updateUri(
                     uid = entityUid,
                     uri = pictureBlobUrl,
                     thumbnailUri = thumbnailBlobUrl,
@@ -200,7 +200,7 @@ class SavePictureUseCase(
                 )
             }
         }else {
-            repo.imageDaoForTable(tableId)?.updateUri(
+            (repo ?: db).imageDaoForTable(tableId)?.updateUri(
                 uid = entityUid,
                 uri = null,
                 thumbnailUri = null,

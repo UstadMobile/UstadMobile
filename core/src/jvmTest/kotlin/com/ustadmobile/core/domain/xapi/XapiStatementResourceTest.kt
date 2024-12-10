@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.xapi
 
 import com.benasher44.uuid.uuid4
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
@@ -19,7 +19,7 @@ class XapiStatementResourceTest {
 
     private val xxHasher = XXStringHasherCommonJvm()
 
-    private val endpoint = Endpoint("http://localhost/")
+    private val learningSpace = LearningSpace("http://localhost/")
 
     private lateinit var xapiStatementResource: XapiStatementResource
 
@@ -38,7 +38,7 @@ class XapiStatementResourceTest {
             db = db,
             repo = null,
             xxHasher = xxHasher,
-            endpoint = endpoint,
+            learningSpace = learningSpace,
             xapiJson = xapiJson,
             hasherFactory = XXHasher64FactoryCommonJvm(),
             storeActivitiesUseCase = storeActivitiesUseCase,

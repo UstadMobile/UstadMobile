@@ -15,7 +15,7 @@ import io.ktor.http.*
  *   http://localhost[:port]/#/ViewName?argname1=argvalue1&...
  */
 data class UstadUrlComponents(
-    val endpoint: String,
+    val learningSpace: String,
     val viewName: String,
     val queryString: String,
 ) {
@@ -37,7 +37,7 @@ data class UstadUrlComponents(
     }
 
     fun fullUrl(divider: String = UstadMobileSystemCommon.LINK_ENDPOINT_VIEWNAME_DIVIDER): String {
-        return UMFileUtil.joinPaths(endpoint, divider, viewUri)
+        return UMFileUtil.joinPaths(learningSpace, divider, viewUri)
     }
 
     companion object {
