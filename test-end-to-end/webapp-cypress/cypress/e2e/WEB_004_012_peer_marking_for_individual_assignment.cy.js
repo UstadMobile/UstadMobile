@@ -16,7 +16,7 @@ it('Admin add a course and assignment block', () => {
  // Add account for teacher
   cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teach1','tests1')
+  cy.ustadCreateUserAccount('teach1','testt1')
  //Add a student1
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','1','Male')
