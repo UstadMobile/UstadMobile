@@ -130,28 +130,26 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                             // Set value based on whether extensionProgress is not null
                                             value =
                                                 attemptsPersonListItems?.maxProgress?.let {
-                                                    it  // If extensionProgress is not null, use it
+                                                    it
                                                 }
                                                     ?: (attemptsPersonListItems?.maxScore?.times(
                                                         100
                                                     )
-                                                        ?: 0) // Otherwise, use resultScoreScaled
+                                                        ?: 0)
                                         }
                                         ListItemText {
                                             primary = ReactNode(
                                                 attemptsPersonListItems?.maxProgress?.let {
-                                                    // If extensionProgress is not null, show its value as percentage
                                                     "${(it)}% Completion"
                                                 }
-                                                    ?: // If extensionProgress is null, fall back to resultScoreScaled
-                                                    "${((attemptsPersonListItems?.maxScore ?: 0f) * 100).toInt()}% Score"
+                                                    ?: "${((attemptsPersonListItems?.maxScore ?: 0f) * 100).toInt()}% Score"
                                             )
                                             sx {
                                                 verticalAlign = VerticalAlign.middle
                                                 marginLeft =
-                                                    8.px // Adds some space between the progress bar and text
+                                                    8.px
                                                 paddingTop =
-                                                    1.px // Adjust vertical padding if needed
+                                                    1.px
                                             }
                                         }
                                     }
