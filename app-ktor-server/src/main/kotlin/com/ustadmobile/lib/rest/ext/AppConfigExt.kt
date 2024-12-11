@@ -11,15 +11,30 @@ fun ApplicationConfig.dbModeProperty(): String {
 /**
  * Find the ktor server app source directory if/when the server is being run from source (e.g. via
  * gradlew command).
+ *
+ * When using the ./gradlew command or a gradle task in the IDE the working directory will be the
+ * app-ktor-server module itself.
+ *
+ * When running as a Kotlin Program (e.g. clicking play next to main function), then the working
+ * directory will be the project root directory.
+ *
  */
 fun ktorAppSourceDir(): File? {
     val userDirFile = File(System.getProperty("user.dir"))
-    return if(File(userDirFile, "settings.gradle").exists()) {
-        File(userDirFile, "app-ktor-server")
-    }else {
-        null
+    return when {
+        //running in the app-ktor-server directory
+        userDirFile.name == "app-ktor-server" && File(userDirFile, "build.gradle").exists() -> userDirFile
+
+        //running in the root source directory
+        File(userDirFile, "settings.gradle").exists() &&
+                File(userDirFile, "app-ktor-server").exists() -> {
+            File(userDirFile, "app-ktor-server")
+        }
+
+        else -> null
     }
 }
+
 /*
  *  Find the ktor server app home directory.
  */
@@ -47,6 +62,18 @@ fun ktorAppHomeDir(): File {
          */
         else -> File(System.getProperty("user.dir"))
     }
+}
+
+/**
+ * The location of the server.properties file. When admin commands are run (e.g. newlearningspace etc)
+ * the command line client needs to connect to the server over http. The admin command needs to have
+ * authorization and needs to know the server port.
+ *
+ * This is secure because anyone who has access to the server.properties file would also have access
+ * to the server directory itself.
+ */
+fun ktorServerPropertiesFile(): File {
+    return File(ktorAppSourceDir() ?: ktorAppHomeDir(), "server.properties")
 }
 
 /**

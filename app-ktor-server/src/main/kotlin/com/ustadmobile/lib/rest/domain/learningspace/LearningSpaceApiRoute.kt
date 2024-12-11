@@ -5,6 +5,7 @@ import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceU
 import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.systemconfig.verifyauth.VerifySystemConfigAuthUseCase
+import com.ustadmobile.lib.rest.ext.respondHttpApiException
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
@@ -42,8 +43,9 @@ fun Route.LearningSpaceApiRoute(
                 status = HttpStatusCode.OK
             )
         }catch(e: Exception) {
-            //TODO Here: return error response.
             e.printStackTrace()
+            call.respondHttpApiException(e)
+            throw e
         }
 
     }
