@@ -6,74 +6,78 @@ Teacher/admin (any user with permission to edit the course itself) can delete po
 
 ## Step-by-Step Procedure:
 
-1. Login as admin.
-2. Click on "Courses."
-3. Click on the "+ Course" button.
-4. Click on the "Add a new course" button.
-5. Enter a course name.
-6. Click on the "Description" field.
-7. New text block appears.
-8. Enter the description.
-9. Click on the "Done" button.
-10. Click "Save" button to save the course.
-11. Click on the "Courses"
-12. Click on the course name.
-13. Click on the "Members" tab.
-14. Click on the "Add a teacher" button
-15. Click on "Add a new person" button
-16. Enter the teacher's first name, last name and Gender.
-17. Click on the "Save" button and save the person details.
-18. Click on the "Save" button to save the enrollment details.
-19. Click on the teacher name.
-20. Click on the "View profile" button.
-21. Click on the "Create account" button.
-22. Enter the username.
-23. Enter the password.
-24. Click on the "Save button"
-25. Click on "People".
-26. Click on "+ Person" button.
-27. Click on "Bulk import" button.
-28. Click on "Select file" button.
-29. Select the csv file.
-30. Click on "Import"
-31. Verify the import success message.
-32. Clear the app storage.
-33. Login to the app using the teacher username and password.
-34. Click on "Courses"
-35. Click on Course name.
-36. Click on the "Edit" button.
-37. Click on the "Add block" button.
-38. Click on the "Discussion board" button.
-39. Enter "Title" for the discussion board.
-40. Click on "Description"
-41. Enter description
-42. Click on "Done" to save the description.
-43. Click on "Done" to save the discussion board.
-44. Click on "Save" to save the course changes.
-45. Verify the "Discussion board" is visible inside the course.
-46. Click on the discussion board name.
-47. Click on "+ Post" button.
-48. Click on "Title".
-49. Enter a title for the post.
-50. Enter a post inside the compose post editor.
-51. Click on the "Post" button.
-52. Verify the post is visible.
-53. Clear the app storage.
-54. Login to the app using the student username and password.
-55. Click on "Courses".
-56. Click on course name.
-57. Click on the existing discussion board.
-58. Click on "+ Post" button
-59. Enter title on "Title" field.
-60. Enter the text inside the text editor.
-61. Click on the "Post" button.
-62. Click "Back" icon.
-63. Verify the 2 posts are visible to the student.
-64. Clear the app storage.
-65. Login to the app using the teacher username and password.
-66. Click on "Courses."
-67. Click on course name.
-68. Click on the discussion board.
-69. Click on "More options" icon next to student's post.
-70. Click on "Delete" button.
-71. Verify the student post is deleted.
+1. Launch Ustad app
+2. Click on "Existing User" button
+3. Click on "Enter link manually" button
+4. Enter the site link 
+5. Login as admin.
+6. Click on "Courses."
+7. Click on the "+ Course" button.
+8. Click on the "Add a new course" button.
+9. Enter a course name.
+10. Click on the "Description" field.
+11. New text block appears.
+12. Enter the description.
+13. Click on the "Done" button.
+14. Click "Save" button to save the course.
+15. Click on the "Courses"
+16. Click on the course name.
+17. Click on the "Members" tab.
+18. Click on the "Add a teacher" button
+19. Click on "Add a new person" button
+20. Enter the teacher's first name, last name and Gender.
+21. Click on the "Save" button and save the person details.
+22. Click on the "Save" button to save the enrollment details.
+23. Click on the teacher name.
+24. Click on the "View profile" button.
+25. Click on the "Create account" button.
+26. Enter the username.
+27. Enter the password.
+28. Click on the "Save button"
+29. Click on "People".
+30. Click on "+ Person" button.
+31. Click on "Bulk import" button.
+32. Click on "Select file" button.
+33. Select the csv file.
+34. Click on "Import"
+35. Verify the import success message.
+36. Clear the app storage.
+37. Login to the app using the teacher username and password.
+38. Click on "Courses"
+39. Click on Course name.
+40. Click on the "Edit" button.
+41. Click on the "Add block" button.
+42. Click on the "Discussion board" button.
+43. Enter "Title" for the discussion board.
+44. Click on "Description"
+45. Enter description
+46. Click on "Done" to save the description.
+47. Click on "Done" to save the discussion board.
+48. Click on "Save" to save the course changes.
+49. Verify the "Discussion board" is visible inside the course.
+50. Click on the discussion board name.
+51. Click on "+ Post" button.
+52. Click on "Title".
+53. Enter a title for the post.
+54. Enter a post inside the compose post editor.
+55. Click on the "Post" button.
+56. Verify the post is visible.
+57. Clear the app storage.
+58. Login to the app using the student username and password.
+59. Click on "Courses".
+60. Click on course name.
+61. Click on the existing discussion board.
+62. Click on "+ Post" button
+63. Enter title on "Title" field.
+64. Enter the text inside the text editor.
+65. Click on the "Post" button.
+66. Click "Back" icon.
+67. Verify the 2 posts are visible to the student.
+68. Clear the app storage.
+69. Login to the app using the teacher username and password.
+70. Click on "Courses."
+71. Click on course name.
+72. Click on the discussion board.
+73. Click on "More options" icon next to student's post.
+74. Click on "Delete" button.
+75. Verify the student post is deleted.
