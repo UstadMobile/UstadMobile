@@ -200,12 +200,7 @@ expect abstract class StatementDao {
     ): List<ActorEntity>
 
 
-    @Query(StatementDaoCommon.FIND_STATUS_FOR_STUDENTS_SQL)
-    abstract suspend fun findStatusForStudentsInClazz(
-        clazzUid: Long,
-        studentPersonUids: List<Long>,
-        accountPersonUid: Long,
-    ): List<BlockStatus>
+
 
     /**
      * Used by ClazzDetailOverview to retrieve the BlockStatus for the current active user (if they
@@ -214,6 +209,7 @@ expect abstract class StatementDao {
      *
      * NOTE: In next release accountpersonuid param will be used to enforce http permissions
      */
+    @Query(StatementDaoCommon.FIND_STATUS_FOR_STUDENTS_SQL)
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
         pullQueriesToReplicate = arrayOf(
@@ -232,6 +228,12 @@ expect abstract class StatementDao {
             )
         )
     )
+    suspend fun findStatusForStudentsInClazz(
+        clazzUid: Long,
+        studentPersonUids: List<Long>,
+        accountPersonUid: Long,
+    ): List<BlockStatus>
+
     @Query(StatementDaoCommon.FIND_STATUS_FOR_STUDENTS_SQL)
     abstract fun findStatusForStudentsInClazzAsFlow(
         clazzUid: Long,
