@@ -19,6 +19,8 @@ import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJs
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCaseJs
 import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteContentEntryImportErrorUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
@@ -52,6 +54,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJs
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCaseJs
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
@@ -104,7 +107,9 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
     bind<PhoneNumValidatorUseCase>() with provider {
         PhoneNumValidatorUseCaseJs()
     }
-
+    bind<ValidateEmailUseCase>() with provider {
+        ValidateEmailUseCase()
+    }
     bind<OnClickPhoneNumUseCase>() with provider {
         OnClickPhoneNumUseCaseJs()
     }
@@ -187,7 +192,7 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
         ResolveXapiLaunchHrefUseCase(
             activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             httpClient = instance(),
-            json = instance(),
+            json = instance<XapiJson>().json,
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             learningSpace = context,
             resumeOrStartXapiSessionUseCase = instance(),
@@ -341,6 +346,15 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
         AddNewPersonUseCase(
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance<UmAppDataLayer>().repository,
+        )
+    }
+
+    bind<GetSubtitleTrackFromUriUseCase>() with scoped(endpointScope).singleton {
+        GetSubtitleTrackFromUriUseCaseJs(
+            endpoint = context,
+            httpClient = instance(),
+            json = instance(),
+            supportedLanguagesConfig = instance(),
         )
     }
 

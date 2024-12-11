@@ -4,6 +4,10 @@
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
+    <string name="got_it">Got it</string>
+    <string name="learn_more">Learn more</string>
+    <string name="be_careful_interacting_online">Be careful interacting online and in-app!</string>
+    <string name="be_careful_not_to_share">Be careful not to share any real world information unless you are completely sure who you are interacting with. Never agree to meet anyone you don\'t know in real life without your parent or guardian.</string>
     <string name="share_app">Share app</string>
     <string name="send_apk_file">Send app file (APK)</string>
     <string name="send_app_link">Share app store link</string>
@@ -1998,6 +2002,32 @@
     <string name="with_passkeys_no_complex_passwords_needed">With passkeys, you don\'t need to remember complex passwords. Instead, you can use your fingerprint, face, or screen to sign in.</string>
     <string name="enter_link_manually">Enter link manually</string>
     <string name="registration_not_allowed">Learning space does not allow new user registration</string>
+
+
+    <string name="add_subtitles">Add subtitles</string>
+
+    <string name="edit_subtitles">Edit subtitles</string>
+
+    <string name="subtitles">Subtitles</string>
+
+
+    <string name="invite_via_contact">Invite Via Contact</string>
+
+    <string name="invite_to_course">Invite to course</string>
+
+    <string name="use_email">Use email</string>
+
+    <string name="use_phone_number">Use phone number</string>
+
+    <string name="add_username_email_phone">Add Username, Email or Phone</string>
+
+    <string name="no_valid_contact_found">No valid contact found</string>
+
+    <string name="no_contact_found">No contact found</string>
+
+    <string name="decline">Decline</string>
+
+    <string name="do_you_want_to_join_this_course">Do you want to join this course?</string>
 
 
 </resources>

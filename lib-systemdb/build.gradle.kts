@@ -30,6 +30,11 @@ kotlin {
                 implementation(libs.ktor.client.core)
                 api(libs.door.runtime)
                 compileOnly(libs.door.room.annotations)
+                implementation(libs.kotlinx.serialization)
+                implementation(libs.coroutines)
+                implementation(libs.ktor.client.core)
+
+
             }
         }
 
@@ -44,7 +49,8 @@ kotlin {
 
         val jvmMain by getting {
             dependencies {
-
+                implementation(libs.ktor.server.core)
+                implementation(libs.kodein.di.framework.ktor.server.jvm)
 
             }
         }
@@ -60,6 +66,8 @@ kotlin {
             dependencies {
                 api(libs.androidx.room.runtime)
                 api(libs.androidx.room.ktx)
+                api(libs.androidx.room.paging)
+                api(libs.androidx.paging.runtime)
             }
         }
 

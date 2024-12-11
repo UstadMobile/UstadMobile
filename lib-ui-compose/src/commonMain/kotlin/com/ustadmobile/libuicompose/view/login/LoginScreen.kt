@@ -27,9 +27,8 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
-import com.ustadmobile.libuicompose.components.PickFileOptions
-import com.ustadmobile.libuicompose.components.PickType
 import com.ustadmobile.libuicompose.components.UstadPasswordField
+import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource

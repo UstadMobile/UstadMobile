@@ -219,6 +219,7 @@ configurations.all {
 
 dependencies {
     implementation libs.androidx.profileinstaller
+    implementation project(':lib-systemdb')
     baselineProfile project(':app-android-baselineprofile')
     coreLibraryDesugaring libs.android.desugar.libs
 
@@ -322,6 +323,9 @@ dependencies {
     //Image loading
     implementation libs.coil
     implementation libs.coil.compose
+
+    //chip text fields
+    implementation libs.chiptextfield
 
     implementation libs.kotlinx.datetime
 

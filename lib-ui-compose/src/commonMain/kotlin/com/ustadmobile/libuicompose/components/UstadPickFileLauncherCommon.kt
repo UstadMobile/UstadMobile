@@ -1,14 +1,10 @@
 package com.ustadmobile.libuicompose.components
 
-enum class PickType { FILE, FOLDER }
+typealias LaunchFilePickFn = (UstadPickFileOpts) -> Unit
 
-data class PickFileOptions(
-    val fileExtensions: List<String> = emptyList(),
-    val mimeTypes: List<String> = emptyList(),
-    val pickType: PickType = PickType.FILE
+data class UstadPickFileOpts(
+    val mimeFilters: List<String> = emptyList()
 )
-
-typealias LaunchFilePickFn = (PickFileOptions) -> Unit
 
 data class UstadFilePickResult(
     val uri: String,
@@ -17,7 +13,3 @@ data class UstadFilePickResult(
     val size: Long,
 )
 
-// Keep this for backward compatibility
-data class UstadPickFileOpts(
-    val mimeFilters: List<String> = emptyList()
-)

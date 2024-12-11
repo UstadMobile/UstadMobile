@@ -83,7 +83,12 @@ This code will silently fail to do anything. A situation like this should normal
 
 #### Never hardcode any literal values
 
-Any literal other than 0, 1, -1, true, false, or null. Any other literal value MUST be defined as a constant with a meaningful name.
+The following can be hardcoded:
+* 0, 1, -1, true, false, null, "" (empty string)
+* Strings less than 64 characters where the string is defined as part of an external specification that we are implementing. 
+
+Any other literal must not be hardcoded and there should be only one constant value defined for a given purpose (such that if this value needs 
+changed in future, it should only need changed in one place).
 
 e.g. 
 Do not do this:
@@ -113,6 +118,11 @@ be reused should normally be turned into a domain usecase (as above).
 
 If a section of code is following a particular official reference (e.g. Android, Kotlin, API specification), that is important to verifying that the code is correct, sensible, etc. then cite the reference in comments.
 
+#### Don't hide exceptions 
+
+If a function's signature is doSomething, when something cannot be done as expected, it _should_ throw an exception. The exception should be
+caught and explicitly handled where appropriate (e.g. in the viewmodel to show that an operation failed, retry logic, etc). Just printing/logging
+an exception hides it, leading to subsequent code running when it probably shoudln't. Logging _and_ rethrowing can be a good idea.
 
 ## Use of AI tools
 
@@ -270,7 +280,8 @@ function PersonDetailScreenPreview(
 
 A UseCase will be named as per the Android architecture recommendations in the form of Verb(Noun-optional)UseCase
 and will contain a single invoke function. A UseCase can depend on other UseCases which should be provided as 
-constructor parameters.
+constructor parameters. Constructor parameters should be dependencies (other use cases, serialization tools, etc). Anything that
+changes per invocation (e.g. input parameters, output parameters, progress listeners, etc) should be arguments for the invoke function.
 
 e.g.
 ```

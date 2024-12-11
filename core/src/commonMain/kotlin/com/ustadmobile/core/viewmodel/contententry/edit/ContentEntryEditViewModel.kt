@@ -2,6 +2,8 @@ package com.ustadmobile.core.viewmodel.contententry.edit
 
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.contentformats.ContentImporter
+import com.ustadmobile.core.contentformats.media.SubtitleTrack
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
@@ -12,8 +14,13 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.replaceOrAppend
 import com.ustadmobile.core.util.ext.setIfNoValueSetYet
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
+import com.ustadmobile.core.util.ext.paramMap
+import com.ustadmobile.core.util.ext.paramSubtitles
+import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditUiState
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -28,6 +35,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -56,7 +66,13 @@ data class ContentEntryEditUiState(
 
     val compressionEnabled: Boolean = false,
 
-)
+    val subtitles: List<SubtitleTrack> = emptyList(),
+
+) {
+    val canModifySubtitles: Boolean
+        get() = entity?.contentJobItem?.cjiPluginId == ContentImporter.VIDEO_IMPORTER_PLUGIN_ID
+
+}
 
 /**
  * When there is no associated CourseBlock
@@ -181,6 +197,7 @@ class ContentEntryEditViewModel(
                     _uiState.update { prev ->
                         prev.copy(
                             entity = it,
+                            subtitles = it?.contentJobItem?.paramSubtitles(json) ?: emptyList()
                         )
                     }
                 }
@@ -231,8 +248,55 @@ class ContentEntryEditViewModel(
                     )
                 }
             }
+
+            launch {
+                navResultReturner.filteredResultFlowForKey(KEY_RESULT_SUBTITLE).collect { navResult ->
+                    val newSubtitleTrack = navResult.result as? SubtitleTrack ?: return@collect
+
+                    updateSubtitles { prev ->
+                        prev.replaceOrAppend(
+                            element = newSubtitleTrack,
+                            replacePredicate = { it.uri == newSubtitleTrack.uri }
+                        )
+                    }
+                }
+            }
         }
     }
+
+    /**
+     * Subtitle info is a little different - it needs to be stored as a parameter on the
+     * ContentEntryImportJob
+     */
+    private fun updateSubtitles(
+        function: (List<SubtitleTrack>) -> List<SubtitleTrack>
+    ) {
+        val updatedState = _uiState.updateAndGet { prev ->
+            val updatedSubtitles = function(prev.subtitles)
+
+            val prevContentJobParamMap = prev.entity?.contentJobItem?.paramMap(json) ?: emptyMap()
+
+            val contentJobParam = prevContentJobParamMap.toMutableMap().also {
+                it[ContentEntryImportJob.PARAM_KEY_SUBTITLES] = json.encodeToString(
+                    ListSerializer(SubtitleTrack.serializer()), updatedSubtitles
+                )
+            }
+
+            prev.copy(
+                subtitles = updatedSubtitles,
+                entity = prev.entity?.copy(
+                    contentJobItem = prev.entity.contentJobItem?.copy(
+                        cjiParams = json.encodeToString(
+                            MapSerializer(String.serializer(), String.serializer()), contentJobParam
+                        )
+                    )
+                )
+            )
+        }
+
+        scheduleEntityCommit(updatedState.entity)
+    }
+
 
     fun onContentEntryChanged(
         contentEntry: ContentEntry?
@@ -294,6 +358,33 @@ class ContentEntryEditViewModel(
         }
     }
 
+    fun onSubtitleFileAdded(uri: String, fileName: String) {
+        navigateForResult(
+            nextViewName = GetSubtitleViewModel.DEST_NAME,
+            key = KEY_RESULT_SUBTITLE,
+            currentValue = null,
+            serializer = SubtitleTrack.serializer(),
+            args = buildMap {
+                this[SubtitleEditViewModel.ARG_URI] = uri
+                this[SubtitleEditViewModel.ARG_FILENAME] = fileName
+            }
+        )
+    }
+
+    fun onClickEditSubtitleTrack(subtitleTrack: SubtitleTrack) {
+        navigateForResult(
+            nextViewName = SubtitleEditViewModel.DEST_NAME,
+            key = KEY_RESULT_SUBTITLE,
+            currentValue = subtitleTrack,
+            serializer = SubtitleTrack.serializer(),
+        )
+    }
+
+    fun onClickDeleteSubtitleTrack(subtitleTrack: SubtitleTrack) {
+        updateSubtitles { prev ->
+            prev.filter { it.uri != subtitleTrack.uri }
+        }
+    }
 
     fun onClickSave() {
         val entityVal = _uiState.value.entity
@@ -416,6 +507,8 @@ class ContentEntryEditViewModel(
         const val ARG_GO_TO_ON_CONTENT_ENTRY_DONE = "goToOnContentEntryDone"
 
         const val KEY_HTML_DESCRIPTION = "contentEntryDesc"
+
+        const val KEY_RESULT_SUBTITLE = "subtitleKey"
 
         const val GO_TO_COURSE_BLOCK_EDIT = 1
 

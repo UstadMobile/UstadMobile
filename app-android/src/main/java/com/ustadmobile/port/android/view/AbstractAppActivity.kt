@@ -23,9 +23,10 @@ import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
+import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
+import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseAndroid
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
-import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -124,6 +125,9 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         }
 
 
+        bind<GoToLearningSpaceUseCase>() with provider {
+            GoToLearningSpaceUseCaseAndroid()
+        }
         bind<CreatePasskeyUseCase>() with singleton {
             CreatePasskeyUseCaseImpl(
                 context=this@AbstractAppActivity,

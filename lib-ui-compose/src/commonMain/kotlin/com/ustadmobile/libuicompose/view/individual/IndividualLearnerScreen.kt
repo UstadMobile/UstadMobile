@@ -27,8 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.individual.ExtractionStatus
 import com.ustadmobile.core.viewmodel.individual.IndividualLearnerViewModel
-import com.ustadmobile.libuicompose.components.PickFileOptions
-import com.ustadmobile.libuicompose.components.PickType
+import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 import com.ustadmobile.libuicompose.images.UstadImage
 import com.ustadmobile.libuicompose.images.ustadAppImagePainter
@@ -105,7 +104,7 @@ fun IndividualLearnerScreenContent(viewModel: IndividualLearnerViewModel) {
 
                     },
                     modifier = Modifier.clickable {
-                        filePickLauncher(PickFileOptions(pickType = PickType.FILE))
+                        filePickLauncher(UstadPickFileOpts())
                     }
                 )
 

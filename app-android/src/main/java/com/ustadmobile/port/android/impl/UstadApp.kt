@@ -79,6 +79,8 @@ import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCaseLocal
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
@@ -114,6 +116,8 @@ import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.domain.storage.CachePathsProviderAndroid
 import com.ustadmobile.core.domain.storage.GetAndroidSdCardDirUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
@@ -201,7 +205,11 @@ import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 import rawhttp.core.RawHttp
 import com.toughra.ustadmobile.BuildConfig
+import com.ustadmobile.appconfigdb.SystemDb
+import com.ustadmobile.appconfigdb.SystemDbDataLayer
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
+import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
+import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
@@ -258,6 +266,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             }
         }
 
+        bind<ShowSocialWarningUseCase>() with singleton {
+            ShowSocialWarningUseCase(
+                settings = instance()
+            )
+        }
+
+        bind<DismissSocialWarningUseCase>() with singleton {
+            DismissSocialWarningUseCase(
+                settings = instance()
+            )
+        }
+
         bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
             File(applicationContext.filesDir, "tmp")
         }
@@ -276,6 +296,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             val settings: Settings = instance()
             val contextIdentifier: String = sanitizeDbNameFromUrl(context.url)
             settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
+        }
+
+        bind<SystemDbNodeIdAndAuth>() with singleton {
+            val settings: Settings = instance()
+            val systemUrlConfig:SystemUrlConfig = instance()
+            val contextIdentifier: String = sanitizeDbNameFromUrl(systemUrlConfig.systemBaseUrl)
+            SystemDbNodeIdAndAuth(nodeIdAndAuth =settings.getOrGenerateNodeIdAndAuth(contextIdentifier) )
         }
 
         bind<SupportedLanguagesConfig>() with singleton {
@@ -328,6 +355,42 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<UstadAccountManager>() with singleton {
             UstadAccountManager(settings = instance(), di = di)
+        }
+
+        bind<SystemDb>() with singleton {
+            val systemUrlConfig:SystemUrlConfig = instance()
+            val dbName = sanitizeDbNameFromUrl(systemUrlConfig.systemBaseUrl)
+            val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
+            DatabaseBuilder.databaseBuilder(
+                context = applicationContext,
+                dbClass =  SystemDb::class,
+                dbName = dbName,
+                nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId
+            ).build()
+        }
+
+        bind<SystemDbDataLayer>() with singleton {
+            val systemUrlConfig:SystemUrlConfig = instance()
+            val systemDb: SystemDb = instance<SystemDb>()
+
+            val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
+            val repo:SystemDb = systemDb.asRepository(
+                RepositoryConfig.repositoryConfig(
+                    context = applicationContext,
+                    endpoint = UrlKmp(systemUrlConfig.systemBaseUrl).resolve("api/SystemDb/")
+                        .toString(),
+                    nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
+                    auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
+                    httpClient = instance(),
+                    okHttpClient = instance(),
+                    json = instance()
+                )
+            )
+
+            SystemDbDataLayer(
+                localDb  = systemDb,
+                repository = repo,
+            )
         }
 
         bind<DbAndObservers>() with scoped(LearningSpaceScope.Default).singleton {
@@ -464,6 +527,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             compressListUseCase = instance(),
+                            mimeTypeHelper = instance(),
                         )
                     )
 
@@ -477,6 +541,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
                             compressListUseCase = instance(),
+                            mimeTypeHelper = instance(),
                             h5pInStream = {
                                 applicationContext.assets.open("h5p/h5p-standalone-3.6.0.zip",
                                     AssetManager.ACCESS_STREAMING)
@@ -772,7 +837,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             ResolveXapiLaunchHrefUseCase(
                 activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
                 httpClient = instance(),
-                json = instance(),
+                json = instance<XapiJson>().json,
                 xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
                 learningSpace = context,
                 accountManager = instance(),
@@ -1119,7 +1184,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<CreateNewLocalAccountUseCase>() with singleton {
             CreateNewLocalAccountUseCase(di)
         }
-
+        bind<GetSubtitleTrackFromUriUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            GetSubtitleTrackFromUriUseCaseLocal(
+                uriHelper = instance(),
+                dispatcher = Dispatchers.IO,
+                supportedLanguagesConfig = instance(),
+            )
+        }
         registerContextTranslator { account: UmAccount -> LearningSpace(account.endpointUrl) }
     }
 

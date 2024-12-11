@@ -3,14 +3,23 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.StorageSettings
 import com.russhwolf.settings.set
 import com.ustadmobile.BuildConfigJs
+import com.ustadmobile.appconfigdb.SystemDb
+import com.ustadmobile.appconfigdb.SystemDbDataLayer
+import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.invite.ClazzRedeemUseCase
+import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
+import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJs
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.UstadBuildConfig
@@ -35,9 +44,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProviderJs
+import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.util.ext.toNullIfBlank
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -55,6 +65,7 @@ import web.url.URLSearchParams
 @OptIn(ExperimentalXmlUtilApi::class)
 internal fun ustadJsDi(
     dbBuilt: UmAppDatabase,
+    systemDbBuilt: SystemDb,
     dbNodeIdAndAuth: NodeIdAndAuth,
     json: Json,
     httpClient: HttpClient,
@@ -62,10 +73,9 @@ internal fun ustadJsDi(
 ) = DI {
     import(commonDomainDiModule(LearningSpaceScope.Default))
     import(DomainDiModuleJs(LearningSpaceScope.Default))
-
     val learningSpaceUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Learning Space URL = $learningSpaceUrl (location.href = ${location.href}")
-
+    val isLearningSpace = js("_ustadLearningSpaceExists") as Boolean
     bind<UstadBuildConfig>() with singleton {
         BuildConfigMap(
             buildMap {
@@ -79,6 +89,18 @@ internal fun ustadJsDi(
         )
     }
 
+    bind<ShowSocialWarningUseCase>() with singleton {
+        ShowSocialWarningUseCase(
+            settings = instance()
+        )
+    }
+
+    bind<DismissSocialWarningUseCase>() with singleton {
+        DismissSocialWarningUseCase(
+            settings = instance()
+        )
+    }
+
     bind<GenderConfig>() with singleton {
         GenderConfig(
             genderConfigStr = BuildConfigJs.APP_UI_GOPTS.toNullIfBlank() ?: GenderConfig.DEFAULT_GENDER_OPTIONS
@@ -87,9 +109,6 @@ internal fun ustadJsDi(
 
     bind<Settings>() with singleton {
         StorageSettings().also {
-            //We don't use onboarding on the web, so mark this as completed
-            it[AddAccountSelectNewOrExistingViewModel.PREF_TAG] = "true"
-
             /*
              * Check if there is a preset default language, and apply if not already actioned
              */
@@ -121,8 +140,9 @@ internal fun ustadJsDi(
     }
 
     bind<SystemUrlConfig>() with singleton {
+
         SystemUrlConfig.fromUstadBuildConfig(instance()).copy(
-            presetLearningSpaceUrl = learningSpaceUrl
+            presetLearningSpaceUrl = if (isLearningSpace) learningSpaceUrl else null
         )
     }
 
@@ -142,7 +162,36 @@ internal fun ustadJsDi(
     bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
         dbNodeIdAndAuth
     }
+    bind<SystemDb>() with singleton {
+        systemDbBuilt
+    }
+    bind<SystemDbNodeIdAndAuth>() with singleton {
+        val settings: Settings = instance()
+        val contextIdentifier: String = sanitizeDbNameFromUrl(learningSpaceUrl)
+        SystemDbNodeIdAndAuth(nodeIdAndAuth =settings.getOrGenerateNodeIdAndAuth(contextIdentifier) )
+    }
 
+
+    bind<SystemDbDataLayer>() with singleton {
+        val systemDb: SystemDb = instance<SystemDb>()
+
+        val systemDbNodeIdAndAuth: SystemDbNodeIdAndAuth = instance()
+        val repo: SystemDb = systemDb.asRepository(
+            RepositoryConfig.repositoryConfig(
+                context = this,
+                endpoint = learningSpaceUrl+"api/SystemDb/",
+                nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
+                auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
+                httpClient = instance(),
+                json = instance()
+            )
+        )
+
+        SystemDbDataLayer(
+            localDb  = systemDb,
+            repository = repo,
+        )
+    }
     bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(LearningSpaceScope.Default).singleton {
         dbBuilt
     }
@@ -222,9 +271,19 @@ internal fun ustadJsDi(
     bind<GetVersionUseCase>() with singleton {
         GetVersionUseCaseJs()
     }
-
+    bind<GoToLearningSpaceUseCase>() with singleton {
+        GoToLearningSpaceUseCaseJs(di)
+    }
     bind<GetShowPoweredByUseCase>() with singleton {
         GetShowPoweredByUseCase(BuildConfigJs.APP_UI_SHOW_POWERED_BY.toBoolean())
+    }
+
+    bind<ClazzRedeemUseCase>() with scoped(LearningSpaceScope.Default).provider {
+        ClazzRedeemUseCase(
+            enrolIntoCourseUseCase = instance(),
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
+        )
     }
 
     bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(LearningSpaceScope.Default).provider {

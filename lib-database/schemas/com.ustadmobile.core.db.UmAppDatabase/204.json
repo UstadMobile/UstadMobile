@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 202,
-    "identityHash": "4e97383b879db14ad7112516d979e38c",
+    "version": 204,
+    "identityHash": "b0e85f4bcf7185908d72ce40a439793d",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -3693,7 +3693,7 @@
       },
       {
         "tableName": "ContentEntryImportJob",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sourceUri` TEXT, `cjiOriginalFilename` TEXT, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContentEntryVersion` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL, `cjiContentDeletedOnCancellation` INTEGER NOT NULL, `cjiCompressionLevel` INTEGER NOT NULL DEFAULT 3, `cjiError` TEXT, `cjiErrorDismissed` INTEGER NOT NULL, `cjiOwnerPersonUid` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sourceUri` TEXT, `cjiOriginalFilename` TEXT, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContentEntryVersion` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL, `cjiContentDeletedOnCancellation` INTEGER NOT NULL, `cjiCompressionLevel` INTEGER NOT NULL DEFAULT 3, `cjiError` TEXT, `cjiErrorDismissed` INTEGER NOT NULL, `cjiOwnerPersonUid` INTEGER NOT NULL, `cjiParams` TEXT)",
         "fields": [
           {
             "fieldPath": "cjiUid",
@@ -3809,6 +3809,12 @@
             "columnName": "cjiOwnerPersonUid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "cjiParams",
+            "columnName": "cjiParams",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -5856,7 +5862,7 @@
       },
       {
         "tableName": "XapiSessionEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xseUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `xseLastMod` INTEGER NOT NULL, `xseRegistrationHi` INTEGER NOT NULL, `xseRegistrationLo` INTEGER NOT NULL, `xseUsUid` INTEGER NOT NULL, `xseAccountPersonUid` INTEGER NOT NULL, `xseActorUid` INTEGER NOT NULL, `xseAccountUsername` TEXT NOT NULL, `xseClazzUid` INTEGER NOT NULL, `xseCbUid` INTEGER NOT NULL, `xseContentEntryUid` INTEGER NOT NULL, `xseRootActivityId` TEXT NOT NULL, `xseRootActivityUid` INTEGER NOT NULL, `xseStartTime` INTEGER NOT NULL, `xseExpireTime` INTEGER NOT NULL, `xseAuth` TEXT, `xseCompleted` INTEGER NOT NULL DEFAULT 0, `knownActorUidToPersonUids` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xseUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `xseLastMod` INTEGER NOT NULL, `xseRegistrationHi` INTEGER NOT NULL, `xseRegistrationLo` INTEGER NOT NULL, `xseUsUid` INTEGER NOT NULL, `xseAccountPersonUid` INTEGER NOT NULL, `xseActorUid` INTEGER NOT NULL, `xseAccountUsername` TEXT NOT NULL, `xseClazzUid` INTEGER NOT NULL, `xseCbUid` INTEGER NOT NULL, `xseContentEntryUid` INTEGER NOT NULL, `xseContentEntryVersionUid` INTEGER NOT NULL DEFAULT 0, `xseRootActivityId` TEXT NOT NULL, `xseRootActivityUid` INTEGER NOT NULL, `xseStartTime` INTEGER NOT NULL, `xseExpireTime` INTEGER NOT NULL, `xseAuth` TEXT, `xseCompleted` INTEGER NOT NULL DEFAULT 0, `knownActorUidToPersonUids` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "xseUid",
@@ -5923,6 +5929,13 @@
             "columnName": "xseContentEntryUid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "xseContentEntryVersionUid",
+            "columnName": "xseContentEntryVersionUid",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "xseRootActivityId",
@@ -6413,7 +6426,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4e97383b879db14ad7112516d979e38c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b0e85f4bcf7185908d72ce40a439793d')"
     ]
   }
 }

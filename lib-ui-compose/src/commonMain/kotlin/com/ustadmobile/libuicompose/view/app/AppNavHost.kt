@@ -29,11 +29,13 @@ import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
 import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
+import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
@@ -47,8 +49,10 @@ import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttend
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
+import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.detail.CourseGroupSetDetailViewModel
 import com.ustadmobile.core.viewmodel.coursegroupset.edit.CourseGroupSetEditViewModel
@@ -146,11 +150,13 @@ import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEdit
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
+import com.ustadmobile.libuicompose.view.clazz.inviteViaContact.InviteViaContactScreen
 import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
 import com.ustadmobile.libuicompose.view.clazz.permissiondetail.CoursePermissionDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.permissionedit.CoursePermissionEditScreen
 import com.ustadmobile.libuicompose.view.clazz.permissionlist.CoursePermissionListScreen
+import com.ustadmobile.libuicompose.view.clazz.redeem.ClazzInviteRedeem
 import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailScreen
 import com.ustadmobile.libuicompose.view.contententry.edit.ContentEntryEditScreen
 import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGetMetadataScreen
@@ -160,6 +166,8 @@ import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminolog
 import com.ustadmobile.libuicompose.view.deleteditem.list.DeletedItemListScreen
 import com.ustadmobile.libuicompose.view.epubcontent.EpubContentScreen
 import com.ustadmobile.libuicompose.view.clazzlog.edit.ClazzLogEditScreen
+import com.ustadmobile.libuicompose.view.contententry.getsubtitle.GetSubtitleScreen
+import com.ustadmobile.libuicompose.view.contententry.subtitleedit.SubtitleEditScreen
 import com.ustadmobile.libuicompose.view.individual.IndividualLearnerScreen
 import com.ustadmobile.libuicompose.view.interop.externalapppermissionrequest.ExternalAppPermissionRequestScreen
 import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationListScreen
@@ -865,6 +873,20 @@ fun AppNavHost(
                 )
             }
 
+            contentScene("/${InviteViaContactViewModel.DEST_NAME}") { backStackEntry ->
+                InviteViaContactScreen(
+                    appViewModel(backStackEntry, InviteViaContactViewModel::class,
+                        ::InviteViaContactViewModel)
+                )
+            }
+
+            contentScene("/${ClazzInviteViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzInviteRedeem(
+                    appViewModel(backStackEntry, ClazzInviteViewModel::class,
+                        ::ClazzInviteViewModel)
+                )
+            }
+
             contentScene("/${ExternalAppPermissionRequestViewModel.DEST_NAME}") { backStackEntry ->
                 ExternalAppPermissionRequestScreen(
                     appViewModel(backStackEntry, ExternalAppPermissionRequestViewModel::class,
@@ -878,6 +900,17 @@ fun AppNavHost(
                 }
             }
 
+            contentScene("/${SubtitleEditViewModel.DEST_NAME}") { backStackEntry ->
+                SubtitleEditScreen(
+                    appViewModel(backStackEntry, SubtitleEditViewModel::class, ::SubtitleEditViewModel)
+                )
+            }
+
+            contentScene("/${GetSubtitleViewModel.DEST_NAME}") { backStackEntry ->
+                GetSubtitleScreen(
+                    appViewModel(backStackEntry, GetSubtitleViewModel::class, ::GetSubtitleViewModel)
+                )
+            }
 
         }
     }

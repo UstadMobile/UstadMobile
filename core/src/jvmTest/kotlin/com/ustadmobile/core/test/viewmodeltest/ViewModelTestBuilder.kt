@@ -12,6 +12,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
@@ -121,6 +123,18 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     @ExperimentalXmlUtilApi
     private var diVar = DI {
         import(CommonJvmDiModule)
+
+        bind<ShowSocialWarningUseCase>() with singleton {
+            ShowSocialWarningUseCase(
+                settings = instance()
+            )
+        }
+
+        bind<DismissSocialWarningUseCase>() with singleton {
+            DismissSocialWarningUseCase(
+                settings = instance()
+            )
+        }
 
         bind<Json>() with singleton {
             Json {

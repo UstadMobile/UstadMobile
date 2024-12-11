@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest.ext
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentjob.MetadataResult
+import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.ihttp.ext.clientProtocolAndHost
 import com.ustadmobile.ihttp.headers.asIHttpHeaders
@@ -15,6 +16,7 @@ import io.ktor.server.application.*
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import io.ktor.util.pipeline.PipelineContext
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -129,30 +131,26 @@ suspend fun ApplicationCall.respondOkHttpResponse(
  */
 val ApplicationCall.callLearningSpace: LearningSpace
     get() {
-        val config = this.application.environment.config
-        val dbMode = config.dbModeProperty()
-
-        return if(dbMode == CONF_DBMODE_SINGLETON) {
-            LearningSpace(config.property(CONF_KEY_SITE_URL).getString().requirePostfix("/"))
-        }else {
-            LearningSpace(request.headers.asIHttpHeaders().clientProtocolAndHost())
-        }
+        return LearningSpace(request.headers.asIHttpHeaders().clientProtocolAndHost())
     }
 
 /**
  * Determine if the request made on the receiver ApplicationCall matches the configuration.
+ * TODO: Use the LearningSpaceServerRepo to do this
  */
-fun ApplicationCall.urlMatchesConfig(): Boolean {
-    val dbMode = application.environment.config
-        .dbModeProperty()
-    if(dbMode == CONF_DBMODE_VIRTUALHOST)
-        return true
-
+fun ApplicationCall.urlMatchesLearningSpace(): Boolean {
     val requestUrl = request.clientUrl()
-    val siteUrl = application.environment.config.property(CONF_KEY_SITE_URL)
-        .getString()
-
-    return requestUrl.startsWith(siteUrl)
+    return true
+//
+//    val dbMode = application.environment.config.dbModeProperty()
+//    if(dbMode == CONF_DBMODE_VIRTUALHOST)
+//        return true
+//
+//    val requestUrl = request.clientUrl()
+//    val siteUrl = application.environment.config.property(CONF_KEY_SITE_URL)
+//        .getString()
+//
+//    return requestUrl.startsWith(siteUrl)
 }
 
 suspend fun ApplicationCall.respondRequestUrlNotMatchingSiteConfUrl() {
@@ -190,3 +188,39 @@ suspend fun ApplicationCall.respondContentEntryMetaDataResult(
         )
     }
 }
+
+/**
+ * Try running the given code block. If an exception occurs, then use RespondHttpApiException
+ */
+suspend inline fun PipelineContext<Unit,ApplicationCall>.tryOrRespondHttpApiException(
+    block:  () -> Unit
+) {
+    try {
+        block()
+    }catch(throwable: Throwable) {
+        call.respondHttpApiException(throwable)
+    }
+}
+
+/**
+ * Generate an HTTP error response for the given throwable. If it is an HTTPApiException, then the
+ * specified return error code will be set
+ *
+ * @param throwable the exception that occurred
+ */
+suspend fun ApplicationCall.respondHttpApiException(
+    throwable: Throwable
+) {
+    val status = when(throwable) {
+        is HttpApiException -> throwable.statusCode
+        else -> 500
+    }
+
+    respondText(
+        contentType = ContentType.Text.Plain,
+        status = HttpStatusCode.fromValue(status),
+        text = throwable.message ?: throwable.toString()
+    )
+
+}
+
