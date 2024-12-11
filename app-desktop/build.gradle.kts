@@ -96,6 +96,8 @@ dependencies {
     implementation(project(":lib-ui-compose"))
     implementation(project(":lib-util"))
     implementation(project(":lib-cache"))
+    implementation(project(":lib-systemdb-sqldelight"))
+    implementation(project(":lib-systemdb-core"))
     implementation(compose.material3)
     implementation(compose.materialIconsExtended)
 

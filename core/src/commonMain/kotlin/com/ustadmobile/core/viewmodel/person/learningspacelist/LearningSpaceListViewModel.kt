@@ -12,8 +12,8 @@ import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedi
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkViewModel
 import com.ustadmobile.systemdb.model.LearningSpaceInfo
-import com.ustadmobile.systemdb.model.LearningSpaceRepository
-import com.ustadmobile.systemdb.model.SystemDbRepository
+import com.ustadmobile.systemdb.repo.LearningSpaceRepository
+import com.ustadmobile.systemdb.repo.SystemDbRepository
 import kotlinx.coroutines.flow.*
 import org.kodein.di.DI
 import org.kodein.di.direct

@@ -1,4 +1,4 @@
-package com.ustadmobile.systemdb.model
+package com.ustadmobile.systemdb.repo
 
 interface SystemDbRepository {
 

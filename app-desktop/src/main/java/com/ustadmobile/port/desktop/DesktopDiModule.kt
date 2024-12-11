@@ -1,9 +1,10 @@
 package com.ustadmobile.port.desktop
 
+import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
-import com.ustadmobile.appconfigdb.SystemDb
-import com.ustadmobile.appconfigdb.SystemDbDataLayer
+import com.ustadmobile.appconfigdb.repo.SystemDbRepositorySqlDelight
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -84,6 +85,8 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import com.ustadmobile.systemdb.repo.SystemDbRepository
+import com.ustadmobile.systemdb.sqlite.SystemDb
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -423,48 +426,29 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<SystemDbNodeIdAndAuth>() with singleton {
-        val settings: Settings = instance()
-        val systemUrlConfig:SystemUrlConfig = instance()
-        val contextIdentifier: String = sanitizeDbNameFromUrl(systemUrlConfig.systemBaseUrl)
-        SystemDbNodeIdAndAuth(nodeIdAndAuth =settings.getOrGenerateNodeIdAndAuth(contextIdentifier) )
-    }
-
     bind<SystemDb>() with singleton {
-        val systemUrlConfig:SystemUrlConfig = instance()
-        val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
         val dataDir: File = instance(tag = TAG_DATA_DIR)
-        Napier.i("db url for systemdb"+dataDir.absolutePath)
-        val dbUrl = "jdbc:sqlite:${dataDir.absolutePath}/localhost_/SystemDb.db"
-         Napier.i("db url for systemdb"+dbUrl)
-        DatabaseBuilder.databaseBuilder(
-            dbUrl = dbUrl,
-            dbClass =  SystemDb::class,
-            nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId
-        ).build()
-    }
+        val dbFile = File(dataDir, "system.db")
+        val dbFileExists = dbFile.exists()
 
-    bind<SystemDbDataLayer>() with singleton {
-        val systemUrlConfig:SystemUrlConfig = instance()
-        val systemDb: SystemDb = instance<SystemDb>()
-
-        val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
-        val repo: SystemDb = systemDb.asRepository(
-            RepositoryConfig.repositoryConfig(
-                context = context,
-                endpoint = UrlKmp(systemUrlConfig.systemBaseUrl).resolve("api/SystemDb/")
-                    .toString(),
-                nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
-                auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
-                httpClient = instance(),
-                okHttpClient = instance(),
-                json = instance()
-            )
+        val driver: SqlDriver = JdbcSqliteDriver(
+            url = "jdbc:sqlite:${dbFile.absolutePath}"
         )
 
-        SystemDbDataLayer(
-            localDb  = systemDb,
-            repository = repo,
+        if(!dbFileExists) {
+            SystemDb.Schema.create(driver)
+        }
+
+        SystemDb(driver)
+    }
+
+    bind<SystemDbRepository>() with singleton {
+        val systemUrlConfig:SystemUrlConfig = instance()
+
+        SystemDbRepositorySqlDelight(
+            systemDb = instance(),
+            url = UrlKmp(systemUrlConfig.systemBaseUrl).resolve("api/SystemDb/")
+                .toString()
         )
     }
 

@@ -27,7 +27,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation(project(":lib-systemdb-model"))
+                implementation(project(":lib-systemdb-core"))
                 implementation(libs.coroutines)
                 implementation(libs.ktor.client.core)
                 implementation(libs.kotlinx.serialization)
@@ -51,7 +51,7 @@ kotlin {
             dependencies {
                 implementation(libs.ktor.server.core)
                 implementation(libs.kodein.di.framework.ktor.server.jvm)
-                implementation(libs.sqldelight.sqlite.driver.jvm)
+                api(libs.sqldelight.sqlite.driver.jvm)
             }
         }
 
@@ -64,7 +64,7 @@ kotlin {
 
         val androidMain by getting {
             dependencies {
-                implementation(libs.sqldelight.sqlite.driver.android)
+                api(libs.sqldelight.sqlite.driver.android)
             }
         }
 

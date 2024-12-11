@@ -73,16 +73,16 @@ fun LearningSpaceListScreen(
 
         items(
             count = uiState.learningSpaces.size,
-            key = { Pair(1, uiState.learningSpaces[it].lsiUid) }
+            key = { Pair(1, uiState.learningSpaces[it].url) }
         ){ index ->
             val learningSpace = uiState.learningSpaces[index]
 
             ListItem (
                 modifier = Modifier.clickable {
-                    onSelectLearningSpace(learningSpace.lsiUrl)
+                    onSelectLearningSpace(learningSpace.url)
                 },
                 headlineContent = {
-                    Text(text = learningSpace.lsiUrl)
+                    Text(text = learningSpace.url)
                 }
             )
         }
