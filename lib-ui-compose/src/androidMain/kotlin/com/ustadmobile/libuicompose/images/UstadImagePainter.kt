@@ -15,8 +15,6 @@ private val nameMap = mapOf(
     UstadImage.COURSE_BANNER_DEFAULT2 to R.drawable.course_banner_default2,
     UstadImage.COURSE_BANNER_DEFAULT3 to R.drawable.course_banner_default3,
     UstadImage.COURSE_BANNER_DEFAULT4 to R.drawable.course_banner_default4,
-    UstadImage.ICON_PERSON to R.drawable.icon_person,
-
     )
 
 @Composable
