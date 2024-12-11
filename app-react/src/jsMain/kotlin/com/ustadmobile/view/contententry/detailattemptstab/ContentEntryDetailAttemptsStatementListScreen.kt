@@ -13,6 +13,7 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -20,15 +21,18 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import mui.icons.material.Star
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemButton
 import mui.material.ListItemIcon
 import mui.material.ListItemText
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.useRequiredContext
 import tanstack.react.query.UseInfiniteQueryResult
 import web.cssom.Contain
 import web.cssom.Height
@@ -36,7 +40,7 @@ import web.cssom.Overflow
 import web.cssom.pct
 
 
-external interface ContentEntryDetailAttemptsStatementListProps: Props {
+external interface ContentEntryDetailAttemptsStatementListProps : Props {
     var uiState: ContentEntryDetailAttemptsStatementListUiState
     var refreshCommandFlow: Flow<RefreshCommand>?
 }
@@ -50,55 +54,90 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
 
     val uiState by viewModel.uiState.collectAsState(ContentEntryDetailAttemptsStatementListUiState())
 
-    val contentEntryDetailAttemptsStatementListComponent2 = FC<ContentEntryDetailAttemptsStatementListProps>
-    { props ->
+    val contentEntryDetailAttemptsStatementListComponent2 =
+        FC<ContentEntryDetailAttemptsStatementListProps>
+        { props ->
 
-        val remoteMediatorResult = useDoorRemoteMediator(
-            pagingSourceFactory = props.uiState.attemptsStatementList,
-            refreshCommandFlow = (props.refreshCommandFlow ?: emptyFlow())
-        )
+            val theme by useRequiredContext(ThemeContext)
 
-        val infiniteQueryResult : UseInfiniteQueryResult
-        <PagingSourceLoadResult<Int, StatementEntityAndVerb>, Throwable> = usePagingSource(
-            remoteMediatorResult.pagingSourceFactory, true, 50
-        )
-        val muiAppState = useMuiAppState()
+            val remoteMediatorResult = useDoorRemoteMediator(
+                pagingSourceFactory = props.uiState.attemptsStatementList,
+                refreshCommandFlow = (props.refreshCommandFlow ?: emptyFlow())
+            )
 
-        VirtualList {
-            style = jso {
-                height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
-                width = 100.pct
-                contain = Contain.strict
-                overflowY = Overflow.scroll
-            }
+            val infiniteQueryResult: UseInfiniteQueryResult
+            <PagingSourceLoadResult<Int, StatementEntityAndVerb>, Throwable> = usePagingSource(
+                remoteMediatorResult.pagingSourceFactory, true, 50
+            )
+            val muiAppState = useMuiAppState()
 
-            content = virtualListContent {
+            VirtualList {
+                style = jso {
+                    height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+                    width = 100.pct
+                    contain = Contain.strict
+                    overflowY = Overflow.scroll
+                }
 
-                infiniteQueryPagingItems(
-                    items = infiniteQueryResult,
-                    key = { it.statementEntity?.statementLct.toString()}
-                ) { attemptsStatementListItems ->
-                    ListItem.create {
-                        ListItemButton{
-                            ListItemIcon {
-                                UstadBlankIcon()
+                content = virtualListContent {
+
+                    infiniteQueryPagingItems(
+                        items = infiniteQueryResult,
+                        key = { it.statementEntity?.statementLct.toString() }
+                    ) { attemptsStatementListItems ->
+                        ListItem.create {
+                            ListItemButton {
+                                ListItemIcon {
+                                    UstadBlankIcon()
+                                }
+                                ListItemText {
+                                    primary = ReactNode(
+                                        attemptsStatementListItems?.verb?.verbUrlId.toString()
+                                            .substringAfterLast("/")
+                                            .replaceFirstChar { it.uppercaseChar() }
+
+                                    )
+                                }
                             }
-                            ListItemText {
-                                primary = ReactNode(
-                                    attemptsStatementListItems?.verb?.verbUrlId.toString()
+                            ListItemButton {
+                                ListItemIcon {
 
-                                )
+                                    Star()
+                                    sx {
+                                        padding = theme.spacing(1, 1, 1, 5)
+                                    }
+                                }
+                                ListItemText {
+                                    secondary = ReactNode(
+                                        if (attemptsStatementListItems?.statementEntity?.extensionProgress == null) {
+                                            if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
+                                                "${
+                                                    attemptsStatementListItems?.statementEntity?.resultScoreRaw?.toInt()
+                                                        .toString()
+                                                }/${
+                                                    attemptsStatementListItems?.statementEntity?.resultScoreMax?.toInt()
+                                                        .toString()
+                                                } Score"
+                                            } else {
+                                                "-"
+                                            }
+
+                                        } else {
+                                            "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
+                                        }
+                                    )
+                                }
                             }
+
                         }
                     }
                 }
-            }
 
-            Container {
-                VirtualListOutlet()
+                Container {
+                    VirtualListOutlet()
+                }
             }
         }
-    }
 
 
     contentEntryDetailAttemptsStatementListComponent2 {

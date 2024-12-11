@@ -2,6 +2,7 @@ import androidx.compose.runtime.Composable
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,7 +10,9 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.paging.RefreshCommand
@@ -67,28 +70,38 @@ fun ContentEntryDetailAttemptsStatementListScreen(
 
                 supportingContent = {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = if (attemptsStatementListItems?.statementEntity?.extensionProgress == null) {
-                                if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
-                                    "${
-                                        attemptsStatementListItems?.statementEntity?.resultScoreRaw?.toInt()
-                                            .toString()
-                                    }/${
-                                        attemptsStatementListItems?.statementEntity?.resultScoreMax?.toInt()
-                                            .toString()
-                                    } Score"
-                                } else {
-                                    "-"
-                                }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Star,
+                                contentDescription = "Icon",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                            Text(
+                                text = if (attemptsStatementListItems?.statementEntity?.extensionProgress == null) {
+                                    if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
+                                        "${
+                                            attemptsStatementListItems?.statementEntity?.resultScoreRaw?.toInt()
+                                                .toString()
+                                        }/${
+                                            attemptsStatementListItems?.statementEntity?.resultScoreMax?.toInt()
+                                                .toString()
+                                        } Score"
+                                    } else{
+                                        "No Score"
+                                    }
 
-                            } else {
-                                "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
-                            }
-                        )
-                        /*      Text(
+                                } else {
+                                    "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
+                                }
+                            )
+                            /*      Text(
                                   text = "100%",
                                   modifier = Modifier.padding(top = 4.dp) // Add spacing between the texts
                               )*/
+                        }
                     }
                 }
             )
