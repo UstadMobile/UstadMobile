@@ -2,7 +2,7 @@ package com.ustadmobile.lib.rest.domain.learningspace
 
 import com.ustadmobile.appconfigdb.adapters.asEntity
 import com.ustadmobile.appconfigdb.adapters.asLearningSpaceConfigAndInfo
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.systemdb.model.LearningSpaceConfigAndInfo
 import com.ustadmobile.systemdb.model.LearningSpaceInfo
 import com.ustadmobile.systemdb.sqlite.SystemDb

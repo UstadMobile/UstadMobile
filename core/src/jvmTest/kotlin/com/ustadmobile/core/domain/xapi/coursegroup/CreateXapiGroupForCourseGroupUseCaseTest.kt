@@ -4,8 +4,8 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Clazz

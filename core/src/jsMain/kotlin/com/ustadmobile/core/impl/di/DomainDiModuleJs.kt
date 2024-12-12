@@ -63,10 +63,10 @@ import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnlo
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnloadUseCaseJs
 import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
 import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCaseJs
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryJs
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherJs
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.jsimpl.XXHasher64FactoryJs
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.jsimpl.XXStringHasherJs
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI

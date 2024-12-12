@@ -73,7 +73,7 @@ kotlin {
 
 android {
     compileSdk = 34
-    namespace = "com.ustadmobile.systemdb"
+    namespace = "com.ustadmobile.systemdb.sqldelight"
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
 

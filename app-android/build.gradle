@@ -229,6 +229,7 @@ dependencies {
     implementation project(":lib-cache")
 
     implementation libs.door.runtime
+    implementation libs.sqldelight.sqlite.driver.android
     implementation project(':lib-database')
     implementation project(':lib-util')
 

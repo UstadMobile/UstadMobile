@@ -15,7 +15,8 @@ kotlin {
     }
 
     js(IR) {
-
+        useCommonJs()
+        browser()
     }
 
     sourceSets {
@@ -27,7 +28,9 @@ kotlin {
         }
 
         val jsMain by getting {
-
+            dependencies {
+                implementation(libs.ktor.client.js)
+            }
         }
 
 

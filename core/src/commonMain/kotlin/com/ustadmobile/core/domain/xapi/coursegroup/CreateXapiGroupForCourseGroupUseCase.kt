@@ -5,7 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.model.XapiAccount
 import com.ustadmobile.core.domain.xapi.model.XapiGroup
 import com.ustadmobile.core.domain.xapi.model.identifierHash
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.core.util.ext.toXapiAgent
 
 /**

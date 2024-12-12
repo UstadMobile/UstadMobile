@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest.domain.learningspace
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.ihttp.ktorserver.clientUrl
 import com.ustadmobile.systemdb.sqlite.SystemDb

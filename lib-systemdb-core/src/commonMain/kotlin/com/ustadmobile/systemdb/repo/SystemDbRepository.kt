@@ -1,7 +1,18 @@
 package com.ustadmobile.systemdb.repo
 
-interface SystemDbRepository {
+import com.ustadmobile.systemdb.datasource.LearningSpaceDataSource
+import com.ustadmobile.systemdb.datasource.SystemDbDataSource
 
-    val learningSpaceRepository: LearningSpaceRepository
+/**
+ *
+ */
+class SystemDbRepository(
+    private val local: SystemDbDataSource,
+    private val remote: SystemDbDataSource,
+): SystemDbDataSource {
+
+    override val learningSpaceDataSource: LearningSpaceDataSource by lazy {
+        LearningSpaceRepository(local.learningSpaceDataSource, remote.learningSpaceDataSource)
+    }
 
 }

@@ -4,8 +4,8 @@ import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.runBlocking

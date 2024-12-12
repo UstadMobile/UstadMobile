@@ -4,7 +4,7 @@ import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo

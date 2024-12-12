@@ -4,7 +4,7 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
-import com.ustadmobile.appconfigdb.repo.SystemDbRepositorySqlDelight
+import com.ustadmobile.appconfigdb.repo.SystemDbDataSourceSqlDelight
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -85,7 +85,7 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
-import com.ustadmobile.systemdb.repo.SystemDbRepository
+import com.ustadmobile.systemdb.datasource.SystemDbDataSource
 import com.ustadmobile.systemdb.sqlite.SystemDb
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
@@ -442,14 +442,16 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         SystemDb(driver)
     }
 
-    bind<SystemDbRepository>() with singleton {
+    bind<SystemDbDataSource>() with singleton {
         val systemUrlConfig:SystemUrlConfig = instance()
 
-        SystemDbRepositorySqlDelight(
-            systemDb = instance(),
-            url = UrlKmp(systemUrlConfig.systemBaseUrl).resolve("api/SystemDb/")
+        SystemDbDataSourceSqlDelight(
+            localDataSource = instance(),
+            remoteDataUrl = UrlKmp(systemUrlConfig.systemBaseUrl)
+                .resolve("api/${SystemDbDataSource.PATH}")
                 .toString()
         )
+
     }
 
     bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {

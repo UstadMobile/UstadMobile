@@ -129,6 +129,10 @@ zoomable = "1.6.1"
 credentials-version = "1.2.2"
 jetbrains-kotlin-jvm = "1.9.23"
 sqldelight = "2.0.2"
+agp = "8.7.2"
+kotlin-version = "1.9.23"
+xxhashjs = "^0.2.2"
+kotlin-wrappers = "1.0.0-pre.721"
 
 [plugins]
 

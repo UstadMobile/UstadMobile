@@ -8,7 +8,7 @@ import com.ustadmobile.core.domain.xapi.ext.resultProgressExtension
 import com.ustadmobile.core.domain.xapi.model.XapiActivity
 import com.ustadmobile.core.domain.xapi.model.XapiActivityStatementObject
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.core.test.isWithinThreshold
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.CoroutineScope

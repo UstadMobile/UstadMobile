@@ -71,10 +71,10 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.lib.rest.ext.*
@@ -141,6 +141,8 @@ import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOn
 import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
+import com.ustadmobile.systemdb.datasource.LearningSpaceDataSource
+import com.ustadmobile.systemdb.datasource.SystemDbDataSource
 import com.ustadmobile.systemdb.sqlite.SystemDb
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
@@ -965,10 +967,12 @@ fun Application.umRestApplication(
                     )
                 }
 
-                route("learningspace") {
-                    LearningSpaceClientRoute(
-                        learningSpaceServerRepo = di.direct.instance()
-                    )
+                route(SystemDbDataSource.PATH) {
+                    route(LearningSpaceDataSource.PATH) {
+                        LearningSpaceClientRoute(
+                            learningSpaceServerRepo = di.direct.instance()
+                        )
+                    }
                 }
 
                 route("account"){

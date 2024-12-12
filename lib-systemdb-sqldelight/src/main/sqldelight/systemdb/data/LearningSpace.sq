@@ -15,7 +15,7 @@ SELECT *
 FROM LearningSpaceEntity;
 
 insertFullObject:
-INSERT INTO LearningSpaceEntity(lsUid, lsUrl, lsName, lsDescription, lsLastModified, lsDbUrl, lsDbUsername, lsDbPassword)
+INSERT OR REPLACE INTO LearningSpaceEntity(lsUid, lsUrl, lsName, lsDescription, lsLastModified, lsDbUrl, lsDbUsername, lsDbPassword)
 VALUES ?;
 
 update:

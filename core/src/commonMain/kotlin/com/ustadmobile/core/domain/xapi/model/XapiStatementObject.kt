@@ -4,8 +4,8 @@ import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.xapi.XapiException
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.door.DoorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity

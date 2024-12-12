@@ -6,6 +6,7 @@ import android.content.res.AssetManager
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.russhwolf.settings.Settings
@@ -149,10 +150,10 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -204,11 +205,11 @@ import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 import rawhttp.core.RawHttp
-import com.toughra.ustadmobile.BuildConfig
-import com.ustadmobile.appconfigdb.SystemDb
-import com.ustadmobile.appconfigdb.SystemDbDataLayer
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.systemdb.datasource.SystemDbDataSource
+import com.ustadmobile.systemdb.repo.SystemDbRepository
+import com.ustadmobile.systemdb.sqlite.SystemDb
+import com.toughra.ustadmobile.BuildConfig
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
@@ -296,13 +297,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
         }
 
-        bind<SystemDbNodeIdAndAuth>() with singleton {
-            val settings: Settings = instance()
-            val systemUrlConfig:SystemUrlConfig = instance()
-            val contextIdentifier: String = sanitizeDbNameFromUrl(systemUrlConfig.systemBaseUrl)
-            SystemDbNodeIdAndAuth(nodeIdAndAuth =settings.getOrGenerateNodeIdAndAuth(contextIdentifier) )
-        }
-
         bind<SupportedLanguagesConfig>() with singleton {
             SupportedLanguagesConfig(
                 systemLocales = LocaleListCompat.getAdjustedDefault().let { localeList ->
@@ -356,40 +350,16 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<SystemDb>() with singleton {
-            val systemUrlConfig:SystemUrlConfig = instance()
-            val dbName = sanitizeDbNameFromUrl(systemUrlConfig.systemBaseUrl)
-            val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
-            DatabaseBuilder.databaseBuilder(
-                context = applicationContext,
-                dbClass =  SystemDb::class,
-                dbName = dbName,
-                nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId
-            ).build()
+            SystemDb(AndroidSqliteDriver(SystemDb.Schema, applicationContext,"system.db"))
         }
 
-        bind<SystemDbDataLayer>() with singleton {
-            val systemUrlConfig:SystemUrlConfig = instance()
-            val systemDb: SystemDb = instance<SystemDb>()
-
-            val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
-            val repo:SystemDb = systemDb.asRepository(
-                RepositoryConfig.repositoryConfig(
-                    context = applicationContext,
-                    endpoint = UrlKmp(systemUrlConfig.systemBaseUrl).resolve("api/SystemDb/")
-                        .toString(),
-                    nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
-                    auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
-                    httpClient = instance(),
-                    okHttpClient = instance(),
-                    json = instance()
-                )
-            )
-
-            SystemDbDataLayer(
-                localDb  = systemDb,
-                repository = repo,
+        bind<SystemDbDataSource>() with singleton {
+            SystemDbRepository(
+                local = instance(),
+                remote = instance(),
             )
         }
+
 
         bind<DbAndObservers>() with scoped(LearningSpaceScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)

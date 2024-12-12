@@ -16,10 +16,6 @@ import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseJvm
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
-import com.ustadmobile.core.domain.backup.JvmUnzipFileUseCase
-import com.ustadmobile.core.domain.backup.JvmZipFileUseCase
-import com.ustadmobile.core.domain.backup.UnzipFileUseCase
-import com.ustadmobile.core.domain.backup.ZipFileUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
@@ -126,10 +122,10 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.config.UstadBuildConfig
 import com.ustadmobile.core.impl.config.UstadBuildConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
 import com.ustadmobile.core.launchopenlicenses.LaunchOpenLicensesUseCaseJvm

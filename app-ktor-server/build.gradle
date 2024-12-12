@@ -115,6 +115,7 @@ dependencies {
     implementation libs.door.room.annotations
     implementation libs.door.runtime
     implementation project(":lib-util")
+    implementation project(":lib-xxhashkmp-commonjvmimpl")
 
     implementation libs.kotlin.stdlib.jdk8
 

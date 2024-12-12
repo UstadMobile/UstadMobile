@@ -15,8 +15,8 @@ import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitt
 import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.SystemUrlConfig
