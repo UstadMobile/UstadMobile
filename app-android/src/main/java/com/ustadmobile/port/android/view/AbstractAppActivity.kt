@@ -27,6 +27,7 @@ import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseAndroid
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
+import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
