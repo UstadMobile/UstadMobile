@@ -5,6 +5,7 @@ import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
@@ -15,6 +16,7 @@ import com.ustadmobile.systemdb.model.LearningSpaceInfo
 import com.ustadmobile.systemdb.datasource.LearningSpaceDataSource
 import com.ustadmobile.systemdb.datasource.SystemDbDataSource
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -50,6 +52,14 @@ class LearningSpaceListViewModel(
             prev.copy(
                 siteLink = savedStateHandle[KEY_LINK] ?: "",
             )
+        }
+
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                repo.getAll().collect { learningSpaceList ->
+                    _uiState.update { it.copy(learningSpaces = learningSpaceList) }
+                }
+            }
         }
     }
 

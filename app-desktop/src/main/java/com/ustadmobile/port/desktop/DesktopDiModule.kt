@@ -86,6 +86,8 @@ import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import com.ustadmobile.systemdb.datasource.SystemDbDataSource
+import com.ustadmobile.systemdb.datasource.network.SystemDbDataSourceHttp
+import com.ustadmobile.systemdb.repo.SystemDbRepository
 import com.ustadmobile.systemdb.sqlite.SystemDb
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
@@ -445,13 +447,18 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
     bind<SystemDbDataSource>() with singleton {
         val systemUrlConfig:SystemUrlConfig = instance()
 
-        SystemDbDataSourceSqlDelight(
-            localDataSource = instance(),
-            remoteDataUrl = UrlKmp(systemUrlConfig.systemBaseUrl)
-                .resolve("api/${SystemDbDataSource.PATH}")
-                .toString()
+        SystemDbRepository(
+            local = SystemDbDataSourceSqlDelight(
+                systemDb = instance(),
+                xxStringHasher = instance(),
+            ),
+            remote = SystemDbDataSourceHttp(
+                url = UrlKmp(systemUrlConfig.systemBaseUrl)
+                    .resolve("api/${SystemDbDataSource.PATH}/")
+                    .toString(),
+                httpClient = instance()
+            )
         )
-
     }
 
     bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {

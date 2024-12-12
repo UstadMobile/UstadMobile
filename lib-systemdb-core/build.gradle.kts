@@ -24,6 +24,8 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation(libs.coroutines)
+                implementation(libs.ktor.client.core)
+                implementation(libs.kotlinx.serialization)
             }
         }
 

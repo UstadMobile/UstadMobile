@@ -28,13 +28,13 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation(project(":lib-systemdb-core"))
+                implementation(project(":lib-xxhashkmp"))
                 implementation(libs.coroutines)
                 implementation(libs.ktor.client.core)
                 implementation(libs.kotlinx.serialization)
                 implementation(libs.coroutines)
                 implementation(libs.ktor.client.core)
-
-
+                implementation(libs.sqldelight.coroutine.extensions)
             }
         }
 

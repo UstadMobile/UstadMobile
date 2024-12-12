@@ -368,3 +368,4 @@ zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials-version" }
 sqldelight-sqlite-driver-jvm = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
 sqldelight-sqlite-driver-android = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
+sqldelight-coroutine-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
