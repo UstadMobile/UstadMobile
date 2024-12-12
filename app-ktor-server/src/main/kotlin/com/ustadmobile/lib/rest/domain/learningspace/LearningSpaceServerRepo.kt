@@ -49,6 +49,7 @@ class LearningSpaceServerRepo(
         systemDb.learningSpaceQueries.insertFullObject(
             learningSpace.asEntity(xxStringHasher.hash(learningSpace.info.url))
         )
+        learningSpaces[learningSpace.info.url] = learningSpace
     }
 
     fun getAll(): List<LearningSpaceInfo> {
