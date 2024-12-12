@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.impl
 import android.app.Application
 import android.content.Context
 import android.content.res.AssetManager
-import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
@@ -210,6 +209,9 @@ import com.ustadmobile.systemdb.datasource.SystemDbDataSource
 import com.ustadmobile.systemdb.repo.SystemDbRepository
 import com.ustadmobile.systemdb.sqlite.SystemDb
 import com.toughra.ustadmobile.BuildConfig
+import com.ustadmobile.appconfigdb.repo.SystemDbDataSourceSqlDelight
+import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.systemdb.datasource.network.SystemDbDataSourceHttp
 
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
@@ -355,9 +357,19 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         bind<SystemDbDataSource>() with singleton {
+            val systemUrlConfig:SystemUrlConfig = instance()
+
             SystemDbRepository(
-                local = instance(),
-                remote = instance(),
+                local = SystemDbDataSourceSqlDelight(
+                    systemDb = instance(),
+                    xxStringHasher = instance(),
+                ),
+                remote = SystemDbDataSourceHttp(
+                    url = UrlKmp(systemUrlConfig.systemBaseUrl)
+                        .resolve("api/${SystemDbDataSource.PATH}/")
+                        .toString(),
+                    httpClient = instance()
+                )
             )
         }
 
@@ -368,7 +380,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
             val nodeIdAndAuth: NodeIdAndAuth = instance()
 
-            Log.i("MigrateIssue", "Creating database name=$dbName")
             val db = DatabaseBuilder.databaseBuilder(
                 context = applicationContext,
                 dbClass = UmAppDatabase::class,
@@ -384,7 +395,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(MIGRATION_169_170_CLIENT)
                 .build()
 
-            Log.i("MigrateIssue", "Database built: name=$dbName")
 
             val cache: UstadCache = instance()
 

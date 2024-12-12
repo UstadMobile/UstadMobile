@@ -15,10 +15,14 @@ class LearningSpaceDataSourceHttp(
 
     override fun getAll(): Flow<List<LearningSpaceInfo>> {
         return flow {
-            val learningSpaceInfos: List<LearningSpaceInfo> = httpClient.get(
-                "${url}getAll"
-            ).body()
-            emit(learningSpaceInfos)
+            try {
+                val learningSpaceInfos: List<LearningSpaceInfo> = httpClient.get(
+                    "${url}getAll"
+                ).body()
+                emit(learningSpaceInfos)
+            }catch(e: Exception) {
+                emit(emptyList())
+            }
         }
     }
 
