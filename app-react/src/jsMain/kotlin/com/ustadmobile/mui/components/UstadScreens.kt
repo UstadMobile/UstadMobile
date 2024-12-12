@@ -1,8 +1,6 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.MuiAppState
-import com.ustadmobile.appconfigdb.SystemDb
-import com.ustadmobile.appconfigdb.SystemDbJsImplementations
 import com.ustadmobile.core.components.DIModule
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabaseJsImplementations
@@ -259,16 +257,6 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
     }
 
     val dbNodeIdAndAuth = NodeIdAndAuth(nodeId, nodeAuth)
-    val systemDbName = sanitizeDbNameFromUrl(window.location.origin)
-    val systemDbUrl = "sqlite:$systemDbName"
-    val systemDbNodeId = localStorage.getOrPut("${systemDbName}_nodeId") {
-        Random.nextLong(0, Long.MAX_VALUE).toString()
-    }.toLong()
-
-    val systemDbNodeAuth = localStorage.getOrPut("${systemDbName}_nodeAuth") {
-        randomUuid().toString()
-    }
-    val systemDbNodeIdAndAuth = NodeIdAndAuth(systemDbNodeId, systemDbNodeAuth)
 
     val builderOptions = DatabaseBuilderOptions(
         UmAppDatabase::class,
@@ -276,15 +264,6 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
         nodeId  = dbNodeIdAndAuth.nodeId,
         webWorkerPath = "./worker.sql-wasm.js"
     )
-
-   val systemDbBuilderOptions= DatabaseBuilderOptions(
-       SystemDb::class,
-       SystemDbJsImplementations,
-       dbUrl = systemDbUrl,
-       nodeId = systemDbNodeIdAndAuth.nodeId,
-       webWorkerPath = "./worker.sql-wasm.js?SystemDbUrl"
-    )
-    val systemDbBuilder =  DatabaseBuilder.databaseBuilder(systemDbBuilderOptions)
 
 
     val dbBuilder = DatabaseBuilder.databaseBuilder(builderOptions)
@@ -308,13 +287,10 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
 
             //Probably something with no migration path, clear and retry
             indexedDB.deleteDatabaseAsync(dbName)
-            indexedDB.deleteDatabaseAsync(systemDbName)
             localStorage.clear()
 
             //Try again
             dbBuilt = dbBuilder.build()
-            systemDbBuilt = systemDbBuilder.build()
-
         }
 
         val json = Json {
@@ -334,7 +310,6 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
 
         val di = ustadJsDi(
             dbBuilt = dbBuilt,
-            systemDbBuilt = systemDbBuilt,
             dbNodeIdAndAuth = dbNodeIdAndAuth,
             json = json,
             httpClient = httpClient,
