@@ -11,10 +11,15 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.google.common.collect.DiscreteDomain
 import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
 import com.ustadmobile.core.domain.passkey.PassKeySignInData
+import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 import io.github.aakira.napier.Napier
 import org.json.JSONObject
 
-class LoginWithPasskeyUseCaseImpl(val context: Context) : LoginWithPasskeyUseCase {
+class LoginWithPasskeyUseCaseImpl(
+    val context: Context,
+    val passkeyRequestJsonUseCase: PasskeyRequestJsonUseCase
+
+) : LoginWithPasskeyUseCase {
     override suspend fun invoke(domain: String): PassKeySignInData? {
         val credentialManager = CredentialManager.create(context)
 
@@ -23,7 +28,7 @@ class LoginWithPasskeyUseCaseImpl(val context: Context) : LoginWithPasskeyUseCas
 
         // Get passkey from the user's public key credential provider.
         val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
-            requestJson = PasskeyRequestJsonUseCase.requestJsonForSignIn(domain)
+            requestJson = passkeyRequestJsonUseCase.requestJsonForSignIn(domain)
         )
         val getCredRequest = GetCredentialRequest(
             listOf(getPasswordOption, getPublicKeyCredentialOption)

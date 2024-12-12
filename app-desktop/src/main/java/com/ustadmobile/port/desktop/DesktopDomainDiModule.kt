@@ -82,10 +82,12 @@ import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUs
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.invite.ClazzRedeemUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJvm
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
+import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
@@ -515,6 +517,13 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
+    bind<PasskeyRequestJsonUseCase>()  with provider {
+        PasskeyRequestJsonUseCase(
+            systemImpl = instance(),
+            json = instance()
+        )
+    }
+
     bind<OpenBlobUiUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         OpenBlobUiUseCase(
             openBlobUseCase = instance(),
@@ -575,6 +584,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             compressImageUseCase = instance(),
             compressAudioUseCase = instance(),
             mimeTypeHelper = instance(),
+        )
+    }
+
+    bind<ClazzRedeemUseCase>() with scoped(LearningSpaceScope.Default).provider {
+        ClazzRedeemUseCase(
+            enrolIntoCourseUseCase = instance(),
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance<UmAppDataLayer>().repository,
         )
     }
 

@@ -25,6 +25,7 @@ import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.cachelock.AddOfflineItemInactiveTriggersCallback
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
 import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseSox
 import com.ustadmobile.core.domain.compress.pdf.CompressPdfUseCase
@@ -39,6 +40,7 @@ import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseC
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaInfoUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
+import com.ustadmobile.core.domain.invite.ClazzRedeemUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson

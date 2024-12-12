@@ -91,6 +91,7 @@ kotlin {
                 implementation npm("mime-matcher","$version_npm_mime_matcher")
                 implementation npm("react-quill", "$version_npm_react_quill")
                 implementation npm("react-easy-sort","$version_npm_react_easy_sort")
+                implementation npm("mui-chips-input","$version_npm_react_mui_chip")
                 implementation libs.xmlpullparsekmp
                 implementation libs.napier
                 implementation npm("linkifyjs", "$version_npm_linkify")

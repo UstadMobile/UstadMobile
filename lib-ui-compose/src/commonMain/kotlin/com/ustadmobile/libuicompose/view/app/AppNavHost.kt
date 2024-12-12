@@ -29,11 +29,13 @@ import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
 import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
+import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
@@ -147,13 +149,14 @@ import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDe
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
-import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyPrompt
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
+import com.ustadmobile.libuicompose.view.clazz.inviteViaContact.InviteViaContactScreen
 import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
 import com.ustadmobile.libuicompose.view.clazz.permissiondetail.CoursePermissionDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.permissionedit.CoursePermissionEditScreen
 import com.ustadmobile.libuicompose.view.clazz.permissionlist.CoursePermissionListScreen
+import com.ustadmobile.libuicompose.view.clazz.redeem.ClazzInviteRedeem
 import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailScreen
 import com.ustadmobile.libuicompose.view.contententry.edit.ContentEntryEditScreen
 import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGetMetadataScreen
@@ -230,25 +233,6 @@ fun AppNavHost(
     }
 
 
-    var passkeyPromptData by remember{ mutableStateOf<PassKeyPromptData?>(null) }
-
-    LaunchedEffect(accountManager.passKeyPromptFlow) {
-        accountManager.passKeyPromptFlow.collect {
-            passkeyPromptData = it
-        }
-    }
-
-    passkeyPromptData?.let {
-        CreatePasskeyPrompt(
-            username = it.username,
-            personUid = it.personUid.toString(),
-            doorNodeId = it.doorNodeId,
-            usStartTime = it.usStartTime,
-            serverUrl = it.serverUrl,
-            passkeyData = {},
-            passkeyError = {}
-        )
-    }
 
     val navResultReturner: NavResultReturner = remember {
         NavResultReturnerImpl()
@@ -886,6 +870,20 @@ fun AppNavHost(
                 BulkAddPersonRunImportScreen(
                     appViewModel(backStackEntry, BulkAddPersonRunImportViewModel::class,
                         ::BulkAddPersonRunImportViewModel)
+                )
+            }
+
+            contentScene("/${InviteViaContactViewModel.DEST_NAME}") { backStackEntry ->
+                InviteViaContactScreen(
+                    appViewModel(backStackEntry, InviteViaContactViewModel::class,
+                        ::InviteViaContactViewModel)
+                )
+            }
+
+            contentScene("/${ClazzInviteViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzInviteRedeem(
+                    appViewModel(backStackEntry, ClazzInviteViewModel::class,
+                        ::ClazzInviteViewModel)
                 )
             }
 

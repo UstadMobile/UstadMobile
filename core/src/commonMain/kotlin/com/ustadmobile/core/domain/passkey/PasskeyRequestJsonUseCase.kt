@@ -1,14 +1,17 @@
-package com.ustadmobile.libuicompose.util.passkey
+package com.ustadmobile.core.domain.passkey
 
-import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
-import com.ustadmobile.core.domain.passkey.UserPasskeyChallenge
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.util.Base64
+import com.ustadmobile.core.MR
+import io.ktor.util.encodeBase64
 import kotlin.random.Random
 
-object PasskeyRequestJsonUseCase {
+class PasskeyRequestJsonUseCase(
+    private val systemImpl: UstadMobileSystemImpl,
+    private val json: Json,
+    ) {
 
     /**
      * https://developer.android.com/identity/sign-in/credential-manager#format-json-request
@@ -24,7 +27,7 @@ object PasskeyRequestJsonUseCase {
         createPasskeyParams: CreatePasskeyParams
     ): String {
         val userId = randomString(16)
-        val challenge = Json.encodeToString(
+        val challenge = json.encodeToString(
             UserPasskeyChallenge(
                 username = createPasskeyParams.username,
                 personUid = createPasskeyParams.personUid,
@@ -33,15 +36,15 @@ object PasskeyRequestJsonUseCase {
             )
         )
 
-        val challengeBase64Encoded = Base64.getEncoder().encodeToString(challenge.toByteArray())
-        val useridBase64Encoded = Base64.getEncoder().encodeToString("$userId@${createPasskeyParams.serverUrl}".toByteArray())
+        val challengeBase64Encoded =   challenge.encodeBase64()
+        val useridBase64Encoded =  "$userId@${createPasskeyParams.serverUrl}".encodeBase64()
 
         val requestJson = """
                   {
                     "challenge": "${challengeBase64Encoded}",
                     "rp": {
                       "id": "credential-manager-${createPasskeyParams.domainName}",
-                      "name": "Ustad Mobile"
+                      "name": "${systemImpl.getString(MR.strings.app_name)}"
                     },
                     "pubKeyCredParams": [
                       {
@@ -76,6 +79,7 @@ object PasskeyRequestJsonUseCase {
         return (1..length).map { i -> charPool.get(Random.nextInt(0, charPool.length)) }
             .joinToString(separator = "")
     }
+
     fun requestJsonForSignIn(domain: String): String {
         val challenge = randomString(16)
 

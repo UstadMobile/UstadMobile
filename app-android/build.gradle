@@ -325,6 +325,9 @@ dependencies {
     implementation libs.coil
     implementation libs.coil.compose
 
+    //chip text fields
+    implementation libs.chiptextfield
+
     implementation libs.kotlinx.datetime
 
     //Xml processing

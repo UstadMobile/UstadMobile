@@ -42,6 +42,7 @@ import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUs
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
+import com.ustadmobile.core.domain.invite.CheckContactTypeUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -134,6 +135,14 @@ import com.ustadmobile.lib.rest.domain.learningspace.SystemConfigScriptRoute
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
+import com.ustadmobile.lib.rest.domain.invite.ProcessInviteRoute
+import com.ustadmobile.lib.rest.domain.invite.ProcessInviteUseCase
+import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
+import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
+import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
+import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCaseHttp
+import com.ustadmobile.lib.rest.domain.invite.sms.SmsProperties
+import com.ustadmobile.lib.rest.domain.invite.sms.twilio.TwilioHttpClient
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.systemconfig.verifyauth.VerifySystemConfigAuthUseCase
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
@@ -401,7 +410,7 @@ fun Application.umRestApplication(
 
             InitialContext().apply {
                 bindDataSourceIfNotExisting("quartzds", dbProperties)
-                initQuartzDb("java:/comp/env/jdbc/quartzds")
+           //     initQuartzDb("java:/comp/env/jdbc/quartzds")
             }
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
@@ -609,6 +618,20 @@ fun Application.umRestApplication(
         bind<ValidateEmailUseCase>() with provider {
             ValidateEmailUseCase()
         }
+
+
+        bind<SendMessageUseCase>() with provider {
+            SendMessageUseCase(activeDb = instance(tag = DoorTag.TAG_DB),)
+        }
+
+        bind<CheckContactTypeUseCase>() with provider {
+            CheckContactTypeUseCase(
+                validateEmailUseCase = instance(),
+                phoneNumValidatorUseCase = instance()
+            )
+        }
+
+
 
         bind<IPhoneNumberUtil>() with provider {
             PhoneNumberUtilJvm(PhoneNumberUtil.getInstance())
@@ -852,13 +875,51 @@ fun Application.umRestApplication(
         }catch(e: Exception) {
             Napier.w("WARNING: Email sending not configured")
         }
+        try {
+            appConfig.config("sms")
+            bind<SmsProperties>() with singleton  {
+                SmsProperties(
+                    appConfig.property("sms.phone_number").getString(),
+                    appConfig.property("sms.provider_link").getString(),
+                    appConfig.property("sms.sid").getString(),
+                    appConfig.property("sms.token").getString(),
+                )
+            }
 
+            bind<TwilioHttpClient>() with singleton {
+                TwilioHttpClient(di)
+            }
+        }catch(e: Exception) {
+            Napier.w("WARNING: SMS. sending not configured ${e.message}")
+        }
+
+        bind<SendSmsUseCaseHttp>() with singleton {
+            SendSmsUseCaseHttp(di)
+        }
+
+        bind<SendEmailUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            SendEmailUseCase(NotificationSender(di))
+        }
+        bind<SendSmsUseCase>() with singleton {
+            SendSmsUseCase(di)
+        }
+        bind<ProcessInviteUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            ProcessInviteUseCase(
+                sendEmailUseCase = instance(),
+                sendSmsUseCase = instance(),
+                sendMessageUseCase = instance(),
+                checkContactTypeUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                learningSpace = context,
+                repo = null
+                )
+        }
         registerContextTranslator { call: ApplicationCall ->
             call.callLearningSpace
         }
 
         onReady {
-            instance<Scheduler>().start()
+           // instance<Scheduler>().start()
             instance<SystemDb>()
 
             Runtime.getRuntime().addShutdownHook(Thread{
@@ -977,6 +1038,13 @@ fun Application.umRestApplication(
 
                 route("account"){
                     SetPasswordRoute(
+                        useCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+                }
+                route("inviteuser") {
+                    ProcessInviteRoute(
                         useCase = { call ->
                             di.on(call).direct.instance()
                         }
