@@ -10,3 +10,4 @@ appId: com.toughra.ustadmobile
     commands:
       - tapOn: "Join Learning Space"
 - tapOn: "Enter link manually"
+
