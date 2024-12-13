@@ -1,12 +1,12 @@
 package com.ustadmobile.view.contententry.detailattemptstab
 
 import app.cash.paging.PagingSourceLoadResult
-import com.ustadmobile.core.contentformats.epub.ncx.Text
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
@@ -21,10 +21,12 @@ import dev.icerock.moko.graphics.parseColor
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.datetime.TimeZone
 import mui.icons.material.Check
 import mui.icons.material.Close
 import mui.icons.material.Schedule
 import mui.icons.material.Star
+import mui.icons.material.Timer
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemButton
@@ -96,7 +98,12 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                         items = infiniteQueryResult,
                         key = { it.contextRegistrationHi.toString() }
                     ) { attemptsSessionListItems ->
-
+                        val formattedDateTime = attemptsSessionListItems?.timeStarted?.let { it1 ->
+                            useFormattedDateAndTime(
+                                timeInMillis = it1,
+                                timezoneId = TimeZone.currentSystemDefault().id
+                            )
+                        }
                         ListItem.create {
 
                             Stack {
@@ -106,8 +113,6 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
 
                                     width = 100.pct
                                 }
-
-
 
                                 ListItemButton {
                                     onClick = {
@@ -147,6 +152,20 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                 }
                                 ListItemButton {
                                     ListItemIcon {
+                                        Timer
+                                        sx {
+                                            padding = theme.spacing(1, 1, 1, 5)
+                                        }
+                                    }
+                                    ListItemText {
+                                        secondary = ReactNode(
+                                            "$formattedDateTime"
+                                        )
+                                    }
+                                }
+
+                                ListItemButton {
+                                    ListItemIcon {
 
                                         Star()
                                         sx {
@@ -157,8 +176,10 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                         secondary = ReactNode(
                                             when {
                                                 attemptsSessionListItems?.maxScore != null -> {
-                                                    "${((attemptsSessionListItems?.maxScore ?: 0f)
-                                                            * 100).toInt()}" + "% Score"
+                                                    "${
+                                                        ((attemptsSessionListItems?.maxScore ?: 0f)
+                                                                * 100).toInt()
+                                                    }" + "% Score"
                                                 }
 
                                                 else -> {
