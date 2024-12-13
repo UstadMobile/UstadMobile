@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.mui.components.ThemeContext
+import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -166,7 +167,6 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
 
                                 ListItemButton {
                                     ListItemIcon {
-
                                         Star()
                                         sx {
                                             padding = theme.spacing(1, 1, 1, 5)
