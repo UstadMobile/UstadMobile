@@ -112,8 +112,17 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                 }
                                 ListItemButton {
                                     ListItemIcon {
+                                        when {
+                                            attemptsStatementListItems?.statementEntity?.resultScoreRaw != null || attemptsStatementListItems?.statementEntity?.extensionProgress != null -> {
+                                                Star()
 
-                                        Star()
+                                            }
+
+                                            else -> {
+                                                UstadBlankIcon()
+
+                                            }
+                                        }
                                         sx {
                                             padding = theme.spacing(1, 1, 1, 5)
                                         }
@@ -130,7 +139,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                                             .toString()
                                                     } Score"
                                                 } else {
-                                                    "-"
+                                                    ""
                                                 }
 
                                             } else {
