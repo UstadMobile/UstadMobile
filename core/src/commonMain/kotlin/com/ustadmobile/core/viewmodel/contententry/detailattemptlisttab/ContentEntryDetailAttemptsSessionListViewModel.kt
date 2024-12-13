@@ -57,7 +57,7 @@ class ContentEntryDetailAttemptsSessionListViewModel(
                     }
                     _appUiState.update { prev ->
                         prev.copy(
-                            title = "${personNames?.firstNames} ${personNames?.lastName} - $entityUidArg"
+                            title = "${personNames?.firstNames} ${personNames?.lastName}"
                         )
                     }
                 }
