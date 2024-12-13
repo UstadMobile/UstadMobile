@@ -12,9 +12,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.runtime.Composable
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -29,7 +31,9 @@ import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.TimeZone
 
 @Composable
 fun ContentEntryDetailAttemptsSessionListScreen(
@@ -62,7 +66,15 @@ fun ContentEntryDetailAttemptsSessionListScreen(
             pagingItems = attemptsSessionListItems,
             key = { it.contextRegistrationHi.toInt() ?: -1 }
         ) { attemptsSessionListItems ->
+            val timeZoneId = remember { TimeZone.currentSystemDefault().id }
 
+            val duration = attemptsSessionListItems?.let {
+                rememberFormattedDateTime(
+                    timeInMillis = it.timeStarted,
+                    timeZoneId = timeZoneId,
+                    joinDateAndTime = {date, time -> "$date - $time"},
+                    )
+            }
 
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {
@@ -121,6 +133,22 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
+                                imageVector = Icons.Filled.Timer,
+                                contentDescription = "Icon",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                            Text(
+                                text =
+                                        "$duration"
+
+                            )
+
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
                                 imageVector = Icons.Filled.Star,
                                 contentDescription = "Icon",
                                 modifier = Modifier.padding(8.dp)
@@ -138,6 +166,8 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                             )
 
                         }
+
+
                     }
 
                 }
