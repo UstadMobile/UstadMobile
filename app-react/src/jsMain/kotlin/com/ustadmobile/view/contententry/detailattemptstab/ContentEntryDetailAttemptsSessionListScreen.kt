@@ -152,14 +152,14 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                 }
                                 ListItemButton {
                                     ListItemIcon {
-                                        Timer
+                                        Timer()
                                         sx {
                                             padding = theme.spacing(1, 1, 1, 5)
                                         }
                                     }
                                     ListItemText {
                                         secondary = ReactNode(
-                                            "$formattedDateTime"
+                                            "${formattedDateTime?:""}"
                                         )
                                     }
                                 }
