@@ -36,7 +36,7 @@ Cypress.on('uncaught:exception', (err) => {
 // Start Test Server
 Cypress.Commands.add('ustadStartTestServer', () => {
   cy.visit('http://localhost:8075/start'); // Use cy.visit to navigate to the start page
-  cy.wait(6000); // Wait for 6 seconds after visiting the start page
+ // cy.wait(6000); // Wait for 6 seconds after visiting the start page
 });
 
 
@@ -44,25 +44,25 @@ Cypress.Commands.add('ustadStartTestServer', () => {
 Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
 
 //below command added as per : https://github.com/thisdot/open-source/blob/main/libs/cypress-indexeddb/README.md
-  cy.log('Clearing IndexedDB');
+  cy.log('Clearing IndexedDB')
   cy.clearIndexedDb('localhost_8087') // clearing index db
+
 // Adding query parameters on the url- below command added as per - https://docs.cypress.io/api/commands/visit#Add-query-parameters
   cy.visit('http://localhost:8087/', {timeout:60000},{
     qs: {
-      username,
-      password,
-    },
+      username,password,},
   })
-
-//https://medium.com/coinmonks/conditional-testing-incypress-tutorial
-
-cy.contains('Existing user').then(($button) => {
-  if ($button.hasClass('active')) {
-    cy.log('The user already in login page');
-  } else {
-    cy.wrap($button).should('be.visible').click();
-  }
-});
+// Conditional check for New/Existing user page
+  cy.get('#registration_enabled', { timeout: 60000 })
+    .invoke('text')
+    .then((text) => {
+    if (text.trim() === 'true') {
+      cy.log('User is on the New user/Existing user page')
+      cy.get('#existing_user', { timeout: 10000 }).should('be.visible').click()
+    } else {
+      cy.log('User is on the login page')
+    }
+  })
   cy.get('input#username', { timeout: 10000 }).should('exist').type(username) // 10 seconds
   cy.get('input#password').type(password)
   cy.get('button#login_button').click()
