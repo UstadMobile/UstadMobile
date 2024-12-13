@@ -7,6 +7,7 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
@@ -21,8 +22,10 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.datetime.TimeZone
 import mui.icons.material.Check
 import mui.icons.material.Star
+import mui.icons.material.Timer
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemButton
@@ -89,6 +92,8 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                         items = infiniteQueryResult,
                         key = { it.statementEntity?.statementLct.toString() }
                     ) { attemptsStatementListItems ->
+
+
                         ListItem.create {
                             Stack {
                                 direction = responsive(StackDirection.column)
