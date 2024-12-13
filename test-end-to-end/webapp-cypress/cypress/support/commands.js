@@ -53,16 +53,20 @@ Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
       password,
     },
   })
-
-//https://medium.com/coinmonks/conditional-testing-incypress-tutorial
-
-cy.contains('Existing user').then(($button) => {
-  if ($button.hasClass('active')) {
-    cy.log('The user already in login page');
-  } else {
-    cy.wrap($button).should('be.visible').click();
-  }
-});
+  cy.wait(1000) //This wait helps the login screen to load
+  cy.get('body').then((body) =>
+ {
+    // Check if the "Existing user" button is present
+   if (body.find('#existing_user').length > 0) {
+    // User is on the "New user/Existing user" page
+   cy.log('User is on the New user/Existing user page');
+   cy.get('#existing_user').should('be.visible').click();
+ } else
+ {
+    // If the "Existing user" button is not found, user is on the login page
+   cy.log('User is on the login page');
+ }
+ })
   cy.get('input#username', { timeout: 10000 }).should('exist').type(username) // 10 seconds
   cy.get('input#password').type(password)
   cy.get('button#login_button').click()
