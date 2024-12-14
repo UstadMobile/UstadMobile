@@ -166,8 +166,6 @@ const val CONF_DBMODE_VIRTUALHOST = "virtualhost"
 
 const val CONF_DBMODE_SINGLETON = "singleton"
 
-const val CONF_GOOGLE_API = "secret"
-
 const val CONF_KEY_SITE_URL = "ktor.ustad.siteUrl"
 
 const val CONF_KEY_URL_PREFIX = "ktor.ustad.urlPrefix"
@@ -341,17 +339,16 @@ fun Application.umRestApplication(
     //Avoid sending the body of content if it has not changed since the client last requested it.
     install(ConditionalHeaders)
 
-    val dataDirPath = environment.config.absoluteDataDir()
+    val dataDirPath = environment.config.absoluteDataDir().also {
+        if(!it.exists())
+            it.mkdirs()
+    }
 
     val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
 
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
     }
-
-    dataDirPath.takeIf { !it.exists() }?.mkdirs()
-
-    val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
     di {
         import(
@@ -373,10 +370,6 @@ fun Application.umRestApplication(
 
         bind<NodeIdAuthCache>() with scoped(LearningSpaceScope.Default).singleton {
             instance<UmAppDatabase>(tag = DoorTag.TAG_DB).nodeIdAuthCache
-        }
-
-        bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
-            apiKey
         }
 
         bind<Gson>() with singleton { Gson() }
@@ -410,8 +403,9 @@ fun Application.umRestApplication(
 
             InitialContext().apply {
                 bindDataSourceIfNotExisting("quartzds", dbProperties)
-           //     initQuartzDb("java:/comp/env/jdbc/quartzds")
+                initQuartzDb("java:/comp/env/jdbc/quartzds")
             }
+
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
             }
@@ -919,7 +913,7 @@ fun Application.umRestApplication(
         }
 
         onReady {
-           // instance<Scheduler>().start()
+            instance<Scheduler>().start()
             instance<SystemDb>()
 
             Runtime.getRuntime().addShutdownHook(Thread{

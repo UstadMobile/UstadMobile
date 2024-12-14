@@ -40,7 +40,7 @@ Studio or IntelliJ, Go to  run, debug, configurations and then add a "remote" co
 
 * __Step 5: Add a learning space__:
 ```
-./gradlew app-ktor-server:run --args='newlearningspace --url http://your.ip.address:8087/ --title learningspacetitle'
+./gradlew app-ktor-server:run --args='newlearningspace --url http://your.ip.address:8087/ --title learningspacetitle --adminpassword adminpassword'
 ```
 to show learning space list add base url in com.ustadmobile.system.systemBaseUrl=your_url
 in buildconfig.default.properties

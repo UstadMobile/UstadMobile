@@ -10,8 +10,6 @@ object DiTag {
 
     const val TAG_ADMIN_PASS_FILE = 81
 
-    const val TAG_GOOGLE_API = 12
-
     const val XPP_FACTORY_NSAWARE = 1
 
     const val XPP_FACTORY_NSUNAWARE = 0
