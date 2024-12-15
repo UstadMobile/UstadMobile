@@ -14,7 +14,7 @@ import com.ustadmobile.core.domain.xapi.model.XapiResult
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xapi.model.XapiVerb
 import com.ustadmobile.core.domain.xapi.model.identifierHash
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.ext.roundTo
 import com.ustadmobile.core.util.ext.toQueryString

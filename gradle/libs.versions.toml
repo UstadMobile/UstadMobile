@@ -130,6 +130,11 @@ kmp-uuid = "0.8.4"
 zoomable = "1.6.1"
 credentials-version = "1.2.2"
 jetbrains-kotlin-jvm = "1.9.23"
+sqldelight = "2.0.2"
+agp = "8.7.2"
+kotlin-version = "1.9.23"
+xxhashjs = "^0.2.2"
+kotlin-wrappers = "1.0.0-pre.721"
 
 [plugins]
 
@@ -142,7 +147,7 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 license = { id = "com.jaredsburrows.license", version.ref = "plugin-license" }
 android-emulator = { id = "com.quittle.android-emulator", version.ref = "android-emulator-plugin" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrains-kotlin-jvm" }
-
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight"}
 
 [libraries]
 
@@ -367,3 +372,6 @@ lz4-pure-java = { module = "org.lz4:lz4-pure-java", version.ref = "lz4" }
 kmp-uuid = { module = "com.benasher44:uuid", version.ref = "kmp-uuid" }
 zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials-version" }
+sqldelight-sqlite-driver-jvm = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
+sqldelight-sqlite-driver-android = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
+sqldelight-coroutine-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }

@@ -117,6 +117,7 @@ dependencies {
     implementation libs.door.room.annotations
     implementation libs.door.runtime
     implementation project(":lib-util")
+    implementation project(":lib-xxhashkmp-commonjvmimpl")
 
     implementation libs.kotlin.stdlib.jdk8
 
@@ -141,7 +142,9 @@ dependencies {
     implementation libs.generateuuid
 
     implementation project(":lib-ihttp-ktor-server")
-    implementation project(':lib-systemdb')
+    implementation project(':lib-centralappconfigdb-common')
+    implementation project(':lib-centralappconfigdb-sqldelight')
+    implementation libs.sqldelight.sqlite.driver.jvm
 
     //test
     testImplementation project(":lib-test-common")

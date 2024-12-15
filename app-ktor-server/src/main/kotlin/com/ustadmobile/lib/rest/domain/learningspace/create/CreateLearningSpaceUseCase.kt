@@ -1,16 +1,17 @@
 package com.ustadmobile.lib.rest.domain.learningspace.create
 
-import com.ustadmobile.appconfigdb.composites.LearningSpaceConfigAndInfo
-import com.ustadmobile.appconfigdb.entities.LearningSpaceConfig
-import com.ustadmobile.appconfigdb.entities.LearningSpaceInfo
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.centralappconfigdb.model.LearningSpaceConfig
+import com.ustadmobile.centralappconfigdb.model.LearningSpaceConfigAndInfo
+import com.ustadmobile.centralappconfigdb.model.LearningSpaceInfo
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -44,16 +45,16 @@ class CreateLearningSpaceUseCase(
         learningSpaceServerRepo.add(
             LearningSpaceConfigAndInfo(
                 config = LearningSpaceConfig(
-                    lscUid = uid,
-                    lscUrl = request.url,
-                    lscDbUrl = effectiveDbUrl,
-                    lscDbUsername = request.dbUsername,
-                    lscDbPassword = request.dbPassword,
+                    url = request.url,
+                    dbUrl = effectiveDbUrl,
+                    dbUsername = request.dbUsername,
+                    dbPassword = request.dbPassword,
                 ),
                 info = LearningSpaceInfo(
-                    lsiUid = uid,
-                    lsiUrl = request.url,
-                    lsiName = request.title,
+                    url = request.url,
+                    name = request.title,
+                    description = request.title,
+                    lastModified = systemTimeInMillis()
                 )
             )
         )

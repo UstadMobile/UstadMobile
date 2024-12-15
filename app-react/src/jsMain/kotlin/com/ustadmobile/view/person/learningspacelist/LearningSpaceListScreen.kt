@@ -8,20 +8,10 @@ import react.FC
 import react.Props
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.paging.RefreshCommand
-import com.ustadmobile.hooks.useDoorRemoteMediator
-import com.ustadmobile.hooks.useMuiAppState
-import com.ustadmobile.hooks.usePagingSource
-import com.ustadmobile.lib.db.composites.TransferJobItemStatus
-import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadStandardContainer
-import com.ustadmobile.mui.components.UstadTransferStatusIcon
-import com.ustadmobile.view.clazz.permissionlist.CoursePermissionListItem
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
-import js.objects.jso
-import kotlinx.coroutines.flow.emptyFlow
 import mui.material.ListItem
 import mui.material.ListItemButton
 import mui.material.ListItemText
@@ -31,14 +21,6 @@ import mui.system.responsive
 import mui.system.sx
 import react.ReactNode
 import react.create
-import react.useMemo
-import react.useRequiredContext
-import web.cssom.Contain
-import web.cssom.Display
-import web.cssom.Height
-import web.cssom.JustifyContent
-import web.cssom.Overflow
-import web.cssom.pct
 import web.cssom.px
 
 
@@ -49,17 +31,6 @@ external interface LearningSpaceListScreenProps : Props {
 }
 
 val LearningSpaceListComponent2 = FC<LearningSpaceListScreenProps> { props ->
-    val refreshFlow = useMemo(dependencies = emptyArray()) {
-        emptyFlow<RefreshCommand>()
-    }
-
-    val mediatorResult = useDoorRemoteMediator(
-        props.uiState.learningSpaceList, refreshFlow
-    )
-
-    val infiniteQueryResult = usePagingSource(
-        mediatorResult.pagingSourceFactory, true
-    )
     val strings = useStringProvider()
     UstadStandardContainer {
         Stack {
@@ -84,23 +55,21 @@ val LearningSpaceListComponent2 = FC<LearningSpaceListScreenProps> { props ->
             VirtualList {
 
                 content = virtualListContent {
-                    infiniteQueryPagingItems(
-                        items = infiniteQueryResult,
-                        key = { "${it.lsiUid}" }
+                    items(
+                        list = props.uiState.learningSpaces,
+                        key = { it.url }
                     ) { learningSpace ->
                         ListItem.create{
                             disablePadding = true
                             key = "1"
                             ListItemButton {
                                 onClick = {
-                                    learningSpace?.lsiUrl?.let { it1 -> props.onSelectLearningSpace(it1) }
+                                    props.onSelectLearningSpace(learningSpace.url)
                                 }
 
-
                                 ListItemText {
-
-                                    primary = ReactNode(learningSpace?.lsiUrl ?: "")
-
+                                    primary = ReactNode(learningSpace.name)
+                                    secondary = ReactNode(learningSpace.url)
                                 }
                             }
 
