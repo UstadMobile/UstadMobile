@@ -2,9 +2,9 @@ package com.ustadmobile.lib.rest.domain.learningspace.update
 
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
-import com.ustadmobile.systemdb.model.LearningSpaceConfig
-import com.ustadmobile.systemdb.model.LearningSpaceConfigAndInfo
-import com.ustadmobile.systemdb.model.LearningSpaceInfo
+import com.ustadmobile.centralappconfigdb.model.LearningSpaceConfig
+import com.ustadmobile.centralappconfigdb.model.LearningSpaceConfigAndInfo
+import com.ustadmobile.centralappconfigdb.model.LearningSpaceInfo
 import kotlinx.serialization.Serializable
 
 class UpdateLearningSpaceUseCase(

@@ -113,7 +113,7 @@ kotlin {
                 implementation libs.door.runtime
                 implementation libs.kodein.di
                 api project(':lib-database')
-                api project(':lib-systemdb-core')
+                api project(':lib-centralappconfigdb-common')
                 api project(":lib-ihttp-core")
                 api project(":lib-xxhashkmp")
                 implementation libs.door.runtime

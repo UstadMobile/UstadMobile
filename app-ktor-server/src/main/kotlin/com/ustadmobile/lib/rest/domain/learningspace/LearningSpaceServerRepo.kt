@@ -1,11 +1,11 @@
 package com.ustadmobile.lib.rest.domain.learningspace
 
-import com.ustadmobile.appconfigdb.adapters.asEntity
-import com.ustadmobile.appconfigdb.adapters.asLearningSpaceConfigAndInfo
+import com.ustadmobile.centralappconfigdb.adapters.asEntity
+import com.ustadmobile.centralappconfigdb.adapters.asLearningSpaceConfigAndInfo
 import com.ustadmobile.xxhashkmp.XXStringHasher
-import com.ustadmobile.systemdb.model.LearningSpaceConfigAndInfo
-import com.ustadmobile.systemdb.model.LearningSpaceInfo
-import com.ustadmobile.systemdb.sqlite.SystemDb
+import com.ustadmobile.centralappconfigdb.model.LearningSpaceConfigAndInfo
+import com.ustadmobile.centralappconfigdb.model.LearningSpaceInfo
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
  * all learning spaces in memory and ensure that any updates are persisted.
  */
 class LearningSpaceServerRepo(
-    private val systemDb: SystemDb,
+    private val centralAppConfigDb: CentralAppConfigDb,
     private val xxStringHasher: XXStringHasher,
 ) {
 
@@ -21,7 +21,7 @@ class LearningSpaceServerRepo(
 
     init {
         learningSpaces.putAll(
-            systemDb.learningSpaceQueries.selectAll().executeAsList().map {
+            centralAppConfigDb.learningSpaceQueries.selectAll().executeAsList().map {
                 it.asLearningSpaceConfigAndInfo()
             }.associateBy {
                 it.config.url
@@ -34,7 +34,7 @@ class LearningSpaceServerRepo(
     }
 
     fun update(learningSpace: LearningSpaceConfigAndInfo) {
-        systemDb.learningSpaceQueries.update(
+        centralAppConfigDb.learningSpaceQueries.update(
             name = learningSpace.info.name,
             description = learningSpace.info.description,
             uid = xxStringHasher.hash(learningSpace.info.url)
@@ -46,7 +46,7 @@ class LearningSpaceServerRepo(
     }
 
     fun add(learningSpace: LearningSpaceConfigAndInfo) {
-        systemDb.learningSpaceQueries.insertFullObject(
+        centralAppConfigDb.learningSpaceQueries.insertFullObject(
             learningSpace.asEntity(xxStringHasher.hash(learningSpace.info.url))
         )
         learningSpaces[learningSpace.info.url] = learningSpace

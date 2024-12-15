@@ -9,9 +9,9 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.systemdb.model.LearningSpaceConfig
-import com.ustadmobile.systemdb.model.LearningSpaceConfigAndInfo
-import com.ustadmobile.systemdb.model.LearningSpaceInfo
+import com.ustadmobile.centralappconfigdb.model.LearningSpaceConfig
+import com.ustadmobile.centralappconfigdb.model.LearningSpaceConfigAndInfo
+import com.ustadmobile.centralappconfigdb.model.LearningSpaceInfo
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.direct

@@ -142,8 +142,8 @@ dependencies {
     implementation libs.generateuuid
 
     implementation project(":lib-ihttp-ktor-server")
-    implementation project(':lib-systemdb-core')
-    implementation project(':lib-systemdb-sqldelight')
+    implementation project(':lib-centralappconfigdb-common')
+    implementation project(':lib-centralappconfigdb-sqldelight')
     implementation libs.sqldelight.sqlite.driver.jvm
 
     //test

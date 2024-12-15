@@ -1,10 +1,10 @@
 package com.ustadmobile.lib.rest.domain.learningspace
 
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.ihttp.ktorserver.clientUrl
-import com.ustadmobile.systemdb.sqlite.SystemDb
 import io.github.aakira.napier.Napier
 import io.ktor.http.CacheControl
 import io.ktor.http.ContentType
@@ -21,7 +21,7 @@ import org.kodein.di.ktor.closestDI
 import org.kodein.di.on
 
 fun Route.SystemConfigScriptRoute(
-    systemDb: SystemDb,
+    systemDb: CentralAppConfigDb,
     xxStringHasher: XXStringHasher,
 ) {
     get("script") {

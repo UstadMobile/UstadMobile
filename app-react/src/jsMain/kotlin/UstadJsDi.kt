@@ -42,8 +42,8 @@ import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
-import com.ustadmobile.systemdb.datasource.SystemDbDataSource
-import com.ustadmobile.systemdb.datasource.network.SystemDbDataSourceHttp
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
+import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -158,9 +158,9 @@ internal fun ustadJsDi(
         dbNodeIdAndAuth
     }
 
-    bind<SystemDbDataSource>() with singleton {
-        SystemDbDataSourceHttp(
-            url = learningSpaceUrl + "api/${SystemDbDataSource.PATH}/",
+    bind<CentralAppConfigDbDataSource>() with singleton {
+        CentralAppConfigDbDataSourceHttp(
+            url = learningSpaceUrl + "api/${CentralAppConfigDbDataSource.PATH}/",
             httpClient = instance(),
         )
     }

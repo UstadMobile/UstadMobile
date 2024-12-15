@@ -205,13 +205,14 @@ import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 import rawhttp.core.RawHttp
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.systemdb.datasource.SystemDbDataSource
-import com.ustadmobile.systemdb.repo.SystemDbRepository
-import com.ustadmobile.systemdb.sqlite.SystemDb
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
+import com.ustadmobile.centralappconfigdb.repo.CentralAppConfigDbRepository
 import com.toughra.ustadmobile.BuildConfig
-import com.ustadmobile.appconfigdb.repo.SystemDbDataSourceSqlDelight
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight.Companion.CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME
 import com.ustadmobile.core.url.UrlKmp
-import com.ustadmobile.systemdb.datasource.network.SystemDbDataSourceHttp
+import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
@@ -352,21 +353,23 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             UstadAccountManager(settings = instance(), di = di)
         }
 
-        bind<SystemDb>() with singleton {
-            SystemDb(AndroidSqliteDriver(SystemDb.Schema, applicationContext,"system.db"))
+        bind<CentralAppConfigDb>() with singleton {
+            CentralAppConfigDb(AndroidSqliteDriver(
+                CentralAppConfigDb.Schema, applicationContext, CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME)
+            )
         }
 
-        bind<SystemDbDataSource>() with singleton {
+        bind<CentralAppConfigDbDataSource>() with singleton {
             val systemUrlConfig:SystemUrlConfig = instance()
 
-            SystemDbRepository(
-                local = SystemDbDataSourceSqlDelight(
-                    systemDb = instance(),
+            CentralAppConfigDbRepository(
+                local = CentralAppConfigDbDataSourceSqlDelight(
+                    centralAppConfigDb = instance(),
                     xxStringHasher = instance(),
                 ),
-                remote = SystemDbDataSourceHttp(
+                remote = CentralAppConfigDbDataSourceHttp(
                     url = UrlKmp(systemUrlConfig.systemBaseUrl)
-                        .resolve("api/${SystemDbDataSource.PATH}/")
+                        .resolve("api/${CentralAppConfigDbDataSource.PATH}/")
                         .toString(),
                     httpClient = instance()
                 )

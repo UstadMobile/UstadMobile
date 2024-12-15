@@ -12,9 +12,9 @@ import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkViewModel
-import com.ustadmobile.systemdb.model.LearningSpaceInfo
-import com.ustadmobile.systemdb.datasource.LearningSpaceDataSource
-import com.ustadmobile.systemdb.datasource.SystemDbDataSource
+import com.ustadmobile.centralappconfigdb.model.LearningSpaceInfo
+import com.ustadmobile.centralappconfigdb.datasource.LearningSpaceDataSource
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -37,7 +37,7 @@ class LearningSpaceListViewModel(
 
     private val goToLearningSpaceUseCase:GoToLearningSpaceUseCase by instance()
 
-    val repo: LearningSpaceDataSource = di.direct.instance<SystemDbDataSource>().learningSpaceDataSource
+    val repo: LearningSpaceDataSource = di.direct.instance<CentralAppConfigDbDataSource>().learningSpaceDataSource
 
     init {
         _appUiState.update { prev ->

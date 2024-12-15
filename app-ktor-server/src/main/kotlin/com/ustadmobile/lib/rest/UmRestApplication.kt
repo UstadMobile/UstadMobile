@@ -150,9 +150,9 @@ import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOn
 import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
-import com.ustadmobile.systemdb.datasource.LearningSpaceDataSource
-import com.ustadmobile.systemdb.datasource.SystemDbDataSource
-import com.ustadmobile.systemdb.sqlite.SystemDb
+import com.ustadmobile.centralappconfigdb.datasource.LearningSpaceDataSource
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -815,7 +815,7 @@ fun Application.umRestApplication(
         }
         bind<VerifySystemConfigAuthUseCase>() with singleton {
             VerifySystemConfigAuthUseCase(
-                systemDb = instance(),
+                centralAppConfigDb = instance(),
                 pbkdf2AuthenticateUseCase = instance()
             )
         }
@@ -841,7 +841,7 @@ fun Application.umRestApplication(
         }
 
         bind<LearningSpaceServerRepo>() with singleton {
-            LearningSpaceServerRepo(systemDb = instance(), xxStringHasher = instance())
+            LearningSpaceServerRepo(centralAppConfigDb = instance(), xxStringHasher = instance())
         }
 
         try {
@@ -914,7 +914,7 @@ fun Application.umRestApplication(
 
         onReady {
             instance<Scheduler>().start()
-            instance<SystemDb>()
+            instance<CentralAppConfigDb>()
 
             Runtime.getRuntime().addShutdownHook(Thread{
                 instance<Scheduler>().shutdown()
@@ -1022,7 +1022,7 @@ fun Application.umRestApplication(
                     )
                 }
 
-                route(SystemDbDataSource.PATH) {
+                route(CentralAppConfigDbDataSource.PATH) {
                     route(LearningSpaceDataSource.PATH) {
                         LearningSpaceClientRoute(
                             learningSpaceServerRepo = di.direct.instance()

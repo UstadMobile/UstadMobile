@@ -100,8 +100,10 @@ However:
 * Passkeys also require the app to be associated with the domain using the same link verification
   procedure.
 
-Hence the app will use a System Base Url (set in buildconfig properties) that provides a list of
-learning spaces. The user can still be allowed to enter a learning space URL manually, however,
+Hence there is a [central app config module](lib-centralappconfigdb-common/) that is used to provide
+a list of known learning spaces (so the user need not manually enter the learning space link).
+
+The user can still be allowed to enter a learning space URL manually if they wish, however,
 only learning spaces that are included within the verified app links will be able to open deep links
 and use passkeys.
 
@@ -115,6 +117,6 @@ dependency injection.
 
 One server process (in one JVM instance) can host multiple learning spaces with minimal overhead. 
 HTTP requests are matched to the relevant learning space, and each learning space is mapped to a 
-separate database. [lib-systemdb](lib-systemdb/) is used to maintain a database of all learning 
-spaces available on the system.
+separate database. [lib-centralappconfigdb-common](lib-centralappconfigdb-common/) is used to 
+maintain a database of all learning spaces available on the system.
 

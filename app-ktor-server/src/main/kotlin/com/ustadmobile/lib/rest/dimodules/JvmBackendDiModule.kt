@@ -4,6 +4,8 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight.Companion.CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -49,7 +51,6 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
-import com.ustadmobile.systemdb.sqlite.SystemDb
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -135,8 +136,8 @@ fun makeJvmBackendDiModule(
         GenerateSystemConfigAuthUseCase(encryptor = instance(), dataDirPath = dataDirPath)
     }
 
-    bind<SystemDb>() with singleton {
-        val dbFile = File(config.absoluteDataDir(), "system.db")
+    bind<CentralAppConfigDb>() with singleton {
+        val dbFile = File(config.absoluteDataDir(), CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME)
         val dbFileExists = dbFile.exists()
 
         val driver: SqlDriver = JdbcSqliteDriver(
@@ -144,10 +145,10 @@ fun makeJvmBackendDiModule(
         )
 
         if(!dbFileExists) {
-            SystemDb.Schema.create(driver)
+            CentralAppConfigDb.Schema.create(driver)
         }
 
-        SystemDb(driver).also {
+        CentralAppConfigDb(driver).also {
             if(!dbFileExists) {
                 instance<GenerateSystemConfigAuthUseCase>().invoke(it)
             }
