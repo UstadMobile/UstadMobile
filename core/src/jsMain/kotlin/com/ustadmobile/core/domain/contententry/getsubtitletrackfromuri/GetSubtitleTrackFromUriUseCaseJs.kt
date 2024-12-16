@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.media.SubtitleTrack
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.door.DoorUri
@@ -17,7 +17,7 @@ import kotlinx.serialization.json.Json
 import web.http.fetch
 
 class GetSubtitleTrackFromUriUseCaseJs(
-    private val endpoint: Endpoint,
+    private val endpoint: LearningSpace,
     private val httpClient: HttpClient,
     private val json: Json,
     private val supportedLanguagesConfig: SupportedLanguagesConfig,

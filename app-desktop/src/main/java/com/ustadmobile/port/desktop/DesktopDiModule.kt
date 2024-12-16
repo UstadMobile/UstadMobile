@@ -1,9 +1,12 @@
 package com.ustadmobile.port.desktop
 
+import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight
 import com.ustadmobile.core.account.AuthManager
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.connectivitymonitor.ConnectivityMonitorJvm
@@ -11,6 +14,7 @@ import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupControll
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
@@ -42,18 +46,17 @@ import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.getdeveloperinfo.GetDeveloperInfoUseCaseJvm
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.config.ApiUrlConfig
-import com.ustadmobile.core.impl.config.AppConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
+import com.ustadmobile.core.impl.config.UstadBuildConfig
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.ManifestAppConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderJvm
-import com.ustadmobile.core.schedule.ClazzLogCreatorManager
-import com.ustadmobile.core.schedule.ClazzLogCreatorManagerJvm
 import com.ustadmobile.core.schedule.initQuartzDb
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
+import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getCommandFile
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
@@ -82,6 +85,11 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight.Companion.CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME
+import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
+import com.ustadmobile.centralappconfigdb.repo.CentralAppConfigDbRepository
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -318,12 +326,12 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
 
     val gsPath = SysPathUtil.findCommandInPath("gs")
 
-    bind<AppConfig>() with singleton {
+    bind<UstadBuildConfig>() with singleton {
         ManifestAppConfig()
     }
 
     bind<SupportedLanguagesConfig>() with singleton {
-        val appConfig = instance<AppConfig>()
+        val appConfig = instance<UstadBuildConfig>()
         SupportedLanguagesConfig(
             systemLocales = listOf(SetLanguageUseCaseJvm.REAL_SYSTEM_DEFAULT.language),
             settings = instance(),
@@ -338,16 +346,15 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         UstadAccountManager(instance(), di)
     }
 
-    bind<ApiUrlConfig>() with singleton {
-        val appConfig : AppConfig = instance()
-        ApiUrlConfig(presetApiUrl = appConfig[AppConfig.KEY_API_URL]?.ifBlank { null })
+    bind<SystemUrlConfig>() with singleton {
+        SystemUrlConfig.fromUstadBuildConfig(instance())
     }
 
     bind<File>(tag = TAG_DATA_DIR) with singleton {
         ustadAppDataDir().also { it.takeIf { !it.exists() }?.mkdirs() }
     }
 
-    bind<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT) with scoped(EndpointScope.Default).singleton {
+    bind<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT) with scoped(LearningSpaceScope.Default).singleton {
         val dataDir: File = instance(tag = TAG_DATA_DIR)
         File(dataDir, sanitizeDbNameFromUrl(context.url)).also {
             it.takeIf { !it.exists() }?.mkdirs()
@@ -381,7 +388,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
+    bind<AuthManager>() with scoped(LearningSpaceScope.Default).singleton {
         AuthManager(context, di)
     }
 
@@ -392,15 +399,15 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         Pbkdf2Params(numIterations, keyLength)
     }
 
-    bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
+    bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(LearningSpaceScope.Default).singleton {
         instance<DbAndObservers>().db
     }
 
-    bind<DbAndObservers>() with scoped(EndpointScope.Default).singleton {
+    bind<DbAndObservers>() with scoped(LearningSpaceScope.Default).singleton {
         val contextDataDir: File = on(context).instance(tag = DiTag.TAG_CONTEXT_DATA_ROOT)
         val dbUrl = "jdbc:sqlite:${contextDataDir.absolutePath}/UmAppDatabase.db"
         val nodeIdAndAuth: NodeIdAndAuth = instance()
-
+        Napier.i("db url for UmAppDatabase"+dbUrl)
         val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl, nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
             .addMigrations(*migrationList().toTypedArray())
@@ -422,7 +429,40 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
+    bind<CentralAppConfigDb>() with singleton {
+        val dataDir: File = instance(tag = TAG_DATA_DIR)
+        val dbFile = File(dataDir, CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME)
+        val dbFileExists = dbFile.exists()
+
+        val driver: SqlDriver = JdbcSqliteDriver(
+            url = "jdbc:sqlite:${dbFile.absolutePath}"
+        )
+
+        if(!dbFileExists) {
+            CentralAppConfigDb.Schema.create(driver)
+        }
+
+        CentralAppConfigDb(driver)
+    }
+
+    bind<CentralAppConfigDbDataSource>() with singleton {
+        val systemUrlConfig:SystemUrlConfig = instance()
+
+        CentralAppConfigDbRepository(
+            local = CentralAppConfigDbDataSourceSqlDelight(
+                centralAppConfigDb = instance(),
+                xxStringHasher = instance(),
+            ),
+            remote = CentralAppConfigDbDataSourceHttp(
+                url = UrlKmp(systemUrlConfig.systemBaseUrl)
+                    .resolve("api/${CentralAppConfigDbDataSource.PATH}/")
+                    .toString(),
+                httpClient = instance()
+            )
+        )
+    }
+
+    bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
         val settings: Settings = instance()
         val contextIdentifier = sanitizeDbNameFromUrl(context.url)
         settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
@@ -450,38 +490,43 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         XhtmlFixerJsoup(xml = instance())
     }
 
-    bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-        val nodeIdAndAuth: NodeIdAndAuth = instance()
+    bind<UmAppDataLayer>() with scoped(LearningSpaceScope.Default).singleton {
         val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-        db.asRepository(
-            RepositoryConfig.repositoryConfig(
-                context = Any(),
-                endpoint = "${context.url}UmAppDatabase/",
-                nodeId = nodeIdAndAuth.nodeId,
-                auth = nodeIdAndAuth.auth,
-                httpClient = instance(),
-                okHttpClient = instance(),
-                json = instance()
+        val repo = if(!context.isLocal) {
+            val nodeIdAndAuth: NodeIdAndAuth = instance()
+            db.asRepository(
+                RepositoryConfig.repositoryConfig(
+                    context = Any(),
+                    endpoint = "${context.url}UmAppDatabase/",
+                    nodeId = nodeIdAndAuth.nodeId,
+                    auth = nodeIdAndAuth.auth,
+                    httpClient = instance(),
+                    okHttpClient = instance(),
+                    json = instance()
+                )
             )
+        }else {
+            null
+        }
+
+        UmAppDataLayer(
+            localDb = db, repository = repo
         )
     }
 
-    bind<EnqueueContentEntryImportUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<EnqueueContentEntryImportUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         EnqueueImportContentEntryUseCaseJvm(
             db = instance(tag = DoorTag.TAG_DB),
             scheduler = instance(),
-            endpoint = context,
+            learningSpace = context,
             enqueueRemoteImport = EnqueueImportContentEntryUseCaseRemote(
-                endpoint = context,
+                learningSpace = context,
                 httpClient = instance(),
                 json = instance(),
             )
         )
     }
 
-    bind<ClazzLogCreatorManager>() with singleton {
-        ClazzLogCreatorManagerJvm(di)
-    }
 
     bind<Scheduler>() with singleton {
         val dataDir: File = instance(tag = TAG_DATA_DIR)

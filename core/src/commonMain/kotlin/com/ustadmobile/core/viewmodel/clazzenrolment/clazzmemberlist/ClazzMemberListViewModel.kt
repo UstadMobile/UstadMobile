@@ -98,7 +98,7 @@ class ClazzMemberListViewModel(
 ) {
 
     private val approveOrDeclinePendingEnrolmentUseCase: IApproveOrDeclinePendingEnrolmentRequestUseCase by
-        on(accountManager.activeEndpoint).instance()
+        on(accountManager.activeLearningSpace).instance()
 
     private val clazzUid = savedStateHandle[UstadView.ARG_CLAZZUID]?.toLong()
         ?: throw IllegalArgumentException("No clazzuid")
@@ -106,7 +106,7 @@ class ClazzMemberListViewModel(
     private fun getMembersAsPagingSource(
         roleId: Int
     ) : PagingSource<Int, PersonAndClazzMemberListDetails>  {
-        return activeRepo.clazzEnrolmentDao().findByClazzUidAndRole(
+        return activeRepoWithFallback.clazzEnrolmentDao().findByClazzUidAndRole(
             clazzUid = clazzUid,
             roleId = roleId,
             sortOrder = _uiState.value.activeSortOrderOption.flag,
@@ -127,7 +127,7 @@ class ClazzMemberListViewModel(
     }
 
     private val pendingStudentListPagingSource: ListPagingSourceFactory<EnrolmentRequestAndPersonDetails> = {
-        activeRepo.enrolmentRequestDao().findPendingEnrolmentsForCourse(
+        activeRepoWithFallback.enrolmentRequestDao().findPendingEnrolmentsForCourse(
             clazzUid = clazzUid,
             includeDeleted = false,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
@@ -160,7 +160,7 @@ class ClazzMemberListViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.clazzDao().getClazzNameAndTerminologyAsFlow(clazzUid).collect { nameAndTerminology ->
+                    activeRepoWithFallback.clazzDao().getClazzNameAndTerminologyAsFlow(clazzUid).collect { nameAndTerminology ->
                         parseAndUpdateTerminologyStringsIfNeeded(
                             currentTerminologyStrings = _uiState.value.terminologyStrings,
                             terminology = nameAndTerminology?.terminology,
@@ -265,6 +265,8 @@ class ClazzMemberListViewModel(
                 put(PersonListViewModel.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ, clazzUid.toString())
                 put(UstadView.ARG_LISTMODE, ListViewMode.PICKER.mode)
                 put(PersonViewModelConstants.ARG_GO_TO_ON_PERSON_SELECTED, goToOnPersonSelectedArg)
+                put(PersonListViewModel.ARG_SHOW_ADD_VIA_CONTACT, "true")
+                put(PersonListViewModel.ARG_ROLE, role.toString())
                 put(ARG_TITLE, title)
                 put(PersonListViewModel.ARG_REQUIRE_PERMISSION_TO_SHOW_LIST,
                     PermissionFlags.DIRECT_ENROL.toString())

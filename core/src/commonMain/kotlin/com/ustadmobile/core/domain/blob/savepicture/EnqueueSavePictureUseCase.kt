@@ -34,7 +34,7 @@ interface EnqueueSavePictureUseCase {
 
     companion object {
 
-        const val DATA_ENDPOINT = "endpoint"
+        const val DATA_LEARNINGSPACE = "endpoint"
 
         const val DATA_TABLE_ID = "tableId"
 

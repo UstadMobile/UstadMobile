@@ -123,7 +123,7 @@ for COMMONFLOWFILE in $(ls $SCRIPTDIR/common); do
 done
 
 # Start control server
-$SCRIPTDIR/../../testserver-controller/start.sh --siteUrl $ENDPOINT --resultsDir $TESTRESULTSDIR
+$SCRIPTDIR/../../testserver-controller/start.sh --learningSpaceUrl $ENDPOINT --resultsDir $TESTRESULTSDIR
 
 export ANDROID_SERIAL=$TESTSERIAL
 adb reverse tcp:8075 tcp:8075
@@ -160,6 +160,6 @@ TESTSTATUS=$?
 $SCRIPTDIR/../../testserver-controller/stop.sh
 
 #Uninstall when finished
-adb shell pm uninstall com.toughra.ustadmobile
+ adb shell pm uninstall com.toughra.ustadmobile
 
 exit $TESTSTATUS

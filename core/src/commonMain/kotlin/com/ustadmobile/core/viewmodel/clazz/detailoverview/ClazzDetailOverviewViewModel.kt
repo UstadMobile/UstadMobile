@@ -124,7 +124,7 @@ class ClazzDetailOverviewViewModel(
         }
 
 
-        val permissionFlow = activeRepo.coursePermissionDao()
+        val permissionFlow = activeRepoWithFallback.coursePermissionDao()
             .personHasPermissionWithClazzTripleAsFlow(
                 accountPersonUid = activeUserPersonUid,
                 clazzUid = entityUidArg,
@@ -141,7 +141,7 @@ class ClazzDetailOverviewViewModel(
                     }.distinctUntilChanged().collectLatest { hasViewPermission ->
                         if(hasViewPermission) {
                             launch {
-                                activeRepo.courseBlockDao().findAllCourseBlockByClazzUidAsFlow(
+                                activeRepoWithFallback.courseBlockDao().findAllCourseBlockByClazzUidAsFlow(
                                     clazzUid = entityUidArg,
                                     includeInactive = false,
                                     includeHidden = false,
@@ -155,7 +155,7 @@ class ClazzDetailOverviewViewModel(
                             }
 
                             launch {
-                                activeRepo.statementDao().findStatusForStudentsInClazzAsFlow(
+                                activeRepoWithFallback.statementDao().findStatusForStudentsInClazzAsFlow(
                                     clazzUid = entityUidArg,
                                     studentPersonUids = listOf(activeUserPersonUid),
                                     accountPersonUid = activeUserPersonUid,
@@ -174,7 +174,7 @@ class ClazzDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeRepo.clazzDao().getClazzWithDisplayDetails(
+                    activeRepoWithFallback.clazzDao().getClazzWithDisplayDetails(
                         clazzUid = entityUidArg,
                         currentTime = systemTimeInMillis(),
                         accountPersonUid = activeUserPersonUid,

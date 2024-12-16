@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.rest.ext
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.domain.interop.HttpApiException
@@ -129,32 +129,28 @@ suspend fun ApplicationCall.respondOkHttpResponse(
  * If the ContentRoute cache were to retrieve content without considering the host (e.g. just use
  * the contentEntryVersion), this could lead to conflicts when there is content on different servers.
  */
-val ApplicationCall.callEndpoint: Endpoint
+val ApplicationCall.callLearningSpace: LearningSpace
     get() {
-        val config = this.application.environment.config
-        val dbMode = config.dbModeProperty()
-
-        return if(dbMode == CONF_DBMODE_SINGLETON) {
-            Endpoint(config.property(CONF_KEY_SITE_URL).getString().requirePostfix("/"))
-        }else {
-            Endpoint(request.headers.asIHttpHeaders().clientProtocolAndHost())
-        }
+        return LearningSpace(request.headers.asIHttpHeaders().clientProtocolAndHost())
     }
 
 /**
  * Determine if the request made on the receiver ApplicationCall matches the configuration.
+ * TODO: Use the LearningSpaceServerRepo to do this
  */
-fun ApplicationCall.urlMatchesConfig(): Boolean {
-    val dbMode = application.environment.config
-        .dbModeProperty()
-    if(dbMode == CONF_DBMODE_VIRTUALHOST)
-        return true
-
+fun ApplicationCall.urlMatchesLearningSpace(): Boolean {
     val requestUrl = request.clientUrl()
-    val siteUrl = application.environment.config.property(CONF_KEY_SITE_URL)
-        .getString()
-
-    return requestUrl.startsWith(siteUrl)
+    return true
+//
+//    val dbMode = application.environment.config.dbModeProperty()
+//    if(dbMode == CONF_DBMODE_VIRTUALHOST)
+//        return true
+//
+//    val requestUrl = request.clientUrl()
+//    val siteUrl = application.environment.config.property(CONF_KEY_SITE_URL)
+//        .getString()
+//
+//    return requestUrl.startsWith(siteUrl)
 }
 
 suspend fun ApplicationCall.respondRequestUrlNotMatchingSiteConfUrl() {

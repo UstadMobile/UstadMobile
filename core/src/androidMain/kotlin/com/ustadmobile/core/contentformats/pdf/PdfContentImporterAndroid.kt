@@ -6,7 +6,7 @@ import android.graphics.pdf.PdfRenderer
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import androidx.core.net.toUri
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.saveandmanifest.SaveLocalUriAsBlobAndManifestUseCase
@@ -31,7 +31,7 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 class PdfContentImporterAndroid(
-    endpoint: Endpoint,
+    learningSpace: LearningSpace,
     cache: UstadCache,
     uriHelper: UriHelper,
     db: UmAppDatabase,
@@ -42,7 +42,7 @@ class PdfContentImporterAndroid(
     private val tmpDir: File,
     private val saveLocalUriAsBlobUseCase: SaveLocalUrisAsBlobsUseCase,
 ): AbstractPdfContentImportCommonJvm(
-    endpoint = endpoint,
+    learningSpace = learningSpace,
     cache = cache,
     uriHelper = uriHelper,
     db = db,

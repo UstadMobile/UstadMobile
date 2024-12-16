@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.saveandmanifest
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCase
 import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCaseJvm
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
@@ -52,7 +52,7 @@ class SaveLocalUriAsBlobAndManifestUseCaseJvmTest {
 
     private lateinit var saveLocalUrisAsBlobsUseCase: SaveLocalUrisAsBlobsUseCase
 
-    private lateinit var endpoint: Endpoint
+    private lateinit var learningSpace: LearningSpace
 
     private lateinit var uriHelper: UriHelper
 
@@ -81,7 +81,7 @@ class SaveLocalUriAsBlobAndManifestUseCaseJvmTest {
             cacheName = "client",
         ).build()
 
-        endpoint = Endpoint("http://localhost:8094/")
+        learningSpace = LearningSpace("http://localhost:8094/")
 
         json = Json { encodeDefaults = true }
         okHttpClient = OkHttpClient.Builder().build()
@@ -100,7 +100,7 @@ class SaveLocalUriAsBlobAndManifestUseCaseJvmTest {
         deleteUrisUseCase = DeleteUrisUseCaseCommonJvm(isTempFileUseCase)
 
         saveLocalUrisAsBlobsUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
-            endpoint = endpoint,
+            learningSpace = learningSpace,
             cache = cache,
             uriHelper = uriHelper,
             tmpDir = Path(temporaryFolder.newFolder().absolutePath),

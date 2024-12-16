@@ -2,13 +2,13 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 'r:s:c:h' --long 'resultsDir:,siteUrl:,config:,help' -n 'start.sh' -- "$@")
+TEMP=$(getopt -o 'r:u:c:h' --long 'resultsDir:,learningSpaceUrl:,config:,help' -n 'start.sh' -- "$@")
 eval set -- "$TEMP"
 unset TEMP
 
 BASEDIR="$(realpath $(dirname $0))"
 
-SITEURL=""
+LEARNINGSPACEURL=""
 
 CONFIGARG=""
 
@@ -31,8 +31,8 @@ while true; do
       shift 2
       continue
       ;;
-    '-u'|'--siteUrl')
-      SITEURL=$2
+    '-u'|'--learningSpaceUrl')
+      LEARNINGSPACEURL=$2
       shift 2
       continue
       ;;
@@ -48,8 +48,8 @@ while true; do
   esac
 done
 
-if [ "$SITEURL" == "" ]; then
-  echo "MUST specify siteUrl using -u or --siteUrl"
+if [ "$LEARNINGSPACEURL" == "" ]; then
+  echo "MUST specify learningSpaceUrl using -u or --learningSpaceUrl"
   exit 1
 fi
 
@@ -77,9 +77,9 @@ echo config=$CONFIGARG
 cd $BASEDIR/..
 java -jar $BASEDIR/build/libs/testserver-controller-all.jar $CONFIGARG \
   -P:resultDir=$TESTRESULTSDIR \
-  -P:siteUrl=$SITEURL &
+  -P:learningSpaceUrl=$LEARNINGSPACEURL &
 
 TESTSERVERPID=$!
 echo $TESTSERVERPID > $BASEDIR/build/server.pid
-echo "Started testserver-controller and saved PID [ $TESTSERVERPID ]. Site URL is $SITEURL. See ../log/testserver-controller.log for output."
+echo "Started testserver-controller and saved PID [ $TESTSERVERPID ]. Learning space URL will be $LEARNINGSPACEURL. See ../log/testserver-controller.log for output."
 

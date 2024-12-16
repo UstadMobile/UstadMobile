@@ -91,7 +91,7 @@ class ClazzEnrolmentEditViewModel(
                         clazzEnrolmentDateJoined = systemTimeInMillis()
                         clazzEnrolmentRole = savedStateHandle[ARG_ROLE]?.toInt()
                             ?: ClazzEnrolment.ROLE_STUDENT
-                        timeZone = activeRepo.clazzDao().getClazzTimeZoneByClazzUidAsync(
+                        timeZone = activeRepoWithFallback.clazzDao().getClazzTimeZoneByClazzUidAsync(
                             clazzEnrolmentClazzUid
                         ) ?: throw IllegalStateException("Could not find timezone for clazzUid")
                     }
@@ -116,7 +116,7 @@ class ClazzEnrolmentEditViewModel(
 
 
             val terminology = async {
-                activeRepo.courseTerminologyDao().getTerminologyForClazz(
+                activeRepoWithFallback.courseTerminologyDao().getTerminologyForClazz(
                     _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0
                 )
             }

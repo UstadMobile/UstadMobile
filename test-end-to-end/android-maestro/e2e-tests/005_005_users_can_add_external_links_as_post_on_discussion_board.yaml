@@ -12,7 +12,7 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -39,7 +39,7 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
 # teacher add an discussion board block
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -128,7 +128,7 @@ env:
     text: "Post 1"
 - assertVisible:
     text: "External link"
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"

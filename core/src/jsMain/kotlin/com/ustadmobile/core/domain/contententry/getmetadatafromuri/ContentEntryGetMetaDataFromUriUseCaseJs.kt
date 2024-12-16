@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.contententry.getmetadatafromuri
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.door.DoorUri
@@ -27,7 +27,7 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
     override suspend fun invoke(
         contentUri: DoorUri,
         fileName: String?,
-        endpoint: Endpoint,
+        learningSpace: LearningSpace,
         onProgress: (ContentEntryGetMetadataStatus) -> Unit
     ): MetadataResult {
         val uploadUuid = randomUuid().toString()
@@ -37,7 +37,7 @@ class ContentEntryGetMetaDataFromUriUseCaseJs(
                 val finalResponse = chunkedUploadClientLocalUriUseCase(
                     uploadUuid = uploadUuid,
                     localUri = contentUri,
-                    remoteUrl = "${endpoint.url}api/contentupload/upload",
+                    remoteUrl = "${learningSpace.url}api/contentupload/upload",
                     fromByte = 0,
                     lastChunkHeaders = buildMap {
                         if(fileName != null)

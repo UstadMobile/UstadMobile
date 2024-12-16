@@ -36,7 +36,7 @@ class BulkAddUsersUseCaseJvmTest {
     @BeforeTest
     fun setup() {
         mockAddNewPersonUseCase = mock {
-            onBlocking { invoke(any(), any(), any(), any()) }.thenAnswer {
+            onBlocking { invoke(any(),any(), any(), any(), any()) }.thenAnswer {
                 personIdCounter.incrementAndGet()
             }
 

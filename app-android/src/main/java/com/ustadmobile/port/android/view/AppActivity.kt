@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.lifecycleScope
 import com.jakewharton.processphoenix.ProcessPhoenix
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseAndroid
 import com.ustadmobile.libuicompose.theme.md_theme_dark_primaryContainer
@@ -23,6 +23,8 @@ import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.provider
 import org.kodein.di.scoped
+import android.content.Intent
+import android.net.Uri
 
 
 class AppActivity: AbstractAppActivity() {
@@ -32,10 +34,12 @@ class AppActivity: AbstractAppActivity() {
 
     private var mCustomTabsSession: CustomTabsSession? = null
 
+
+
     override val di by DI.lazy {
         extend(super.di)
 
-        bind<LaunchXapiUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<LaunchXapiUseCase>() with scoped(LearningSpaceScope.Default).provider {
             LaunchXapiUseCaseAndroid(
                 androidContext = this@AppActivity,
                 resolveXapiLaunchHrefUseCase = instance(),
@@ -127,6 +131,11 @@ class AppActivity: AbstractAppActivity() {
         //Official docs make no mention of disconnecting, does not seem to be required
         // https://developer.chrome.com/docs/android/custom-tabs/guide-warmup-prefetch
         bindCustomTabsService()
+
+        // ATTENTION: This was auto-generated to handle app links.
+        val appLinkIntent: Intent = intent
+        val appLinkAction: String? = appLinkIntent.action
+        val appLinkData: Uri? = appLinkIntent.data
     }
 
     override fun onLocalesChanged(locales: LocaleListCompat) {

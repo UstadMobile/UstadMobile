@@ -10,7 +10,7 @@ env:
       CONTROLSERVER: ${CONTROLSERVER}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -43,7 +43,7 @@ env:
     env:
       TESTCOURSENAME: "Test Course Block"
 # teacher should be able to edit a course
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -56,7 +56,7 @@ env:
       TESTCOURSENAME: "Test Course Block"
 - tapOn: "SAVE"
 #student should not be able to edit a course
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"

@@ -116,8 +116,8 @@ class CoursePermissionEditViewModel(
         ) {
             val entity = _uiState.value.entity ?: return@launchWithLoadingIndicator
 
-            activeRepo.withDoorTransactionAsync {
-                activeRepo.coursePermissionDao().upsertAsync(entity)
+            activeRepoWithFallback.withDoorTransactionAsync {
+                activeRepoWithFallback.coursePermissionDao().upsertAsync(entity)
             }
 
             val popUpToOnFinish = savedStateHandle[UstadView.ARG_POPUPTO_ON_FINISH]

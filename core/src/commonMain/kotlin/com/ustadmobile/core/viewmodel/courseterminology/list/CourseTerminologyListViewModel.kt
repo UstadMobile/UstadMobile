@@ -26,7 +26,7 @@ class CourseTerminologyListViewModel(
 ) {
 
     private val pagingSourceFactory: () -> PagingSource<Int, CourseTerminology> = {
-        activeRepo.courseTerminologyDao().findAllCourseTerminologyPagingSource()
+        activeRepoWithFallback.courseTerminologyDao().findAllCourseTerminologyPagingSource()
     }
 
     init {

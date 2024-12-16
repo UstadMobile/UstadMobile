@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.interop.oneroster
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.oneroster.model.Clazz
 import com.ustadmobile.core.domain.interop.oneroster.model.LineItem
@@ -10,8 +10,8 @@ import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterClass
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterLineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterResult
 import com.ustadmobile.core.domain.interop.oneroster.model.toStudentResult
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.toLongOrHash
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.toLongOrHash
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfFalse
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import kotlinx.serialization.json.Json
@@ -30,7 +30,7 @@ import kotlinx.serialization.json.Json
 class OneRosterEndpoint(
     private val db: UmAppDatabase,
     repo: UmAppDatabase?,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val xxHasher: XXStringHasher,
     private val json: Json,
 ) {
@@ -69,7 +69,7 @@ class OneRosterEndpoint(
         return repoOrDb.studentResultDao().findByClazzAndStudent(
             clazzUid, studentPersonUid, accountPersonUid
         ).map {
-            it.toOneRosterResult(endpoint)
+            it.toOneRosterResult(learningSpace)
         }
     }
 
@@ -80,7 +80,7 @@ class OneRosterEndpoint(
         return repoOrDb.courseBlockDao().findBySourcedId(
             sourcedId = lineItemSourcedId,
             accountPersonUid = accountPersonUid
-        )?.toOneRosterLineItem(endpoint, json)
+        )?.toOneRosterLineItem(learningSpace, json)
     }
 
     /**

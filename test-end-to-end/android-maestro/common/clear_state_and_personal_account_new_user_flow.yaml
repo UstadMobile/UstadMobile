@@ -1,0 +1,8 @@
+appId: com.toughra.ustadmobile
+---
+# this test clear app data and start app
+- clearState: com.toughra.ustadmobile
+- launchApp
+- tapOn: "New user"
+- tapOn: "Personal"
+
