@@ -111,8 +111,10 @@ fi
 
 # Check if APK exists
 if [ ! -f "$TESTAPK" ]; then
-  echo "Error: APK file not found at $TESTAPK. Please build the APK and try again."
-  exit 1
+    echo "Error: Release APK file not found at $TESTAPK."
+    echo "Please ensure the APK is built (This should normally be the release APK)."
+    echo "Refer to the README for build instructions."
+    exit 1
 fi
 
 # Create a copy of common scripts that will work on the second app id (used to test interactions
