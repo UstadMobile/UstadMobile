@@ -154,6 +154,45 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                     }
                                 }
 
+                                ListItemButton {
+                                    ListItemIcon {
+                                        when {
+                                            attemptsStatementListItems?.statementEntity?.resultScoreRaw != null || attemptsStatementListItems?.statementEntity?.extensionProgress != null -> {
+                                                Star()
+
+                                            }
+
+                                            else -> {
+                                                UstadBlankIcon()
+
+                                            }
+                                        }
+                                        sx {
+                                            padding = theme.spacing(1, 1, 1, 5)
+                                        }
+                                    }
+                                    ListItemText {
+                                        secondary = ReactNode(
+                                            if (attemptsStatementListItems?.statementEntity?.extensionProgress == null) {
+                                                if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
+                                                    "${
+                                                        attemptsStatementListItems?.statementEntity?.resultScoreRaw?.toInt()
+                                                            .toString()
+                                                    }/${
+                                                        attemptsStatementListItems?.statementEntity?.resultScoreMax?.toInt()
+                                                            .toString()
+                                                    } Score"
+                                                } else {
+                                                    ""
+                                                }
+
+                                            } else {
+                                                "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
+                                            }
+                                        )
+                                    }
+                                }
+
                             }
                         }
                     }
