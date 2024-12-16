@@ -7,14 +7,15 @@ but that has not been thoroughly tested.
 ### Prerequisites:
 
 * Install Maestro as per the [official instructions](https://maestro.mobile.dev/getting-started/installing-maestro).
-* Build the android release apk from the [app-android](../../app-android/) module and the
-  HTTP server from the [app-ktor-server](../../app-ktor-server/) module. This would be done by the normal
-  **gradlew build** command.
+* Build the HTTP server from the [app-ktor-server](../../app-ktor-server/) module (e.g. ```./gradlew app-ktor-server:build```).
+* Build the release APK by either
+  * _Using Android Studio_: From the Build menu, click Generate Signed App Bundle / APK (select the release variant when prompted). For further details see [official Android Studio documentation](https://developer.android.com/studio/publish/app-signing#generate-key).
+  * _Using the command line_: Build using ```./gradlew app-android:assembleRelease```. You must setup the signing keystore as per the [app-android README](../../app-android/README.md#command-line-signing-for-release-apk-).   
 * Start an Android emulator or connect a physical device and get the serial of the device 
   (e.g. using the **adb devices** command). It is highly recommended to use a device created by the
   [Meastro start-device command](https://maestro.mobile.dev/cli/start-device). 
 * MacOS only: install the realpath command.
-* Chrome browser **must** be updated otherwise H5P tests will fail. The version of Chrome that is
+* Use Android SDK 33 emulator as the chrome browser **must** be updated otherwise H5P tests will fail. The version of Chrome that is
   included with SDK33 will work. To test on devices running earlier versions of Android:
     * Update Google Play Services (e.g. from [APKMirror](https://www.apkmirror.com/apk/google-inc/google-play-services/google-play-services-24-31-33-release/))
     * Update Chrome (e.g. from [APKMirror](https://www.apkmirror.com/apk/google-inc/chrome/chrome-127-0-6533-103-release/))
