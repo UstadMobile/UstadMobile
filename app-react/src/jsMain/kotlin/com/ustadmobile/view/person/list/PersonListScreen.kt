@@ -75,7 +75,8 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
             overflowY = Overflow.scroll
         }
 
-        content = virtualListContent {
+        content =
+            virtualListContent {
             item("sort_list_opts") {
                 UstadListSortHeader.create {
                     activeSortOrderOption = props.uiState.sortOption

@@ -19,7 +19,10 @@ import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.BlockStatus
+import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
+import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndRelated
+import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
@@ -278,5 +281,142 @@ expect abstract class StatementDao {
         actorUid: Long,
     ): StatementEntity?
 
+    @HttpAccessible
+    @Query("""
+     SELECT Person.*, PersonPicture.*,
+            (SELECT COUNT(*)
+               FROM (SELECT DISTINCT StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo
+                       FROM StatementEntity
+                      WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                        AND StatementEntity.statementActorPersonUid = Person.personUid
+                    ) AS DistinctRegistrations) AS numAttempts,
+            (SELECT EXISTS(
+                    SELECT 1
+                      FROM StatementEntity
+                     WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                       AND StatementEntity.statementActorPersonUid = Person.personUid
+                       AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                       AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1)) AS isCompleted,
+            (SELECT CASE
+                    WHEN EXISTS(
+                         SELECT 1
+                           FROM StatementEntity
+                          WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                            AND StatementEntity.statementActorPersonUid = Person.personUid
+                            AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                            AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 1
+                    WHEN EXISTS(
+                         SELECT 1
+                           FROM StatementEntity
+                          WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                            AND StatementEntity.statementActorPersonUid = Person.personUid
+                            AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                            AND StatementEntity.resultSuccess IS NOT NULL
+                            AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 0
+                    ELSE NULL
+                    END) AS isSuccessful,
+            (SELECT MAX(StatementEntity.extensionProgress)
+               FROM StatementEntity
+              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                AND StatementEntity.statementActorPersonUid = Person.personUid
+                AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1) AS maxProgress,
+            (SELECT MAX(StatementEntity.resultScoreScaled)
+               FROM StatementEntity
+              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                AND StatementEntity.statementActorPersonUid = Person.personUid
+                AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1) AS maxScore    
+       FROM Person
+            LEFT JOIN PersonPicture
+                 ON PersonPicture.personPictureUid = Person.personUid
+      WHERE Person.personUid IN
+            (SELECT DISTINCT StatementEntity.statementActorPersonUid
+               FROM StatementEntity
+              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid)       
+""")
+    abstract fun findPersonsWithAttempts(
+        contentEntryUid: Long
+    ): PagingSource<Int, PersonAndPictureAndNumAttempts>
+
+
+    @Query("""
+          WITH DistinctRegistrationUids(contextRegistrationHi, contextRegistrationLo) AS (
+               SELECT DISTINCT StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo
+                          FROM StatementEntity
+                         WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                           AND StatementEntity.statementActorPersonUid = :personUid)
+                         
+        SELECT DistinctRegistrationUids.contextRegistrationHi AS contextRegistrationHi,
+               DistinctRegistrationUids.contextRegistrationLo AS contextRegistrationLo,
+               (SELECT MIN(StatementEntity.timestamp)
+                  FROM StatementEntity
+                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+               ) AS timeStarted,
+                   (SELECT MAX(StatementEntity.extensionProgress)
+                  FROM StatementEntity
+                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                   AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                ) AS maxProgress,
+               (SELECT MAX(StatementEntity.resultScoreScaled)
+                  FROM StatementEntity
+                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                   AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                ) AS maxScore,
+               (SELECT EXISTS(
+                       SELECT 1 
+                         FROM StatementEntity
+                        WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                          AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                          AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                          AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
+               )) AS isCompleted,
+               (SELECT CASE 
+                       WHEN EXISTS(
+                            SELECT 1 
+                              FROM StatementEntity
+                             WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                               AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                               AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                               AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 1
+                       WHEN EXISTS(
+                            SELECT 1 
+                              FROM StatementEntity
+                             WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                               AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                               AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                               AND StatementEntity.resultSuccess IS NOT NULL
+                               AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0) THEN 0
+                       ELSE NULL
+                       END) AS isSuccessful
+          FROM DistinctRegistrationUids       
+    """)
+    abstract fun findSessionsByPersonAndContent(
+        contentEntryUid: Long,
+        personUid: Long
+    ): PagingSource<Int, SessionTimeAndProgressInfo>
+
+
+    @HttpAccessible
+    @Query("""
+        SELECT StatementEntity.*, VerbEntity.*, VerbLangMapEntry.*
+          FROM StatementEntity
+               LEFT JOIN VerbEntity
+                         ON StatementEntity.statementVerbUid = VerbEntity.verbUid
+               LEFT JOIN VerbLangMapEntry 
+                         ON (VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash) = 
+                            (SELECT VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash
+                               FROM VerbLangMapEntry
+                              WHERE VerbLangMapEntry.vlmeVerbUid = VerbEntity.verbUid
+                           ORDER BY VerbLangMapEntry.vlmeLastModified DESC
+                              LIMIT 1)
+         WHERE StatementEntity.contextRegistrationHi = :registrationHi
+           AND StatementEntity.contextRegistrationLo = :registrationLo                        
+    """)
+    abstract fun findStatementsBySession(
+        registrationHi: Long,
+        registrationLo: Long,
+    ): PagingSource<Int, StatementEntityAndVerb>
 
 }

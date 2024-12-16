@@ -2,6 +2,7 @@ package com.ustadmobile.view.components.virtuallist
 
 import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
+import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import js.objects.Object
 import js.objects.jso
 import react.*

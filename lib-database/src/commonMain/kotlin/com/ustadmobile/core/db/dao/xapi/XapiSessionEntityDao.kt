@@ -15,20 +15,32 @@ expect abstract class XapiSessionEntityDao {
     @Insert
     abstract suspend fun insertAsync(xapiSessionEntity: XapiSessionEntity)
 
-    @Query("""
+    @Query(
+        """
         SELECT XapiSessionEntity.*
           FROM XapiSessionEntity
          WHERE XapiSessionEntity.xseUid = :uid
-    """)
+    """
+    )
     abstract suspend fun findByUidAsync(uid: Long): XapiSessionEntity?
 
-    @Query("""
+    @Query(
+        """
+        SELECT XapiSessionEntity.*
+          FROM XapiSessionEntity
+    """
+    )
+    abstract suspend fun findSession(): XapiSessionEntity?
+
+    @Query(
+        """
         UPDATE XapiSessionEntity
            SET xseCompleted = :completed,
                xseLastMod = :time
          WHERE xseUid = :xseUid
 
-    """)
+    """
+    )
     abstract suspend fun updateLatestAsComplete(
         completed: Boolean,
         time: Long,
@@ -40,14 +52,16 @@ expect abstract class XapiSessionEntityDao {
         pullQueriesToReplicate = arrayOf(
             HttpServerFunctionCall(
                 functionName = "findMostRecentSessionByActorAndActivity"
+
             ),
             HttpServerFunctionCall(
-                functionName ="findByUidAndPersonUidAsync",
+                functionName = "findByUidAndPersonUidAsync",
                 functionDao = ActorDao::class,
             ),
         )
     )
-    @Query("""
+    @Query(
+        """
         SELECT XapiSessionEntity.*
           FROM XapiSessionEntity
          WHERE XapiSessionEntity.xseRootActivityUid = :xseRootActivityUid
@@ -59,7 +73,8 @@ expect abstract class XapiSessionEntityDao {
                  FROM ActorEntity
                 WHERE ActorEntity.actorUid = :actorUid
                   AND ActorEntity.actorPersonUid = :accountPersonUid)     
-    """)
+    """
+    )
     abstract suspend fun findMostRecentSessionByActorAndActivity(
         accountPersonUid: Long,
         actorUid: Long,
@@ -67,5 +82,7 @@ expect abstract class XapiSessionEntityDao {
         contentEntryVersionUid: Long,
         clazzUid: Long,
     ): XapiSessionEntity?
+
+
 
 }
