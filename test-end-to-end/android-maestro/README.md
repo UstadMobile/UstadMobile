@@ -45,22 +45,6 @@ Result artifacts (screenshots, screen recording, etc) will be saved as follows:
 
 The combined report (with videos for each test) HTML will be saved to build/results/index.html 
 
-
-### Run a single test using Maestro command line:
-
-1. Build and install APK on emulator or device as per [app-android README](../../app-android)
-
-2. Clear Data Folder in app-ktor-server:Start the server using runserver.sh or runserver.bat as per the [Main README development environment setup](../../README.md)
-
-3. Run Maestro command to run test
-
-```
-cd test-end-to-end/android-maestro
-maestro test e2e-tests/<test name>.yaml -e USERNAME=admin -e PASSWORD=testpass -e TESTSERIAL=emulator-5554 -e ENDPOINT=http://<ip address>:8087/
-```
-
-Replace the values for`PASSWORD` with the server admin password, `TESTSERIAL` with the emulator or device serial (as per adb devices command), `ENDPOINT` with the server url as per the --siteUrl parameter used with runserver.
-
 ### Resource IDs (testtags)
 
 Editable fields: testTag should be the label, in snake_case e.g. if a field label is "First names",
