@@ -15,7 +15,7 @@ but that has not been thoroughly tested.
   (e.g. using the **adb devices** command). It is highly recommended to use a device created by the
   [Meastro start-device command](https://maestro.mobile.dev/cli/start-device). 
 * MacOS only: install the realpath command.
-* Chrome browser **must** be updated otherwise H5P tests will fail. The version of Chrome that is
+* Use Android SDK 33 emulator as the chrome browser **must** be updated otherwise H5P tests will fail. The version of Chrome that is
   included with SDK33 will work. To test on devices running earlier versions of Android:
     * Update Google Play Services (e.g. from [APKMirror](https://www.apkmirror.com/apk/google-inc/google-play-services/google-play-services-24-31-33-release/))
     * Update Chrome (e.g. from [APKMirror](https://www.apkmirror.com/apk/google-inc/chrome/chrome-127-0-6533-103-release/))
