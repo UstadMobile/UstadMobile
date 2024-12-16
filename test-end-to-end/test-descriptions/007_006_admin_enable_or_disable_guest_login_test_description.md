@@ -5,7 +5,8 @@
 Admin can enable/disable guest login. If enabled, then users can connect as guest
 
 ## Step-by-Step Procedure:
-1. Open the app
+
+1. Launch Ustad app
 2. Click on "Existing user" button
 3. Click on "Learning Space" button
 4. Click on "Enter link manually" button
