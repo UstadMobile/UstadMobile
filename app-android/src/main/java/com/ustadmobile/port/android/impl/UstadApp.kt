@@ -213,6 +213,14 @@ import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourc
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.libcache.db.ClearNeighborsCallback
+import com.ustadmobile.libcache.db.MIGRATE_8_9
+import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.db.UstadDbDiscoveryListener
+import com.ustadmobile.libcache.db.addCacheDbMigrations
+import com.ustadmobile.libcache.distributed.DistributedCacheNsdAndroid
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
@@ -455,6 +463,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<UstadCacheDb>() with singleton {
+            DatabaseBuilder.databaseBuilder(
+                context = applicationContext,
+                dbClass = UstadCacheDb::class,
+                dbName = UstadCacheBuilder.DEFAULT_DB_NAME,
+                nodeId = 1L
+            ).addCacheDbMigrations()
+                .addMigrations(MIGRATE_8_9)
+                .addCallback(ClearNeighborsCallback())
+                .build()
+        }
+
         bind<UstadCache>() with singleton {
             val httpCacheDir =  applicationContext.httpPersistentFilesDir
             val storagePath = Path(httpCacheDir.absolutePath)
@@ -462,6 +482,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
             UstadCacheBuilder(
                 appContext = applicationContext,
+                db = instance(),
                 storagePath = storagePath,
                 logger = NapierLoggingAdapter(),
                 sizeLimit = { 100_000_000L },
@@ -1173,6 +1194,20 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 supportedLanguagesConfig = instance(),
             )
         }
+
+        bind<DistributedCacheNsdAndroid>() with singleton {
+            DistributedCacheNsdAndroid(
+                context = applicationContext,
+                port = 4242,
+                logger = NapierLoggingAdapter(),
+                listener = UstadDbDiscoveryListener(
+                    db = instance(),
+                    scope = CoroutineScope(Dispatchers.IO + Job()),
+                    xxStringHasher = instance(),
+                )
+            )
+        }
+
         registerContextTranslator { account: UmAccount -> LearningSpace(account.endpointUrl) }
     }
 
@@ -1195,6 +1230,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         GlobalScope.launch(Dispatchers.IO) {
             di.direct.instance<EmbeddedHttpServer>().start()
+            di.direct.instance<DistributedCacheNsdAndroid>()
         }
     }
 

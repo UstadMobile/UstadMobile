@@ -5,7 +5,9 @@ import com.ustadmobile.door.room.RoomDatabase
 import com.ustadmobile.libcache.db.dao.CacheEntryDao
 import com.ustadmobile.libcache.db.dao.RequestedEntryDao
 import com.ustadmobile.libcache.db.dao.RetentionLockDao
+import com.ustadmobile.libcache.db.dao.NeighborCacheDao
 import com.ustadmobile.libcache.db.entities.CacheEntry
+import com.ustadmobile.libcache.db.entities.NeighborCache
 import com.ustadmobile.libcache.db.entities.RequestedEntry
 import com.ustadmobile.libcache.db.entities.RetentionLock
 
@@ -27,6 +29,7 @@ import com.ustadmobile.libcache.db.entities.RetentionLock
         CacheEntry::class,
         RequestedEntry::class,
         RetentionLock::class,
+        NeighborCache::class,
     ),
 )
 expect abstract class UstadCacheDb : RoomDatabase {
@@ -36,5 +39,7 @@ expect abstract class UstadCacheDb : RoomDatabase {
     abstract val requestedEntryDao: RequestedEntryDao
 
     abstract val retentionLockDao: RetentionLockDao
+
+    abstract val neighborCacheDao: NeighborCacheDao
 
 }

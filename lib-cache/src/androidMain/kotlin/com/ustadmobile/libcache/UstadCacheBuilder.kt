@@ -13,7 +13,8 @@ import kotlinx.io.files.SystemFileSystem
 class UstadCacheBuilder(
     var appContext: Context,
     var storagePath: Path,
-    var dbName: String = "UstadCache",
+    var dbName: String = DEFAULT_DB_NAME,
+    var db: UstadCacheDb? = null,
     var logger: UstadCacheLogger? = null,
     var sizeLimit: () -> Long,
     var cachePathsProvider: CachePathsProvider = CachePathsProvider {
@@ -31,7 +32,7 @@ class UstadCacheBuilder(
             pathsProvider = cachePathsProvider,
             logger =  logger,
             sizeLimit = sizeLimit,
-            db = DatabaseBuilder.databaseBuilder(
+            db = db ?: DatabaseBuilder.databaseBuilder(
                 context = appContext,
                 dbClass = UstadCacheDb::class,
                 dbName = dbName,
@@ -50,6 +51,8 @@ class UstadCacheBuilder(
         const val DEFAULT_SUBPATH_PERSISTENT = "persistent"
 
         const val DEFAULT_SUBPATH_CACHE = "ustad-cache"
+
+        const val DEFAULT_DB_NAME = "UstadCache"
 
     }
 
