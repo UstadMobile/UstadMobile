@@ -7,6 +7,7 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
@@ -21,12 +22,18 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.datetime.TimeZone
+import mui.icons.material.Check
 import mui.icons.material.Star
+import mui.icons.material.Timer
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemButton
 import mui.material.ListItemIcon
 import mui.material.ListItemText
+import mui.material.Stack
+import mui.material.StackDirection
+import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
@@ -85,50 +92,69 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                         items = infiniteQueryResult,
                         key = { it.statementEntity?.statementLct.toString() }
                     ) { attemptsStatementListItems ->
+
+
                         ListItem.create {
-                            ListItemButton {
-                                ListItemIcon {
-                                    UstadBlankIcon()
-                                }
-                                ListItemText {
-                                    primary = ReactNode(
-                                        attemptsStatementListItems?.verb?.verbUrlId.toString()
-                                            .substringAfterLast("/")
-                                            .replaceFirstChar { it.uppercaseChar() }
+                            Stack {
+                                direction = responsive(StackDirection.column)
 
-                                    )
-                                }
-                            }
-                            ListItemButton {
-                                ListItemIcon {
+                                sx {
 
-                                    Star()
-                                    sx {
-                                        padding = theme.spacing(1, 1, 1, 5)
+                                    width = 100.pct
+                                }
+                                ListItemButton {
+                                    ListItemIcon {
+                                        Check()
+                                    }
+                                    ListItemText {
+                                        primary = ReactNode(
+                                            attemptsStatementListItems?.verb?.verbUrlId.toString()
+                                                .substringAfterLast("/")
+                                                .replaceFirstChar { it.uppercaseChar() }
+
+                                        )
                                     }
                                 }
-                                ListItemText {
-                                    secondary = ReactNode(
-                                        if (attemptsStatementListItems?.statementEntity?.extensionProgress == null) {
-                                            if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
-                                                "${
-                                                    attemptsStatementListItems?.statementEntity?.resultScoreRaw?.toInt()
-                                                        .toString()
-                                                }/${
-                                                    attemptsStatementListItems?.statementEntity?.resultScoreMax?.toInt()
-                                                        .toString()
-                                                } Score"
-                                            } else {
-                                                "-"
+                                ListItemButton {
+                                    ListItemIcon {
+                                        when {
+                                            attemptsStatementListItems?.statementEntity?.resultScoreRaw != null || attemptsStatementListItems?.statementEntity?.extensionProgress != null -> {
+                                                Star()
+
                                             }
 
-                                        } else {
-                                            "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
-                                        }
-                                    )
-                                }
-                            }
+                                            else -> {
+                                                UstadBlankIcon()
 
+                                            }
+                                        }
+                                        sx {
+                                            padding = theme.spacing(1, 1, 1, 5)
+                                        }
+                                    }
+                                    ListItemText {
+                                        secondary = ReactNode(
+                                            if (attemptsStatementListItems?.statementEntity?.extensionProgress == null) {
+                                                if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
+                                                    "${
+                                                        attemptsStatementListItems?.statementEntity?.resultScoreRaw?.toInt()
+                                                            .toString()
+                                                    }/${
+                                                        attemptsStatementListItems?.statementEntity?.resultScoreMax?.toInt()
+                                                            .toString()
+                                                    } Score"
+                                                } else {
+                                                    ""
+                                                }
+
+                                            } else {
+                                                "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
+                                            }
+                                        )
+                                    }
+                                }
+
+                            }
                         }
                     }
                 }
