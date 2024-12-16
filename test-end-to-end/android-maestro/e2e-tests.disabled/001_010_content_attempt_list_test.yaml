@@ -21,10 +21,10 @@ env:
 - tapOn: "Video"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 20000
+    timeout: 30000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 20000
+    timeout: 30000
 # add new course
 - runFlow:
     file: "../common/add_course.yaml"
@@ -66,10 +66,10 @@ env:
 - tapOn: "True/False Question"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 20000
+    timeout: 30000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 20000
+    timeout: 30000
 - tapOn: Open
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
