@@ -8,8 +8,8 @@ import com.ustadmobile.core.domain.xapi.xapiRequireDurationOrNullAsLong
 import com.ustadmobile.core.domain.xapi.xapiRequireTimestampAsLong
 import com.ustadmobile.core.domain.xapi.xapiRequireValidIRI
 import com.ustadmobile.core.domain.xapi.xapiRequireValidUuidOrNull
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.core.util.ext.toEmptyIfNull
 import com.ustadmobile.door.DoorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis

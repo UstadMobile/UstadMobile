@@ -2,8 +2,6 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.ustadmobile.appconfigdb.SystemDb
-import com.ustadmobile.appconfigdb.SystemDb_KtorRoute
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
@@ -44,6 +42,7 @@ import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUs
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
+import com.ustadmobile.core.domain.invite.CheckContactTypeUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -73,10 +72,10 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.lib.rest.ext.*
@@ -130,11 +129,21 @@ import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryIm
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyRoute
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceApiRoute
+import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceClientRoute
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
 import com.ustadmobile.lib.rest.domain.learningspace.SystemConfigScriptRoute
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
+import com.ustadmobile.lib.rest.domain.matomo.MatomoConfigRoute
+import com.ustadmobile.lib.rest.domain.invite.ProcessInviteRoute
+import com.ustadmobile.lib.rest.domain.invite.ProcessInviteUseCase
+import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
+import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
+import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
+import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCaseHttp
+import com.ustadmobile.lib.rest.domain.invite.sms.SmsProperties
+import com.ustadmobile.lib.rest.domain.invite.sms.twilio.TwilioHttpClient
 import com.ustadmobile.lib.rest.domain.matomo.MatomoConfigRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.systemconfig.verifyauth.VerifySystemConfigAuthUseCase
@@ -143,6 +152,9 @@ import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOn
 import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
+import com.ustadmobile.centralappconfigdb.datasource.LearningSpaceDataSource
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -155,8 +167,6 @@ const val TAG_UPLOAD_DIR = 10
 const val CONF_DBMODE_VIRTUALHOST = "virtualhost"
 
 const val CONF_DBMODE_SINGLETON = "singleton"
-
-const val CONF_GOOGLE_API = "secret"
 
 const val CONF_KEY_SITE_URL = "ktor.ustad.siteUrl"
 
@@ -331,17 +341,16 @@ fun Application.umRestApplication(
     //Avoid sending the body of content if it has not changed since the client last requested it.
     install(ConditionalHeaders)
 
-    val dataDirPath = environment.config.absoluteDataDir()
+    val dataDirPath = environment.config.absoluteDataDir().also {
+        if(!it.exists())
+            it.mkdirs()
+    }
 
     val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
 
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
     }
-
-    dataDirPath.takeIf { !it.exists() }?.mkdirs()
-
-    val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
     di {
         import(
@@ -363,10 +372,6 @@ fun Application.umRestApplication(
 
         bind<NodeIdAuthCache>() with scoped(LearningSpaceScope.Default).singleton {
             instance<UmAppDatabase>(tag = DoorTag.TAG_DB).nodeIdAuthCache
-        }
-
-        bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
-            apiKey
         }
 
         bind<Gson>() with singleton { Gson() }
@@ -402,6 +407,7 @@ fun Application.umRestApplication(
                 bindDataSourceIfNotExisting("quartzds", dbProperties)
                 initQuartzDb("java:/comp/env/jdbc/quartzds")
             }
+
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
             }
@@ -609,6 +615,20 @@ fun Application.umRestApplication(
             ValidateEmailUseCase()
         }
 
+
+        bind<SendMessageUseCase>() with provider {
+            SendMessageUseCase(activeDb = instance(tag = DoorTag.TAG_DB),)
+        }
+
+        bind<CheckContactTypeUseCase>() with provider {
+            CheckContactTypeUseCase(
+                validateEmailUseCase = instance(),
+                phoneNumValidatorUseCase = instance()
+            )
+        }
+
+
+
         bind<IPhoneNumberUtil>() with provider {
             PhoneNumberUtilJvm(PhoneNumberUtil.getInstance())
         }
@@ -797,7 +817,7 @@ fun Application.umRestApplication(
         }
         bind<VerifySystemConfigAuthUseCase>() with singleton {
             VerifySystemConfigAuthUseCase(
-                systemDb = instance(),
+                centralAppConfigDb = instance(),
                 pbkdf2AuthenticateUseCase = instance()
             )
         }
@@ -823,7 +843,7 @@ fun Application.umRestApplication(
         }
 
         bind<LearningSpaceServerRepo>() with singleton {
-            LearningSpaceServerRepo(systemDb = instance())
+            LearningSpaceServerRepo(centralAppConfigDb = instance(), xxStringHasher = instance())
         }
 
         try {
@@ -851,14 +871,52 @@ fun Application.umRestApplication(
         }catch(e: Exception) {
             Napier.w("WARNING: Email sending not configured")
         }
+        try {
+            appConfig.config("sms")
+            bind<SmsProperties>() with singleton  {
+                SmsProperties(
+                    appConfig.property("sms.phone_number").getString(),
+                    appConfig.property("sms.provider_link").getString(),
+                    appConfig.property("sms.sid").getString(),
+                    appConfig.property("sms.token").getString(),
+                )
+            }
 
+            bind<TwilioHttpClient>() with singleton {
+                TwilioHttpClient(di)
+            }
+        }catch(e: Exception) {
+            Napier.w("WARNING: SMS. sending not configured ${e.message}")
+        }
+
+        bind<SendSmsUseCaseHttp>() with singleton {
+            SendSmsUseCaseHttp(di)
+        }
+
+        bind<SendEmailUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            SendEmailUseCase(NotificationSender(di))
+        }
+        bind<SendSmsUseCase>() with singleton {
+            SendSmsUseCase(di)
+        }
+        bind<ProcessInviteUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            ProcessInviteUseCase(
+                sendEmailUseCase = instance(),
+                sendSmsUseCase = instance(),
+                sendMessageUseCase = instance(),
+                checkContactTypeUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                learningSpace = context,
+                repo = null
+                )
+        }
         registerContextTranslator { call: ApplicationCall ->
             call.callLearningSpace
         }
 
         onReady {
             instance<Scheduler>().start()
-            instance<SystemDb>()
+            instance<CentralAppConfigDb>()
 
             Runtime.getRuntime().addShutdownHook(Thread{
                 instance<Scheduler>().shutdown()
@@ -961,26 +1019,31 @@ fun Application.umRestApplication(
             route("api") {
                 route("sysconfig") {
                     SystemConfigScriptRoute(
-                         systemDb = di.direct.instance(),
+                        systemDb = di.direct.instance(),
+                        xxStringHasher = di.direct.instance()
                     )
                 }
                 route("matomo") {
                     MatomoConfigRoute()
                 }
-                route("SystemDb") {
-                    SystemDb_KtorRoute(
-                        serverConfig = DoorHttpServerConfig(
-                            json = json,
-                            logger = NapierDoorLogger(),
-                        ),
-                        dbCallAdapter = {
-                            di.direct.instance()
-                        }
-                    )
+
+                route(CentralAppConfigDbDataSource.PATH) {
+                    route(LearningSpaceDataSource.PATH) {
+                        LearningSpaceClientRoute(
+                            learningSpaceServerRepo = di.direct.instance()
+                        )
+                    }
                 }
 
                 route("account"){
                     SetPasswordRoute(
+                        useCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+                }
+                route("inviteuser") {
+                    ProcessInviteRoute(
                         useCase = { call ->
                             di.on(call).direct.instance()
                         }

@@ -10,8 +10,8 @@ import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterClass
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterLineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.toOneRosterResult
 import com.ustadmobile.core.domain.interop.oneroster.model.toStudentResult
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.toLongOrHash
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.toLongOrHash
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfFalse
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import kotlinx.serialization.json.Json

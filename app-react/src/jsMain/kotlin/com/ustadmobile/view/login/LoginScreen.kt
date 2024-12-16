@@ -43,7 +43,6 @@ val LoginScreen = FC<Props> {
     LoginComponent2 {
         this.uiState = uiState
         onClickLogin = viewModel::onClickLogin
-        onClickCreateAccount = viewModel::onClickCreateAccount
         onClickConnectAsGuest = viewModel::onClickConnectAsGuest
         onUsernameValueChange = viewModel::onUsernameChanged
         onPasswordValueChange = viewModel::onPasswordChanged

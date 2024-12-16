@@ -12,8 +12,8 @@ import com.ustadmobile.core.domain.interop.oneroster.model.LineItem
 import com.ustadmobile.core.domain.interop.oneroster.model.Status
 import com.ustadmobile.core.domain.interop.timestamp.format8601Timestamp
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
-import com.ustadmobile.core.domain.xxhash.toLongOrHash
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.toLongOrHash
 import com.ustadmobile.core.util.isimplerequest.StringSimpleTextRequest
 import com.ustadmobile.core.util.stringvalues.asIStringValues
 import com.ustadmobile.core.util.uuid.randomUuidAsString

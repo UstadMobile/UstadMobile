@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.passkey
 
 import com.ustadmobile.lib.db.entities.Person
+import io.ktor.http.Url
 
 data class CreatePasskeyParams(
     val username: String,
@@ -12,10 +13,6 @@ data class CreatePasskeyParams(
 ){
     val domainName: String
         get() {
-            val domain = serverUrl
-                .removePrefix("http://")
-                .removePrefix("https://")
-                .removeSuffix("/")
-            return domain
+         return   Url(serverUrl).host
         }
 }

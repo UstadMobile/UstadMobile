@@ -3,9 +3,9 @@ package com.ustadmobile.port.android.impl
 import android.app.Application
 import android.content.Context
 import android.content.res.AssetManager
-import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.russhwolf.settings.Settings
@@ -149,10 +149,10 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -210,12 +210,16 @@ import org.matomo.sdk.extra.DownloadTracker
 import org.matomo.sdk.extra.MatomoApplication
 import org.matomo.sdk.extra.TrackHelper
 import rawhttp.core.RawHttp
-import com.toughra.ustadmobile.BuildConfig
-import com.ustadmobile.appconfigdb.SystemDb
-import com.ustadmobile.appconfigdb.SystemDbDataLayer
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
+import com.ustadmobile.centralappconfigdb.repo.CentralAppConfigDbRepository
+import com.toughra.ustadmobile.BuildConfig
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight.Companion.CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME
 import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+
 
 class UstadApp : MatomoApplication(), DIAware, ImageLoaderFactory{
 
@@ -304,13 +308,6 @@ class UstadApp : MatomoApplication(), DIAware, ImageLoaderFactory{
             settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
         }
 
-        bind<SystemDbNodeIdAndAuth>() with singleton {
-            val settings: Settings = instance()
-            val systemUrlConfig:SystemUrlConfig = instance()
-            val contextIdentifier: String = sanitizeDbNameFromUrl(systemUrlConfig.systemBaseUrl)
-            SystemDbNodeIdAndAuth(nodeIdAndAuth =settings.getOrGenerateNodeIdAndAuth(contextIdentifier) )
-        }
-
         bind<SupportedLanguagesConfig>() with singleton {
             SupportedLanguagesConfig(
                 systemLocales = LocaleListCompat.getAdjustedDefault().let { localeList ->
@@ -363,41 +360,29 @@ class UstadApp : MatomoApplication(), DIAware, ImageLoaderFactory{
             UstadAccountManager(settings = instance(), di = di)
         }
 
-        bind<SystemDb>() with singleton {
-            val systemUrlConfig:SystemUrlConfig = instance()
-            val dbName = sanitizeDbNameFromUrl(systemUrlConfig.systemBaseUrl)
-            val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
-            DatabaseBuilder.databaseBuilder(
-                context = applicationContext,
-                dbClass =  SystemDb::class,
-                dbName = dbName,
-                nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId
-            ).build()
+        bind<CentralAppConfigDb>() with singleton {
+            CentralAppConfigDb(AndroidSqliteDriver(
+                CentralAppConfigDb.Schema, applicationContext, CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME)
+            )
         }
 
-        bind<SystemDbDataLayer>() with singleton {
+        bind<CentralAppConfigDbDataSource>() with singleton {
             val systemUrlConfig:SystemUrlConfig = instance()
-            val systemDb: SystemDb = instance<SystemDb>()
 
-            val systemDbNodeIdAndAuth:SystemDbNodeIdAndAuth = instance()
-            val repo:SystemDb = systemDb.asRepository(
-                RepositoryConfig.repositoryConfig(
-                    context = applicationContext,
-                    endpoint = UrlKmp(systemUrlConfig.systemBaseUrl).resolve("api/SystemDb/")
+            CentralAppConfigDbRepository(
+                local = CentralAppConfigDbDataSourceSqlDelight(
+                    centralAppConfigDb = instance(),
+                    xxStringHasher = instance(),
+                ),
+                remote = CentralAppConfigDbDataSourceHttp(
+                    url = UrlKmp(systemUrlConfig.systemBaseUrl)
+                        .resolve("api/${CentralAppConfigDbDataSource.PATH}/")
                         .toString(),
-                    nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
-                    auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
-                    httpClient = instance(),
-                    okHttpClient = instance(),
-                    json = instance()
+                    httpClient = instance()
                 )
             )
-
-            SystemDbDataLayer(
-                localDb  = systemDb,
-                repository = repo,
-            )
         }
+
 
         bind<DbAndObservers>() with scoped(LearningSpaceScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
@@ -405,7 +390,6 @@ class UstadApp : MatomoApplication(), DIAware, ImageLoaderFactory{
 
             val nodeIdAndAuth: NodeIdAndAuth = instance()
 
-            Log.i("MigrateIssue", "Creating database name=$dbName")
             val db = DatabaseBuilder.databaseBuilder(
                 context = applicationContext,
                 dbClass = UmAppDatabase::class,
@@ -421,7 +405,6 @@ class UstadApp : MatomoApplication(), DIAware, ImageLoaderFactory{
                 .addMigrations(MIGRATION_169_170_CLIENT)
                 .build()
 
-            Log.i("MigrateIssue", "Database built: name=$dbName")
 
             val cache: UstadCache = instance()
 

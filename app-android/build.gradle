@@ -222,7 +222,7 @@ configurations.all {
 
 dependencies {
     implementation libs.androidx.profileinstaller
-    implementation project(':lib-systemdb')
+    implementation project(':lib-centralappconfigdb-sqldelight')
     baselineProfile project(':app-android-baselineprofile')
     coreLibraryDesugaring libs.android.desugar.libs
 
@@ -232,6 +232,7 @@ dependencies {
     implementation project(":lib-cache")
 
     implementation libs.door.runtime
+    implementation libs.sqldelight.sqlite.driver.android
     implementation project(':lib-database')
     implementation project(':lib-util')
 
@@ -326,6 +327,9 @@ dependencies {
     //Image loading
     implementation libs.coil
     implementation libs.coil.compose
+
+    //chip text fields
+    implementation libs.chiptextfield
 
     implementation libs.kotlinx.datetime
 

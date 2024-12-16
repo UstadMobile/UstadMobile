@@ -3,13 +3,11 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.StorageSettings
 import com.russhwolf.settings.set
 import com.ustadmobile.BuildConfigJs
-import com.ustadmobile.appconfigdb.SystemDb
-import com.ustadmobile.appconfigdb.SystemDbDataLayer
-import com.ustadmobile.appconfigdb.model.SystemDbNodeIdAndAuth
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.invite.ClazzRedeemUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJs
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
@@ -42,10 +40,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.kodein.di.*
 import com.ustadmobile.core.impl.locale.StringProviderJs
-import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
+import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -63,7 +61,6 @@ import web.url.URLSearchParams
 @OptIn(ExperimentalXmlUtilApi::class)
 internal fun ustadJsDi(
     dbBuilt: UmAppDatabase,
-    systemDbBuilt: SystemDb,
     dbNodeIdAndAuth: NodeIdAndAuth,
     json: Json,
     httpClient: HttpClient,
@@ -160,36 +157,14 @@ internal fun ustadJsDi(
     bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
         dbNodeIdAndAuth
     }
-    bind<SystemDb>() with singleton {
-        systemDbBuilt
-    }
-    bind<SystemDbNodeIdAndAuth>() with singleton {
-        val settings: Settings = instance()
-        val contextIdentifier: String = sanitizeDbNameFromUrl(learningSpaceUrl)
-        SystemDbNodeIdAndAuth(nodeIdAndAuth =settings.getOrGenerateNodeIdAndAuth(contextIdentifier) )
-    }
 
-
-    bind<SystemDbDataLayer>() with singleton {
-        val systemDb: SystemDb = instance<SystemDb>()
-
-        val systemDbNodeIdAndAuth: SystemDbNodeIdAndAuth = instance()
-        val repo: SystemDb = systemDb.asRepository(
-            RepositoryConfig.repositoryConfig(
-                context = this,
-                endpoint = learningSpaceUrl+"api/SystemDb/",
-                nodeId = systemDbNodeIdAndAuth.nodeIdAndAuth.nodeId,
-                auth = systemDbNodeIdAndAuth.nodeIdAndAuth.auth,
-                httpClient = instance(),
-                json = instance()
-            )
-        )
-
-        SystemDbDataLayer(
-            localDb  = systemDb,
-            repository = repo,
+    bind<CentralAppConfigDbDataSource>() with singleton {
+        CentralAppConfigDbDataSourceHttp(
+            url = learningSpaceUrl + "api/${CentralAppConfigDbDataSource.PATH}/",
+            httpClient = instance(),
         )
     }
+
     bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(LearningSpaceScope.Default).singleton {
         dbBuilt
     }
@@ -274,6 +249,14 @@ internal fun ustadJsDi(
     }
     bind<GetShowPoweredByUseCase>() with singleton {
         GetShowPoweredByUseCase(BuildConfigJs.APP_UI_SHOW_POWERED_BY.toBoolean())
+    }
+
+    bind<ClazzRedeemUseCase>() with scoped(LearningSpaceScope.Default).provider {
+        ClazzRedeemUseCase(
+            enrolIntoCourseUseCase = instance(),
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
+        )
     }
 
     bind<BulkAddPersonsFromLocalUriUseCase>() with scoped(LearningSpaceScope.Default).provider {

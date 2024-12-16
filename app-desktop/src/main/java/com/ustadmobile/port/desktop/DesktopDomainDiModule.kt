@@ -82,12 +82,14 @@ import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUs
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.invite.ClazzRedeemUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCase
 import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCaseJvmImpl
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJvm
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
+import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
@@ -124,10 +126,10 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.config.UstadBuildConfig
 import com.ustadmobile.core.impl.config.UstadBuildConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
 import com.ustadmobile.core.impl.config.UstadBuildConfig.Companion.MATOMO_API_URL
@@ -526,6 +528,13 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
+    bind<PasskeyRequestJsonUseCase>()  with provider {
+        PasskeyRequestJsonUseCase(
+            systemImpl = instance(),
+            json = instance()
+        )
+    }
+
     bind<OpenBlobUiUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         OpenBlobUiUseCase(
             openBlobUseCase = instance(),
@@ -586,6 +595,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             compressImageUseCase = instance(),
             compressAudioUseCase = instance(),
             mimeTypeHelper = instance(),
+        )
+    }
+
+    bind<ClazzRedeemUseCase>() with scoped(LearningSpaceScope.Default).provider {
+        ClazzRedeemUseCase(
+            enrolIntoCourseUseCase = instance(),
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance<UmAppDataLayer>().repository,
         )
     }
 

@@ -38,6 +38,7 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
+import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
@@ -53,6 +54,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJs
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCaseJs
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
@@ -63,10 +65,10 @@ import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnlo
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnloadUseCaseJs
 import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
 import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCaseJs
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryJs
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherJs
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.jsimpl.XXHasher64FactoryJs
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.jsimpl.XXStringHasherJs
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
@@ -105,7 +107,9 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
     bind<PhoneNumValidatorUseCase>() with provider {
         PhoneNumValidatorUseCaseJs()
     }
-
+    bind<ValidateEmailUseCase>() with provider {
+        ValidateEmailUseCase()
+    }
     bind<OnClickPhoneNumUseCase>() with provider {
         OnClickPhoneNumUseCaseJs()
     }
@@ -166,6 +170,13 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
         ContentEntryGetMetaDataFromUriUseCaseJs(
             json = instance(),
             chunkedUploadClientLocalUriUseCase = instance()
+        )
+    }
+
+    bind<PasskeyRequestJsonUseCase>() with provider {
+        PasskeyRequestJsonUseCase(
+            systemImpl = instance(),
+            json = instance()
         )
     }
 

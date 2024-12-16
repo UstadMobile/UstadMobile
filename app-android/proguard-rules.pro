@@ -14,7 +14,7 @@
 -keep public class com.ustadmobile.core.db.**{
     public <init>(...);
 }
--keep public class com.ustadmobile.appconfigdb.**{
+-keep public class com.ustadmobile.centralappconfigdb.**{
     public <init>(...);
 }
 
