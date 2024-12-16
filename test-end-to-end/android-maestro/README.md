@@ -8,35 +8,9 @@ but that has not been thoroughly tested.
 
 * Install Maestro as per the [official instructions](https://maestro.mobile.dev/getting-started/installing-maestro).
 * Build the Android release APK from the [app-android](../../app-android/) module and the HTTP server from the [app-ktor-server](../../app-ktor-server/) module. The APK can be built either using Android Studio or the command line.
-
-### Building the Release APK
-
-#### Option 1: Using Android Studio
-
-1. Open the project in Android Studio.
-2. In the toolbar, select the "app-android" module.
-3. From the "Build" menu, select "Build Bundle(s)/APK(s)" > "Build APK(s)."
-4. Locate the release APK in the `app-android/build/outputs/apk/release/` directory.
-
-For detailed instructions, refer to the [official Android Studio documentation](https://developer.android.com/studio/run).
-
-#### Option 2: Using the Command Line
-
-1. Navigate to the root of the project directory.
-
-2. Run the following command to assemble the release APK:
-
-   ```
-   ./gradlew app-android:assembleRelease
-   ```
-   On Windows, use:
-
-   ```
-   gradlew app-android:assembleRelease
-   ```
-3. The release APK will be generated in the app-android/build/outputs/apk/release/ directory.
-   For more details, see the [app-android README](../../app-android/).
-   
+* Build the release APK by either
+  * _Using Android Studio_: From the Build menu, click Generate Signed App Bundle / APK (select the release variant when prompted). For further details see [official Android Studio documentation](https://developer.android.com/studio/publish/app-signing#generate-key).
+  * _Using the command line_: Build using ```gradlew app-android:assembleRelease```. You must setup the signing keystore as per the [app-android README](../../app-android/README.md#command-line-signing-for-release-apk-).   
 * Start an Android emulator or connect a physical device and get the serial of the device 
   (e.g. using the **adb devices** command). It is highly recommended to use a device created by the
   [Meastro start-device command](https://maestro.mobile.dev/cli/start-device). 
