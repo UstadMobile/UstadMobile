@@ -20,7 +20,7 @@ but that has not been thoroughly tested.
     * Update Google Play Services (e.g. from [APKMirror](https://www.apkmirror.com/apk/google-inc/google-play-services/google-play-services-24-31-33-release/))
     * Update Chrome (e.g. from [APKMirror](https://www.apkmirror.com/apk/google-inc/chrome/chrome-127-0-6533-103-release/))
  
-### Run all tests:
+### Run tests:
 
 ```
 $ ./run-maestro-test.sh --serial1 emulator-5554
@@ -29,7 +29,7 @@ Where emulator-5554 is the serial of the emulator as per the **adb devices** com
 
 Options:
 
-* **--test** specify a test to run as per the test flows found in e2e-tests e.g. --test 001_001_admin_can_add_content_001-h5p
+* **--test** specify a test to run as per the test flows found in e2e-tests e.g. --test 001_001_admin_can_add_content_001-h5p . If not specified, then all tests will run
 * **--apk** specify a particular apk file to test and install. By default the test runner expects to
  use the release APK file built from source
 * **--console-output** use Maestro console output instead of saving to a JUnit XML. Helpful to see 
