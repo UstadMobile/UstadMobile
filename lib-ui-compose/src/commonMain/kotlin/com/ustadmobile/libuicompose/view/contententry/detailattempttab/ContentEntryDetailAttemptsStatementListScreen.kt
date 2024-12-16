@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -23,9 +22,7 @@ import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
-import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.TimeZone
 
 @Composable
 fun ContentEntryDetailAttemptsStatementListScreen(
@@ -55,17 +52,8 @@ fun ContentEntryDetailAttemptsStatementListScreen(
             pagingItems = attemptsStatementListItems,
             key = { it.statementEntity?.statementIdHi ?: -1 }
         ) { attemptsStatementListItems ->
-            val timeZoneId = remember { TimeZone.currentSystemDefault().id }
 
-            val duration = attemptsStatementListItems?.let {
-                it.statementEntity?.let { it1 ->
-                    rememberFormattedDateTime(
-                        timeInMillis = it1.timestamp,
-                        timeZoneId = timeZoneId,
-                        joinDateAndTime = { date, time -> time },
-                    )
-                }
-            }
+
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {
                 },
@@ -95,9 +83,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                                 modifier = Modifier.padding(8.dp)
                             )
                             Text(
-                                text =
-                                "$duration"
-
+                                text = "${attemptsStatementListItems?.statementEntity?.timestamp}"
                             )
 
                         }
@@ -128,10 +114,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                                     "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
                                 }
                             )
-                            /*      Text(
-                                  text = "100%",
-                                  modifier = Modifier.padding(top = 4.dp) // Add spacing between the texts
-                              )*/
+
                         }
                     }
                 }
