@@ -49,6 +49,28 @@ env:
       GENDER: "Female"
       PASSWORD: "tests1"
 - back
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- runFlow:
+    file: "../common/add_new_content_block_to_course.yaml"
+    env:
+      TESTFILENAME: "H5p_Content.h5p"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- scrollUntilVisible:
+    element:
+      text:  "True/False Question"
+    direction: DOWN
+- assertVisible:
+    text:  "True/False Question"
+- tapOn: "True/False Question"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 20000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 20000
+- tapOn: Open
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
@@ -56,6 +78,7 @@ env:
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"
+  # Verify student able to see attempts made in library
 - assertVisible: "Test Course Block"
 - tapOn: "Library"
 - tapOn: "Video"
@@ -64,19 +87,40 @@ env:
 - extendedWaitUntil:
     visible: "Play"
     timeout: 20000
+- back
+- tapOn: "Attempts"
+- tapOn: "Student 1"
+- tapOn:
+    text: "Completed"
+    index: 0
+- assertVisible: "Completed"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+- tapOn: Open
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- tapOn: "Yes "
+- tapOn: "Check"
+- tapOn: "Close tab"
+- tapOn: "Attempts"
+- assertVisible: "Student 1"
+- assertVisible: "100% Score"
+- tapOn: "Student 1"
+- tapOn:
+    text: "Passed"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "admin"
-      PASSWORD: "testpass"
-- tapOn: "Library"
-- tapOn: "Video"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
 - tapOn: "Attempts"
-- assertVisible: "Progress bar is visible" #change needed
+- assertVisible: "100% Completion"
 - tapOn: "Student 1"
-- assertVisible: "Completed is visible" #change needed
-- assertVisible: "Completion time" #change needed
-- assertVisible: "Completed %" #change needed
-- assertVisible: "Completion score" #change needed
+- tapOn:
+    text: "Scored 100%"
+    index: 0
