@@ -152,22 +152,40 @@ class PersonAccountEditViewModel(
     }
 
     fun onEntityChanged(entity: PersonUsernameAndPasswordModel?) {
+        val updatedEntity = if (entity != null) {
+            if (entity.username != _uiState.value.personAccount?.username) {
+                val newUsername = entity.username ?: ""
+                if (newUsername.isEmpty() || validateUsernameUseCase.isCharacterAllowed(
+                        char = newUsername.last(),
+                        isFirstChar = newUsername.length == 1
+                    )) {
+                    entity
+                } else {
+                    entity.copy(username = _uiState.value.personAccount?.username ?: "")
+                }
+            } else {
+                entity
+            }
+        } else {
+            null
+        }
         _uiState.update { prev ->
             prev.copy(
-                personAccount = entity,
-                usernameError = if(prev.usernameError != null && prev.personAccount?.username == entity?.username) {
+                personAccount = updatedEntity,
+                usernameError = if(prev.usernameError != null &&
+                    prev.personAccount?.username == updatedEntity?.username) {
                     prev.usernameError
                 }else {
                     null
                 },
-                currentPasswordError = if(prev.currentPasswordError != null
-                    && prev.personAccount?.currentPassword == entity?.currentPassword) {
+                currentPasswordError = if(prev.currentPasswordError != null &&
+                    prev.personAccount?.currentPassword == updatedEntity?.currentPassword) {
                     prev.currentPasswordError
                 }else {
                     null
                 },
                 newPasswordError = if(prev.newPasswordError != null &&
-                    prev.personAccount?.newPassword == entity?.newPassword) {
+                    prev.personAccount?.newPassword == updatedEntity?.newPassword) {
                     prev.newPasswordError
                 }else {
                     null
@@ -176,7 +194,7 @@ class PersonAccountEditViewModel(
         }
 
         scheduleEntityCommitToSavedState(
-            entity = entity,
+            entity = updatedEntity,
             serializer = PersonUsernameAndPasswordModel.serializer(),
             commitDelay = 200
         )

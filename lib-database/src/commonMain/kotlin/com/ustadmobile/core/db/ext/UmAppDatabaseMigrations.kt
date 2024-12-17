@@ -1653,6 +1653,43 @@ val MIGRATION_201_202 = DoorMigrationStatementList(201, 202) { db ->
     }
 }
 
+val MIGRATION_202_203_SERVER = DoorMigrationStatementList(202, 203) { db ->
+    buildList {
+        // First convert usernames to lowercase and remove invalid chars
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("""
+                UPDATE Person 
+                SET username = LOWER(
+                    REPLACE(TRIM(username), ' ', '_')
+                ),
+                personLct = ${systemTimeInMillis()}
+                WHERE username LIKE '% %'    -- Contains spaces
+                   OR username != LOWER(username)  -- Has uppercase
+            """)
+        } else {
+            add("""
+                UPDATE Person 
+                SET username = LOWER(
+                    REPLACE(TRIM(username), ' ', '_')
+                ),
+                personLct = ${systemTimeInMillis()}
+                WHERE username LIKE '% %'
+                   OR username != LOWER(username)
+            """)
+        }
+
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE INDEX IF NOT EXISTS idx_person_username_ci ON Person (username COLLATE NOCASE)")
+        } else {
+            add("CREATE INDEX IF NOT EXISTS idx_person_username_ci ON Person using btree (lower(username))")
+        }
+    }
+}
+
+val MIGRATION_202_203_CLIENT = DoorMigrationStatementList(202, 203) { db ->
+    emptyList()
+}
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,

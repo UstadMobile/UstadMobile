@@ -159,9 +159,17 @@ class LoginViewModel(
         }
     }
 
-    fun onUsernameChanged(username: String) {
-        _uiState.update { prev ->
-            prev.copy(username = username)
+    fun onUsernameChanged(newValue: String) {
+        if (newValue.isEmpty() || validateUsernameUseCase.isCharacterAllowed(
+                char = newValue.last(),
+                isFirstChar = newValue.length == 1
+            )) {
+            _uiState.update { prev ->
+                prev.copy(
+                    username = newValue,
+                    usernameError = null
+                )
+            }
         }
     }
 
