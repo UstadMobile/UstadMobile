@@ -12,11 +12,8 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HtmlContentDisplayEngineOption
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
-import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
-import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
-import com.ustadmobile.core.domain.storage.GetOfflineStorageSettingUseCase
+import com.ustadmobile.core.domain.localsharing.EnableLocalSharingUseCase
 import com.ustadmobile.core.domain.storage.OfflineStorageOption
-import com.ustadmobile.core.domain.storage.SetOfflineStorageSettingUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
@@ -24,6 +21,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel.Companion.PREFKEY_DEVSETTINGS_ENABLED
+import com.ustadmobile.core.viewmodel.settings.storageanddata.StorageAndDataSettingsViewModel
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.flow.Flow
@@ -76,15 +74,14 @@ data class SettingsUiState(
 
     val storageOptionsDialogVisible: Boolean = false,
 
+    val storageAndDataSettingsVisible: Boolean = false,
+
 ) {
     val htmlContentDisplayEngineVisible: Boolean
         get() = htmlContentDisplayOptions.isNotEmpty()
 
     val advancedSectionVisible: Boolean
         get() = htmlContentDisplayEngineVisible
-
-    val storageOptionsVisible: Boolean
-        get() = storageOptions.isNotEmpty() && selectedOfflineStorageOption != null
 
 }
 
@@ -111,20 +108,13 @@ class SettingsViewModel(
 
     private val getVersionUseCase: GetVersionUseCase by instance()
 
-    private val getStorageOptionsUseCase: GetOfflineStorageOptionsUseCase? by instanceOrNull()
-
-    private val getOfflineStorageSettingUseCase: GetOfflineStorageSettingUseCase? by instanceOrNull()
-
-    private val setOfflineStorageSettingUseCase: SetOfflineStorageSettingUseCase? by instanceOrNull()
-
-    private val getOfflineStorageAvailableSpace: GetOfflineStorageAvailableSpace? by instanceOrNull()
+    private val enableNearbySharingUseCase: EnableLocalSharingUseCase? by instanceOrNull()
 
     private val versionClickCount = atomic(0)
 
     private val settings: Settings by instance()
 
     private val zipFileUseCase: ZipFileUseCase by instance()
-
 
     init {
 
@@ -148,28 +138,9 @@ class SettingsViewModel(
                 htmlContentDisplayOptions = getHtmlContentDisplayOptsUseCase?.invoke() ?: emptyList(),
                 currentHtmlContentDisplayOption = getHtmlContentDisplaySettingUseCase?.invoke(),
                 version = getVersionUseCase().versionString,
-                showDeveloperOptions = settings.getBoolean(PREFKEY_DEVSETTINGS_ENABLED, false)
+                showDeveloperOptions = settings.getBoolean(PREFKEY_DEVSETTINGS_ENABLED, false),
+                storageAndDataSettingsVisible = enableNearbySharingUseCase != null,
             )
-        }
-
-        viewModelScope.launch {
-            val offlineStorageOptions = getStorageOptionsUseCase?.invoke()
-            val selectedOfflineStorage = getOfflineStorageSettingUseCase?.invoke()
-            if(offlineStorageOptions != null) {
-                val optionsWithSpace = offlineStorageOptions.map {
-                    SettingsOfflineStorageOption(
-                        option = it,
-                        availableSpace = getOfflineStorageAvailableSpace?.invoke(it) ?: 0
-                    )
-                }
-
-                _uiState.update {
-                    it.copy(
-                        storageOptions = optionsWithSpace,
-                        selectedOfflineStorageOption = selectedOfflineStorage ?: offlineStorageOptions.first(),
-                    )
-                }
-            }
         }
 
         viewModelScope.launch {
@@ -324,27 +295,10 @@ class SettingsViewModel(
         }
     }
 
-    fun onClickOfflineStorageOptionsDialog() {
-        _uiState.update {
-            it.copy(storageOptionsDialogVisible = true)
-        }
+    fun onClickStorageAndDataSettings() {
+        navController.navigate(StorageAndDataSettingsViewModel.DEST_NAME, emptyMap())
     }
 
-    fun onDismissOfflineStorageOptionsDialog() {
-        _uiState.update {
-            it.copy(storageOptionsDialogVisible = false)
-        }
-    }
-
-    fun onSelectOfflineStorageOption(option: OfflineStorageOption) {
-        onDismissOfflineStorageOptionsDialog()
-        setOfflineStorageSettingUseCase?.invoke(option)
-        _uiState.update {
-            it.copy(
-                selectedOfflineStorageOption = getOfflineStorageSettingUseCase?.invoke()
-            )
-        }
-    }
 
     companion object {
         const val DEST_NAME = "Settings"

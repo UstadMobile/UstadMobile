@@ -142,6 +142,8 @@ import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
+import com.ustadmobile.core.viewmodel.settings.localsharing.LocalSharingSettingsViewModel
+import com.ustadmobile.core.viewmodel.settings.storageanddata.StorageAndDataSettingsViewModel
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.core.viewmodel.signup.SignupEnterUsernamePasswordViewModel
@@ -187,6 +189,8 @@ import com.ustadmobile.libuicompose.view.systempermission.edit.SystemPermissionE
 import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
 import com.ustadmobile.libuicompose.view.person.addaccount.AddAccountSelectNewOrExistingScreen
 import com.ustadmobile.libuicompose.view.person.learningspacelist.LearningSpaceListScreen
+import com.ustadmobile.libuicompose.view.settings.localsharing.LocalSharingSettingsScreen
+import com.ustadmobile.libuicompose.view.settings.storageanddata.StorageAndDataSettingsScreen
 import com.ustadmobile.libuicompose.view.signup.OtherSignUpOptionSelectionScreen
 import com.ustadmobile.libuicompose.view.signup.SignUpEnterUsernamePasswordScreen
 import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
@@ -909,6 +913,21 @@ fun AppNavHost(
             contentScene("/${GetSubtitleViewModel.DEST_NAME}") { backStackEntry ->
                 GetSubtitleScreen(
                     appViewModel(backStackEntry, GetSubtitleViewModel::class, ::GetSubtitleViewModel)
+                )
+            }
+
+            contentScene("/${StorageAndDataSettingsViewModel.DEST_NAME}") { backStackEntry ->
+                StorageAndDataSettingsScreen(
+                    appViewModel(
+                        backStackEntry, StorageAndDataSettingsViewModel::class,
+                        ::StorageAndDataSettingsViewModel
+                    )
+                )
+            }
+
+            contentScene("/${LocalSharingSettingsViewModel.DEST_NAME}") { backStackEntry ->
+                LocalSharingSettingsScreen(
+                    appViewModel(backStackEntry, LocalSharingSettingsViewModel::class, ::LocalSharingSettingsViewModel)
                 )
             }
 

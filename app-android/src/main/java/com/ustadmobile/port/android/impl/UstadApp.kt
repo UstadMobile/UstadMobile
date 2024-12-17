@@ -213,6 +213,7 @@ import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourc
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.core.domain.localsharing.EnableLocalSharingUseCase
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
 import com.ustadmobile.libcache.db.MIGRATE_8_9
 import com.ustadmobile.libcache.db.UstadCacheDb
@@ -1206,6 +1207,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     xxStringHasher = instance(),
                 )
             )
+        }
+
+        bind<EnableLocalSharingUseCase>() with singleton {
+            EnableLocalSharingUseCase()
         }
 
         registerContextTranslator { account: UmAccount -> LearningSpace(account.endpointUrl) }
