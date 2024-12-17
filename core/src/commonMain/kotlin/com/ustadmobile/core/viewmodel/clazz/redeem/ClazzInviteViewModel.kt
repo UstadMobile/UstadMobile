@@ -18,7 +18,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 
-data class InviteRedeemUiState(
+data class ClazzInviteUiState(
     val onError: String? = null,
     val onRedeem: Boolean? = null
 )
@@ -28,9 +28,9 @@ class ClazzInviteViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private var _uiState = MutableStateFlow(InviteRedeemUiState())
+    private var _uiState = MutableStateFlow(ClazzInviteUiState())
 
-    val uiState: Flow<InviteRedeemUiState> = _uiState.asStateFlow()
+    val uiState: Flow<ClazzInviteUiState> = _uiState.asStateFlow()
 
     private val clazzRedeemUseCase: ClazzRedeemUseCase by on(LearningSpace(accountManager.activeLearningSpace.url)).instance()
 
@@ -74,6 +74,5 @@ class ClazzInviteViewModel(
     companion object {
 
         const val DEST_NAME = "clazz_redeem"
-        const val ARG_INVITE = "inviteCode"
     }
 }

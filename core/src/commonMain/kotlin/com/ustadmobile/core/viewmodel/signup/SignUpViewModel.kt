@@ -451,7 +451,7 @@ class SignUpViewModel(
             ARG_IS_PERSONAL_ACCOUNT
         )
 
-        const val SIGN_WITH_USERNAME_AND_PASSWORD = "SignupWithUsernameAndPassowrd"
+        const val SIGN_WITH_USERNAME_AND_PASSWORD = "SignupWithUsernameAndPassword"
 
 
     }

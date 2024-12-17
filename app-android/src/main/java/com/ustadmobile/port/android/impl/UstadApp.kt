@@ -213,6 +213,7 @@ import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourc
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.core.domain.invite.ClazzRedeemUseCase
 
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
@@ -1076,6 +1077,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             GetOfflineStorageSettingUseCase(
                 getOfflineStorageOptionsUseCase = instance(),
                 settings = instance(),
+            )
+        }
+
+        bind<ClazzRedeemUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            ClazzRedeemUseCase(
+                enrolIntoCourseUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance<UmAppDataLayer>().repository,
             )
         }
 

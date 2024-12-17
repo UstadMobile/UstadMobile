@@ -87,7 +87,7 @@ class RedirectViewModel(
                     put(
                         ARG_LEARNINGSPACE_URL,
                         apiUrlConfig.presetLearningSpaceUrl?.requireHttpPrefix()
-                            ?.requirePostfix("/")?.replace("/umapp", "") ?: ""
+                            ?.requirePostfix("/")?: ""
                     )
                 }
             )
