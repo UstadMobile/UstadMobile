@@ -5,6 +5,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.libcache.db.entities.NeighborCache
+import kotlinx.coroutines.flow.Flow
 
 
 @DoorDao
@@ -18,5 +19,11 @@ expect abstract class NeighborCacheDao {
          WHERE neighborUid = :neighborUid
     """)
     abstract suspend fun deleteAsync(neighborUid: Long)
+
+    @Query("""
+        SELECT NeighborCache.*
+          FROM NeighborCache
+    """)
+    abstract fun allNeighborsAsFlow(): Flow<List<NeighborCache>>
 
 }

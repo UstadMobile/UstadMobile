@@ -5,15 +5,17 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import com.ustadmobile.libcache.distributed.DistributedCacheConstants.DCACHE_LOGTAG
 import com.ustadmobile.libcache.logging.UstadCacheLogger
-import java.net.InetAddress
 
 class DistributedCacheNsdAndroid(
-    private val context: Context,
+    context: Context,
     private val port: Int,
     private val logger: UstadCacheLogger,
     private val listener: DistributedCacheNeighborDiscoveryListener,
 ) {
 
+    /**
+     * The currently registered service name
+     */
     private var mServiceName: String? = SERVICE_NAME
 
     /**
@@ -36,6 +38,13 @@ class DistributedCacheNsdAndroid(
         override fun onServiceRegistered(serviceInfo: NsdServiceInfo) {
             mServiceName = serviceInfo.serviceName
             logger.i(DCACHE_LOGTAG, "Registered: $serviceInfo")
+
+            nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, discoveryListener)
+        }
+
+        override fun onServiceUnregistered(serviceInfo: NsdServiceInfo) {
+            logger.i(DCACHE_LOGTAG, "Unregistered: $serviceInfo")
+            nsdManager.stopServiceDiscovery(discoveryListener)
         }
 
         override fun onRegistrationFailed(serviceInfo: NsdServiceInfo, errorCode: Int) {
@@ -44,11 +53,6 @@ class DistributedCacheNsdAndroid(
 
         override fun onUnregistrationFailed(serviceInfo: NsdServiceInfo, errorCode: Int) {
             logger.e(DCACHE_LOGTAG, "Unregister failed: $serviceInfo : $errorCode")
-        }
-
-
-        override fun onServiceUnregistered(serviceInfo: NsdServiceInfo) {
-            logger.i(DCACHE_LOGTAG, "Unregistered: $serviceInfo")
         }
 
     }
@@ -70,10 +74,6 @@ class DistributedCacheNsdAndroid(
                 logger.d(DCACHE_LOGTAG, "Same IP.")
                 return
             }
-
-            //mService = serviceInfo
-            val port: Int = serviceInfo.port
-            val host: InetAddress = serviceInfo.host
 
             val neighborUrlVal = serviceInfo.neighborUrl
             if(neighborUrlVal != null) {
@@ -147,8 +147,15 @@ class DistributedCacheNsdAndroid(
     }
 
     init {
+        /* To avoid discovering the device itself, Android as per docs relies on comparing the
+         * discovered service name with the registered service name.
+         *
+         * Therefor: we first register the service, get the name registered, and then the
+         * registrationListener's onServiceRegistered function will start discovery, so when
+         * onServiceFound is called we can compare the found service name with the registered
+         * service name.
+         */
         nsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, registrationListener)
-        nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, discoveryListener)
     }
 
 
