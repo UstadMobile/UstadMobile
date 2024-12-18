@@ -1,0 +1,90 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTNAME: "002_010_username_validation"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_010_username_validation"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#-------Admin Login---------------#
+- runFlow:
+    file: "../common/user_login.yaml"
+- tapOn: "People"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add Person"
+- tapOn: "First names*"
+- inputText: User
+- hideKeyboard
+- tapOn: "Last name*"
+- inputText: A
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Gender*"
+    direction: DOWN
+- tapOn: "Gender*"
+- tapOn: Male
+- tapOn: "SAVE"
+- tapOn: "User A"
+- tapOn: "CREATE ACCOUNT"
+  # verify the space is not acceptable
+- tapOn: "Username*"
+- inputText: user A
+- tapOn: "New password*"
+- inputText: 1234
+- tapOn: "SAVE"
+- assertVisible: "Username must be 3 to 15 characters, use only letters, avoid spaces or special symbols."
+- hideKeyboard
+- tapOn: "Back"
+- tapOn: "CREATE ACCOUNT"
+  # verify the special character is not acceptable
+- tapOn: "Username*"
+- inputText: user@A
+- tapOn: "New password*"
+- inputText: 1234
+- tapOn: "SAVE"
+- assertVisible: "Username must be 3 to 15 characters, use only letters, avoid spaces or special symbols."
+- hideKeyboard
+- tapOn: "Back"
+- tapOn: "CREATE ACCOUNT"
+  # verify the . _ characters are acceptable
+- tapOn: "Username*"
+- inputText: user.a_123
+- tapOn: "New password*"
+- inputText: 1234
+- tapOn: "SAVE"
+- assertVisible: "Change Password"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+#-------Admin Login---------------#
+- runFlow:
+    file: "../common/user_login.yaml"
+    # verify the space is not acceptable
+    env:
+      USERNAME: "user A"
+      PASSWORD: "1234"
+- assertVisible: "Username must be 3 to 15 characters, use only letters, avoid spaces or special symbols."
+- tapOn: "Back"
+- tapOn: "Next"
+  # verify the special character is not acceptable
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "user@A"
+      PASSWORD: "1234"
+- tapOn: "Back"
+- tapOn: "Next"
+  # verify the . _ characters are acceptable
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "user.a_123"
+      PASSWORD: "1234"
+- assertVisible: "Library"
