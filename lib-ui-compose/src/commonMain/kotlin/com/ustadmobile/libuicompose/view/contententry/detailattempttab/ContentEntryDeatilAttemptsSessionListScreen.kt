@@ -82,6 +82,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
 
                             attemptsSessionListItems?.isCompleted == true -> Icons.Filled.Check
                             else -> Icons.Filled.Close
+
                         }, contentDescription = when {
                             attemptsSessionListItems?.isSuccessful != null -> {
                                 if (attemptsSessionListItems.isSuccessful == true) "Success"

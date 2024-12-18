@@ -181,10 +181,9 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                                 }
 
                                                 attemptsSessionListItems?.maxProgress != null -> {
-                                                    "${attemptsSessionListItems?.maxProgress}% Completion"
+                                                    "${attemptsSessionListItems.maxProgress}% Completion"
 
                                                 }
-
                                                 else -> {
                                                     "No Score"
                                                 }
