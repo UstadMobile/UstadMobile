@@ -19,4 +19,14 @@ expect abstract class NeighborCacheEntryDao {
     """)
     abstract fun allEntriesAsFlow(): Flow<List<NeighborCacheEntry>>
 
+
+    @Query("""
+        SELECT NeighborCacheEntry.nceUrlHash
+          FROM NeighborCacheEntry
+         WHERE NeighborCacheEntry.nceUrlHash IN (:urlHashes) 
+    """)
+    abstract fun findAvailableEntries(
+        urlHashes: List<Long>
+    ): List<Long>
+
 }

@@ -214,6 +214,8 @@ import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.domain.localsharing.EnableLocalSharingUseCase
+import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentAvailabilityUseCase
+import com.ustadmobile.core.domain.localsharing.checkcontentavailability.UstadCacheCheckContentAvailabilityUseCase
 import com.ustadmobile.core.domain.localsharing.listneighbors.ListLocalSharingNeighborsUseCase
 import com.ustadmobile.core.domain.localsharing.listneighbors.ListLocalSharingNeighborsUseCaseCommonJvm
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
@@ -1218,6 +1220,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     scope = CoroutineScope(Dispatchers.IO + Job()),
                     xxStringHasher = instance(),
                 )
+            )
+        }
+
+        bind<CheckContentAvailabilityUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            UstadCacheCheckContentAvailabilityUseCase(
+                ustadCache = instance(),
+                httpClient = instance(),
             )
         }
 

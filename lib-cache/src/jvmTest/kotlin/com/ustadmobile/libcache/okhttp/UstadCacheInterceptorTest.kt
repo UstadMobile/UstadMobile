@@ -21,6 +21,7 @@ import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.util.test.ResourcesDispatcher
 import com.ustadmobile.util.test.initNapierLog
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import kotlinx.io.files.Path
 import kotlinx.io.readByteArray
 import kotlinx.serialization.encodeToString
@@ -107,6 +108,7 @@ class UstadCacheInterceptorTest {
                 db = cacheDb,
                 logger = logger,
                 listener = cacheListener,
+                xxStringHasher = XXStringHasherCommonJvm(),
             )
         )
         okHttpClient = OkHttpClient.Builder()

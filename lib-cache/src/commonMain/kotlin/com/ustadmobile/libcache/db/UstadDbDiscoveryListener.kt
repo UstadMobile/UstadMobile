@@ -23,6 +23,7 @@ class UstadDbDiscoveryListener(
                     neighborIp = neighborIp,
                     neighborDiscovered = systemTimeInMillis(),
                     neighborPingTime = 0,
+                    neighborUdpPort = neighborUdpPort,
                 )
             )
         }
