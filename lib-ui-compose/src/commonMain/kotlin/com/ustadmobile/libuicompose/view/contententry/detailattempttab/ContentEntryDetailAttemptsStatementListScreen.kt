@@ -1,10 +1,8 @@
 import androidx.compose.runtime.Composable
-import com.ustadmobile.core.contentformats.epub.ncx.Text
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
-
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,16 +10,14 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-
-import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.paging.RefreshCommand
-import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
-
-import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
@@ -29,65 +25,97 @@ import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun ContentEntryDetailAttemptsStatementScreen(
+fun ContentEntryDetailAttemptsStatementListScreen(
     viewModel: ContentEntryDetailAttemptsStatementListViewModel
 ) {
-    // Collect the personName from the ViewModel
     val uiState = viewModel.uiState.collectAsState(ContentEntryDetailAttemptsStatementListUiState())
+    ContentEntryDetailAttemptsStatementListScreen(
+        uiState = uiState.value,
+        refreshCommandFlow = viewModel.refreshCommandFlow,
 
-
+        )
 }
 
 @Composable
-fun ContentEntryDetailAttemptsStatementListViewModel(
+fun ContentEntryDetailAttemptsStatementListScreen(
     uiState: ContentEntryDetailAttemptsStatementListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
-    onClickEntry: (StatementEntity) -> Unit = {},
 ) {
-    val attemptsSessionListPager =
+    val attemptsStatementListPager =
         rememberDoorRepositoryPager(uiState.attemptsStatementList, refreshCommandFlow)
-    val attemptsSessionListItems = attemptsSessionListPager.lazyPagingItems
+    val attemptsStatementListItems = attemptsStatementListPager.lazyPagingItems
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
-    ){
+    ) {
         ustadPagedItems(
-            pagingItems = attemptsSessionListItems,
-            key = {it.statementIdHi }
-        )  { attemptsSessionListItems ->
+            pagingItems = attemptsStatementListItems,
+            key = { it.statementEntity?.statementIdHi ?: -1 }
+        ) { attemptsStatementListItems ->
+
+
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {
-                    attemptsSessionListItems?.also(onClickEntry)
                 },
                 leadingContent = {
-                    // Add an icon in the leading content
                     Icon(
-                        imageVector = Icons.Filled.Check, // Tick (check) icon
-                        contentDescription = "Icon", // Description for accessibility
-                        modifier = Modifier.padding(end = 8.dp) // Add padding between icon and text
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = "Icon",
+                        modifier = Modifier.padding(end = 8.dp)
                     )
                 },
                 headlineContent = {
                     androidx.compose.material3.Text(
-                        text = if (attemptsSessionListItems?.resultCompletion == true) {
-                            "Completed"
-                        } else {
-                            "Incomplete"
-                        }
+                        text = attemptsStatementListItems?.verb?.verbUrlId.toString()
+                            .substringAfterLast("/").replaceFirstChar { it.uppercaseChar() }
                     )
                 },
 
                 supportingContent = {
-                    // Supporting text
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = "date",
-                        )
-                        // Additional text below supporting text
-                        Text(
-                            text = "100%",
-                            modifier = Modifier.padding(top = 4.dp) // Add spacing between the texts
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Timer,
+                                contentDescription = "Icon",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                            Text(
+                                text = "${attemptsStatementListItems?.statementEntity?.timestamp}"
+                            )
+
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Star,
+                                contentDescription = "Icon",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                            Text(
+                                text = if (attemptsStatementListItems?.statementEntity?.extensionProgress == null) {
+                                    if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
+                                        "${
+                                            attemptsStatementListItems?.statementEntity?.resultScoreRaw?.toInt()
+                                                .toString()
+                                        }/${
+                                            attemptsStatementListItems?.statementEntity?.resultScoreMax?.toInt()
+                                                .toString()
+                                        } Score"
+                                    } else {
+                                        "No Score"
+                                    }
+
+                                } else {
+                                    "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
+                                }
+                            )
+
+                        }
                     }
                 }
             )
