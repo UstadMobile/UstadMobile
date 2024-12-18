@@ -135,7 +135,6 @@ import com.ustadmobile.lib.rest.domain.learningspace.SystemConfigScriptRoute
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
-import com.ustadmobile.lib.rest.domain.matomo.MatomoConfigRoute
 import com.ustadmobile.lib.rest.domain.invite.ProcessInviteRoute
 import com.ustadmobile.lib.rest.domain.invite.ProcessInviteUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
@@ -144,7 +143,6 @@ import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
 import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCaseHttp
 import com.ustadmobile.lib.rest.domain.invite.sms.SmsProperties
 import com.ustadmobile.lib.rest.domain.invite.sms.twilio.TwilioHttpClient
-import com.ustadmobile.lib.rest.domain.matomo.MatomoConfigRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.systemconfig.verifyauth.VerifySystemConfigAuthUseCase
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
@@ -1023,10 +1021,6 @@ fun Application.umRestApplication(
                         xxStringHasher = di.direct.instance()
                     )
                 }
-                route("matomo") {
-                    MatomoConfigRoute()
-                }
-
                 route(CentralAppConfigDbDataSource.PATH) {
                     route(LearningSpaceDataSource.PATH) {
                         LearningSpaceClientRoute(

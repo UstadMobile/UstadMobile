@@ -3,7 +3,6 @@ package com.ustadmobile.lib.rest.domain.learningspace
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.xxhashkmp.XXStringHasher
-import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.UstadBuildConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.ihttp.ktorserver.clientUrl
@@ -51,18 +50,17 @@ fun Route.SystemConfigScriptRoute(
             ) {
                 "var _ustadLearningSpaceExists = $learningSpaceExists;\n"+
                 "var _ustadRegistrationAllowed = $registrationAllowed;"+
-                "var _paq = window._paq = window._paq || [];\n" +
-                "        _paq.push(['setCustomUrl', 'https://yourdomain.com/your-new-page-url']);\n"+
-                "        _paq.push(['setDocumentTitle', \"<?php echo myPageTitle ?>\"]);\n"+
-                "        _paq.push(['trackPageView']);\n" +
-                "        _paq.push(['enableLinkTracking']);\n" +
-                "        (function() {\n" +
-                "          var u= ${matomoApiUrl}\n" +
-                "          _paq.push(['setTrackerUrl', u]);\n" +
-                "          _paq.push(['setSiteId', '1']);\n" +
-                "          var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];\n" +
-                "          g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);\n" +
-                "        })();"
+                        "var _paq = window._paq = window._paq || [];\n" +
+                        "        _paq.push(['trackPageView']);\n" +
+                        "        _paq.push(['enableLinkTracking']);\n" +
+                        "        (function() {\n" +
+                        "           var u = \"http://192.168.20.10/matomo/\";\n" +
+                        "          _paq.push(['setTrackerUrl', u+'matomo.php']);\n" +
+                        "          _paq.push(['setSiteId', '1']);\n" +
+                        "          var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];\n" +
+                        "          g.async = true; g.src = u + 'matomo.js'; s.parentNode.insertBefore(g, s);\n" +
+                        "        })();"
+
             }
         } catch (e: Throwable) {
             Napier.d { "ustadLearningSpaceExistsErr:-  ${e.message}" }
