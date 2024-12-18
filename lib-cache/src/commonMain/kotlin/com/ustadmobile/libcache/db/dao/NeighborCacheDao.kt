@@ -26,4 +26,13 @@ expect abstract class NeighborCacheDao {
     """)
     abstract fun allNeighborsAsFlow(): Flow<List<NeighborCache>>
 
+    @Query("""
+        UPDATE NeighborCache
+           SET neighborHttpPort = :httpPort
+         WHERE neighborUid = :neighborUid
+           AND neighborHttpPort != :httpPort
+    """)
+    abstract fun updateHttpPort(neighborUid: Long, httpPort: Int)
+
+
 }

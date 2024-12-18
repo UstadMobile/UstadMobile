@@ -18,8 +18,7 @@ data class DistributedHashEntries(
 ) {
 
     val size: Int
-        //1 byte version, 4 bytes port, 4 bytes for number of entries, and then for each entry
-        get() = 1 + 4 + 4 + (entries.size * DistributedHashCacheEntry.SIZE)
+        get() = OVERHEAD_SIZE + (entries.size * DistributedHashCacheEntry.SIZE)
 
     fun toBytes(): ByteArray {
         val buffer = ByteBuffer.allocate(size)
@@ -31,6 +30,13 @@ data class DistributedHashEntries(
     }
 
     companion object {
+
+        //1 byte version, 4 bytes port, 4 bytes for number of entries, and then for each entry
+        const val OVERHEAD_SIZE = 1 + 4 + 4
+
+        fun numEntriesFor(mtu: Int): Int {
+            return (mtu - OVERHEAD_SIZE) / DistributedHashCacheEntry.SIZE
+        }
 
         fun fromBytes(
             bytesArray: ByteArray,

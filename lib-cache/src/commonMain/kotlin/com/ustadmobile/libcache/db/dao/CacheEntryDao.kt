@@ -117,4 +117,14 @@ expect abstract class CacheEntryDao {
         lastAccessed: Long,
     )
 
+    @Query("""
+        SELECT CacheEntry.url
+          FROM CacheEntry
+      ORDER BY CacheEntry.key 
+         LIMIT :limit
+        OFFSET :offset
+       
+    """)
+    abstract fun getEntryUrlsInOrder(offset: Int, limit: Int): List<String>
+
 }

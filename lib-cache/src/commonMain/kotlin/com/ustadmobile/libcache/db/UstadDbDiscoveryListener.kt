@@ -3,6 +3,7 @@ package com.ustadmobile.libcache.db
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.libcache.db.entities.NeighborCache
 import com.ustadmobile.libcache.distributed.DistributedCacheNeighborDiscoveryListener
+import com.ustadmobile.libcache.distributed.neighborUid
 import com.ustadmobile.xxhashkmp.XXStringHasher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -18,7 +19,7 @@ class UstadDbDiscoveryListener(
         scope.launch {
             db.neighborCacheDao.upsertAsync(
                 NeighborCache(
-                    neighborUid = xxStringHasher.hash("$neighborIp:$neighborUdpPort"),
+                    neighborUid = xxStringHasher.neighborUid(neighborIp, neighborUdpPort),
                     neighborIp = neighborIp,
                     neighborDiscovered = systemTimeInMillis(),
                     neighborPingTime = 0,
@@ -30,7 +31,7 @@ class UstadDbDiscoveryListener(
     override fun onNeighborLost(neighborIp: String, neighborUdpPort: Int) {
         scope.launch {
             db.neighborCacheDao.deleteAsync(
-                neighborUid = xxStringHasher.hash("$neighborIp:$neighborUdpPort"),
+                neighborUid = xxStringHasher.neighborUid(neighborIp, neighborUdpPort),
             )
         }
     }
