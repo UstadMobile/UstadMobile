@@ -927,6 +927,22 @@ fun AppNavHost(
                 )
             }
 
+            contentScene("/${ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME}") { backStackEntry ->
+                ContentEntryDetailAttemptsSessionListScreen(
+                    appViewModel(
+                        backStackEntry, ContentEntryDetailAttemptsSessionListViewModel::class,
+                        ::ContentEntryDetailAttemptsSessionListViewModel
+                    )
+                )
+            }
+            contentScene("/${ContentEntryDetailAttemptsStatementListViewModel.DEST_NAME}") { backStackEntry ->
+                ContentEntryDetailAttemptsStatementListScreen(
+                    appViewModel(
+                        backStackEntry, ContentEntryDetailAttemptsStatementListViewModel::class,
+                        ::ContentEntryDetailAttemptsStatementListViewModel
+                    )
+                )
+            }
         }
     }
 }
