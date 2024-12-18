@@ -10,18 +10,22 @@ import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
+import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
+import dev.icerock.moko.graphics.parseColor
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.datetime.TimeZone
 import mui.icons.material.Check
 import mui.icons.material.Close
+import mui.icons.material.Schedule
 import mui.icons.material.Star
 import mui.icons.material.Timer
 import mui.material.Container
@@ -31,6 +35,7 @@ import mui.material.ListItemIcon
 import mui.material.ListItemText
 import mui.material.Stack
 import mui.material.StackDirection
+import mui.material.SvgIconSize
 import mui.system.responsive
 import mui.system.sx
 import react.FC
@@ -39,13 +44,16 @@ import react.ReactNode
 import react.create
 import react.useRequiredContext
 import tanstack.react.query.UseInfiniteQueryResult
+import web.cssom.Color
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
+import web.cssom.px
 
 
 external interface ContentEntryDetailAttemptsSessionListProps : Props {
+
     var uiState: ContentEntryDetailAttemptsSessionListUiState
     var refreshCommandFlow: Flow<RefreshCommand>?
     var onListItemClick: (SessionTimeAndProgressInfo) -> Unit
@@ -163,12 +171,10 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                             attemptsSessionListItems?.maxScore != null || attemptsSessionListItems?.maxProgress != null -> {
                                                 Star()
                                             }
-
                                             else -> {
                                                 UstadBlankIcon()
                                             }
                                         }
-                                        Star()
                                         sx {
                                             padding = theme.spacing(1, 1, 1, 5)
                                         }
@@ -181,9 +187,9 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                                 }
 
                                                 attemptsSessionListItems?.maxProgress != null -> {
-                                                    "${attemptsSessionListItems.maxProgress}% Completion"
-
+                                                    "${attemptsSessionListItems?.maxProgress}% Completion"
                                                 }
+
                                                 else -> {
                                                     "No Score"
                                                 }

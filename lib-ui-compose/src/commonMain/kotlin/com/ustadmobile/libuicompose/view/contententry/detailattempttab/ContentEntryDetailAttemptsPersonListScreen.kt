@@ -1,17 +1,23 @@
 package com.ustadmobile.libuicompose.view.contententry.detailattempttab
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.Text
 import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
-import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
-import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
+import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
@@ -30,17 +36,14 @@ fun ContentEntryDetailAttemptsPersonListScreen(
         uiState = uiState,
         refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickEntry = viewModel::onClickEntry,
-
         )
-
 }
 
 @Composable
 fun ContentEntryDetailAttemptsPersonListScreen(
     uiState: ContentEntryDetailAttemptsPersonListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
-    onClickEntry: (PersonAndAttemptInfo) -> Unit = {},
-
+    onClickEntry: (PersonAndPictureAndNumAttempts) -> Unit = {},
     ) {
     val attemptsPersonListPager =
         rememberDoorRepositoryPager(uiState.attemptsPersonList, refreshCommandFlow)
@@ -62,27 +65,34 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                     )
                 },
                 supportingContent = {
-                    androidx.compose.material3.Text(text = "")
-
+                    androidx.compose.material3.Text(text = "${attemptsPersonListItems?.numAttempts.toString()} attempts")
                 },
                 leadingContent = {
                     UstadPersonAvatar(
-                        pictureUri = attemptsPersonListItems?.personPicture?.personPictureThumbnailUri,
+                        pictureUri = attemptsPersonListItems?.picture?.personPictureThumbnailUri,
                         personName = attemptsPersonListItems?.person?.fullName(),
                     )
                 }
             )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val progressValue = attemptsPersonListItems?.maxProgress?.toFloat()
+                    ?: attemptsPersonListItems?.maxScore ?: 0f
+                LinearProgressIndicator(
+                    progress = progressValue,
+                    modifier = Modifier.weight(0.7f).padding(start=12.dp),
+                )
+                Text(
+                    text = when {
+                        attemptsPersonListItems?.maxProgress !=null ->
+                            "${(attemptsPersonListItems.maxProgress?: 0f)}% Completion"
+                        else ->"${((attemptsPersonListItems?.maxScore ?: 0f) * 100).toInt()}% Score"
+                    },
+                    modifier = Modifier.padding(start = 8.dp).weight(0.3f),
+                )
+            }
         }
     }
-
-    /*
-                       LinearProgressIndicator(
-                            progress = 0.8f,
-                            modifier = Modifier
-                                .fillMaxWidth() // Fill the width of the parent
-                                .height(4.dp) // Set height of the progress bar
-                                .padding(start = 120.dp, end = 100.dp)
-                        )
-                    }*/
-
 }
