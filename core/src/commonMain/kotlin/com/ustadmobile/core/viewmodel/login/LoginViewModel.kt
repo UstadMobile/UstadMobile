@@ -160,10 +160,19 @@ class LoginViewModel(
     }
 
     fun onUsernameChanged(newValue: String) {
-        if (newValue.isEmpty() || validateUsernameUseCase.isCharacterAllowed(
-                char = newValue.last(),
-                isFirstChar = newValue.length == 1
-            )) {
+        // If no input or input is valid (including whitespace)
+        val lastChar = newValue.lastOrNull()
+        val isFirstChar = newValue.length == 1
+
+        val isValid = when {
+            newValue.isEmpty() -> true
+            lastChar?.isWhitespace() == true -> true // Allow whitespace
+            isFirstChar && lastChar?.isDigit() == true -> false // Block starting with number
+            lastChar != null -> validateUsernameUseCase.isCharacterAllowed(lastChar, isFirstChar)
+            else -> true
+        }
+
+        if (isValid) {
             _uiState.update { prev ->
                 prev.copy(
                     username = newValue,
@@ -193,78 +202,72 @@ class LoginViewModel(
         )
     }
 
-    fun onClickLogin(){
+    fun onClickLogin() {
         _uiState.update { prev ->
             prev.copy(
-                username = prev.username.trim(),
-                password = prev.password.trim(),
                 fieldsEnabled = false,
                 passwordError = null,
                 usernameError = null,
             )
         }
 
-        val username = _uiState.value.username
-        val password = _uiState.value.password
+        val currentState = _uiState.value
+        val username = currentState.username
+        val password = currentState.password
 
-        val validatedUsername = validateUsernameUseCase(username)
-        if (validatedUsername == null) {
+        // Handle empty case first
+        if (username.trim().isEmpty()) {
             _uiState.update { prev ->
                 prev.copy(
                     fieldsEnabled = true,
-                    usernameError = impl.getString(MR.strings.invalid_username),
+                    usernameError = impl.getString(MR.strings.invalid_username)
                 )
             }
             return
         }
 
-        if(username.isNotEmpty() && password.isNotEmpty()){
-            loadingState = LoadingUiState.INDETERMINATE
-            viewModelScope.launch {
-                var errorMessage: String? = null
-                try {
-                    val account = accountManager.login(
-                        username = validatedUsername.trim(),
-                        password = password.trim(),
-                        endpointUrl = serverUrl,
-                        maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L,
-                        dontSetCurrentSession = dontSetCurrentSession,
-                    )
-                    goToNextDestAfterLoginOrGuestSelected(account.personUid)
-                }catch(e: AdultAccountRequiredException) {
-                    errorMessage = impl.getString(MR.strings.adult_account_required)
-                } catch(e: UnauthorizedException) {
-                    errorMessage = impl.getString(MR.strings.wrong_user_pass_combo)
-                } catch(e: ConsentNotGrantedException) {
-                    errorMessage =  impl.getString(MR.strings.your_account_needs_approved)
-                }catch(e: Exception) {
-                    errorMessage = impl.getString(MR.strings.login_network_error)
-                }finally {
-                    loadingState = LoadingUiState.NOT_LOADING
-                    _uiState.update { prev ->
-                        prev.copy(
-                            fieldsEnabled = true,
-                            errorMessage = errorMessage,
-                        )
-                    }
-                }
-            }
-        }else{
-            loadingState = LoadingUiState.NOT_LOADING
+        if (password.trim().isEmpty()) {
             _uiState.update { prev ->
                 prev.copy(
                     fieldsEnabled = true,
-                    usernameError = if(prev.username.isEmpty()) {
-                        impl.getString(MR.strings.field_required_prompt)
-                    } else {
-                        null
-                    },
-                    passwordError = if(prev.password.isEmpty()) {
-                        impl.getString(MR.strings.field_required_prompt)
-                    }else {
-                        null
-                    }
+                    passwordError = impl.getString(MR.strings.field_required_prompt)
                 )
+            }
+            return
+        }
+
+        // Username validation
+        val trimmedUsername = username.trim()
+        val trimmedPassword = password.trim()
+
+        loadingState = LoadingUiState.INDETERMINATE
+        viewModelScope.launch {
+            var errorMessage: String? = null
+            try {
+                val account = accountManager.login(
+                    username = trimmedUsername,
+                    password = trimmedPassword,
+                    endpointUrl = serverUrl,
+                    maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L,
+                    dontSetCurrentSession = dontSetCurrentSession,
+                )
+                goToNextDestAfterLoginOrGuestSelected(account.personUid)
+            } catch(e: AdultAccountRequiredException) {
+                errorMessage = impl.getString(MR.strings.adult_account_required)
+            } catch(e: UnauthorizedException) {
+                errorMessage = impl.getString(MR.strings.wrong_user_pass_combo)
+            } catch(e: ConsentNotGrantedException) {
+                errorMessage = impl.getString(MR.strings.your_account_needs_approved)
+            } catch(e: Exception) {
+                errorMessage = impl.getString(MR.strings.login_network_error)
+            } finally {
+                loadingState = LoadingUiState.NOT_LOADING
+                _uiState.update { prev ->
+                    prev.copy(
+                        fieldsEnabled = true,
+                        errorMessage = errorMessage,
+                    )
+                }
             }
         }
     }

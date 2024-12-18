@@ -3,11 +3,10 @@ package com.ustadmobile.core.domain.validateusername
 class ValidateUsernameUseCase {
     /**
      * Validates username according to rules:
-     * - Must not contain spaces, tabs, or special characters (except . and _)
+     * - Must not contain special characters (except . and _)
      * - Must not start with a number
-     * - Non-English Unicode characters are allowed
-     * - Must be 3–15 characters long after trimming
      * - All letters will be converted to lowercase
+     * - Returns cleaned username or null if invalid
      *
      * @param username The username string to validate
      * @param invalidReplacement String to replace invalid characters with (default empty string)
@@ -17,26 +16,36 @@ class ValidateUsernameUseCase {
         username: String,
         invalidReplacement: String = ""
     ): String? {
-        val trimmed = username.trim().lowercase()
+        val trimmed = username.trim()
+        if (trimmed.isEmpty()) return null
 
-        if (trimmed.length !in MIN_LENGTH..MAX_LENGTH) {
+        // Convert to lowercase
+        val lowercased = trimmed.lowercase()
+
+        // Check if starts with number
+        if (lowercased.firstOrNull()?.isDigit() == true) {
             return null
         }
 
-        if (trimmed.firstOrNull()?.isDigit() == true) {
+        // Check for invalid characters
+        val containsInvalidChars = lowercased.any { !isCharacterAllowed(it) }
+        if (containsInvalidChars && invalidReplacement.isEmpty()) {
             return null
         }
 
-        val containsInvalidChars = trimmed.any { !isCharacterAllowed(it) }
-        if (containsInvalidChars) {
-            if (invalidReplacement.isEmpty()) return null
-
-            return trimmed.map { char ->
-                if (!isCharacterAllowed(char)) invalidReplacement else char
+        // Replace invalid characters if replacement provided
+        return if (containsInvalidChars) {
+            lowercased.map { char ->
+                when {
+                    !isCharacterAllowed(char) -> invalidReplacement
+                    char.isWhitespace() -> invalidReplacement
+                    else -> char
+                }
             }.joinToString("")
+        } else {
+            lowercased.replace("\\s+".toRegex(), invalidReplacement)
         }
 
-        return trimmed
     }
 
     /**
@@ -55,8 +64,6 @@ class ValidateUsernameUseCase {
     }
 
     companion object {
-        const val MIN_LENGTH = 3
-        const val MAX_LENGTH = 15
         private val ALLOWED_SPECIAL = setOf('.', '_')
     }
 }
