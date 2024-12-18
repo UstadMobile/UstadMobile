@@ -43,6 +43,7 @@ import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttend
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
@@ -898,7 +899,14 @@ fun AppNavHost(
                     GrantExternalAppPermissionRedirectViewModel(di, savedStateHandle)
                 }
             }
-
+            contentScene("/${ContentEntryDetailAttemptsPersonListViewModel.DEST_NAME}") { backStackEntry ->
+                ContentEntryDetailAttemptsPersonListScreen(
+                    appViewModel(
+                        backStackEntry, ContentEntryDetailAttemptsPersonListViewModel::class,
+                        ::ContentEntryDetailAttemptsPersonListViewModel
+                    )
+                )
+            }
             contentScene("/${ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME}") { backStackEntry ->
                 ContentEntryDetailAttemptsSessionListScreen(
                     appViewModel(
@@ -927,22 +935,6 @@ fun AppNavHost(
                 )
             }
 
-            contentScene("/${ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME}") { backStackEntry ->
-                ContentEntryDetailAttemptsSessionListScreen(
-                    appViewModel(
-                        backStackEntry, ContentEntryDetailAttemptsSessionListViewModel::class,
-                        ::ContentEntryDetailAttemptsSessionListViewModel
-                    )
-                )
-            }
-            contentScene("/${ContentEntryDetailAttemptsStatementListViewModel.DEST_NAME}") { backStackEntry ->
-                ContentEntryDetailAttemptsStatementListScreen(
-                    appViewModel(
-                        backStackEntry, ContentEntryDetailAttemptsStatementListViewModel::class,
-                        ::ContentEntryDetailAttemptsStatementListViewModel
-                    )
-                )
-            }
         }
     }
 }
