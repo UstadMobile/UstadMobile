@@ -19,20 +19,24 @@ expect abstract class XapiSessionEntityDao {
     @Insert
     abstract suspend fun insertAsync(xapiSessionEntity: XapiSessionEntity)
 
-    @Query("""
+    @Query(
+        """
         SELECT XapiSessionEntity.*
           FROM XapiSessionEntity
          WHERE XapiSessionEntity.xseUid = :uid
-    """)
+    """
+    )
     abstract suspend fun findByUidAsync(uid: Long): XapiSessionEntity?
 
-    @Query("""
+    @Query(
+        """
         UPDATE XapiSessionEntity
            SET xseCompleted = :completed,
                xseLastMod = :time
          WHERE xseUid = :xseUid
 
-    """)
+    """
+    )
     abstract suspend fun updateLatestAsComplete(
         completed: Boolean,
         time: Long,
@@ -46,12 +50,13 @@ expect abstract class XapiSessionEntityDao {
                 functionName = "findMostRecentSessionByActorAndActivity"
             ),
             HttpServerFunctionCall(
-                functionName ="findByUidAndPersonUidAsync",
+                functionName = "findByUidAndPersonUidAsync",
                 functionDao = ActorDao::class,
             ),
         )
     )
-    @Query("""
+    @Query(
+        """
         SELECT XapiSessionEntity.*
           FROM XapiSessionEntity
          WHERE XapiSessionEntity.xseRootActivityUid = :xseRootActivityUid
@@ -63,7 +68,8 @@ expect abstract class XapiSessionEntityDao {
                  FROM ActorEntity
                 WHERE ActorEntity.actorUid = :actorUid
                   AND ActorEntity.actorPersonUid = :accountPersonUid)     
-    """)
+    """
+    )
     abstract suspend fun findMostRecentSessionByActorAndActivity(
         accountPersonUid: Long,
         actorUid: Long,
@@ -73,52 +79,4 @@ expect abstract class XapiSessionEntityDao {
     ): XapiSessionEntity?
 
 
-
-/*
-
-    @Query("""
-    SELECT Person.*,
-       (SELECT COUNT(XapiSessionEntity.xseUid)
-		  FROM XapiSessionEntity
-		 WHERE XapiSessionEntity.xseAccountPersonUid = Person.personUid
-		   AND XapiSessionEntity.xseContentEntryUid = :contentEntryUid) AS numberAttempts
-	FROM Person
-    LEFT JOIN PersonPicture ON Person.personUid = PersonPicture.personPictureUid
-    GROUP BY Person.personUid
-    HAVING numberAttempts >= 1
-""")
-    abstract suspend fun getAttemptList(contentEntryUid: Long): PagingSource<Int, PersonAndAttemptInfo>
-*/
-
-    @Query("""
-    SELECT Person.*, PersonPicture.*,
-           (SELECT COUNT(XapiSessionEntity.xseUid)
-            FROM XapiSessionEntity
-            WHERE XapiSessionEntity.xseAccountPersonUid = Person.personUid
-              AND XapiSessionEntity.xseContentEntryUid = :contentEntryUid) AS numberAttempts
-    FROM Person
-    LEFT JOIN PersonPicture 
-                ON PersonPicture.personPictureUid = Person.personUid
-    WHERE numberAttempts >= 1
-               
-""")
-    abstract  fun getAttemptList(contentEntryUid: Long): PagingSource<Int, PersonAndAttemptInfo>
-
-    @Query("""
-    
-        SELECT XapiSessionEntity.*,
-         (SELECT EXISTS(
-                              SELECT *
-                                   FROM StatementEntity
-                                 WHERE XapiSessionEntity.xseRegistrationHi = StatementEntity.statementIdHi
-                                      AND XapiSessionEntity.xseRegistrationLo = StatementEntity.statementIdLo
-AND Statement.resultSuccess = successful
-                )) as sessionSuccesful
-               FROM XapiSessionEntity
-               WHERE XapiSessionEntity.xseContentEntryUid = :contentEntryUid
-               AND XapiSessionEntity.xseAccountPersonUid = :personUid
-
-""")
-    abstract  fun getSessionList(contentEntryUid: Long, personUid: Long): PagingSource<Int, StatementEntity>
 }
-//
