@@ -14,12 +14,12 @@ import java.nio.ByteBuffer
 data class DistributedHashEntries(
     val version: Byte = 1,
     val httpPort: Int,
-    val entries: List<DistributedHashEntry>
+    val entries: List<DistributedHashCacheEntry>
 ) {
 
     val size: Int
         //1 byte version, 4 bytes port, 4 bytes for number of entries, and then for each entry
-        get() = 1 + 4 + 4 + (entries.size * DistributedHashEntry.SIZE)
+        get() = 1 + 4 + 4 + (entries.size * DistributedHashCacheEntry.SIZE)
 
     fun toBytes(): ByteArray {
         val buffer = ByteBuffer.allocate(size)
@@ -42,9 +42,9 @@ data class DistributedHashEntries(
             val version = buffer.get()
             val httpPort = buffer.int
             val numEntries = buffer.int
-            val entriesList = mutableListOf<DistributedHashEntry>()
+            val entriesList = mutableListOf<DistributedHashCacheEntry>()
             for(i in 0 until numEntries) {
-                entriesList.add(DistributedHashEntry.readBytes(buffer))
+                entriesList.add(DistributedHashCacheEntry.readBytes(buffer))
             }
 
             return DistributedHashEntries(version, httpPort, entriesList)

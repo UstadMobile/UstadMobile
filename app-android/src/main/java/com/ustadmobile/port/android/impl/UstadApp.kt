@@ -221,6 +221,7 @@ import com.ustadmobile.libcache.db.MIGRATE_8_9
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.UstadDbDiscoveryListener
 import com.ustadmobile.libcache.db.addCacheDbMigrations
+import com.ustadmobile.libcache.distributed.DistributedCacheHashtable
 import com.ustadmobile.libcache.distributed.DistributedCacheNsdAndroid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -1198,10 +1199,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<DistributedCacheHashtable>() with singleton {
+            DistributedCacheHashtable(
+                cacheDb = instance(),
+                httpPort = instance<EmbeddedHttpServer>().listeningPort,
+                logger = NapierLoggingAdapter(),
+            )
+        }
+
         bind<DistributedCacheNsdAndroid>() with singleton {
             DistributedCacheNsdAndroid(
                 context = applicationContext,
-                port = 4242,
+                port = instance<DistributedCacheHashtable>().port,
                 logger = NapierLoggingAdapter(),
                 listener = UstadDbDiscoveryListener(
                     db = instance(),

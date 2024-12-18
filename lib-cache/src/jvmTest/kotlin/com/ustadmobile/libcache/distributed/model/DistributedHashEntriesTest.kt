@@ -10,7 +10,7 @@ class DistributedHashEntriesTest {
         val entries = DistributedHashEntries(
             httpPort = 4243,
             entries = listOf(
-                DistributedHashEntry(42L, 43L, 44L)
+                DistributedHashCacheEntry(42L, 43L, 44L)
             )
         )
 

@@ -18,13 +18,7 @@ class DistributedCacheNsdAndroid(
      */
     private var mServiceName: String? = SERVICE_NAME
 
-    /**
-     * host will be null if info not yet resolved
-     */
-    val NsdServiceInfo.neighborUrl: String?
-        get() = host?.let { "http://${it.hostName}:${port}/" }
-
-    val serviceInfo = NsdServiceInfo().apply {
+    private val serviceInfo = NsdServiceInfo().apply {
         // The name is subject to change based on conflicts
         // with other services advertised on the same network.
         serviceName = SERVICE_NAME
@@ -75,9 +69,9 @@ class DistributedCacheNsdAndroid(
                 return
             }
 
-            val neighborUrlVal = serviceInfo.neighborUrl
-            if(neighborUrlVal != null) {
-                listener.onNeighborDiscovered(neighborUrlVal)
+            val neighborHostAddr = serviceInfo.host?.hostAddress
+            if(neighborHostAddr != null) {
+                listener.onNeighborDiscovered(neighborHostAddr, serviceInfo.port)
             }else {
                 logger.e(DCACHE_LOGTAG, "Error: could not get neighborUrl. Url should not " +
                         "have been null after service resolved")
@@ -123,9 +117,9 @@ class DistributedCacheNsdAndroid(
             // When the network service is no longer available.
             // Internal bookkeeping code goes here.
             logger.e(DCACHE_LOGTAG, "service lost: $service")
-            val neighborUrlVal = service.neighborUrl
-            if(neighborUrlVal != null) {
-                listener.onNeighborLost(neighborUrlVal)
+            val neighborIpAddr = service.host?.hostAddress
+            if(neighborIpAddr != null) {
+                listener.onNeighborLost(neighborIpAddr, service.port)
             }else {
                 logger.d(DCACHE_LOGTAG, "Service lost, but neighbor url is null")
             }

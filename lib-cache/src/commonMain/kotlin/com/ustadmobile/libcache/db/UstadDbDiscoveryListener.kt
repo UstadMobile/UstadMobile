@@ -14,12 +14,12 @@ class UstadDbDiscoveryListener(
     private val xxStringHasher: XXStringHasher,
 ): DistributedCacheNeighborDiscoveryListener {
 
-    override fun onNeighborDiscovered(neighborUrl: String) {
+    override fun onNeighborDiscovered(neighborIp: String, neighborUdpPort: Int) {
         scope.launch {
             db.neighborCacheDao.upsertAsync(
                 NeighborCache(
-                    neighborUid = xxStringHasher.hash(neighborUrl),
-                    neighborUrl = neighborUrl,
+                    neighborUid = xxStringHasher.hash("$neighborIp:$neighborUdpPort"),
+                    neighborIp = neighborIp,
                     neighborDiscovered = systemTimeInMillis(),
                     neighborPingTime = 0,
                 )
@@ -27,10 +27,10 @@ class UstadDbDiscoveryListener(
         }
     }
 
-    override fun onNeighborLost(neighborUrl: String) {
+    override fun onNeighborLost(neighborIp: String, neighborUdpPort: Int) {
         scope.launch {
             db.neighborCacheDao.deleteAsync(
-                neighborUid = xxStringHasher.hash(neighborUrl),
+                neighborUid = xxStringHasher.hash("$neighborIp:$neighborUdpPort"),
             )
         }
     }

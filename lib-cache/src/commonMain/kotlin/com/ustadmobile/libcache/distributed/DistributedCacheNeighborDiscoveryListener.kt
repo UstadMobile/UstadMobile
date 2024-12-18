@@ -2,8 +2,8 @@ package com.ustadmobile.libcache.distributed
 
 interface DistributedCacheNeighborDiscoveryListener {
 
-    fun onNeighborDiscovered(neighborUrl: String)
+    fun onNeighborDiscovered(neighborIp: String, neighborUdpPort: Int)
 
-    fun onNeighborLost(neighborUrl: String)
+    fun onNeighborLost(neighborIp: String, neighborUdpPort: Int)
 
 }

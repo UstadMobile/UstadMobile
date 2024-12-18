@@ -11,7 +11,7 @@ class ListLocalSharingNeighborsUseCaseCommonJvm(
     override fun invoke(): Flow<List<ListLocalSharingNeighborsUseCase.LocalSharingNeighbor>> {
         return ustadCacheDb.neighborCacheDao.allNeighborsAsFlow().map { neighborList ->
             neighborList.map {
-                ListLocalSharingNeighborsUseCase.LocalSharingNeighbor(it.neighborUrl)
+                ListLocalSharingNeighborsUseCase.LocalSharingNeighbor(it.neighborIp)
             }
         }
     }
