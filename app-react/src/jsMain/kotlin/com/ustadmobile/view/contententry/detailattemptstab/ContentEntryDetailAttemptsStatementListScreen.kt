@@ -92,8 +92,6 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                         items = infiniteQueryResult,
                         key = { it.statementEntity?.statementLct.toString() }
                     ) { attemptsStatementListItems ->
-
-
                         ListItem.create {
                             Stack {
                                 direction = responsive(StackDirection.column)

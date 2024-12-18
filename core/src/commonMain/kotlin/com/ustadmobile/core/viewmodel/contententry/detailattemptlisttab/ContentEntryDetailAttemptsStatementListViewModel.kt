@@ -2,27 +2,72 @@ package com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab
 
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
-import com.ustadmobile.lib.db.entities.xapi.StatementEntity
+import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 
 data class ContentEntryDetailAttemptsStatementListUiState(
-    val attemptsStatementList: () -> PagingSource<Int, StatementEntity> = { EmptyPagingSource() },
+    val attemptsStatementList: () -> PagingSource<Int, StatementEntityAndVerb> = { EmptyPagingSource() },
 )
 
 class ContentEntryDetailAttemptsStatementListViewModel(
-    di: DI, savedStateHandle: UstadSavedStateHandle, destinationName: String = DEST_NAME, )
-    : UstadListViewModel<ContentEntryDetailAttemptsStatementListUiState>(
-    di, savedStateHandle, ContentEntryDetailAttemptsStatementListUiState(), destinationName) {
+    di: DI, savedStateHandle: UstadSavedStateHandle, destinationName: String = DEST_NAME,
+) : UstadListViewModel<ContentEntryDetailAttemptsStatementListUiState>(
+    di, savedStateHandle, ContentEntryDetailAttemptsStatementListUiState(), destinationName
+) {
 
-    protected val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
+    private val argPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
+    private val argContextRegistrationIdHi = savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_HI]?.toLong() ?: 0
+    private val argContextRegistrationIdLo = savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_LO]?.toLong() ?: 0
 
+    private fun getAttemptsStatementListAsPagingSource(
+        contextRegistrationHi: Long,
+        contextRegistrationLo: Long,
+
+
+        ): PagingSource<Int, StatementEntityAndVerb> {
+        return activeRepo.statementDao().findStatementsBySession(
+            contextRegistrationHi,contextRegistrationLo
+        )
+    }
+
+    private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementEntityAndVerb> =
+        {
+            getAttemptsStatementListAsPagingSource(
+                contextRegistrationHi = argContextRegistrationIdHi,
+                contextRegistrationLo =  argContextRegistrationIdLo
+            )
+        }
+
+    init {
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                activeRepo.personDao().getNamesByUid(argPersonUid).collect { personNames ->
+                    _uiState.update {
+                        it.copy(attemptsStatementList = attemptsStatementListPagingSource)
+                    }
+                    _appUiState.update { prev ->
+                        prev.copy(
+                            title = "${personNames?.firstNames} ${personNames?.lastName}"
+                        )
+                    }
+                }
+            }
+
+        }
+    }
 
     companion object {
         const val DEST_NAME = "ContentEntryDetailAttemptsStatementList"
+
+
     }
 
     override fun onUpdateSearchResult(searchText: String) {
