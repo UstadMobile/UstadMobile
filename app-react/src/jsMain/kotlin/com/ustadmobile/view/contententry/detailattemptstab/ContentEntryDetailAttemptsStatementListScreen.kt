@@ -7,13 +7,10 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
-import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
-import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -22,7 +19,6 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.datetime.TimeZone
 import mui.icons.material.Check
 import mui.icons.material.Star
 import mui.icons.material.Timer
@@ -115,40 +111,14 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                 }
                                 ListItemButton {
                                     ListItemIcon {
-                                        when {
-                                            attemptsStatementListItems?.statementEntity?.resultScoreRaw != null || attemptsStatementListItems?.statementEntity?.extensionProgress != null -> {
-                                                Star()
-
-                                            }
-
-                                            else -> {
-                                                UstadBlankIcon()
-
-                                            }
-                                        }
+                                        Timer
                                         sx {
                                             padding = theme.spacing(1, 1, 1, 5)
                                         }
                                     }
                                     ListItemText {
                                         secondary = ReactNode(
-                                            if (attemptsStatementListItems?.statementEntity?.extensionProgress == null) {
-                                                if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
-                                                    "${
-                                                        attemptsStatementListItems?.statementEntity?.resultScoreRaw?.toInt()
-                                                            .toString()
-                                                    }/${
-                                                        attemptsStatementListItems?.statementEntity?.resultScoreMax?.toInt()
-                                                            .toString()
-                                                    } Score"
-                                                } else {
-                                                    ""
-                                                }
-
-                                            } else {
-                                                "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
-                                            }
-                                        )
+                                            "${attemptsStatementListItems?.statementEntity?.timestamp}")
                                     }
                                 }
 
@@ -157,12 +127,9 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                         when {
                                             attemptsStatementListItems?.statementEntity?.resultScoreRaw != null || attemptsStatementListItems?.statementEntity?.extensionProgress != null -> {
                                                 Star()
-
                                             }
-
                                             else -> {
                                                 UstadBlankIcon()
-
                                             }
                                         }
                                         sx {
@@ -174,18 +141,18 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                             if (attemptsStatementListItems?.statementEntity?.extensionProgress == null) {
                                                 if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
                                                     "${
-                                                        attemptsStatementListItems?.statementEntity?.resultScoreRaw?.toInt()
+                                                        attemptsStatementListItems.statementEntity?.resultScoreRaw?.toInt()
                                                             .toString()
                                                     }/${
-                                                        attemptsStatementListItems?.statementEntity?.resultScoreMax?.toInt()
+                                                        attemptsStatementListItems.statementEntity?.resultScoreMax?.toInt()
                                                             .toString()
                                                     } Score"
                                                 } else {
-                                                    ""
+                                                    "No Score"
                                                 }
 
                                             } else {
-                                                "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
+                                                "${attemptsStatementListItems.statementEntity?.extensionProgress} %Completion"
                                             }
                                         )
                                     }
