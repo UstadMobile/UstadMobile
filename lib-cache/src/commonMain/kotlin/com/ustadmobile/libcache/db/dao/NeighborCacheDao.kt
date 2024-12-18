@@ -14,6 +14,10 @@ expect abstract class NeighborCacheDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(neighborCache: NeighborCache)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun upsert(neighborCache: NeighborCache)
+
+
     @Query("""
         DELETE FROM NeighborCache
          WHERE neighborUid = :neighborUid
@@ -25,6 +29,12 @@ expect abstract class NeighborCacheDao {
           FROM NeighborCache
     """)
     abstract fun allNeighborsAsFlow(): Flow<List<NeighborCache>>
+
+    @Query("""
+        SELECT NeighborCache.*
+          FROM NeighborCache
+    """)
+    abstract fun allNeighbors(): List<NeighborCache>
 
     @Query("""
         UPDATE NeighborCache

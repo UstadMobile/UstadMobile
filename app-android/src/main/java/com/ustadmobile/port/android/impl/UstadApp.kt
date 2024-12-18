@@ -1204,6 +1204,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 cacheDb = instance(),
                 httpPort = instance<EmbeddedHttpServer>().listeningPort,
                 logger = NapierLoggingAdapter(),
+                xxStringHasher = instance(),
             )
         }
 

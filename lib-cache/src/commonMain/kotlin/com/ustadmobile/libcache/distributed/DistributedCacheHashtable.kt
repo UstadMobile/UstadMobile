@@ -1,5 +1,7 @@
 package com.ustadmobile.libcache.distributed
 import com.ustadmobile.door.ext.concurrentSafeMapOf
+import com.ustadmobile.door.ext.withDoorTransaction
+import com.ustadmobile.door.room.InvalidationTrackerObserver
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.NeighborCache
 import com.ustadmobile.libcache.db.entities.NeighborCacheEntry
@@ -50,6 +52,38 @@ class DistributedCacheHashtable(
 
     private val logPrefix = "DistributedCacheHashtable($port)"
 
+    private fun DatagramSocket.sendDistributedHashEntries(
+        urls: List<String>,
+        neighborCache: NeighborCache,
+        neighborAddress: InetAddress = InetAddress.getByName(neighborCache.neighborIp)
+    ) {
+        logger.d(DCACHE_LOGTAG,
+            "$logPrefix Sending ${urls.size} url hash(es) to " +
+                    "${neighborCache.neighborIp}:${neighborCache.neighborUdpPort}"
+        )
+
+        val entriesPerPacket = DistributedHashEntries.numEntriesFor(mtu)
+
+        urls.chunked(entriesPerPacket).forEach { urlList ->
+            val hashEntries = DistributedHashEntries(
+                httpPort = httpPort,
+                entries = urlList.map {
+                    DistributedHashCacheEntry(
+                        urlHash = xxStringHasher.hash(it),
+                        md5Hi = 0L,
+                        md5Lo = 0L,
+                    )
+                }
+            )
+            val hashEntryBytes = hashEntries.toBytes()
+            val packet = DatagramPacket(
+                hashEntryBytes, hashEntryBytes.size,
+                neighborAddress, neighborCache.neighborUdpPort
+            )
+            send(packet)
+        }
+    }
+
     /**
      * Runnable that will send the hashes of everything we have to the neighbor; runs when neighbor
      * is discovered
@@ -62,7 +96,7 @@ class DistributedCacheHashtable(
 
             var urls: List<String>
             var offset = 0
-            val entriesPerPacket = DistributedHashEntries.numEntriesFor(mtu)
+
             val neighborAddress = InetAddress.getByName(neighborCache.neighborIp)
 
             while(
@@ -70,29 +104,7 @@ class DistributedCacheHashtable(
                     offset = offset, limit  = DATABASE_CHUNK_SIZE
                 ).also { urls = it }.isNotEmpty()
             ) {
-                logger.d(DCACHE_LOGTAG,
-                    "$logPrefix Sending ${urls.size} url hash(es) to " +
-                            "${neighborCache.neighborIp}:${neighborCache.neighborUdpPort}"
-                )
-
-                urls.chunked(entriesPerPacket).forEach { urlList ->
-                    val hashEntries = DistributedHashEntries(
-                        httpPort = httpPort,
-                        entries = urlList.map {
-                            DistributedHashCacheEntry(
-                                urlHash = xxStringHasher.hash(it),
-                                md5Hi = 0L,
-                                md5Lo = 0L,
-                            )
-                        }
-                    )
-                    val hashEntryBytes = hashEntries.toBytes()
-                    val packet = DatagramPacket(
-                        hashEntryBytes, hashEntryBytes.size,
-                        neighborAddress, neighborCache.neighborUdpPort
-                    )
-                    datagramSocket.send(packet)
-                }
+                datagramSocket.sendDistributedHashEntries(urls, neighborCache, neighborAddress)
 
                 offset += DATABASE_CHUNK_SIZE
             }
@@ -141,6 +153,39 @@ class DistributedCacheHashtable(
         }
     }
 
+    inner class SendNewCacheEntriesRunnable: Runnable {
+        override fun run() {
+            logger.d(DCACHE_LOGTAG, "SendNewCacheEntriesRunnable: Looking for new cache entries to send out")
+            val (newEntries, allNodes) = cacheDb.withDoorTransaction {
+                val entries = cacheDb.newCacheEntryDao.findAllNewEntries()
+                val nodes = cacheDb.neighborCacheDao.allNeighbors()
+
+                Pair(entries, nodes)
+            }
+
+            logger.d(DCACHE_LOGTAG,
+                "SendNewCacheEntriesRunnable: sending ${newEntries.size} new entry hashes" +
+                    " to ${allNodes.size} nodes "
+            )
+
+            allNodes.forEach { neighbor ->
+                datagramSocket.sendDistributedHashEntries(
+                    urls = newEntries.map { it.nceUrl },
+                    neighborCache = neighbor,
+                )
+            }
+        }
+    }
+
+
+    private val newCacheEntryInvalidationCallback = object: InvalidationTrackerObserver(arrayOf("NewCacheEntry")) {
+
+        override fun onInvalidated(tables: Set<String>) {
+            executorService.submit(SendNewCacheEntriesRunnable())
+        }
+
+    }
+
     init {
         logger.i(DCACHE_LOGTAG, "$logPrefix initialized on udp port $port")
 
@@ -158,6 +203,8 @@ class DistributedCacheHashtable(
                 }
             }
         }
+
+        cacheDb.invalidationTracker.addObserver(newCacheEntryInvalidationCallback)
         executorService.submit(ReceiveNeighborHashesRunnable())
     }
 
@@ -170,6 +217,7 @@ class DistributedCacheHashtable(
 
 
     override fun close() {
+        cacheDb.invalidationTracker.removeObserver(newCacheEntryInvalidationCallback)
         executorService.shutdown()
         scope.cancel()
         datagramSocket.close()
