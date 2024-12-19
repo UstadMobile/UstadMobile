@@ -52,7 +52,7 @@ fun PersonAccountEditScreen(
 
         if (uiState.usernameVisible){
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth().testTag("iusername"),
+                modifier = Modifier.fillMaxWidth().testTag("username"),
                 value = uiState.personAccount?.username ?: "",
                 maxLines = 1,
                 label = {
