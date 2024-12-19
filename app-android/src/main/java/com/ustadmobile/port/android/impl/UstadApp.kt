@@ -3,14 +3,13 @@ package com.ustadmobile.port.android.impl
 import android.app.Application
 import android.content.Context
 import android.content.res.AssetManager
-import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
-import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
@@ -35,6 +34,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
@@ -111,9 +111,13 @@ import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
+import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.domain.storage.CachePathsProviderAndroid
 import com.ustadmobile.core.domain.storage.GetAndroidSdCardDirUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
@@ -145,10 +149,10 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -157,14 +161,14 @@ import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
-import com.ustadmobile.core.impl.config.ApiUrlConfig
-import com.ustadmobile.core.impl.config.AppConfig
-import com.ustadmobile.core.impl.config.BundleAppConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
+import com.ustadmobile.core.impl.config.BundleBuildConfig
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.LocaleSettingDelegateAndroid
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.APPCONFIG_KEY_PRESET_LANG
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
+import com.ustadmobile.core.impl.config.UstadBuildConfig
 import com.ustadmobile.core.impl.nav.NavCommandExecutionTracker
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
@@ -200,6 +204,30 @@ import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 import rawhttp.core.RawHttp
+import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
+import com.ustadmobile.centralappconfigdb.repo.CentralAppConfigDbRepository
+import com.toughra.ustadmobile.BuildConfig
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight.Companion.CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME
+import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.core.domain.localsharing.EnableLocalSharingUseCase
+import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentAvailabilityUseCase
+import com.ustadmobile.core.domain.localsharing.checkcontentavailability.UstadCacheCheckContentAvailabilityUseCase
+import com.ustadmobile.core.domain.localsharing.listneighbors.ListLocalSharingNeighborsUseCase
+import com.ustadmobile.core.domain.localsharing.listneighbors.ListLocalSharingNeighborsUseCaseCommonJvm
+import com.ustadmobile.libcache.db.ClearNeighborsCallback
+import com.ustadmobile.libcache.db.MIGRATE_8_9
+import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.db.UstadDbDiscoveryListener
+import com.ustadmobile.libcache.db.addCacheDbMigrations
+import com.ustadmobile.libcache.distributed.DistributedCacheHashtable
+import com.ustadmobile.libcache.distributed.DistributedCacheNsdAndroid
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
@@ -255,12 +283,24 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             }
         }
 
+        bind<ShowSocialWarningUseCase>() with singleton {
+            ShowSocialWarningUseCase(
+                settings = instance()
+            )
+        }
+
+        bind<DismissSocialWarningUseCase>() with singleton {
+            DismissSocialWarningUseCase(
+                settings = instance()
+            )
+        }
+
         bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
             File(applicationContext.filesDir, "tmp")
         }
 
-        bind<AppConfig>() with singleton {
-            BundleAppConfig(appMetaData)
+        bind<UstadBuildConfig>() with singleton {
+            BundleBuildConfig(appMetaData)
         }
 
         bind<Settings>() with singleton {
@@ -269,7 +309,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<NodeIdAndAuth>() with scoped(EndpointScope.Default).singleton {
+        bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
             val settings: Settings = instance()
             val contextIdentifier: String = sanitizeDbNameFromUrl(context.url)
             settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
@@ -287,11 +327,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<ApiUrlConfig>() with singleton {
-            ApiUrlConfig(
-                presetApiUrl = applicationContext.appMetaData?.getString(AppConfig.KEY_API_URL)
-                    ?.ifBlank { null }
-            )
+        bind<SystemUrlConfig>() with singleton {
+            SystemUrlConfig.fromUstadBuildConfig(instance())
         }
 
         bind<Json>() with singleton {
@@ -330,13 +367,36 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             UstadAccountManager(settings = instance(), di = di)
         }
 
-        bind<DbAndObservers>() with scoped(EndpointScope.Default).singleton {
+        bind<CentralAppConfigDb>() with singleton {
+            CentralAppConfigDb(AndroidSqliteDriver(
+                CentralAppConfigDb.Schema, applicationContext, CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME)
+            )
+        }
+
+        bind<CentralAppConfigDbDataSource>() with singleton {
+            val systemUrlConfig:SystemUrlConfig = instance()
+
+            CentralAppConfigDbRepository(
+                local = CentralAppConfigDbDataSourceSqlDelight(
+                    centralAppConfigDb = instance(),
+                    xxStringHasher = instance(),
+                ),
+                remote = CentralAppConfigDbDataSourceHttp(
+                    url = UrlKmp(systemUrlConfig.systemBaseUrl)
+                        .resolve("api/${CentralAppConfigDbDataSource.PATH}/")
+                        .toString(),
+                    httpClient = instance()
+                )
+            )
+        }
+
+
+        bind<DbAndObservers>() with scoped(LearningSpaceScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
 
 
             val nodeIdAndAuth: NodeIdAndAuth = instance()
 
-            Log.i("MigrateIssue", "Creating database name=$dbName")
             val db = DatabaseBuilder.databaseBuilder(
                 context = applicationContext,
                 dbClass = UmAppDatabase::class,
@@ -352,7 +412,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(MIGRATION_169_170_CLIENT)
                 .build()
 
-            Log.i("MigrateIssue", "Database built: name=$dbName")
 
             val cache: UstadCache = instance()
 
@@ -365,23 +424,32 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
+        bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(LearningSpaceScope.Default).singleton {
             instance<DbAndObservers>().db
         }
 
-        bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
-            val nodeIdAndAuth: NodeIdAndAuth = instance()
-            val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-            db.asRepository(
-                RepositoryConfig.repositoryConfig(
-                    context = applicationContext,
-                    endpoint = "${context.url}UmAppDatabase/",
-                    nodeId = nodeIdAndAuth.nodeId,
-                    auth = nodeIdAndAuth.auth,
-                    httpClient = instance(),
-                    okHttpClient = instance(),
-                    json = instance()
+        bind<UmAppDataLayer>() with scoped(LearningSpaceScope.Default).singleton {
+            val db: UmAppDatabase = instance(tag = DoorTag.TAG_DB)
+            val repo: UmAppDatabase? = if(!context.isLocal) {
+                val nodeIdAndAuth: NodeIdAndAuth = instance()
+                db.asRepository(
+                    RepositoryConfig.repositoryConfig(
+                        context = applicationContext,
+                        endpoint = "${context.url}UmAppDatabase/",
+                        nodeId = nodeIdAndAuth.nodeId,
+                        auth = nodeIdAndAuth.auth,
+                        httpClient = instance(),
+                        okHttpClient = instance(),
+                        json = instance()
+                    )
                 )
+            }else {
+                null
+            }
+
+            UmAppDataLayer(
+                localDb  = db,
+                repository = repo,
             )
         }
 
@@ -401,6 +469,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<UstadCacheDb>() with singleton {
+            DatabaseBuilder.databaseBuilder(
+                context = applicationContext,
+                dbClass = UstadCacheDb::class,
+                dbName = UstadCacheBuilder.DEFAULT_DB_NAME,
+                nodeId = 1L
+            ).addCacheDbMigrations()
+                .addMigrations(MIGRATE_8_9)
+                .addCallback(ClearNeighborsCallback())
+                .build()
+        }
+
         bind<UstadCache>() with singleton {
             val httpCacheDir =  applicationContext.httpPersistentFilesDir
             val storagePath = Path(httpCacheDir.absolutePath)
@@ -408,6 +488,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
             UstadCacheBuilder(
                 appContext = applicationContext,
+                db = instance(),
                 storagePath = storagePath,
                 logger = NapierLoggingAdapter(),
                 sizeLimit = { 100_000_000L },
@@ -415,7 +496,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             ).build()
         }
 
-        bind<ContentImportersManager>() with scoped(EndpointScope.Default).singleton {
+        bind<ContentImportersManager>() with scoped(LearningSpaceScope.Default).singleton {
             val cache: UstadCache = instance()
             val uriHelper: UriHelper = instance()
             val xml: XML = instance()
@@ -431,7 +512,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 buildList {
                     add(
                         EpubContentImporterCommonJvm(
-                            endpoint = context,
+                            learningSpace = context,
                             cache = cache,
                             db = db,
                             uriHelper = uriHelper,
@@ -447,7 +528,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     )
                     add(
                         XapiZipContentImporter(
-                            endpoint = context,
+                            learningSpace = context,
                             db = db,
                             cache = cache,
                             uriHelper = uriHelper,
@@ -461,7 +542,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
                     add(
                         H5PContentImporter(
-                            endpoint = context,
+                            learningSpace = context,
                             db = db,
                             cache = cache,
                             uriHelper = uriHelper,
@@ -479,7 +560,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
                     add(
                         VideoContentImporterCommonJvm(
-                            endpoint = context,
+                            learningSpace = context,
                             validateVideoFileUseCase = instance(),
                             uriHelper = uriHelper,
                             cache = cache,
@@ -497,7 +578,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
                     add(
                         PdfContentImporterAndroid(
-                            endpoint = context,
+                            learningSpace = context,
                             cache = cache,
                             uriHelper = uriHelper,
                             db = db,
@@ -537,7 +618,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             }
         }
 
-        bind<AuthManager>() with scoped(EndpointScope.Default).singleton {
+        bind<AuthManager>() with scoped(LearningSpaceScope.Default).singleton {
             AuthManager(context, di)
         }
 
@@ -553,10 +634,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
 
 
-        bind<SaveLocalUrisAsBlobsUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<SaveLocalUrisAsBlobsUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             val rootTmpDir: File = instance(tag = DiTag.TAG_TMP_DIR)
             SaveLocalUrisAsBlobsUseCaseJvm(
-                endpoint = context,
+                learningSpace = context,
                 cache = instance(),
                 uriHelper = instance(),
                 tmpDir = Path(rootTmpDir.absolutePath, "savelocaluriaslblobtmp"),
@@ -569,38 +650,41 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             FileMimeTypeHelperImpl()
         }
 
-        bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<SaveLocalUriAsBlobAndManifestUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             SaveLocalUriAsBlobAndManifestUseCaseJvm(
                 saveLocalUrisAsBlobsUseCase = instance(),
                 mimeTypeHelper = instance(),
             )
         }
 
-        bind<EnqueueBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<EnqueueBlobUploadClientUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             EnqueueBlobUploadClientUseCaseAndroid(
                 appContext = applicationContext,
-                endpoint = context,
+                learningSpace = context,
                 db = on(context).instance(tag = DoorTag.TAG_DB),
                 cache = instance(),
             )
         }
 
-        bind<BlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<BlobUploadClientUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            val repo = instance<UmAppDataLayer>().repository
+                ?: throw IllegalStateException("Cannot BlobUploadClientUseCase for local endpoint")
+
             BlobUploadClientUseCaseJvm(
                 chunkedUploadUseCase = on(context).instance(),
                 httpClient = instance(),
                 httpCache = instance(),
                 json = instance(),
-                db = on(context).instance(tag = DoorTag.TAG_DB),
-                repo = on(context).instance(tag = DoorTag.TAG_REPO),
-                endpoint = context,
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = repo,
+                learningSpace = context,
             )
         }
 
-        bind<EnqueueSavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<EnqueueSavePictureUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             EnqueueSavePictureUseCaseAndroid(
                 appContext = applicationContext,
-                endpoint = context,
+                learningSpace = context,
             )
         }
 
@@ -616,19 +700,19 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<SavePictureUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<SavePictureUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             SavePictureUseCase(
-                saveLocalUrisAsBlobUseCase = on(context).instance(),
-                db = on(context).instance(tag = DoorTag.TAG_DB),
-                repo = on(context).instance(tag = DoorTag.TAG_REPO),
-                enqueueBlobUploadClientUseCase = on(context).instance(),
+                saveLocalUrisAsBlobUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance<UmAppDataLayer>().repository,
+                enqueueBlobUploadClientUseCase = takeIf { !context.isLocal }?.instance(),
                 compressImageUseCase = instance(),
                 deleteUrisUseCase = instance(),
                 getStoragePathForUrlUseCase = instance(),
             )
         }
 
-        bind<UpdateFailedTransferJobUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<UpdateFailedTransferJobUseCase>() with scoped(LearningSpaceScope.Default).provider {
             UpdateFailedTransferJobUseCase(
                 db = instance(tag = DoorTag.TAG_DB)
             )
@@ -650,33 +734,33 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             instance<ChunkedUploadClientUseCaseKtorImpl>()
         }
 
-        bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<ContentEntryGetMetaDataFromUriUseCase>() with scoped(LearningSpaceScope.Default).provider {
             ContentEntryGetMetaDataFromUriUseCaseCommonJvm(
                 importersManager = instance()
             )
         }
 
-        bind<EnqueueContentEntryImportUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<EnqueueContentEntryImportUseCase>() with scoped(LearningSpaceScope.Default).provider {
             EnqueueImportContentEntryUseCaseAndroid(
                 db = instance(tag = DoorTag.TAG_DB),
                 appContext = applicationContext,
-                endpoint = context,
+                learningSpace = context,
                 enqueueRemoteImport = EnqueueImportContentEntryUseCaseRemote(
-                    endpoint = context,
+                    learningSpace = context,
                     httpClient = instance(),
                     json = instance(),
                 )
             )
         }
 
-        bind<CancelImportContentEntryUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<CancelImportContentEntryUseCase>() with scoped(LearningSpaceScope.Default).provider {
             CancelImportContentEntryUseCaseAndroid(
                 appContext = applicationContext,
                 endpoint = context,
             )
         }
 
-        bind<ImportContentEntryUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<ImportContentEntryUseCase>() with scoped(LearningSpaceScope.Default).provider {
             ImportContentEntryUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 importersManager = instance(),
@@ -687,30 +771,30 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<CreateRetentionLocksForManifestUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<CreateRetentionLocksForManifestUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             CreateRetentionLocksForManifestUseCaseCommonJvm(
                 cache = instance()
             )
         }
 
-        bind<BlobDownloadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<BlobDownloadClientUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             BlobDownloadClientUseCaseCommonJvm(
                 okHttpClient = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().requireRepository(),
                 httpCache = instance(),
             )
         }
 
-        bind<EnqueueBlobDownloadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<EnqueueBlobDownloadClientUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             EnqueueBlobDownloadClientUseCaseAndroid(
                 appContext = applicationContext,
-                endpoint = context,
+                learningSpace = context,
                 db = instance(tag = DoorTag.TAG_DB)
             )
         }
 
-        bind<ContentManifestDownloadUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<ContentManifestDownloadUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             val cachePathsProvider: CachePathsProvider = instance()
 
             ContentManifestDownloadUseCase(
@@ -722,18 +806,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<EnqueueContentManifestDownloadJobUseCaseAndroid>() with scoped(EndpointScope.Default).singleton {
+        bind<EnqueueContentManifestDownloadJobUseCaseAndroid>() with scoped(LearningSpaceScope.Default).singleton {
             EnqueueContentManifestDownloadJobUseCaseAndroid(
                 appContext = applicationContext,
-                endpoint = context,
+                learningSpace = context,
                 db = instance(tag = DoorTag.TAG_DB),
             )
         }
 
-        bind<ContentEntryVersionServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<ContentEntryVersionServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             ContentEntryVersionServerUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 okHttpClient = instance(),
                 json = instance(),
                 onlyIfCached = false,
@@ -752,29 +836,29 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             GetVersionUseCaseAndroid(applicationContext)
         }
 
-        bind<SetPasswordUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<SetPasswordUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             SetPasswordUseCaseCommonJvm(
                 authManager = instance()
             )
         }
 
-        bind<ResolveXapiLaunchHrefUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<ResolveXapiLaunchHrefUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             ResolveXapiLaunchHrefUseCase(
-                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
                 httpClient = instance(),
                 json = instance<XapiJson>().json,
                 xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
-                endpoint = context,
+                learningSpace = context,
                 accountManager = instance(),
                 getApiUrlUseCase = instance(),
                 resumeOrStartXapiSessionUseCase = instance(),
             )
         }
 
-        bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<ResumeOrStartXapiSessionUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             ResumeOrStartXapiSessionUseCaseLocal(
                 activeDb = instance(tag = DoorTag.TAG_DB),
-                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                activeRepo = instance<UmAppDataLayer>().repository,
                 xxStringHasher= instance(),
             )
         }
@@ -793,7 +877,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<XapiHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<XapiHttpServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             XapiHttpServerUseCase(
                 statementResource = instance(),
                 retrieveXapiStateUseCase = instance(),
@@ -803,64 +887,64 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 h5PUserDataEndpointUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 xapiJson = instance(),
-                endpoint = context,
+                learningSpace = context,
                 xxStringHasher = instance(),
             )
         }
 
-        bind<H5PUserDataEndpointUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<H5PUserDataEndpointUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             H5PUserDataEndpointUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instanceOrNull(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
                 xapiJson = instance(),
             )
         }
 
-        bind<StoreXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<StoreXapiStateUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             StoreXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 xapiJson = instance(),
                 xxHasher64Factory = instance(),
                 xxStringHasher = instance(),
-                endpoint = context,
+                learningSpace = context,
             )
         }
 
-        bind<RetrieveXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<RetrieveXapiStateUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             RetrieveXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 xapiJson = instance(),
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
             )
         }
 
-        bind<ListXapiStateIdsUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<ListXapiStateIdsUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             ListXapiStateIdsUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 xxStringHasher = instance(),
             )
         }
 
-        bind<DeleteXapiStateUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<DeleteXapiStateUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             DeleteXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 xxStringHasher = instance(),
                 xxHasher64Factory = instance(),
-                endpoint = context,
+                learningSpace = context,
             )
         }
 
-        bind<GetApiUrlUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<GetApiUrlUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             GetApiUrlUseCaseEmbeddedServer(
                 embeddedServer = instance(),
-                endpoint = context,
+                learningSpace = context,
             )
         }
 
@@ -891,10 +975,12 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<GetShowPoweredByUseCase>() with singleton {
             GetShowPoweredByUseCase(
-                applicationContext.appMetaData?.getBoolean(AppConfig.KEY_CONFIG_SHOW_POWERED_BY) ?: false,
+                applicationContext.appMetaData?.getBoolean(UstadBuildConfig.KEY_CONFIG_SHOW_POWERED_BY) ?: false,
             )
         }
-
+        bind<GetLocalAccountsSupportedUseCase>() with singleton {
+            GetLocalAccountsSupportedUseCase(true)
+        }
         bind<SetClipboardStringUseCase>() with provider {
             SetClipboardStringUseCaseAndroid(applicationContext)
         }
@@ -903,36 +989,41 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             GetDeveloperInfoUseCaseAndroid(applicationContext)
         }
 
-        bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<DeleteContentEntryParentChildJoinUseCase>() with scoped(LearningSpaceScope.Default).provider {
             DeleteContentEntryParentChildJoinUseCase(
-                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+                repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             )
         }
 
-        bind<RestoreDeletedItemUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<RestoreDeletedItemUseCase>() with scoped(LearningSpaceScope.Default).provider {
             RestoreDeletedItemUseCase(
-                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+                repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             )
         }
 
-        bind<DeletePermanentlyUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<DeletePermanentlyUseCase>() with scoped(LearningSpaceScope.Default).provider {
             DeletePermanentlyUseCase(
-                repoOrDb = instance(tag = DoorTag.TAG_REPO),
+                repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             )
         }
-
-        bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<SavePersonPasskeyUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            SavePersonPasskeyUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance<UmAppDataLayer>().repository,
+            )
+        }
+        bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             MakeContentEntryAvailableOfflineUseCase(
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().requireRepository(),
                 nodeIdAndAuth = instance(),
                 enqueueContentManifestDownloadUseCase = instance(),
             )
         }
 
-        bind<CancelDownloadUseCase>() with scoped(EndpointScope.Default).provider {
+        bind<CancelDownloadUseCase>() with scoped(LearningSpaceScope.Default).provider {
             CancelDownloadUseCaseAndroid(
                 appContext = applicationContext,
-                endpoint = context,
+                learningSpace = context,
                 db = instance(tag = DoorTag.TAG_DB)
             )
         }
@@ -941,24 +1032,24 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             ShareTextUseCaseAndroid(applicationContext)
         }
 
-        bind<SaveAndUploadLocalUrisUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<SaveAndUploadLocalUrisUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             SaveAndUploadLocalUrisUseCase(
                 saveLocalUrisAsBlobsUseCase = instance(),
                 enqueueBlobUploadClientUseCase = instance(),
                 activeDb = instance(tag = DoorTag.TAG_DB),
-                activeRepo = instance(tag = DoorTag.TAG_REPO),
+                activeRepo = instance<UmAppDataLayer>().repository,
             )
         }
 
-        bind<CancelBlobUploadClientUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<CancelBlobUploadClientUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             CancelBlobUploadClientUseCaseAndroid(
                 appContext = applicationContext,
-                endpoint = context,
+                learningSpace = context,
                 db = instance(tag = DoorTag.TAG_DB),
             )
         }
 
-        bind<OpenBlobUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<OpenBlobUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             OpenBlobUseCaseAndroid(
                 appContext = applicationContext,
                 getStoragePathForUrlUseCase = instance()
@@ -969,19 +1060,19 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             ValidateEmailUseCase()
         }
 
-        bind<CancelRemoteContentEntryImportUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<CancelRemoteContentEntryImportUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             CancelRemoteContentEntryImportUseCase(
-                endpoint = context,
+                learningSpace = context,
                 httpClient = instance(),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().requireRepository(),
             )
         }
 
-        bind<DismissRemoteContentEntryImportErrorUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<DismissRemoteContentEntryImportErrorUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             DismissRemoteContentEntryImportErrorUseCase(
-                endpoint = context,
+                learningSpace = context,
                 httpClient = instance(),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().requireRepository(),
             )
         }
 
@@ -1030,17 +1121,17 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             RawHttp()
         }
 
-        bind<OneRosterEndpoint>() with scoped(EndpointScope.Default).singleton {
+        bind<OneRosterEndpoint>() with scoped(LearningSpaceScope.Default).singleton {
             OneRosterEndpoint(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
-                endpoint = context,
+                repo = instance<UmAppDataLayer>().repository,
+                learningSpace = context,
                 xxHasher = instance(),
                 json = instance(),
             )
         }
 
-        bind<OneRosterHttpServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<OneRosterHttpServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             OneRosterHttpServerUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 json = instance(),
@@ -1056,44 +1147,53 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             XXStringHasherCommonJvm()
         }
 
-        bind<StoreActivitiesUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<StoreActivitiesUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             StoreActivitiesUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
             )
         }
 
-        bind<XapiStatementResource>() with scoped(EndpointScope.Default).singleton {
+        bind<XapiStatementResource>() with scoped(LearningSpaceScope.Default).singleton {
             XapiStatementResource(
                 db = instance(tag = DoorTag.TAG_DB),
-                repo = instance(tag = DoorTag.TAG_REPO),
+                repo = instance<UmAppDataLayer>().repository,
                 xxHasher = instance(),
-                endpoint = context,
+                learningSpace = context,
                 xapiJson = instance(),
                 hasherFactory = instance(),
                 storeActivitiesUseCase = instance(),
             )
         }
 
-        bind<SaveStatementOnClearUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<SaveStatementOnClearUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             SaveStatementOnClearUseCaseAndroid(
                 appContext = applicationContext,
-                endpoint = context,
+                learningSpace = context,
                 json = instance(),
             )
         }
 
-        bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(EndpointScope.Default).provider {
+        bind<NonInteractiveContentXapiStatementRecorderFactory>() with scoped(LearningSpaceScope.Default).provider {
             NonInteractiveContentXapiStatementRecorderFactory(
                 saveStatementOnClearUseCase = instance(),
                 saveStatementOnUnloadUseCase = null,
                 xapiStatementResource = instance(),
-                endpoint = context,
+                learningSpace = context,
             )
         }
 
+        bind<AddNewPersonUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            AddNewPersonUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance<UmAppDataLayer>().repository,
+            )
+        }
 
-        bind<GetSubtitleTrackFromUriUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<CreateNewLocalAccountUseCase>() with singleton {
+            CreateNewLocalAccountUseCase(di)
+        }
+        bind<GetSubtitleTrackFromUriUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             GetSubtitleTrackFromUriUseCaseLocal(
                 uriHelper = instance(),
                 dispatcher = Dispatchers.IO,
@@ -1101,7 +1201,46 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+        bind<DistributedCacheHashtable>() with singleton {
+            DistributedCacheHashtable(
+                cacheDb = instance(),
+                httpPort = instance<EmbeddedHttpServer>().listeningPort,
+                logger = NapierLoggingAdapter(),
+                xxStringHasher = instance(),
+            )
+        }
+
+        bind<DistributedCacheNsdAndroid>() with singleton {
+            DistributedCacheNsdAndroid(
+                context = applicationContext,
+                port = instance<DistributedCacheHashtable>().port,
+                logger = NapierLoggingAdapter(),
+                listener = UstadDbDiscoveryListener(
+                    db = instance(),
+                    scope = CoroutineScope(Dispatchers.IO + Job()),
+                    xxStringHasher = instance(),
+                )
+            )
+        }
+
+        bind<CheckContentAvailabilityUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            UstadCacheCheckContentAvailabilityUseCase(
+                ustadCache = instance(),
+                httpClient = instance(),
+            )
+        }
+
+        bind<EnableLocalSharingUseCase>() with singleton {
+            EnableLocalSharingUseCase()
+        }
+
+        bind<ListLocalSharingNeighborsUseCase>() with singleton {
+            ListLocalSharingNeighborsUseCaseCommonJvm(
+                ustadCacheDb = instance()
+            )
+        }
+
+        registerContextTranslator { account: UmAccount -> LearningSpace(account.endpointUrl) }
     }
 
 
@@ -1123,6 +1262,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         GlobalScope.launch(Dispatchers.IO) {
             di.direct.instance<EmbeddedHttpServer>().start()
+            di.direct.instance<DistributedCacheNsdAndroid>()
         }
     }
 

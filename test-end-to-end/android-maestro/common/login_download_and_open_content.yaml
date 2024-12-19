@@ -3,7 +3,7 @@ appId: com.toughra.ustadmobile
 # This test tests the Library page of app downloading and opening content
 
 #clear state and launch app
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 #admin login
 - runFlow:

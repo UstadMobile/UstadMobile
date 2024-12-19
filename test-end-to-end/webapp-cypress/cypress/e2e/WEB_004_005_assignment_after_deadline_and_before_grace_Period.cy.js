@@ -69,6 +69,8 @@ it('Student submit assignment', () => {
   cy.get('#assignment_text').click()
   cy.get('.ql-editor').ustadTypeAndVerify('Text 1')
   cy.contains('SUBMIT',{timeout:5000}).click()
+  cy.get('#assignment_text').get('div[contenteditable="true"]').should('not.exist')
+  cy.contains("Not submitted").should('not.exist')
   cy.go('back')
   cy.contains('Assignment 1',{timeout:1000}).click()
   cy.contains("Not submitted").should('not.exist') //
@@ -85,6 +87,7 @@ it('Teacher add assignment mark and course comment', () => {
   cy.contains('Submissions').click()
   cy.ustadReloadUntilVisible("Student 1")
   cy.contains("Student 1").click()
+  cy.contains("Text 1").should('be.visible')
   cy.get('#marker_comment').type("Keep it up")
   cy.get('#marker_mark').type('10')
   cy.get('#submit_mark_button').click()

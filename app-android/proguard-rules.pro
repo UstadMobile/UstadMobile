@@ -14,6 +14,11 @@
 -keep public class com.ustadmobile.core.db.**{
     public <init>(...);
 }
+-keep public class com.ustadmobile.centralappconfigdb.**{
+    public <init>(...);
+}
+
+
 -keep public class com.ustadmobile.core.controller.IndexLog{
        *;
 }
@@ -102,3 +107,9 @@
 }
 
 # End XXHash rules
+
+#passkey
+-if class androidx.credentials.CredentialManager
+-keep class androidx.credentials.playservices.** {
+  *;
+}

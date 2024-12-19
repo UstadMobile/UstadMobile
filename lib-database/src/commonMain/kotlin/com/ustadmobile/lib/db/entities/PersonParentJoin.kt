@@ -86,6 +86,8 @@ data class PersonParentJoin(
         const val RELATIONSHIP_OTHER_LEGAL_GUARDIAN = 4
 
         const val RELATIONSHIP_OTHER = 8
+
+        const val RELATIONSHIP_ACCOUNT_OWNER = 5
     }
 
 }

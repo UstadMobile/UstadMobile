@@ -31,6 +31,7 @@ import com.ustadmobile.ihttp.response.IHttpResponse
 import com.ustadmobile.libcache.headers.integrity
 import com.ustadmobile.libcache.util.LruMap
 import com.ustadmobile.libcache.uuid.randomUuid
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.getAndUpdate
 import kotlinx.atomicfu.update
@@ -72,6 +73,7 @@ class UstadCacheImpl(
         sizeLimit = sizeLimit,
     ),
     override val storageCompressionFilter: CacheStorageCompressionFilter = DefaultCacheCompressionFilter(),
+    private val xxStringHasher: XXStringHasher,
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -681,6 +683,31 @@ class UstadCacheImpl(
                 entryAndLocks.urlKey to it
             }
         }.toMap()
+    }
+
+    override fun getEntriesLocallyAvailable(urls: Set<String>): Map<String, Boolean> {
+        val hashesToUrl = urls.associateBy {
+            xxStringHasher.hash(it)
+        }
+
+        val availableEntryMap = mutableMapOf<String, Boolean>()
+
+        urls.chunked(100).forEach { chunkedList ->
+            val availableHashes = db.neighborCacheEntryDao.findAvailableEntries(
+                chunkedList.map { xxStringHasher.hash(it) }
+            )
+
+            availableHashes.forEach { availableHash ->
+                val availableUrl = hashesToUrl[availableHash]
+                if(availableUrl != null) {
+                    availableEntryMap[availableUrl] = true
+                }else {
+                    logger?.w(LOG_TAG, "Strangely could not find url in getEntriesAvailable")
+                }
+            }
+        }
+
+        return availableEntryMap
     }
 
     private fun CacheEntry.isStoredIn(parent: Path): Boolean {

@@ -1,9 +1,9 @@
 package com.ustadmobile.core.domain.blob.download
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.InterruptableCoroutineJob
-import com.ustadmobile.core.domain.blob.download.AbstractEnqueueBlobDownloadClientUseCase.Companion.DATA_ENDPOINT
+import com.ustadmobile.core.domain.blob.download.AbstractEnqueueBlobDownloadClientUseCase.Companion.DATA_LEARNINGSPACE
 import com.ustadmobile.core.domain.blob.download.AbstractEnqueueBlobDownloadClientUseCase.Companion.DATA_JOB_UID
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import com.ustadmobile.core.util.ext.di
@@ -23,7 +23,7 @@ class BlobDownloadJob : InterruptableCoroutineJob() {
     override suspend fun executeAsync(context: JobExecutionContext)  {
         val di = context.scheduler.di
         val jobDataMap = context.jobDetail.jobDataMap
-        val endpoint = Endpoint(jobDataMap.getString(DATA_ENDPOINT))
+        val endpoint = LearningSpace(jobDataMap.getString(DATA_LEARNINGSPACE))
         val jobUid = jobDataMap.getInt(DATA_JOB_UID)
         val logPrefix = "BlobDownloadJob: #$jobUid:"
 

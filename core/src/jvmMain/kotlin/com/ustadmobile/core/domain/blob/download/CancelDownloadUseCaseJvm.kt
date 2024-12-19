@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.download
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupController
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.interruptJobs
@@ -10,7 +10,7 @@ import org.quartz.TriggerKey
 
 class CancelDownloadUseCaseJvm(
     private val scheduler: Scheduler,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val db: UmAppDatabase,
 ) : CancelDownloadUseCase{
 
@@ -21,11 +21,11 @@ class CancelDownloadUseCaseJvm(
         //uneschedule
         val triggerKeys = listOf(
             TriggerKey.triggerKey(
-                AbstractEnqueueContentManifestDownloadUseCase.uniqueNameFor(endpoint, transferJobId),
+                AbstractEnqueueContentManifestDownloadUseCase.uniqueNameFor(learningSpace, transferJobId),
                 ConnectivityTriggerGroupController.TRIGGERKEY_CONNECTIVITY_REQUIRED_GROUP
             ),
             TriggerKey.triggerKey(
-                AbstractEnqueueBlobDownloadClientUseCase.uniqueNameFor(endpoint, transferJobId),
+                AbstractEnqueueBlobDownloadClientUseCase.uniqueNameFor(learningSpace, transferJobId),
                 ConnectivityTriggerGroupController.TRIGGERKEY_CONNECTIVITY_REQUIRED_GROUP
             )
         )

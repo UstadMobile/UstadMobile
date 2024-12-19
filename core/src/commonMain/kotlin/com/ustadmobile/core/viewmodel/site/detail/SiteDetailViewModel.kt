@@ -56,8 +56,8 @@ class SiteDetailViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                val siteFlow =activeRepo.siteDao().getSiteAsFlow()
-                val permissionFlow = activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
+                val siteFlow =activeRepoWithFallback.siteDao().getSiteAsFlow()
+                val permissionFlow = activeRepoWithFallback.systemPermissionDao().personHasSystemPermissionAsFlow(
                     activeUserPersonUid, PermissionFlags.MANAGE_SITE_SETTINGS
                 )
 
@@ -83,7 +83,7 @@ class SiteDetailViewModel(
                 }
 
                 launch {
-                    activeRepo.siteTermsDao().findAllTermsAsListFlow(1).collect {
+                    activeRepoWithFallback.siteTermsDao().findAllTermsAsListFlow(1).collect {
                         _uiState.update { prev ->
                             prev.copy(
                                 siteTerms = it.mapNotNull { siteTerms ->

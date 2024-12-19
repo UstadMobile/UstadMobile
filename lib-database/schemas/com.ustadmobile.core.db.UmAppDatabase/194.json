@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 194,
-    "identityHash": "e7a9ab2a112884c6bee5f0ec9357f8ae",
+    "identityHash": "3e43f62bdcac3841986d55766aa17cc6",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -406,7 +406,7 @@
       },
       {
         "tableName": "Person",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personLct` INTEGER NOT NULL, `personCountry` TEXT, `personType` INTEGER NOT NULL DEFAULT 0, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `isPersonalAccount` INTEGER NOT NULL, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personLct` INTEGER NOT NULL, `personCountry` TEXT, `personType` INTEGER NOT NULL DEFAULT 0, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT)",
         "fields": [
           {
             "fieldPath": "personUid",
@@ -453,6 +453,12 @@
           {
             "fieldPath": "active",
             "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPersonalAccount",
+            "columnName": "isPersonalAccount",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -732,7 +738,7 @@
       },
       {
         "tableName": "ClazzEnrolment",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzEnrolmentUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzEnrolmentPersonUid` INTEGER NOT NULL, `clazzEnrolmentClazzUid` INTEGER NOT NULL, `clazzEnrolmentDateJoined` INTEGER NOT NULL, `clazzEnrolmentDateLeft` INTEGER NOT NULL, `clazzEnrolmentRole` INTEGER NOT NULL, `clazzEnrolmentAttendancePercentage` REAL NOT NULL, `clazzEnrolmentActive` INTEGER NOT NULL, `clazzEnrolmentLeavingReasonUid` INTEGER NOT NULL, `clazzEnrolmentOutcome` INTEGER NOT NULL, `clazzEnrolmentLocalChangeSeqNum` INTEGER NOT NULL, `clazzEnrolmentMasterChangeSeqNum` INTEGER NOT NULL, `clazzEnrolmentLastChangedBy` INTEGER NOT NULL, `clazzEnrolmentLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzEnrolmentUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzEnrolmentPersonUid` INTEGER NOT NULL, `clazzEnrolmentClazzUid` INTEGER NOT NULL, `clazzEnrolmentDateJoined` INTEGER NOT NULL, `clazzEnrolmentDateLeft` INTEGER NOT NULL, `clazzEnrolmentRole` INTEGER NOT NULL, `clazzEnrolmentAttendancePercentage` REAL NOT NULL, `clazzEnrolmentActive` INTEGER NOT NULL, `clazzEnrolmentLeavingReasonUid` INTEGER NOT NULL, `clazzEnrolmentOutcome` INTEGER NOT NULL, `clazzEnrolmentLocalChangeSeqNum` INTEGER NOT NULL, `clazzEnrolmentMasterChangeSeqNum` INTEGER NOT NULL, `clazzEnrolmentLastChangedBy` INTEGER NOT NULL, `clazzEnrolmentLct` INTEGER NOT NULL, `clazzEnrolmentInviteUid` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "clazzEnrolmentUid",
@@ -815,6 +821,12 @@
           {
             "fieldPath": "clazzEnrolmentLct",
             "columnName": "clazzEnrolmentLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzEnrolmentInviteUid",
+            "columnName": "clazzEnrolmentInviteUid",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -922,6 +934,75 @@
           "autoGenerate": true,
           "columnNames": [
             "leavingReasonUid"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzInvite",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ciUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ciPersonUid` INTEGER NOT NULL, `ciRoleId` INTEGER NOT NULL, `ciClazzUid` INTEGER NOT NULL, `inviteType` INTEGER NOT NULL DEFAULT 1, `inviteContact` TEXT, `inviteToken` TEXT, `inviteStatus` INTEGER NOT NULL, `inviteLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "ciUid",
+            "columnName": "ciUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ciPersonUid",
+            "columnName": "ciPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ciRoleId",
+            "columnName": "ciRoleId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ciClazzUid",
+            "columnName": "ciClazzUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inviteType",
+            "columnName": "inviteType",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "inviteContact",
+            "columnName": "inviteContact",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "inviteToken",
+            "columnName": "inviteToken",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "inviteStatus",
+            "columnName": "inviteStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inviteLct",
+            "columnName": "inviteLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "ciUid"
           ]
         },
         "indices": [],
@@ -3687,7 +3768,7 @@
       },
       {
         "tableName": "ContentEntryImportJob",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sourceUri` TEXT, `cjiOriginalFilename` TEXT, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContentEntryVersion` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL, `cjiContentDeletedOnCancellation` INTEGER NOT NULL, `cjiCompressionLevel` INTEGER NOT NULL DEFAULT 3, `cjiError` TEXT, `cjiErrorDismissed` INTEGER NOT NULL, `cjiOwnerPersonUid` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cjiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sourceUri` TEXT, `cjiOriginalFilename` TEXT, `cjiContentEntryUid` INTEGER NOT NULL, `cjiParentContentEntryUid` INTEGER NOT NULL, `cjiContentEntryVersion` INTEGER NOT NULL, `cjiItemProgress` INTEGER NOT NULL, `cjiItemTotal` INTEGER NOT NULL, `cjiStatus` INTEGER NOT NULL, `cjiRecursiveStatus` INTEGER NOT NULL, `cjiPluginId` INTEGER NOT NULL, `cjiParentCjiUid` INTEGER NOT NULL, `cjiStartTime` INTEGER NOT NULL, `cjiFinishTime` INTEGER NOT NULL, `cjiContentDeletedOnCancellation` INTEGER NOT NULL, `cjiCompressionLevel` INTEGER NOT NULL DEFAULT 3, `cjiError` TEXT, `cjiErrorDismissed` INTEGER NOT NULL, `cjiOwnerPersonUid` INTEGER NOT NULL, `cjiParams` TEXT)",
         "fields": [
           {
             "fieldPath": "cjiUid",
@@ -3803,6 +3884,12 @@
             "columnName": "cjiOwnerPersonUid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "cjiParams",
+            "columnName": "cjiParams",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -5850,7 +5937,7 @@
       },
       {
         "tableName": "XapiSessionEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xseUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `xseLastMod` INTEGER NOT NULL, `xseRegistrationHi` INTEGER NOT NULL, `xseRegistrationLo` INTEGER NOT NULL, `xseUsUid` INTEGER NOT NULL, `xseAccountPersonUid` INTEGER NOT NULL, `xseAccountUsername` TEXT, `xseClazzUid` INTEGER NOT NULL, `xseCbUid` INTEGER NOT NULL, `xseContentEntryUid` INTEGER NOT NULL, `xseRootActivityId` TEXT, `xseStartTime` INTEGER NOT NULL, `xseExpireTime` INTEGER NOT NULL, `xseAuth` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xseUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `xseLastMod` INTEGER NOT NULL, `xseRegistrationHi` INTEGER NOT NULL, `xseRegistrationLo` INTEGER NOT NULL, `xseUsUid` INTEGER NOT NULL, `xseAccountPersonUid` INTEGER NOT NULL, `xseActorUid` INTEGER NOT NULL, `xseAccountUsername` TEXT NOT NULL, `xseClazzUid` INTEGER NOT NULL, `xseCbUid` INTEGER NOT NULL, `xseContentEntryUid` INTEGER NOT NULL, `xseContentEntryVersionUid` INTEGER NOT NULL DEFAULT 0, `xseRootActivityId` TEXT NOT NULL, `xseRootActivityUid` INTEGER NOT NULL, `xseStartTime` INTEGER NOT NULL, `xseExpireTime` INTEGER NOT NULL, `xseAuth` TEXT, `xseCompleted` INTEGER NOT NULL DEFAULT 0, `knownActorUidToPersonUids` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "xseUid",
@@ -5889,10 +5976,16 @@
             "notNull": true
           },
           {
+            "fieldPath": "xseActorUid",
+            "columnName": "xseActorUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "xseAccountUsername",
             "columnName": "xseAccountUsername",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "xseClazzUid",
@@ -5913,10 +6006,23 @@
             "notNull": true
           },
           {
+            "fieldPath": "xseContentEntryVersionUid",
+            "columnName": "xseContentEntryVersionUid",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
             "fieldPath": "xseRootActivityId",
             "columnName": "xseRootActivityId",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
+          },
+          {
+            "fieldPath": "xseRootActivityUid",
+            "columnName": "xseRootActivityUid",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "xseStartTime",
@@ -5935,6 +6041,19 @@
             "columnName": "xseAuth",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "xseCompleted",
+            "columnName": "xseCompleted",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "knownActorUidToPersonUids",
+            "columnName": "knownActorUidToPersonUids",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -5980,6 +6099,242 @@
           "columnNames": [
             "stmtJsonIdHi",
             "stmtJsonIdLo"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PersonPasskey",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPasskeyUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ppPersonUid` INTEGER NOT NULL, `ppAttestationObj` TEXT, `ppClientDataJson` TEXT, `ppOriginString` TEXT, `ppRpid` TEXT, `ppId` TEXT, `ppChallengeString` TEXT, `ppPublicKey` TEXT, `isRevoked` INTEGER NOT NULL, `ppPasskeyLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "personPasskeyUid",
+            "columnName": "personPasskeyUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppPersonUid",
+            "columnName": "ppPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppAttestationObj",
+            "columnName": "ppAttestationObj",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ppClientDataJson",
+            "columnName": "ppClientDataJson",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ppOriginString",
+            "columnName": "ppOriginString",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ppRpid",
+            "columnName": "ppRpid",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ppId",
+            "columnName": "ppId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ppChallengeString",
+            "columnName": "ppChallengeString",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ppPublicKey",
+            "columnName": "ppPublicKey",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isRevoked",
+            "columnName": "isRevoked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppPasskeyLct",
+            "columnName": "ppPasskeyLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "personPasskeyUid"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "StateEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`seActorUid` INTEGER NOT NULL, `seHash` INTEGER NOT NULL, `seActivityUid` INTEGER NOT NULL, `seStateId` TEXT NOT NULL, `seLastMod` INTEGER NOT NULL, `seTimeStored` INTEGER NOT NULL, `seContentType` TEXT NOT NULL, `seCompressed` INTEGER NOT NULL, `seContent` TEXT NOT NULL, `seDeleted` INTEGER NOT NULL, `seRegistrationHi` INTEGER, `seRegistrationLo` INTEGER, `seH5PPreloaded` INTEGER NOT NULL, `seH5PSubContentId` TEXT, PRIMARY KEY(`seActorUid`, `seHash`))",
+        "fields": [
+          {
+            "fieldPath": "seActorUid",
+            "columnName": "seActorUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seHash",
+            "columnName": "seHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seActivityUid",
+            "columnName": "seActivityUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seStateId",
+            "columnName": "seStateId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seLastMod",
+            "columnName": "seLastMod",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seTimeStored",
+            "columnName": "seTimeStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seContentType",
+            "columnName": "seContentType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seCompressed",
+            "columnName": "seCompressed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seContent",
+            "columnName": "seContent",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seDeleted",
+            "columnName": "seDeleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seRegistrationHi",
+            "columnName": "seRegistrationHi",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "seRegistrationLo",
+            "columnName": "seRegistrationLo",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "seH5PPreloaded",
+            "columnName": "seH5PPreloaded",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seH5PSubContentId",
+            "columnName": "seH5PSubContentId",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "seActorUid",
+            "seHash"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "StateDeleteCommand",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sdcActorUid` INTEGER NOT NULL, `sdcHash` INTEGER NOT NULL, `sdcActivityUid` INTEGER NOT NULL, `sdcStateId` TEXT, `sdcLastMod` INTEGER NOT NULL, `sdcRegistrationHi` INTEGER, `sdcRegistrationLo` INTEGER, PRIMARY KEY(`sdcActorUid`, `sdcHash`))",
+        "fields": [
+          {
+            "fieldPath": "sdcActorUid",
+            "columnName": "sdcActorUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdcHash",
+            "columnName": "sdcHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdcActivityUid",
+            "columnName": "sdcActivityUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdcStateId",
+            "columnName": "sdcStateId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sdcLastMod",
+            "columnName": "sdcLastMod",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdcRegistrationHi",
+            "columnName": "sdcRegistrationHi",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sdcRegistrationLo",
+            "columnName": "sdcRegistrationLo",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sdcActorUid",
+            "sdcHash"
           ]
         },
         "indices": [],
@@ -6146,7 +6501,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e7a9ab2a112884c6bee5f0ec9357f8ae')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3e43f62bdcac3841986d55766aa17cc6')"
     ]
   }
 }

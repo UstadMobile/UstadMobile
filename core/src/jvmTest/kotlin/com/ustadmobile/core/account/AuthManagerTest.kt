@@ -1,9 +1,9 @@
 package com.ustadmobile.core.account
 
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
 import kotlinx.coroutines.runBlocking
@@ -20,11 +20,13 @@ class AuthManagerTest {
 
     lateinit var di: DI
 
-    val endpoint = Endpoint("https://test.ustadmobile.app/")
+    val learningSpace = LearningSpace("https://test.ustadmobile.app/")
 
     @JvmField
     @Rule
     val ustadTestRule = UstadTestRule()
+
+    lateinit var dataLayer: UmAppDataLayer
 
     lateinit var repo: UmAppDatabase
 
@@ -38,7 +40,8 @@ class AuthManagerTest {
             import(ustadTestRule.diModule)
         }
 
-        repo = di.on(endpoint).direct.instance(tag = DoorTag.TAG_REPO)
+        dataLayer = di.on(learningSpace).direct.instance()
+        repo = dataLayer.repository!!
 
         runBlocking {
             repo.insertPersonAndGroup(Person().apply {
@@ -54,7 +57,7 @@ class AuthManagerTest {
 
     @Test
     fun givenAuthSet_whenAuthenticatedWithValidPassword_thenShouldAccept() {
-        val authManager = AuthManager(endpoint, di)
+        val authManager = AuthManager(learningSpace, di)
 
         runBlocking {
             authManager.setAuth(testUserUid, testUserPassword)
@@ -69,7 +72,7 @@ class AuthManagerTest {
 
     @Test
     fun givenAuthSet_whenAuthenticatedWithWrongPassword_thenShouldReject() {
-        val authManager = AuthManager(endpoint, di)
+        val authManager = AuthManager(learningSpace, di)
 
         runBlocking {
             authManager.setAuth(testUserUid, testUserPassword)

@@ -280,6 +280,13 @@ fun ContentDetailRightColumn(
             )
         }
 
+        if(uiState.locallyAvailable) {
+            Text(
+                text = stringResource(MR.strings.download_locally_availability),
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }
+
         if (uiState.authorVisible){
             Text(
                 text = uiState.contentEntry?.entry?.author ?: "",

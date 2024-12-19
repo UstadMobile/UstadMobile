@@ -15,14 +15,14 @@ internal actual suspend fun AuthManager.doublePbkdf2Hash(password: String): Byte
 
 internal actual suspend fun AuthManager.doublePbkdf2HashAsBase64(password: String): String {
     val httpClient: HttpClient = di.direct.instance()
-    return httpClient.get("${endpoint.url}api/pbkdf2/doubleEncryptPbkdf2") {
+    return httpClient.get("${learningSpace.url}api/pbkdf2/doubleEncryptPbkdf2") {
         parameter("secret", password)
     }.bodyAsText()
 }
 
 internal actual suspend fun AuthManager.encryptPbkdf2(password: String): ByteArray {
     val httpClient: HttpClient = di.direct.instance()
-    return httpClient.get("${endpoint.url}api/pbkdf2/encryptPbkdf2") {
+    return httpClient.get("${learningSpace.url}api/pbkdf2/encryptPbkdf2") {
         parameter("secret", password)
     }.bodyAsText().decodeBase64Bytes()
 }

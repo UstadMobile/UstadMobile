@@ -117,7 +117,10 @@ android {
             "uiLanguages": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.uilanguages"),
             "showPoweredByMsg": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.showpoweredbymsg"),
             "gopts": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.gopts"),
-            "apiUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.apiurl"),
+            "systemBaseUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.systemBaseUrl"),
+            "passkeyRpId": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.passkeyRpId"),
+            "presetLsUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.presetLsUrl"),
+            "newPersonalAccountsLsUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.newPersonalAccountsLsUrl"),
         ]
 
         //When using variables the build analyzer reports that major tasks reran because of a
@@ -216,6 +219,7 @@ configurations.all {
 
 dependencies {
     implementation libs.androidx.profileinstaller
+    implementation project(':lib-centralappconfigdb-sqldelight')
     baselineProfile project(':app-android-baselineprofile')
     coreLibraryDesugaring libs.android.desugar.libs
 
@@ -225,6 +229,7 @@ dependencies {
     implementation project(":lib-cache")
 
     implementation libs.door.runtime
+    implementation libs.sqldelight.sqlite.driver.android
     implementation project(':lib-database')
     implementation project(':lib-util')
 
@@ -262,9 +267,6 @@ dependencies {
 
     //Work manager
     implementation libs.androidx.work.runtime
-
-    //Klock
-    implementation libs.klock.android
 
     //Crash reporting
     implementation libs.acra.http
@@ -322,6 +324,9 @@ dependencies {
     //Image loading
     implementation libs.coil
     implementation libs.coil.compose
+
+    //chip text fields
+    implementation libs.chiptextfield
 
     implementation libs.kotlinx.datetime
 

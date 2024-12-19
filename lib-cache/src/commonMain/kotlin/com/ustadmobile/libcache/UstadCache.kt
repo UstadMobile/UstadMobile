@@ -99,6 +99,13 @@ interface UstadCache {
         urls: Set<String>
     ): Map<String, CacheEntry?>
 
+    /**
+     * Run a bulk query to see if the given urls are available from neighbor caches.
+     */
+    fun getEntriesLocallyAvailable(
+        urls: Set<String>
+    ): Map<String, Boolean>
+
 
     /**
      * Create retention locks for the given urls. Retention locks are used to prevent a given url

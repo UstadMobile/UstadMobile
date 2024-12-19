@@ -12,6 +12,6 @@ data class RegisterRequest(
     val person: Person,
     val newPassword: String,
     val parent: PersonParentJoin?,
-    val endpointUrl: String,
+    val learningSpaceUrl: String,
     val langCode: String = "en"
 )

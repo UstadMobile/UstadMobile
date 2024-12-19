@@ -89,6 +89,8 @@ open class ClazzEnrolment()  {
     @ReplicateEtag
     var clazzEnrolmentLct: Long = 0
 
+    var clazzEnrolmentInviteUid: Long = 0
+
     constructor(clazzUid: Long, personUid: Long) : this() {
         this.clazzEnrolmentClazzUid = clazzUid
         this.clazzEnrolmentPersonUid = personUid

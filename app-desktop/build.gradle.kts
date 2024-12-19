@@ -52,7 +52,10 @@ tasks.withType<Jar> {
 
         attributes["com-ustadmobile-showpoweredbymsg"] = buildConfigProps?.getProperty("com.ustadmobile.showpoweredbymsg") ?: ""
 
-        attributes["com-ustadmobile-apiurl"] = buildConfigProps?.getProperty("com.ustadmobile.apiurl") ?: ""
+        attributes["com-ustadmobile-system-systemBaseUrl"] = buildConfigProps?.getProperty("com.ustadmobile.system.systemBaseUrl") ?: ""
+        attributes["com-ustadmobile-system-passkeyRpId"] = buildConfigProps?.getProperty("com.ustadmobile.system.passkeyRpId") ?: ""
+        attributes["com-ustadmobile-system-presetLsUrl"] = buildConfigProps?.getProperty("com.ustadmobile.system.presetLsUrl") ?: ""
+        attributes["com-ustadmobile-system-newPersonalAccountsLsUrl"] = buildConfigProps?.getProperty("com.ustadmobile.system.newPersonalAccountsLsUrl") ?: ""
     }
 }
 
@@ -93,6 +96,8 @@ dependencies {
     implementation(project(":lib-ui-compose"))
     implementation(project(":lib-util"))
     implementation(project(":lib-cache"))
+    implementation(project(":lib-centralappconfigdb-sqldelight"))
+    implementation(project(":lib-centralappconfigdb-common"))
     implementation(compose.material3)
     implementation(compose.materialIconsExtended)
 

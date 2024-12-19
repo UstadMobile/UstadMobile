@@ -89,7 +89,15 @@ val MIGRATE_7_8 = DoorMigrationStatementList(7, 8) {
     }
 }
 
+val MIGRATE_9_10 = DoorMigrationStatementList(9, 10) {
+    listOf("CREATE TABLE IF NOT EXISTS NeighborCache (  neighborUid  INTEGER  PRIMARY KEY  NOT NULL , neighborIp  TEXT  NOT NULL , neighborUdpPort  INTEGER  NOT NULL , neighborHttpPort  INTEGER  NOT NULL , neighborDiscovered  INTEGER  NOT NULL , neighborPingTime  INTEGER  NOT NULL )")
+}
+
+val MIGRATE_10_11 = DoorMigrationStatementList(10, 11) {
+    listOf("CREATE TABLE IF NOT EXISTS NeighborCacheEntry (  nceNeighborUid  INTEGER  NOT NULL , nceUrlHash  INTEGER  NOT NULL , PRIMARY KEY (nceNeighborUid, nceUrlHash) )")
+}
+
 fun DatabaseBuilder<UstadCacheDb>.addCacheDbMigrations(): DatabaseBuilder<UstadCacheDb> {
     return addMigrations(MIGRATE_1_2, MIGRATE_2_3, MIGRATE_3_4, MIGRATE_4_5,
-        MIGRATE_5_6, MIGRATE_6_7, MIGRATE_7_8)
+        MIGRATE_5_6, MIGRATE_6_7, MIGRATE_7_8, MIGRATE_9_10, MIGRATE_10_11)
 }

@@ -6,6 +6,8 @@ import com.ustadmobile.libcache.db.MIGRATE_8_9
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.addCacheDbMigrations
 import com.ustadmobile.libcache.logging.UstadCacheLogger
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import kotlinx.io.files.Path
 
 /**
@@ -18,6 +20,7 @@ import kotlinx.io.files.Path
 class UstadCacheBuilder(
     var dbUrl: String,
     var storagePath: Path,
+    var xxStringHasher: XXStringHasher = XXStringHasherCommonJvm(),
     var logger: UstadCacheLogger? = null,
     var cacheName: String = "",
     var sizeLimit: () -> Long = { DEFAULT_SIZE_LIMIT },
@@ -41,6 +44,7 @@ class UstadCacheBuilder(
             sizeLimit = sizeLimit,
             logger = logger,
             cacheName = cacheName,
+            xxStringHasher = xxStringHasher,
         )
     }
 }

@@ -44,11 +44,11 @@ class PersonAuthRegisterRouteTest {
 
     private lateinit var serverDi: DI
 
-    private lateinit var endpointScope: EndpointScope
+    private lateinit var learningSpaceScope: LearningSpaceScope
 
     @Before
     fun setup() {
-        endpointScope = EndpointScope()
+        learningSpaceScope = LearningSpaceScope()
         mockNotificationSender = mock { }
         Napier.takeLogarithm()
         Napier.base(DebugAntilog())
@@ -56,13 +56,13 @@ class PersonAuthRegisterRouteTest {
         serverDi = DI {
             import(CommonJvmDiModule)
 
-            import(commonTestKtorDiModule(endpointScope))
+            import(commonTestKtorDiModule(learningSpaceScope))
 
             bind<NotificationSender>() with singleton {
                 mockNotificationSender
             }
 
-            bind<AddNewPersonUseCase>() with scoped(endpointScope).singleton {
+            bind<AddNewPersonUseCase>() with scoped(learningSpaceScope).singleton {
                 AddNewPersonUseCase(
                     db = instance(tag = DoorTag.TAG_DB),
                     repo = null,
@@ -71,7 +71,7 @@ class PersonAuthRegisterRouteTest {
 
 
             registerContextTranslator { _: ApplicationCall ->
-                Endpoint("localhost")
+                LearningSpace("localhost")
             }
         }
     }
@@ -134,7 +134,7 @@ class PersonAuthRegisterRouteTest {
                     person = registerPerson,
                     newPassword = "test",
                     parent = registerParent,
-                    endpointUrl = "https://org.ustadmobile.app/"
+                    learningSpaceUrl = "https://org.ustadmobile.app/"
                 ))
             }
         }
@@ -164,7 +164,7 @@ class PersonAuthRegisterRouteTest {
                     person = registerPerson,
                     newPassword = "secret23",
                     parent = null,
-                    endpointUrl = "https://org.ustadmobile.app/"
+                    learningSpaceUrl = "https://org.ustadmobile.app/"
                 ))
             }
         }
@@ -175,7 +175,7 @@ class PersonAuthRegisterRouteTest {
         val pbkdf2Params: Pbkdf2Params = serverDi.direct.instance()
 
         runBlocking {
-            val db: UmAppDatabase = serverDi.direct.on(Endpoint("localhost")).instance(tag = DoorTag.TAG_DB)
+            val db: UmAppDatabase = serverDi.direct.on(LearningSpace("localhost")).instance(tag = DoorTag.TAG_DB)
             val personAuth2 = db.personAuth2Dao().findByPersonUid(createdAccount.personUid)
             val salt = db.siteDao().getSite()?.authSalt ?: throw IllegalStateException("No auth salt!")
             Assert.assertEquals("PersonAuth2 created with valid hashed password",
@@ -189,7 +189,7 @@ class PersonAuthRegisterRouteTest {
     fun givenValidCredentials_whenLoginCalled_thenShouldReturnAccount(
 
     )  = testPersonAuthRegisterApplication { client ->
-        val db: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_DB)
+        val db: UmAppDatabase by serverDi.on(LearningSpace("localhost")).instance(tag= DoorTag.TAG_DB)
         val pbkdf2Params: Pbkdf2Params by serverDi.instance()
         val httpClient: HttpClient by serverDi.instance()
 
@@ -232,7 +232,7 @@ class PersonAuthRegisterRouteTest {
     fun givenInvalidCredentials_whenLoginCalled_thenShouldRespondForbidden(
 
     )  = testPersonAuthRegisterApplication { client ->
-        val db: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_DB)
+        val db: UmAppDatabase by serverDi.on(LearningSpace("localhost")).instance(tag= DoorTag.TAG_DB)
         val pbkdf2Params: Pbkdf2Params by serverDi.instance()
         val httpClient: HttpClient by serverDi.instance()
 
@@ -271,7 +271,7 @@ class PersonAuthRegisterRouteTest {
     fun givenParentalConsentIsRequiredButNotGranted_whenLoginCalled_thenShouldRespondFailedDepdency(
 
     ) = testPersonAuthRegisterApplication {
-        val db: UmAppDatabase by serverDi.on(Endpoint("localhost")).instance(tag= DoorTag.TAG_DB)
+        val db: UmAppDatabase by serverDi.on(LearningSpace("localhost")).instance(tag= DoorTag.TAG_DB)
         val pbkdf2Params: Pbkdf2Params by serverDi.instance()
         val httpClient: HttpClient by serverDi.instance()
 

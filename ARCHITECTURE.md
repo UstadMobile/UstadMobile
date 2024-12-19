@@ -85,3 +85,38 @@ a separate URL but share common content).
   content piece available offline, it will download all the resources listed in sitemap.xml that are
   not yet stored locally.
 
+# Learning Spaces
+
+Learning Spaces are to Ustad Mobile what a workspace is to Slack. Each space has its own users,
+classes, library, etc. Schools, projects, companies, etc can each have their own learning space. 
+Each Learning Space will have a specific URL. Each Learning Space has its own database (Postgres or
+SQLite).
+
+In the ideal world the client app would not be linked to any specific server URL at compile time.
+However:
+
+* Deep links on Android 12+ [must be verified](https://developer.android.com/training/app-links/verify-android-applinks), 
+  and the domains (or subdomain pattern) for links to verify must be in AndroidManifest.xml file
+* Passkeys also require the app to be associated with the domain using the same link verification
+  procedure.
+
+Hence there is a [central app config module](lib-centralappconfigdb-common/) that is used to provide
+a list of known learning spaces (so the user need not manually enter the learning space link).
+
+The user can still be allowed to enter a learning space URL manually if they wish, however,
+only learning spaces that are included within the verified app links will be able to open deep links
+and use passkeys.
+
+## Client side
+
+The client will have a separate instance of the main database (UmAppDatabase) for each learning 
+space. This is used for [scoped](https://kosi-libs.org/kodein/7.22/core/using-environment.html#scope)
+dependency injection.
+
+## Server side (virtual hosting)
+
+One server process (in one JVM instance) can host multiple learning spaces with minimal overhead. 
+HTTP requests are matched to the relevant learning space, and each learning space is mapped to a 
+separate database. [lib-centralappconfigdb-common](lib-centralappconfigdb-common/) is used to 
+maintain a database of all learning spaces available on the system.
+

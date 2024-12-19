@@ -1,0 +1,16 @@
+CREATE TABLE SystemConfigAuth(
+    scaUid INTEGER PRIMARY KEY NOT NULL,
+    scaAuthType INTEGER NOT NULL DEFAULT 0,
+    scaAuthId TEXT NOT NULL,
+    scaAuthCredential TEXT NOT NULL,
+    scaAuthSalt TEXT NOT NULL
+);
+
+selectByAuthId:
+SELECT SystemConfigAuth.*
+FROM SystemConfigAuth
+WHERE scaAuthId = :scaAuthId;
+
+insert:
+INSERT INTO SystemConfigAuth(scaUid, scaAuthType, scaAuthId , scaAuthCredential, scaAuthSalt)
+VALUES ?;

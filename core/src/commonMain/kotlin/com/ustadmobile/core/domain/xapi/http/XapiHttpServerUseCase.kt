@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.xapi.http
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.XapiJson
@@ -14,7 +14,7 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.core.util.ext.firstNonWhiteSpaceChar
 import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.ihttp.request.IHttpRequest
@@ -39,7 +39,7 @@ class XapiHttpServerUseCase(
     private val h5PUserDataEndpointUseCase: H5PUserDataEndpointUseCase,
     private val db: UmAppDatabase,
     xapiJson: XapiJson,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val xxStringHasher: XXStringHasher,
 ) {
 
@@ -170,7 +170,7 @@ class XapiHttpServerUseCase(
                                 val listResponse = listXapiStateIdsUseCase.invoke(
                                     request = ListXapiStateIdsUseCase.ListXapiStateIdsRequest(
                                         activityId = request.queryParamOrThrow("activityId"),
-                                        agent = xapiSessionEntity.agent(endpoint),
+                                        agent = xapiSessionEntity.agent(learningSpace),
                                         registration = request.queryParam("registration"),
                                         since = request.queryParam("since")?.fromHttpToGmtDate()?.timestamp ?: 0
                                     ),

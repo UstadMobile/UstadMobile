@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
 import com.ustadmobile.core.viewmodel.accountlist.AccountListUiState
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
@@ -84,8 +84,8 @@ fun AccountListScreen(
 @Composable
 fun AccountListScreen(
     uiState: AccountListUiState,
-    onAccountListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit = {},
-    onDeleteListItemClick: (UserSessionWithPersonAndEndpoint) -> Unit = {},
+    onAccountListItemClick: (UserSessionWithPersonAndLearningSpace) -> Unit = {},
+    onDeleteListItemClick: (UserSessionWithPersonAndLearningSpace) -> Unit = {},
     onClickOpenLicenses: () -> Unit = {},
     onAddItem: () -> Unit = {},
     onMyProfileClick: () -> Unit = {},
@@ -133,7 +133,7 @@ fun AccountListScreen(
         items(
             uiState.accountsList,
             key = {
-                "${it.person.personUid}@${it.endpoint}"
+                "${it.person.personUid}@${it.learningSpace}"
             }
         ){  account ->
             AccountListItem(
@@ -216,9 +216,9 @@ fun AccountListScreen(
 
 @Composable
 fun AccountListItem(
-    account: UserSessionWithPersonAndEndpoint?,
+    account: UserSessionWithPersonAndLearningSpace?,
     trailing: @Composable (() -> Unit)? = null,
-    onClickAccount: ((UserSessionWithPersonAndEndpoint?) -> Unit)? = null
+    onClickAccount: ((UserSessionWithPersonAndLearningSpace?) -> Unit)? = null
 ) {
     ListItem(
         modifier = if (onClickAccount != null) {
@@ -258,7 +258,7 @@ fun AccountListItem(
                     modifier = Modifier.size(16.dp)
                 )
                 Text(
-                    text = account?.endpoint?.url ?: "",
+                    text = account?.learningSpace?.url ?: "",
                     maxLines = 1,
                     modifier = Modifier.padding(start = 8.dp)
                 )

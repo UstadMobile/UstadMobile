@@ -16,6 +16,7 @@ import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.StringResponse
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.util.test.ext.newFileFromResource
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import kotlinx.io.asInputStream
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -146,7 +147,8 @@ class UstadCacheJvmTest {
             .build()
         val ustadCache = UstadCacheImpl(
             pathsProvider = temporaryFolderPathsProvider,
-            db = cacheDb
+            db = cacheDb,
+            xxStringHasher = XXStringHasherCommonJvm(),
         )
 
         val createdLocks = if(createLock) {
@@ -278,6 +280,7 @@ class UstadCacheJvmTest {
             .build()
         val ustadCache = UstadCacheImpl(
             pathsProvider = temporaryFolderPathsProvider,
+            xxStringHasher = XXStringHasherCommonJvm(),
             db = cacheDb
         )
 
@@ -313,7 +316,8 @@ class UstadCacheJvmTest {
             .build()
         val ustadCache = UstadCacheImpl(
             pathsProvider = temporaryFolderPathsProvider,
-            db = cacheDb
+            db = cacheDb,
+            xxStringHasher = XXStringHasherCommonJvm(),
         )
 
         val url = "http://server.com/file.css"
@@ -327,7 +331,8 @@ class UstadCacheJvmTest {
             .build()
         val ustadCache = UstadCacheImpl(
             pathsProvider = temporaryFolderPathsProvider,
-            db = cacheDb
+            db = cacheDb,
+            xxStringHasher = XXStringHasherCommonJvm(),
         )
 
         val url = "http://server.com/file.css"

@@ -23,6 +23,8 @@ include:
 * Offline sync that works via any Internet connection or via nearby devices (e.g. from teacher device
   to student device etc). With a class of 30 students this reduces bandwidth consumption 97%+ whilst
   supporting data sync to the Internet when a connection is available.
+* Support for multiple learning spaces: each learning space has its own users, classes, 
+  content library, etc.
 
 Want to collaborate on development? Join us on discord: [https://discord.gg/WHe35Sbsg4](https://discord.gg/WHe35Sbsg4).  
 
@@ -133,7 +135,7 @@ Further details: see the [Java website](https://www.java.com/en/download/help/pa
 __VLC__
 Download and install from [https://www.videolan.org/](https://www.videolan.org/). Make sure to choose
 a 64bit version (using a non-64bit version will fail). VLC is used by the Desktop version to play 
-videos via VLCJ.
+videos via [VLCJ](https://github.com/caprica/vlcj).
 
 __MediaInfo__
 Download and install such that the MediaInfo command is in the PATH. This can be done using winget:
@@ -167,40 +169,45 @@ installed using winget:
 winget install -e --id ArtifexSoftware.GhostScript
 ```
 
-
-
 * __Step 3: Import the project in Android Studio__: Select File, New, Project from Version Control. Enter
 https://github.com/UstadMobile/UstadMobile.git and wait for the project to import. Switch to the
   dev-mvvm-primary branch (Menu: Git - Branches - search for dev-mvvm-primary - checkout ).
 
-* __Step 4: Build/run the server__: Run the server locally:
+* __Step 4: Set the system base URL__: The system base URL is used to show the user lists of 
+  available learning spaces.
+
+Create the file buildconfig.local.properties in the root source directory, and then set:
+```
+com.ustadmobile.system.systemBaseUrl=http://your.ip.address:8087/
+```
+
+* __Step 5: Run the server__: Run the server using Gradle:
 
 Linux/MacOS:
 ```
-$ ./runserver.sh --siteUrl http://your.ip.address:8087/
+./gradlew app-ktor-server:run
 ```
 
 Windows:
 ```
-$ runserver.bat --siteUrl http://your.ip.address:8087/
+gradlew app-ktor-server:run
 ```
 
-The siteUrl parameter must match the address that you use to access the system (e.g. in the browser
-or when entering the link on the Android app). 
+* __Step 6: Add a learning space__:
 
-As above, your.ip.address is your IP address (e.g. 192.168.1.2). If the siteUrl changes and the old 
-site url is inaccessible, then this may make content uploaded before the change inaccessible.
+Each server hosts one (or more) learning spaces. Each learning space has its own users, classes,
+content library, etc. One learning space could be dedicated to a particular school, institution, 
+project, etc. For development/testing you can use your IP address. __DO NOT__ use localhost because
+this won't work on Android (an Android emulator or device will see itself as localhost).
 
-This will start the server on port 8087. The admin password will be randomly generated - you can find
-it in app-ktor-server/data/singleton/admin.txt .
+These can be created as subdomains e.g. learningspace1.example.org, 
+learningspace2.example.org, etc. 
 
-This will run the REST API which is required by the Android and web apps. It will not include the 
-web client app itself. To use the web client app in the browser, you must build/run it (as below).
+```
+./gradlew app-ktor-server:run --args='newlearningspace --url http://your.ip.address:8087/ --title learningspacetitle --adminpassword adminpassword'
+```
 
-If you use localhost or 127.0.0.1, you will not be able to connect from Android (because localhost 
-on an emulator or device refers to the Android emulator/device, not the PC running the server).
-
-* __Step 5: Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
+* __Step 7: Build/run the Android and/or web client version__ : see [app-android](app-android/) for the
 Android app, [app-react](app-react/) for the web app.
 
 Note: If self-registration is enabled, you must add an email server configuration to the 
@@ -246,7 +253,10 @@ Code is contained (mostly) in the following modules:
 * [app-ktor-server](app-ktor-server/): Contains the HTTP rest server (implemented using KTOR)
 * [core](core/) : Contains view models, ui state, core business logic.
 * [sharedse](sharedse/): Contains some shared implementations for operating systems with a disk (JVM/Android)
-* [lib-database](lib-database/): contains the database: DAOs (e.g. SQL queries), and entity classes.
+* [lib-database](lib-database/): contains DAOs and entities for the primary database. This is the database 
+  that represents the learning space and contains classes, users, etc. 
+* [lib-centralappconfigdb-common](lib-systemdb/): contains an app-wide configuration database e.g. the list of
+  known learning spaces.
 * [lib-ui-compose](lib-ui-compose/): contains Compose multiplatform UI code used by app-android and app-desktop.
 * [lib-util](lib-util/): Small utility functions
 * [test-end-to-end](test-end-to-end/) End-to-end tests that run the app and server.
@@ -257,6 +267,6 @@ To build / run versions for any given platform please see the README in the modu
 
 ## Legal and license
 
-Copyright 2015-2023 UstadMobile FZ-LLC.
+Copyright 2015-2024 UstadMobile FZ-LLC.
 Documentation: [CC-BY](https://creativecommons.org/licenses/by/4.0/) license.
 Code and all other works: [AGPLv3](LICENSE) license.

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.contententry.getmetadatafromuri
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.ContentImportersManager
 import com.ustadmobile.core.contentjob.MetadataResult
 import com.ustadmobile.door.DoorUri
@@ -12,7 +12,7 @@ class ContentEntryGetMetaDataFromUriUseCaseCommonJvm(
     override suspend fun invoke(
         contentUri: DoorUri,
         fileName: String?,
-        endpoint: Endpoint,
+        learningSpace: LearningSpace,
         onProgress: (ContentEntryGetMetadataStatus) -> Unit
     ): MetadataResult {
         return importersManager.extractMetadata(

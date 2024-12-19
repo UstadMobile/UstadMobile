@@ -66,7 +66,7 @@ env:
 - tapOn: "SAVE"
 
 # teacher add existing content in library to course as a content block
-- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"

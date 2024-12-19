@@ -1,6 +1,6 @@
 package com.ustadmobile.port.android.authenticator
 
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.domain.interop.externalapppermission.DeclineExternalAppPermissionUseCase
 import com.ustadmobile.core.domain.interop.externalapppermission.DeclineExternalAppPermissionUseCaseAndroid
 import com.ustadmobile.core.domain.interop.externalapppermission.GetExternalAppPermissionRequestInfoUseCase
@@ -37,19 +37,19 @@ class AuthenticatorActivity: AbstractAppActivity() {
             GetExternalAppPermissionRequestInfoUseCaseAndroid(this@AuthenticatorActivity)
         }
 
-        bind<StoreExternalAppPermissionUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<StoreExternalAppPermissionUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             StoreExternalAppPermissionUseCase(
                 getExternalAppPermissionRequestInfoUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB)
             )
         }
 
-        bind<GrantExternalAppPermissionUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<GrantExternalAppPermissionUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             GrantExternalAppPermissionUseCaseAndroid(
                 storeExternalAppPermissionUseCase = instance(),
                 activity = this@AuthenticatorActivity,
                 db = instance(tag = DoorTag.TAG_DB),
-                endpoint = context,
+                learningSpace = context,
             )
         }
 

@@ -176,12 +176,12 @@ class DiscussionPostEditViewModel (
                 post.discussionPostClazzUid = activeDb.courseBlockDao()
                     .findClazzUidByCourseBlockUid(post.discussionPostCourseBlockUid)
                 if(post.discussionPostClazzUid == 0L) {
-                    post.discussionPostClazzUid = activeRepo.courseBlockDao()
+                    post.discussionPostClazzUid = activeRepoWithFallback.courseBlockDao()
                         .findClazzUidByCourseBlockUid(post.discussionPostCourseBlockUid)
                 }
 
-                activeRepo.withDoorTransactionAsync {
-                    activeRepo.discussionPostDao().upsertAsync(post)
+                activeRepoWithFallback.withDoorTransactionAsync {
+                    activeRepoWithFallback.discussionPostDao().upsertAsync(post)
                 }
 
                 finishWithResult(

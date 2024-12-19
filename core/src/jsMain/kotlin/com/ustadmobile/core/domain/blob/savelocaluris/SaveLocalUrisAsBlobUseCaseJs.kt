@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.savelocaluris
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.BlobTransferJobItem
 import com.ustadmobile.core.domain.blob.BlobTransferProgressUpdate
@@ -26,7 +26,7 @@ import web.http.fetchAsync
 
 class SaveLocalUrisAsBlobUseCaseJs(
     private val chunkedUploadClientLocalUriUseCase: ChunkedUploadClientLocalUriUseCase,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val json: Json,
     private val db: UmAppDatabase,
     private val updateTransferJobItemEtagUseCase: UpdateTransferJobItemEtagUseCase =
@@ -100,7 +100,7 @@ class SaveLocalUrisAsBlobUseCaseJs(
                     val response = chunkedUploadClientLocalUriUseCase(
                         uploadUuid = randomUuidAsString(),
                         localUri = DoorUri.parse(uriToSaveQueueItem.uriToSaveItem.localUri),
-                        remoteUrl = "${endpoint.url}api/blob/upload-item",
+                        remoteUrl = "${learningSpace.url}api/blob/upload-item",
                         lastChunkHeaders = buildMap {
                             uriToSaveQueueItem.uriToSaveItem.mimeType?.also { blobMimeType ->
                                 put("${BLOB_RESPONSE_HEADER_PREFIX}Content-Type", listOf(blobMimeType))

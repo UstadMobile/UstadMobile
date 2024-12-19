@@ -20,6 +20,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 api(project(":lib-ihttp-core"))
+                implementation(project(":lib-xxhashkmp"))
                 implementation(libs.coroutines)
                 implementation(libs.door.runtime)
                 implementation(libs.atomicfu)

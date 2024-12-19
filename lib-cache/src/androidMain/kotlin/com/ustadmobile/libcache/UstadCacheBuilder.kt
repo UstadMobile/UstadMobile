@@ -2,10 +2,13 @@ package com.ustadmobile.libcache
 
 import android.content.Context
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.libcache.db.AddNewEntryTriggerCallback
 import com.ustadmobile.libcache.db.MIGRATE_8_9
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.addCacheDbMigrations
 import com.ustadmobile.libcache.logging.UstadCacheLogger
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 
@@ -13,9 +16,11 @@ import kotlinx.io.files.SystemFileSystem
 class UstadCacheBuilder(
     var appContext: Context,
     var storagePath: Path,
-    var dbName: String = "UstadCache",
+    var dbName: String = DEFAULT_DB_NAME,
+    var db: UstadCacheDb? = null,
     var logger: UstadCacheLogger? = null,
     var sizeLimit: () -> Long,
+    var xxStringHasher: XXStringHasher = XXStringHasherCommonJvm(),
     var cachePathsProvider: CachePathsProvider = CachePathsProvider {
         CachePaths(
             tmpWorkPath = Path(storagePath, DEFAULT_SUBPATH_WORK),
@@ -31,7 +36,8 @@ class UstadCacheBuilder(
             pathsProvider = cachePathsProvider,
             logger =  logger,
             sizeLimit = sizeLimit,
-            db = DatabaseBuilder.databaseBuilder(
+            xxStringHasher = xxStringHasher,
+            db = db ?: DatabaseBuilder.databaseBuilder(
                 context = appContext,
                 dbClass = UstadCacheDb::class,
                 dbName = dbName,
@@ -39,6 +45,7 @@ class UstadCacheBuilder(
             )
             .addCacheDbMigrations()
             .addMigrations(MIGRATE_8_9)
+            .addCallback(AddNewEntryTriggerCallback())
             .build()
         )
     }
@@ -50,6 +57,8 @@ class UstadCacheBuilder(
         const val DEFAULT_SUBPATH_PERSISTENT = "persistent"
 
         const val DEFAULT_SUBPATH_CACHE = "ustad-cache"
+
+        const val DEFAULT_DB_NAME = "UstadCache"
 
     }
 

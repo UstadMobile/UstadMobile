@@ -4,6 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 
 enum class UstadImage {
+    ONBOARDING_EXISTING,
+    ONBOARDING_ADD_ORG,
+    ONBOARDING_INDIVIDUAL,
+
+    INDIVIDUAL_NEW_ACCOUNT,
+    INDIVIDUAL_RESTORE_ACCOUNT,
+
     ILLUSTRATION_CONNECT,
     ILLUSTRATION_ONBOARDING1,
     ILLUSTRATION_ONBOARDING2,

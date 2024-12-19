@@ -19,6 +19,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteConte
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
+import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentAvailabilityUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -37,6 +38,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.instance
@@ -71,6 +74,9 @@ data class ContentEntryDetailOverviewUiState(
     val openButtonEnabled: Boolean = true,
 
     val activeUserPersonUid: Long = 0,
+
+    val availableLocally: Boolean = false,
+
 ) {
     val scoreProgressVisible: Boolean
         get() = scoreProgress?.progress != null && scoreProgress.progress > 0
@@ -153,13 +159,16 @@ class ContentEntryDetailOverviewViewModel(
 
     private val parentEntryUid = savedStateHandle[ARG_PARENT_UID]?.toLong() ?: 0
 
+    private val checkLocalAvailabilityUseCase: CheckContentAvailabilityUseCase? by
+        di.onActiveEndpoint().instanceOrNull()
+
     init {
         _uiState.update { it.copy(activeUserPersonUid = activeUserPersonUid) }
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.contentEntryDao().findByContentEntryUidWithDetailsAsFlow(
+                    activeRepoWithFallback.contentEntryDao().findByContentEntryUidWithDetailsAsFlow(
                         contentEntryUid = entityUidArg,
                         clazzUid = clazzUid,
                         courseBlockUid = savedStateHandle[ARG_COURSE_BLOCK_UID]?.toLong() ?: 0,
@@ -178,7 +187,7 @@ class ContentEntryDetailOverviewViewModel(
                         val parentTitle = if(parentEntryUid == ContentEntryListViewModel.LIBRARY_ROOT_CONTENT_ENTRY_UID) {
                             systemImpl.getString(MR.strings.library)
                         }else {
-                            activeRepo.localFirstThenRepoIfNull { db ->
+                            activeRepoWithFallback.localFirstThenRepoIfNull { db ->
                                 db.contentEntryDao().findTitleByUidAsync(parentEntryUid)
                             }
                         }
@@ -192,14 +201,24 @@ class ContentEntryDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeRepo.contentEntryVersionDao().findLatestByContentEntryUidAsFlow(
+                    activeRepoWithFallback.contentEntryVersionDao().findLatestByContentEntryUidAsFlow(
                         contentEntryUid = entityUidArg
-                    ).collect{
+                    ).distinctUntilChangedBy { it?.cevLct }.collectLatest { contentEntryVersion ->
                         _uiState.update { prev ->
                             prev.copy(
-                                latestContentEntryVersion = it
+                                latestContentEntryVersion = contentEntryVersion
                             )
                         }
+
+                        if(contentEntryVersion != null) {
+                            val isAvailable = checkLocalAvailabilityUseCase
+                                ?.invoke(contentEntryVersion) ?: false
+
+                            _uiState.takeIf { isAvailable }?.update {
+                                it.copy(locallyAvailable = isAvailable)
+                            }
+                        }
+
                     }
                 }
 
@@ -245,7 +264,7 @@ class ContentEntryDetailOverviewViewModel(
                     try {
                         do {
                             val remoteImportJobsJson = httpClient.get(
-                                "${accountManager.activeEndpoint.url}api/contententryimportjob/importjobs"
+                                "${accountManager.activeLearningSpace.url}api/contententryimportjob/importjobs"
                             ) {
                                 parameter("contententryuid", entityUidArg.toString())
                                 header("cache-control", "no-store")
@@ -295,7 +314,7 @@ class ContentEntryDetailOverviewViewModel(
                 //remove CacheLockJoin(s) status to pending deletion so cache content becomes
                 // eligible for eviction as required.
                 offlineItemAndStateVal.readyForOffline -> {
-                    activeRepo.offlineItemDao().updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
+                    activeRepoWithFallback.offlineItemDao().updateActiveByOfflineItemUid(offlineItemVal.oiUid, false)
                 }
             }
         }
@@ -308,7 +327,7 @@ class ContentEntryDetailOverviewViewModel(
                 loadingState = LoadingUiState.INDETERMINATE
                 Napier.d("ContentEntryDetailOverviewViewModel: onClickOpen launched")
                 _uiState.update { it.copy(openButtonEnabled = false) }
-                val latestContentEntryVersion = activeRepo.localFirstThenRepoIfNull {
+                val latestContentEntryVersion = activeRepoWithFallback.localFirstThenRepoIfNull {
                     it.contentEntryVersionDao().findLatestVersionUidByContentEntryUidEntity(entityUidArg)
                 }
 

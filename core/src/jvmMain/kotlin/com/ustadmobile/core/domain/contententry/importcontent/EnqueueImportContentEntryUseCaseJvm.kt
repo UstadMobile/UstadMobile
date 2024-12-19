@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.contententry.importcontent
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.isRemote
 import com.ustadmobile.door.DoorUri
@@ -20,7 +20,7 @@ import org.quartz.TriggerKey
 class EnqueueImportContentEntryUseCaseJvm(
     private val db: UmAppDatabase,
     private val scheduler: Scheduler,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val enqueueRemoteImport: EnqueueContentEntryImportUseCase?,
 ) : EnqueueContentEntryImportUseCase {
 
@@ -34,10 +34,10 @@ class EnqueueImportContentEntryUseCaseJvm(
         }else {
             val uid = db.contentEntryImportJobDao().insertJobItem(contentJobItem)
             val quartzJob = JobBuilder.newJob(ImportContentEntryJob::class.java)
-                .usingJobData(EnqueueContentEntryImportUseCase.DATA_ENDPOINT, endpoint.url)
+                .usingJobData(EnqueueContentEntryImportUseCase.DATA_LEARNINGSPACE, learningSpace.url)
                 .usingJobData(EnqueueContentEntryImportUseCase.DATA_JOB_UID, uid)
                 .build()
-            val triggerKey = TriggerKey(EnqueueContentEntryImportUseCase.uniqueNameFor(endpoint, uid))
+            val triggerKey = TriggerKey(EnqueueContentEntryImportUseCase.uniqueNameFor(learningSpace, uid))
             scheduler.unscheduleJob(triggerKey)
             val jobTrigger = TriggerBuilder.newTrigger()
                 .withIdentity(triggerKey)
