@@ -2,6 +2,9 @@ package com.ustadmobile.libcache
 
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.libcache.UstadCache.Companion.DEFAULT_SIZE_LIMIT
+import com.ustadmobile.libcache.db.AddNewEntryTriggerCallback
+import com.ustadmobile.libcache.db.MIGRATE_11_12_CLIENT
+import com.ustadmobile.libcache.db.MIGRATE_11_12_SERVER
 import com.ustadmobile.libcache.db.MIGRATE_8_9
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.addCacheDbMigrations
@@ -15,6 +18,7 @@ import kotlinx.io.files.Path
  * @param storagePath the path where cache data will be stored
  * @param logger logging adapter (optional)
  * @param cacheName name (used in logging)
+ * @param distributedCacheEnabled if true, then add triggers for distributed caching
  */
 @Suppress("MemberVisibilityCanBePrivate")
 class UstadCacheBuilder(
@@ -24,6 +28,7 @@ class UstadCacheBuilder(
     var logger: UstadCacheLogger? = null,
     var cacheName: String = "",
     var sizeLimit: () -> Long = { DEFAULT_SIZE_LIMIT },
+    var distributedCacheEnabled: Boolean = false,
     var pathsProvider: CachePathsProvider = CachePathsProvider {
         CachePaths(
             tmpWorkPath = Path(storagePath, "tmpWork"),
@@ -40,6 +45,14 @@ class UstadCacheBuilder(
             db = DatabaseBuilder.databaseBuilder(UstadCacheDb::class, dbUrl, 1L)
                 .addCacheDbMigrations()
                 .addMigrations(MIGRATE_8_9)
+                .apply {
+                    if(distributedCacheEnabled) {
+                        addMigrations(MIGRATE_11_12_CLIENT)
+                        addCallback(AddNewEntryTriggerCallback())
+                    }else {
+                        addMigrations(MIGRATE_11_12_SERVER)
+                    }
+                }
                 .build(),
             sizeLimit = sizeLimit,
             logger = logger,

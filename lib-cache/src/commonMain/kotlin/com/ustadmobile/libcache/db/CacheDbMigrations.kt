@@ -97,6 +97,21 @@ val MIGRATE_10_11 = DoorMigrationStatementList(10, 11) {
     listOf("CREATE TABLE IF NOT EXISTS NeighborCacheEntry (  nceNeighborUid  INTEGER  NOT NULL , nceUrlHash  INTEGER  NOT NULL , PRIMARY KEY (nceNeighborUid, nceUrlHash) )")
 }
 
+//On client devices - add the new cache entry trigger for distributed caching
+val MIGRATE_11_12_CLIENT = DoorMigrationStatementList(11, 12) {
+    listOf("""
+        CREATE TRIGGER NewCacheEntryTrigger 
+            AFTER INSERT ON CacheEntry
+            BEGIN
+               INSERT OR REPLACE INTO NewCacheEntry(cacheEntryKey, nceUrl) VALUES(NEW.key, NEW.url);
+            END
+    """)
+}
+
+val MIGRATE_11_12_SERVER = DoorMigrationStatementList(11, 12) {
+    emptyList()
+}
+
 fun DatabaseBuilder<UstadCacheDb>.addCacheDbMigrations(): DatabaseBuilder<UstadCacheDb> {
     return addMigrations(MIGRATE_1_2, MIGRATE_2_3, MIGRATE_3_4, MIGRATE_4_5,
         MIGRATE_5_6, MIGRATE_6_7, MIGRATE_7_8, MIGRATE_9_10, MIGRATE_10_11)
