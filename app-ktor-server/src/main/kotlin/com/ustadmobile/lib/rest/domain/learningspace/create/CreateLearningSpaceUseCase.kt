@@ -12,6 +12,8 @@ import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.centralappconfigdb.model.LearningSpaceConfig
 import com.ustadmobile.centralappconfigdb.model.LearningSpaceConfigAndInfo
 import com.ustadmobile.centralappconfigdb.model.LearningSpaceInfo
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.ext.DoorTag
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -60,19 +62,26 @@ class CreateLearningSpaceUseCase(
         )
 
         val learningSpace = LearningSpace(request.url)
-        val addPersonUseCase: AddNewPersonUseCase = di.on(learningSpace).direct.instance()
-        val authManager: AuthManager = di.on(learningSpace).direct.instance()
 
-        val personUid = addPersonUseCase(
-            person = Person(
-                username = request.adminUsername,
-                firstNames = "Admin",
-                lastName = "User"
-            ),
-            systemPermissions = PermissionFlags.ALL,
-        )
+        val adminUsername = request.adminUsername
+        val umAppDatabase: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
+        val existingAdminUser = umAppDatabase.personDao().findByUsername(adminUsername)
 
-        authManager.setAuth(personUid, request.adminPassword)
+        if(existingAdminUser == null) {
+            val addPersonUseCase: AddNewPersonUseCase = di.on(learningSpace).direct.instance()
+            val authManager: AuthManager = di.on(learningSpace).direct.instance()
+
+            val personUid = addPersonUseCase(
+                person = Person(
+                    username = request.adminUsername,
+                    firstNames = "Admin",
+                    lastName = "User"
+                ),
+                systemPermissions = PermissionFlags.ALL,
+            )
+
+            authManager.setAuth(personUid, request.adminPassword)
+        }
     }
 
 
