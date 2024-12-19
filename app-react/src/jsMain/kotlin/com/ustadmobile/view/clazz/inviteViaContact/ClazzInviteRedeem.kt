@@ -4,7 +4,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
-import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteUiState
+import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteRedeemUiState
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadStandardContainer
 import mui.material.Button
@@ -22,7 +22,7 @@ import web.cssom.px
 
 
 external interface ClazzInviteRedeemProps : Props {
-    var uiState: ClazzInviteUiState
+    var uiState: ClazzInviteRedeemUiState
     var processDecision: (Boolean) -> Unit
 }
 
@@ -31,7 +31,7 @@ val ClazzInviteRedeemScreen = FC<Props> {
         ClazzInviteViewModel(di, savedStateHandle)
     }
 
-    val uiStateVal by viewModel.uiState.collectAsState(ClazzInviteUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzInviteRedeemUiState())
 
     ClazzInviteRedeemComponent2 {
         uiState = uiStateVal

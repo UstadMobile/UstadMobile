@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
-import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteUiState
+import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteRedeemUiState
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import dev.icerock.moko.resources.compose.stringResource
 
@@ -24,7 +24,7 @@ import dev.icerock.moko.resources.compose.stringResource
 fun ClazzInviteRedeem(
     viewModel: ClazzInviteViewModel
 ) {
-    val uiState by viewModel.uiState.collectAsState(ClazzInviteUiState())
+    val uiState by viewModel.uiState.collectAsState(ClazzInviteRedeemUiState())
 
     InviteViaLinkScreen(
         uiState = uiState,
@@ -34,7 +34,7 @@ fun ClazzInviteRedeem(
 
 @Composable
 fun InviteViaLinkScreen(
-    uiState: ClazzInviteUiState = ClazzInviteUiState(),
+    uiState: ClazzInviteRedeemUiState = ClazzInviteRedeemUiState(),
     processDecision: (Boolean) -> Unit,
 ) {
     UstadVerticalScrollColumn(

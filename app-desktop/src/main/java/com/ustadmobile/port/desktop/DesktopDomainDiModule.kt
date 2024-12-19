@@ -82,7 +82,7 @@ import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUs
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
-import com.ustadmobile.core.domain.invite.ClazzRedeemUseCase
+import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJvm
@@ -587,8 +587,8 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<ClazzRedeemUseCase>() with scoped(LearningSpaceScope.Default).provider {
-        ClazzRedeemUseCase(
+    bind<ClazzInviteRedeemUseCase>() with scoped(LearningSpaceScope.Default).provider {
+        ClazzInviteRedeemUseCase(
             enrolIntoCourseUseCase = instance(),
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance<UmAppDataLayer>().repository,
