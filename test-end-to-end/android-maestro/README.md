@@ -7,20 +7,19 @@ but that has not been thoroughly tested.
 ### Prerequisites:
 
 * Install Maestro as per the [official instructions](https://maestro.mobile.dev/getting-started/installing-maestro).
-* Build the HTTP server from the [app-ktor-server](../../app-ktor-server/) module (e.g. ```./gradlew app-ktor-server:build```).
-* Build the release APK by either
-  * _Using Android Studio_: From the Build menu, click Generate Signed App Bundle / APK (select the release variant when prompted). For further details see [official Android Studio documentation](https://developer.android.com/studio/publish/app-signing#generate-key).
-  * _Using the command line_: Build using ```./gradlew app-android:assembleRelease```. You must setup the signing keystore as per the [app-android README](../../app-android/README.md#command-line-signing-for-release-apk-).   
+* Build the android release apk from the [app-android](../../app-android/) module and the
+  HTTP server from the [app-ktor-server](../../app-ktor-server/) module. This would be done by the normal
+  **gradlew build** command.
 * Start an Android emulator or connect a physical device and get the serial of the device 
   (e.g. using the **adb devices** command). It is highly recommended to use a device created by the
   [Meastro start-device command](https://maestro.mobile.dev/cli/start-device). 
 * MacOS only: install the realpath command.
-* Use Android SDK 33 emulator as the chrome browser **must** be updated otherwise H5P tests will fail. The version of Chrome that is
+* Chrome browser **must** be updated otherwise H5P tests will fail. The version of Chrome that is
   included with SDK33 will work. To test on devices running earlier versions of Android:
     * Update Google Play Services (e.g. from [APKMirror](https://www.apkmirror.com/apk/google-inc/google-play-services/google-play-services-24-31-33-release/))
     * Update Chrome (e.g. from [APKMirror](https://www.apkmirror.com/apk/google-inc/chrome/chrome-127-0-6533-103-release/))
  
-### Run tests:
+### Run all tests:
 
 ```
 $ ./run-maestro-test.sh --serial1 emulator-5554
@@ -29,7 +28,7 @@ Where emulator-5554 is the serial of the emulator as per the **adb devices** com
 
 Options:
 
-* **--test** specify a test to run as per the test flows found in e2e-tests e.g. --test 001_001_admin_can_add_content_001-h5p . If not specified, then all tests will run
+* **--test** specify a test to run as per the test flows found in e2e-tests e.g. --test 001_001_admin_can_add_content_001-h5p
 * **--apk** specify a particular apk file to test and install. By default the test runner expects to
  use the release APK file built from source
 * **--console-output** use Maestro console output instead of saving to a JUnit XML. Helpful to see 
