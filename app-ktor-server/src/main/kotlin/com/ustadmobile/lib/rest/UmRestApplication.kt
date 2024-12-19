@@ -153,6 +153,8 @@ import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.centralappconfigdb.datasource.LearningSpaceDataSource
 import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.core.impl.config.ManifestAppConfig
+import com.ustadmobile.core.impl.config.UstadBuildConfig
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -793,6 +795,10 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<UstadBuildConfig>() with singleton {
+            ManifestAppConfig()
+        }
+
         bind<DeleteXapiStateUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             DeleteXapiStateUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
@@ -1018,7 +1024,8 @@ fun Application.umRestApplication(
                 route("sysconfig") {
                     SystemConfigScriptRoute(
                         systemDb = di.direct.instance(),
-                        xxStringHasher = di.direct.instance()
+                        xxStringHasher = di.direct.instance(),
+                        buildConfig = di.direct.instance()
                     )
                 }
                 route(CentralAppConfigDbDataSource.PATH) {
