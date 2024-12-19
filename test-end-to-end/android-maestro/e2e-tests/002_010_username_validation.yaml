@@ -56,7 +56,7 @@ env:
 - tapOn: "CREATE ACCOUNT"
   # verify the . _ characters are acceptable
 - tapOn: "Username*"
-- inputText: user.A_123
+- inputText: user.a_123
 - tapOn: "New password*"
 - inputText: 1234
 - tapOn: "SAVE"
@@ -85,6 +85,6 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "user.A_123"
+      USERNAME: "user.a_123"
       PASSWORD: "1234"
 - assertVisible: "Library"
