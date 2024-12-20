@@ -5,7 +5,9 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE
+import com.ustadmobile.core.db.dao.SystemPermissionDaoCommon
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.ACTOR_UIDS_FOR_PERSONUIDS_CTE
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
@@ -281,7 +283,50 @@ expect abstract class StatementDao {
         actorUid: Long,
     ): StatementEntity?
 
-    @HttpAccessible
+    /**
+     * Get StatementEntities required for findPersonsWithAttempts when running over http
+     */
+    @Query("""
+        SELECT StatementEntity.*
+          FROM StatementEntity
+               LEFT JOIN ClazzEnrolment 
+                         ON ClazzEnrolment.clazzEnrolmentUid =
+                           COALESCE(
+                            (SELECT ClazzEnrolment.clazzEnrolmentUid 
+                               FROM ClazzEnrolment
+                              WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                                AND ClazzEnrolment.clazzEnrolmentActive
+                                AND ClazzEnrolment.clazzEnrolmentClazzUid = StatementEntity.statementClazzUid 
+                           ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
+                              LIMIT 1), 0)
+         WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+           AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+           AND (    StatementEntity.statementActorPersonUid = :accountPersonUid
+                      OR EXISTS(SELECT CoursePermission.cpUid
+                                  FROM CoursePermission
+                                 WHERE CoursePermission.cpClazzUid = StatementEntity.statementClazzUid
+                                   AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
+                                        OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
+                                   AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
+                                   AND NOT CoursePermission.cpIsDeleted)
+                      OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
+                          ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                          ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
+                          
+    """)
+    abstract suspend fun findPersonsWithAttemptsStatements(
+        contentEntryUid: Long,
+        accountPersonUid: Long,
+    ): List<StatementEntity>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findPersonsWithAttempts"),
+            HttpServerFunctionCall("findPersonsWithAttemptsStatements")
+        )
+    )
+
     @Query("""
      SELECT Person.*, PersonPicture.*,
             (SELECT COUNT(*)
@@ -331,10 +376,34 @@ expect abstract class StatementDao {
       WHERE Person.personUid IN
             (SELECT DISTINCT StatementEntity.statementActorPersonUid
                FROM StatementEntity
-              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid)       
-""")
+  LEFT JOIN ClazzEnrolment 
+                         ON ClazzEnrolment.clazzEnrolmentUid =
+                           COALESCE(
+                            (SELECT ClazzEnrolment.clazzEnrolmentUid 
+                               FROM ClazzEnrolment
+                              WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                                AND ClazzEnrolment.clazzEnrolmentActive
+                                AND ClazzEnrolment.clazzEnrolmentClazzUid = StatementEntity.statementClazzUid 
+                           ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
+                              LIMIT 1), 0)
+              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                /* permission check */
+                AND (    StatementEntity.statementActorPersonUid = :accountPersonUid
+                      OR EXISTS(SELECT CoursePermission.cpUid
+                                  FROM CoursePermission
+                                 WHERE CoursePermission.cpClazzUid = StatementEntity.statementClazzUid
+                                   AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
+                                        OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
+                                   AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
+                                   AND NOT CoursePermission.cpIsDeleted)
+                      OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
+                          ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                          ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
+            )      
+            """)
     abstract fun findPersonsWithAttempts(
-        contentEntryUid: Long
+        contentEntryUid: Long,
+        accountPersonUid: Long
     ): PagingSource<Int, PersonAndPictureAndNumAttempts>
 
 
