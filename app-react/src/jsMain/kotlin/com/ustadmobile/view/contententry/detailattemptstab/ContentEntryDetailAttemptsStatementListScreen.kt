@@ -7,21 +7,18 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
-import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useFormattedDuration
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import com.ustadmobile.mui.components.ThemeContext
-import com.ustadmobile.view.components.UstadBlankIcon
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.datetime.TimeZone
 import mui.icons.material.Check
 import mui.icons.material.Star
 import mui.icons.material.Timer
@@ -134,25 +131,17 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                     }
                                 }
 
-                                ListItemButton {
-                                    ListItemIcon {
-                                        when {
-                                            attemptsStatementListItems?.statementEntity?.resultScoreRaw != null || attemptsStatementListItems?.statementEntity?.extensionProgress != null -> {
-                                                Star()
-                                            }
-
-                                            else -> {
-                                                UstadBlankIcon()
+                                if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null || attemptsStatementListItems?.statementEntity?.extensionProgress != null)
+                                    ListItemButton {
+                                        ListItemIcon {
+                                            Star()
+                                            sx {
+                                                padding = theme.spacing(1, 1, 1, 5)
                                             }
                                         }
-                                        sx {
-                                            padding = theme.spacing(1, 1, 1, 5)
-                                        }
-                                    }
-                                    ListItemText {
-                                        secondary = ReactNode(
-                                            if (attemptsStatementListItems?.statementEntity?.extensionProgress == null) {
-                                                if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
+                                        ListItemText {
+                                            ReactNode(
+                                                if (attemptsStatementListItems.statementEntity?.resultScoreRaw != null) {
                                                     "${
                                                         attemptsStatementListItems.statementEntity?.resultScoreRaw?.toInt()
                                                             .toString()
@@ -161,15 +150,11 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                                             .toString()
                                                     } Score"
                                                 } else {
-                                                    "No Score"
+                                                    "${attemptsStatementListItems.statementEntity?.extensionProgress} %Completion"
                                                 }
-
-                                            } else {
-                                                "${attemptsStatementListItems.statementEntity?.extensionProgress} %Completion"
-                                            }
-                                        )
+                                            ).also { secondary = it }
+                                        }
                                     }
-                                }
 
                             }
                         }

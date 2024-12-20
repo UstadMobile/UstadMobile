@@ -18,9 +18,12 @@ import dev.icerock.moko.resources.compose.stringResource
 fun rememberFormattedDuration(timeInMillis: Long) : String {
     val hoursStr = stringResource(MR.strings.xapi_hours)
     val minsStr = stringResource(MR.strings.xapi_minutes)
+    val secsStr = stringResource(MR.strings.xapi_seconds)
+
     return remember(timeInMillis) {
         val hours = (timeInMillis / MS_PER_HOUR)
         val mins = timeInMillis.mod(MS_PER_HOUR) / MS_PER_MIN
+        val secs = (timeInMillis % MS_PER_MIN) / 1000
 
         buildString {
             if(hours > 0)
@@ -28,6 +31,9 @@ fun rememberFormattedDuration(timeInMillis: Long) : String {
 
             if(mins > 0)
                 append("$mins $minsStr")
+
+            if (secs > 0 || (hours.toInt() == 0 && mins == 0))
+                append("$secs $secsStr")
         }
     }
 }
