@@ -24,6 +24,7 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListUiState
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
@@ -58,6 +59,11 @@ fun ContentEntryDetailAttemptsSessionListScreen(
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
+        if(attemptsSessionListPager.isSettledEmpty) {
+            item("empty_state") {
+                UstadNothingHereYet()
+            }
+        }
         ustadPagedItems(pagingItems = attemptsSessionListItems, key = { it.contextRegistrationHi.toInt() }) { attemptsSessionListItems ->
             val timeZoneId = remember { TimeZone.currentSystemDefault().id }
 
@@ -116,44 +122,49 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                     )
                 },
                 supportingContent = {
+
                     Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Timer,
-                                contentDescription = "Icon",
-                                modifier = Modifier.padding(8.dp)
-                            )
-                            Text(
-                                text =
-                                        "$formattedDateAndTime"
+                        if(formattedDateAndTime!=null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Timer,
+                                    contentDescription = "Icon",
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                                Text(
+                                    text =
+                                    "$formattedDateAndTime"
 
-                            )
+                                )
 
+                            }
                         }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Star,
-                                contentDescription = "Icon",
-                                modifier = Modifier.padding(8.dp)
-                            )
-                            Text(
-                                text = when {
-                                    attemptsSessionListItems?.maxScore != null -> {
-                                        "${((attemptsSessionListItems.maxScore ?: 0f) * 100).toInt()}% Score"
-                                    }
+                        if(attemptsSessionListItems?.maxScore!=null ||attemptsSessionListItems?.maxProgress!=null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Star,
+                                    contentDescription = "Icon",
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                                Text(
+                                    text = when {
+                                        attemptsSessionListItems.maxScore != null -> {
+                                            "${((attemptsSessionListItems.maxScore ?: 0f) * 100).toInt()}% Score"
+                                        }
 
-                                    else -> {
-                                        "${(attemptsSessionListItems?.maxProgress)}% Completion"
+                                        else -> {
+                                            "${(attemptsSessionListItems.maxProgress)}% Completion"
+                                        }
                                     }
-                                }
-                            )
+                                )
 
+                            }
                         }
 
 
