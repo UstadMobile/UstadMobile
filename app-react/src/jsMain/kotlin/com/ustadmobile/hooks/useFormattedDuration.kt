@@ -19,6 +19,7 @@ fun useFormattedDuration(timeInMillis: Long): String {
     return useMemo(dependencies = arrayOf(timeInMillis)) {
         val hours = (timeInMillis / MS_PER_HOUR)
         val mins = timeInMillis.mod(MS_PER_HOUR) / MS_PER_MIN
+        val secs = (timeInMillis % MS_PER_MIN) / 1000
 
         buildString {
             if(hours > 0)
@@ -26,6 +27,9 @@ fun useFormattedDuration(timeInMillis: Long): String {
 
             if(mins > 0)
                 append("$mins ${stringsXml[MR.strings.xapi_minutes]}")
+
+            if (secs > 0 || (hours == 0L && mins.toLong() == 0L))
+                append("$secs ${stringsXml[MR.strings.xapi_seconds]}")
         }
     }
 }

@@ -95,22 +95,23 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                                 )
 
                                 Text(
-                                    text = formattedDuration ?: ""
+                                    text = formattedDuration
                                 )
 
                             }
                         }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Star,
-                                contentDescription = "Icon",
-                                modifier = Modifier.padding(8.dp)
-                            )
-                            Text(
-                                text = if (attemptsStatementListItems?.statementEntity?.extensionProgress == null) {
+                        if (attemptsStatementListItems?.statementEntity?.extensionProgress != null || attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Star,
+                                    contentDescription = "Icon",
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                                Text(
+                                    text =
                                     if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
                                         "${
                                             attemptsStatementListItems?.statementEntity?.resultScoreRaw?.toInt()
@@ -120,14 +121,11 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                                                 .toString()
                                         } Score"
                                     } else {
-                                        "No Score"
+                                        "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
                                     }
+                                )
 
-                                } else {
-                                    "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
-                                }
-                            )
-
+                            }
                         }
                     }
                 }
