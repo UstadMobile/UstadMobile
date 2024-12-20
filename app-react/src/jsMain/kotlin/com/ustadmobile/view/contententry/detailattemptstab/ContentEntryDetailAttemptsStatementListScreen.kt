@@ -2,7 +2,9 @@ package com.ustadmobile.view.contententry.detailattemptstab
 
 
 import app.cash.paging.PagingSourceLoadResult
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
@@ -50,7 +52,6 @@ external interface ContentEntryDetailAttemptsStatementListProps : Props {
     var refreshCommandFlow: Flow<RefreshCommand>?
 }
 
-
 val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
 
     val viewModel = useUstadViewModel { di, savedStateHandle ->
@@ -75,6 +76,9 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                 remoteMediatorResult.pagingSourceFactory, true, 50
             )
             val muiAppState = useMuiAppState()
+            val stringsXml = useStringProvider()
+            val score = stringsXml[MR.strings.content_score]
+            val percentageCompletion = stringsXml[MR.strings.content_percentage_completion]
             val isSettledEmpty = infiniteQueryResult.isSettledEmpty(remoteMediatorResult)
 
             VirtualList {
@@ -86,7 +90,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                 }
 
                 content = virtualListContent {
-                    if(isSettledEmpty) {
+                    if (isSettledEmpty) {
                         item("empty_state") {
                             UstadNothingHereYet.create()
                         }
@@ -155,9 +159,9 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                                     }/${
                                                         attemptsStatementListItems.statementEntity?.resultScoreMax?.toInt()
                                                             .toString()
-                                                    } Score"
+                                                    } $score"
                                                 } else {
-                                                    "${attemptsStatementListItems.statementEntity?.extensionProgress} %Completion"
+                                                    "${attemptsStatementListItems.statementEntity?.extensionProgress}$percentageCompletion"
                                                 }
                                             ).also { secondary = it }
                                         }

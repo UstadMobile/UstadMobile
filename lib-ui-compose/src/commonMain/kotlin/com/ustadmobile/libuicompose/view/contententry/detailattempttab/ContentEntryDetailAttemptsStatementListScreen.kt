@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Star
@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -24,6 +25,7 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberFormattedDuration
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -46,6 +48,8 @@ fun ContentEntryDetailAttemptsStatementListScreen(
     val attemptsStatementListPager =
         rememberDoorRepositoryPager(uiState.attemptsStatementList, refreshCommandFlow)
     val attemptsStatementListItems = attemptsStatementListPager.lazyPagingItems
+    val percentageCompletion = stringResource(MR.strings.content_percentage_completion)
+    val score = stringResource(MR.strings.content_score)
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -77,7 +81,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                     )
                 },
                 headlineContent = {
-                    androidx.compose.material3.Text(
+                    Text(
                         text = attemptsStatementListItems?.verb?.verbUrlId.toString()
                             .substringAfterLast("/").replaceFirstChar { it.uppercaseChar() }
                     )
@@ -93,7 +97,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                                 Icon(
 
                                     imageVector = Icons.Filled.Timer,
-                                    contentDescription = "Icon",
+                                    contentDescription = null,
                                     modifier = Modifier.padding(8.dp)
 
                                 )
@@ -123,9 +127,9 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                                         }/${
                                             attemptsStatementListItems.statementEntity?.resultScoreMax?.toInt()
                                                 .toString()
-                                        } Score"
+                                        } $score"
                                     } else {
-                                        "${attemptsStatementListItems.statementEntity?.extensionProgress} %Completion"
+                                        "${attemptsStatementListItems.statementEntity?.extensionProgress}$percentageCompletion"
                                     }
                                 )
 
