@@ -18,10 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
+import com.ustadmobile.libuicompose.components.UstadBlockIcon
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDuration
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -53,7 +56,12 @@ fun ContentEntryDetailAttemptsStatementListScreen(
             key = { it.statementEntity?.statementIdHi ?: -1 }
         ) { attemptsStatementListItems ->
 
-
+            val formattedDuration =
+                attemptsStatementListItems?.statementEntity?.resultDuration?.let {
+                    rememberFormattedDuration(
+                        timeInMillis = it,
+                    )
+                }
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable {
                 },
@@ -73,19 +81,24 @@ fun ContentEntryDetailAttemptsStatementListScreen(
 
                 supportingContent = {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Timer,
-                                contentDescription = "Icon",
-                                modifier = Modifier.padding(8.dp)
-                            )
-                            Text(
-                                text = "${attemptsStatementListItems?.statementEntity?.timestamp}"
-                            )
+                        if (formattedDuration != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
 
+                                    imageVector = Icons.Filled.Timer,
+                                    contentDescription = "Icon",
+                                    modifier = Modifier.padding(8.dp)
+
+                                )
+
+                                Text(
+                                    text = formattedDuration ?: ""
+                                )
+
+                            }
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
