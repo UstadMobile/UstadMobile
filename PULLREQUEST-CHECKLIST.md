@@ -3,6 +3,8 @@
 #### Coding style
 
 * Ensure all code follows the [Coding Style](CODING-STYLE.md)
+  
+* Files that are not related to the pull request should not be changed. Check the pull request on GitHub and make sure that no files unrelated to the pull request itself appear in the list of changes.
 
 * Ensure that all new variables and functions have **meaningful** names. The name should make the purpose clear.
 
