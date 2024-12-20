@@ -133,6 +133,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.core.viewmodel.report.ReportViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
 import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
@@ -163,6 +164,7 @@ import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
+import com.ustadmobile.libuicompose.view.report.reportedit.ReportEditScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
 import com.ustadmobile.libuicompose.view.systempermission.detail.SystemPermissionDetailScreen
 import com.ustadmobile.libuicompose.view.systempermission.edit.SystemPermissionEditScreen
@@ -384,6 +386,17 @@ fun AppNavHost(
                             backStackEntry, PersonListViewModel::class
                         ) { di, savedStateHandle ->
                             PersonListViewModel(di, savedStateHandle, destName)
+                        }
+                    )
+                }
+            }
+            ReportViewModel.ALL_DEST_NAMES.forEach { destName ->
+                contentScene("/$destName") { backStackEntry ->
+                    ReportEditScreen(
+                        appViewModel(
+                            backStackEntry, ReportViewModel::class
+                        ) { di, savedStateHandle ->
+                            ReportViewModel(di, savedStateHandle, destName)
                         }
                     )
                 }

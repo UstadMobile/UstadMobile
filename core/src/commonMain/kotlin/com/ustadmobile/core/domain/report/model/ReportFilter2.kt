@@ -2,56 +2,40 @@ package com.ustadmobile.core.domain.report.model
 
 import kotlinx.serialization.Serializable
 
+/** Enum representing different comparison types */
+enum class Comparisons {
+    EQUALS,
+    NOT_EQUALS,
+    GREATER,
+    LESSER,
+    BETWEEN,
+    IN_LIST,
+    NOT_IN_LIST
+}
+
+/** Sealed class representing different types of report filters */
 @Serializable
-class ReportFilter2(
-    var reportFilterUid: Int = 0,
-
-    var reportFilterSeriesUid: Int = 0,
-
-    var reportFilterField: Int = FIELD_PERSON_GENDER,
-
-    var reportFilterCondition: Int = 0,
-
-    var reportFilterValue: String? = null,
-
-    var reportFilterDropDownValue: Int = 0,
-
-    var reportFilterValueBetweenX: String? = null,
-
-    var reportFilterValueBetweenY: String? = null,
+sealed class ReportFilter2(
+    val comparisonTypes: List<Comparisons>
 ) {
+    @Serializable
+    data class GenderFilter(
+        val gender: String
+    ) : ReportFilter2(
+        comparisonTypes = listOf(Comparisons.EQUALS, Comparisons.NOT_EQUALS)
+    )
 
-    companion object {
+    @Serializable
+    data class AgeFilter(
+        val age: Int
+    ) : ReportFilter2(
+        comparisonTypes = listOf(Comparisons.EQUALS, Comparisons.NOT_EQUALS, Comparisons.GREATER, Comparisons.LESSER, Comparisons.BETWEEN)
+    )
 
-        const val FIELD_PERSON_GENDER = 100
-
-        const val FIELD_PERSON_AGE = 101
-
-        const val FIELD_CONTENT_COMPLETION = 102
-
-        const val FIELD_CONTENT_ENTRY = 103
-
-        const val FIELD_CONTENT_PROGRESS = 104
-
-        const val FIELD_ATTENDANCE_PERCENTAGE = 105
-
-        const val FIELD_CLAZZ_ENROLMENT_OUTCOME = 106
-
-        const val FIELD_CLAZZ_ENROLMENT_LEAVING_REASON = 107
-
-        const val CONDITION_IS = 200
-
-        const val CONDITION_IS_NOT = 201
-
-        const val CONDITION_GREATER_THAN = 202
-
-        const val CONDITION_LESS_THAN = 203
-
-        const val CONDITION_BETWEEN = 205
-
-        const val CONDITION_IN_LIST = 206
-
-        const val CONDITION_NOT_IN_LIST = 207
-
-    }
+    @Serializable
+    data class ContentCompletionFilter(
+        val completionPercentage: Int
+    ) : ReportFilter2(
+        comparisonTypes = listOf(Comparisons.EQUALS, Comparisons.GREATER, Comparisons.LESSER)
+    )
 }
