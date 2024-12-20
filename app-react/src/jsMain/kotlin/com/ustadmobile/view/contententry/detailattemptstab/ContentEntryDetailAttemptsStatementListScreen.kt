@@ -7,6 +7,8 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useFormattedDateAndTime
+import com.ustadmobile.hooks.useFormattedDuration
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
@@ -19,6 +21,7 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.datetime.TimeZone
 import mui.icons.material.Check
 import mui.icons.material.Star
 import mui.icons.material.Timer
@@ -88,6 +91,12 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                         items = infiniteQueryResult,
                         key = { it.statementEntity?.statementLct.toString() }
                     ) { attemptsStatementListItems ->
+                        val formattedDuration =
+                            attemptsStatementListItems?.statementEntity?.resultDuration?.let { it1 ->
+                                useFormattedDuration(
+                                    timeInMillis = it1,
+                                )
+                            }
                         ListItem.create {
                             Stack {
                                 direction = responsive(StackDirection.column)
@@ -109,16 +118,19 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                         )
                                     }
                                 }
-                                ListItemButton {
-                                    ListItemIcon {
-                                        Timer
-                                        sx {
-                                            padding = theme.spacing(1, 1, 1, 5)
+                                if (formattedDuration != null) {
+                                    ListItemButton {
+                                        ListItemIcon {
+                                            Timer
+                                            sx {
+                                                padding = theme.spacing(1, 1, 1, 5)
+                                            }
                                         }
-                                    }
-                                    ListItemText {
-                                        secondary = ReactNode(
-                                            "${attemptsStatementListItems?.statementEntity?.timestamp}")
+                                        ListItemText {
+                                            secondary = ReactNode(
+                                                formattedDuration
+                                            )
+                                        }
                                     }
                                 }
 
@@ -128,6 +140,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                             attemptsStatementListItems?.statementEntity?.resultScoreRaw != null || attemptsStatementListItems?.statementEntity?.extensionProgress != null -> {
                                                 Star()
                                             }
+
                                             else -> {
                                                 UstadBlankIcon()
                                             }
