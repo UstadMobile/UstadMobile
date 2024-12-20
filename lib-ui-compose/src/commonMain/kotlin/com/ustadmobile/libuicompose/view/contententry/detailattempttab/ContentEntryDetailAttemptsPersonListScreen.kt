@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.Text
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
@@ -24,6 +25,7 @@ import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
 
 
@@ -37,7 +39,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
         uiState = uiState,
         refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickEntry = viewModel::onClickEntry,
-        )
+    )
 }
 
 @Composable
@@ -45,14 +47,19 @@ fun ContentEntryDetailAttemptsPersonListScreen(
     uiState: ContentEntryDetailAttemptsPersonListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
     onClickEntry: (PersonAndPictureAndNumAttempts) -> Unit = {},
-    ) {
+) {
     val attemptsPersonListPager =
         rememberDoorRepositoryPager(uiState.attemptsPersonList, refreshCommandFlow)
+
     val attemptsPersonListItems = attemptsPersonListPager.lazyPagingItems
+    val attempts = stringResource(MR.strings.attempts)
+    val percentageCompletion = stringResource(MR.strings.content_percentage_completion)
+    val percentageScore = stringResource(MR.strings.content_percentage_score)
+
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        if(attemptsPersonListPager.isSettledEmpty) {
+        if (attemptsPersonListPager.isSettledEmpty) {
             item("empty_state") {
                 UstadNothingHereYet()
             }
@@ -66,12 +73,12 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                     attemptsPersonListItems?.also(onClickEntry)
                 },
                 headlineContent = {
-                    androidx.compose.material3.Text(
+                    Text(
                         text = attemptsPersonListItems?.person?.fullName() ?: ""
                     )
                 },
                 supportingContent = {
-                    androidx.compose.material3.Text(text = "${attemptsPersonListItems?.numAttempts.toString()} attempts")
+                    Text(text = "${attemptsPersonListItems?.numAttempts.toString()} $attempts")
                 },
                 leadingContent = {
                     UstadPersonAvatar(
@@ -94,9 +101,9 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                     Text(
                         text = when {
                             attemptsPersonListItems.maxProgress != null ->
-                                "${(attemptsPersonListItems.maxProgress ?: 0f)}% Completion"
+                                "${(attemptsPersonListItems.maxProgress ?: 0f)}$percentageCompletion"
 
-                            else -> "${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}% Score"
+                            else -> "${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}$percentageScore"
                         },
                         modifier = Modifier.padding(start = 8.dp).weight(0.3f),
                     )

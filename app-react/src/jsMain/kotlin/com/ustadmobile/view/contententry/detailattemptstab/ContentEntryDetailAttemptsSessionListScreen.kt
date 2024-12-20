@@ -1,7 +1,9 @@
 package com.ustadmobile.view.contententry.detailattemptstab
 
 import app.cash.paging.PagingSourceLoadResult
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
@@ -79,6 +81,15 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                     remoteMediatorResult.pagingSourceFactory, true, 50
                 )
             val muiAppState = useMuiAppState()
+            val stringsXml = useStringProvider()
+            val percentageScore=stringsXml[MR.strings.content_percentage_score]
+            val percentageCompletion=stringsXml[MR.strings.content_percentage_completion]
+
+            val passed=stringsXml[MR.strings.passed]
+            val failed=stringsXml[MR.strings.failed]
+            val completed=stringsXml[MR.strings.completed]
+            val incomplete=stringsXml[MR.strings.incomplete]
+
             val isSettledEmpty = infiniteQueryResult.isSettledEmpty(remoteMediatorResult)
 
             VirtualList {
@@ -136,13 +147,12 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                         primary =
                                             ReactNode(
                                                 when {
-                                                    attemptsSessionListItems?.isSuccessful == true -> "Passed"
-                                                    attemptsSessionListItems?.isSuccessful == false -> "Failed"
-                                                    attemptsSessionListItems?.isCompleted == true -> "Completed"
-                                                    else -> "Incomplete"
+                                                    attemptsSessionListItems?.isSuccessful == true -> passed
+                                                    attemptsSessionListItems?.isSuccessful == false -> failed
+                                                    attemptsSessionListItems?.isCompleted == true -> completed
+                                                    else -> incomplete
                                                 }
                                             )
-
                                     }
 
 
@@ -157,7 +167,7 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                         }
                                         ListItemText {
                                             secondary = ReactNode(
-                                                formattedDateAndTime ?: ""
+                                                formattedDateAndTime
                                             )
                                         }
                                     }
@@ -173,11 +183,11 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                         }
                                         ListItemText {
                                             secondary = ReactNode(
-                                                if (attemptsSessionListItems?.maxScore != null) {
-                                                    "${((attemptsSessionListItems.maxScore ?: 0f) * 100).toInt()}" + "% Score"
+                                                if (attemptsSessionListItems.maxScore != null) {
+                                                    "${((attemptsSessionListItems.maxScore ?: 0f) * 100).toInt()}$percentageScore"
 
                                                 } else {
-                                                    "${attemptsSessionListItems?.maxProgress}% Completion"
+                                                    "${attemptsSessionListItems.maxProgress}$percentageCompletion"
 
                                                 }
                                             )

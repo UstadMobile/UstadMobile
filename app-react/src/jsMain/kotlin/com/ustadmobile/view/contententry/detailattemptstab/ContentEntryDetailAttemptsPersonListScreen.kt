@@ -1,7 +1,9 @@
 package com.ustadmobile.view.contententry.detailattemptstab
 
 import app.cash.paging.PagingSourceLoadResult
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
@@ -35,11 +37,9 @@ import react.Props
 import react.ReactNode
 import react.create
 import tanstack.react.query.UseInfiniteQueryResult
-import web.cssom.AlignContent
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
-import web.cssom.Position
 import web.cssom.VerticalAlign
 import web.cssom.pct
 import web.cssom.px
@@ -67,7 +67,6 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                 pagingSourceFactory = props.uiState.attemptsPersonList,
                 refreshCommandFlow = (props.refreshCommandFlow ?: emptyFlow())
             )
-            println("remoteMediatorResult: $remoteMediatorResult")
 
             val infiniteQueryResult: UseInfiniteQueryResult<PagingSourceLoadResult<Int, PersonAndPictureAndNumAttempts>, Throwable> =
                 usePagingSource(
@@ -75,6 +74,10 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                 )
 
             val muiAppState = useMuiAppState()
+            val stringsXml = useStringProvider()
+            val attempts = stringsXml[MR.strings.attempts]
+            val percentageCompletion = stringsXml[MR.strings.content_percentage_completion]
+            val percentageScore = stringsXml[MR.strings.content_percentage_score]
             val isSettledEmpty = infiniteQueryResult.isSettledEmpty(remoteMediatorResult)
 
             VirtualList {
@@ -118,13 +121,13 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                                         ?: ""
                                                 )
                                             secondary = ReactNode(
-                                                "${attemptsPersonListItems?.numAttempts.toString()} attempts"
+                                                "${attemptsPersonListItems?.numAttempts.toString()} $attempts"
                                             )
                                         }
 
 
                                     }
-                                    if(attemptsPersonListItems?.maxScore!=null || attemptsPersonListItems?.maxProgress!=null) {
+                                    if (attemptsPersonListItems?.maxScore != null || attemptsPersonListItems?.maxProgress != null) {
                                         Stack {
                                             direction = responsive(StackDirection.row)
                                             LinearProgress {
@@ -143,9 +146,9 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                             ListItemText {
                                                 primary = ReactNode(
                                                     attemptsPersonListItems.maxProgress?.let {
-                                                        "${(it)}% Completion"
+                                                        "${(it)}$percentageCompletion"
                                                     }
-                                                        ?: "${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}% Score"
+                                                        ?: "${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}$percentageScore"
                                                 )
                                                 sx {
                                                     verticalAlign = VerticalAlign.middle

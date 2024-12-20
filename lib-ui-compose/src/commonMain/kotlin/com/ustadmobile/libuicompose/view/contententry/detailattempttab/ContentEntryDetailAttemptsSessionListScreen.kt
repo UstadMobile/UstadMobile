@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
@@ -31,6 +31,8 @@ import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.TimeZone
+import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.core.MR
 
 @Composable
 fun ContentEntryDetailAttemptsSessionListScreen(
@@ -56,23 +58,35 @@ fun ContentEntryDetailAttemptsSessionListScreen(
         rememberDoorRepositoryPager(uiState.attemptsSessionList, refreshCommandFlow)
     val attemptsSessionListItems = attemptsSessionListPager.lazyPagingItems
 
+    val percentageCompletion = stringResource(MR.strings.content_percentage_completion)
+    val percentageScore = stringResource(MR.strings.content_percentage_score)
+    val passed = stringResource(MR.strings.passed)
+    val failed = stringResource(MR.strings.failed)
+
+    val completed = stringResource(MR.strings.completed)
+    val incomplete = stringResource(MR.strings.incomplete)
+
+
+
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        if(attemptsSessionListPager.isSettledEmpty) {
+        if (attemptsSessionListPager.isSettledEmpty) {
             item("empty_state") {
                 UstadNothingHereYet()
             }
         }
-        ustadPagedItems(pagingItems = attemptsSessionListItems, key = { it.contextRegistrationHi.toInt() }) { attemptsSessionListItems ->
+        ustadPagedItems(
+            pagingItems = attemptsSessionListItems,
+            key = { it.contextRegistrationHi.toInt() }) { attemptsSessionListItems ->
             val timeZoneId = remember { TimeZone.currentSystemDefault().id }
 
             val formattedDateAndTime = attemptsSessionListItems?.let {
                 rememberFormattedDateTime(
                     timeInMillis = it.timeStarted,
                     timeZoneId = timeZoneId,
-                    joinDateAndTime = {date, time -> "$date - $time"},
-                    )
+                    joinDateAndTime = { date, time -> "$date - $time" },
+                )
             }
 
             androidx.compose.material3.ListItem(
@@ -80,7 +94,8 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                     attemptsSessionListItems?.also(onClickEntry)
                 },
                 leadingContent = {
-                    Icon(imageVector = when {
+                    Icon(
+                        imageVector = when {
                             attemptsSessionListItems?.isSuccessful != null -> {
                                 if (attemptsSessionListItems.isSuccessful == true) Icons.Filled.Check
                                 else Icons.Filled.Close
@@ -89,32 +104,26 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                             attemptsSessionListItems?.isCompleted == true -> Icons.Filled.Check
                             else -> Icons.Filled.Close
 
-                        }, contentDescription = when {
-                            attemptsSessionListItems?.isSuccessful != null -> {
-                                if (attemptsSessionListItems.isSuccessful == true) "Success"
-                                else "Failure"
-                            }
-
-                            attemptsSessionListItems?.isCompleted == true -> "Completed"
-                            else -> "Incomplete"
-                        }, modifier = Modifier.padding(end = 8.dp))
+                        }, contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
                 },
                 headlineContent = {
-                    androidx.compose.material3.Text(
+                    Text(
                         text = when {
                             attemptsSessionListItems?.isSuccessful != null -> {
                                 when (attemptsSessionListItems.isSuccessful) {
-                                    true -> "Passed"
-                                    false -> "Failed"
+                                    true -> passed
+                                    false -> failed
                                     else -> ""
                                 }
                             }
 
                             else -> {
                                 if (attemptsSessionListItems?.isCompleted == true) {
-                                    "Completed"
+                                    completed
                                 } else {
-                                    "Incomplete"
+                                    incomplete
                                 }
                             }
                         }
@@ -124,42 +133,41 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                 supportingContent = {
 
                     Column {
-                        if(formattedDateAndTime!=null) {
+                        if (formattedDateAndTime != null) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Timer,
-                                    contentDescription = "Icon",
+                                    contentDescription = null,
                                     modifier = Modifier.padding(8.dp)
                                 )
                                 Text(
                                     text =
                                     "$formattedDateAndTime"
-
                                 )
 
                             }
                         }
-                        if(attemptsSessionListItems?.maxScore!=null ||attemptsSessionListItems?.maxProgress!=null) {
+                        if (attemptsSessionListItems?.maxScore != null || attemptsSessionListItems?.maxProgress != null) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Star,
-                                    contentDescription = "Icon",
+                                    contentDescription = null,
                                     modifier = Modifier.padding(8.dp)
                                 )
                                 Text(
                                     text = when {
                                         attemptsSessionListItems.maxScore != null -> {
-                                            "${((attemptsSessionListItems.maxScore ?: 0f) * 100).toInt()}% Score"
+                                            "${((attemptsSessionListItems.maxScore ?: 0f) * 100).toInt()}$percentageScore"
                                         }
 
                                         else -> {
-                                            "${(attemptsSessionListItems.maxProgress)}% Completion"
+                                            "${(attemptsSessionListItems.maxProgress)}$percentageCompletion"
                                         }
                                     }
                                 )
