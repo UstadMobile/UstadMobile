@@ -283,50 +283,7 @@ expect abstract class StatementDao {
         actorUid: Long,
     ): StatementEntity?
 
-    /**
-     * Get StatementEntities required for findPersonsWithAttempts when running over http
-     */
-    @Query("""
-        SELECT StatementEntity.*
-          FROM StatementEntity
-               LEFT JOIN ClazzEnrolment 
-                         ON ClazzEnrolment.clazzEnrolmentUid =
-                           COALESCE(
-                            (SELECT ClazzEnrolment.clazzEnrolmentUid 
-                               FROM ClazzEnrolment
-                              WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
-                                AND ClazzEnrolment.clazzEnrolmentActive
-                                AND ClazzEnrolment.clazzEnrolmentClazzUid = StatementEntity.statementClazzUid 
-                           ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
-                              LIMIT 1), 0)
-         WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
-           AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
-           AND (    StatementEntity.statementActorPersonUid = :accountPersonUid
-                      OR EXISTS(SELECT CoursePermission.cpUid
-                                  FROM CoursePermission
-                                 WHERE CoursePermission.cpClazzUid = StatementEntity.statementClazzUid
-                                   AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
-                                        OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
-                                   AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
-                                   AND NOT CoursePermission.cpIsDeleted)
-                      OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
-                          ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
-                          ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
-                          
-    """)
-    abstract suspend fun findPersonsWithAttemptsStatements(
-        contentEntryUid: Long,
-        accountPersonUid: Long,
-    ): List<StatementEntity>
-
-    @HttpAccessible(
-        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
-        pullQueriesToReplicate = arrayOf(
-            HttpServerFunctionCall("findPersonsWithAttempts"),
-            HttpServerFunctionCall("findPersonsWithAttemptsStatements")
-        )
-    )
-
+    @HttpAccessible
     @Query("""
      SELECT Person.*, PersonPicture.*,
             (SELECT COUNT(*)
@@ -376,7 +333,7 @@ expect abstract class StatementDao {
       WHERE Person.personUid IN
             (SELECT DISTINCT StatementEntity.statementActorPersonUid
                FROM StatementEntity
-  LEFT JOIN ClazzEnrolment 
+                    LEFT JOIN ClazzEnrolment 
                          ON ClazzEnrolment.clazzEnrolmentUid =
                            COALESCE(
                             (SELECT ClazzEnrolment.clazzEnrolmentUid 
@@ -400,10 +357,10 @@ expect abstract class StatementDao {
                           ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
                           ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
             )      
-            """)
+""")
     abstract fun findPersonsWithAttempts(
         contentEntryUid: Long,
-        accountPersonUid: Long
+        accountPersonUid: Long,
     ): PagingSource<Int, PersonAndPictureAndNumAttempts>
 
 
