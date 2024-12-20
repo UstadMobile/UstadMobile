@@ -19,6 +19,7 @@ import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentE
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
@@ -51,9 +52,14 @@ fun ContentEntryDetailAttemptsPersonListScreen(
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
+        if(attemptsPersonListPager.isSettledEmpty) {
+            item("empty_state") {
+                UstadNothingHereYet()
+            }
+        }
         ustadPagedItems(
             pagingItems = attemptsPersonListItems,
-            key = { it.person?.personUid ?: -1 }
+            key = { it.person.personUid }
         ) { attemptsPersonListItems ->
             ListItem(
                 modifier = Modifier.clickable {
@@ -74,24 +80,27 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                     )
                 }
             )
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val progressValue = attemptsPersonListItems?.maxProgress?.toFloat()
-                    ?: attemptsPersonListItems?.maxScore ?: 0f
-                LinearProgressIndicator(
-                    progress = progressValue,
-                    modifier = Modifier.weight(0.7f).padding(start=12.dp),
-                )
-                Text(
-                    text = when {
-                        attemptsPersonListItems?.maxProgress !=null ->
-                            "${(attemptsPersonListItems.maxProgress?: 0f)}% Completion"
-                        else ->"${((attemptsPersonListItems?.maxScore ?: 0f) * 100).toInt()}% Score"
-                    },
-                    modifier = Modifier.padding(start = 8.dp).weight(0.3f),
-                )
+            if (attemptsPersonListItems?.maxScore != null || attemptsPersonListItems?.maxProgress != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val progressValue = attemptsPersonListItems.maxProgress?.toFloat()
+                        ?: attemptsPersonListItems.maxScore ?: 0f
+                    LinearProgressIndicator(
+                        progress = progressValue,
+                        modifier = Modifier.weight(0.7f).padding(start = 12.dp),
+                    )
+                    Text(
+                        text = when {
+                            attemptsPersonListItems.maxProgress != null ->
+                                "${(attemptsPersonListItems.maxProgress ?: 0f)}% Completion"
+
+                            else -> "${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}% Score"
+                        },
+                        modifier = Modifier.padding(start = 8.dp).weight(0.3f),
+                    )
+                }
             }
         }
     }
