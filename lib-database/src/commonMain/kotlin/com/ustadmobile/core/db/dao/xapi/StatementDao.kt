@@ -283,6 +283,7 @@ expect abstract class StatementDao {
         actorUid: Long,
     ): StatementEntity?
 
+
     /**
      * Get StatementEntities required for findPersonsWithAttempts when running over http
      */
@@ -326,7 +327,6 @@ expect abstract class StatementDao {
             HttpServerFunctionCall("findPersonsWithAttemptsStatements")
         )
     )
-
     @Query("""
      SELECT Person.*, PersonPicture.*,
             (SELECT COUNT(*)
@@ -376,7 +376,7 @@ expect abstract class StatementDao {
       WHERE Person.personUid IN
             (SELECT DISTINCT StatementEntity.statementActorPersonUid
                FROM StatementEntity
-  LEFT JOIN ClazzEnrolment 
+                    LEFT JOIN ClazzEnrolment 
                          ON ClazzEnrolment.clazzEnrolmentUid =
                            COALESCE(
                             (SELECT ClazzEnrolment.clazzEnrolmentUid 
@@ -400,10 +400,10 @@ expect abstract class StatementDao {
                           ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
                           ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
             )      
-            """)
+""")
     abstract fun findPersonsWithAttempts(
         contentEntryUid: Long,
-        accountPersonUid: Long
+        accountPersonUid: Long,
     ): PagingSource<Int, PersonAndPictureAndNumAttempts>
 
 

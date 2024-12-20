@@ -6,7 +6,6 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import kotlinx.coroutines.flow.update
@@ -32,7 +31,7 @@ class ContentEntryDetailAttemptsPersonListViewModel(
         val pagingSource =
             activeRepo.statementDao().findPersonsWithAttempts(
                 contentEntryUid = contentEntryUid,
-                accountPersonUid = activeUserPersonUid
+                accountPersonUid = activeUserPersonUid,
             )
         return pagingSource
     }
@@ -62,7 +61,7 @@ class ContentEntryDetailAttemptsPersonListViewModel(
         navController.navigate(
             viewName = ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME,
             args = mapOf(
-                UstadView.ARG_PERSON_UID to entry.person.personUid.toString(),
+                UstadView.ARG_PERSON_UID to (entry.person?.personUid ?: 0).toString(),
                 UstadView.ARG_CONTENT_ENTRY_UID to entityUidArg.toString(),
             )
         )
