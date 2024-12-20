@@ -2,15 +2,11 @@ package com.ustadmobile.core.db.dao.xapi
 
 import androidx.room.Insert
 import androidx.room.Query
-import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.db.composites.PersonAndAttemptInfo
-import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
-import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository

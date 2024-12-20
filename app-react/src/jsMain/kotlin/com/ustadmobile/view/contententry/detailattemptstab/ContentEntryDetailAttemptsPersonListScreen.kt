@@ -10,7 +10,8 @@ import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
-import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
+import com.ustadmobile.mui.components.UstadNothingHereYet
+import com.ustadmobile.util.ext.isSettledEmpty
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -74,6 +75,8 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                 )
 
             val muiAppState = useMuiAppState()
+            val isSettledEmpty = infiniteQueryResult.isSettledEmpty(remoteMediatorResult)
+
             VirtualList {
                 style = jso {
                     height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
@@ -83,6 +86,11 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                 }
                 content =
                     virtualListContent {
+                        if (isSettledEmpty) {
+                            item("empty_state") {
+                                UstadNothingHereYet.create()
+                            }
+                        }
                         infiniteQueryPagingItems(
                             items = infiniteQueryResult,
                             key = { it.person.personUid.toString() }
@@ -111,45 +119,39 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                                 )
                                             secondary = ReactNode(
                                                 "${attemptsPersonListItems?.numAttempts.toString()} attempts"
-                                                    ?: "0 attempts"
                                             )
                                         }
 
 
                                     }
-                                    Stack {
-                                        direction = responsive(StackDirection.row)
+                                    if(attemptsPersonListItems?.maxScore!=null || attemptsPersonListItems?.maxProgress!=null) {
+                                        Stack {
+                                            direction = responsive(StackDirection.row)
+                                            LinearProgress {
+                                                sx {
+                                                    width = 500.px
+                                                    height = 4.px
 
-                                        LinearProgress {
-                                            sx {
-                                                width = 500.px
-                                                height = 4.px
-
+                                                }
+                                                variant = LinearProgressVariant.determinate
+                                                value =
+                                                    attemptsPersonListItems.maxProgress
+                                                        ?: (attemptsPersonListItems.maxScore?.times(
+                                                            100
+                                                        ) ?: 0)
                                             }
-                                            variant = LinearProgressVariant.determinate
-                                            // Set value based on whether extensionProgress is not null
-                                            value =
-                                                attemptsPersonListItems?.maxProgress?.let {
-                                                    it
+                                            ListItemText {
+                                                primary = ReactNode(
+                                                    attemptsPersonListItems.maxProgress?.let {
+                                                        "${(it)}% Completion"
+                                                    }
+                                                        ?: "${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}% Score"
+                                                )
+                                                sx {
+                                                    verticalAlign = VerticalAlign.middle
+                                                    marginLeft = 8.px
+                                                    paddingTop = 1.px
                                                 }
-                                                    ?: (attemptsPersonListItems?.maxScore?.times(
-                                                        100
-                                                    )
-                                                        ?: 0)
-                                        }
-                                        ListItemText {
-                                            primary = ReactNode(
-                                                attemptsPersonListItems?.maxProgress?.let {
-                                                    "${(it)}% Completion"
-                                                }
-                                                    ?: "${((attemptsPersonListItems?.maxScore ?: 0f) * 100).toInt()}% Score"
-                                            )
-                                            sx {
-                                                verticalAlign = VerticalAlign.middle
-                                                marginLeft =
-                                                    8.px
-                                                paddingTop =
-                                                    1.px
                                             }
                                         }
                                     }

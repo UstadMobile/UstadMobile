@@ -9,7 +9,6 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
-import com.ustadmobile.lib.db.composites.StatementAndPersonAndPicture
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 
