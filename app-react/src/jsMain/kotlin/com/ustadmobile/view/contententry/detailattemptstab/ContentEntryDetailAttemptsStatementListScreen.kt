@@ -13,6 +13,8 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import com.ustadmobile.mui.components.ThemeContext
+import com.ustadmobile.mui.components.UstadNothingHereYet
+import com.ustadmobile.util.ext.isSettledEmpty
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
@@ -73,6 +75,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                 remoteMediatorResult.pagingSourceFactory, true, 50
             )
             val muiAppState = useMuiAppState()
+            val isSettledEmpty = infiniteQueryResult.isSettledEmpty(remoteMediatorResult)
 
             VirtualList {
                 style = jso {
@@ -83,7 +86,11 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                 }
 
                 content = virtualListContent {
-
+                    if(isSettledEmpty) {
+                        item("empty_state") {
+                            UstadNothingHereYet.create()
+                        }
+                    }
                     infiniteQueryPagingItems(
                         items = infiniteQueryResult,
                         key = { it.statementEntity?.statementLct.toString() }
