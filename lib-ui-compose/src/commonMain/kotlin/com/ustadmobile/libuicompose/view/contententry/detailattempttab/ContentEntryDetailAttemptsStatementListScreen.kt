@@ -18,12 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
-import com.ustadmobile.libuicompose.components.UstadBlockIcon
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
-import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import com.ustadmobile.libuicompose.util.rememberFormattedDuration
 import kotlinx.coroutines.flow.Flow
 
@@ -51,6 +50,11 @@ fun ContentEntryDetailAttemptsStatementListScreen(
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
+        if(attemptsStatementListPager.isSettledEmpty) {
+            item("empty_state") {
+                UstadNothingHereYet()
+            }
+        }
         ustadPagedItems(
             pagingItems = attemptsStatementListItems,
             key = { it.statementEntity?.statementIdHi ?: -1 }
@@ -112,16 +116,16 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                                 )
                                 Text(
                                     text =
-                                    if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
+                                    if (attemptsStatementListItems.statementEntity?.resultScoreRaw != null) {
                                         "${
-                                            attemptsStatementListItems?.statementEntity?.resultScoreRaw?.toInt()
+                                            attemptsStatementListItems.statementEntity?.resultScoreRaw?.toInt()
                                                 .toString()
                                         }/${
-                                            attemptsStatementListItems?.statementEntity?.resultScoreMax?.toInt()
+                                            attemptsStatementListItems.statementEntity?.resultScoreMax?.toInt()
                                                 .toString()
                                         } Score"
                                     } else {
-                                        "${attemptsStatementListItems?.statementEntity?.extensionProgress} %Completion"
+                                        "${attemptsStatementListItems.statementEntity?.extensionProgress} %Completion"
                                     }
                                 )
 
