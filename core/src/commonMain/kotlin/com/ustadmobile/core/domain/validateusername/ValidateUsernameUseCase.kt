@@ -6,53 +6,40 @@ class ValidateUsernameUseCase {
      * - Must not contain special characters (except . and _)
      * - Must not start with a number
      * - All letters will be converted to lowercase
-     * - Returns cleaned username or null if invalid
-     *
+     * - Any banned characters will be replaced with provided replacement string
      * @param username The username string to validate
-     * @param invalidReplacement String to replace invalid characters with (default empty string)
-     * @return The valid username if valid, or null if invalid
      */
     operator fun invoke(
         username: String,
         invalidReplacement: String = ""
     ): String? {
         val trimmed = username.trim()
-        if (trimmed.isEmpty()) return null
+        if(trimmed.isEmpty()) return null
 
-        // Convert to lowercase
         val lowercased = trimmed.lowercase()
 
-        // Check if starts with number
-        if (lowercased.firstOrNull()?.isDigit() == true) {
+        // Return null if starts with number
+        if(lowercased.firstOrNull()?.isDigit() == true) {
             return null
         }
 
-        // Check for invalid characters
-        val containsInvalidChars = lowercased.any { !isCharacterAllowed(it) }
-        if (containsInvalidChars && invalidReplacement.isEmpty()) {
-            return null
-        }
+        // Replace any invalid characters with replacement
+        val result = lowercased.map { char ->
+            if(isCharacterAllowed(char)) {
+                char.toString()
+            } else {
+                invalidReplacement
+            }
+        }.joinToString("")
 
-        // Replace invalid characters if replacement provided
-        return if (containsInvalidChars) {
-            lowercased.map { char ->
-                when {
-                    !isCharacterAllowed(char) -> invalidReplacement
-                    char.isWhitespace() -> invalidReplacement
-                    else -> char
-                }
-            }.joinToString("")
-        } else {
-            lowercased.replace("\\s+".toRegex(), invalidReplacement)
-        }
-
+        return result.ifEmpty { null }
     }
 
     /**
-     * Check if character is allowed in username for keyboard input
+     * Check if character is allowed in username
      * @param char Character to check
      * @param isFirstChar Whether this is first character being typed
-     * @return true if character is allowed
+     * @return true if character is allowed, false otherwise
      */
     fun isCharacterAllowed(char: Char, isFirstChar: Boolean = false): Boolean {
         return when {

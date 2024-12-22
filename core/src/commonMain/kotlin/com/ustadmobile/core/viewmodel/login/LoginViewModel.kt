@@ -160,19 +160,9 @@ class LoginViewModel(
     }
 
     fun onUsernameChanged(newValue: String) {
-        // If no input or input is valid (including whitespace)
-        val lastChar = newValue.lastOrNull()
-        val isFirstChar = newValue.length == 1
+        val validatedUsername = validateUsernameUseCase(newValue)
 
-        val isValid = when {
-            newValue.isEmpty() -> true
-            lastChar?.isWhitespace() == true -> true // Allow whitespace
-            isFirstChar && lastChar?.isDigit() == true -> false // Block starting with number
-            lastChar != null -> validateUsernameUseCase.isCharacterAllowed(lastChar, isFirstChar)
-            else -> true
-        }
-
-        if (isValid) {
+        if (validatedUsername != null || newValue.isEmpty()) {
             _uiState.update { prev ->
                 prev.copy(
                     username = newValue,
