@@ -61,7 +61,6 @@ nestedscroll-webview =  "0.1.6"
 androidx-webkit =  "1.10.0"
 androidx-browser =  "1.8.0"
 conveyor =  "1.5"
-download-task =  "5.5.0"
 jspecify =  "0.3.0"
 apache-commons-pool2 =  "2.12.0"
 apache-commons-pool1 =  "1.6"
@@ -135,6 +134,8 @@ agp = "8.7.2"
 kotlin-version = "1.9.23"
 xxhashjs = "^0.2.2"
 kotlin-wrappers = "1.0.0-pre.721"
+android-nsd-rx = "3.0.35"
+rxjava = "3.1.10"
 
 [plugins]
 
@@ -375,3 +376,6 @@ androidx-credentials = { group = "androidx.credentials", name = "credentials", v
 sqldelight-sqlite-driver-jvm = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
 sqldelight-sqlite-driver-android = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
 sqldelight-coroutine-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
+
+android-nsd-rx = { group = "com.ToxicBakery.library.nsd.rx", name = "android-nsd-rx", version.ref = "android-nsd-rx" }
+rxjava = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxjava" }

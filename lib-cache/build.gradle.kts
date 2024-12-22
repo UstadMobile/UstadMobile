@@ -71,6 +71,8 @@ kotlin {
             dependencies {
                 implementation(libs.androidx.room.ktx)
                 implementation(libs.androidx.room.runtime)
+                implementation(libs.android.nsd.rx)
+                implementation(libs.rxjava)
             }
         }
 
