@@ -99,7 +99,6 @@ env:
     visible: "Play"
     timeout: 20000
 - back
-
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - tapOn: "True/False Question"
@@ -133,26 +132,18 @@ env:
 - assertVisible: "Student 1"
 - assertVisible: "100% Completion"
 - tapOn: "Student 1"
-- assertVisible:
-    text: "Completed"
-    index: 1
-#- runScript:    file: "../common/setDate.js"
-#- assertVisible: ${output.currentDate}
+- assertVisible: "Completed"
 - assertVisible: "100% Completion"
-- tapOn:
-    text: "Completed"
-    index: 1
+- tapOn: "Completed"
 - assertVisible: "Completed"
 - assertVisible:
-    text: "100 %Completion"
-    index: 0
+         text: "100% Completion"
+         index: 0
 - assertVisible: "Progressed"
-- tapOn:
-    text: "100 %Completion"
+- assertVisible:
+    text: "100% Completion"
     index: 1
-#- runFlow: "../common/clear_state_and_get_started.yaml"
-- tapOn: "S"
-- tapOn: "Log out"
+- runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -184,22 +175,16 @@ env:
 - assertVisible: "Student 1"
 - assertVisible: "100% Completion"
 - tapOn: "Student 1"
-- assertVisible:
-    text: "Completed"
-    index: 1
-#- runScript:    file: "../common/setDate.js"
-#- assertVisible: ${output.currentDate}
+- assertVisible: "Completed"
 - assertVisible: "100% Completion"
-- tapOn:
-    text: "Completed"
-    index: 1
+- tapOn: "Completed"
 - assertVisible: "Completed"
 - assertVisible:
-    text: "100 %Completion"
+    text: "100% Completion"
     index: 0
 - assertVisible: "Progressed"
-- tapOn:
-    text: "100 %Completion"
+- assertVisible:
+    text: "100% Completion"
     index: 1
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
