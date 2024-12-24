@@ -6,6 +6,7 @@ import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.NeighborCache
 import com.ustadmobile.libcache.db.entities.NeighborCacheEntry
 import com.ustadmobile.libcache.distributed.DistributedCacheConstants.DCACHE_LOGTAG
+import com.ustadmobile.libcache.distributed.model.DistributedCachePacket
 import com.ustadmobile.libcache.distributed.model.DistributedHashCacheEntry
 import com.ustadmobile.libcache.distributed.model.DistributedHashEntries
 import com.ustadmobile.libcache.logging.UstadCacheLogger
@@ -132,20 +133,27 @@ class DistributedCacheHashtable(
                     )
 
                     val neighborUid = xxStringHasher.neighborUid(packet.address, packet.port)
-                    val hashEntries = DistributedHashEntries.fromBytes(packet.data, packet.offset, packet.length)
+                    val dCachePacket = DistributedCachePacket.fromBytes(packet.data, packet.offset, packet.length)
 
                     cacheDb.neighborCacheDao.updateHttpPort(neighborUid, packet.port)
-                    cacheDb.neighborCacheEntryDao.upsertList(
-                        hashEntries.entries.map {
-                            NeighborCacheEntry(
-                                nceNeighborUid = neighborUid, nceUrlHash = it.urlHash
+
+                    when(dCachePacket) {
+                        is DistributedHashEntries -> {
+                            cacheDb.neighborCacheEntryDao.upsertList(
+                                dCachePacket.entries.map {
+                                    NeighborCacheEntry(
+                                        nceNeighborUid = neighborUid, nceUrlHash = it.urlHash
+                                    )
+                                }
+                            )
+                            logger.d(DCACHE_LOGTAG,
+                                "$logPrefix saved hashes from ${packet.socketAddress} to database"
                             )
                         }
-                    )
-
-                    logger.d(DCACHE_LOGTAG,
-                        "$logPrefix saved hashes from ${packet.socketAddress} to database"
-                    )
+                        else -> {
+                            //do nothing
+                        }
+                    }
                 }catch(e: Exception) {
                     logger.e(DCACHE_LOGTAG, "$logPrefix exception reading incoming hashes", e)
                 }

@@ -29,6 +29,11 @@ import kotlin.concurrent.withLock
  *  b) When calling resolve in onServiceFound we create a new class. If resolveService is called
  *     twice using the same listener (before the first resolve call has completed), this leads to
  *     an exception being thrown.
+ *
+ * The service is generally registered whenever the application is running (e.g. created). Discovery
+ * should generally run only when the application is in the foreground (e.g. started) because the
+ * discovery process is an 'expensive' (e.g. power consuming) operation as per
+ * https://developer.android.com/develop/connectivity/wifi/use-nsd#teardown .
  */
 class DistributedCacheNsdAndroid(
     context: Context,
