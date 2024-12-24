@@ -3,6 +3,9 @@ package com.ustadmobile.libcache.distributed
 import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import com.ustadmobile.libcache.distributed.DistributedCacheConstants.DCACHE_LOGTAG
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import kotlinx.coroutines.CoroutineScope
@@ -34,11 +37,6 @@ class DistributedCacheNsdAndroid(
     private val listener: DistributedCacheNeighborDiscoveryListener,
 ) {
 
-    /**
-     * The currently registered service name
-     */
-    private var mServiceName: String? = SERVICE_NAME
-
     private val scope = CoroutineScope(Dispatchers.IO + Job())
 
     private val serviceInfo = NsdServiceInfo().apply {
@@ -49,10 +47,9 @@ class DistributedCacheNsdAndroid(
         setPort(this@DistributedCacheNsdAndroid.port)
     }
 
-    private val registrationListener = object: NsdManager.RegistrationListener {
+    inner class RegistrationListener : NsdManager.RegistrationListener {
 
         override fun onServiceRegistered(serviceInfo: NsdServiceInfo) {
-            mServiceName = serviceInfo.serviceName
             logger.i(DCACHE_LOGTAG, "Registered: $serviceInfo")
         }
 
@@ -110,7 +107,7 @@ class DistributedCacheNsdAndroid(
          *
          * @param other service type (without trailing .)
          */
-        fun String.serviceTypeMatches(other: String): Boolean {
+        private fun String.serviceTypeMatches(other: String): Boolean {
             return this == other || this == "${other}."
         }
 
@@ -155,10 +152,45 @@ class DistributedCacheNsdAndroid(
     @Volatile
     private var mDiscoveryListener: DiscoveryListener? = null
 
+    private var mRegistrationListener: RegistrationListener? = null
+
     private val discoveryLock = ReentrantLock()
 
-    init {
-        nsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, registrationListener)
+    private val registrationLock = ReentrantLock()
+
+    private val lifecycleObserver = object: DefaultLifecycleObserver {
+
+        override fun onCreate(owner: LifecycleOwner) {
+            registerService()
+        }
+
+        override fun onDestroy(owner: LifecycleOwner) {
+            unregisterService()
+        }
+
+        override fun onStart(owner: LifecycleOwner) {
+            startDiscovery()
+        }
+
+        override fun onStop(owner: LifecycleOwner) {
+            stopDiscovery()
+        }
+    }
+
+    /**
+     * Initialize the distributed cache to follow a LifecycleOwner . When the lifecycle state is at
+     * least created, then the NSD service will be registered. When the lifecycle state is at least
+     * started NSD discovery will run.
+     */
+    fun initWithLifecycleOwner(lifecycleOwner: LifecycleOwner) {
+        val currentState = lifecycleOwner.lifecycle.currentState
+        if(currentState.isAtLeast(Lifecycle.State.CREATED))
+            registerService()
+
+        if(currentState.isAtLeast(Lifecycle.State.STARTED))
+            startDiscovery()
+
+        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
     }
 
     /**
@@ -167,8 +199,10 @@ class DistributedCacheNsdAndroid(
      */
     fun startDiscovery() {
         discoveryLock.withLock {
-            mDiscoveryListener = DiscoveryListener().also {
-                nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, it)
+            if(mDiscoveryListener == null) {
+                mDiscoveryListener = DiscoveryListener().also {
+                    nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, it)
+                }
             }
         }
     }
@@ -182,6 +216,26 @@ class DistributedCacheNsdAndroid(
             if(discoveryListenerVal != null) {
                 nsdManager.stopServiceDiscovery(discoveryListenerVal)
                 mDiscoveryListener = null
+            }
+        }
+    }
+
+    fun registerService() {
+        registrationLock.withLock {
+            if(mRegistrationListener == null) {
+                mRegistrationListener = RegistrationListener().also {
+                    nsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, it)
+                }
+            }
+        }
+    }
+
+    fun unregisterService() {
+        registrationLock.withLock {
+            val registrationListenerVal = mRegistrationListener
+            if(registrationListenerVal != null) {
+                nsdManager.unregisterService(registrationListenerVal)
+                mRegistrationListener = null
             }
         }
     }
