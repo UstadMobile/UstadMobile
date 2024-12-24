@@ -25,6 +25,9 @@ import org.kodein.di.provider
 import org.kodein.di.scoped
 import android.content.Intent
 import android.net.Uri
+import com.ustadmobile.libcache.distributed.DistributedCacheNsdAndroid
+import kotlinx.coroutines.Dispatchers
+import org.kodein.di.direct
 
 
 class AppActivity: AbstractAppActivity() {
@@ -33,7 +36,6 @@ class AppActivity: AbstractAppActivity() {
     private var mCustomTabsClient: CustomTabsClient? = null
 
     private var mCustomTabsSession: CustomTabsSession? = null
-
 
 
     override val di by DI.lazy {
@@ -143,6 +145,19 @@ class AppActivity: AbstractAppActivity() {
 
         //App must be fully restart when locale changes - see SetLanguageUseCaseAndroid for details.
         ProcessPhoenix.triggerRebirth(this@AppActivity)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            di.direct.instance<DistributedCacheNsdAndroid>().startDiscovery()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        di.direct.instance<DistributedCacheNsdAndroid>().stopDiscovery()
     }
 
     override fun onDestroy() {

@@ -11,6 +11,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.net.InetAddress
 import java.net.NetworkInterface
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.Volatile
+import kotlin.concurrent.withLock
 
 /**
  * This is mostly as per as per https://developer.android.com/develop/connectivity/wifi/use-nsd
@@ -55,7 +58,6 @@ class DistributedCacheNsdAndroid(
 
         override fun onServiceUnregistered(serviceInfo: NsdServiceInfo) {
             logger.i(DCACHE_LOGTAG, "Unregistered: $serviceInfo")
-            nsdManager.stopServiceDiscovery(discoveryListener)
         }
 
         override fun onRegistrationFailed(serviceInfo: NsdServiceInfo, errorCode: Int) {
@@ -88,15 +90,14 @@ class DistributedCacheNsdAndroid(
                 if(neighborHostAddr !in localAddresses) {
                     listener.onNeighborDiscovered(neighborHostAddr.hostName, serviceInfo.port)
                 }else {
-                    logger.e(DCACHE_LOGTAG, "Error: could not get neighborUrl. Url should not " +
-                            "have been null after service resolved")
+                    logger.d(DCACHE_LOGTAG, "$neighborHostAddr is local device")
                 }
             }
         }
     }
 
     // Instantiate a new DiscoveryListener
-    private val discoveryListener = object : NsdManager.DiscoveryListener {
+    inner class DiscoveryListener : NsdManager.DiscoveryListener {
 
         // Called as soon as service discovery begins.
         override fun onDiscoveryStarted(regType: String) {
@@ -151,11 +152,39 @@ class DistributedCacheNsdAndroid(
         }
     }
 
+    @Volatile
+    private var mDiscoveryListener: DiscoveryListener? = null
+
+    private val discoveryLock = ReentrantLock()
+
     init {
         nsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, registrationListener)
-        nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, discoveryListener)
     }
 
+    /**
+     * As per the docs: Service discovery is a more 'expensive' (e.g. battery consuming) operation.
+     * This is best done only when the app is in the foreground (e.g. started by Activity.onStart)
+     */
+    fun startDiscovery() {
+        discoveryLock.withLock {
+            mDiscoveryListener = DiscoveryListener().also {
+                nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, it)
+            }
+        }
+    }
+
+    /**
+     * Stop discovery: should generally be done when the app is going into the background.
+     */
+    fun stopDiscovery() {
+        discoveryLock.withLock {
+            val discoveryListenerVal = mDiscoveryListener
+            if(discoveryListenerVal != null) {
+                nsdManager.stopServiceDiscovery(discoveryListenerVal)
+                mDiscoveryListener = null
+            }
+        }
+    }
 
     companion object {
 
