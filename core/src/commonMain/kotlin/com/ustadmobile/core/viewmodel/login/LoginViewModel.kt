@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -78,6 +79,8 @@ class LoginViewModel(
     private val setLanguageUseCase: SetLanguageUseCase by instance()
 
     private val languagesConfig: SupportedLanguagesConfig by instance()
+
+    private val filterUsernameUseCase: FilterUsernameUseCase by instance()
 
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
@@ -156,10 +159,18 @@ class LoginViewModel(
         }
     }
 
-    fun onUsernameChanged(username: String) {
+    fun onUsernameChanged(newValue: String) {
+        val filteredUsername = filterUsernameUseCase(newValue, ' ')
         _uiState.update { prev ->
-            prev.copy(username = username)
+            prev.copy(
+                username = filteredUsername,
+                usernameError = null
+            )
         }
+    }
+
+    fun onUsernameKeyEvent(char: Char, isFirstChar: Boolean): Boolean {
+        return filterUsernameUseCase.shouldBlockKeyEvent(char, isFirstChar)
     }
 
     fun onPasswordChanged(password: String) {

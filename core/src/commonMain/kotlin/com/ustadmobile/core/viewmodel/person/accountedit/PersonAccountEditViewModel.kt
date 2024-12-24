@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -78,6 +79,8 @@ class PersonAccountEditViewModel(
     private val authManager: AuthManager by on(accountManager.activeEndpoint).instance()
 
     private val setPasswordUseCase: SetPasswordUseCase by on(accountManager.activeEndpoint).instance()
+
+    private val filterUsernameUseCase: FilterUsernameUseCase by instance()
 
     init {
         _appUiState.value = AppUiState(
@@ -178,6 +181,9 @@ class PersonAccountEditViewModel(
         )
     }
 
+    fun onUsernameKeyEvent(char: Char, isFirstChar: Boolean): Boolean {
+        return filterUsernameUseCase.shouldBlockKeyEvent(char, isFirstChar)
+    }
 
     fun onClickSave() {
         if(loadingState == LoadingUiState.INDETERMINATE)

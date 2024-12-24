@@ -10,6 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
@@ -42,6 +46,7 @@ fun PersonEditScreen(viewModel: PersonEditViewModel) {
         onPersonPictureUriChanged = viewModel::onPersonPictureChanged,
         onNationalNumberSetChanged = viewModel::onNationalPhoneNumSetChanged,
         onPasswordChanged = viewModel::onPasswordChanged,
+        onUsernameKeyEvent = viewModel::onUsernameKeyEvent,
     )
 }
 
@@ -53,6 +58,7 @@ fun PersonEditScreen(
     onApprovalPersonParentJoinChanged: (PersonParentJoin?) -> Unit = {},
     onPersonPictureUriChanged: (String?) -> Unit = { },
     onNationalNumberSetChanged: (Boolean) -> Unit = { },
+    onUsernameKeyEvent: (Char, Boolean) -> Boolean = { _, _ -> false }
 ){
     UstadVerticalScrollColumn(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -221,7 +227,14 @@ fun PersonEditScreen(
 
         if (uiState.usernameVisible){
             OutlinedTextField(
-                modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding().onKeyEvent { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyDown) {
+                        onUsernameKeyEvent(
+                            keyEvent.utf16CodePoint.toChar(),
+                            uiState.person?.username?.isEmpty() ?: true
+                        )
+                    } else false
+                },
                 value = uiState.person?.username ?: "",
                 label = { Text(stringResource(MR.strings.username)) },
                 enabled = uiState.fieldsEnabled,

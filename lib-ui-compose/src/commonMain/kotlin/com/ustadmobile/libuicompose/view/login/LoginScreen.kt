@@ -17,6 +17,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalUriHandler
@@ -48,6 +52,7 @@ fun LoginScreen(
         onClickConnectAsGuest = viewModel::onClickConnectAsGuest,
         onUsernameValueChange = viewModel::onUsernameChanged,
         onPasswordValueChange = viewModel::onPasswordChanged,
+        onUsernameKeyEvent = viewModel::onUsernameKeyEvent,
     )
 }
 
@@ -59,6 +64,7 @@ fun LoginScreen(
     onClickConnectAsGuest: () -> Unit = {},
     onUsernameValueChange: (String) -> Unit = {},
     onPasswordValueChange: (String) -> Unit = {},
+    onUsernameKeyEvent: (Char, Boolean) -> Boolean = { _, _ -> false }
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize(),
@@ -71,7 +77,15 @@ fun LoginScreen(
             modifier = Modifier
                 .testTag("username")
                 .defaultItemPadding()
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .onKeyEvent { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyDown) {
+                        onUsernameKeyEvent(
+                            keyEvent.utf16CodePoint.toChar(),
+                            uiState.username.isEmpty()
+                        )
+                    } else false
+                },
             value = uiState.username,
             singleLine = true,
             label = {

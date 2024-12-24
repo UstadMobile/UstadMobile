@@ -5,6 +5,7 @@ import com.russhwolf.settings.set
 import com.ustadmobile.BuildConfigJs
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
@@ -79,6 +80,10 @@ internal fun ustadJsDi(
         DismissSocialWarningUseCase(
             settings = instance()
         )
+    }
+
+    bind<FilterUsernameUseCase>() with singleton {
+        FilterUsernameUseCase()
     }
 
     bind<AppConfig>() with singleton {

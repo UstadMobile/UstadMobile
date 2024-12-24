@@ -5,6 +5,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
@@ -151,6 +152,8 @@ class PersonEditViewModel(
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase by instance()
 
     private val validateEmailUseCase = ValidateEmailUseCase()
+
+    private val filterUsernameUseCase: FilterUsernameUseCase by instance()
 
     private val genderConfig : GenderConfig by instance()
 
@@ -308,6 +311,10 @@ class PersonEditViewModel(
 
         scheduleEntityCommitToSavedState(entity, serializer = Person.serializer(),
             commitDelay = 200)
+    }
+
+    fun onUsernameKeyEvent(char: Char, isFirstChar: Boolean): Boolean {
+        return filterUsernameUseCase.shouldBlockKeyEvent(char, isFirstChar)
     }
 
     fun onPasswordChanged(password: String?) {

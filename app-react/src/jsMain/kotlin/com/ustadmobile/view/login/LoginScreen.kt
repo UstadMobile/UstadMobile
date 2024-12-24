@@ -31,6 +31,7 @@ external interface LoginProps : Props {
     var onUsernameValueChange: (String) -> Unit
     var onPasswordValueChange: (String) -> Unit
     var onChangeLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit
+    var onUsernameKeyEvent: (Char, Boolean) -> Boolean
 }
 
 val LoginScreen = FC<Props> {
@@ -48,6 +49,7 @@ val LoginScreen = FC<Props> {
         onUsernameValueChange = viewModel::onUsernameChanged
         onPasswordValueChange = viewModel::onPasswordChanged
         onChangeLanguage = viewModel::onChangeLanguage
+        onUsernameKeyEvent = viewModel::onUsernameKeyEvent
     }
 }
 
@@ -73,6 +75,15 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 label = ReactNode(strings[MR.strings.username])
                 onTextChange = {
                     props.onUsernameValueChange(it)
+                }
+                onKeyDown = { event ->
+                    val char = event.key.singleOrNull()
+                    if (char != null) {
+                        val isFirstChar = props.uiState.username.isEmpty()
+                        if (props.onUsernameKeyEvent(char, isFirstChar)) {
+                            event.preventDefault()
+                        }
+                    }
                 }
                 error = props.uiState.usernameError != null
                 helperText = props.uiState.usernameError?.let { ReactNode(it) }

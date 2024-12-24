@@ -12,6 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditUiState
@@ -33,7 +37,8 @@ fun PersonAccountEditScreen(
 
     PersonAccountEditScreen(
         uiState = uiState,
-        onChange = viewModel::onEntityChanged
+        onChange = viewModel::onEntityChanged,
+        onUsernameKeyEvent = viewModel::onUsernameKeyEvent
     )
 }
 
@@ -41,6 +46,7 @@ fun PersonAccountEditScreen(
 fun PersonAccountEditScreen(
     uiState: PersonAccountEditUiState,
     onChange: (PersonUsernameAndPasswordModel?) -> Unit = { },
+    onUsernameKeyEvent: (Char, Boolean) -> Boolean = { _, _ -> false }
 ) {
     Column(
         modifier = Modifier
@@ -52,7 +58,14 @@ fun PersonAccountEditScreen(
 
         if (uiState.usernameVisible){
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth().testTag("username"),
+                modifier = Modifier.fillMaxWidth().testTag("username").onKeyEvent { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyDown) {
+                        onUsernameKeyEvent(
+                            keyEvent.utf16CodePoint.toChar(),
+                            uiState.personAccount?.username?.isEmpty() ?: true
+                        )
+                    } else false
+                },
                 value = uiState.personAccount?.username ?: "",
                 maxLines = 1,
                 label = {

@@ -24,6 +24,8 @@ external interface PersonAccountEditScreenProps : Props {
 
     var onAccountChanged: (PersonUsernameAndPasswordModel?) -> Unit
 
+    var onUsernameKeyEvent: (Char, Boolean) -> Boolean
+
 }
 
 val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
@@ -42,6 +44,15 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
                     helperText = ReactNode(props.uiState.usernameError ?: strings[MR.strings.required])
                     error = props.uiState.usernameError != null
                     disabled = !props.uiState.fieldsEnabled
+                    onKeyDown = { event ->
+                        val char = event.key.singleOrNull()
+                        if (char != null) {
+                            val isFirstChar = props.uiState.personAccount?.username?.isEmpty() ?: true
+                            if (props.onUsernameKeyEvent(char, isFirstChar)) {
+                                event.preventDefault()
+                            }
+                        }
+                    }
                     onTextChange = {
                         props.onAccountChanged(
                             props.uiState.personAccount?.copy(
@@ -118,5 +129,6 @@ val PersonAccountEditScreen = FC<Props> {
     PersonAccountEditComponent2 {
         uiState = uiStateVar
         onAccountChanged = viewModel::onEntityChanged
+        onUsernameKeyEvent = viewModel::onUsernameKeyEvent
     }
 }

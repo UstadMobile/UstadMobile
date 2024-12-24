@@ -49,6 +49,7 @@ external interface PersonEditScreenProps : Props{
 
     var onNationalPhoneNumSetChanged: (Boolean) -> Unit
 
+    var onUsernameKeyEvent: (Char, Boolean) -> Boolean
 }
 
 val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
@@ -242,6 +243,15 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                     disabled = !props.uiState.fieldsEnabled
                     error = props.uiState.usernameError != null
                     helperText = ReactNode(props.uiState.usernameError ?: strings[MR.strings.required])
+                    onKeyDown = { event ->
+                        val char = event.key.singleOrNull()
+                        if (char != null) {
+                            val isFirstChar = props.uiState.person?.username?.isEmpty() ?: true
+                            if (props.onUsernameKeyEvent(char, isFirstChar)) {
+                                event.preventDefault()
+                            }
+                        }
+                    }
                     onTextChange = {
                         props.onPersonChanged(
                             props.uiState.person?.shallowCopy {
@@ -309,5 +319,6 @@ val PersonEditScreen = FC<Props> {
         onPersonPictureUriChanged = viewModel::onPersonPictureChanged
         onNationalPhoneNumSetChanged = viewModel::onNationalPhoneNumSetChanged
         onPasswordChanged = viewModel::onPasswordChanged
+        onUsernameKeyEvent = viewModel::onUsernameKeyEvent
     }
 }
