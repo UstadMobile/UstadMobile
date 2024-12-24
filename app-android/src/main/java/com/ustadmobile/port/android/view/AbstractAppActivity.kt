@@ -28,12 +28,14 @@ import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseAndroid
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
 import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.password.LoginWithSavedPasswordUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCaseImpl
 import com.ustadmobile.core.domain.process.CloseProcessUseCase
 import com.ustadmobile.core.domain.process.CloseProcessUseCaseAndroid
+import com.ustadmobile.core.domain.password.SavePasswordUseCase
 import com.ustadmobile.core.domain.share.ShareAppUseCase
 import com.ustadmobile.core.domain.share.ShareAppUseCaseAndroid
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -55,6 +57,8 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyUseCaseImpl
 import com.ustadmobile.libuicompose.util.passkey.LoginWithPasskeyUseCaseImpl
+import com.ustadmobile.libuicompose.util.password.LoginWithSavedPasswordUseCaseImpl
+import com.ustadmobile.libuicompose.util.password.SavePasswordUseCaseImpl
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
@@ -135,6 +139,19 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 passkeyRequestJsonUseCase = instance()
             )
         }
+
+        bind<SavePasswordUseCase>() with singleton {
+            SavePasswordUseCaseImpl(
+                context=this@AbstractAppActivity,
+            )
+        }
+
+        bind<LoginWithSavedPasswordUseCase>() with singleton {
+            LoginWithSavedPasswordUseCaseImpl(
+                context=this@AbstractAppActivity,
+            )
+        }
+
         bind<LoginWithPasskeyUseCase>() with singleton {
             LoginWithPasskeyUseCaseImpl(
                 context=this@AbstractAppActivity,

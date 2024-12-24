@@ -9,33 +9,28 @@ import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
 import com.ustadmobile.core.domain.passkey.PassKeySignInData
+import com.ustadmobile.core.domain.password.LoginWithSavedPasswordUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
-import com.ustadmobile.core.util.ext.requireHttpPrefix
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
-import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
-import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.http.Url
@@ -95,6 +90,7 @@ class LoginViewModel(
 
     private val languagesConfig: SupportedLanguagesConfig by instance()
 
+    private val loginWithSavedPasswordUseCase: LoginWithSavedPasswordUseCase? by instanceOrNull()
 
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
@@ -167,7 +163,16 @@ class LoginViewModel(
                 }
             }
         }
+
         onSignInWithPassKey()
+        viewModelScope.launch {
+            val result=  loginWithSavedPasswordUseCase?.invoke()
+            if (result?.username != null&& result.password != null){
+                onUsernameChanged(result.username)
+                onPasswordChanged(result.password)
+                onClickLogin()
+            }
+        }
     }
 
     private fun onSiteVerified(site: Site) {
