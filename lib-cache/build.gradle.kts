@@ -70,9 +70,9 @@ kotlin {
 
             dependencies {
                 implementation(libs.androidx.room.ktx)
+                implementation(libs.androidx.lifecycle.common.java8)
+                implementation(libs.androidx.lifecycle.runtime.ktx)
                 implementation(libs.androidx.room.runtime)
-                implementation(libs.android.nsd.rx)
-                implementation(libs.rxjava)
             }
         }
 

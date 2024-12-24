@@ -134,8 +134,6 @@ agp = "8.7.2"
 kotlin-version = "1.9.23"
 xxhashjs = "^0.2.2"
 kotlin-wrappers = "1.0.0-pre.721"
-android-nsd-rx = "3.0.35"
-rxjava = "3.1.10"
 
 [plugins]
 
@@ -165,6 +163,7 @@ door-compiler = { module = "com.github.UstadMobile.door:door-compiler", version.
 door-shallowcopy = { module = "com.github.UstadMobile.door:door-shallowcopy", version.ref = "door" }
 door-room-annotations = { module = "com.github.UstadMobile.door:room-annotations", version.ref = "door" }
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-rx3 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-rx3", version.ref = "coroutines" }
 atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu"}
 kotlinxio-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "android-room" }
@@ -376,6 +375,3 @@ androidx-credentials = { group = "androidx.credentials", name = "credentials", v
 sqldelight-sqlite-driver-jvm = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
 sqldelight-sqlite-driver-android = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
 sqldelight-coroutine-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
-
-android-nsd-rx = { group = "com.ToxicBakery.library.nsd.rx", name = "android-nsd-rx", version.ref = "android-nsd-rx" }
-rxjava = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxjava" }
