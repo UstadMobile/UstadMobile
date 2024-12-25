@@ -152,43 +152,22 @@ class PersonAccountEditViewModel(
     }
 
     fun onEntityChanged(entity: PersonUsernameAndPasswordModel?) {
-        val updatedEntity = if (entity != null) {
-            if (entity.username != _uiState.value.personAccount?.username) {
-                // Username has changed
-                val newUsername = entity.username
-                if (newUsername.isEmpty() || validateUsernameUseCase.isCharacterAllowed(
-                        char = newUsername.last(),
-                        isFirstChar = newUsername.length == 1
-                    )) {
-                    entity
-                } else {
-                    // Invalid character - keep old username
-                    entity.copy(username = _uiState.value.personAccount?.username ?: "")
-                }
-            } else {
-                entity
-            }
-        } else {
-            null
-        }
-
         _uiState.update { prev ->
             prev.copy(
-                personAccount = updatedEntity,
-                usernameError = if(prev.usernameError != null &&
-                    prev.personAccount?.username == updatedEntity?.username) {
+                personAccount = entity,
+                usernameError = if(prev.usernameError != null && prev.personAccount?.username == entity?.username) {
                     prev.usernameError
                 }else {
                     null
                 },
-                currentPasswordError = if(prev.currentPasswordError != null &&
-                    prev.personAccount?.currentPassword == updatedEntity?.currentPassword) {
+                currentPasswordError = if(prev.currentPasswordError != null
+                    && prev.personAccount?.currentPassword == entity?.currentPassword) {
                     prev.currentPasswordError
                 }else {
                     null
                 },
                 newPasswordError = if(prev.newPasswordError != null &&
-                    prev.personAccount?.newPassword == updatedEntity?.newPassword) {
+                    prev.personAccount?.newPassword == entity?.newPassword) {
                     prev.newPasswordError
                 }else {
                     null
@@ -197,7 +176,7 @@ class PersonAccountEditViewModel(
         }
 
         scheduleEntityCommitToSavedState(
-            entity = updatedEntity,
+            entity = entity,
             serializer = PersonUsernameAndPasswordModel.serializer(),
             commitDelay = 200
         )
@@ -217,69 +196,40 @@ class PersonAccountEditViewModel(
             )
         }
         viewModelScope.launch {
-            // Reset any previous errors first
-            _uiState.update { prev ->
-                prev.copy(
-                    usernameError = null,
-                    currentPasswordError = null,
-                    newPasswordError = null,
-                    errorMessage = null
-                )
-            }
+            val usernameValidator = ValidateUsernameUseCase()
 
-            var hasErrors = false
-
-            // Handle required fields based on mode
             if(entity.mode == MODE_CREATE_ACCOUNT) {
-                // Validate username for create account mode
-                if(entity.username.isBlank()) {
+                val validationResult = usernameValidator(entity.username)
+
+                if (validationResult != ValidateUsernameUseCase.ValidationResult.VALID) {
                     _uiState.update { prev ->
-                        prev.copy(usernameError = systemImpl.getString(MR.strings.field_required_prompt))
-                    }
-                    hasErrors = true
-                } else {
-                    // Validate username format
-                    val validatedUsername = validateUsernameUseCase(entity.username)
-                    if (validatedUsername == null) {
-                        _uiState.update { prev ->
-                            prev.copy(usernameError = systemImpl.getString(MR.strings.invalid_username))
-                        }
-                        hasErrors = true
-                    } else {
-                        // Update with validated username
-                        _uiState.update { prev ->
-                            prev.copy(personAccount = prev.personAccount?.copy(username = validatedUsername))
-                        }
+                        prev.copy(
+                            usernameError = systemImpl.getString(MR.strings.invalid_username)
+                        )
                     }
                 }
             }
 
-            // Check new password requirement for all modes
             if(entity.newPassword.isBlank()) {
                 _uiState.update { prev ->
                     prev.copy(newPasswordError = systemImpl.getString(MR.strings.field_required_prompt))
                 }
-                hasErrors = true
             }
 
-            // Check current password for password change mode
-            if(entity.mode == MODE_CHANGE_PASS && entity.currentPassword.isBlank()) {
-                _uiState.update { prev ->
-                    prev.copy(currentPasswordError = systemImpl.getString(MR.strings.field_required_prompt))
-                }
-                hasErrors = true
-            }
+            if(entity.mode == MODE_CHANGE_PASS && entity.currentPassword.isBlank())
 
-            if(hasErrors) {
+            if(_uiState.value.hasErrors) {
                 loadingState = LoadingUiState.NOT_LOADING
                 _uiState.update { prev ->
-                    prev.copy(fieldsEnabled = true)
+                    prev.copy(
+                        fieldsEnabled = true
+                    )
                 }
                 return@launch
             }
 
-            // Process based on mode
             if(entity.mode == MODE_CREATE_ACCOUNT) {
+                //This is a registration
                 try {
                     val usernameCount = activeRepo.personDao().countUsername(entity.username)
                     if(usernameCount == 0) {
@@ -290,25 +240,31 @@ class PersonAccountEditViewModel(
                                 username = entity.username,
                                 currentTime = systemTimeInMillis()
                             )
+
                             Napier.e("Updated username: $numChanges changes")
                         }
+
                         finishWithResult(null)
-                    } else {
+                    }else {
                         _uiState.update { prev ->
-                            prev.copy(usernameError = systemImpl.getString(MR.strings.person_exists))
+                            prev.copy(
+                                usernameError = systemImpl.getString(MR.strings.person_exists)
+                            )
                         }
                     }
-                } catch(e: Exception) {
+                }catch(e: Exception) {
                     _uiState.update { prev ->
-                        prev.copy(usernameError = systemImpl.getString(MR.strings.login_network_error))
+                        prev.copy(
+                            usernameError = systemImpl.getString(MR.strings.login_network_error)
+                        )
                     }
-                } finally {
+                }finally {
                     loadingState = LoadingUiState.NOT_LOADING
                     _uiState.update { prev ->
                         prev.copy(fieldsEnabled = true)
                     }
                 }
-            } else {
+            }else {
                 try {
                     setPasswordUseCase(
                         activeUserPersonUid = activeUserPersonUid,
@@ -323,19 +279,21 @@ class PersonAccountEditViewModel(
 
                     snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.password_updated)))
                     finishWithResult(null)
-                } catch(e: Exception) {
+                }catch(e: Exception) {
                     if(e is UnauthorizedException) {
                         _uiState.update { prev ->
                             prev.copy(
                                 currentPasswordError = systemImpl.getString(MR.strings.wrong_user_pass_combo),
                             )
                         }
-                    } else {
+                    }else {
                         _uiState.update { prev ->
-                            prev.copy(errorMessage = e.message)
+                            prev.copy(
+                                errorMessage = e.message
+                            )
                         }
                     }
-                } finally {
+                }finally {
                     loadingState = LoadingUiState.NOT_LOADING
                     _uiState.update { prev -> prev.copy(fieldsEnabled = true) }
                 }

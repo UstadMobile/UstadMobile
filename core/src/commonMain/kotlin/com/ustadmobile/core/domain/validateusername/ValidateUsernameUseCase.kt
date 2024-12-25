@@ -1,56 +1,41 @@
 package com.ustadmobile.core.domain.validateusername
 
+/**
+ * Validates whether a username meets all required criteria:
+ * - Must not be too short or too long
+ * - Must not start with a number
+ * - Must only contain valid characters (letters, numbers, dots, underscores)
+ */
 class ValidateUsernameUseCase {
-    /**
-     * Validates username according to rules:
-     * - Must not contain special characters (except . and _)
-     * - Must not start with a number
-     * - All letters will be converted to lowercase
-     * - Any banned characters will be replaced with provided replacement string
-     * @param username The username string to validate
-     */
-    operator fun invoke(
-        username: String,
-        invalidReplacement: String = ""
-    ): String? {
-        val trimmed = username.trim()
-        if(trimmed.isEmpty()) return null
 
-        val lowercased = trimmed.lowercase()
-
-        // Return null if starts with number
-        if(lowercased.firstOrNull()?.isDigit() == true) {
-            return null
-        }
-
-        // Replace any invalid characters with replacement
-        val result = lowercased.map { char ->
-            if(isCharacterAllowed(char)) {
-                char.toString()
-            } else {
-                invalidReplacement
-            }
-        }.joinToString("")
-
-        return result.ifEmpty { null }
+    enum class ValidationResult {
+        VALID,
+        INVALID_TOO_SHORT,
+        INVALID_TOO_LONG,
+        INVALID_STARTS_WITH_NUMBER,
+        INVALID_OTHER
     }
 
-    /**
-     * Check if character is allowed in username
-     * @param char Character to check
-     * @param isFirstChar Whether this is first character being typed
-     * @return true if character is allowed, false otherwise
-     */
-    fun isCharacterAllowed(char: Char, isFirstChar: Boolean = false): Boolean {
+    operator fun invoke(username: String): ValidationResult {
         return when {
-            char.isLetter() -> true
-            char in ALLOWED_SPECIAL -> true
-            char.isDigit() -> !isFirstChar
-            else -> false
+            username.length < MIN_LENGTH -> ValidationResult.INVALID_TOO_SHORT
+            username.length > MAX_LENGTH -> ValidationResult.INVALID_TOO_LONG
+            username.firstOrNull()?.isDigit() == true -> ValidationResult.INVALID_STARTS_WITH_NUMBER
+            !username.all { it.isValidUsernameChar() } -> ValidationResult.INVALID_OTHER
+            else -> ValidationResult.VALID
         }
+    }
+
+    private fun Char.isValidUsernameChar(): Boolean = when {
+        isLetter() -> true
+        isDigit() -> true
+        this in ALLOWED_SPECIAL -> true
+        else -> false
     }
 
     companion object {
+        private const val MIN_LENGTH = 3
+        private const val MAX_LENGTH = 30
         private val ALLOWED_SPECIAL = setOf('.', '_')
     }
 }

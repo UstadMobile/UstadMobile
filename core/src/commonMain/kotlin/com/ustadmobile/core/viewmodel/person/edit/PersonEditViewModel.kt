@@ -386,8 +386,13 @@ class PersonEditViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                usernameError = if (isRegistrationMode && validateUsernameUseCase(savePerson.username ?: "") == null) {
-                    systemImpl.getString(MR.strings.invalid_username)
+                usernameError = if(isRegistrationMode) {
+                    val validationResult = validateUsernameUseCase(savePerson.username ?: "")
+                    if (validationResult != ValidateUsernameUseCase.ValidationResult.VALID) {
+                        systemImpl.getString(MR.strings.invalid_username)
+                    } else {
+                        null
+                    }
                 }else {
                     null
                 },

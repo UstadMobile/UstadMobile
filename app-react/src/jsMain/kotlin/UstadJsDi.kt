@@ -9,6 +9,7 @@ import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.ApiUrlConfig
 import com.ustadmobile.core.impl.config.AppConfig
@@ -114,6 +115,10 @@ internal fun ustadJsDi(
 
     bind<ApiUrlConfig>() with singleton {
         ApiUrlConfig(apiUrl)
+    }
+
+    bind<ValidateUsernameUseCase>() with singleton {
+        ValidateUsernameUseCase()
     }
 
     bind<UstadMobileSystemImpl>() with singleton {

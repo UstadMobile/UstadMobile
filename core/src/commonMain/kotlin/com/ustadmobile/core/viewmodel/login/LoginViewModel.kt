@@ -159,16 +159,9 @@ class LoginViewModel(
         }
     }
 
-    fun onUsernameChanged(newValue: String) {
-        val validatedUsername = validateUsernameUseCase(newValue)
-
-        if (validatedUsername != null || newValue.isEmpty()) {
-            _uiState.update { prev ->
-                prev.copy(
-                    username = newValue,
-                    usernameError = null
-                )
-            }
+    fun onUsernameChanged(username: String) {
+        _uiState.update { prev ->
+            prev.copy(username = username)
         }
     }
 
@@ -192,21 +185,24 @@ class LoginViewModel(
         )
     }
 
-    fun onClickLogin() {
+    fun onClickLogin(){
         _uiState.update { prev ->
             prev.copy(
+                username = prev.username.trim(),
+                password = prev.password.trim(),
                 fieldsEnabled = false,
                 passwordError = null,
                 usernameError = null,
             )
         }
 
-        val currentState = _uiState.value
-        val username = currentState.username
-        val password = currentState.password
+        val username = _uiState.value.username
+        val password = _uiState.value.password
 
-        // Handle empty case first
-        if (username.trim().isEmpty()) {
+        val usernameValidator = ValidateUsernameUseCase()
+        val validationResult = usernameValidator(username)
+
+        if (validationResult != ValidateUsernameUseCase.ValidationResult.VALID) {
             _uiState.update { prev ->
                 prev.copy(
                     fieldsEnabled = true,
@@ -216,48 +212,53 @@ class LoginViewModel(
             return
         }
 
-        if (password.trim().isEmpty()) {
+        if (username.isNotEmpty() && password.isNotEmpty()) {
+            loadingState = LoadingUiState.INDETERMINATE
+            viewModelScope.launch {
+                var errorMessage: String? = null
+                try {
+                    val account = accountManager.login(
+                        username = username.trim(),
+                        password = password.trim(),
+                        endpointUrl = serverUrl,
+                        maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L,
+                        dontSetCurrentSession = dontSetCurrentSession,
+                    )
+                    goToNextDestAfterLoginOrGuestSelected(account.personUid)
+                }catch(e: AdultAccountRequiredException) {
+                    errorMessage = impl.getString(MR.strings.adult_account_required)
+                } catch(e: UnauthorizedException) {
+                    errorMessage = impl.getString(MR.strings.wrong_user_pass_combo)
+                } catch(e: ConsentNotGrantedException) {
+                    errorMessage =  impl.getString(MR.strings.your_account_needs_approved)
+                }catch(e: Exception) {
+                    errorMessage = impl.getString(MR.strings.login_network_error)
+                }finally {
+                    loadingState = LoadingUiState.NOT_LOADING
+                    _uiState.update { prev ->
+                        prev.copy(
+                            fieldsEnabled = true,
+                            errorMessage = errorMessage,
+                        )
+                    }
+                }
+            }
+        }else{
+            loadingState = LoadingUiState.NOT_LOADING
             _uiState.update { prev ->
                 prev.copy(
                     fieldsEnabled = true,
-                    passwordError = impl.getString(MR.strings.field_required_prompt)
+                    usernameError = if(prev.username.isEmpty()) {
+                        impl.getString(MR.strings.field_required_prompt)
+                    } else {
+                        null
+                    },
+                    passwordError = if(prev.password.isEmpty()) {
+                        impl.getString(MR.strings.field_required_prompt)
+                    }else {
+                        null
+                    }
                 )
-            }
-            return
-        }
-
-        // Username validation
-        val trimmedUsername = username.trim()
-        val trimmedPassword = password.trim()
-
-        loadingState = LoadingUiState.INDETERMINATE
-        viewModelScope.launch {
-            var errorMessage: String? = null
-            try {
-                val account = accountManager.login(
-                    username = trimmedUsername,
-                    password = trimmedPassword,
-                    endpointUrl = serverUrl,
-                    maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong() ?: 0L,
-                    dontSetCurrentSession = dontSetCurrentSession,
-                )
-                goToNextDestAfterLoginOrGuestSelected(account.personUid)
-            } catch(e: AdultAccountRequiredException) {
-                errorMessage = impl.getString(MR.strings.adult_account_required)
-            } catch(e: UnauthorizedException) {
-                errorMessage = impl.getString(MR.strings.wrong_user_pass_combo)
-            } catch(e: ConsentNotGrantedException) {
-                errorMessage = impl.getString(MR.strings.your_account_needs_approved)
-            } catch(e: Exception) {
-                errorMessage = impl.getString(MR.strings.login_network_error)
-            } finally {
-                loadingState = LoadingUiState.NOT_LOADING
-                _uiState.update { prev ->
-                    prev.copy(
-                        fieldsEnabled = true,
-                        errorMessage = errorMessage,
-                    )
-                }
             }
         }
     }
