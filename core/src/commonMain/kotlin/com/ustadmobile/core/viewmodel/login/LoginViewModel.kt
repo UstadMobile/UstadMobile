@@ -169,10 +169,6 @@ class LoginViewModel(
         }
     }
 
-    fun onUsernameKeyEvent(char: Char, isFirstChar: Boolean): Boolean {
-        return filterUsernameUseCase.shouldBlockKeyEvent(char, isFirstChar)
-    }
-
     fun onPasswordChanged(password: String) {
         _uiState.update { prev ->
             prev.copy(password = password)

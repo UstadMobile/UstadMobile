@@ -80,8 +80,6 @@ class PersonAccountEditViewModel(
 
     private val setPasswordUseCase: SetPasswordUseCase by on(accountManager.activeEndpoint).instance()
 
-    private val filterUsernameUseCase: FilterUsernameUseCase by instance()
-
     init {
         _appUiState.value = AppUiState(
             loadingState = LoadingUiState.INDETERMINATE,
@@ -179,10 +177,6 @@ class PersonAccountEditViewModel(
             serializer = PersonUsernameAndPasswordModel.serializer(),
             commitDelay = 200
         )
-    }
-
-    fun onUsernameKeyEvent(char: Char, isFirstChar: Boolean): Boolean {
-        return filterUsernameUseCase.shouldBlockKeyEvent(char, isFirstChar)
     }
 
     fun onClickSave() {

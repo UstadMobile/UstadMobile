@@ -14,6 +14,7 @@ import mui.system.responsive
 import mui.system.sx
 import react.*
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.mui.components.UstadLanguageSelect
@@ -31,7 +32,6 @@ external interface LoginProps : Props {
     var onUsernameValueChange: (String) -> Unit
     var onPasswordValueChange: (String) -> Unit
     var onChangeLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit
-    var onUsernameKeyEvent: (Char, Boolean) -> Boolean
 }
 
 val LoginScreen = FC<Props> {
@@ -49,7 +49,6 @@ val LoginScreen = FC<Props> {
         onUsernameValueChange = viewModel::onUsernameChanged
         onPasswordValueChange = viewModel::onPasswordChanged
         onChangeLanguage = viewModel::onChangeLanguage
-        onUsernameKeyEvent = viewModel::onUsernameKeyEvent
     }
 }
 
@@ -79,8 +78,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 onKeyDown = { event ->
                     val char = event.key.singleOrNull()
                     if (char != null) {
-                        val isFirstChar = props.uiState.username.isEmpty()
-                        if (props.onUsernameKeyEvent(char, isFirstChar)) {
+                        if (FilterUsernameUseCase.isCharAllowed(char)) {
                             event.preventDefault()
                         }
                     }

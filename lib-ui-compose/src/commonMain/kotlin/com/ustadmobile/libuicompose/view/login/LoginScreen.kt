@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.libuicompose.components.UstadPasswordField
@@ -52,7 +53,6 @@ fun LoginScreen(
         onClickConnectAsGuest = viewModel::onClickConnectAsGuest,
         onUsernameValueChange = viewModel::onUsernameChanged,
         onPasswordValueChange = viewModel::onPasswordChanged,
-        onUsernameKeyEvent = viewModel::onUsernameKeyEvent,
     )
 }
 
@@ -64,7 +64,6 @@ fun LoginScreen(
     onClickConnectAsGuest: () -> Unit = {},
     onUsernameValueChange: (String) -> Unit = {},
     onPasswordValueChange: (String) -> Unit = {},
-    onUsernameKeyEvent: (Char, Boolean) -> Boolean = { _, _ -> false }
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize(),
@@ -80,10 +79,7 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .onKeyEvent { keyEvent ->
                     if (keyEvent.type == KeyEventType.KeyDown) {
-                        onUsernameKeyEvent(
-                            keyEvent.utf16CodePoint.toChar(),
-                            uiState.username.isEmpty()
-                        )
+                        FilterUsernameUseCase.isCharAllowed(keyEvent.utf16CodePoint.toChar())
                     } else false
                 },
             value = uiState.username,

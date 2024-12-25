@@ -153,8 +153,6 @@ class PersonEditViewModel(
 
     private val validateEmailUseCase = ValidateEmailUseCase()
 
-    private val filterUsernameUseCase: FilterUsernameUseCase by instance()
-
     private val genderConfig : GenderConfig by instance()
 
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
@@ -311,10 +309,6 @@ class PersonEditViewModel(
 
         scheduleEntityCommitToSavedState(entity, serializer = Person.serializer(),
             commitDelay = 200)
-    }
-
-    fun onUsernameKeyEvent(char: Char, isFirstChar: Boolean): Boolean {
-        return filterUsernameUseCase.shouldBlockKeyEvent(char, isFirstChar)
     }
 
     fun onPasswordChanged(password: String?) {

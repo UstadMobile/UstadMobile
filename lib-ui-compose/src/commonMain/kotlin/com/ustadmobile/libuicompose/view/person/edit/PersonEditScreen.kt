@@ -20,6 +20,7 @@ import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -46,7 +47,6 @@ fun PersonEditScreen(viewModel: PersonEditViewModel) {
         onPersonPictureUriChanged = viewModel::onPersonPictureChanged,
         onNationalNumberSetChanged = viewModel::onNationalPhoneNumSetChanged,
         onPasswordChanged = viewModel::onPasswordChanged,
-        onUsernameKeyEvent = viewModel::onUsernameKeyEvent,
     )
 }
 
@@ -58,7 +58,6 @@ fun PersonEditScreen(
     onApprovalPersonParentJoinChanged: (PersonParentJoin?) -> Unit = {},
     onPersonPictureUriChanged: (String?) -> Unit = { },
     onNationalNumberSetChanged: (Boolean) -> Unit = { },
-    onUsernameKeyEvent: (Char, Boolean) -> Boolean = { _, _ -> false }
 ){
     UstadVerticalScrollColumn(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -229,10 +228,7 @@ fun PersonEditScreen(
             OutlinedTextField(
                 modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding().onKeyEvent { keyEvent ->
                     if (keyEvent.type == KeyEventType.KeyDown) {
-                        onUsernameKeyEvent(
-                            keyEvent.utf16CodePoint.toChar(),
-                            uiState.person?.username?.isEmpty() ?: true
-                        )
+                        FilterUsernameUseCase.isCharAllowed(keyEvent.utf16CodePoint.toChar())
                     } else false
                 },
                 value = uiState.person?.username ?: "",

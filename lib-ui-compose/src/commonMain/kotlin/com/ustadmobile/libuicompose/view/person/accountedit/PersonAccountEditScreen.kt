@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditUiState
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonUsernameAndPasswordModel
 import com.ustadmobile.libuicompose.components.UstadPasswordField
@@ -38,7 +39,6 @@ fun PersonAccountEditScreen(
     PersonAccountEditScreen(
         uiState = uiState,
         onChange = viewModel::onEntityChanged,
-        onUsernameKeyEvent = viewModel::onUsernameKeyEvent
     )
 }
 
@@ -46,7 +46,6 @@ fun PersonAccountEditScreen(
 fun PersonAccountEditScreen(
     uiState: PersonAccountEditUiState,
     onChange: (PersonUsernameAndPasswordModel?) -> Unit = { },
-    onUsernameKeyEvent: (Char, Boolean) -> Boolean = { _, _ -> false }
 ) {
     Column(
         modifier = Modifier
@@ -60,10 +59,7 @@ fun PersonAccountEditScreen(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth().testTag("username").onKeyEvent { keyEvent ->
                     if (keyEvent.type == KeyEventType.KeyDown) {
-                        onUsernameKeyEvent(
-                            keyEvent.utf16CodePoint.toChar(),
-                            uiState.personAccount?.username?.isEmpty() ?: true
-                        )
+                        FilterUsernameUseCase.isCharAllowed(keyEvent.utf16CodePoint.toChar())
                     } else false
                 },
                 value = uiState.personAccount?.username ?: "",

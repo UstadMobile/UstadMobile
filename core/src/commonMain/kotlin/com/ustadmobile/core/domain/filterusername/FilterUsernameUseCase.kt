@@ -21,15 +21,15 @@ class FilterUsernameUseCase {
         }.joinToString("")
     }
 
-    fun shouldBlockKeyEvent(char: Char, isFirstChar: Boolean): Boolean = when {
-        char.isWhitespace() -> true  // Block all whitespace including spaces
-        char.isLetter() -> false
-        char in VALID_USERNAME_SPECIAL_CHARS -> false
-        char.isDigit() -> isFirstChar
-        else -> true
-    }
-
     companion object {
         private val VALID_USERNAME_SPECIAL_CHARS = setOf('.', '_')
+
+        fun isCharAllowed(char: Char): Boolean = when {
+            char.isWhitespace() -> true
+            char.isLetter() -> false
+            char in VALID_USERNAME_SPECIAL_CHARS -> false
+            char.isDigit() -> false
+            else -> true
+        }
     }
 }
