@@ -45,7 +45,7 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
                     onKeyDown = { event ->
                         val char = event.key.singleOrNull()
                         if (char != null) {
-                            if (FilterUsernameUseCase.isCharAllowed(char)) { event.preventDefault() }
+                            if (FilterUsernameUseCase.shouldBlockKeyEvent(char)) { event.preventDefault() }
                         }
                     }
                     onTextChange = {

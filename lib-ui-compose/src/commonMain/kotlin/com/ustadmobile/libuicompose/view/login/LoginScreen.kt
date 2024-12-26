@@ -79,7 +79,7 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .onKeyEvent { keyEvent ->
                     if (keyEvent.type == KeyEventType.KeyDown) {
-                        FilterUsernameUseCase.isCharAllowed(keyEvent.utf16CodePoint.toChar())
+                        FilterUsernameUseCase.shouldBlockKeyEvent(keyEvent.utf16CodePoint.toChar())
                     } else false
                 },
             value = uiState.username,

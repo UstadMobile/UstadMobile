@@ -78,7 +78,7 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 onKeyDown = { event ->
                     val char = event.key.singleOrNull()
                     if (char != null) {
-                        if (FilterUsernameUseCase.isCharAllowed(char)) {
+                        if (FilterUsernameUseCase.shouldBlockKeyEvent(char)) {
                             event.preventDefault()
                         }
                     }

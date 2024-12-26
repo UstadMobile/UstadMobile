@@ -24,7 +24,7 @@ class FilterUsernameUseCase {
     companion object {
         private val VALID_USERNAME_SPECIAL_CHARS = setOf('.', '_')
 
-        fun isCharAllowed(char: Char): Boolean = when {
+        fun shouldBlockKeyEvent(char: Char): Boolean = when {
             char.isWhitespace() -> true
             char.isLetter() -> false
             char in VALID_USERNAME_SPECIAL_CHARS -> false

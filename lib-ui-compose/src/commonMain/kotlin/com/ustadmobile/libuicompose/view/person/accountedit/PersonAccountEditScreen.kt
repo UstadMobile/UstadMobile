@@ -59,7 +59,7 @@ fun PersonAccountEditScreen(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth().testTag("username").onKeyEvent { keyEvent ->
                     if (keyEvent.type == KeyEventType.KeyDown) {
-                        FilterUsernameUseCase.isCharAllowed(keyEvent.utf16CodePoint.toChar())
+                        FilterUsernameUseCase.shouldBlockKeyEvent(keyEvent.utf16CodePoint.toChar())
                     } else false
                 },
                 value = uiState.personAccount?.username ?: "",
