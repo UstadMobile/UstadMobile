@@ -37,6 +37,7 @@ import react.Props
 import react.ReactNode
 import react.create
 import tanstack.react.query.UseInfiniteQueryResult
+import web.cssom.AlignItems
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
@@ -77,7 +78,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
             val stringsXml = useStringProvider()
             val attempts = stringsXml[MR.strings.attempts]
             val percentageCompletion = stringsXml[MR.strings.content_percentage_completion]
-            val percentageScore = stringsXml[MR.strings.content_percentage_score]
+            val percentageScore = stringsXml[MR.strings.content_score]
             val isSettledEmpty = infiniteQueryResult.isSettledEmpty(remoteMediatorResult)
 
             VirtualList {
@@ -129,29 +130,30 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                     }
                                     if (attemptsPersonListItems?.maxScore != null || attemptsPersonListItems?.maxProgress != null) {
                                         Stack {
-                                            direction = responsive(StackDirection.row)
+                                            direction = responsive(StackDirection.row) // Ensure horizontal layout
+                                            sx {
+                                                verticalAlign = VerticalAlign.middle // Align stack elements in the middle
+                                                marginLeft = 8.px
+                                                paddingTop = 1.px
+                                                alignItems = AlignItems.center // This ensures vertical centering of all stack children
+                                            }
                                             LinearProgress {
                                                 sx {
                                                     width = 500.px
                                                     height = 4.px
-
                                                 }
                                                 variant = LinearProgressVariant.determinate
-                                                value =
-                                                    attemptsPersonListItems.maxProgress
-                                                        ?: (attemptsPersonListItems.maxScore?.times(
-                                                            100
-                                                        ) ?: 0)
+                                                value = attemptsPersonListItems.maxProgress
+                                                    ?: (attemptsPersonListItems.maxScore?.times(100) ?: 0)
                                             }
                                             ListItemText {
                                                 primary = ReactNode(
                                                     attemptsPersonListItems.maxProgress?.let {
-                                                        "${(it)}$percentageCompletion"
-                                                    }
-                                                        ?: "${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}$percentageScore"
+                                                        "${it}% $percentageCompletion"
+                                                    } ?: "${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}% $percentageScore"
                                                 )
                                                 sx {
-                                                    verticalAlign = VerticalAlign.middle
+                                                    verticalAlign = VerticalAlign.middle // Ensure vertical alignment within the item
                                                     marginLeft = 8.px
                                                     paddingTop = 1.px
                                                 }

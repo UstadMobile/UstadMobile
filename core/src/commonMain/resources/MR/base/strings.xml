@@ -297,11 +297,7 @@
     <string name="xapi_result_header">Result</string>
     <string name="xapi_score">Score (%)</string>
     <string name="content_score">Score</string>
-
-    <string name="content_percentage_score">% Score</string>
-    <string name="content_percentage_completion">% Completion</string>
-    <string name="content_score">Score</string>
-
+    <string name="content_percentage_completion">Completion</string>
     <string name="import_title_not_entered">Title not entered</string>
     <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>

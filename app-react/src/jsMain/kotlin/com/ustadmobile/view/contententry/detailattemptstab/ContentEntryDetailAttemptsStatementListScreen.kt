@@ -129,7 +129,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                 if (formattedDuration != null) {
                                     ListItemButton {
                                         ListItemIcon {
-                                            Timer
+                                            Timer()
                                             sx {
                                                 padding = theme.spacing(1, 1, 1, 5)
                                             }
@@ -141,7 +141,6 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                         }
                                     }
                                 }
-
                                 if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null || attemptsStatementListItems?.statementEntity?.extensionProgress != null)
                                     ListItemButton {
                                         ListItemIcon {
@@ -161,7 +160,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                                             .toString()
                                                     } $score"
                                                 } else {
-                                                    "${attemptsStatementListItems.statementEntity?.extensionProgress}$percentageCompletion"
+                                                    "${attemptsStatementListItems.statementEntity?.extensionProgress}% $percentageCompletion"
                                                 }
                                             ).also { secondary = it }
                                         }

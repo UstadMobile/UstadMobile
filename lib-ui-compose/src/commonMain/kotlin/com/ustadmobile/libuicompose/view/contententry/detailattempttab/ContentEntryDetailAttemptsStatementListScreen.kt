@@ -129,7 +129,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
                                                 .toString()
                                         } $score"
                                     } else {
-                                        "${attemptsStatementListItems.statementEntity?.extensionProgress}$percentageCompletion"
+                                        "${attemptsStatementListItems.statementEntity?.extensionProgress}% $percentageCompletion"
                                     }
                                 )
 
