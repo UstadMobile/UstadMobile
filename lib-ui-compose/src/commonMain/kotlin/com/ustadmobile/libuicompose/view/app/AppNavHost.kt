@@ -19,6 +19,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
+import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -133,7 +134,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
-import com.ustadmobile.core.viewmodel.report.ReportViewModel
+import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
 import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
@@ -164,6 +165,7 @@ import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
+import com.ustadmobile.libuicompose.view.report.filteredit.ReportFilterEditScreen
 import com.ustadmobile.libuicompose.view.report.reportedit.ReportEditScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
 import com.ustadmobile.libuicompose.view.systempermission.detail.SystemPermissionDetailScreen
@@ -390,16 +392,25 @@ fun AppNavHost(
                     )
                 }
             }
-            ReportViewModel.ALL_DEST_NAMES.forEach { destName ->
+            ReportEditViewModel.ALL_DEST_NAMES.forEach { destName ->
                 contentScene("/$destName") { backStackEntry ->
                     ReportEditScreen(
                         appViewModel(
-                            backStackEntry, ReportViewModel::class
+                            backStackEntry, ReportEditViewModel::class
                         ) { di, savedStateHandle ->
-                            ReportViewModel(di, savedStateHandle, destName)
+                            ReportEditViewModel(di, savedStateHandle, destName)
                         }
                     )
                 }
+            }
+            contentScene("/${ReportFilterEditViewModel.DEST_NAME}") { backStackEntry ->
+                ReportFilterEditScreen(
+                    appViewModel(
+                        backStackEntry, ReportFilterEditViewModel::class,
+                    ) { di, savedStateHandle ->
+                        ReportFilterEditViewModel(di, savedStateHandle)
+                    }
+                )
             }
 
             contentScene("/${ClazzEnrolmentEditViewModel.DEST_NAME}") { backStackEntry ->

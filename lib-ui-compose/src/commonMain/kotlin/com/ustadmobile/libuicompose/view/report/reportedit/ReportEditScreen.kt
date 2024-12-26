@@ -1,97 +1,147 @@
 package com.ustadmobile.libuicompose.view.report.reportedit
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.impl.locale.entityconstants.ReportSeriesVisualTypeConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ReportSeriesYAxisConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ReportTimeRangeConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ReportXAxisConstants
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.viewmodel.report.ReportUiState
-import com.ustadmobile.core.viewmodel.report.ReportViewModel
+import com.ustadmobile.core.viewmodel.report.ReportEditUiState
+import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.Dispatchers
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
-fun ReportEditScreen(viewModel: ReportViewModel) {
+fun ReportEditScreen(viewModel: ReportEditViewModel) {
 
-    val uiState: ReportUiState by viewModel.uiState.collectAsState(ReportUiState())
+    val uiState: ReportEditUiState by viewModel.uiState.collectAsStateWithLifecycle(
+        ReportEditUiState(), Dispatchers.Main.immediate
+    )
 
+    ReportEditScreen(
+        uiState = uiState,
+        onReportChanged = viewModel::onEntityChanged,
+        onAddFilter = viewModel::onAddFilter,
+    )
+}
+
+@Composable
+private fun ReportEditScreen(
+    uiState: ReportEditUiState = ReportEditUiState(),
+    onReportChanged: (ReportOptions2?) -> Unit = {},
+    onAddFilter: () -> Unit = { },
+    onAddSeries: () -> Unit = { },
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .defaultItemPadding()
     ) {
         item {
-            // Title Input
-            EditReportTextField(
-                label = "Title",
-                placeholder = "Report title",
-                onValueChange = { viewModel.onSeriesTitleChanged(it) },
-                value = ""
-            )
+            Column {
+                Text("Title", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                OutlinedTextField(
+                    modifier = Modifier.testTag("first_names").fillMaxWidth(),
+                    value = uiState.reportOptions2?.title ?: "",
+                    label = { androidx.compose.material3.Text("Report title" + "*") },
+                    singleLine = true,
+                    onValueChange = { newTitle ->
+                        val updatedOptions = uiState.reportOptions2?.copy(title = newTitle)
+                            ?: ReportOptions2(title = newTitle)
+                        onReportChanged(updatedOptions)
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                    supportingText = {
+                    }
+                )
+            }
         }
         // X Axis Dropdown
         item {
             EditReportDropdown(
-                value =uiState.selectedXAxis,
+                value = uiState.reportOptions2?.xAxis ?: "",
                 label = "X Axis",
                 options = ReportXAxisConstants.X_AXIS_OPTIONS,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = { viewModel.onXAxisChanged(it) },
-                isError = uiState.xAxisError != null,
+                onOptionSelected = {
+                    val updatedOptions = uiState.reportOptions2?.copy(xAxis = it.value.toString())
+                        ?: ReportOptions2(xAxis = it.value.toString())
+                    onReportChanged(updatedOptions)
+                },
             )
         }
 
         // Series Title Input
         item {
-            EditReportTextField(
-                label = "Series Title",
-                value = uiState.seriesTitle,
-                onValueChange = { viewModel.onSeriesTitleChanged(it) },
-                placeholder = ""
-            )
+            Column {
+                Text("Series Title", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                OutlinedTextField(
+                    modifier = Modifier.testTag("series_title").fillMaxWidth(),
+                    value = uiState.reportOptions2?.series?.firstOrNull()?.reportSeriesTitle ?: "",
+                    label = { androidx.compose.material3.Text("Series Title" + "*") },
+                    singleLine = true,
+                    onValueChange = { newTitle ->
+//                        val updatedSeries =
+//                            uiState.reportOptions2?.series?.toMutableList() ?: mutableListOf()
+//
+//                        if (updatedSeries.isNotEmpty()) {
+//                            updatedSeries[0] = updatedSeries[0].copy(reportSeriesTitle = newTitle)
+//                        } else {
+//                            updatedSeries.add(ReportSeries2(reportSeriesTitle = newTitle))
+//                        }
+//
+//                        val updatedOptions = uiState.reportOptions2?.copy(series = updatedSeries)
+//                            ?: ReportOptions2(series = updatedSeries)
+//
+//                        onReportChanged(updatedOptions)
+                    },
+                    supportingText = { }
+                )
+            }
         }
+
 
         // Y Axis Dropdown
         item {
             EditReportDropdown(
                 label = "Y Axis",
                 options = ReportSeriesYAxisConstants.Y_AXIS_OPTIONS,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = { viewModel.onYAxisChanged(it) },
-                value = uiState.selectedYAxis
+                value = "",
+                onOptionSelected = {
+
+                },
             )
         }
 
-        // Subgroup Dropdown
+//         Subgroup Dropdown
         item {
             EditReportDropdown(
                 label = "Subgroup by",
                 options = ReportXAxisConstants.X_AXIS_OPTIONS,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = { viewModel.onSubgroupChanged(it) },
-                value = uiState.selectedYAxis
+                onOptionSelected = {
+
+                },
+                value = ""
             )
         }
 
@@ -100,9 +150,9 @@ fun ReportEditScreen(viewModel: ReportViewModel) {
             EditReportDropdown(
                 label = "Chart Type",
                 options = ReportSeriesVisualTypeConstants.VISUAL_TYPE_OPTIONS,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = { viewModel.onChartTypeChanged(it) },
-                value = uiState.selectedChartType
+                onOptionSelected = {
+                },
+                value = ""
             )
         }
 
@@ -111,9 +161,11 @@ fun ReportEditScreen(viewModel: ReportViewModel) {
             EditReportDropdown(
                 label = "Time Range",
                 options = ReportTimeRangeConstants.TIME_RANGE_OPTIONS,
-                enabled = uiState.fieldsEnabled,
-                onOptionSelected = { viewModel.onTimeRangeChanged(it) },
-                value = uiState.selectedTimeRange
+                onOptionSelected = {
+
+                },
+
+                value = ""
             )
         }
 
@@ -124,62 +176,43 @@ fun ReportEditScreen(viewModel: ReportViewModel) {
                 modifier = Modifier.padding(top = 16.dp)
             )
         }
-        items(uiState.filters.size) { filter ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("filter.description", modifier = Modifier.padding(end = 8.dp))
-                Icon(
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = "Remove filter",
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .clickable { viewModel.onRemoveFilter(0) },
-                )
-            }
-        }
+//        itemsIndexed(uiState.reportOptions2?.series[0].reportSeriesFilters) { index, filter ->
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(8.dp),
+//                horizontalArrangement = Arrangement.SpaceBetween
+//            ) {
+//                Text("filter.description", modifier = Modifier.padding(end = 8.dp))
+//                Icon(
+//                    imageVector = Icons.Filled.Close,
+//                    contentDescription = "Remove filter",
+//                    modifier = Modifier
+//                        .padding(8.dp)
+//                        .clickable {
+//                            onRemoveFilter(index)
+//                        },
+//                )
+//            }
+//        }
 
         item {
-            Button(onClick = { viewModel.onAddFilter() }, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = { onAddFilter() }, modifier = Modifier.fillMaxWidth()) {
                 Text("+ Add Filter")
             }
         }
 
         item {
-            Button(onClick = { viewModel.onAddSeries() }, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = { onAddSeries() }, modifier = Modifier.fillMaxWidth()) {
                 Text("+ Add Series")
             }
         }
-    }
-
-}
-
-@Composable
-fun EditReportTextField(
-    label: String,
-    value: String,
-    placeholder: String,
-    onValueChange: (String) -> Unit
-) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(label, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-        OutlinedTextField(
-            value = value,
-            onValueChange = { newValue ->
-                onValueChange(newValue)
-            },
-            placeholder = { Text(placeholder) },
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
 
 @Composable
 fun EditReportDropdown(
-    value: Int,
+    value: String,
     label: String,
     options: List<MessageIdOption2>,
     onOptionSelected: (MessageIdOption2) -> Unit,
@@ -191,7 +224,7 @@ fun EditReportDropdown(
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Text(label, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
         UstadExposedDropDownMenuField(
-            value = options.firstOrNull { it.value == value },
+            value = options.firstOrNull { it.value.toString() == value },
             label = label,
             options = options,
             onOptionSelected = { selectedOption ->
