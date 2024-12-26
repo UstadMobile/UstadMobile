@@ -30,7 +30,7 @@ data class Report(
 
     var reportTitle: String? = null,
 
-    var reportOptions: String? = "",
+    var reportOptions: String? = null,
 
     var reportIsTemplate: Boolean = false,
 

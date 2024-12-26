@@ -87,7 +87,6 @@ class ReportEditViewModel(
             )
         }
     }
-
     fun onClickSave() {
         viewModelScope.launch {
             activeRepo.withDoorTransactionAsync {
@@ -127,7 +126,6 @@ class ReportEditViewModel(
             serializer = Report.serializer(),
         )
     }
-
 
     companion object {
         const val DEST_NAME = "Report"

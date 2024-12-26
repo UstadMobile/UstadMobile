@@ -18,7 +18,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ustadmobile.core.domain.report.model.ReportOptions2
-import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.impl.locale.entityconstants.ReportSeriesVisualTypeConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ReportSeriesYAxisConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ReportTimeRangeConstants
@@ -42,7 +41,7 @@ fun ReportEditScreen(viewModel: ReportEditViewModel) {
     ReportEditScreen(
         uiState = uiState,
         onReportChanged = viewModel::onEntityChanged,
-        onAddFilter = viewModel::onAddFilter,
+        onAddFilter = viewModel::onAddFilter
     )
 }
 
@@ -129,7 +128,7 @@ private fun ReportEditScreen(
                 value = "",
                 onOptionSelected = {
 
-                },
+                }
             )
         }
 
