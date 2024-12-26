@@ -3,7 +3,7 @@ package com.ustadmobile.libcache.distributed.model
 import java.nio.ByteBuffer
 
 data class DistributedCachePing(
-    override val id: Long,
+    override val id: Int,
     override val payload: ByteArray,
 ): DistributedCachePacket(), DistributedCacheWhatWithIdAndPayload {
 

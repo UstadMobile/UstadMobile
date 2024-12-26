@@ -44,5 +44,12 @@ expect abstract class NeighborCacheDao {
     """)
     abstract fun updateHttpPort(neighborUid: Long, httpPort: Int)
 
+    @Query("""
+        UPDATE NeighborCache
+           SET neighborPingTime = :pingTime
+         WHERE neighborUid = :neighborUid  
+    """)
+    abstract fun updatePingTime(neighborUid: Long, pingTime: Int): Int
+
 
 }

@@ -21,7 +21,7 @@ class DistributedHashEntriesTest {
     @Test
     fun givenPingSerialized_whenDeserialized_thenWillBeEqual() {
         val ping = DistributedCachePing(
-            id = 42L,
+            id = 42,
             payload = "payload".toByteArray()
         )
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache.distributed.model
 
 import com.ustadmobile.libcache.distributed.model.DistributedCachePing.Companion.readDistributedCachePing
+import com.ustadmobile.libcache.distributed.model.DistributedCachePong.Companion.readDistributedCachePong
 import com.ustadmobile.libcache.distributed.model.DistributedHashEntries.Companion.readDistributedHashEntries
 import java.nio.ByteBuffer
 
@@ -20,6 +21,7 @@ sealed class DistributedCachePacket {
             return when(what) {
                 WHAT_ENTRIES -> buffer.readDistributedHashEntries()
                 WHAT_PING -> buffer.readDistributedCachePing()
+                WHAT_PONG -> buffer.readDistributedCachePong()
                 else -> throw IllegalArgumentException("DistributedCachePacket.fromBytes: WHAT byte not recognized")
             }
         }

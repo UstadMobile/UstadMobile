@@ -30,7 +30,8 @@ fun LocalSharingSettingsScreen(
     ) {
         items(uiState.neighbors) {
             ListItem(
-                headlineContent = { Text(it.addr) }
+                headlineContent = { Text(it.addr) },
+                supportingContent = { Text("${it.pingTime}ms") }
             )
         }
     }
