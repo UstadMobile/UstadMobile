@@ -67,7 +67,6 @@ private fun ReportEditScreen(
                     singleLine = true,
                     onValueChange = { newTitle ->
                         val updatedOptions = uiState.reportOptions2?.copy(title = newTitle)
-                            ?: ReportOptions2(title = newTitle)
                         onReportChanged(updatedOptions)
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -84,7 +83,6 @@ private fun ReportEditScreen(
                 options = ReportXAxisConstants.X_AXIS_OPTIONS,
                 onOptionSelected = {
                     val updatedOptions = uiState.reportOptions2?.copy(xAxis = it.value.toString())
-                        ?: ReportOptions2(xAxis = it.value.toString())
                     onReportChanged(updatedOptions)
                 },
             )
@@ -100,19 +98,6 @@ private fun ReportEditScreen(
                     label = { androidx.compose.material3.Text("Series Title" + "*") },
                     singleLine = true,
                     onValueChange = { newTitle ->
-//                        val updatedSeries =
-//                            uiState.reportOptions2?.series?.toMutableList() ?: mutableListOf()
-//
-//                        if (updatedSeries.isNotEmpty()) {
-//                            updatedSeries[0] = updatedSeries[0].copy(reportSeriesTitle = newTitle)
-//                        } else {
-//                            updatedSeries.add(ReportSeries2(reportSeriesTitle = newTitle))
-//                        }
-//
-//                        val updatedOptions = uiState.reportOptions2?.copy(series = updatedSeries)
-//                            ?: ReportOptions2(series = updatedSeries)
-//
-//                        onReportChanged(updatedOptions)
                     },
                     supportingText = { }
                 )

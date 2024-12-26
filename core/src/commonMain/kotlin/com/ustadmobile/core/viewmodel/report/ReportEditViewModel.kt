@@ -48,35 +48,6 @@ class ReportEditViewModel(
             )
         }
 
-        launchIfHasPermission(
-            setLoadingState = true,
-            onSetFieldsEnabled = { enabled ->
-            },
-            permissionCheck = { db ->
-                db.systemPermissionDao().personHasSystemPermission(
-                    activeUserPersonUid, PermissionFlags.MANAGE_SITE_SETTINGS
-                )
-            }
-        ) {
-            awaitAll(
-                async {
-                    loadEntity(
-                        serializer = Report.serializer(),
-                        onLoadFromDb = {
-                            it.reportDao().takeIf { entityUid != 0L }?.findByUid(entityUid)
-                        },
-                        makeDefault = {
-                            Report().also {
-                                it.reportTitle = savedStateHandle[ARG_DATE_OF_BIRTH]
-                            }
-                        },
-                        uiUpdate = { entityToDisplay ->
-                        }
-                    )
-                }
-            )
-        }
-
         _appUiState.update { prev ->
             prev.copy(
                 actionBarButtonState = ActionBarButtonUiState(
@@ -135,5 +106,5 @@ class ReportEditViewModel(
 }
 
 data class ReportEditUiState(
-    val reportOptions2: ReportOptions2? = null,
+    val reportOptions2: ReportOptions2? = ReportOptions2(),
 )
