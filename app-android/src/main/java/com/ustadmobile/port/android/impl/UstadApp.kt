@@ -213,7 +213,7 @@ import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourc
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
-import com.ustadmobile.core.domain.localsharing.EnableLocalSharingUseCase
+import com.ustadmobile.core.domain.localsharing.setenabled.SetLocalSharingEnabledUseCase
 import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentAvailabilityUseCase
 import com.ustadmobile.core.domain.localsharing.checkcontentavailability.UstadCacheCheckContentAvailabilityUseCase
 import com.ustadmobile.core.domain.localsharing.listneighbors.ListLocalSharingNeighborsUseCase
@@ -1230,8 +1230,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<EnableLocalSharingUseCase>() with singleton {
-            EnableLocalSharingUseCase()
+        bind<SetLocalSharingEnabledUseCase>() with singleton {
+            SetLocalSharingEnabledUseCase(settings = instance())
         }
 
         bind<ListLocalSharingNeighborsUseCase>() with singleton {

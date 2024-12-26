@@ -2037,6 +2037,8 @@
 
     <string name="local_sharing_subtitle">Automatically download/share content with other users on the same WiFi network to reduce data usage and increase speed.</string>
 
+    <string name="available_neighbors">Available neighbors</string>
+
     <string name="local_only_hotspot">Local-only hotspot</string>
 
     <string name="local_only_hotspot_subtitle">Create a local-only WiFi hotspot that does not share Internet, but can share content files.</string>

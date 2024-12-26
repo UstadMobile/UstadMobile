@@ -12,7 +12,7 @@ import com.ustadmobile.core.domain.htmlcontentdisplayengine.GetHtmlContentDispla
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.HtmlContentDisplayEngineOption
 import com.ustadmobile.core.domain.htmlcontentdisplayengine.SetHtmlContentDisplayEngineUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
-import com.ustadmobile.core.domain.localsharing.EnableLocalSharingUseCase
+import com.ustadmobile.core.domain.localsharing.setenabled.SetLocalSharingEnabledUseCase
 import com.ustadmobile.core.domain.storage.OfflineStorageOption
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.Snack
@@ -108,7 +108,7 @@ class SettingsViewModel(
 
     private val getVersionUseCase: GetVersionUseCase by instance()
 
-    private val enableNearbySharingUseCase: EnableLocalSharingUseCase? by instanceOrNull()
+    private val enableNearbySharingUseCase: SetLocalSharingEnabledUseCase? by instanceOrNull()
 
     private val versionClickCount = atomic(0)
 
