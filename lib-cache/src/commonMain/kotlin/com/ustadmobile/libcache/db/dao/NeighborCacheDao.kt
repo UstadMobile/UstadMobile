@@ -27,6 +27,7 @@ expect abstract class NeighborCacheDao {
     @Query("""
         SELECT NeighborCache.*
           FROM NeighborCache
+         WHERE NeighborCache.neighborStatus = ${NeighborCache.STATUS_ACTIVE} 
     """)
     abstract fun allNeighborsAsFlow(): Flow<List<NeighborCache>>
 
@@ -46,10 +47,25 @@ expect abstract class NeighborCacheDao {
 
     @Query("""
         UPDATE NeighborCache
-           SET neighborPingTime = :pingTime
+           SET neighborPingTime = :pingTime,
+               neighborLastSeen = :timeNow
          WHERE neighborUid = :neighborUid  
     """)
-    abstract fun updatePingTime(neighborUid: Long, pingTime: Int): Int
+    abstract fun updatePingTime(neighborUid: Long, pingTime: Int, timeNow: Long): Int
+
+    /**
+     * Update the neighbor status based on whether or not it has replied to a ping within the threshold
+     * time
+     *
+     * @param timeNow current system time
+     * @param lostThreshold the threshold (in ms) after which, if a node has not replied to a ping, it is considered lost
+     */
+    @Query("""
+        UPDATE NeighborCache
+           SET neighborStatus = CAST(((:timeNow - NeighborCache.neighborLastSeen) < :lostThreshold) AS INTEGER)
+         WHERE neighborStatus != CAST(((:timeNow - NeighborCache.neighborLastSeen) < :lostThreshold) AS INTEGER)   
+    """)
+    abstract fun updateStatuses(timeNow: Long, lostThreshold: Long)
 
 
 }

@@ -112,7 +112,17 @@ val MIGRATE_11_12_SERVER = DoorMigrationStatementList(11, 12) {
     emptyList()
 }
 
+val MIGRATE_12_13 = DoorMigrationStatementList(12, 13) {
+    listOf(
+        "DROP TABLE IF EXISTS NeighborCache",
+        "CREATE TABLE IF NOT EXISTS NeighborCache (  neighborUid  INTEGER  PRIMARY KEY  NOT NULL , neighborIp  TEXT  NOT NULL , neighborUdpPort  INTEGER  NOT NULL , neighborHttpPort  INTEGER  NOT NULL , neighborDiscovered  INTEGER  NOT NULL , neighborPingTime  INTEGER  NOT NULL , neighborLastSeen  INTEGER  NOT NULL , neighborStatus  INTEGER  NOT NULL )"
+    )
+}
+
+
 fun DatabaseBuilder<UstadCacheDb>.addCacheDbMigrations(): DatabaseBuilder<UstadCacheDb> {
-    return addMigrations(MIGRATE_1_2, MIGRATE_2_3, MIGRATE_3_4, MIGRATE_4_5,
-        MIGRATE_5_6, MIGRATE_6_7, MIGRATE_7_8, MIGRATE_9_10, MIGRATE_10_11)
+    return addMigrations(
+        MIGRATE_1_2, MIGRATE_2_3, MIGRATE_3_4, MIGRATE_4_5,
+        MIGRATE_5_6, MIGRATE_6_7, MIGRATE_7_8, MIGRATE_9_10, MIGRATE_10_11, MIGRATE_12_13,
+    )
 }

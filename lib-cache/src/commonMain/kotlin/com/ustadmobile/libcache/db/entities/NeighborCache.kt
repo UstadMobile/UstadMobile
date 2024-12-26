@@ -19,4 +19,17 @@ data class NeighborCache(
     var neighborHttpPort: Int = 0,
     var neighborDiscovered: Long = 0L,
     var neighborPingTime: Int = 0,
-)
+    var neighborLastSeen: Long = 0L,
+    var neighborStatus: Int = 1,
+) {
+
+    companion object {
+
+        const val STATUS_ACTIVE = 1
+
+        @Suppress("unused")
+        const val STATUS_LOST = 0
+
+    }
+
+}

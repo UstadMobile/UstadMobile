@@ -39,6 +39,9 @@ import kotlin.math.max
  *
  * @param cacheDb the cache database we will observe to watch for new neighbors
  * @param httpPort the EmbeddedServer http port that neighbors can use to retrieve entries
+ * @param mtu MTU for UDP packets: used when sending hash entries to packetize
+ * @parma pingInterval the interval in milliseconds between pings to neighbors
+ * @param neighborLostThreshold the number of milliseconds after which a neighbor is considered lost
  */
 class DistributedCacheHashtable(
     private val cacheDb: UstadCacheDb,
@@ -46,6 +49,8 @@ class DistributedCacheHashtable(
     private val logger: UstadCacheLogger,
     private val xxStringHasher: XXStringHasher,
     private val mtu: Int = DEFAULT_MTU,
+    pingInterval: Long = DEFAULT_PING_INTERVAL,
+    private val neighborLostThreshold: Long = DEFAULT_NEIGHBOR_LOST_THRESHOLD,
     name: String? = null,
 ): Closeable  {
 
@@ -193,6 +198,7 @@ class DistributedCacheHashtable(
                                 val updates = cacheDb.neighborCacheDao.updatePingTime(
                                     neighborUid = xxStringHasher.neighborUid(packet.address, packet.port),
                                     pingTime = pingTime.toInt(),
+                                    timeNow = systemTimeInMillis()
                                 )
 
                                 logger.d(DCACHE_LOGTAG,
@@ -259,6 +265,11 @@ class DistributedCacheHashtable(
                     logger.e(DCACHE_LOGTAG, "$logPrefix exception sending ping to $neighbor", e)
                 }
             }
+
+            cacheDb.neighborCacheDao.updateStatuses(
+                timeNow = systemTimeInMillis(),
+                lostThreshold = neighborLostThreshold
+            )
         }
     }
 
@@ -292,13 +303,14 @@ class DistributedCacheHashtable(
         cacheDb.invalidationTracker.addObserver(newCacheEntryInvalidationCallback)
         executorService.submit(ReceivePacketsRunnable())
         executorService.scheduleWithFixedDelay(
-            SendPingsRunnable(), DEFAULT_PING_INTERVAL, DEFAULT_PING_INTERVAL, TimeUnit.MILLISECONDS
+            SendPingsRunnable(), pingInterval, pingInterval, TimeUnit.MILLISECONDS
         )
     }
 
     /**
      * Get a neighbor cache URL to retrieve
      */
+    @Suppress("unused")
     fun neighborUrl(url: String): String? {
         return null
     }
@@ -318,5 +330,7 @@ class DistributedCacheHashtable(
         const val DATABASE_CHUNK_SIZE = 1000
 
         const val DEFAULT_PING_INTERVAL = 3_000L
+
+        const val DEFAULT_NEIGHBOR_LOST_THRESHOLD = 10_000L
     }
 }

@@ -81,7 +81,8 @@ class DistributedCacheHashtableIntegrationTest {
             httpPort = 42,
             logger = NapierLoggingAdapter(),
             xxStringHasher = xxStringHasher,
-            name = "cache1"
+            name = "cache1",
+            pingInterval = PING_INTERVAL,
         )
 
         val dCacheTable2 = DistributedCacheHashtable(
@@ -89,7 +90,8 @@ class DistributedCacheHashtableIntegrationTest {
             httpPort = 42,
             logger = NapierLoggingAdapter(),
             xxStringHasher = xxStringHasher,
-            name = "cache2"
+            name = "cache2",
+            pingInterval = PING_INTERVAL,
         )
 
         val context = DistributedCacheHashtableTestContext(
@@ -182,4 +184,8 @@ class DistributedCacheHashtableIntegrationTest {
 
 
 
+    companion object {
+        //Ping interval to use in testing - reduced to speed up test times
+        const val PING_INTERVAL = 500L
+    }
 }

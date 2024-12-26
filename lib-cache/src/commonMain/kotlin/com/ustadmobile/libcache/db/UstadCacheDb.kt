@@ -28,7 +28,7 @@ import com.ustadmobile.libcache.db.entities.RetentionLock
  *
  */
 @DoorDatabase(
-    version = 12,
+    version = 13,
     entities = arrayOf(
         CacheEntry::class,
         RequestedEntry::class,
