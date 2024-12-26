@@ -54,7 +54,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
     val attemptsPersonListItems = attemptsPersonListPager.lazyPagingItems
     val attempts = stringResource(MR.strings.attempts)
     val percentageCompletion = stringResource(MR.strings.content_percentage_completion)
-    val percentageScore = stringResource(MR.strings.content_percentage_score)
+    val percentageScore = stringResource(MR.strings.content_score)
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -101,9 +101,9 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                     Text(
                         text = when {
                             attemptsPersonListItems.maxProgress != null ->
-                                "${(attemptsPersonListItems.maxProgress ?: 0f)}$percentageCompletion"
+                                "${(attemptsPersonListItems.maxProgress ?: 0f)}% $percentageCompletion"
 
-                            else -> "${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}$percentageScore"
+                            else -> "${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}% $percentageScore"
                         },
                         modifier = Modifier.padding(start = 8.dp).weight(0.3f),
                     )

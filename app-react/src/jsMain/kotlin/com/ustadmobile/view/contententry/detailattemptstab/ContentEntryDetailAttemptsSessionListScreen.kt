@@ -82,7 +82,7 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                 )
             val muiAppState = useMuiAppState()
             val stringsXml = useStringProvider()
-            val percentageScore=stringsXml[MR.strings.content_percentage_score]
+            val percentageScore=stringsXml[MR.strings.content_score]
             val percentageCompletion=stringsXml[MR.strings.content_percentage_completion]
 
             val passed=stringsXml[MR.strings.passed]
@@ -184,10 +184,10 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                         ListItemText {
                                             secondary = ReactNode(
                                                 if (attemptsSessionListItems.maxScore != null) {
-                                                    "${((attemptsSessionListItems.maxScore ?: 0f) * 100).toInt()}$percentageScore"
+                                                    "${((attemptsSessionListItems.maxScore ?: 0f) * 100).toInt()}% $percentageScore"
 
                                                 } else {
-                                                    "${attemptsSessionListItems.maxProgress}$percentageCompletion"
+                                                    "${attemptsSessionListItems.maxProgress}% $percentageCompletion"
 
                                                 }
                                             )
