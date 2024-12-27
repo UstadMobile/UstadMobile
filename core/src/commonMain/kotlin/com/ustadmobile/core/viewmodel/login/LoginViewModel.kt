@@ -7,15 +7,13 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
-import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
-import com.ustadmobile.core.domain.passkey.PassKeySignInData
-import com.ustadmobile.core.domain.password.LoginWithSavedPasswordUseCase
+import com.ustadmobile.core.domain.passkey.CredentialResult
+import com.ustadmobile.core.domain.passkey.GetCredentialUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
-import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -78,7 +76,7 @@ class LoginViewModel(
 
     private val impl: UstadMobileSystemImpl by instance()
 
-    private val loginWithPasskeyUseCase: LoginWithPasskeyUseCase? by instanceOrNull()
+    private val getCredentialUseCase: GetCredentialUseCase? by instanceOrNull()
 
     private val httpClient: HttpClient by instance()
 
@@ -89,8 +87,6 @@ class LoginViewModel(
     private val setLanguageUseCase: SetLanguageUseCase by instance()
 
     private val languagesConfig: SupportedLanguagesConfig by instance()
-
-    private val loginWithSavedPasswordUseCase: LoginWithSavedPasswordUseCase? by instanceOrNull()
 
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
@@ -164,15 +160,7 @@ class LoginViewModel(
             }
         }
 
-        onSignInWithPassKey()
-        viewModelScope.launch {
-            val result=  loginWithSavedPasswordUseCase?.invoke()
-            if (result?.username != null&& result.password != null){
-                onUsernameChanged(result.username)
-                onPasswordChanged(result.password)
-                onClickLogin()
-            }
-        }
+        getCredentials()
     }
 
     private fun onSiteVerified(site: Site) {
@@ -318,28 +306,38 @@ class LoginViewModel(
         }
     }
 
-    private fun onSignInWithPassKey() {
+    private fun getCredentials() {
         viewModelScope.launch {
             try {
-               val domain= Url(serverUrl).host
-                loginWithPasskeyUseCase?.let {
-                    val passKeySignInData = it.invoke(
-                       domain
-                    )
-                    if (passKeySignInData != null) {
-                        val account = accountManager.loginWithPasskey(passKeySignInData, serverUrl)
-                        goToNextDestAfterLoginOrGuestSelected(account.toPerson())
+                val domain = Url(serverUrl).host
+                getCredentialUseCase?.let { useCase ->
+                    when (val credentialResult = useCase.invoke(domain)) {
+                        is CredentialResult.PasskeyCredentialResult -> {
+                            val account = accountManager.loginWithPasskey(
+                                credentialResult.passKeySignInData,
+                                serverUrl
+                            )
+                            goToNextDestAfterLoginOrGuestSelected(account.toPerson())
+                        }
+                        is CredentialResult.PasswordCredentialResult -> {
+                            credentialResult.username?.let { onUsernameChanged(it) }
+                            credentialResult.password?.let { onPasswordChanged(it) }
+                            onClickLogin()
 
+                        }
+                        is CredentialResult.Error -> {
+                            Napier.e { "Error occurred: ${credentialResult.message}"}
 
+                        }
                     }
                 }
-
             } catch (e: Exception) {
-                snackDispatcher.showSnackBar(Snack(message = "error occurred :" + e.message))
-
+                Napier.e { "Error occurred: ${e.message}"}
             }
         }
     }
+
+
 
     companion object {
 

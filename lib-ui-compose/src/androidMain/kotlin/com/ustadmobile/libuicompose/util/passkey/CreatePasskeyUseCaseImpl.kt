@@ -26,7 +26,6 @@ class CreatePasskeyUseCaseImpl(
     @SuppressLint("PublicKeyCredential")
     override suspend fun invoke(createPassKeyParams: CreatePasskeyParams): CreatePasskeyResult? {
         val credentialManager = CredentialManager.create(context)
-
         /**credentialManager to create credential requires a request
          * https://developer.android.com/identity/sign-in/credential-manager#format-json-request
          */
@@ -64,7 +63,7 @@ class CreatePasskeyUseCaseImpl(
                 attestationObj = attestationObject,
                 clientDataJson = clientDataJsonString,
                 originString = originString,
-                rpid = "credential-manager-subdomain.applinktest.ustadmobile.com",
+                rpid = "credential-manager-${createPassKeyParams.domainName}",
                 challengeString = challengeString,
                 publicKey = publicKey,
                 id = id,
