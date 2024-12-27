@@ -8,7 +8,6 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.exceptions.GetCredentialException
-import com.google.common.collect.DiscreteDomain
 import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
 import com.ustadmobile.core.domain.passkey.PassKeySignInData
 import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
@@ -31,7 +30,8 @@ class LoginWithPasskeyUseCaseImpl(
             requestJson = passkeyRequestJsonUseCase.requestJsonForSignIn(domain)
         )
         val getCredRequest = GetCredentialRequest(
-            listOf(getPasswordOption, getPublicKeyCredentialOption)
+            listOf(getPasswordOption, getPublicKeyCredentialOption),
+            preferImmediatelyAvailableCredentials = true
         )
 
         try {

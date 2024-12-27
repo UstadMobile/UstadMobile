@@ -1,7 +1,6 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
-import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
@@ -61,8 +60,6 @@ class AddAccountSelectNewOrExistingViewModel(
 
     private val setLanguageUseCase: SetLanguageUseCase by instance()
 
-    private val openExternalLinkUseCase: OpenExternalLinkUseCase by instance()
-
     private val apiUrlConfig: SystemUrlConfig by instance()
 
     val uiState: Flow<AddAccountSelectNewOrExistingUiState>
@@ -88,19 +85,14 @@ class AddAccountSelectNewOrExistingViewModel(
 
     fun onClickNewUser() {
         navigateUser(true)
-
-
     }
 
     fun onClickExistingUser() {
         navigateUser(false)
-
     }
 
     fun navigateUser(isNewUser: Boolean) {
         val userType = if (isNewUser) "new" else "existing"
-
-
         val arg = buildMap {
             putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, userType)
@@ -117,7 +109,6 @@ class AddAccountSelectNewOrExistingViewModel(
             apiUrlConfig.newPersonalAccountsLearningSpaceUrl.isNullOrEmpty() -> {
                 LearningSpaceListViewModel.DEST_NAME
             }
-
             else -> AddAccountSelectNewOrExistingUserTypeViewModel.DEST_NAME
         }
 
@@ -142,7 +133,6 @@ class AddAccountSelectNewOrExistingViewModel(
     companion object {
 
         const val DEST_NAME = "addAccountSelectNewOrExisting"
-        const val PREF_TAG = "addAccountSelectNewOrExisting_screen"
 
     }
 }

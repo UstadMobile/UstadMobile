@@ -78,16 +78,16 @@ class RedirectViewModel(
         } else {
             ClazzListViewModel.DEST_NAME_HOME
         }
-
-        val destination = if (!apiUrlConfig.presetLearningSpaceUrl.isNullOrEmpty()) {
+        val presetLearningSpaceUrl = apiUrlConfig.presetLearningSpaceUrl
+        val destination = if (!presetLearningSpaceUrl.isNullOrEmpty()) {
             makeLinkUseCase.invoke(
                 destinationArg ?: clazzType,
                 args = buildMap {
                     putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
                     put(
                         ARG_LEARNINGSPACE_URL,
-                        apiUrlConfig.presetLearningSpaceUrl?.requireHttpPrefix()
-                            ?.requirePostfix("/")?.replace("/umapp", "") ?: ""
+                        presetLearningSpaceUrl.requireHttpPrefix()
+                            .requirePostfix("/")
                     )
                 }
             )

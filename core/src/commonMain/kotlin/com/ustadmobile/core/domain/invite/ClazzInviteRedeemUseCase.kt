@@ -5,7 +5,7 @@ import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCour
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzInvite
 
-class ClazzRedeemUseCase(
+class ClazzInviteRedeemUseCase(
     private val enrolIntoCourseUseCase: EnrolIntoCourseUseCase,
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase?
