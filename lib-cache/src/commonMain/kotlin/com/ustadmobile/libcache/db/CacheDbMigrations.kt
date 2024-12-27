@@ -119,10 +119,17 @@ val MIGRATE_12_13 = DoorMigrationStatementList(12, 13) {
     )
 }
 
+val MIGRATE_13_14 = DoorMigrationStatementList(13, 14) {
+    listOf(
+        "ALTER TABLE NeighborCache ADD COLUMN neighborDeviceName TEXT NOT NULL DEFAULT ''"
+    )
+}
+
 
 fun DatabaseBuilder<UstadCacheDb>.addCacheDbMigrations(): DatabaseBuilder<UstadCacheDb> {
     return addMigrations(
         MIGRATE_1_2, MIGRATE_2_3, MIGRATE_3_4, MIGRATE_4_5,
         MIGRATE_5_6, MIGRATE_6_7, MIGRATE_7_8, MIGRATE_9_10, MIGRATE_10_11, MIGRATE_12_13,
+        MIGRATE_13_14,
     )
 }

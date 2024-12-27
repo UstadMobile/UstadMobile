@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 
 /**
  * @param neighborUid the xxhash of neighborUrl
+ * @param neighborDeviceName the device name of the neighboring cache as per its ping message
  * @param neighborIp the IP address of the neighbor
  * @param neighborUdpPort the UDP port of the neighbor used to exchange available entries
  * @param neighborHttpPort the HTTP port of the neighbor used to download actual entries
@@ -14,6 +15,7 @@ import androidx.room.PrimaryKey
 data class NeighborCache(
     @PrimaryKey
     var neighborUid: Long = 0L,
+    var neighborDeviceName: String = "",
     var neighborIp: String = "",
     var neighborUdpPort: Int = 0,
     var neighborHttpPort: Int = 0,

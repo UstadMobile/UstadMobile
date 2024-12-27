@@ -8,7 +8,7 @@ import java.nio.ByteBuffer
 
 data class DistributedCachePing(
     override val id: Int,
-    private val deviceName: String,
+    val deviceName: String,
     override val payload: ByteArray,
 ): DistributedCachePacket(), DistributedCacheWhatWithIdAndPayload {
 

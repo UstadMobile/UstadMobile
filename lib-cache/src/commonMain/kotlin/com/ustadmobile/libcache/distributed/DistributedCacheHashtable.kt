@@ -164,17 +164,35 @@ class DistributedCacheHashtable(
                     val neighborUid = xxStringHasher.neighborUid(packet.address, packet.port)
                     val dCachePacket = DistributedCachePacket.fromBytes(packet.data, packet.offset, packet.length)
 
-                    cacheDb.neighborCacheDao.updateHttpPort(neighborUid, packet.port)
+                    //If not yet discovered - eg. our neighbor discovered us, but we didn't discover
+                    //them yet, then insert (fallback)
+                    fun insertNeighborIfNeeded() {
+                        cacheDb.neighborCacheDao.insertOrIgnore(
+                            NeighborCache(
+                                neighborUid = neighborUid,
+                                neighborIp = packet.address.hostAddress,
+                                neighborUdpPort = packet.port,
+                                neighborHttpPort = 0,
+                            )
+                        )
+                    }
 
                     when(dCachePacket) {
                         is DistributedHashEntries -> {
-                            cacheDb.neighborCacheEntryDao.upsertList(
-                                dCachePacket.entries.map {
-                                    NeighborCacheEntry(
-                                        nceNeighborUid = neighborUid, nceUrlHash = it.urlHash
-                                    )
-                                }
-                            )
+                            cacheDb.withDoorTransaction {
+                                insertNeighborIfNeeded()
+                                cacheDb.neighborCacheDao.updateHttpPort(
+                                    neighborUid = neighborUid, httpPort = dCachePacket.httpPort
+                                )
+                                cacheDb.neighborCacheEntryDao.upsertList(
+                                    dCachePacket.entries.map {
+                                        NeighborCacheEntry(
+                                            nceNeighborUid = neighborUid, nceUrlHash = it.urlHash
+                                        )
+                                    }
+                                )
+                            }
+
                             logger.d(DCACHE_LOGTAG,
                                 "$logPrefix saved hashes from ${packet.socketAddress} to database"
                             )
@@ -186,6 +204,15 @@ class DistributedCacheHashtable(
                             val replyPacket = DatagramPacket(
                                 replyBytes, replyBytes.size, packet.address, packet.port
                             )
+
+                            cacheDb.withDoorTransaction {
+                                insertNeighborIfNeeded()
+                                cacheDb.neighborCacheDao.updateDeviceName(
+                                    neighborUid = neighborUid,
+                                    deviceName = dCachePacket.deviceName,
+                                )
+                            }
+
                             sendLock.withLock {
                                 datagramSocket.send(replyPacket)
                             }

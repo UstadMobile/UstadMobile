@@ -219,6 +219,7 @@ import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckCo
 import com.ustadmobile.core.domain.localsharing.checkcontentavailability.UstadCacheCheckContentAvailabilityUseCase
 import com.ustadmobile.core.domain.localsharing.devicename.GetLocalSharingDeviceNameUseCase
 import com.ustadmobile.core.domain.localsharing.devicename.GetLocalSharingDeviceNameUseCaseAndroid
+import com.ustadmobile.core.domain.localsharing.devicename.SetLocalSharingDeviceNameUseCase
 import com.ustadmobile.core.domain.localsharing.listneighbors.ListLocalSharingNeighborsUseCase
 import com.ustadmobile.core.domain.localsharing.listneighbors.ListLocalSharingNeighborsUseCaseCommonJvm
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
@@ -1214,6 +1215,10 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
         bind<GetLocalSharingDeviceNameUseCase>() with singleton {
             GetLocalSharingDeviceNameUseCaseAndroid(settings = instance())
+        }
+
+        bind<SetLocalSharingDeviceNameUseCase>() with singleton {
+            SetLocalSharingDeviceNameUseCase(settings = instance())
         }
 
         bind<DistributedCacheHashtable>() with singleton {

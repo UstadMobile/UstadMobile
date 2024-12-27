@@ -12,7 +12,10 @@ class ListLocalSharingNeighborsUseCaseCommonJvm(
         return ustadCacheDb.neighborCacheDao.allNeighborsAsFlow().map { neighborList ->
             neighborList.map {
                 ListLocalSharingNeighborsUseCase.LocalSharingNeighbor(
-                    addr = it.neighborIp, pingTime = it.neighborPingTime
+                    uid = it.neighborUid,
+                    addr = it.neighborIp,
+                    pingTime = it.neighborPingTime,
+                    name = it.neighborDeviceName,
                 )
             }
         }

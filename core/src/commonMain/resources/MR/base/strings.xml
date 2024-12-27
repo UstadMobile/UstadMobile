@@ -2038,4 +2038,7 @@
     <string name="local_sharing_subtitle">Automatically download/share content with other users on the same WiFi network to reduce data usage and increase speed.</string>
 
     <string name="available_neighbors">Available neighbors</string>
+
+    <string name="device_name">Device name</string>
+
 </resources>

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.localsharing.devicename.GetLocalSharingDeviceNameUseCase
+import com.ustadmobile.core.domain.localsharing.devicename.SetLocalSharingDeviceNameUseCase
 import com.ustadmobile.core.domain.localsharing.listneighbors.ListLocalSharingNeighborsUseCase
 import com.ustadmobile.core.domain.localsharing.setenabled.SetLocalSharingEnabledUseCase
 import kotlinx.coroutines.launch
@@ -21,6 +22,8 @@ data class LocalSharingSettingsUiState(
     val neighbors: List<ListLocalSharingNeighborsUseCase.LocalSharingNeighbor> = emptyList(),
     val deviceName: String = "",
     val enabled: Boolean = false,
+    val deviceNameDialogVisible: Boolean = false,
+    val deviceNameDialogText: String = "",
 )
 
 class LocalSharingSettingsViewModel(
@@ -40,6 +43,8 @@ class LocalSharingSettingsViewModel(
 
     private val getDeviceNameUseCase: GetLocalSharingDeviceNameUseCase? by instanceOrNull()
 
+    private val setDeviceNameUseCase: SetLocalSharingDeviceNameUseCase? by instanceOrNull()
+
     init {
         _appUiState.update {
             it.copy(
@@ -48,10 +53,12 @@ class LocalSharingSettingsViewModel(
             )
         }
 
+        val deviceNameVal = getDeviceNameUseCase?.invoke() ?: ""
         _uiState.update {
             it.copy(
                 enabled = settings[SetLocalSharingEnabledUseCase.LOCAL_SHARING_ENABLED] ?: true,
-                deviceName = getDeviceNameUseCase?.invoke() ?: ""
+                deviceName = deviceNameVal,
+                deviceNameDialogText = deviceNameVal,
             )
         }
 
@@ -71,6 +78,28 @@ class LocalSharingSettingsViewModel(
 
         _uiState.update {
             it.copy(enabled = enabled)
+        }
+    }
+
+    fun onClickDeviceName() {
+        _uiState.update { it.copy(deviceNameDialogVisible = true) }
+    }
+
+    fun onDismissDeviceNameDialog() {
+        _uiState.update { it.copy(deviceNameDialogVisible = false) }
+    }
+
+    fun onDeviceNameDialogTextChange(deviceNameDialogText: String) {
+        _uiState.update { it.copy(deviceNameDialogText = deviceNameDialogText) }
+    }
+
+    fun onClickDeviceNameDialogOk() {
+        setDeviceNameUseCase?.invoke(_uiState.value.deviceNameDialogText)
+        _uiState.update {
+            it.copy(
+                deviceNameDialogVisible = false,
+                deviceName = it.deviceNameDialogText,
+            )
         }
     }
 

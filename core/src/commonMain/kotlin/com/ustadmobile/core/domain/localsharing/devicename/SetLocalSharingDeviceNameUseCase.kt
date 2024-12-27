@@ -3,7 +3,7 @@ package com.ustadmobile.core.domain.localsharing.devicename
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 
-class SetDeviceNameUseCase(
+class SetLocalSharingDeviceNameUseCase(
     private val settings: Settings,
 ) {
 

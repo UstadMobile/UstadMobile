@@ -17,6 +17,8 @@ expect abstract class NeighborCacheDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun upsert(neighborCache: NeighborCache)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract fun insertOrIgnore(neighborCache: NeighborCache)
 
     @Query("""
         DELETE FROM NeighborCache
@@ -66,6 +68,14 @@ expect abstract class NeighborCacheDao {
          WHERE neighborStatus != CAST(((:timeNow - NeighborCache.neighborLastSeen) < :lostThreshold) AS INTEGER)   
     """)
     abstract fun updateStatuses(timeNow: Long, lostThreshold: Long)
+
+    @Query("""
+        UPDATE NeighborCache
+           SET neighborDeviceName = :deviceName
+        WHERE neighborUid = :neighborUid
+          AND neighborDeviceName != :deviceName   
+    """)
+    abstract fun updateDeviceName(neighborUid: Long, deviceName: String)
 
 
 }

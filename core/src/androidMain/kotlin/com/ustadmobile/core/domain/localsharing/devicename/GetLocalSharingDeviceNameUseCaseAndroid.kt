@@ -9,6 +9,6 @@ class GetLocalSharingDeviceNameUseCaseAndroid(
 ): GetLocalSharingDeviceNameUseCase {
 
     override fun invoke(): String {
-        return settings[SetDeviceNameUseCase.KEY_DEVICE_NAME] ?: "${Build.MANUFACTURER} ${Build.MODEL}"
+        return settings[SetLocalSharingDeviceNameUseCase.KEY_DEVICE_NAME] ?: "${Build.MANUFACTURER} ${Build.MODEL}"
     }
 }
