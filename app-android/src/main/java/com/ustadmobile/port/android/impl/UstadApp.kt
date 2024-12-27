@@ -217,6 +217,8 @@ import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
 import com.ustadmobile.core.domain.localsharing.setenabled.SetLocalSharingEnabledUseCase
 import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentAvailabilityUseCase
 import com.ustadmobile.core.domain.localsharing.checkcontentavailability.UstadCacheCheckContentAvailabilityUseCase
+import com.ustadmobile.core.domain.localsharing.devicename.GetLocalSharingDeviceNameUseCase
+import com.ustadmobile.core.domain.localsharing.devicename.GetLocalSharingDeviceNameUseCaseAndroid
 import com.ustadmobile.core.domain.localsharing.listneighbors.ListLocalSharingNeighborsUseCase
 import com.ustadmobile.core.domain.localsharing.listneighbors.ListLocalSharingNeighborsUseCaseCommonJvm
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
@@ -1210,12 +1212,17 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<GetLocalSharingDeviceNameUseCase>() with singleton {
+            GetLocalSharingDeviceNameUseCaseAndroid(settings = instance())
+        }
+
         bind<DistributedCacheHashtable>() with singleton {
             DistributedCacheHashtable(
                 cacheDb = instance(),
                 httpPort = instance<EmbeddedHttpServer>().listeningPort,
                 logger = NapierLoggingAdapter(),
                 xxStringHasher = instance(),
+                deviceName = { instance<GetLocalSharingDeviceNameUseCase>().invoke() },
             )
         }
 
