@@ -7,19 +7,19 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Initialize DistributedCacheNsdAndroid with a LifecycleOwner
+ * Initialize DistributedCacheNsdAndroid with a LifecycleOwner so discovery will run only when the
+ * lifecycle is at least started and the service will be registered when the lifecycle is created.
  *
- * @param distCacheProvider function that returns DistributedCacheNsdAndroid. This may invoke IO
+ * @param distCacheNsd function that returns DistributedCacheNsdAndroid. This may invoke IO
  *        activity, so it will be run on the IO dispatcher.
- *
  */
-fun LifecycleOwner.launchDistributedCacheNsdInit(
-    distCacheProvider: () -> DistributedCacheNsdAndroid
+fun LifecycleOwner.launchInitDistributedCacheNsdWithLifecycle(
+    distCacheNsd: () -> DistributedCacheNsdAndroid
 ) {
     lifecycleScope.launch(Dispatchers.IO) {
-        val cacheNsdAndroid = distCacheProvider()
+        val cacheNsdAndroid = distCacheNsd()
         withContext(Dispatchers.Main) {
-            cacheNsdAndroid.initWithLifecycleOwner(this@launchDistributedCacheNsdInit)
+            cacheNsdAndroid.initWithLifecycleOwner(this@launchInitDistributedCacheNsdWithLifecycle)
         }
     }
 }

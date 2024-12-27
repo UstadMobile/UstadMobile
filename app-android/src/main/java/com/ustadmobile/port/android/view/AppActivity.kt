@@ -25,7 +25,7 @@ import org.kodein.di.provider
 import org.kodein.di.scoped
 import android.content.Intent
 import android.net.Uri
-import com.ustadmobile.libcache.distributed.launchDistributedCacheNsdInit
+import com.ustadmobile.libcache.distributed.launchInitDistributedCacheNsdWithLifecycle
 import org.kodein.di.direct
 
 
@@ -137,7 +137,7 @@ class AppActivity: AbstractAppActivity() {
         val appLinkAction: String? = appLinkIntent.action
         val appLinkData: Uri? = appLinkIntent.data
 
-        this.launchDistributedCacheNsdInit { di.direct.instance() }
+        this.launchInitDistributedCacheNsdWithLifecycle(distCacheNsd = { di.direct.instance() } )
     }
 
     override fun onLocalesChanged(locales: LocaleListCompat) {

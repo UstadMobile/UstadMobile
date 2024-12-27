@@ -163,7 +163,6 @@ door-compiler = { module = "com.github.UstadMobile.door:door-compiler", version.
 door-shallowcopy = { module = "com.github.UstadMobile.door:door-shallowcopy", version.ref = "door" }
 door-room-annotations = { module = "com.github.UstadMobile.door:room-annotations", version.ref = "door" }
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
-coroutines-rx3 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-rx3", version.ref = "coroutines" }
 atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu"}
 kotlinxio-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "android-room" }
