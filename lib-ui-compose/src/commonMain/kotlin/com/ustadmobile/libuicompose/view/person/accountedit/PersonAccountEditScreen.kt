@@ -67,13 +67,12 @@ fun PersonAccountEditScreen(
                 label = {
                     Text(stringResource(MR.strings.username) + "*")
                 },
-                onValueChange = {
-                    onChange(
-                        uiState.personAccount?.copy(
-                            username = it
-                        )
-                    )
-
+                onValueChange = { newValue ->
+                    newValue.lastOrNull()?.let { lastChar ->
+                        if (!FilterUsernameUseCase.shouldBlockKeyEvent(lastChar)) {
+                            onChange(uiState.personAccount?.copy(username = newValue.lowercase()))
+                        }
+                    } ?: onChange(uiState.personAccount?.copy(username = newValue.lowercase()))
                 },
                 isError = uiState.usernameError != null,
                 enabled = uiState.fieldsEnabled,

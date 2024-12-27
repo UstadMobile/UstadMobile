@@ -9,6 +9,7 @@ import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -80,7 +81,7 @@ class LoginViewModel(
 
     private val languagesConfig: SupportedLanguagesConfig by instance()
 
-    private val filterUsernameUseCase: FilterUsernameUseCase by instance()
+    private val validateUsernameUseCase = ValidateUsernameUseCase()
 
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
@@ -159,13 +160,9 @@ class LoginViewModel(
         }
     }
 
-    fun onUsernameChanged(newValue: String) {
-        val filteredUsername = filterUsernameUseCase(newValue, ' ')
+    fun onUsernameChanged(username: String) {
         _uiState.update { prev ->
-            prev.copy(
-                username = filteredUsername,
-                usernameError = null
-            )
+            prev.copy(username = username)
         }
     }
 
@@ -203,7 +200,19 @@ class LoginViewModel(
         val username = _uiState.value.username
         val password = _uiState.value.password
 
-        if(username.isNotEmpty() && password.isNotEmpty()){
+        val validationResult = validateUsernameUseCase(username)
+
+        if (validationResult != ValidateUsernameUseCase.ValidationResult.VALID) {
+            _uiState.update { prev ->
+                prev.copy(
+                    fieldsEnabled = true,
+                    usernameError = impl.getString(MR.strings.invalid_username)
+                )
+            }
+            return
+        }
+
+        if (username.isNotEmpty() && password.isNotEmpty()) {
             loadingState = LoadingUiState.INDETERMINATE
             viewModelScope.launch {
                 var errorMessage: String? = null

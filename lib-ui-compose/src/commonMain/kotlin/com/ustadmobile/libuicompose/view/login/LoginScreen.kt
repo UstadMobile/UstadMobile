@@ -87,7 +87,12 @@ fun LoginScreen(
             label = {
                 Text(stringResource(MR.strings.username))
             },
-            onValueChange = onUsernameValueChange,
+            onValueChange = { newValue ->
+                val lastChar = newValue.lastOrNull()
+                if (lastChar == null || !FilterUsernameUseCase.shouldBlockKeyEvent(lastChar)) {
+                    onUsernameValueChange(newValue.lowercase())
+                }
+            },
             enabled = uiState.fieldsEnabled,
             isError = uiState.usernameError != null,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),

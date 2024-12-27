@@ -9,6 +9,7 @@ import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -152,6 +153,8 @@ class PersonEditViewModel(
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase by instance()
 
     private val validateEmailUseCase = ValidateEmailUseCase()
+
+    private val validateUsernameUseCase = ValidateUsernameUseCase()
 
     private val genderConfig : GenderConfig by instance()
 
@@ -356,31 +359,6 @@ class PersonEditViewModel(
             phoneNumError != null
     }
 
-    private fun validateUsername(username: String): Boolean {
-        var isValid = true
-
-        if (username.isNullOrEmpty()){
-            isValid = false
-        }
-
-        if (isValid){
-            if (username.contains(" ")){
-                isValid = false
-            }
-        }
-
-        if (isValid){
-            var usernameChars = username.toCharArray()
-
-            for(i in 1..<usernameChars.count()){
-                if(usernameChars[i].isUpperCase()){
-                    isValid = false
-                }
-            }
-        }
-
-        return isValid
-    }
 
     fun onNationalPhoneNumSetChanged(phoneNumSet: Boolean) {
         _uiState.takeIf { it.value.nationalPhoneNumSet != phoneNumSet }?.update { prev ->
@@ -410,8 +388,13 @@ class PersonEditViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                usernameError = if(isRegistrationMode && !validateUsername(savePerson.username ?: "")) {
-                    systemImpl.getString(MR.strings.invalid)
+                usernameError = if(isRegistrationMode) {
+                    val validationResult = validateUsernameUseCase(savePerson.username ?: "")
+                    if (validationResult != ValidateUsernameUseCase.ValidationResult.VALID) {
+                        systemImpl.getString(MR.strings.invalid_username)
+                    } else {
+                        null
+                    }
                 }else {
                     null
                 },

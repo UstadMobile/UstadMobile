@@ -236,10 +236,15 @@ fun PersonEditScreen(
                 enabled = uiState.fieldsEnabled,
                 isError = uiState.usernameError != null,
                 singleLine = true,
-                onValueChange = {
-                    onPersonChanged(uiState.person?.shallowCopy{
-                        username = it
-                    })
+                onValueChange = { newValue ->
+                    val lastChar = newValue.lastOrNull()
+                    if (lastChar == null || !FilterUsernameUseCase.shouldBlockKeyEvent(lastChar)) {
+                        onPersonChanged(
+                            uiState.person?.shallowCopy {
+                                username = newValue.lowercase()
+                            }
+                        )
+                    }
                 },
                 supportingText = {
                     Text(uiState.usernameError ?: stringResource(MR.strings.required))

@@ -6,6 +6,7 @@ import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -79,6 +80,8 @@ class PersonAccountEditViewModel(
     private val authManager: AuthManager by on(accountManager.activeEndpoint).instance()
 
     private val setPasswordUseCase: SetPasswordUseCase by on(accountManager.activeEndpoint).instance()
+
+    private val validateUsernameUseCase = ValidateUsernameUseCase()
 
     init {
         _appUiState.value = AppUiState(
@@ -192,9 +195,18 @@ class PersonAccountEditViewModel(
             )
         }
         viewModelScope.launch {
-            if(entity.mode == MODE_CREATE_ACCOUNT && entity.username.isBlank()) {
-                _uiState.update { prev ->
-                    prev.copy(usernameError = systemImpl.getString(MR.strings.field_required_prompt))
+
+            if(entity.mode == MODE_CREATE_ACCOUNT) {
+                val validationResult = validateUsernameUseCase(entity.username)
+                loadingState = LoadingUiState.NOT_LOADING
+                if (validationResult != ValidateUsernameUseCase.ValidationResult.VALID) {
+                    _uiState.update { prev ->
+                        prev.copy(
+                            fieldsEnabled = true,
+                            usernameError = systemImpl.getString(MR.strings.invalid_username)
+                        )
+                    }
+                    return@launch
                 }
             }
 
