@@ -42,6 +42,7 @@ import kotlin.math.max
  * @param mtu MTU for UDP packets: used when sending hash entries to packetize
  * @parma pingInterval the interval in milliseconds between pings to neighbors
  * @param neighborLostThreshold the number of milliseconds after which a neighbor is considered lost
+ * @param deviceName function to provide the device name as it will be shown to other devices
  */
 class DistributedCacheHashtable(
     private val cacheDb: UstadCacheDb,
@@ -51,7 +52,7 @@ class DistributedCacheHashtable(
     private val mtu: Int = DEFAULT_MTU,
     pingInterval: Long = DEFAULT_PING_INTERVAL,
     private val neighborLostThreshold: Long = DEFAULT_NEIGHBOR_LOST_THRESHOLD,
-    name: String? = null,
+    private val deviceName: () -> String,
 ): Closeable  {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -65,7 +66,7 @@ class DistributedCacheHashtable(
 
     private val discoveredNeighbors = concurrentSafeMapOf<Long, NeighborCache>()
 
-    private val logPrefix = "DistributedCacheHashtable($port ${name ?: ""})"
+    private val logPrefix = "DistributedCacheHashtable($port ${deviceName()})"
 
     data class PendingPing(
         val id: Int,
@@ -115,7 +116,7 @@ class DistributedCacheHashtable(
      * Runnable that will send the hashes of everything we have to the neighbor; runs when neighbor
      * is discovered
      */
-    inner class SendNeighborHashesRunnable(val neighborCache: NeighborCache): Runnable {
+    inner class SendNeighborHashesRunnable(private val neighborCache: NeighborCache): Runnable {
         override fun run() {
             logger.d(DCACHE_LOGTAG,
                 "$logPrefix starting new neighbor run for ${neighborCache.neighborIp}:${neighborCache.neighborUdpPort}"
@@ -245,11 +246,16 @@ class DistributedCacheHashtable(
         override fun run() {
             val allNodes = cacheDb.neighborCacheDao.allNeighbors()
             logger.d(DCACHE_LOGTAG, "$logPrefix: sending pings to ${allNodes.size} nodes")
+            val deviceNameVal = deviceName()
 
             allNodes.forEach { neighbor ->
                 try {
                     val address = InetAddress.getByName(neighbor.neighborIp)
-                    val ping = DistributedCachePing(id = pingIdAtomic.incrementAndGet(), ByteArray(0))
+                    val ping = DistributedCachePing(
+                        id = pingIdAtomic.incrementAndGet(),
+                        deviceName = deviceNameVal,
+                        payload = ByteArray(0)
+                    )
                     pendingPings[ping.id] = PendingPing(ping.id, systemTimeInMillis(), address)
                     val pingPacketBytes = ping.toBytes()
                     sendLock.withLock {
@@ -311,7 +317,9 @@ class DistributedCacheHashtable(
      * Get a neighbor cache URL to retrieve
      */
     @Suppress("unused")
-    fun neighborUrl(url: String): String? {
+    fun neighborUrl(
+        @Suppress("UNUSED_PARAMETER") url: String
+    ): String? {
         return null
     }
 

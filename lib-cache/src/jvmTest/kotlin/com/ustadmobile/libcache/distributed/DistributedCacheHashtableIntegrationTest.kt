@@ -81,7 +81,7 @@ class DistributedCacheHashtableIntegrationTest {
             httpPort = 42,
             logger = NapierLoggingAdapter(),
             xxStringHasher = xxStringHasher,
-            name = "cache1",
+            deviceName = { "cache1" },
             pingInterval = PING_INTERVAL,
         )
 
@@ -90,7 +90,7 @@ class DistributedCacheHashtableIntegrationTest {
             httpPort = 42,
             logger = NapierLoggingAdapter(),
             xxStringHasher = xxStringHasher,
-            name = "cache2",
+            deviceName = { "cache2" },
             pingInterval = PING_INTERVAL,
         )
 
