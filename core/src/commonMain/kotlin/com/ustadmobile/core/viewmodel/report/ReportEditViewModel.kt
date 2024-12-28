@@ -2,18 +2,23 @@ package com.ustadmobile.core.viewmodel.report
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.domain.report.model.ReportFilter2
 import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.replace
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
 import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel.Companion.RESULT_KEY_REPORT
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_DATE_OF_BIRTH
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.Site
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
@@ -47,17 +52,47 @@ class ReportEditViewModel(
                 hideBottomNavigation = false
             )
         }
+        launchIfHasPermission(
+            setLoadingState = true,
+            onSetFieldsEnabled = { enabled ->
+            },
+            permissionCheck = { db ->
+                db.systemPermissionDao().personHasSystemPermission(
+                    activeUserPersonUid, PermissionFlags.REPORT_EDIT
+                )
+            }
+        ) {
+            loadEntity(
+                serializer = Report.serializer(),
+                onLoadFromDb = { db ->
+                    db.reportDao().findByUid(entityUid)
+                },
+                makeDefault = {
+                    Report()
+                },
+                uiUpdate = { loadedReport ->
+                    _uiState.update { prev ->
+                        prev.copy(
+                            reportOptions2 = loadedReport?.reportOptions?.takeIf { it.isNotBlank() }
+                                ?.let { Json.decodeFromString(ReportOptions2.serializer(), it) }
+                                ?: ReportOptions2()
+                        )
+                    }
+                }
+            )
+        }
 
         _appUiState.update { prev ->
             prev.copy(
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MR.strings.save),
+                    text = systemImpl.getString(MR.strings.done),
                     onClick = this@ReportEditViewModel::onClickSave
                 )
             )
         }
     }
+
     fun onClickSave() {
         viewModelScope.launch {
             activeRepo.withDoorTransactionAsync {
@@ -65,7 +100,7 @@ class ReportEditViewModel(
                     val currentReport = _uiState.value.reportOptions2
                     val report = Report(
                         reportUid = entityUid,
-                        reportTitle = currentReport?.title,
+                        reportTitle = currentReport.title,
                         reportOptions = Json.encodeToString(currentReport),
                     )
                     if (entityUid == 0L) {
@@ -82,9 +117,21 @@ class ReportEditViewModel(
         }
     }
 
-    fun onEntityChanged(newOptions: ReportOptions2?) {
+    fun onEntityChanged(newOptions: ReportOptions2) {
         _uiState.update { currentState ->
             currentState.copy(reportOptions2 = newOptions)
+        }
+    }
+
+    fun onSeriesChanged(updatedSeries: ReportSeries2) {
+        _uiState.update { prev ->
+            prev.copy(
+                reportOptions2 = prev.reportOptions2.copy(
+                    series = prev.reportOptions2.series.replace(updatedSeries) {
+                        it.reportSeriesUid == updatedSeries.reportSeriesUid
+                    }
+                )
+            )
         }
     }
 
@@ -94,9 +141,48 @@ class ReportEditViewModel(
             nextViewName = ReportFilterEditViewModel.DEST_NAME,
             key = RESULT_KEY_REPORT,
             currentValue = null,
-            serializer = Report.serializer(),
+            serializer = Report.serializer()
         )
     }
+
+
+    fun onAddSeries() {
+        _uiState.update { prev ->
+            prev.copy(
+                reportOptions2 = prev.reportOptions2.copy(
+                    series = prev.reportOptions2.series + ReportSeries2(
+                        reportSeriesUid = prev.reportOptions2.series.size + 1,
+                        reportSeriesVisualType = null,
+                        reportSeriesSubGroup = null,
+                        reportTimeRange = null,
+                        reportSeriesYAxis = null
+                    ),
+                )
+            )
+        }
+    }
+
+    fun onRemoveFilter(index: Int, seriesId: Int) {
+        _uiState.update { prev ->
+            val updatedSeriesList = prev.reportOptions2.series.map { series ->
+                if (series.reportSeriesUid == seriesId) {
+                    val updatedFilters = series.reportSeriesFilters?.toMutableList()?.apply {
+                        removeAt(index)
+                    }
+                    series.copy(reportSeriesFilters = updatedFilters)
+                } else {
+                    series
+                }
+            }
+
+            prev.copy(
+                reportOptions2 = prev.reportOptions2.copy(
+                    series = updatedSeriesList
+                )
+            )
+        }
+    }
+
 
     companion object {
         const val DEST_NAME = "Report"
@@ -106,5 +192,5 @@ class ReportEditViewModel(
 }
 
 data class ReportEditUiState(
-    val reportOptions2: ReportOptions2? = ReportOptions2(),
+    val reportOptions2: ReportOptions2 = ReportOptions2(),
 )

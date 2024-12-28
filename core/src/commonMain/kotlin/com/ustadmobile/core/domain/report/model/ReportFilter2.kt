@@ -1,6 +1,9 @@
 package com.ustadmobile.core.domain.report.model
 
+import com.benasher44.uuid.UUID
+import com.benasher44.uuid.Uuid
 import kotlinx.serialization.Serializable
+import kotlin.random.Random
 
 /** Enum representing different comparison types */
 enum class Comparisons {
@@ -16,7 +19,8 @@ enum class Comparisons {
 /** Sealed class representing different types of report filters */
 @Serializable
 sealed class ReportFilter2(
-    val comparisonTypes: List<Comparisons>
+    val comparisonTypes: List<Comparisons>,
+    val id : Int = 0
 ) {
     @Serializable
     data class GenderFilter(

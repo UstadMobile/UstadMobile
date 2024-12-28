@@ -6,6 +6,9 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
+import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
+import com.ustadmobile.lib.db.entities.ReportFilter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -38,15 +41,25 @@ class ReportFilterEditViewModel(
             prev.copy(
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MR.strings.save),
+                    text = systemImpl.getString(MR.strings.done),
                     onClick = this@ReportFilterEditViewModel::onClickSave
                 )
             )
         }
     }
-    fun onClickSave() {
 
+    fun onClickSave() {
+        val filter = uiState.value.filters
+        finishWithResult(ReportEditViewModel.DEST_NAME, filter?.id?.toLong() ?:0, filter)
     }
+
+
+    fun onEntityChanged(value: ReportFilter2?) {
+        _uiState.update { currentState ->
+            currentState.copy(filters = value)
+        }
+    }
+
     companion object {
 
         const val DEST_NAME = "ReportFilterEdit"
