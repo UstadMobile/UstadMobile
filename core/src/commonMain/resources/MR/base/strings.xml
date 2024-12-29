@@ -1945,8 +1945,8 @@
 
     <string name="subtitles">Subtitles</string>
 
+    <!--  Edit Report -->
     <string name="edit_report">Edit Report</string>
-
     <string name="field">Field</string>
     <string name="condition">Condition</string>
     <string name="value">Value</string>
@@ -1979,14 +1979,4 @@
     <string name="none">None</string>
     <string name="attendance_query">Attendance Query</string>
     <string name="statement_query">Statement Query</string>
-
-
-
-
-
-
-
-
-
-
 </resources>
