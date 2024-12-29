@@ -23,6 +23,8 @@ class ReportFilterEditViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
+    val seriesId: Int = savedStateHandle["reportSeriesUid"]?.toInt() ?: 0
+
     private val _uiState = MutableStateFlow(ReportFilterEditUiState())
     val uiState: StateFlow<ReportFilterEditUiState> = _uiState
 
@@ -50,7 +52,13 @@ class ReportFilterEditViewModel(
 
     fun onClickSave() {
         val filter = uiState.value.filters
-        finishWithResult(ReportEditViewModel.DEST_NAME, filter?.id?.toLong() ?:0, filter)
+        finishWithResult(
+            ReportEditViewModel.DEST_NAME,
+            filter?.id?.toLong() ?: 0,
+            mapOf(
+                "reportSeriesUid" to seriesId
+            )
+        )
     }
 
 
@@ -64,7 +72,6 @@ class ReportFilterEditViewModel(
 
         const val DEST_NAME = "ReportFilterEdit"
         const val DEST_NAME_HOME = "ReportFilterEditHome"
-        const val RESULT_KEY_REPORT = "arg"
         const val ARG = "arg"
     }
 }

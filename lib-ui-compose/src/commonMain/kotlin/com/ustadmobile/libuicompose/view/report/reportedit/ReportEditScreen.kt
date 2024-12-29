@@ -63,7 +63,7 @@ fun ReportEditScreen(viewModel: ReportEditViewModel) {
 private fun ReportEditScreen(
     uiState: ReportEditUiState = ReportEditUiState(),
     onReportChanged: (ReportOptions2) -> Unit = {},
-    onAddFilter: () -> Unit = { },
+    onAddFilter: (Int) -> Unit = { },
     onAddSeries: () -> Unit = { },
     onSeriesChanged: (ReportSeries2) -> Unit = {},
     onRemoveFilter: (Int, Int) -> Unit = { _, _ -> }
@@ -218,7 +218,7 @@ private fun ReportEditScreen(
             }
 
             item {
-                Button(onClick = { onAddFilter() }, modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = { onAddFilter(seriesItem.reportSeriesUid) }, modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = stringResource(MR.strings.add_filter),
                     )

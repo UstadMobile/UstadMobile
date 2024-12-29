@@ -168,7 +168,10 @@ import com.ustadmobile.mui.components.UstadChipsDemo
 import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
 import com.ustadmobile.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
+import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
 import com.ustadmobile.view.contententry.subtitleedit.SubtitleEditScreen
+import com.ustadmobile.view.report.ReportEditScreen
+import com.ustadmobile.view.report.ReportFilterEditScreenComponent
 
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
@@ -232,7 +235,10 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ErrorReportView.VIEW_NAME, name = "ErrorReport Preview", ErrorReportPreview),
     UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
     UstadScreen(ReportFilterEditViewModel.DEST_NAME,
-        "ReportFilterEdit Preview", ReportFilterEditScreenPreview),
+        "ReportFilterEdit Preview", ReportFilterEditScreenComponent),
+    UstadScreen(
+        ReportEditViewModel.DEST_NAME,
+        "ReportEdit Preview", ReportEditScreen),
     UstadScreen(ScopedGrantDetailView.VIEW_NAME, "ScopedGrantDetail Preview",
         ScopedGrantDetailScreenPreview),
     UstadScreen(ContentEntryImportLinkViewModel.DEST_NAME, "ContentEntryImportLink",
@@ -399,7 +405,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("UstadChipsDemo", "UstadChipsDemo", UstadChipsDemo),
     UstadScreen(GetSubtitleViewModel.DEST_NAME, "GetSubtitle", GetSubtitleScreen),
     UstadScreen(SubtitleEditViewModel.DEST_NAME, "SubtitleEdit", SubtitleEditScreen),
-)
+    )
 
 //Here as per the MUI showcase template
 @Suppress("Unused")

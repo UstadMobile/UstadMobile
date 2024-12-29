@@ -1,7 +1,6 @@
 package com.ustadmobile.core.viewmodel.report
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.report.model.ReportFilter2
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
@@ -12,15 +11,10 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.replace
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
-import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel.Companion.RESULT_KEY_REPORT
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_DATE_OF_BIRTH
 import com.ustadmobile.door.ext.withDoorTransactionAsync
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.Site
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,7 +27,7 @@ import org.kodein.di.DI
 class ReportEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    destName: String
+    destName: String = ""
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState: MutableStateFlow<ReportEditUiState> =
@@ -54,32 +48,36 @@ class ReportEditViewModel(
         }
         launchIfHasPermission(
             setLoadingState = true,
-            onSetFieldsEnabled = { enabled ->
-            },
-            permissionCheck = { db ->
-                db.systemPermissionDao().personHasSystemPermission(
-                    activeUserPersonUid, PermissionFlags.REPORT_EDIT
-                )
-            }
+            permissionCheck = { true }
         ) {
-            loadEntity(
-                serializer = Report.serializer(),
-                onLoadFromDb = { db ->
-                    db.reportDao().findByUid(entityUid)
-                },
-                makeDefault = {
-                    Report()
-                },
-                uiUpdate = { loadedReport ->
-                    _uiState.update { prev ->
-                        prev.copy(
-                            reportOptions2 = loadedReport?.reportOptions?.takeIf { it.isNotBlank() }
-                                ?.let { Json.decodeFromString(ReportOptions2.serializer(), it) }
-                                ?: ReportOptions2()
-                        )
+            async {
+                loadEntity(
+                    serializer = Report.serializer(),
+                    onLoadFromDb = { db ->
+                        db.reportDao().findByUid(entityUid)
+                    },
+                    makeDefault = {
+                        Report()
+                    },
+                    uiUpdate = { loadedReport ->
+                        _uiState.update { prev ->
+                            prev.copy(
+                                reportOptions2 = loadedReport?.reportOptions?.takeIf { it.isNotBlank() }
+                                    ?.let { Json.decodeFromString(ReportOptions2.serializer(), it) }
+                                    ?: ReportOptions2()
+                            )
+                        }
                     }
+                )
+                navResultReturner.filteredResultFlowForKey(RESULT_KEY_REPORT).collect { result ->
+                    val reportResult = result.result as? Map<*, *> ?: return@collect
+                    val filter = reportResult["filter"] as? ReportFilter2 ?: return@collect
+                    val seriesId = (reportResult["reportSeriesUid"] as? Int) ?: return@collect
+                    println("Report seriesId: ${seriesId}")
+
+                    onFilterChanged(filter, seriesId)
                 }
-            )
+            }
         }
 
         _appUiState.update { prev ->
@@ -134,16 +132,39 @@ class ReportEditViewModel(
             )
         }
     }
+    private fun onFilterChanged(filter2: ReportFilter2, seriesId: Int) {
+        _uiState.update { prev ->
+            val updatedSeriesList = prev.reportOptions2.series.map { series ->
+                if (series.reportSeriesUid == seriesId) {
+                    val updatedFilters = series.reportSeriesFilters?.toMutableList() ?: mutableListOf()
+                    updatedFilters.add(filter2)
+                    series.copy(reportSeriesFilters = updatedFilters)
+                } else {
+                    series
+                }
+            }
+
+            prev.copy(
+                reportOptions2 = prev.reportOptions2.copy(
+                    series = updatedSeriesList
+                )
+            )
+        }
+    }
 
 
-    fun onAddFilter() {
+
+    fun onAddFilter(seriesId: Int) {
         navigateForResult(
             nextViewName = ReportFilterEditViewModel.DEST_NAME,
             key = RESULT_KEY_REPORT,
             currentValue = null,
-            serializer = Report.serializer()
+            serializer = Report.serializer(),
+            args = mapOf("reportSeriesUid" to seriesId.toString())
         )
     }
+
+
 
 
     fun onAddSeries() {
@@ -188,6 +209,7 @@ class ReportEditViewModel(
         const val DEST_NAME = "Report"
         const val DEST_NAME_HOME = "ReportHome"
         val ALL_DEST_NAMES = listOf(DEST_NAME, DEST_NAME_HOME)
+        const val RESULT_KEY_REPORT = "arg"
     }
 }
 
