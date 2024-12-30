@@ -21,6 +21,7 @@ import mui.material.List
 import mui.icons.material.School as SchoolIcon
 import mui.icons.material.LibraryBooks
 import mui.icons.material.Person
+import mui.icons.material.Report
 import mui.system.sx
 import react.FC
 import react.Props
@@ -46,7 +47,7 @@ val ROOT_SCREENS = listOf(
     RootScreen(ContentEntryListViewModel.DEST_NAME_HOME, MR.strings.library, LibraryBooks),
     RootScreen(ConversationListViewModel.DEST_NAME_HOME, MR.strings.messages, Chat),
     RootScreen(PersonListViewModel.DEST_NAME_HOME, MR.strings.people, Person),
-    RootScreen(ReportEditViewModel.DEST_NAME_HOME, MR.strings.people, Person)
+    RootScreen(ReportEditViewModel.DEST_NAME_HOME, MR.strings.edit_report, Report)
 
 )
 
