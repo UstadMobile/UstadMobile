@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.locale.entityconstants.ReportSeriesYAxisConstan
 import com.ustadmobile.core.impl.locale.entityconstants.ReportXAxisConstants
 import com.ustadmobile.core.viewmodel.ReportFilterEditUiState
 import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.core.viewmodel.report.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -89,10 +90,10 @@ val ReportEditScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
         ReportEditViewModel(di, savedStateHandle)
     }
-    val uiState by viewModel.uiState.collectAsState(Dispatchers.Main.immediate)
-
+    val uiStateVar by viewModel.uiState.collectAsState(
+        ReportEditUiState(), Dispatchers.Main.immediate)
     ReportEditScreenComponent2 {
-        this.uiState = uiState as ReportEditUiState
+        this.uiState = uiStateVar
         onEntityChanged = viewModel::onEntityChanged
         onSeriesChanged = viewModel::onSeriesChanged
     }

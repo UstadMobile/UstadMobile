@@ -237,8 +237,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ReportFilterEditViewModel.DEST_NAME,
         "ReportFilterEdit", ReportFilterEditScreenComponent),
     UstadScreen(
-        ReportEditViewModel.DEST_NAME,
-        "ReportEdit", ReportEditScreen),
+        ReportEditViewModel.DEST_NAME_HOME,
+        "ReportHome", ReportEditScreen),
     UstadScreen(ScopedGrantDetailView.VIEW_NAME, "ScopedGrantDetail Preview",
         ScopedGrantDetailScreenPreview),
     UstadScreen(ContentEntryImportLinkViewModel.DEST_NAME, "ContentEntryImportLink",
