@@ -2,14 +2,20 @@ package com.ustadmobile.libcache.distributed
 import com.ustadmobile.door.ext.concurrentSafeMapOf
 import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.room.InvalidationTrackerObserver
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.NeighborCache
 import com.ustadmobile.libcache.db.entities.NeighborCacheEntry
 import com.ustadmobile.libcache.distributed.DistributedCacheConstants.DCACHE_LOGTAG
+import com.ustadmobile.libcache.distributed.model.DistributedCachePacket
+import com.ustadmobile.libcache.distributed.model.DistributedCachePing
+import com.ustadmobile.libcache.distributed.model.DistributedCachePong
 import com.ustadmobile.libcache.distributed.model.DistributedHashCacheEntry
 import com.ustadmobile.libcache.distributed.model.DistributedHashEntries
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.xxhashkmp.XXStringHasher
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -20,6 +26,12 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
+import kotlin.math.max
+import java.net.URLEncoder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 
 /**
  * Monitor newly discovered neighbors (just observe flow). When a new node is found, send
@@ -30,6 +42,10 @@ import java.util.concurrent.Executors
  *
  * @param cacheDb the cache database we will observe to watch for new neighbors
  * @param httpPort the EmbeddedServer http port that neighbors can use to retrieve entries
+ * @param mtu MTU for UDP packets: used when sending hash entries to packetize
+ * @parma pingInterval the interval in milliseconds between pings to neighbors
+ * @param neighborLostThreshold the number of milliseconds after which a neighbor is considered lost
+ * @param deviceName function to provide the device name as it will be shown to other devices
  */
 class DistributedCacheHashtable(
     private val cacheDb: UstadCacheDb,
@@ -37,11 +53,14 @@ class DistributedCacheHashtable(
     private val logger: UstadCacheLogger,
     private val xxStringHasher: XXStringHasher,
     private val mtu: Int = DEFAULT_MTU,
+    pingInterval: Long = DEFAULT_PING_INTERVAL,
+    private val neighborLostThreshold: Long = DEFAULT_NEIGHBOR_LOST_THRESHOLD,
+    private val deviceName: () -> String,
 ): Closeable  {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
 
-    private val executorService = Executors.newCachedThreadPool()
+    private val executorService = Executors.newScheduledThreadPool(2)
 
     private val datagramSocket = DatagramSocket()
 
@@ -50,7 +69,19 @@ class DistributedCacheHashtable(
 
     private val discoveredNeighbors = concurrentSafeMapOf<Long, NeighborCache>()
 
-    private val logPrefix = "DistributedCacheHashtable($port)"
+    private val logPrefix = "DistributedCacheHashtable($port ${deviceName()})"
+
+    data class PendingPing(
+        val id: Int,
+        val timeSent: Long,
+        val remoteAddress: InetAddress,
+    )
+
+    private val pendingPings: MutableMap<Int, PendingPing> = concurrentSafeMapOf()
+
+    private val pingIdAtomic = atomic(0)
+
+    private val sendLock = ReentrantLock()
 
     private fun DatagramSocket.sendDistributedHashEntries(
         urls: List<String>,
@@ -88,7 +119,7 @@ class DistributedCacheHashtable(
      * Runnable that will send the hashes of everything we have to the neighbor; runs when neighbor
      * is discovered
      */
-    inner class SendNeighborHashesRunnable(val neighborCache: NeighborCache): Runnable {
+    inner class SendNeighborHashesRunnable(private val neighborCache: NeighborCache): Runnable {
         override fun run() {
             logger.d(DCACHE_LOGTAG,
                 "$logPrefix starting new neighbor run for ${neighborCache.neighborIp}:${neighborCache.neighborUdpPort}"
@@ -116,10 +147,12 @@ class DistributedCacheHashtable(
     }
 
     /**
-     *
+     * Receive packets from the datagram socket and action them:
+     *  a) List of hashes from neighbor
+     *  b) Ping from neighbor
+     *  c) Pong reply to ping sent by this node
      */
-    inner class ReceiveNeighborHashesRunnable: Runnable {
-
+    inner class ReceivePacketsRunnable: Runnable {
         //Note: maybe this should ensure the neighbor itself is created
         override fun run() {
             logger.d(DCACHE_LOGTAG,"$logPrefix waiting to receive hashes from neighbors")
@@ -132,22 +165,83 @@ class DistributedCacheHashtable(
                     )
 
                     val neighborUid = xxStringHasher.neighborUid(packet.address, packet.port)
-                    val hashEntries = DistributedHashEntries.fromBytes(packet.data, packet.offset, packet.length)
+                    val dCachePacket = DistributedCachePacket.fromBytes(packet.data, packet.offset, packet.length)
 
-                    cacheDb.neighborCacheDao.updateHttpPort(neighborUid, packet.port)
-                    cacheDb.neighborCacheEntryDao.upsertList(
-                        hashEntries.entries.map {
-                            NeighborCacheEntry(
-                                nceNeighborUid = neighborUid, nceUrlHash = it.urlHash
+                    //If not yet discovered - eg. our neighbor discovered us, but we didn't discover
+                    //them yet, then insert (fallback)
+                    fun insertNeighborIfNeeded() {
+                        cacheDb.neighborCacheDao.insertOrIgnore(
+                            NeighborCache(
+                                neighborUid = neighborUid,
+                                neighborIp = packet.address.hostAddress,
+                                neighborUdpPort = packet.port,
+                                neighborHttpPort = 0,
+                            )
+                        )
+                    }
+
+                    when(dCachePacket) {
+                        is DistributedHashEntries -> {
+                            cacheDb.withDoorTransaction {
+                                insertNeighborIfNeeded()
+                                cacheDb.neighborCacheDao.updateHttpPort(
+                                    neighborUid = neighborUid, httpPort = dCachePacket.httpPort
+                                )
+                                cacheDb.neighborCacheEntryDao.upsertList(
+                                    dCachePacket.entries.map {
+                                        NeighborCacheEntry(
+                                            nceNeighborUid = neighborUid, nceUrlHash = it.urlHash
+                                        )
+                                    }
+                                )
+                            }
+
+                            logger.d(DCACHE_LOGTAG,
+                                "$logPrefix saved hashes from ${packet.socketAddress} to database"
                             )
                         }
-                    )
 
-                    logger.d(DCACHE_LOGTAG,
-                        "$logPrefix saved hashes from ${packet.socketAddress} to database"
-                    )
+                        is DistributedCachePing -> {
+                            val pongReply = DistributedCachePong(dCachePacket.id, dCachePacket.payload)
+                            val replyBytes = pongReply.toBytes()
+                            val replyPacket = DatagramPacket(
+                                replyBytes, replyBytes.size, packet.address, packet.port
+                            )
+
+                            cacheDb.withDoorTransaction {
+                                insertNeighborIfNeeded()
+                                cacheDb.neighborCacheDao.updateDeviceName(
+                                    neighborUid = neighborUid,
+                                    deviceName = dCachePacket.deviceName,
+                                )
+                            }
+
+                            sendLock.withLock {
+                                datagramSocket.send(replyPacket)
+                            }
+                            logger.d(DCACHE_LOGTAG, "$logPrefix sent pong reply to ${packet.socketAddress}")
+                        }
+
+                        is DistributedCachePong -> {
+                            val pendingPing = pendingPings.remove(dCachePacket.id)
+                            if(pendingPing != null) {
+                                val pingTime = max(systemTimeInMillis() - pendingPing.timeSent, 1L)
+                                val updates = cacheDb.neighborCacheDao.updatePingTime(
+                                    neighborUid = xxStringHasher.neighborUid(packet.address, packet.port),
+                                    pingTime = pingTime.toInt(),
+                                    timeNow = systemTimeInMillis()
+                                )
+
+                                logger.d(DCACHE_LOGTAG,
+                                    "$logPrefix ping time to ${packet.socketAddress} is ${pingTime}ms updates=$updates"
+                                )
+                            }else {
+                                logger.d(DCACHE_LOGTAG, "Could not find pending ping for id ${dCachePacket.id}")
+                            }
+                        }
+                    }
                 }catch(e: Exception) {
-                    logger.e(DCACHE_LOGTAG, "$logPrefix exception reading incoming hashes", e)
+                    logger.e(DCACHE_LOGTAG, "$logPrefix exception reading incoming packet", e)
                 }
             }
         }
@@ -155,10 +249,11 @@ class DistributedCacheHashtable(
 
     inner class SendNewCacheEntriesRunnable: Runnable {
         override fun run() {
-            logger.d(DCACHE_LOGTAG, "SendNewCacheEntriesRunnable: Looking for new cache entries to send out")
+            logger.d(DCACHE_LOGTAG, "$logPrefix SendNewCacheEntriesRunnable: Looking for new cache entries to send out")
             val (newEntries, allNodes) = cacheDb.withDoorTransaction {
                 val entries = cacheDb.newCacheEntryDao.findAllNewEntries()
                 val nodes = cacheDb.neighborCacheDao.allNeighbors()
+                cacheDb.newCacheEntryDao.clearAll()
 
                 Pair(entries, nodes)
             }
@@ -174,6 +269,43 @@ class DistributedCacheHashtable(
                     neighborCache = neighbor,
                 )
             }
+        }
+    }
+
+    inner class SendPingsRunnable: Runnable {
+        override fun run() {
+            val allNodes = cacheDb.neighborCacheDao.allNeighbors()
+            logger.d(DCACHE_LOGTAG, "$logPrefix: sending pings to ${allNodes.size} nodes")
+            val deviceNameVal = deviceName()
+
+            allNodes.forEach { neighbor ->
+                try {
+                    val address = InetAddress.getByName(neighbor.neighborIp)
+                    val ping = DistributedCachePing(
+                        id = pingIdAtomic.incrementAndGet(),
+                        deviceName = deviceNameVal,
+                        payload = ByteArray(0)
+                    )
+                    pendingPings[ping.id] = PendingPing(ping.id, systemTimeInMillis(), address)
+                    val pingPacketBytes = ping.toBytes()
+                    sendLock.withLock {
+                        datagramSocket.send(
+                            DatagramPacket(pingPacketBytes, pingPacketBytes.size, address, neighbor.neighborUdpPort)
+                        )
+                    }
+
+                    logger.d(DCACHE_LOGTAG,
+                        "$logPrefix: send ping to ${address.hostAddress}:${neighbor.neighborUdpPort}"
+                    )
+                }catch(e: Throwable) {
+                    logger.e(DCACHE_LOGTAG, "$logPrefix exception sending ping to $neighbor", e)
+                }
+            }
+
+            cacheDb.neighborCacheDao.updateStatuses(
+                timeNow = systemTimeInMillis(),
+                lostThreshold = neighborLostThreshold
+            )
         }
     }
 
@@ -205,14 +337,36 @@ class DistributedCacheHashtable(
         }
 
         cacheDb.invalidationTracker.addObserver(newCacheEntryInvalidationCallback)
-        executorService.submit(ReceiveNeighborHashesRunnable())
+        executorService.submit(ReceivePacketsRunnable())
+        executorService.scheduleWithFixedDelay(
+            SendPingsRunnable(), pingInterval, pingInterval, TimeUnit.MILLISECONDS
+        )
     }
 
     /**
-     * Get a neighbor cache URL to retrieve
+     * Retrieve the given request from a mirror if available
      */
-    fun neighborUrl(url: String): String? {
-        return null
+    fun localRequestFor(request: IHttpRequest): IHttpRequest? {
+        if(request.method != IHttpRequest.Companion.Method.GET)
+            return null
+
+        val urlHash = xxStringHasher.hash(request.url)
+
+        val localResults = cacheDb.neighborCacheEntryDao.findAvailableNeighborsByUrlHash(urlHash)
+        if(localResults.isEmpty())
+            return null
+
+        //Connect to the first result, sanity check the response, then return it
+        val selectedNeighbor = localResults.first()
+        return iRequestBuilder(
+            "http://${selectedNeighbor.neighborCache.neighborIp}:${selectedNeighbor.neighborCache.neighborHttpPort}/dcache?url=${URLEncoder.encode(request.url)}"
+        ) {
+            request.headers.names().forEach { headerName ->
+                request.headers.getAllByName(headerName).forEach { headerVal ->
+                    header(headerName, headerVal)
+                }
+            }
+        }
     }
 
 
@@ -228,5 +382,9 @@ class DistributedCacheHashtable(
         const val DEFAULT_MTU = 1500
 
         const val DATABASE_CHUNK_SIZE = 1000
+
+        const val DEFAULT_PING_INTERVAL = 3_000L
+
+        const val DEFAULT_NEIGHBOR_LOST_THRESHOLD = 10_000L
     }
 }

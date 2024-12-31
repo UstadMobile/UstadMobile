@@ -1,5 +1,7 @@
 package com.ustadmobile.core.viewmodel.settings.storageanddata
 
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.get
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import kotlinx.coroutines.flow.Flow
@@ -8,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.localsharing.setenabled.SetLocalSharingEnabledUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageSettingUseCase
@@ -16,6 +19,7 @@ import com.ustadmobile.core.domain.storage.SetOfflineStorageSettingUseCase
 import com.ustadmobile.core.viewmodel.settings.SettingsOfflineStorageOption
 import com.ustadmobile.core.viewmodel.settings.localsharing.LocalSharingSettingsViewModel
 import kotlinx.coroutines.launch
+import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 
 data class StorageAndSettingsUiState(
@@ -48,11 +52,22 @@ class StorageAndDataSettingsViewModel(
 
     private val getStorageOptionsUseCase: GetOfflineStorageOptionsUseCase? by instanceOrNull()
 
+    private val setLocalSharingEnabledUseCase: SetLocalSharingEnabledUseCase? by instanceOrNull()
+
+    private val settings: Settings by instance()
+
     init {
         _appUiState.update {
             it.copy(
                 title = systemImpl.getString(MR.strings.storage_and_data),
                 hideBottomNavigation = true,
+            )
+        }
+
+        _uiState.update {
+            it.copy(
+                nearbySharingEnabled =
+                    settings[SetLocalSharingEnabledUseCase.LOCAL_SHARING_ENABLED] ?: true
             )
         }
 
@@ -75,10 +90,11 @@ class StorageAndDataSettingsViewModel(
                 }
             }
         }
-
     }
 
     fun onSetLocalSharingEnabled(enabled: Boolean) {
+        setLocalSharingEnabledUseCase?.invoke(enabled)
+
         _uiState.update {
             it.copy(nearbySharingEnabled = enabled)
         }

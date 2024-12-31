@@ -10,13 +10,12 @@ import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 class DistributedCacheHashtableIntegrationTest {
@@ -43,6 +42,7 @@ class DistributedCacheHashtableIntegrationTest {
         val dCacheTable2: DistributedCacheHashtable,
     ) {
         fun discover() {
+            //Add cache2 as a neighbor on cache1
             cacheDb1.neighborCacheDao.upsert(
                 NeighborCache(
                     neighborUid = xxStringHasher.neighborUid(
@@ -81,6 +81,8 @@ class DistributedCacheHashtableIntegrationTest {
             httpPort = 42,
             logger = NapierLoggingAdapter(),
             xxStringHasher = xxStringHasher,
+            deviceName = { "cache1" },
+            pingInterval = PING_INTERVAL,
         )
 
         val dCacheTable2 = DistributedCacheHashtable(
@@ -88,6 +90,8 @@ class DistributedCacheHashtableIntegrationTest {
             httpPort = 42,
             logger = NapierLoggingAdapter(),
             xxStringHasher = xxStringHasher,
+            deviceName = { "cache2" },
+            pingInterval = PING_INTERVAL,
         )
 
         val context = DistributedCacheHashtableTestContext(
@@ -113,8 +117,6 @@ class DistributedCacheHashtableIntegrationTest {
      */
     @Test
     fun givenTwoNeighborCaches_whenDiscovered_thenShouldExchangeAvailabilityInfo() {
-        Napier.base(DebugAntilog())
-
         testDistributedCacheWithTwoNeighbors {
             //Add entry to cache1
             cacheDb1.cacheEntryDao.insertList(listOf(exampleCacheEntries.first()))
@@ -136,8 +138,6 @@ class DistributedCacheHashtableIntegrationTest {
 
     @Test
     fun givenTwoNeighborCachesDiscovered_whenNewEntryAdded_thenOtherNodeWillAddToDistributedHash() {
-        Napier.base(DebugAntilog())
-
         testDistributedCacheWithTwoNeighbors {
             //Add entry to cache1
             cacheDb1.cacheEntryDao.insertList(listOf(exampleCacheEntries.first()))
@@ -162,5 +162,30 @@ class DistributedCacheHashtableIntegrationTest {
         }
     }
 
+    @Test
+    fun givenTwoNeighborCachesDiscovered_thenPingTimesWillBeDetermined() {
+        testDistributedCacheWithTwoNeighbors {
+            discover()
 
+            runBlocking {
+                listOf(cacheDb1, cacheDb2).forEach { cacheDb ->
+                    cacheDb.neighborCacheDao.allNeighborsAsFlow().filter { list ->
+                        list.isNotEmpty() && list.all { it.neighborPingTime > 0 }
+                    }.test(
+                        timeout = 5_000.milliseconds, name = "Cache will determine ping time for neighbor"
+                    ) {
+                        awaitItem()
+                        cancelAndIgnoreRemainingEvents()
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    companion object {
+        //Ping interval to use in testing - reduced to speed up test times
+        const val PING_INTERVAL = 500L
+    }
 }

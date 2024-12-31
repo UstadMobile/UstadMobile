@@ -213,9 +213,13 @@ import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourc
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
-import com.ustadmobile.core.domain.localsharing.EnableLocalSharingUseCase
+import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
+import com.ustadmobile.core.domain.localsharing.setenabled.SetLocalSharingEnabledUseCase
 import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentAvailabilityUseCase
 import com.ustadmobile.core.domain.localsharing.checkcontentavailability.UstadCacheCheckContentAvailabilityUseCase
+import com.ustadmobile.core.domain.localsharing.devicename.GetLocalSharingDeviceNameUseCase
+import com.ustadmobile.core.domain.localsharing.devicename.GetLocalSharingDeviceNameUseCaseAndroid
+import com.ustadmobile.core.domain.localsharing.devicename.SetLocalSharingDeviceNameUseCase
 import com.ustadmobile.core.domain.localsharing.listneighbors.ListLocalSharingNeighborsUseCase
 import com.ustadmobile.core.domain.localsharing.listneighbors.ListLocalSharingNeighborsUseCaseCommonJvm
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
@@ -225,6 +229,7 @@ import com.ustadmobile.libcache.db.UstadDbDiscoveryListener
 import com.ustadmobile.libcache.db.addCacheDbMigrations
 import com.ustadmobile.libcache.distributed.DistributedCacheHashtable
 import com.ustadmobile.libcache.distributed.DistributedCacheNsdAndroid
+import com.ustadmobile.libcache.distributed.http.DistributedCacheHttpEndpoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 
@@ -874,6 +879,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 },
                 staticUmAppFilesDir = null,
                 mimeTypeHelper = FileMimeTypeHelperImpl(),
+                distributedCacheHttpEndpoint = instance(),
             )
         }
 
@@ -1106,6 +1112,14 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<ClazzInviteRedeemUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            ClazzInviteRedeemUseCase(
+                enrolIntoCourseUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance<UmAppDataLayer>().repository,
+            )
+        }
+
         bind<SetOfflineStorageSettingUseCase>() with singleton {
             SetOfflineStorageSettingUseCase(settings = instance())
         }
@@ -1201,12 +1215,21 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<GetLocalSharingDeviceNameUseCase>() with singleton {
+            GetLocalSharingDeviceNameUseCaseAndroid(settings = instance())
+        }
+
+        bind<SetLocalSharingDeviceNameUseCase>() with singleton {
+            SetLocalSharingDeviceNameUseCase(settings = instance())
+        }
+
         bind<DistributedCacheHashtable>() with singleton {
             DistributedCacheHashtable(
                 cacheDb = instance(),
                 httpPort = instance<EmbeddedHttpServer>().listeningPort,
                 logger = NapierLoggingAdapter(),
                 xxStringHasher = instance(),
+                deviceName = { instance<GetLocalSharingDeviceNameUseCase>().invoke() },
             )
         }
 
@@ -1223,6 +1246,12 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<DistributedCacheHttpEndpoint>() with singleton {
+            DistributedCacheHttpEndpoint(
+                cache = instance()
+            )
+        }
+
         bind<CheckContentAvailabilityUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             UstadCacheCheckContentAvailabilityUseCase(
                 ustadCache = instance(),
@@ -1230,8 +1259,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<EnableLocalSharingUseCase>() with singleton {
-            EnableLocalSharingUseCase()
+        bind<SetLocalSharingEnabledUseCase>() with singleton {
+            SetLocalSharingEnabledUseCase(settings = instance())
         }
 
         bind<ListLocalSharingNeighborsUseCase>() with singleton {

@@ -14,8 +14,22 @@ class DistributedHashEntriesTest {
             )
         )
 
-        val fromSerialized = DistributedHashEntries.fromBytes(entries.toBytes())
+        val fromSerialized = DistributedCachePacket.fromBytes(entries.toBytes())
         assertEquals(entries, fromSerialized)
     }
+
+    @Test
+    fun givenPingSerialized_whenDeserialized_thenWillBeEqual() {
+        val ping = DistributedCachePing(
+            id = 42,
+            deviceName = "device",
+            payload = "payload".toByteArray()
+        )
+
+        val serialized = ping.toBytes()
+        val fromSerialized = DistributedCachePacket.fromBytes(serialized)
+        assertEquals(ping, fromSerialized)
+    }
+
 
 }

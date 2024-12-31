@@ -109,6 +109,14 @@ if [ ! -e $TESTRESULTSDIR ]; then
   mkdir -p $TESTRESULTSDIR
 fi
 
+# Check if APK exists
+if [ ! -f "$TESTAPK" ]; then
+    echo "Error: Release APK file not found at $TESTAPK."
+    echo "Please ensure the APK is built (This should normally be the release APK)."
+    echo "Refer to the README for build instructions."
+    exit 1
+fi
+
 # Create a copy of common scripts that will work on the second app id (used to test interactions
 # between users)
 if [ ! -e $SCRIPTDIR/build/common-app2 ]; then
@@ -137,6 +145,12 @@ if [ "$(adb shell pm list packages com.toughra.ustadmobile2)" != "" ]; then
 fi
 
 adb install $TESTAPK
+INSTALL_STATUS=$?
+
+if [ $INSTALL_STATUS -ne 0 ]; then
+  echo "Error: APK installation failed. Exiting."
+  exit 1
+fi
 
 TESTARG=$TEST
 if [ "$TEST" != "" ]; then

@@ -29,6 +29,9 @@ kotlin {
                 implementation(libs.napier)
                 implementation(libs.kotlinx.serialization)
                 compileOnly(libs.door.room.annotations)
+                implementation(libs.nanohttpd)
+                implementation(libs.okhttp)
+                implementation(project(":lib-ihttp-okhttp"))
             }
         }
 
@@ -70,6 +73,8 @@ kotlin {
 
             dependencies {
                 implementation(libs.androidx.room.ktx)
+                implementation(libs.androidx.lifecycle.common.java8)
+                implementation(libs.androidx.lifecycle.runtime.ktx)
                 implementation(libs.androidx.room.runtime)
             }
         }

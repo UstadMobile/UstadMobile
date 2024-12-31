@@ -26,8 +26,9 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseAndroid
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
-import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
+import com.ustadmobile.core.domain.passkey.GetCredentialUseCase
 import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.password.SavePasswordUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -53,8 +54,9 @@ import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
-import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyUseCaseImpl
-import com.ustadmobile.libuicompose.util.passkey.LoginWithPasskeyUseCaseImpl
+import com.ustadmobile.core.impl.passkey.CreatePasskeyUseCaseImpl
+import com.ustadmobile.core.impl.passkey.GetCredentialUseCaseImpl
+import com.ustadmobile.core.impl.password.SavePasswordUseCaseImpl
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
@@ -135,9 +137,17 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 passkeyRequestJsonUseCase = instance()
             )
         }
-        bind<LoginWithPasskeyUseCase>() with singleton {
-            LoginWithPasskeyUseCaseImpl(
+
+        bind<SavePasswordUseCase>() with singleton {
+            SavePasswordUseCaseImpl(
                 context=this@AbstractAppActivity,
+            )
+        }
+
+        bind<GetCredentialUseCase>() with scoped(LearningSpaceScope.Default).singleton{
+            GetCredentialUseCaseImpl(
+                context=this@AbstractAppActivity,
+                learningSpace = context,
                 passkeyRequestJsonUseCase = instance()
             )
         }

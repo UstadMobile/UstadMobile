@@ -7,35 +7,28 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
-import com.ustadmobile.core.domain.passkey.LoginWithPasskeyUseCase
-import com.ustadmobile.core.domain.passkey.PassKeySignInData
+import com.ustadmobile.core.domain.passkey.CredentialResult
+import com.ustadmobile.core.domain.passkey.GetCredentialUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
-import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
-import com.ustadmobile.core.util.ext.requireHttpPrefix
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
-import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
-import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.http.Url
@@ -46,8 +39,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 data class LoginUiState(
     val username: String = "",
@@ -83,8 +78,6 @@ class LoginViewModel(
 
     private val impl: UstadMobileSystemImpl by instance()
 
-    private val loginWithPasskeyUseCase: LoginWithPasskeyUseCase? by instanceOrNull()
-
     private val httpClient: HttpClient by instance()
 
     private val apiUrlConfig: SystemUrlConfig by instance()
@@ -94,7 +87,6 @@ class LoginViewModel(
     private val setLanguageUseCase: SetLanguageUseCase by instance()
 
     private val languagesConfig: SupportedLanguagesConfig by instance()
-
 
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
@@ -167,7 +159,8 @@ class LoginViewModel(
                 }
             }
         }
-        onSignInWithPassKey()
+
+        getCredentials()
     }
 
     private fun onSiteVerified(site: Site) {
@@ -313,28 +306,38 @@ class LoginViewModel(
         }
     }
 
-    private fun onSignInWithPassKey() {
+    private fun getCredentials() {
+        val credentialUseCase: GetCredentialUseCase? = di.on(LearningSpace(serverUrl)).direct.instanceOrNull()
         viewModelScope.launch {
             try {
-               val domain= Url(serverUrl).host
-                loginWithPasskeyUseCase?.let {
-                    val passKeySignInData = it.invoke(
-                       domain
-                    )
-                    if (passKeySignInData != null) {
-                        val account = accountManager.loginWithPasskey(passKeySignInData, serverUrl)
-                        goToNextDestAfterLoginOrGuestSelected(account.toPerson())
+                credentialUseCase?.let { useCase ->
+                    when (val credentialResult = useCase.invoke()) {
+                        is CredentialResult.PasskeyCredentialResult -> {
+                            val account = accountManager.loginWithPasskey(
+                                credentialResult.passKeySignInData,
+                                serverUrl
+                            )
+                            goToNextDestAfterLoginOrGuestSelected(account.toPerson())
+                        }
+                        is CredentialResult.PasswordCredentialResult -> {
+                            credentialResult.username?.let { onUsernameChanged(it) }
+                            credentialResult.password?.let { onPasswordChanged(it) }
+                            onClickLogin()
 
+                        }
+                        is CredentialResult.Error -> {
+                            Napier.e { "Error occurred: ${credentialResult.message}"}
 
+                        }
                     }
                 }
-
             } catch (e: Exception) {
-                snackDispatcher.showSnackBar(Snack(message = "error occurred :" + e.message))
-
+                Napier.e { "Error occurred: ${e.message}"}
             }
         }
     }
+
+
 
     companion object {
 

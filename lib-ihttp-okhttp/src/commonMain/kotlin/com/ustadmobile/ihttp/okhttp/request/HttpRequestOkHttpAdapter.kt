@@ -5,9 +5,13 @@ import com.ustadmobile.ihttp.request.IHttpRequest
 import okhttp3.Request
 
 fun IHttpRequest.asOkHttpRequest(): Request {
-    return Request.Builder()
-        .url(url)
-        .headers(headers.asOkHttpHeaders())
-        .method(method.name, null)
-        .build()
+    return if(this is OkHttpRequestAdapter) {
+        request
+    }else {
+        Request.Builder()
+            .url(url)
+            .headers(headers.asOkHttpHeaders())
+            .method(method.name, null)
+            .build()
+    }
 }
