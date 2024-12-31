@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.cachelock.CreateCacheLocksForActiveContentEntryVersionUseCase
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.network.findFreePort
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.http.DoorHttpServerConfig
 import com.ustadmobile.door.log.NapierDoorLogger
@@ -50,7 +51,7 @@ typealias XferTestServerInteceptor = suspend PipelineContext<Unit, ApplicationCa
  */
 class XferTestServer(
     val node: XferTestNode,
-    val port: Int = 8094,
+    val port: Int = findFreePort(),
     val ktorInterceptor: XferTestServerInteceptor? = null,
 ) {
 
