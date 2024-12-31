@@ -25,6 +25,7 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.network.findFreePort
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -208,7 +209,9 @@ fun clientServerIntegrationTest(
         }
     }
 
-    val server = embeddedServer(Netty, 8094) {
+    val port = findFreePort()
+
+    val server = embeddedServer(Netty, port) {
         install(ContentNegotiationServer) {
             json(json = json)
         }
@@ -225,7 +228,7 @@ fun clientServerIntegrationTest(
         }
     }
     server.start()
-    val serverUrl = "http://localhost:8094/"
+    val serverUrl = "http://localhost:${port}/"
 
     val clients = (0..numClients).map {
         val clientEndpointScope = LearningSpaceScope()
@@ -303,7 +306,7 @@ fun clientServerIntegrationTest(
             },
             serverDi = serverDi,
             diEndpointScope = clientEndpointScope,
-            serverUrl = "http://localhost:8094/"
+            serverUrl = "http://localhost:${port}/"
         )
     }
 

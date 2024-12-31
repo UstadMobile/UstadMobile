@@ -17,21 +17,16 @@ Background info on user story
 * info1
 * info2
 
-**Design tasks** 
+**Tasks** 
 
-- [ ]  ...
-
-When design is complete: attach PDF of prototype that includes _all_ screens added/modified here.
-
-
-**Implementation tasks**
-
-Each task max one day
-
-- [ ]  ...
-
-
-When implementation is complete: developer to attach video showing completion of acceptance criteria
+- [ ] (Designer) Complete wireframe designs for all screens to be added or modified
+- [ ] (Developer) Create new branch and pull request.
+- [ ] (Tester) Create Jenkins job to build automatically on commit and nightly end-to-end build of branch
+- [ ] (Tester) Update end-to-end testing scenarios in accordance with user story
+- [ ] (Tester) Add Cypress and Maestro tests to branch based on testing scenarios/wireframes
+- [ ] (Developer) Implement code as per design and acceptance criteria: requires successful Jenkins build and end-to-end build. Post video of completion of acceptance criteria on task card. Self check for at least 5-10 minutes.
+  - [ ] Development subtasks can go here
+- [ ] (Tester) check/verify - run any manual sanity checks required
 
 **Acceptance criteria**
 
