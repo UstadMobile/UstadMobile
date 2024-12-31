@@ -20,7 +20,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditUiState
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonUsernameAndPasswordModel
 import com.ustadmobile.libuicompose.components.UstadPasswordField
@@ -59,7 +59,7 @@ fun PersonAccountEditScreen(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth().testTag("username").onKeyEvent { keyEvent ->
                     if (keyEvent.type == KeyEventType.KeyDown) {
-                        FilterUsernameUseCase.shouldBlockKeyEvent(keyEvent.utf16CodePoint.toChar())
+                        !ValidateUsernameUseCase.isValidUsernameChar(keyEvent.utf16CodePoint.toChar())
                     } else false
                 },
                 value = uiState.personAccount?.username ?: "",
@@ -68,11 +68,7 @@ fun PersonAccountEditScreen(
                     Text(stringResource(MR.strings.username) + "*")
                 },
                 onValueChange = { newValue ->
-                    newValue.lastOrNull()?.let { lastChar ->
-                        if (!FilterUsernameUseCase.shouldBlockKeyEvent(lastChar)) {
-                            onChange(uiState.personAccount?.copy(username = newValue.lowercase()))
-                        }
-                    } ?: onChange(uiState.personAccount?.copy(username = newValue.lowercase()))
+                    onChange(uiState.personAccount?.copy(username = newValue))
                 },
                 isError = uiState.usernameError != null,
                 enabled = uiState.fieldsEnabled,

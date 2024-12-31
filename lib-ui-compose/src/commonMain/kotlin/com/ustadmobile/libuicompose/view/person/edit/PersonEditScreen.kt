@@ -20,7 +20,7 @@ import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -226,25 +226,26 @@ fun PersonEditScreen(
 
         if (uiState.usernameVisible){
             OutlinedTextField(
-                modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding().onKeyEvent { keyEvent ->
-                    if (keyEvent.type == KeyEventType.KeyDown) {
-                        FilterUsernameUseCase.shouldBlockKeyEvent(keyEvent.utf16CodePoint.toChar())
-                    } else false
-                },
+                modifier = Modifier
+                    .testTag("username")
+                    .fillMaxWidth()
+                    .defaultItemPadding()
+                    .onKeyEvent { keyEvent ->
+                        if (keyEvent.type == KeyEventType.KeyDown) {
+                            !ValidateUsernameUseCase.isValidUsernameChar(keyEvent.utf16CodePoint.toChar())
+                        } else false
+                    },
                 value = uiState.person?.username ?: "",
                 label = { Text(stringResource(MR.strings.username)) },
                 enabled = uiState.fieldsEnabled,
                 isError = uiState.usernameError != null,
                 singleLine = true,
                 onValueChange = { newValue ->
-                    val lastChar = newValue.lastOrNull()
-                    if (lastChar == null || !FilterUsernameUseCase.shouldBlockKeyEvent(lastChar)) {
-                        onPersonChanged(
-                            uiState.person?.shallowCopy {
-                                username = newValue.lowercase()
-                            }
-                        )
-                    }
+                    onPersonChanged(
+                        uiState.person?.shallowCopy {
+                            username = newValue
+                        }
+                    )
                 },
                 supportingText = {
                     Text(uiState.usernameError ?: stringResource(MR.strings.required))

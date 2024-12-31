@@ -83,6 +83,8 @@ class LoginViewModel(
 
     private val validateUsernameUseCase = ValidateUsernameUseCase()
 
+    private val filterUsernameUseCase = FilterUsernameUseCase()
+
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
     private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
@@ -160,10 +162,13 @@ class LoginViewModel(
         }
     }
 
-    fun onUsernameChanged(username: String) {
-        _uiState.update { prev ->
-            prev.copy(username = username)
-        }
+    fun onUsernameChanged(newValue: String) {
+        val filteredValue = filterUsernameUseCase(
+            username = newValue,
+            invalidCharReplacement = ' '
+        ).filter { it != ' ' }
+
+        _uiState.update { it.copy(username = filteredValue) }
     }
 
     fun onPasswordChanged(password: String) {

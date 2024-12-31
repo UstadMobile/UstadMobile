@@ -29,7 +29,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.libuicompose.components.UstadPasswordField
@@ -79,7 +79,7 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .onKeyEvent { keyEvent ->
                     if (keyEvent.type == KeyEventType.KeyDown) {
-                        FilterUsernameUseCase.shouldBlockKeyEvent(keyEvent.utf16CodePoint.toChar())
+                        !ValidateUsernameUseCase.isValidUsernameChar(keyEvent.utf16CodePoint.toChar())
                     } else false
                 },
             value = uiState.username,
@@ -87,12 +87,7 @@ fun LoginScreen(
             label = {
                 Text(stringResource(MR.strings.username))
             },
-            onValueChange = { newValue ->
-                val lastChar = newValue.lastOrNull()
-                if (lastChar == null || !FilterUsernameUseCase.shouldBlockKeyEvent(lastChar)) {
-                    onUsernameValueChange(newValue.lowercase())
-                }
-            },
+            onValueChange = onUsernameValueChange,
             enabled = uiState.fieldsEnabled,
             isError = uiState.usernameError != null,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),

@@ -2,6 +2,7 @@ package com.ustadmobile.view.person.accountedit
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditUiState
@@ -44,8 +45,8 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
                     disabled = !props.uiState.fieldsEnabled
                     onKeyDown = { event ->
                         val char = event.key.singleOrNull()
-                        if (char != null) {
-                            if (FilterUsernameUseCase.shouldBlockKeyEvent(char)) { event.preventDefault() }
+                        if(char != null && !ValidateUsernameUseCase.isValidUsernameChar(char)) {
+                            event.preventDefault()
                         }
                     }
                     onTextChange = {

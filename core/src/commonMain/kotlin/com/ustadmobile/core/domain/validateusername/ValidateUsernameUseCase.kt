@@ -21,21 +21,21 @@ class ValidateUsernameUseCase {
             username.length < MIN_LENGTH -> ValidationResult.INVALID_TOO_SHORT
             username.length > MAX_LENGTH -> ValidationResult.INVALID_TOO_LONG
             username.firstOrNull()?.isDigit() == true -> ValidationResult.INVALID_STARTS_WITH_NUMBER
-            !username.all { it.isValidUsernameChar() } -> ValidationResult.INVALID_OTHER
+            !username.all { isValidUsernameChar(it) } -> ValidationResult.INVALID_OTHER
             else -> ValidationResult.VALID
         }
-    }
-
-    private fun Char.isValidUsernameChar(): Boolean = when {
-        isLetter() -> true
-        isDigit() -> true
-        this in ALLOWED_SPECIAL -> true
-        else -> false
     }
 
     companion object {
         private const val MIN_LENGTH = 3
         private const val MAX_LENGTH = 30
-        private val ALLOWED_SPECIAL = setOf('.', '_')
+        val ALLOWED_SPECIAL = setOf('.', '_')
+
+        fun isValidUsernameChar(character: Char) = when {
+            character.isLetter() -> true
+            character.isDigit() -> true
+            character in ALLOWED_SPECIAL -> true
+            else -> false
+        }
     }
 }

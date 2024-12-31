@@ -14,7 +14,7 @@ import mui.system.responsive
 import mui.system.sx
 import react.*
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.mui.components.UstadLanguageSelect
@@ -77,10 +77,8 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 }
                 onKeyDown = { event ->
                     val char = event.key.singleOrNull()
-                    if (char != null) {
-                        if (FilterUsernameUseCase.shouldBlockKeyEvent(char)) {
-                            event.preventDefault()
-                        }
+                    if(char != null && !ValidateUsernameUseCase.isValidUsernameChar(char)) {
+                        event.preventDefault()
                     }
                 }
                 error = props.uiState.usernameError != null

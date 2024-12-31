@@ -156,6 +156,8 @@ class PersonEditViewModel(
 
     private val validateUsernameUseCase = ValidateUsernameUseCase()
 
+    private val filterUsernameUseCase = FilterUsernameUseCase()
+
     private val genderConfig : GenderConfig by instance()
 
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
@@ -292,9 +294,20 @@ class PersonEditViewModel(
     }
 
     fun onEntityChanged(entity: Person?) {
+        val filteredEntity = entity?.let { currentEntity ->
+            if (currentEntity.username != _uiState.value.person?.username) {
+                currentEntity.shallowCopy {
+                    username = filterUsernameUseCase(
+                        username = currentEntity.username ?: "",
+                        invalidCharReplacement = ' '
+                    ).filter { it != ' ' }
+                }
+            } else currentEntity
+        }
+
         _uiState.update { prev ->
             prev.copy(
-                person = entity,
+                person = filteredEntity,
                 genderError = updateErrorMessageOnChange(prev.person?.gender,
                     entity?.gender, prev.genderError),
                 firstNameError = updateErrorMessageOnChange(prev.person?.firstNames,

@@ -83,6 +83,8 @@ class PersonAccountEditViewModel(
 
     private val validateUsernameUseCase = ValidateUsernameUseCase()
 
+    private val filterUsernameUseCase = FilterUsernameUseCase()
+
     init {
         _appUiState.value = AppUiState(
             loadingState = LoadingUiState.INDETERMINATE,
@@ -152,9 +154,21 @@ class PersonAccountEditViewModel(
     }
 
     fun onEntityChanged(entity: PersonUsernameAndPasswordModel?) {
+
+        val filteredEntity = entity?.let { currentEntity ->
+            if (currentEntity.username != _uiState.value.personAccount?.username) {
+                currentEntity.copy(
+                    username = filterUsernameUseCase(
+                        username = currentEntity.username,
+                        invalidCharReplacement = ' '
+                    ).filter { it != ' ' }
+                )
+            } else currentEntity
+        }
+
         _uiState.update { prev ->
             prev.copy(
-                personAccount = entity,
+                personAccount = filteredEntity,
                 usernameError = if(prev.usernameError != null && prev.personAccount?.username == entity?.username) {
                     prev.usernameError
                 }else {
