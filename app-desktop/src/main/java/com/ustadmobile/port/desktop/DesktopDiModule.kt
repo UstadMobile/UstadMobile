@@ -611,7 +611,8 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
                 di.on(it).direct.instance()
             },
             staticUmAppFilesDir = File(resourcesDir, "umapp"),
-            mimeTypeHelper = instance()
+            mimeTypeHelper = instance(),
+            distributedCacheHttpEndpoint = null,
         )
     }
 

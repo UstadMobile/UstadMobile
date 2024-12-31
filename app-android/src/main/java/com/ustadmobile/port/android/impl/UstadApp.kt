@@ -229,6 +229,7 @@ import com.ustadmobile.libcache.db.UstadDbDiscoveryListener
 import com.ustadmobile.libcache.db.addCacheDbMigrations
 import com.ustadmobile.libcache.distributed.DistributedCacheHashtable
 import com.ustadmobile.libcache.distributed.DistributedCacheNsdAndroid
+import com.ustadmobile.libcache.distributed.http.DistributedCacheHttpEndpoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 
@@ -878,6 +879,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 },
                 staticUmAppFilesDir = null,
                 mimeTypeHelper = FileMimeTypeHelperImpl(),
+                distributedCacheHttpEndpoint = instance(),
             )
         }
 
@@ -1241,6 +1243,12 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     scope = CoroutineScope(Dispatchers.IO + Job()),
                     xxStringHasher = instance(),
                 )
+            )
+        }
+
+        bind<DistributedCacheHttpEndpoint>() with singleton {
+            DistributedCacheHttpEndpoint(
+                cache = instance()
             )
         }
 

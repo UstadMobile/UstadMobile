@@ -3,6 +3,7 @@ import com.ustadmobile.door.ext.concurrentSafeMapOf
 import com.ustadmobile.door.ext.withDoorTransaction
 import com.ustadmobile.door.room.InvalidationTrackerObserver
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.NeighborCache
 import com.ustadmobile.libcache.db.entities.NeighborCacheEntry
@@ -29,6 +30,8 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.math.max
+import java.net.URLEncoder
+import com.ustadmobile.ihttp.request.iRequestBuilder
 
 /**
  * Monitor newly discovered neighbors (just observe flow). When a new node is found, send
@@ -341,13 +344,29 @@ class DistributedCacheHashtable(
     }
 
     /**
-     * Get a neighbor cache URL to retrieve
+     * Retrieve the given request from a mirror if available
      */
-    @Suppress("unused")
-    fun neighborUrl(
-        @Suppress("UNUSED_PARAMETER") url: String
-    ): String? {
-        return null
+    fun localRequestFor(request: IHttpRequest): IHttpRequest? {
+        if(request.method != IHttpRequest.Companion.Method.GET)
+            return null
+
+        val urlHash = xxStringHasher.hash(request.url)
+
+        val localResults = cacheDb.neighborCacheEntryDao.findAvailableNeighborsByUrlHash(urlHash)
+        if(localResults.isEmpty())
+            return null
+
+        //Connect to the first result, sanity check the response, then return it
+        val selectedNeighbor = localResults.first()
+        return iRequestBuilder(
+            "http://${selectedNeighbor.neighborCache.neighborIp}:${selectedNeighbor.neighborCache.neighborHttpPort}/dcache?url=${URLEncoder.encode(request.url)}"
+        ) {
+            request.headers.names().forEach { headerName ->
+                request.headers.getAllByName(headerName).forEach { headerVal ->
+                    header(headerName, headerVal)
+                }
+            }
+        }
     }
 
 

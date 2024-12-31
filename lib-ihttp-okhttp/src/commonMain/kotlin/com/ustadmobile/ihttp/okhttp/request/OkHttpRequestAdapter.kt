@@ -6,7 +6,7 @@ import com.ustadmobile.ihttp.request.IHttpRequest
 import okhttp3.Request
 
 class OkHttpRequestAdapter(
-    private val request: Request
+    internal val request: Request
 ) : IHttpRequest {
     override val headers: IHttpHeaders = request.headers.asIHttpHeaders()
 
