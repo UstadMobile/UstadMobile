@@ -1,6 +1,7 @@
 package com.ustadmobile.view.report
 
 import com.ustadmobile.core.domain.report.model.ReportFilter2
+import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.ConditionConstants
@@ -25,7 +26,7 @@ import web.html.InputMode
 
 external interface ReportFilterEditScreenProps : Props {
     var uiState: ReportFilterEditUiState
-    var onReportFilterChanged: (ReportFilter2?) -> Unit
+    var onReportFilterChanged: (ReportFilter3?) -> Unit
 }
 
 private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> { props ->

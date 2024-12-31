@@ -1,38 +1,29 @@
 package com.ustadmobile.libuicompose.view.report.filteredit
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.model.ReportFilter2
-import com.ustadmobile.core.impl.locale.entityconstants.FieldConstants
-import com.ustadmobile.core.impl.locale.entityconstants.FilterFieldConstants
-import com.ustadmobile.core.util.MessageIdOption3
+import com.ustadmobile.core.domain.report.model.Comparisons
+import com.ustadmobile.core.domain.report.model.FilterType
+import com.ustadmobile.core.domain.report.model.ReportFilter3
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.ReportFilterEditUiState
 import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
-import com.ustadmobile.lib.db.entities.ReportFilter
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
-import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import com.ustadmobile.libuicompose.view.report.reportedit.EditReportDropdown
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -47,13 +38,13 @@ fun ReportFilterEditScreen(
     ReportFilterEditScreen(
         uiState,
         onEntityChanged = viewModel::onEntityChanged
-        )
+    )
 }
 
 @Composable
 fun ReportFilterEditScreen(
     uiState: ReportFilterEditUiState = ReportFilterEditUiState(),
-    onEntityChanged: (ReportFilter2?) -> Unit = {}
+    onEntityChanged: (ReportFilter3?) -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier
@@ -67,12 +58,23 @@ fun ReportFilterEditScreen(
             ) {
                 EditFilterDropdown(
                     modifier = Modifier.fillMaxWidth(),
-                    value = null,
+                    value = uiState.filters?.reportFilterField?.value?.toString() ?: "",
                     label = stringResource(MR.strings.field),
-                    options = FilterFieldConstants.FILTER_OPTIONS,
-                    onOptionSelected = {selectedOption->
-
+                    options = FilterType.entries.map { filterType ->
+                        MessageIdOption2(
+                            stringResource = FilterType.getStringResourceForFilterType(filterType),
+                            value = filterType.value
+                        )
                     },
+                    onOptionSelected = { selectedOption ->
+                        val selectedFilterType =
+                            FilterType.entries.firstOrNull { it.value == selectedOption.value }
+                                ?: FilterType.PERSON_AGE
+                        val updatedOptions =
+                            uiState.filters?.copy(reportFilterField = selectedFilterType)
+                        onEntityChanged(updatedOptions)
+                        println("updatedOptions: $updatedOptions")
+                    }
                 )
             }
         }
@@ -82,14 +84,27 @@ fun ReportFilterEditScreen(
             ) {
                 UstadInputFieldLayout(
                     modifier = Modifier
-                        .weight(0.2F),
+                        .weight(0.3F),
                 ) {
                     EditFilterDropdown(
                         label = stringResource(MR.strings.condition),
-                        options = FilterFieldConstants.FILTER_OPTIONS,
-                        onOptionSelected = {
+                        value = uiState.filters?.reportFilterCondition?.value?.toString() ?: "",
+                        options = Comparisons.entries.map { comparison ->
+                            MessageIdOption2(
+                                stringResource = Comparisons.getStringResourceForComparison(
+                                    comparison
+                                ),
+                                value = comparison.value
+                            )
                         },
-                        value = null,
+                        onOptionSelected = { selectedOption ->
+                            val selectedComparison =
+                                Comparisons.entries.firstOrNull { it.value == selectedOption.value }
+                                    ?: Comparisons.EQUALS
+                            val updatedOptions =
+                                uiState.filters?.copy(reportFilterCondition = selectedComparison)
+                            onEntityChanged(updatedOptions)
+                        }
                     )
                 }
                 Column(
@@ -103,9 +118,11 @@ fun ReportFilterEditScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                     androidx.compose.material.OutlinedTextField(
-                        value = "",
+                        value = uiState.filters?.reportFilterValue.toString(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         onValueChange = {
+                            val updatedOptions = uiState.filters?.copy(reportFilterValue = it)
+                            onEntityChanged(updatedOptions)
                         }
                     )
                 }
@@ -118,17 +135,17 @@ fun ReportFilterEditScreen(
 fun EditFilterDropdown(
     value: String?,
     label: String,
-    options: List<MessageIdOption3>,
-    onOptionSelected: (MessageIdOption3) -> Unit,
+    options: List<MessageIdOption2>,
+    onOptionSelected: (MessageIdOption2) -> Unit,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     enabled: Boolean = true,
     supportingText: (@Composable () -> Unit)? = null,
 ) {
     Column(modifier = Modifier) {
-        Text(text = label, fontWeight = FontWeight.SemiBold)
+        Text(text = label, fontWeight = FontWeight.SemiBold, maxLines = 1)
         UstadExposedDropDownMenuField(
-            value = options.firstOrNull { it.value == value },
+            value = options.firstOrNull { it.value.toString() == value },
             label = "",
             options = options,
             onOptionSelected = { selectedOption ->

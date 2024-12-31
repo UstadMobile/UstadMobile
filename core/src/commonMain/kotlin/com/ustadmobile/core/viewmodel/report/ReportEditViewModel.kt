@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.report
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.ReportFilter2
+import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -54,7 +55,7 @@ class ReportEditViewModel(
                 loadEntity(
                     serializer = Report.serializer(),
                     onLoadFromDb = { db ->
-                        db.reportDao().findByUid(entityUid)
+                        db.reportDao().findByUid(677393338081959936)
                     },
                     makeDefault = {
                         Report()
@@ -71,10 +72,9 @@ class ReportEditViewModel(
                 )
                 navResultReturner.filteredResultFlowForKey(RESULT_KEY_REPORT).collect { result ->
                     val reportResult = result.result as? Map<*, *> ?: return@collect
-                    val filter = reportResult["filter"] as? ReportFilter2 ?: return@collect
+                    val filter = reportResult["filter"] as? ReportFilter3 ?: return@collect
                     val seriesId = (reportResult["reportSeriesUid"] as? Int) ?: return@collect
-                    println("Report seriesId: ${seriesId}")
-
+                    println("Report filter: ${filter}")
                     onFilterChanged(filter, seriesId)
                 }
             }
@@ -97,7 +97,6 @@ class ReportEditViewModel(
                 try {
                     val currentReport = _uiState.value.reportOptions2
                     val report = Report(
-                        reportUid = entityUid,
                         reportTitle = currentReport.title,
                         reportOptions = Json.encodeToString(currentReport),
                     )
@@ -132,11 +131,13 @@ class ReportEditViewModel(
             )
         }
     }
-    private fun onFilterChanged(filter2: ReportFilter2, seriesId: Int) {
+
+    private fun onFilterChanged(filter2: ReportFilter3, seriesId: Int) {
         _uiState.update { prev ->
             val updatedSeriesList = prev.reportOptions2.series.map { series ->
                 if (series.reportSeriesUid == seriesId) {
-                    val updatedFilters = series.reportSeriesFilters?.toMutableList() ?: mutableListOf()
+                    val updatedFilters =
+                        series.reportSeriesFilters?.toMutableList() ?: mutableListOf()
                     updatedFilters.add(filter2)
                     series.copy(reportSeriesFilters = updatedFilters)
                 } else {
@@ -153,7 +154,6 @@ class ReportEditViewModel(
     }
 
 
-
     fun onAddFilter(seriesId: Int) {
         navigateForResult(
             nextViewName = ReportFilterEditViewModel.DEST_NAME,
@@ -163,8 +163,6 @@ class ReportEditViewModel(
             args = mapOf("reportSeriesUid" to seriesId.toString())
         )
     }
-
-
 
 
     fun onAddSeries() {

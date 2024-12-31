@@ -1,21 +1,19 @@
 package com.ustadmobile.core.viewmodel
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.model.ReportFilter2
+import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
-import com.ustadmobile.lib.db.entities.ReportFilter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 
 data class ReportFilterEditUiState(
-    val filters: ReportFilter2? = null
+    val filters: ReportFilter3? = ReportFilter3()
 )
 
 class ReportFilterEditViewModel(
@@ -25,7 +23,11 @@ class ReportFilterEditViewModel(
 
     val seriesId: Int = savedStateHandle["reportSeriesUid"]?.toInt() ?: 0
 
-    private val _uiState = MutableStateFlow(ReportFilterEditUiState())
+    private val _uiState = MutableStateFlow(
+        ReportFilterEditUiState(
+            filters = ReportFilter3(reportFilterSeriesUid = seriesId)
+        )
+    )
     val uiState: StateFlow<ReportFilterEditUiState> = _uiState
 
     init {
@@ -54,19 +56,25 @@ class ReportFilterEditViewModel(
         val filter = uiState.value.filters
         finishWithResult(
             ReportEditViewModel.DEST_NAME,
-            filter?.id?.toLong() ?: 0,
-            mapOf(
+            entityUid = filter?.reportFilterUid?.toLong() ?: 0,
+            result = mapOf(
+                "filter" to filter?.copy(reportFilterSeriesUid = seriesId),
                 "reportSeriesUid" to seriesId
             )
         )
     }
 
 
-    fun onEntityChanged(value: ReportFilter2?) {
+    fun onEntityChanged(value: ReportFilter3?) {
         _uiState.update { currentState ->
-            currentState.copy(filters = value)
+            currentState.copy(
+                filters = value?.copy(
+                    reportFilterSeriesUid = currentState.filters?.reportFilterSeriesUid ?: 0
+                )
+            )
         }
     }
+
 
     companion object {
 
