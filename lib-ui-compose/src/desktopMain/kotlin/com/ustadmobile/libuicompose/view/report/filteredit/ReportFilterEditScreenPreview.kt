@@ -9,21 +9,4 @@ import com.ustadmobile.lib.db.entities.UidAndLabel
 @Composable
 @Preview
 fun ReportFilterEditScreenPreview() {
-    val uiStateVal = ReportFilterEditUiState(
-        uidAndLabelList = listOf(
-            UidAndLabel().apply {
-                uid = 1
-                labelName = "First Filter"
-            },
-            UidAndLabel().apply {
-                uid = 2
-                labelName = "Second Filter"
-            }
-        ),
-        createNewFilter = "Create new filter",
-        reportFilterValueVisible = true
-    )
-
-    ReportFilterEditScreen(uiStateVal)
-
 }

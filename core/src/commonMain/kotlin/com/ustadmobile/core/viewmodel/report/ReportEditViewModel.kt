@@ -55,7 +55,7 @@ class ReportEditViewModel(
                 loadEntity(
                     serializer = Report.serializer(),
                     onLoadFromDb = { db ->
-                        db.reportDao().findByUid(677393338081959936)
+                        db.reportDao().findByUid(entityUid)
                     },
                     makeDefault = {
                         Report()
