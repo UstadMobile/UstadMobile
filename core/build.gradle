@@ -316,6 +316,7 @@ kotlin {
 }
 
 dependencies {
+    implementation libs.androidx.credentials
     coreLibraryDesugaring libs.android.desugar.libs
 }
 

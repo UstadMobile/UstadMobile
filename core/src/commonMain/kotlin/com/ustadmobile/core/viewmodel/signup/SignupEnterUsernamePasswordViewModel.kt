@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.domain.password.SavePasswordUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -86,6 +87,7 @@ class SignupEnterUsernamePasswordViewModel(
         SignupEnterUsernamePasswordUiState()
     )
 
+    private val savePasswordUseCase: SavePasswordUseCase? by instanceOrNull()
 
     private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
 
@@ -271,6 +273,10 @@ class SignupEnterUsernamePasswordViewModel(
                     )
 
                 }
+
+                savePasswordUseCase?.invoke(
+                    username =savePerson.username.toString(),
+                    password = _uiState.value.password.toString())
 
                 navigateToAppropriateScreen(savePerson)
 
