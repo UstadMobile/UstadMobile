@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.util.passkey
+package com.ustadmobile.core.impl.passkey
 
 import android.content.Context
 import android.util.Base64
@@ -10,17 +10,23 @@ import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.passkey.CredentialResult
 import com.ustadmobile.core.domain.passkey.GetCredentialUseCase
 import com.ustadmobile.core.domain.passkey.PassKeySignInData
 import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
+import io.ktor.http.Url
 import org.json.JSONObject
 
 class GetCredentialUseCaseImpl(
     val context: Context,
+    val learningSpace: LearningSpace,
     val passkeyRequestJsonUseCase: PasskeyRequestJsonUseCase
 ) : GetCredentialUseCase {
-    override suspend fun invoke(domain: String): CredentialResult {
+    private val domain: String by lazy {
+        Url(learningSpace.url).host
+    }
+    override suspend fun invoke(): CredentialResult {
         val credentialManager = CredentialManager.create(context)
 
         val getPasswordOption = GetPasswordOption()

@@ -54,9 +54,9 @@ import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
-import com.ustadmobile.libuicompose.util.passkey.CreatePasskeyUseCaseImpl
-import com.ustadmobile.libuicompose.util.passkey.GetCredentialUseCaseImpl
-import com.ustadmobile.libuicompose.util.password.SavePasswordUseCaseImpl
+import com.ustadmobile.core.impl.passkey.CreatePasskeyUseCaseImpl
+import com.ustadmobile.core.impl.passkey.GetCredentialUseCaseImpl
+import com.ustadmobile.core.impl.password.SavePasswordUseCaseImpl
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
@@ -144,9 +144,10 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
             )
         }
 
-        bind<GetCredentialUseCase>() with singleton {
+        bind<GetCredentialUseCase>() with scoped(LearningSpaceScope.Default).singleton{
             GetCredentialUseCaseImpl(
                 context=this@AbstractAppActivity,
+                learningSpace = context,
                 passkeyRequestJsonUseCase = instance()
             )
         }

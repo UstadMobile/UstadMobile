@@ -39,8 +39,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 data class LoginUiState(
     val username: String = "",
@@ -75,8 +77,6 @@ class LoginViewModel(
     private var serverUrl: String
 
     private val impl: UstadMobileSystemImpl by instance()
-
-    private val getCredentialUseCase: GetCredentialUseCase? by instanceOrNull()
 
     private val httpClient: HttpClient by instance()
 
@@ -307,11 +307,11 @@ class LoginViewModel(
     }
 
     private fun getCredentials() {
+        val credentialUseCase: GetCredentialUseCase? = di.on(LearningSpace(serverUrl)).direct.instanceOrNull()
         viewModelScope.launch {
             try {
-                val domain = Url(serverUrl).host
-                getCredentialUseCase?.let { useCase ->
-                    when (val credentialResult = useCase.invoke(domain)) {
+                credentialUseCase?.let { useCase ->
+                    when (val credentialResult = useCase.invoke()) {
                         is CredentialResult.PasskeyCredentialResult -> {
                             val account = accountManager.loginWithPasskey(
                                 credentialResult.passKeySignInData,

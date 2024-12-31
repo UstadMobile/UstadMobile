@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.util.password
+package com.ustadmobile.core.impl.password
 
 import com.ustadmobile.core.domain.password.SavePasswordUseCase
 import android.content.Context

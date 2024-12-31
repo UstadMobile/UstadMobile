@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.util.passkey
+package com.ustadmobile.core.impl.passkey
 
 import android.annotation.SuppressLint
 import android.content.Context
