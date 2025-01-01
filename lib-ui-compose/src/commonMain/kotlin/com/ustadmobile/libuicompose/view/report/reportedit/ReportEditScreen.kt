@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -36,7 +38,6 @@ import com.ustadmobile.core.impl.locale.entityconstants.ReportSeriesYAxisConstan
 import com.ustadmobile.core.impl.locale.entityconstants.ReportTimeRangeConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ReportXAxisConstants
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.util.MessageIdOption3
 import com.ustadmobile.core.viewmodel.report.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
@@ -57,7 +58,8 @@ fun ReportEditScreen(viewModel: ReportEditViewModel) {
         onAddFilter = viewModel::onAddFilter,
         onSeriesChanged = viewModel::onSeriesChanged,
         onAddSeries = viewModel::onAddSeries,
-        onRemoveFilter = viewModel::onRemoveFilter
+        onRemoveFilter = viewModel::onRemoveFilter,
+        onRemoveSeries = viewModel::onRemoveSeries
     )
 }
 
@@ -68,7 +70,8 @@ private fun ReportEditScreen(
     onAddFilter: (Int) -> Unit = { },
     onAddSeries: () -> Unit = { },
     onSeriesChanged: (ReportSeries2) -> Unit = {},
-    onRemoveFilter: (Int, Int) -> Unit = { _, _ -> }
+    onRemoveFilter: (Int, Int) -> Unit = { _, _ -> },
+    onRemoveSeries: (Int) -> Unit = { },
 ) {
     LazyColumn(
         modifier = Modifier
@@ -130,17 +133,32 @@ private fun ReportEditScreen(
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp
                     )
-                    OutlinedTextField(
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        value = seriesItem.reportSeriesTitle,
-                        label = null,
-                        singleLine = true,
-                        onValueChange = { newTitle ->
-                            val updatedSeries = seriesItem.copy(reportSeriesTitle = newTitle)
-                            onSeriesChanged(updatedSeries)
-                        },
-                        supportingText = {}
-                    )
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            modifier = Modifier.weight(1f),
+                            value = seriesItem.reportSeriesTitle,
+                            label = null,
+                            singleLine = true,
+                            onValueChange = { newTitle ->
+                                val updatedSeries = seriesItem.copy(reportSeriesTitle = newTitle)
+                                onSeriesChanged(updatedSeries)
+                            },
+                            supportingText = {}
+                        )
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Remove filter",
+                            modifier = Modifier
+                                .clickable {
+                                    onRemoveSeries(seriesItem.reportSeriesUid)
+                                }
+                                .defaultItemPadding(start = 16.dp, bottom = 12.dp)
+                        )
+                    }
 
                     // Y Axis Dropdown
                     EditReportDropdown(

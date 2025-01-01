@@ -9,7 +9,6 @@ import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.util.MessageIdOption3
 
 object ReportXAxisConstants {
     val X_AXIS_OPTIONS = listOf(
@@ -72,8 +71,6 @@ object ComparisonConstants {
         MessageIdOption2(MR.strings.greater, Comparisons.GREATER.value),
         MessageIdOption2(MR.strings.lesser, Comparisons.LESSER.value),
         MessageIdOption2(MR.strings.between, Comparisons.BETWEEN.value),
-        MessageIdOption2(MR.strings.in_list, Comparisons.IN_LIST.value),
-        MessageIdOption2(MR.strings.not_in_list, Comparisons.NOT_IN_LIST.value),
     )
 }
 

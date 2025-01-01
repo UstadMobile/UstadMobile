@@ -1,7 +1,6 @@
 package com.ustadmobile.core.viewmodel.report
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.model.ReportFilter2
 import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
@@ -54,6 +53,7 @@ class ReportEditViewModel(
             async {
                 loadEntity(
                     serializer = Report.serializer(),
+                    loadFromStateKeys =listOf(ENTITY_UID),
                     onLoadFromDb = { db ->
                         db.reportDao().findByUid(entityUid)
                     },
@@ -93,13 +93,13 @@ class ReportEditViewModel(
 
     fun onClickSave() {
         viewModelScope.launch {
+            val currentReport = _uiState.value.reportOptions2
+            val report = Report(
+                reportTitle = currentReport.title,
+                reportOptions = Json.encodeToString(currentReport),
+            )
             activeRepo.withDoorTransactionAsync {
                 try {
-                    val currentReport = _uiState.value.reportOptions2
-                    val report = Report(
-                        reportTitle = currentReport.title,
-                        reportOptions = Json.encodeToString(currentReport),
-                    )
                     if (entityUid == 0L) {
                         activeRepo.reportDao().insert(report)
                         println("Report options inserted successfully: ${report}")
@@ -111,6 +111,9 @@ class ReportEditViewModel(
                     println("Error updating report options: ${e.message}")
                 }
             }
+            savedStateHandle.setJson(ENTITY_UID, Report.serializer(), report)
+
+            scheduleEntityCommitToSavedState(report, serializer = Report.serializer())
         }
     }
 
@@ -180,6 +183,17 @@ class ReportEditViewModel(
             )
         }
     }
+    fun onRemoveSeries(seriesId: Int) {
+        _uiState.update { prev ->
+            val updatedSeriesList = prev.reportOptions2.series.filterNot { it.reportSeriesUid == seriesId }
+
+            prev.copy(
+                reportOptions2 = prev.reportOptions2.copy(
+                    series = updatedSeriesList
+                )
+            )
+        }
+    }
 
     fun onRemoveFilter(index: Int, seriesId: Int) {
         _uiState.update { prev ->
@@ -208,6 +222,7 @@ class ReportEditViewModel(
         const val DEST_NAME_HOME = "ReportHome"
         val ALL_DEST_NAMES = listOf(DEST_NAME, DEST_NAME_HOME)
         const val RESULT_KEY_REPORT = "arg"
+        const val ENTITY_UID = "uid"
     }
 }
 

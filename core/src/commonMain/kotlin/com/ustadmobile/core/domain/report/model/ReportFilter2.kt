@@ -10,9 +10,7 @@ enum class Comparisons(val value: Int) {
     NOT_EQUALS(2),
     GREATER(3),
     LESSER(4),
-    BETWEEN(5),
-    IN_LIST(6),
-    NOT_IN_LIST(7);
+    BETWEEN(5);
 
     companion object {
         // Map enum values to their corresponding string resources
@@ -21,9 +19,7 @@ enum class Comparisons(val value: Int) {
             NOT_EQUALS to MR.strings.not_equals,
             GREATER to MR.strings.greater,
             LESSER to MR.strings.lesser,
-            BETWEEN to MR.strings.between,
-            IN_LIST to MR.strings.in_list,
-            NOT_IN_LIST to MR.strings.not_in_list
+            BETWEEN to MR.strings.between
         )
 
         // Function to get the string resource for a given enum value
@@ -38,19 +34,14 @@ enum class Comparisons(val value: Int) {
 @Serializable
 sealed class ReportFilter2(
     val comparisonTypes: List<Comparisons>,
-    val reportFilterSeriesUid: Int = 0
 ) {
     @Serializable
-    data class GenderFilter(
-        val gender: String
-    ) : ReportFilter2(
+     class GenderFilter : ReportFilter2(
         comparisonTypes = listOf(Comparisons.EQUALS, Comparisons.NOT_EQUALS)
     )
 
     @Serializable
-    data class AgeFilter(
-        val age: Int
-    ) : ReportFilter2(
+     class AgeFilter : ReportFilter2(
         comparisonTypes = listOf(
             Comparisons.EQUALS,
             Comparisons.NOT_EQUALS,
@@ -61,9 +52,7 @@ sealed class ReportFilter2(
     )
 
     @Serializable
-    data class ContentCompletionFilter(
-        val completionPercentage: Int
-    ) : ReportFilter2(
+     class ContentCompletionFilter: ReportFilter2(
         comparisonTypes = listOf(Comparisons.EQUALS, Comparisons.GREATER, Comparisons.LESSER)
     )
 }
@@ -88,7 +77,5 @@ fun getComparisonSymbol(comparison: Comparisons): String {
         Comparisons.GREATER -> ">"
         Comparisons.LESSER -> "<"
         Comparisons.BETWEEN -> "BETWEEN"
-        Comparisons.IN_LIST -> "IN"
-        Comparisons.NOT_IN_LIST -> "NOT IN"
     }
 }

@@ -19,12 +19,3 @@ data class MessageIdOption2(val stringResource: StringResource, val value: Int) 
 
     }
 }
-data class MessageIdOption3(val stringResource: StringResource, val value: String) {
-    companion object {
-
-        val UNSET_VALUE = -1
-
-        val UNSET = MessageIdOption2(MR.strings.unset, UNSET_VALUE)
-
-    }
-}

@@ -73,7 +73,6 @@ fun ReportFilterEditScreen(
                         val updatedOptions =
                             uiState.filters?.copy(reportFilterField = selectedFilterType)
                         onEntityChanged(updatedOptions)
-                        println("updatedOptions: $updatedOptions")
                     }
                 )
             }
@@ -88,24 +87,23 @@ fun ReportFilterEditScreen(
                 ) {
                     EditFilterDropdown(
                         label = stringResource(MR.strings.condition),
-                        value = uiState.filters?.reportFilterCondition?.value?.toString() ?: "",
-                        options = Comparisons.entries.map { comparison ->
+                        value = uiState.filterCondition?.comparisonTypes?.firstOrNull()?.value?.toString() ?: "",
+                        options = uiState.filterCondition?.comparisonTypes?.map { comparison ->
                             MessageIdOption2(
-                                stringResource = Comparisons.getStringResourceForComparison(
-                                    comparison
-                                ),
+                                stringResource = Comparisons.getStringResourceForComparison(comparison),
                                 value = comparison.value
                             )
-                        },
+                        } ?: emptyList(),
                         onOptionSelected = { selectedOption ->
-                            val selectedComparison =
-                                Comparisons.entries.firstOrNull { it.value == selectedOption.value }
-                                    ?: Comparisons.EQUALS
-                            val updatedOptions =
-                                uiState.filters?.copy(reportFilterCondition = selectedComparison)
+                            val selectedComparison = uiState.filterCondition?.comparisonTypes
+                                ?.firstOrNull { it.value == selectedOption.value }
+                                ?: Comparisons.EQUALS
+
+                            val updatedOptions = uiState.filters?.copy(reportFilterCondition = selectedComparison)
                             onEntityChanged(updatedOptions)
                         }
                     )
+
                 }
                 Column(
                     modifier = Modifier
