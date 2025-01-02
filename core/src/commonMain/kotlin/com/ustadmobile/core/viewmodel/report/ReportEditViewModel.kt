@@ -53,7 +53,6 @@ class ReportEditViewModel(
             async {
                 loadEntity(
                     serializer = Report.serializer(),
-                    loadFromStateKeys =listOf(ENTITY_UID),
                     onLoadFromDb = { db ->
                         db.reportDao().findByUid(entityUid)
                     },
@@ -98,6 +97,7 @@ class ReportEditViewModel(
                 reportTitle = currentReport.title,
                 reportOptions = Json.encodeToString(currentReport),
             )
+            scheduleEntityCommitToSavedState(report, serializer = Report.serializer())
             activeRepo.withDoorTransactionAsync {
                 try {
                     if (entityUid == 0L) {
@@ -111,9 +111,6 @@ class ReportEditViewModel(
                     println("Error updating report options: ${e.message}")
                 }
             }
-            savedStateHandle.setJson(ENTITY_UID, Report.serializer(), report)
-
-            scheduleEntityCommitToSavedState(report, serializer = Report.serializer())
         }
     }
 
@@ -136,23 +133,25 @@ class ReportEditViewModel(
     }
 
     private fun onFilterChanged(filter2: ReportFilter3, seriesId: Int) {
-        _uiState.update { prev ->
-            val updatedSeriesList = prev.reportOptions2.series.map { series ->
-                if (series.reportSeriesUid == seriesId) {
-                    val updatedFilters =
-                        series.reportSeriesFilters?.toMutableList() ?: mutableListOf()
-                    updatedFilters.add(filter2)
-                    series.copy(reportSeriesFilters = updatedFilters)
-                } else {
-                    series
+        if (filter2.reportFilterField != null) {
+            _uiState.update { prev ->
+                val updatedSeriesList = prev.reportOptions2.series.map { series ->
+                    if (series.reportSeriesUid == seriesId) {
+                        val updatedFilters =
+                            series.reportSeriesFilters?.toMutableList() ?: mutableListOf()
+                        updatedFilters.add(filter2)
+                        series.copy(reportSeriesFilters = updatedFilters)
+                    } else {
+                        series
+                    }
                 }
-            }
 
-            prev.copy(
-                reportOptions2 = prev.reportOptions2.copy(
-                    series = updatedSeriesList
+                prev.copy(
+                    reportOptions2 = prev.reportOptions2.copy(
+                        series = updatedSeriesList
+                    )
                 )
-            )
+            }
         }
     }
 

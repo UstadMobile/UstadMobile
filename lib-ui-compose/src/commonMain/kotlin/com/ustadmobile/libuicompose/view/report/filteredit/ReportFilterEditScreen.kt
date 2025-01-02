@@ -87,7 +87,7 @@ fun ReportFilterEditScreen(
                 ) {
                     EditFilterDropdown(
                         label = stringResource(MR.strings.condition),
-                        value = uiState.filterCondition?.comparisonTypes?.firstOrNull()?.value?.toString() ?: "",
+                        value = uiState.filters?.reportFilterCondition?.value?.toString() ?: "",
                         options = uiState.filterCondition?.comparisonTypes?.map { comparison ->
                             MessageIdOption2(
                                 stringResource = Comparisons.getStringResourceForComparison(comparison),
@@ -95,15 +95,12 @@ fun ReportFilterEditScreen(
                             )
                         } ?: emptyList(),
                         onOptionSelected = { selectedOption ->
-                            val selectedComparison = uiState.filterCondition?.comparisonTypes
-                                ?.firstOrNull { it.value == selectedOption.value }
+                            val selectedComparison = Comparisons.entries.firstOrNull { it.value == selectedOption.value }
                                 ?: Comparisons.EQUALS
-
                             val updatedOptions = uiState.filters?.copy(reportFilterCondition = selectedComparison)
                             onEntityChanged(updatedOptions)
                         }
                     )
-
                 }
                 Column(
                     modifier = Modifier
