@@ -34,10 +34,12 @@ Cypress.on('uncaught:exception', (err) => {
 });
 
 // Start Test Server
-Cypress.Commands.add('ustadStartTestServer', () => {
-  cy.visit('http://localhost:8075/start'); // Use cy.visit to navigate to the start page
-  cy.wait(6000); // Wait for 6 seconds after visiting the start page
-});
+Cypress.Commands.add('ustadStartTestServer', (waitTime = 6000) => {
+  const testServerUrl = Cypress.env('TESTSERVER_URL') || 'http://localhost:8075'
+  const url = testServerUrl.endsWith('/') ? `${testServerUrl}start` : `${testServerUrl}/start`
+  cy.visit(url) // Visit the start endpoint of the test server
+  cy.wait(waitTime)// Wait for the specified time after visiting the start page
+})
 
 
 //User Login

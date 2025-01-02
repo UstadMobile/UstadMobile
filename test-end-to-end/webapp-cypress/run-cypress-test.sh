@@ -49,6 +49,9 @@ while true; do
     esac
 done
 
+# Export the URL to Cypress environment variables
+export TESTSERVER_URL
+
 # Ensure the results directory exists
 if [ ! -e "$SCRIPTDIR/results" ]; then
     mkdir -p "$SCRIPTDIR/results"
@@ -79,7 +82,7 @@ npm install || exit_with_error "Failed to run 'npm install'"
 
 # Run Cypress tests
 echo "Running Cypress tests..."
-npm exec cypress run -- --spec "$SPECARG" || exit_with_error "Cypress test run failed"
+npm exec cypress run -- --env TESTSERVER_URL="$TESTSERVER_URL" --spec "$SPECARG" || exit_with_error "Cypress test run failed"
 
 # Capture the exit status of the Cypress test run
 teststatus=$?
