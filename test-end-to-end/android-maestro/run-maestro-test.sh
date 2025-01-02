@@ -3,6 +3,7 @@
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
 TEMP=$(getopt -o 'hs:u:p:e:t:a:c:r' --long 'help,serial1:,username:,password:,endpoint:,test:,apk:,console-output,result:' -n 'run-maestro-tests.sh' -- "$@")
+TEMP=$(getopt -o 'hs:u:p:t:a:c:r:e:l' --long 'help,serial1:,username:,password:,test:,apk:,console-output,result:,testserverControllerUrl:,learningSpaceUrl:' -n 'run-maestro-tests.sh' -- "$@")
 
 
 eval set -- "$TEMP"
@@ -15,8 +16,10 @@ TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
 TESTAPK=$SCRIPTDIR/../../app-android/build/outputs/apk/release/app-android-release.apk
 TESTRESULTSDIR=""
-CONTROLSERVER=""
+TESTSERVER_URL=""
 USECONSOLEOUTPUT=0
+LEARNING_SPACE_URL=""
+
 echo $SCRIPTDIR
 while true; do
         case "$1" in
@@ -26,11 +29,12 @@ while true; do
                   echo "-s | --serial1 (serial) the android device serial (as per adb devices) - required"
                   echo "-u | --username (username)  admin username"
                   echo "-p | --password (password) admin password"
-                  echo "-e | --endpoint (http-endpoint) the endpoint of the server to connect to"
                   echo "-t | --test (testname) specify a specific test to run e.g. the filename of a test in e2e-tests (without .yaml extension)"
                   echo "-a | --apk (apk-path) apk to install (defaults to release apk from app-android module)"
                   echo "-c | --console-output use console output mode with Maestro"
                   echo "-r | --result (result-dir) directory to save junit test results"
+                  echo "-e | --testserverControllerUrl url that run the testserver controller"
+                  echo "-l | --learningSpaceUrl (http-endpoint)url for the learning space server to connect to"
                   exit 0
                   ;;
 
@@ -49,12 +53,7 @@ while true; do
                         shift 2
                        continue
                 ;;
-              '-e'|'--endpoint')
-                    ENDPOINT=$2
-                      shift 2
-                     continue
-               ;;
-               '-t'|'--test')
+             '-t'|'--test')
                      echo "Set test to $2"
                      TEST=$2
                      shift 2
@@ -78,6 +77,18 @@ while true; do
                     shift 2
                     continue
                 ;;
+              '-e'|'--testserverControllerUrl')
+                    echo "Set testserver Controller URL to $2"
+                    TESTSERVER_URL=$2
+                    shift 2
+                    continue
+              ;;
+              '-l'|'--learningSpaceUrl')
+                    echo "Learning Space Url"
+                    LEARNING_SPACE_URL=$2
+                    shift 2
+                    continue
+              ;;
                 '--')
 
                         shift
@@ -88,17 +99,18 @@ while true; do
 done
 
 if [ "$TESTSERIAL" == "" ]; then
-  echo "Please specify adb device serial usign --serial1 param or use --help to see all options"
+  echo "Please specify adb device serial using --serial1 param or use --help to see all options"
   exit 1
 fi
 
 IPADDR=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n 1)
-if [ "$ENDPOINT" = "" ]; then
-    ENDPOINT="http://$IPADDR:8087/"
+if [ "$LEARNING_SPACE_URL" = "" ]; then
+    LEARNING_SPACE_URL="http://$IPADDR:8087/"
 fi
 
-if [ "$CONTROLSERVER" = "" ]; then
-  CONTROLSERVER="http://localhost:8075/"
+if [ "$TESTSERVER_URL" == "" ]; then
+    echo "Error: Please specify a testserver Controller URL using --testserverControllerUrl <http://ip:port/>."
+    exit 1
 fi
 
 if [ "$TESTRESULTSDIR" == "" ]; then
@@ -131,10 +143,21 @@ for COMMONFLOWFILE in $(ls $SCRIPTDIR/common); do
 done
 
 # Start control server
-$SCRIPTDIR/../../testserver-controller/start.sh --siteUrl $ENDPOINT --resultsDir $TESTRESULTSDIR
+$SCRIPTDIR/../../testserver-controller/start.sh --siteUrl $LEARNING_SPACE_URL --resultsDir $TESTRESULTSDIR
 
 export ANDROID_SERIAL=$TESTSERIAL
-adb reverse tcp:8075 tcp:8075
+
+# Extract the port from the URL
+if [[ "$TESTSERVER_URL" =~ :([0-9]+) ]]; then
+    TESTSERVER_PORT="${BASH_REMATCH[1]}"
+else
+    echo "Error: Invalid testserver Controller URL format. Ensure it includes a port (e.g., http://ip:port/)."
+    exit 1
+fi
+
+# Set up adb reverse using the extracted port
+echo "Setting up adb reverse on port $TESTSERVER_PORT"
+adb reverse tcp:$TESTSERVER_PORT tcp:$TESTSERVER_PORT
 
 if [ "$(adb shell pm list packages com.toughra.ustadmobile)" != "" ]; then
   adb shell pm uninstall com.toughra.ustadmobile
@@ -164,10 +187,10 @@ if [ "$USECONSOLEOUTPUT" == "1" ]; then
   OUTPUTARGS=""
 fi
 
-maestro  --device=$TESTSERIAL  test -e ENDPOINT=$ENDPOINT -e USERNAME=$TESTUSER \
+maestro  --device=$TESTSERIAL  test -e LEARNING_SPACE_URL=$LEARNING_SPACE_URL -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-         -e TESTSERIAL=$TESTSERIAL $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR $OUTPUTARGS
-
+         -e TESTSERIAL=$TESTSERIAL $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR $OUTPUTARGS \
+         -e TESTSERVER_URL=$TESTSERVER_URL
 
 TESTSTATUS=$?
 
