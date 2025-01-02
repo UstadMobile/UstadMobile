@@ -1,4 +1,4 @@
-package com.ustadmobile.view.report
+package com.ustadmobile.view.report.filteredit
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.Comparisons
@@ -38,7 +38,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                 value = props.uiState.filters?.reportFilterField?.value ?: 0
                 options = FilterType.entries.map { filterType ->
                     MessageIdOption2(
-                        stringResource = FilterType.getStringResourceForFilterType(filterType),
+                        stringResource = filterType.stringResource,
                         value = filterType.value
                     )
                 }
@@ -62,9 +62,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                     value = props.uiState.filters?.reportFilterCondition?.value ?: 0
                     options = Comparisons.entries.map { comparison ->
                         MessageIdOption2(
-                            stringResource = Comparisons.getStringResourceForComparison(
-                                comparison
-                            ),
+                            stringResource = comparison.stringResource,
                             value = comparison.value
                         )
                     }

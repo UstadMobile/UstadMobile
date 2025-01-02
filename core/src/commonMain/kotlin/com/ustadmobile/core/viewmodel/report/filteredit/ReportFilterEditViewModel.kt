@@ -83,9 +83,11 @@ class ReportFilterEditViewModel(
                         FilterType.PERSON_AGE -> {
                             ReportFilter2.AgeFilter()
                         }
+
                         FilterType.PERSON_GENDER -> {
                             ReportFilter2.GenderFilter()
                         }
+
                         else -> {
                             null
                         }

@@ -9,8 +9,8 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.replace
-import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Report
 import kotlinx.coroutines.async
@@ -100,12 +100,12 @@ class ReportEditViewModel(
 
     fun onClickSave() {
         viewModelScope.launch {
-            val currentReport = _uiState.value.reportOptions2
-            val report = Report(
-                reportTitle = currentReport.title,
-                reportOptions = Json.encodeToString(currentReport),
-            )
             activeRepo.withDoorTransactionAsync {
+                val currentReport = _uiState.value.reportOptions2
+                val report = Report(
+                    reportTitle = currentReport.title,
+                    reportOptions = json.encodeToString(currentReport),
+                )
                 try {
                     if (entityUidArg == 0L) {
                         activeRepo.reportDao().insertAsync(report)
@@ -134,16 +134,15 @@ class ReportEditViewModel(
 
     fun onSeriesChanged(updatedSeries: ReportSeries2) {
         _uiState.update { prev ->
-            val updatedState = prev.copy(
+            prev.copy(
                 reportOptions2 = prev.reportOptions2.copy(
                     series = prev.reportOptions2.series.replace(updatedSeries) {
                         it.reportSeriesUid == updatedSeries.reportSeriesUid
                     }
                 )
             )
-            onEntityChanged(updatedState.reportOptions2)
-            updatedState
         }
+        onEntityChanged(_uiState.value.reportOptions2)
     }
 
 
@@ -239,6 +238,5 @@ class ReportEditViewModel(
         const val DEST_NAME_HOME = "ReportHome"
         val ALL_DEST_NAMES = listOf(DEST_NAME, DEST_NAME_HOME)
         const val RESULT_KEY_REPORT = "arg"
-        const val ENTITY_UID = "uid"
     }
 }

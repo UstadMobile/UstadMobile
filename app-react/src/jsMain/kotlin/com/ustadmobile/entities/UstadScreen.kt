@@ -170,8 +170,8 @@ import com.ustadmobile.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
 import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
 import com.ustadmobile.view.contententry.subtitleedit.SubtitleEditScreen
-import com.ustadmobile.view.report.ReportEditScreen
-import com.ustadmobile.view.report.ReportFilterEditScreenComponent
+import com.ustadmobile.view.report.edit.ReportEditScreen
+import com.ustadmobile.view.report.filteredit.ReportFilterEditScreenComponent
 
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
@@ -236,10 +236,12 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
     UstadScreen(
         ReportFilterEditViewModel.DEST_NAME,
-        "ReportFilterEdit", ReportFilterEditScreenComponent),
+        "ReportFilterEdit", ReportFilterEditScreenComponent
+    ),
     UstadScreen(
         ReportEditViewModel.DEST_NAME_HOME,
-        "ReportHome", ReportEditScreen),
+        "ReportHome", ReportEditScreen
+    ),
     UstadScreen(ScopedGrantDetailView.VIEW_NAME, "ScopedGrantDetail Preview",
         ScopedGrantDetailScreenPreview),
     UstadScreen(ContentEntryImportLinkViewModel.DEST_NAME, "ContentEntryImportLink",

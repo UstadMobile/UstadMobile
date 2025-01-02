@@ -6,24 +6,27 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
-import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExposedDropdownMenuBox
+import androidx.compose.material.ExposedDropdownMenuDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
@@ -31,13 +34,11 @@ import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportXAxis
-import com.ustadmobile.core.domain.report.model.getComparisonSymbol
 import com.ustadmobile.core.impl.locale.entityconstants.ReportXAxisConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
-
-import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import dev.icerock.moko.resources.compose.stringResource
@@ -70,17 +71,16 @@ private fun ReportEditScreen(
     onRemoveFilter: (Int, Int) -> Unit = { _, _ -> },
     onRemoveSeries: (Int) -> Unit = { },
 ) {
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .defaultItemPadding(),
-        verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         item {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(stringResource(MR.strings.title), fontWeight = FontWeight.SemiBold)
+                Text(stringResource(MR.strings.title))
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = uiState.reportOptions2.title,
@@ -97,8 +97,8 @@ private fun ReportEditScreen(
             }
         }
         item {
-            EditReportDropdown(
-                value = uiState.reportOptions2.xAxis ?: 0,
+            LabeledDropdownMenu(
+                selectedValue = uiState.reportOptions2.xAxis ?: 0,
                 label = stringResource(MR.strings.x_axis),
                 options = ReportXAxisConstants.X_AXIS_OPTIONS,
                 onOptionSelected = {
@@ -111,11 +111,10 @@ private fun ReportEditScreen(
         // Dynamically iterate over the series
         uiState.reportOptions2.series.forEach { seriesItem ->
             item {
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .defaultScreenPadding()
-                        .height(2.dp)
+                        .defaultScreenPadding(), thickness = 1.dp
                 )
             }
             item {
@@ -127,8 +126,6 @@ private fun ReportEditScreen(
                     // Series Title Input
                     Text(
                         stringResource(MR.strings.series_title),
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -144,7 +141,6 @@ private fun ReportEditScreen(
                                 val updatedSeries = seriesItem.copy(reportSeriesTitle = newTitle)
                                 onSeriesChanged(updatedSeries)
                             },
-                            supportingText = {}
                         )
                         Icon(
                             imageVector = Icons.Filled.Close,
@@ -153,20 +149,20 @@ private fun ReportEditScreen(
                                 .clickable {
                                     onRemoveSeries(seriesItem.reportSeriesUid)
                                 }
-                                .defaultItemPadding(start = 16.dp, bottom = 12.dp)
+                                .align(Alignment.CenterVertically)
                         )
                     }
 
                     // Y Axis Dropdown
-                    EditReportDropdown(
+                    LabeledDropdownMenu(
                         label = stringResource(MR.strings.y_axis),
                         options = ReportSeriesYAxis.entries.map { yAxis ->
                             MessageIdOption2(
-                                stringResource = ReportSeriesYAxis.getStringResourceForYAxis(yAxis),
+                                stringResource = yAxis.stringResource,
                                 value = yAxis.value
                             )
                         },
-                        value = seriesItem.reportSeriesYAxis?.value ?: 0,
+                        selectedValue = seriesItem.reportSeriesYAxis?.value ?: 0,
                         onOptionSelected = { selectedOption ->
                             val selectedYAxis =
                                 ReportSeriesYAxis.entries.firstOrNull { it.value == selectedOption.value }
@@ -176,15 +172,15 @@ private fun ReportEditScreen(
                     )
 
                     // Subgroup Dropdown
-                    EditReportDropdown(
+                    LabeledDropdownMenu(
                         label = stringResource(MR.strings.subgroup_by),
                         options = ReportXAxis.entries.map { xAxis ->
                             MessageIdOption2(
-                                stringResource = ReportXAxis.getStringResourceForXAxis(xAxis),
+                                stringResource = xAxis.stringResource,
                                 value = xAxis.value
                             )
                         },
-                        value = seriesItem.reportSeriesSubGroup?.value ?: 0,
+                        selectedValue = seriesItem.reportSeriesSubGroup?.value ?: 0,
                         onOptionSelected = { selectedOption ->
                             val selectedXAxis =
                                 ReportXAxis.entries.firstOrNull { it.value == selectedOption.value }
@@ -195,18 +191,17 @@ private fun ReportEditScreen(
                         }
                     )
 
+
                     // Chart Type Dropdown
-                    EditReportDropdown(
+                    LabeledDropdownMenu(
                         label = stringResource(MR.strings.chart_type),
                         options = ReportSeriesVisualType.entries.map { visualType ->
                             MessageIdOption2(
-                                stringResource = ReportSeriesVisualType.getStringResourceForVisualType(
-                                    visualType
-                                ),
+                                stringResource = visualType.stringResource,
                                 value = visualType.value
                             )
                         },
-                        value = seriesItem.reportSeriesVisualType?.value ?: 0,
+                        selectedValue = seriesItem.reportSeriesVisualType?.value ?: 0,
                         onOptionSelected = { selectedOption ->
                             val selectedVisualType =
                                 ReportSeriesVisualType.entries.firstOrNull { it.value == selectedOption.value }
@@ -218,17 +213,15 @@ private fun ReportEditScreen(
                     )
 
                     // Time Range Dropdown
-                    EditReportDropdown(
+                    LabeledDropdownMenu(
                         label = stringResource(MR.strings.time_range),
                         options = ReportTimeRange.entries.map { timeRange ->
                             MessageIdOption2(
-                                stringResource = ReportTimeRange.getStringResourceForTimeRange(
-                                    timeRange
-                                ),
+                                stringResource = timeRange.stringResource,
                                 value = timeRange.value
                             )
                         },
-                        value = seriesItem.reportTimeRange?.value ?: 0,
+                        selectedValue = seriesItem.reportTimeRange?.value ?: 0,
                         onOptionSelected = { selectedOption ->
                             val selectedTimeRange =
                                 ReportTimeRange.entries.firstOrNull { it.value == selectedOption.value }
@@ -258,7 +251,7 @@ private fun ReportEditScreen(
                         val fieldName = reportFilter2.reportFilterField?.name?.lowercase()
                             ?.replaceFirstChar { it.uppercase() } ?: ""
                         val comparisonSymbol =
-                            reportFilter2.reportFilterCondition?.let { getComparisonSymbol(it) }
+                            reportFilter2.reportFilterCondition?.symbol ?: ""
                         val filterText =
                             "$fieldName $comparisonSymbol ${reportFilter2.reportFilterValue}"
 
@@ -281,7 +274,7 @@ private fun ReportEditScreen(
             item {
                 Button(
                     onClick = { onAddFilter(seriesItem.reportSeriesUid) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().defaultScreenPadding()
                 ) {
                     Text(
                         text = stringResource(MR.strings.add_filter),
@@ -301,28 +294,62 @@ private fun ReportEditScreen(
 }
 
 @Composable
-fun EditReportDropdown(
-    value: Int,
+fun LabeledDropdownMenu(
     label: String,
     options: List<MessageIdOption2>,
-    onOptionSelected: (MessageIdOption2) -> Unit,
-    modifier: Modifier = Modifier,
-    isError: Boolean = false,
-    enabled: Boolean = true,
-    supportingText: (@Composable () -> Unit)? = null,
-) {
-    Column(modifier = Modifier) {
-        Text(label)
-        UstadExposedDropDownMenuField(
-            value = options.firstOrNull { it.value == value },
-            label = "",
+    selectedValue: Int,
+    onOptionSelected: (MessageIdOption2) -> Unit
+){
+    Column(
+        modifier = Modifier.defaultScreenPadding(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+
+    ) {
+        Text(text = label, maxLines = 1)
+        ExposedDropdownMenu(
             options = options,
-            onOptionSelected = onOptionSelected,
-            itemText = { stringResource(resource = it.stringResource) },
-            modifier = modifier,
-            isError = isError,
-            enabled = enabled,
-            supportingText = supportingText,
+            selectedValue = selectedValue,
+            onOptionSelected = onOptionSelected
         )
+    }
+}
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ExposedDropdownMenu(
+    options: List<MessageIdOption2>,
+    selectedValue: Int,
+    onOptionSelected: (MessageIdOption2) -> Unit
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+    val selectedOption = options.firstOrNull { it.value == selectedValue }
+
+    ExposedDropdownMenuBox(
+        expanded = isExpanded,
+        onExpandedChange = { isExpanded = !isExpanded }
+    ) {
+        OutlinedTextField(
+            value = selectedOption?.stringResource?.let { stringResource(it) } ?: "",
+            onValueChange = {},
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth(),
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+            }
+        )
+        ExposedDropdownMenu(
+            expanded = isExpanded,
+            onDismissRequest = { isExpanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(option.stringResource)) },
+                    onClick = {
+                        onOptionSelected(option)
+                        isExpanded = false
+                    }
+                )
+            }
+        }
     }
 }

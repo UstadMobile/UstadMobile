@@ -5,28 +5,16 @@ import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Serializable
 
 /** Enum representing different comparison types */
-enum class Comparisons(val value: Int) {
-    EQUALS(1),
-    NOT_EQUALS(2),
-    GREATER(3),
-    LESSER(4),
-    BETWEEN(5);
-
-    companion object {
-        // Map enum values to their corresponding string resources
-        private val stringResourceMap = mapOf(
-            EQUALS to MR.strings.equals,
-            NOT_EQUALS to MR.strings.not_equals,
-            GREATER to MR.strings.greater,
-            LESSER to MR.strings.lesser,
-            BETWEEN to MR.strings.between
-        )
-
-        // Function to get the string resource for a given enum value
-        fun getStringResourceForComparison(comparison: Comparisons): StringResource {
-            return stringResourceMap[comparison] ?: MR.strings.equals
-        }
-    }
+enum class Comparisons(
+    val value: Int,
+    val stringResource: StringResource,
+    val symbol: String
+) {
+    EQUALS(1, MR.strings.equals, "="),
+    NOT_EQUALS(2, MR.strings.not_equals, "!="),
+    GREATER(3, MR.strings.greater, ">"),
+    LESSER(4, MR.strings.lesser, "<"),
+    BETWEEN(5, MR.strings.between, "BETWEEN");
 }
 
 
@@ -50,11 +38,6 @@ sealed class ReportFilter2(
             Comparisons.BETWEEN
         )
     )
-
-    @Serializable
-     class ContentCompletionFilter: ReportFilter2(
-        comparisonTypes = listOf(Comparisons.EQUALS, Comparisons.GREATER, Comparisons.LESSER)
-    )
 }
 
 @Serializable
@@ -69,13 +52,3 @@ data class ReportFilter3(
 
     var reportFilterValue: String? = ""
 )
-
-fun getComparisonSymbol(comparison: Comparisons): String {
-    return when (comparison) {
-        Comparisons.EQUALS -> "="
-        Comparisons.NOT_EQUALS -> "!="
-        Comparisons.GREATER -> ">"
-        Comparisons.LESSER -> "<"
-        Comparisons.BETWEEN -> "BETWEEN"
-    }
-}

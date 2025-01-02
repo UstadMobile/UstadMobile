@@ -1,4 +1,4 @@
-package com.ustadmobile.view.report
+package com.ustadmobile.view.report.edit
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.ReportOptions2
@@ -7,26 +7,23 @@ import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportXAxis
-import com.ustadmobile.core.domain.report.model.getComparisonSymbol
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.entityconstants.ReportXAxisConstants
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.viewmodel.report.ReportEditUiState
-import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
+import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
+import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
 import kotlinx.coroutines.Dispatchers
 import mui.icons.material.Close
-import mui.icons.material.Person2
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.Divider
 import mui.material.Icon
 import mui.material.IconButton
-import mui.material.ListItemText
 import mui.material.Orientation
 import mui.material.Stack
 import mui.material.StackDirection
@@ -101,7 +98,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         value = series.reportSeriesYAxis?.value ?: 0
                         options = ReportSeriesYAxis.entries.map { yAxis ->
                             MessageIdOption2(
-                                stringResource = ReportSeriesYAxis.getStringResourceForYAxis(yAxis),
+                                stringResource = yAxis.stringResource,
                                 value = yAxis.value
                             )
                         }
@@ -120,7 +117,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         value = series.reportSeriesSubGroup?.value ?: 0
                         options = ReportXAxis.entries.map { xAxis ->
                             MessageIdOption2(
-                                stringResource = ReportXAxis.getStringResourceForXAxis(xAxis),
+                                stringResource = xAxis.stringResource,
                                 value = xAxis.value
                             )
                         }
@@ -142,9 +139,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     value = series.reportSeriesVisualType?.value ?: 0
                     options = ReportSeriesVisualType.entries.map { visualType ->
                         MessageIdOption2(
-                            stringResource = ReportSeriesVisualType.getStringResourceForVisualType(
-                                visualType
-                            ),
+                            stringResource = visualType.stringResource,
                             value = visualType.value
                         )
                     }
@@ -165,9 +160,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     value = series.reportTimeRange?.value ?: 0
                     options = ReportTimeRange.entries.map { timeRange ->
                         MessageIdOption2(
-                            stringResource = ReportTimeRange.getStringResourceForTimeRange(
-                                timeRange
-                            ),
+                            stringResource = timeRange.stringResource,
                             value = timeRange.value
                         )
                     }
@@ -194,10 +187,8 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         spacing = responsive(8.px)
                         val fieldName = reportFilter2.reportFilterField?.name?.lowercase()
                             ?.replaceFirstChar { it.uppercase() } ?: ""
-                        val comparisonSymbol =
-                            reportFilter2.reportFilterCondition?.let { getComparisonSymbol(it) }
-                        val filterText =
-                            "$fieldName $comparisonSymbol ${reportFilter2.reportFilterValue}"
+                        val comparisonSymbol = reportFilter2.reportFilterCondition?.symbol ?: ""
+                        val filterText = "$fieldName $comparisonSymbol ${reportFilter2.reportFilterValue}"
 
                         Typography {
                             variant = TypographyVariant.h6
