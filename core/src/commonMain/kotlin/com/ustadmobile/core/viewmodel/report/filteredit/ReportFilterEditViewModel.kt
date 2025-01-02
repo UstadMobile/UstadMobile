@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.report.filteredit
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.FilterType
@@ -8,7 +8,8 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
+import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -62,7 +63,6 @@ class ReportFilterEditViewModel(
             entityUid = filter?.reportFilterUid?.toLong() ?: 0,
             result = mapOf(
                 "filter" to filter?.copy(reportFilterSeriesUid = seriesId),
-                "reportSeriesUid" to seriesId
             )
         )
     }

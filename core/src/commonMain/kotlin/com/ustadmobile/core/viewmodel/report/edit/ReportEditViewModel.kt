@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel.report
+package com.ustadmobile.core.viewmodel.report.edit
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.ReportFilter3
@@ -9,8 +9,7 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.replace
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
+import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Report
@@ -24,17 +23,19 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
+data class ReportEditUiState(
+    val reportOptions2: ReportOptions2 = ReportOptions2(),
+)
+
 class ReportEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-    destName: String = ""
-) : UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
+    destName: String = DEST_NAME
+) : UstadEditViewModel(di, savedStateHandle, destName) {
 
     private val _uiState: MutableStateFlow<ReportEditUiState> =
         MutableStateFlow(ReportEditUiState())
     val uiState: Flow<ReportEditUiState> = _uiState.asStateFlow()
-    private val entityUid: Long
-        get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -52,29 +53,36 @@ class ReportEditViewModel(
         ) {
             async {
                 loadEntity(
-                    serializer = Report.serializer(),
+                    serializer = ReportOptions2.serializer(),
                     onLoadFromDb = { db ->
-                        db.reportDao().findByUid(entityUid)
+                        val report = db.reportDao().findByUid(entityUidArg)
+                        report?.let {
+                            it.reportOptions?.takeIf { options -> options.isNotBlank() }
+                                ?.let { options ->
+                                    Json.decodeFromString(ReportOptions2.serializer(), options)
+                                } ?: ReportOptions2(title = it.reportTitle ?: "")
+                        }
                     },
                     makeDefault = {
-                        Report()
+                        ReportOptions2()
                     },
                     uiUpdate = { loadedReport ->
                         _uiState.update { prev ->
                             prev.copy(
-                                reportOptions2 = loadedReport?.reportOptions?.takeIf { it.isNotBlank() }
-                                    ?.let { Json.decodeFromString(ReportOptions2.serializer(), it) }
-                                    ?: ReportOptions2()
+                                reportOptions2 = loadedReport ?: ReportOptions2()
                             )
                         }
                     }
                 )
-                navResultReturner.filteredResultFlowForKey(RESULT_KEY_REPORT).collect { result ->
-                    val reportResult = result.result as? Map<*, *> ?: return@collect
-                    val filter = reportResult["filter"] as? ReportFilter3 ?: return@collect
-                    val seriesId = (reportResult["reportSeriesUid"] as? Int) ?: return@collect
-                    println("Report filter: ${filter}")
-                    onFilterChanged(filter, seriesId)
+
+                launch {
+                    navResultReturner.filteredResultFlowForKey(RESULT_KEY_REPORT)
+                        .collect { result ->
+                            val reportResult = result.result as? Map<*, *> ?: return@collect
+                            val filter = reportResult["filter"] as? ReportFilter3 ?: return@collect
+                            val seriesId = filter.reportFilterSeriesUid
+                            onFilterChanged(filter, seriesId)
+                        }
                 }
             }
         }
@@ -97,14 +105,13 @@ class ReportEditViewModel(
                 reportTitle = currentReport.title,
                 reportOptions = Json.encodeToString(currentReport),
             )
-            scheduleEntityCommitToSavedState(report, serializer = Report.serializer())
             activeRepo.withDoorTransactionAsync {
                 try {
-                    if (entityUid == 0L) {
-                        activeRepo.reportDao().insert(report)
+                    if (entityUidArg == 0L) {
+                        activeRepo.reportDao().insertAsync(report)
                         println("Report options inserted successfully: ${report}")
                     } else {
-                        activeRepo.reportDao().update(report)
+                        activeRepo.reportDao().updateAsync(report)
                         println("Report options updated successfully: ${report}")
                     }
                 } catch (e: Exception) {
@@ -118,19 +125,27 @@ class ReportEditViewModel(
         _uiState.update { currentState ->
             currentState.copy(reportOptions2 = newOptions)
         }
+        scheduleEntityCommitToSavedState(
+            entity = newOptions,
+            serializer = ReportOptions2.serializer(),
+            commitDelay = 200
+        )
     }
 
     fun onSeriesChanged(updatedSeries: ReportSeries2) {
         _uiState.update { prev ->
-            prev.copy(
+            val updatedState = prev.copy(
                 reportOptions2 = prev.reportOptions2.copy(
                     series = prev.reportOptions2.series.replace(updatedSeries) {
                         it.reportSeriesUid == updatedSeries.reportSeriesUid
                     }
                 )
             )
+            onEntityChanged(updatedState.reportOptions2)
+            updatedState
         }
     }
+
 
     private fun onFilterChanged(filter2: ReportFilter3, seriesId: Int) {
         if (filter2.reportFilterField != null) {
@@ -152,6 +167,7 @@ class ReportEditViewModel(
                     )
                 )
             }
+            onEntityChanged(_uiState.value.reportOptions2)
         }
     }
 
@@ -172,7 +188,8 @@ class ReportEditViewModel(
             prev.copy(
                 reportOptions2 = prev.reportOptions2.copy(
                     series = prev.reportOptions2.series + ReportSeries2(
-                        reportSeriesUid = prev.reportOptions2.series.size + 1,
+                        reportSeriesUid = (prev.reportOptions2.series.maxOfOrNull { it.reportSeriesUid }
+                            ?: 0) + 1,
                         reportSeriesVisualType = null,
                         reportSeriesSubGroup = null,
                         reportTimeRange = null,
@@ -182,9 +199,11 @@ class ReportEditViewModel(
             )
         }
     }
+
     fun onRemoveSeries(seriesId: Int) {
         _uiState.update { prev ->
-            val updatedSeriesList = prev.reportOptions2.series.filterNot { it.reportSeriesUid == seriesId }
+            val updatedSeriesList =
+                prev.reportOptions2.series.filterNot { it.reportSeriesUid == seriesId }
 
             prev.copy(
                 reportOptions2 = prev.reportOptions2.copy(
@@ -215,7 +234,6 @@ class ReportEditViewModel(
         }
     }
 
-
     companion object {
         const val DEST_NAME = "Report"
         const val DEST_NAME_HOME = "ReportHome"
@@ -224,7 +242,3 @@ class ReportEditViewModel(
         const val ENTITY_UID = "uid"
     }
 }
-
-data class ReportEditUiState(
-    val reportOptions2: ReportOptions2 = ReportOptions2(),
-)

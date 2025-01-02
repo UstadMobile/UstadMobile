@@ -79,7 +79,7 @@ import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntr
 import com.ustadmobile.core.viewmodel.HolidayCalendarEditViewModel
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
-import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
+import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
 import com.ustadmobile.core.viewmodel.ScopedGrantEditViewModel
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
@@ -234,7 +234,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("EasySort", "Easy Sort", EasySortPreview),
     UstadScreen(ErrorReportView.VIEW_NAME, name = "ErrorReport Preview", ErrorReportPreview),
     UstadScreen(LanguageEditView.VIEW_NAME, "LanguageEdit Preview", LanguageEditPreview),
-    UstadScreen(ReportFilterEditViewModel.DEST_NAME,
+    UstadScreen(
+        ReportFilterEditViewModel.DEST_NAME,
         "ReportFilterEdit", ReportFilterEditScreenComponent),
     UstadScreen(
         ReportEditViewModel.DEST_NAME_HOME,

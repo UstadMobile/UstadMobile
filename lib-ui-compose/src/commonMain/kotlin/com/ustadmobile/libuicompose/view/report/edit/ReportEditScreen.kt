@@ -1,10 +1,9 @@
-package com.ustadmobile.libuicompose.view.report.reportedit
+package com.ustadmobile.libuicompose.view.report.edit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,13 +32,11 @@ import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.getComparisonSymbol
-import com.ustadmobile.core.impl.locale.entityconstants.ReportSeriesVisualTypeConstants
-import com.ustadmobile.core.impl.locale.entityconstants.ReportSeriesYAxisConstants
-import com.ustadmobile.core.impl.locale.entityconstants.ReportTimeRangeConstants
 import com.ustadmobile.core.impl.locale.entityconstants.ReportXAxisConstants
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.viewmodel.report.ReportEditUiState
-import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
+import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
+import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
+
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
@@ -315,7 +312,7 @@ fun EditReportDropdown(
     supportingText: (@Composable () -> Unit)? = null,
 ) {
     Column(modifier = Modifier) {
-        Text(label, fontWeight = FontWeight.SemiBold)
+        Text(label)
         UstadExposedDropDownMenuField(
             value = options.firstOrNull { it.value == value },
             label = "",

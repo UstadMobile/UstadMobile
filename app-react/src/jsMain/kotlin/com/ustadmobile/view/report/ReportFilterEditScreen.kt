@@ -3,26 +3,16 @@ package com.ustadmobile.view.report
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.Comparisons
 import com.ustadmobile.core.domain.report.model.FilterType
-import com.ustadmobile.core.domain.report.model.ReportFilter2
 import com.ustadmobile.core.domain.report.model.ReportFilter3
-import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.impl.locale.entityconstants.ConditionConstants
-import com.ustadmobile.core.impl.locale.entityconstants.FieldConstants
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.viewmodel.ReportFilterEditUiState
-import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditUiState
+import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.lib.db.entities.ReportFilter
-import com.ustadmobile.lib.db.entities.UidAndLabel
 import com.ustadmobile.mui.components.UstadStandardContainer
-import com.ustadmobile.mui.components.UstadTextEditField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadMessageIdSelectField
-import com.ustadmobile.view.person.edit.PersonEditComponent2
 import kotlinx.coroutines.Dispatchers
 import web.cssom.px
 import mui.material.*
@@ -30,7 +20,6 @@ import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
-import web.html.InputMode
 
 external interface ReportFilterEditScreenProps : Props {
     var uiState: ReportFilterEditUiState

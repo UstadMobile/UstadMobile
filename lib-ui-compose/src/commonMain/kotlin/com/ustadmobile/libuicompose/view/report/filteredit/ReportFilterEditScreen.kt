@@ -19,8 +19,8 @@ import com.ustadmobile.core.domain.report.model.Comparisons
 import com.ustadmobile.core.domain.report.model.FilterType
 import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.viewmodel.ReportFilterEditUiState
-import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
+import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditUiState
+import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
 import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding

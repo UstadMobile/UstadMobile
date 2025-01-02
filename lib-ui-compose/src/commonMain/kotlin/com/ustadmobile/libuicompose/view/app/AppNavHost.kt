@@ -19,7 +19,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
-import com.ustadmobile.core.viewmodel.ReportFilterEditViewModel
+import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -134,7 +134,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
-import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
+import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
 import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
@@ -166,7 +166,7 @@ import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRu
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.libuicompose.view.report.filteredit.ReportFilterEditScreen
-import com.ustadmobile.libuicompose.view.report.reportedit.ReportEditScreen
+import com.ustadmobile.libuicompose.view.report.edit.ReportEditScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
 import com.ustadmobile.libuicompose.view.systempermission.detail.SystemPermissionDetailScreen
 import com.ustadmobile.libuicompose.view.systempermission.edit.SystemPermissionEditScreen
