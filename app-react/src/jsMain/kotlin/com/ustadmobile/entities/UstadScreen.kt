@@ -168,7 +168,7 @@ import com.ustadmobile.mui.components.UstadChipsDemo
 import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
 import com.ustadmobile.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
-import com.ustadmobile.core.viewmodel.report.ReportEditViewModel
+import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import com.ustadmobile.view.contententry.subtitleedit.SubtitleEditScreen
 import com.ustadmobile.view.report.edit.ReportEditScreen
 import com.ustadmobile.view.report.filteredit.ReportFilterEditScreenComponent
