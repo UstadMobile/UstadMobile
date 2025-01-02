@@ -2,18 +2,24 @@ package com.ustadmobile.libcache.distributed
 
 import app.cash.turbine.test
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.libcache.CachePaths
+import com.ustadmobile.libcache.CachePathsProvider
+import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.UstadCacheImpl
 import com.ustadmobile.libcache.db.AddNewEntryTriggerCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
-import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.NeighborCache
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
-import com.ustadmobile.libcache.md5.Md5Digest
-import com.ustadmobile.libcache.md5.urlKey
+import com.ustadmobile.libcache.util.storeFileAsUrl
+import com.ustadmobile.util.test.ext.newFileFromResource
 import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.io.files.Path
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -22,22 +28,28 @@ class DistributedCacheHashtableIntegrationTest {
 
     private val xxStringHasher = XXStringHasherCommonJvm()
 
-    private val md5Digest = Md5Digest()
+    @get:Rule
+    val tempDir = TemporaryFolder()
 
     private val exampleUrls = (1..2).map {
         "https://example.org/file$it.html"
     }
 
-    private val exampleCacheEntries = exampleUrls.map {
-        CacheEntry(
-            url = it,
-            key = md5Digest.urlKey(it)
-        )
+    private inner class TestCachePathProvider(val rootPath: Path): CachePathsProvider {
+        override fun invoke(): CachePaths {
+            return CachePaths(
+                tmpWorkPath = Path(rootPath, "tmpWork"),
+                persistentPath = Path(rootPath, "persistent"),
+                cachePath = Path(rootPath, "cache")
+            )
+        }
     }
 
     inner class DistributedCacheHashtableTestContext(
         val cacheDb1: UstadCacheDb,
         val cacheDb2: UstadCacheDb,
+        val cache1: UstadCache,
+        val cache2: UstadCache,
         val dCacheTable1: DistributedCacheHashtable,
         val dCacheTable2: DistributedCacheHashtable,
     ) {
@@ -76,6 +88,24 @@ class DistributedCacheHashtableIntegrationTest {
                 .build()
         }.zipWithNext().first()
 
+        val rootDir1 = Path(tempDir.newFolder("cache1").absolutePath)
+        val rootDir2 = Path(tempDir.newFolder("cache2").absolutePath)
+
+
+        val cache1 = UstadCacheImpl(
+            pathsProvider = TestCachePathProvider(rootDir1),
+            db = cacheDb1,
+            xxStringHasher = XXStringHasherCommonJvm(),
+            databaseCommitInterval = 100,
+        )
+
+        val cache2 = UstadCacheImpl(
+            pathsProvider = TestCachePathProvider(rootDir2),
+            db = cacheDb2,
+            xxStringHasher = XXStringHasherCommonJvm(),
+            databaseCommitInterval = 100,
+        )
+
         val dCacheTable1 = DistributedCacheHashtable(
             cacheDb = cacheDb1,
             httpPort = 42,
@@ -97,6 +127,8 @@ class DistributedCacheHashtableIntegrationTest {
         val context = DistributedCacheHashtableTestContext(
             cacheDb1 = cacheDb1,
             cacheDb2 = cacheDb2,
+            cache1 = cache1,
+            cache2 = cache2,
             dCacheTable1 = dCacheTable1,
             dCacheTable2 = dCacheTable2,
         )
@@ -108,6 +140,8 @@ class DistributedCacheHashtableIntegrationTest {
             context.dCacheTable2.close()
             context.cacheDb1.close()
             context.cacheDb2.close()
+            context.cache1.close()
+            context.cache2.close()
         }
     }
 
@@ -119,7 +153,11 @@ class DistributedCacheHashtableIntegrationTest {
     fun givenTwoNeighborCaches_whenDiscovered_thenShouldExchangeAvailabilityInfo() {
         testDistributedCacheWithTwoNeighbors {
             //Add entry to cache1
-            cacheDb1.cacheEntryDao.insertList(listOf(exampleCacheEntries.first()))
+            cache1.storeFileAsUrl(
+                testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+                testUrl = exampleUrls.first(),
+                mimeType = "image/png"
+            )
 
             discover()
 
@@ -139,8 +177,11 @@ class DistributedCacheHashtableIntegrationTest {
     @Test
     fun givenTwoNeighborCachesDiscovered_whenNewEntryAdded_thenOtherNodeWillAddToDistributedHash() {
         testDistributedCacheWithTwoNeighbors {
-            //Add entry to cache1
-            cacheDb1.cacheEntryDao.insertList(listOf(exampleCacheEntries.first()))
+            cache1.storeFileAsUrl(
+                testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+                testUrl = exampleUrls.first(),
+                mimeType = "image/png"
+            )
 
             discover()
 
@@ -152,7 +193,11 @@ class DistributedCacheHashtableIntegrationTest {
                     it.any { entry -> entry.nceUrlHash == exampleCacheEntry1Hash }
                 }.first()
 
-                cacheDb1.cacheEntryDao.insertList(listOf(exampleCacheEntries.last()))
+                cache1.storeFileAsUrl(
+                    testFile = tempDir.newFileFromResource(this::class.java, "/testfile2.png"),
+                    testUrl = exampleUrls.last(),
+                    mimeType = "image/png"
+                )
 
                 val exampleCacheEntry2Hash = xxStringHasher.hash(exampleUrls.last())
                 cacheDb2.neighborCacheEntryDao.allEntriesAsFlow().filter {

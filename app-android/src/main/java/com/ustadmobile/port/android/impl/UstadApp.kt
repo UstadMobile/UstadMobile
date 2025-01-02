@@ -230,6 +230,7 @@ import com.ustadmobile.libcache.db.addCacheDbMigrations
 import com.ustadmobile.libcache.distributed.DistributedCacheHashtable
 import com.ustadmobile.libcache.distributed.DistributedCacheNsdAndroid
 import com.ustadmobile.libcache.distributed.http.DistributedCacheHttpEndpoint
+import com.ustadmobile.libcache.okhttp.DistributedCacheInterceptor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 
@@ -264,6 +265,12 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                         tmpDirProvider = { File(cachePathProvider().tmpWorkPath.toString()) },
                         logger = NapierLoggingAdapter(),
                         json = instance(),
+                    )
+                )
+                .addInterceptor(
+                    DistributedCacheInterceptor(
+                        distributedCacheHashtable = instance(),
+                        logger = NapierLoggingAdapter(),
                     )
                 )
                 .build()
