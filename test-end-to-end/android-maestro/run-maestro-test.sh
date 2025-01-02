@@ -102,10 +102,6 @@ if [ "$TESTSERIAL" == "" ]; then
   exit 1
 fi
 
-IPADDR=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n 1)
-if [ "$LEARNING_SPACE_URL" = "" ]; then
-    LEARNING_SPACE_URL="http://$IPADDR:8087/"
-fi
 
 # Set default TESTSERVER_URL if not explicitly provided
 if [ "$TESTSERVER_URL" == "" ]; then
@@ -116,6 +112,12 @@ fi
 if [[ ! "$TESTSERVER_URL" =~ ^http://.*$ && ! "$TESTSERVER_URL" =~ ^https://.*$ ]]; then
     echo "Error: Invalid testserver Controller URL format. Ensure it starts with http:// or https://."
     exit 1
+fi
+
+
+IPADDR=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n 1)
+if [ "$LEARNING_SPACE_URL" = "" ]; then
+    LEARNING_SPACE_URL="http://$IPADDR:8087/"
 fi
 
 if [ "$TESTRESULTSDIR" == "" ]; then
@@ -195,7 +197,7 @@ fi
 maestro  --device=$TESTSERIAL  test -e LEARNING_SPACE_URL=$LEARNING_SPACE_URL -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR \
-         -e TESTSERVER_URL=$TESTSERVER_URL  # $OUTPUTARGS
+         -e TESTSERVER_URL=$TESTSERVER_URL  #$OUTPUTARGS
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
 
