@@ -23,7 +23,6 @@ import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTERCEP
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.response.HttpPathResponse
-import com.ustadmobile.libcache.distributed.DistributedCacheHashtable
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -64,7 +63,6 @@ class UstadCacheInterceptor(
         ResponseCacheabilityCheckerImpl(),
     private val fileSystem: FileSystem = SystemFileSystem,
     private val json: Json,
-    private val distributedCache: DistributedCacheHashtable? = null,
 ): Interceptor {
 
     private val executor = Executors.newCachedThreadPool()

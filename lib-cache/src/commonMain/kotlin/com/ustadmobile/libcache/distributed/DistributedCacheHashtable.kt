@@ -344,7 +344,7 @@ class DistributedCacheHashtable(
     }
 
     /**
-     * Retrieve the given request from a mirror if available
+     * Creates a new HTTP request to retrieve this locally if available.
      */
     fun localRequestFor(request: IHttpRequest): IHttpRequest? {
         if(request.method != IHttpRequest.Companion.Method.GET)
@@ -359,7 +359,7 @@ class DistributedCacheHashtable(
         //Connect to the first result, sanity check the response, then return it
         val selectedNeighbor = localResults.first()
         return iRequestBuilder(
-            "http://${selectedNeighbor.neighborCache.neighborIp}:${selectedNeighbor.neighborCache.neighborHttpPort}/dcache?url=${URLEncoder.encode(request.url)}"
+            "http://${selectedNeighbor.neighborCache.neighborIp}:${selectedNeighbor.neighborCache.neighborHttpPort}/dcache?url=${URLEncoder.encode(request.url, "UTF-8")}"
         ) {
             request.headers.names().forEach { headerName ->
                 request.headers.getAllByName(headerName).forEach { headerVal ->
