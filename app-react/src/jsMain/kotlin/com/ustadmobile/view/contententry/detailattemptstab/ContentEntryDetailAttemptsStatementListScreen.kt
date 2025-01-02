@@ -46,6 +46,8 @@ import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
 
+private const val LOAD_SIZE = 50
+private const val WIDTH = 100
 
 external interface ContentEntryDetailAttemptsStatementListProps : Props {
     var uiState: ContentEntryDetailAttemptsStatementListUiState
@@ -73,7 +75,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
 
             val infiniteQueryResult: UseInfiniteQueryResult
             <PagingSourceLoadResult<Int, StatementEntityAndVerb>, Throwable> = usePagingSource(
-                remoteMediatorResult.pagingSourceFactory, true, 50
+                remoteMediatorResult.pagingSourceFactory, true, LOAD_SIZE
             )
             val muiAppState = useMuiAppState()
             val stringsXml = useStringProvider()
@@ -84,7 +86,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
             VirtualList {
                 style = jso {
                     height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
-                    width = 100.pct
+                    width = WIDTH.pct
                     contain = Contain.strict
                     overflowY = Overflow.scroll
                 }
@@ -110,8 +112,7 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                 direction = responsive(StackDirection.column)
 
                                 sx {
-
-                                    width = 100.pct
+                                    width = WIDTH.pct
                                 }
                                 ListItemButton {
                                     ListItemIcon {

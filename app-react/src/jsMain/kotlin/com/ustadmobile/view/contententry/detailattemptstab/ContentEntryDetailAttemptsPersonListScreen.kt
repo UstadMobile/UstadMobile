@@ -45,6 +45,14 @@ import web.cssom.VerticalAlign
 import web.cssom.pct
 import web.cssom.px
 
+private const val LOAD_SIZE = 150
+private const val LIST_HEIGHT = 100
+private const val LINEAR_PROGRESS_WIDTH = 500
+private const val LINEAR_PROGRESS_HEIGHT = 4
+private const val PADDING_TOP = 1
+private const val MARGIN_LEFT = 8
+
+
 
 external interface ContentEntryDetailAttemptsPersonListProps : Props {
     var uiState: ContentEntryDetailAttemptsPersonListUiState
@@ -71,7 +79,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
 
             val infiniteQueryResult: UseInfiniteQueryResult<PagingSourceLoadResult<Int, PersonAndPictureAndNumAttempts>, Throwable> =
                 usePagingSource(
-                    remoteMediatorResult.pagingSourceFactory, true, 150
+                    remoteMediatorResult.pagingSourceFactory, true, LOAD_SIZE
                 )
 
             val muiAppState = useMuiAppState()
@@ -84,7 +92,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
             VirtualList {
                 style = jso {
                     height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
-                    width = 100.pct
+                    width = LIST_HEIGHT.pct
                     contain = Contain.strict
                     overflowY = Overflow.scroll
                 }
@@ -133,14 +141,14 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                             direction = responsive(StackDirection.row) // Ensure horizontal layout
                                             sx {
                                                 verticalAlign = VerticalAlign.middle // Align stack elements in the middle
-                                                marginLeft = 8.px
-                                                paddingTop = 1.px
+                                                marginLeft = MARGIN_LEFT.px
+                                                paddingTop = PADDING_TOP.px
                                                 alignItems = AlignItems.center // This ensures vertical centering of all stack children
                                             }
                                             LinearProgress {
                                                 sx {
-                                                    width = 500.px
-                                                    height = 4.px
+                                                    width = LINEAR_PROGRESS_WIDTH.px
+                                                    height = LINEAR_PROGRESS_HEIGHT.px
                                                 }
                                                 variant = LinearProgressVariant.determinate
                                                 value = attemptsPersonListItems.maxProgress
@@ -154,8 +162,8 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                                 )
                                                 sx {
                                                     verticalAlign = VerticalAlign.middle // Ensure vertical alignment within the item
-                                                    marginLeft = 8.px
-                                                    paddingTop = 1.px
+                                                    marginLeft = MARGIN_LEFT.px
+                                                    paddingTop = PADDING_TOP.px
                                                 }
                                             }
                                         }
