@@ -11,7 +11,7 @@ import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 class FilterUsernameUseCase {
     operator fun invoke(
         username: String,
-        invalidCharReplacement: Char
+        invalidCharReplacement: String
     ): String {
         return username.map { char ->
             when {

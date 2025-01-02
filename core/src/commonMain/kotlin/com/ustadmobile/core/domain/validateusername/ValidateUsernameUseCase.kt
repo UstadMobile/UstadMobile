@@ -1,28 +1,32 @@
 package com.ustadmobile.core.domain.validateusername
 
+import com.ustadmobile.core.MR
+import dev.icerock.moko.resources.StringResource
+
 /**
  * Validates whether a username meets all required criteria:
  * - Must not be too short or too long
  * - Must not start with a number
  * - Must only contain valid characters (letters, numbers, dots, underscores)
  */
-class ValidateUsernameUseCase {
-
-    enum class ValidationResult {
-        VALID,
-        INVALID_TOO_SHORT,
-        INVALID_TOO_LONG,
-        INVALID_STARTS_WITH_NUMBER,
-        INVALID_OTHER
+data class ValidationResult(val errorMessage: StringResource? = null) {
+    companion object {
+        val Valid = ValidationResult()
+        val TooShort = ValidationResult(MR.strings.username_too_short)
+        val TooLong = ValidationResult(MR.strings.username_too_long)
+        val StartsWithNumber = ValidationResult(MR.strings.username_starts_with_number)
+        val InvalidCharacters = ValidationResult(MR.strings.username_invalid_chars)
     }
+}
 
+class ValidateUsernameUseCase {
     operator fun invoke(username: String): ValidationResult {
         return when {
-            username.length < MIN_LENGTH -> ValidationResult.INVALID_TOO_SHORT
-            username.length > MAX_LENGTH -> ValidationResult.INVALID_TOO_LONG
-            username.firstOrNull()?.isDigit() == true -> ValidationResult.INVALID_STARTS_WITH_NUMBER
-            !username.all { isValidUsernameChar(it) } -> ValidationResult.INVALID_OTHER
-            else -> ValidationResult.VALID
+            username.length < MIN_LENGTH -> ValidationResult.TooShort
+            username.length > MAX_LENGTH -> ValidationResult.TooLong
+            username.firstOrNull()?.isDigit() == true -> ValidationResult.StartsWithNumber
+            !username.all { isValidUsernameChar(it) } -> ValidationResult.InvalidCharacters
+            else -> ValidationResult.Valid
         }
     }
 

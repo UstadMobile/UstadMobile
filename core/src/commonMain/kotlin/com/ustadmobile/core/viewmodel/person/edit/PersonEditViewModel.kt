@@ -294,20 +294,18 @@ class PersonEditViewModel(
     }
 
     fun onEntityChanged(entity: Person?) {
-        val filteredEntity = entity?.let { currentEntity ->
-            if (currentEntity.username != _uiState.value.person?.username) {
-                currentEntity.shallowCopy {
-                    username = filterUsernameUseCase(
-                        username = currentEntity.username ?: "",
-                        invalidCharReplacement = ' '
-                    ).filter { it != ' ' }
-                }
-            } else currentEntity
-        }
-
         _uiState.update { prev ->
             prev.copy(
-                person = filteredEntity,
+                person = if(entity?.username != _uiState.value.person?.username) {
+                    entity?.shallowCopy {
+                        username = filterUsernameUseCase(
+                            username = entity.username ?: "",
+                            invalidCharReplacement = ""
+                        )
+                    }
+                }else {
+                    entity
+                },
                 genderError = updateErrorMessageOnChange(prev.person?.gender,
                     entity?.gender, prev.genderError),
                 firstNameError = updateErrorMessageOnChange(prev.person?.firstNames,
@@ -398,19 +396,15 @@ class PersonEditViewModel(
         val currentTime = systemTimeInMillis()
         val isRegistrationMode = registrationModeFlags.hasFlag(REGISTER_MODE_ENABLED)
         val validatedEmailAddr = savePerson.emailAddr?.let { validateEmailUseCase(it) }
+        val validationResult = if(isRegistrationMode) {
+            validateUsernameUseCase(savePerson.username ?: "")
+        } else null
 
         _uiState.update { prev ->
             prev.copy(
                 usernameError = if(isRegistrationMode) {
-                    val validationResult = validateUsernameUseCase(savePerson.username ?: "")
-                    if (validationResult != ValidateUsernameUseCase.ValidationResult.VALID) {
-                        systemImpl.getString(MR.strings.invalid_username)
-                    } else {
-                        null
-                    }
-                }else {
-                    null
-                },
+                    validationResult?.errorMessage?.let { systemImpl.getString(MR.strings.invalid) }
+                } else null,
                 passwordError = if(isRegistrationMode && savePerson.username.isNullOrBlank()) {
                     systemImpl.getString(MR.strings.field_required_prompt)
                 }else {

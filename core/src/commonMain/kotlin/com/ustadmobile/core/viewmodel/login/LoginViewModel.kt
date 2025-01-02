@@ -10,6 +10,7 @@ import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidationResult
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -165,8 +166,8 @@ class LoginViewModel(
     fun onUsernameChanged(newValue: String) {
         val filteredValue = filterUsernameUseCase(
             username = newValue,
-            invalidCharReplacement = ' '
-        ).filter { it != ' ' }
+            invalidCharReplacement = ""
+        )
 
         _uiState.update { it.copy(username = filteredValue) }
     }
@@ -205,19 +206,19 @@ class LoginViewModel(
         val username = _uiState.value.username
         val password = _uiState.value.password
 
-        val validationResult = validateUsernameUseCase(username)
-
-        if (validationResult != ValidateUsernameUseCase.ValidationResult.VALID) {
-            _uiState.update { prev ->
-                prev.copy(
-                    fieldsEnabled = true,
-                    usernameError = impl.getString(MR.strings.invalid_username)
-                )
-            }
-            return
-        }
-
         if (username.isNotEmpty() && password.isNotEmpty()) {
+
+            val validationResult = validateUsernameUseCase(username)
+            if (validationResult != ValidationResult.Valid) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        fieldsEnabled = true,
+                        usernameError = validationResult.errorMessage?.let { impl.getString(it) }
+                    )
+                }
+                return
+            }
+
             loadingState = LoadingUiState.INDETERMINATE
             viewModelScope.launch {
                 var errorMessage: String? = null

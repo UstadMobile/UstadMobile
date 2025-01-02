@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidationResult
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -155,20 +156,18 @@ class PersonAccountEditViewModel(
 
     fun onEntityChanged(entity: PersonUsernameAndPasswordModel?) {
 
-        val filteredEntity = entity?.let { currentEntity ->
-            if (currentEntity.username != _uiState.value.personAccount?.username) {
-                currentEntity.copy(
-                    username = filterUsernameUseCase(
-                        username = currentEntity.username,
-                        invalidCharReplacement = ' '
-                    ).filter { it != ' ' }
-                )
-            } else currentEntity
-        }
-
         _uiState.update { prev ->
             prev.copy(
-                personAccount = filteredEntity,
+                personAccount = if(entity?.username != _uiState.value.personAccount?.username) {
+                    entity?.copy(
+                        username = filterUsernameUseCase(
+                            username = entity.username,
+                            invalidCharReplacement = ""
+                        )
+                    )
+                } else {
+                    entity
+                },
                 usernameError = if(prev.usernameError != null && prev.personAccount?.username == entity?.username) {
                     prev.usernameError
                 }else {
@@ -213,11 +212,11 @@ class PersonAccountEditViewModel(
             if(entity.mode == MODE_CREATE_ACCOUNT) {
                 val validationResult = validateUsernameUseCase(entity.username)
                 loadingState = LoadingUiState.NOT_LOADING
-                if (validationResult != ValidateUsernameUseCase.ValidationResult.VALID) {
+                if (validationResult != ValidationResult.Valid) {
                     _uiState.update { prev ->
                         prev.copy(
                             fieldsEnabled = true,
-                            usernameError = systemImpl.getString(MR.strings.invalid_username)
+                            usernameError = validationResult.errorMessage?.let { systemImpl.getString(MR.strings.invalid_username) }
                         )
                     }
                     return@launch
