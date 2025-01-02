@@ -2,7 +2,6 @@
 
 #Parse command line arguments as per
 # /usr/share/doc/util-linux/examples/getopt-example.bash
-TEMP=$(getopt -o 'hs:u:p:e:t:a:c:r' --long 'help,serial1:,username:,password:,endpoint:,test:,apk:,console-output,result:' -n 'run-maestro-tests.sh' -- "$@")
 TEMP=$(getopt -o 'hs:u:p:t:a:c:r:e:l' --long 'help,serial1:,username:,password:,test:,apk:,console-output,result:,testserverControllerUrl:,learningSpaceUrl:' -n 'run-maestro-tests.sh' -- "$@")
 
 
@@ -108,8 +107,14 @@ if [ "$LEARNING_SPACE_URL" = "" ]; then
     LEARNING_SPACE_URL="http://$IPADDR:8087/"
 fi
 
+# Set default TESTSERVER_URL if not explicitly provided
 if [ "$TESTSERVER_URL" == "" ]; then
-    echo "Error: Please specify a testserver Controller URL using --testserverControllerUrl <http://ip:port/>."
+    TESTSERVER_URL="http://localhost:8075/"
+fi
+
+# Check if the URL provided (or default) is valid
+if [[ ! "$TESTSERVER_URL" =~ ^http://.*$ && ! "$TESTSERVER_URL" =~ ^https://.*$ ]]; then
+    echo "Error: Invalid testserver Controller URL format. Ensure it starts with http:// or https://."
     exit 1
 fi
 
@@ -189,10 +194,8 @@ fi
 
 maestro  --device=$TESTSERIAL  test -e LEARNING_SPACE_URL=$LEARNING_SPACE_URL -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-         -e TESTSERIAL=$TESTSERIAL $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR $OUTPUTARGS \
-         -e TESTSERVER_URL=$TESTSERVER_URL
-
-TESTSTATUS=$?
+         -e TESTSERIAL=$TESTSERIAL $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR \
+         -e TESTSERVER_URL=$TESTSERVER_URL  # $OUTPUTARGS
 
 $SCRIPTDIR/../../testserver-controller/stop.sh
 
