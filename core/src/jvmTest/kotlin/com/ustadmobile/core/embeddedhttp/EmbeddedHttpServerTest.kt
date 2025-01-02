@@ -73,7 +73,8 @@ class EmbeddedHttpServerTest {
             contentEntryVersionServerUseCase =  { mockUseCase },
             staticUmAppFilesDir = temporaryFolder.newFolder(),
             mimeTypeHelper = FileMimeTypeHelperImpl(),
-            xapiServerUseCase = { mock { /* not used for this test */ } }
+            xapiServerUseCase = { mock { /* not used for this test */ } },
+            distributedCacheHttpEndpoint = null,
         )
         httpServer.start()
         val contentEntryVersionUid = 1234L
