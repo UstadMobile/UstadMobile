@@ -34,7 +34,6 @@ import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportXAxis
-import com.ustadmobile.core.impl.locale.entityconstants.ReportXAxisConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
@@ -100,7 +99,12 @@ private fun ReportEditScreen(
             LabeledDropdownMenu(
                 selectedValue = uiState.reportOptions2.xAxis ?: 0,
                 label = stringResource(MR.strings.x_axis),
-                options = ReportXAxisConstants.X_AXIS_OPTIONS,
+                options = ReportXAxis.entries.map { xAxis ->
+                    MessageIdOption2(
+                        stringResource = xAxis.stringResource,
+                        value = xAxis.value
+                    )
+                },
                 onOptionSelected = {
                     val updatedOptions = uiState.reportOptions2.copy(xAxis = it.value)
                     onReportChanged(updatedOptions)
@@ -144,7 +148,7 @@ private fun ReportEditScreen(
                         )
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Remove filter",
+                            contentDescription = stringResource(MR.strings.remove),
                             modifier = Modifier
                                 .clickable {
                                     onRemoveSeries(seriesItem.reportSeriesUid)

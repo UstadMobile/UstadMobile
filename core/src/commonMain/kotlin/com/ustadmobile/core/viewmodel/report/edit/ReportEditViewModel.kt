@@ -78,10 +78,9 @@ class ReportEditViewModel(
                 launch {
                     navResultReturner.filteredResultFlowForKey(RESULT_KEY_REPORT)
                         .collect { result ->
-                            val reportResult = result.result as? Map<*, *> ?: return@collect
-                            val filter = reportResult["filter"] as? ReportFilter3 ?: return@collect
-                            val seriesId = filter.reportFilterSeriesUid
-                            onFilterChanged(filter, seriesId)
+                            val reportFilter = result.result as? ReportFilter3 ?: return@collect
+                            val seriesId = reportFilter.reportFilterSeriesUid
+                            onFilterChanged(reportFilter, seriesId)
                         }
                 }
             }

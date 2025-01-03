@@ -2,8 +2,9 @@ package com.ustadmobile.core.viewmodel.report.filteredit
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.FilterType
-import com.ustadmobile.core.domain.report.model.ReportFilter2
+import com.ustadmobile.core.domain.report.model.ReportFilterConditionList
 import com.ustadmobile.core.domain.report.model.ReportFilter3
+import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -17,7 +18,7 @@ import org.kodein.di.DI
 
 data class ReportFilterEditUiState(
     val filters: ReportFilter3? = ReportFilter3(),
-    val filterCondition: ReportFilter2? = null
+    val filterConditionList: ReportFilterConditionList? = null
 )
 
 class ReportFilterEditViewModel(
@@ -61,9 +62,7 @@ class ReportFilterEditViewModel(
         finishWithResult(
             ReportEditViewModel.DEST_NAME,
             entityUid = filter?.reportFilterUid?.toLong() ?: 0,
-            result = mapOf(
-                "filter" to filter?.copy(reportFilterSeriesUid = seriesId),
-            )
+            result = filter?.copy(reportFilterSeriesUid = seriesId)
         )
     }
 
@@ -79,13 +78,13 @@ class ReportFilterEditViewModel(
         if (value?.reportFilterField != null) {
             _uiState.update { currentState ->
                 currentState.copy(
-                    filterCondition = when (value.reportFilterField) {
+                    filterConditionList = when (value.reportFilterField) {
                         FilterType.PERSON_AGE -> {
-                            ReportFilter2.AgeFilter()
+                            ReportFilterConditionList.AgeFilter()
                         }
 
                         FilterType.PERSON_GENDER -> {
-                            ReportFilter2.GenderFilter()
+                            ReportFilterConditionList.GenderFilter()
                         }
 
                         else -> {
@@ -95,12 +94,15 @@ class ReportFilterEditViewModel(
                 )
             }
         }
+        scheduleEntityCommitToSavedState(
+            entity = value,
+            serializer = ReportFilter3.serializer(),
+            commitDelay = 200
+        )
     }
 
     companion object {
-
         const val DEST_NAME = "ReportFilterEdit"
         const val DEST_NAME_HOME = "ReportFilterEditHome"
-        const val ARG = "arg"
     }
 }

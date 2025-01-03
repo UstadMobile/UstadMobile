@@ -9,7 +9,6 @@ import com.ustadmobile.core.domain.report.model.ReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.impl.locale.entityconstants.ReportXAxisConstants
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
@@ -67,7 +66,12 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
             UstadMessageIdSelectField {
                 id = "X Axis"
                 value = props.uiState.reportOptions2.xAxis ?: 0
-                options = ReportXAxisConstants.X_AXIS_OPTIONS
+                options = ReportXAxis.entries.map { xAxis ->
+                    MessageIdOption2(
+                        stringResource = xAxis.stringResource,
+                        value = xAxis.value
+                    )
+                }
                 label = strings[MR.strings.x_axis]
                 onChange = { selectedValue ->
                     props.onEntityChanged(props.uiState.reportOptions2.copy(xAxis = selectedValue.value))

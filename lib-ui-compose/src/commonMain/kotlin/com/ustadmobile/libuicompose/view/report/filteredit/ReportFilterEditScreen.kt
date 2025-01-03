@@ -19,12 +19,10 @@ import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditUiState
 import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
-import com.ustadmobile.libuicompose.components.UstadExposedDropDownMenuField
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
-import com.ustadmobile.libuicompose.view.report.edit.ExposedDropdownMenu
 import com.ustadmobile.libuicompose.view.report.edit.LabeledDropdownMenu
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
@@ -89,7 +87,7 @@ fun ReportFilterEditScreen(
                     LabeledDropdownMenu(
                         label = stringResource(MR.strings.condition),
                         selectedValue = uiState.filters?.reportFilterCondition?.value ?:0,
-                        options = uiState.filterCondition?.comparisonTypes?.map { comparison ->
+                        options = uiState.filterConditionList?.comparisonTypes?.map { comparison ->
                             MessageIdOption2(
                                 stringResource = comparison.stringResource,
                                 value = comparison.value
