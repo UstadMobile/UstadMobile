@@ -7,6 +7,7 @@ import com.ustadmobile.libcache.distributed.DistributedCacheHashtable
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import okhttp3.Interceptor
 import okhttp3.Response
+import okhttp3.internal.closeQuietly
 
 class DistributedCacheInterceptor(
     val distributedCacheHashtable: DistributedCacheHashtable,
@@ -19,7 +20,20 @@ class DistributedCacheInterceptor(
             logger.i(DCACHE_LOGTAG, "Local Download: ${chainRequest.url} from ${it.url}")
         }
 
+        if(localRequest != null){
+            try {
+                val response = chain.proceed(localRequest.asOkHttpRequest())
+                if(response.isSuccessful) {
+                    return response
+                }else {
+                    response.closeQuietly()
+                }
+            }catch (e: Exception){
+                logger.w(DCACHE_LOGTAG, "Local request failed", e)
+            }
+        }
+
         //here: could monitor the local response e.g. to track success/fail per node
-        return chain.proceed(localRequest?.asOkHttpRequest() ?: chainRequest)
+        return chain.proceed(chainRequest)
     }
 }

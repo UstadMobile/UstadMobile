@@ -319,6 +319,9 @@ class DistributedCacheHashtable(
     }
 
     init {
+        if(httpPort == 0)
+            throw IllegalArgumentException("DistributedCacheHashtable: httpPort cannot be 0")
+
         logger.i(DCACHE_LOGTAG, "$logPrefix initialized on udp port $port")
 
         //Observe the database for neighbors, then send them our hashes
