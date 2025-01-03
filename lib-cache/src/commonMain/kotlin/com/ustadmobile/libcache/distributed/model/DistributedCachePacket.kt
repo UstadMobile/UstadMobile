@@ -7,9 +7,14 @@ import java.nio.ByteBuffer
 
 sealed class DistributedCachePacket {
 
+    abstract val httpPort: Int
+
     abstract fun toBytes(): ByteArray
 
     companion object {
+
+        //What + http port
+        const val DCACHE_PACKET_OVERHEAD = 1 + 4
 
         fun fromBytes(
             bytesArray: ByteArray,
@@ -18,10 +23,11 @@ sealed class DistributedCachePacket {
         ): DistributedCachePacket {
             val buffer = ByteBuffer.wrap(bytesArray, offset, len)
             val what = buffer.get()
+            val httpPort = buffer.getInt()
             return when(what) {
-                WHAT_ENTRIES -> buffer.readDistributedHashEntries()
-                WHAT_PING -> buffer.readDistributedCachePing()
-                WHAT_PONG -> buffer.readDistributedCachePong()
+                WHAT_ENTRIES -> buffer.readDistributedHashEntries(httpPort)
+                WHAT_PING -> buffer.readDistributedCachePing(httpPort)
+                WHAT_PONG -> buffer.readDistributedCachePong(httpPort)
                 else -> throw IllegalArgumentException("DistributedCachePacket.fromBytes: WHAT byte not recognized")
             }
         }

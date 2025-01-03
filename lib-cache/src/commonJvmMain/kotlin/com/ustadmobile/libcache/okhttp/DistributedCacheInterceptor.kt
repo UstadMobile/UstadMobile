@@ -16,11 +16,10 @@ class DistributedCacheInterceptor(
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val chainRequest = chain.request()
-        val localRequest = distributedCacheHashtable.localRequestFor(chainRequest.asIHttpRequest())?.also {
-            logger.i(DCACHE_LOGTAG, "Local Download: ${chainRequest.url} from ${it.url}")
-        }
+        val localRequest = distributedCacheHashtable.localRequestFor(chainRequest.asIHttpRequest())
 
         if(localRequest != null){
+            logger.i(DCACHE_LOGTAG, "Local Download: ${chainRequest.url} from ${localRequest.url}")
             try {
                 val response = chain.proceed(localRequest.asOkHttpRequest())
                 if(response.isSuccessful) {

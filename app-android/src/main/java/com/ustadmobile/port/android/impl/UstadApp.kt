@@ -887,7 +887,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 staticUmAppFilesDir = null,
                 mimeTypeHelper = FileMimeTypeHelperImpl(),
                 distributedCacheHttpEndpoint = instance(),
-            )
+            ).also {
+                it.start()
+            }
         }
 
         bind<XapiHttpServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
@@ -1297,7 +1299,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         GlobalScope.launch(Dispatchers.IO) {
-            di.direct.instance<EmbeddedHttpServer>().start()
+            di.direct.instance<EmbeddedHttpServer>()
             di.direct.instance<DistributedCacheNsdAndroid>()
         }
     }

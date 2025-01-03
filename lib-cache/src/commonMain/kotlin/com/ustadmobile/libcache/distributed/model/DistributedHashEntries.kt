@@ -13,7 +13,7 @@ import java.nio.ByteBuffer
  */
 data class DistributedHashEntries(
     val version: Byte = 1,
-    val httpPort: Int,
+    override val httpPort: Int,
     val entries: List<DistributedHashCacheEntry>
 ): DistributedCachePacket() {
 
@@ -23,8 +23,8 @@ data class DistributedHashEntries(
     override fun toBytes(): ByteArray {
         val buffer = ByteBuffer.allocate(size)
         buffer.put(WHAT_ENTRIES)
-        buffer.put(version)
         buffer.putInt(httpPort)
+        buffer.put(version)
         buffer.putInt(entries.size)
         entries.forEach { it.writeBytes(buffer) }
         return buffer.array()
@@ -32,16 +32,15 @@ data class DistributedHashEntries(
 
     companion object {
 
-        //1 byte WHAT, 1 byte version, 4 bytes port, 4 bytes for number of entries, and then for each entry
-        const val OVERHEAD_SIZE = 1 + 1 + 4 + 4
+        //(1 byte WHAT, 4 byte httpPort), 1 byte version, 4 bytes for number of entries, and then for each entry
+        const val OVERHEAD_SIZE = DCACHE_PACKET_OVERHEAD + 1 + 4
 
         fun numEntriesFor(mtu: Int): Int {
             return (mtu - OVERHEAD_SIZE) / DistributedHashCacheEntry.SIZE
         }
 
-        fun ByteBuffer.readDistributedHashEntries(): DistributedHashEntries {
+        fun ByteBuffer.readDistributedHashEntries(httpPort: Int): DistributedHashEntries {
             val version = get()
-            val httpPort = int
             val numEntries = int
             val entriesList = mutableListOf<DistributedHashCacheEntry>()
             for(i in 0 until numEntries) {

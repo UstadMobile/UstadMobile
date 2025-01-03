@@ -23,6 +23,7 @@ class DistributedHashEntriesTest {
         val ping = DistributedCachePing(
             id = 42,
             deviceName = "device",
+            httpPort = 8082,
             payload = "payload".toByteArray()
         )
 

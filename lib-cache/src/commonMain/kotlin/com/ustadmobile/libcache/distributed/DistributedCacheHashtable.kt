@@ -170,23 +170,26 @@ class DistributedCacheHashtable(
                     //If not yet discovered - eg. our neighbor discovered us, but we didn't discover
                     //them yet, then insert (fallback)
                     fun insertNeighborIfNeeded() {
-                        cacheDb.neighborCacheDao.insertOrIgnore(
-                            NeighborCache(
-                                neighborUid = neighborUid,
-                                neighborIp = packet.address.hostAddress,
-                                neighborUdpPort = packet.port,
-                                neighborHttpPort = 0,
+                        cacheDb.withDoorTransaction {
+                            cacheDb.neighborCacheDao.insertOrIgnore(
+                                NeighborCache(
+                                    neighborUid = neighborUid,
+                                    neighborIp = packet.address.hostAddress,
+                                    neighborUdpPort = packet.port,
+                                    neighborHttpPort = dCachePacket.httpPort,
+                                )
                             )
-                        )
+                            cacheDb.neighborCacheDao.updateHttpPort(
+                                neighborUid = neighborUid,
+                                httpPort = dCachePacket.httpPort
+                            )
+                        }
                     }
 
                     when(dCachePacket) {
                         is DistributedHashEntries -> {
                             cacheDb.withDoorTransaction {
                                 insertNeighborIfNeeded()
-                                cacheDb.neighborCacheDao.updateHttpPort(
-                                    neighborUid = neighborUid, httpPort = dCachePacket.httpPort
-                                )
                                 cacheDb.neighborCacheEntryDao.upsertList(
                                     dCachePacket.entries.map {
                                         NeighborCacheEntry(
@@ -202,7 +205,11 @@ class DistributedCacheHashtable(
                         }
 
                         is DistributedCachePing -> {
-                            val pongReply = DistributedCachePong(dCachePacket.id, dCachePacket.payload)
+                            val pongReply = DistributedCachePong(
+                                id = dCachePacket.id,
+                                httpPort = dCachePacket.httpPort,
+                                payload = dCachePacket.payload
+                            )
                             val replyBytes = pongReply.toBytes()
                             val replyPacket = DatagramPacket(
                                 replyBytes, replyBytes.size, packet.address, packet.port
@@ -284,6 +291,7 @@ class DistributedCacheHashtable(
                     val ping = DistributedCachePing(
                         id = pingIdAtomic.incrementAndGet(),
                         deviceName = deviceNameVal,
+                        httpPort = httpPort,
                         payload = ByteArray(0)
                     )
                     pendingPings[ping.id] = PendingPing(ping.id, systemTimeInMillis(), address)
