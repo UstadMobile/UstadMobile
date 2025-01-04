@@ -2,9 +2,8 @@ package com.ustadmobile.core.viewmodel.report.filteredit
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.FilterType
-import com.ustadmobile.core.domain.report.model.ReportFilterConditionList
+import com.ustadmobile.core.domain.report.model.ReportConditionFilterOptions
 import com.ustadmobile.core.domain.report.model.ReportFilter3
-import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -18,7 +17,7 @@ import org.kodein.di.DI
 
 data class ReportFilterEditUiState(
     val filters: ReportFilter3? = ReportFilter3(),
-    val filterConditionList: ReportFilterConditionList? = null
+    val filterConditionOptions: ReportConditionFilterOptions? = null
 )
 
 class ReportFilterEditViewModel(
@@ -78,13 +77,13 @@ class ReportFilterEditViewModel(
         if (value?.reportFilterField != null) {
             _uiState.update { currentState ->
                 currentState.copy(
-                    filterConditionList = when (value.reportFilterField) {
+                    filterConditionOptions = when (value.reportFilterField) {
                         FilterType.PERSON_AGE -> {
-                            ReportFilterConditionList.AgeFilter()
+                            ReportConditionFilterOptions.AgeConditionFilter()
                         }
 
                         FilterType.PERSON_GENDER -> {
-                            ReportFilterConditionList.GenderFilter()
+                            ReportConditionFilterOptions.GenderConditionFilter()
                         }
 
                         else -> {

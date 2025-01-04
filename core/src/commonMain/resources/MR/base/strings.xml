@@ -1947,6 +1947,7 @@
 
     <!--  Edit Report -->
     <string name="edit_report">Edit Report</string>
+    <string name="add_a_new_report">Add a New Report</string>
     <string name="field">Field</string>
     <string name="condition">Condition</string>
     <string name="value">Value</string>

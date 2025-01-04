@@ -43,7 +43,7 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
-import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
+import com.ustadmobile.core.viewmodel.report.list.ReportListViewModel
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
@@ -81,7 +81,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         label = MR.strings.people,
     ),
     TopNavigationItem(
-        destRoute = ReportEditViewModel.DEST_NAME_HOME,
+        destRoute = ReportListViewModel.DEST_NAME_HOME,
         icon = Icons.Outlined.Add,
         label = MR.strings.report,
     )

@@ -26,7 +26,7 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.core.viewmodel.errors.ErrorViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
-import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
+import com.ustadmobile.core.viewmodel.report.list.ReportListViewModel
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -532,7 +532,7 @@ abstract class UstadViewModel(
             ContentEntryListViewModel.DEST_NAME_HOME,
             ConversationListViewModel.DEST_NAME_HOME,
             PersonListViewModel.DEST_NAME_HOME,
-            ReportEditViewModel.DEST_NAME_HOME
+            ReportListViewModel.DEST_NAME_HOME
         )
 
         /**

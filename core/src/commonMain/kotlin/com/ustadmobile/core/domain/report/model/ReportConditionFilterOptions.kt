@@ -20,16 +20,16 @@ enum class Comparisons(
 
 /** Sealed class representing different types of report filters */
 @Serializable
-sealed class ReportFilterConditionList(
+sealed class ReportConditionFilterOptions(
     val comparisonTypes: List<Comparisons>,
 ) {
     @Serializable
-     class GenderFilter : ReportFilterConditionList(
+     class GenderConditionFilter : ReportConditionFilterOptions(
         comparisonTypes = listOf(Comparisons.EQUALS, Comparisons.NOT_EQUALS)
     )
 
     @Serializable
-     class AgeFilter : ReportFilterConditionList(
+     class AgeConditionFilter : ReportConditionFilterOptions(
         comparisonTypes = listOf(
             Comparisons.EQUALS,
             Comparisons.NOT_EQUALS,

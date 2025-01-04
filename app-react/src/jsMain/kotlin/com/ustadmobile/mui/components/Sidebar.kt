@@ -5,7 +5,7 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
-import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
+import com.ustadmobile.core.viewmodel.report.list.ReportListViewModel
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import dev.icerock.moko.resources.StringResource
@@ -47,7 +47,7 @@ val ROOT_SCREENS = listOf(
     RootScreen(ContentEntryListViewModel.DEST_NAME_HOME, MR.strings.library, LibraryBooks),
     RootScreen(ConversationListViewModel.DEST_NAME_HOME, MR.strings.messages, Chat),
     RootScreen(PersonListViewModel.DEST_NAME_HOME, MR.strings.people, Person),
-    RootScreen(ReportEditViewModel.DEST_NAME_HOME, MR.strings.edit_report, Report)
+    RootScreen(ReportListViewModel.DEST_NAME_HOME, MR.strings.report, Report)
 
 )
 

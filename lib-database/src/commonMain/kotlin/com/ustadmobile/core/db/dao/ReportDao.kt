@@ -16,6 +16,12 @@ expect abstract class ReportDao : BaseDao<Report> {
     @RawQuery
     abstract fun getResults(query: DoorQuery): List<Report>
 
+    @Query("DELETE FROM Report WHERE reportUid = :reportUid")
+    abstract suspend fun deleteReportByUid(reportUid: Long)
+
+    @Query("SELECT * FROM Report ORDER BY reportTitle ASC")
+    abstract fun findAllReports(): PagingSource<Int, Report>
+
     @Query("""
         SELECT * FROM Report 
         WHERE reportIsTemplate = :isTemplate

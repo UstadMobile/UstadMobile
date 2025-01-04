@@ -9,8 +9,12 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.replace
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
+import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
+import com.ustadmobile.core.viewmodel.report.list.ReportListViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Report
 import kotlinx.coroutines.async
@@ -36,10 +40,15 @@ class ReportEditViewModel(
     private val _uiState: MutableStateFlow<ReportEditUiState> =
         MutableStateFlow(ReportEditUiState())
     val uiState: Flow<ReportEditUiState> = _uiState.asStateFlow()
+    private val entityUid: Long
+        get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
-        val title = systemImpl.getString(MR.strings.edit_report)
+        val title =  if(entityUid == 0L)
+            systemImpl.getString(MR.strings.add_a_new_report)
+        else
+            systemImpl.getString(MR.strings.edit_report)
 
         _appUiState.update {
             AppUiState(
@@ -102,6 +111,7 @@ class ReportEditViewModel(
             activeRepo.withDoorTransactionAsync {
                 val currentReport = _uiState.value.reportOptions2
                 val report = Report(
+                    reportUid = entityUidArg,
                     reportTitle = currentReport.title,
                     reportOptions = json.encodeToString(currentReport),
                 )
@@ -115,9 +125,14 @@ class ReportEditViewModel(
                     }
                 } catch (e: Exception) {
                     println("Error updating report options: ${e.message}")
+                }finally {
+                    finishWithResult(ReportDetailViewModel.DEST_NAME, report.reportUid ?: 0, report)
                 }
             }
         }
+
+
+
     }
 
     fun onEntityChanged(newOptions: ReportOptions2) {
@@ -233,9 +248,8 @@ class ReportEditViewModel(
     }
 
     companion object {
-        const val DEST_NAME = "Report"
+        const val DEST_NAME = "ReportEdit"
         const val DEST_NAME_HOME = "ReportHome"
-        val ALL_DEST_NAMES = listOf(DEST_NAME, DEST_NAME_HOME)
         const val RESULT_KEY_REPORT = "arg"
     }
 }

@@ -87,7 +87,7 @@ fun ReportFilterEditScreen(
                     LabeledDropdownMenu(
                         label = stringResource(MR.strings.condition),
                         selectedValue = uiState.filters?.reportFilterCondition?.value ?:0,
-                        options = uiState.filterConditionList?.comparisonTypes?.map { comparison ->
+                        options = uiState.filterConditionOptions?.comparisonTypes?.map { comparison ->
                             MessageIdOption2(
                                 stringResource = comparison.stringResource,
                                 value = comparison.value
