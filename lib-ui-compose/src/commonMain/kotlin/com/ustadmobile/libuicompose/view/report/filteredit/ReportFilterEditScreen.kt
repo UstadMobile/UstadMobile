@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.report.filteredit
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
@@ -78,15 +80,18 @@ fun ReportFilterEditScreen(
         }
         item {
             Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
             ) {
                 UstadInputFieldLayout(
                     modifier = Modifier
-                        .weight(0.3F),
+                        .weight(1F)
+                        .fillMaxWidth(),
                 ) {
                     LabeledDropdownMenu(
                         label = stringResource(MR.strings.condition),
-                        selectedValue = uiState.filters?.reportFilterCondition?.value ?:0,
+                        selectedValue = uiState.filters?.reportFilterCondition?.value ?: 0,
                         options = uiState.filterConditionOptions?.comparisonTypes?.map { comparison ->
                             MessageIdOption2(
                                 stringResource = comparison.stringResource,
@@ -105,7 +110,8 @@ fun ReportFilterEditScreen(
                 }
                 Column(
                     modifier = Modifier
-                        .weight(0.5F)
+                        .weight(3F)
+                        .fillMaxWidth()
                         .defaultScreenPadding(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
 
@@ -114,6 +120,7 @@ fun ReportFilterEditScreen(
                         text = stringResource(MR.strings.value),
                     )
                     androidx.compose.material.OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
                         value = uiState.filters?.reportFilterValue.toString(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         onValueChange = {

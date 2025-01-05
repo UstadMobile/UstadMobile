@@ -21,11 +21,14 @@ import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
+import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
 import com.ustadmobile.view.person.list.PersonListComponent2
 import com.ustadmobile.view.person.list.PersonListProps
+import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemButton
 import mui.material.ListItemIcon
@@ -36,13 +39,18 @@ import react.ReactNode
 import react.create
 import react.router.useLocation
 import tanstack.react.query.UseInfiniteQueryResult
+import web.cssom.Contain
+import web.cssom.Height
+import web.cssom.Overflow
+import web.cssom.pct
 
-external interface ReportListProps: Props {
+external interface ReportListProps : Props {
     var uiState: ReportListUiState
     var refreshCommandFlow: Flow<RefreshCommand>?
     var onListItemClick: (Report) -> Unit
     var onClickAddItem: () -> Unit
 }
+
 val ReportListComponent2 = FC<ReportListProps> { props ->
     val strings = useStringProvider()
 
@@ -57,10 +65,16 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
         )
     val muiAppState = useMuiAppState()
     VirtualList {
+        style = jso {
+            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            width = 100.pct
+            contain = Contain.strict
+            overflowY = Overflow.scroll
+        }
         content = virtualListContent {
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
-                key = { it.reportUid.toString()}
+                key = { it.reportUid.toString() }
             ) { reportAndDetails ->
                 ListItem.create {
                     ListItemButton {
@@ -69,11 +83,14 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
                         }
 
                         ListItemText {
-                            primary = ReactNode(reportAndDetails?.reportTitle ?: "")
+                            primary = ReactNode(reportAndDetails?.reportTitle ?: "fggfdfdf")
                         }
                     }
                 }
             }
+        }
+        Container {
+            VirtualListOutlet()
         }
     }
 }
