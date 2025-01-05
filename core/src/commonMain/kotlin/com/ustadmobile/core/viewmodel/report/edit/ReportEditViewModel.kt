@@ -249,7 +249,6 @@ class ReportEditViewModel(
 
     companion object {
         const val DEST_NAME = "ReportEdit"
-        const val DEST_NAME_HOME = "ReportHome"
         const val RESULT_KEY_REPORT = "arg"
     }
 }

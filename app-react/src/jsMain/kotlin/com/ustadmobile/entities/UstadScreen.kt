@@ -168,10 +168,14 @@ import com.ustadmobile.mui.components.UstadChipsDemo
 import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
 import com.ustadmobile.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
+import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
+import com.ustadmobile.core.viewmodel.report.list.ReportListViewModel
 import com.ustadmobile.view.contententry.subtitleedit.SubtitleEditScreen
+import com.ustadmobile.view.report.detail.ReportDetailScreen
 import com.ustadmobile.view.report.edit.ReportEditScreen
 import com.ustadmobile.view.report.filteredit.ReportFilterEditScreenComponent
+import com.ustadmobile.view.report.list.ReportListScreen
 
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
@@ -239,9 +243,10 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         "ReportFilterEdit", ReportFilterEditScreenComponent
     ),
     UstadScreen(
-        ReportEditViewModel.DEST_NAME_HOME,
-        "ReportHome", ReportEditScreen
+        ReportEditViewModel.DEST_NAME,
+        "ReportEdit", ReportEditScreen
     ),
+    UstadScreen(ReportDetailViewModel.DEST_NAME, "Person Detail", ReportDetailScreen),
     UstadScreen(ScopedGrantDetailView.VIEW_NAME, "ScopedGrantDetail Preview",
         ScopedGrantDetailScreenPreview),
     UstadScreen(ContentEntryImportLinkViewModel.DEST_NAME, "ContentEntryImportLink",
@@ -286,6 +291,9 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("PersonListPreview", "PersonList Preview", PersonListScreenPreview),
     UstadScreen(PersonListViewModel.DEST_NAME, "PersonList", PersonListScreen),
     UstadScreen(PersonListViewModel.DEST_NAME_HOME, "PersonListHome", PersonListScreen),
+    UstadScreen(ReportListViewModel.DEST_NAME_HOME, "ReportListHome", ReportListScreen),
+    UstadScreen(ReportListViewModel.DEST_NAME, "ReportList", ReportListScreen),
+
     UstadScreen(NAVHOST_CLEARSTACK_VIEWNAME, "Clear Stack", NavHostClearStackPlaceholder),
     UstadScreen("UstadAddListItem", "UstadAddListItem Preview",
         UstadAddListItemPreview),
