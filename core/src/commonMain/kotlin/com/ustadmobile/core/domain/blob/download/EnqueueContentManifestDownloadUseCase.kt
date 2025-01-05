@@ -26,6 +26,9 @@ interface EnqueueContentManifestDownloadUseCase {
      * Used to enqueue the download of a ContentEntryVersion for offline use as per the manifest. This
      * will create a TransferJob and TransferJobItem for the manifest url itself (which allows
      * OfflineItemsDownloadEnqueuer to spot what needs enqueued and what has already been enqueued)
+     *
+     * @param contentEntryVersionUid the content entry version uid to be downloaded
+     * @param offlineItemUid OfflineItem UID (see database entity)
      */
     suspend operator fun invoke(
         contentEntryVersionUid: Long,

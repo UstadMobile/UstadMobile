@@ -7,12 +7,12 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_CONTENTENTRYVERSION_UID
 import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_LEARNINGSPACE
 import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_JOB_UID
+import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCase.Companion.KEY_CONNECTIVITY_REQUIRED
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -28,8 +28,9 @@ class ContentManifestDownloadWorker(
         val learningSpace = LearningSpace(endpointUrl)
         val jobUid = inputData.getInt(DATA_JOB_UID, 0)
         val contentEntryVersionUid = inputData.getLong(DATA_CONTENTENTRYVERSION_UID, 0L)
+        val connectivityRequired = inputData.getBoolean(KEY_CONNECTIVITY_REQUIRED, true)
 
-        val contentManifestDownloadUseCase: ContentManifestDownloadUseCase = di.on(learningSpace).direct
+        val contentManifestDownloadUseCase: ContentManifestDownloadUseCase by di.on(learningSpace)
             .instance()
         val updateFailedTransferJobUseCase: UpdateFailedTransferJobUseCase by di.on(learningSpace)
             .instance()
@@ -38,6 +39,7 @@ class ContentManifestDownloadWorker(
             contentManifestDownloadUseCase(
                 contentEntryVersionUid = contentEntryVersionUid,
                 transferJobUid = jobUid,
+                connectivityRequired = connectivityRequired,
             )
             Result.success()
         }catch(e: Throwable) {

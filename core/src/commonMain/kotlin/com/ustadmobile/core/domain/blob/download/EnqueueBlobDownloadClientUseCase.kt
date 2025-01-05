@@ -18,6 +18,14 @@ interface EnqueueBlobDownloadClientUseCase {
     suspend operator fun invoke(
         items: List<EnqueueBlobDownloadItem>,
         existingTransferJobId: Int = 0,
+        connectivityRequired: Boolean = true,
     )
+
+    companion object {
+        /**
+         * String constant key for connectivityRequired argument
+         */
+        const val KEY_CONNECTIVITY_REQUIRED = "connectivityRequired"
+    }
 
 }

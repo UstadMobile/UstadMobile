@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 class UstadCacheCheckContentAvailabilityUseCase(
     private val ustadCache: UstadCache,
     private val httpClient: HttpClient,
-) : CheckContentAvailabilityUseCase {
+) : CheckContentLocalAvailabilityUseCase {
 
     override suspend fun invoke(contentEntryVersion: ContentEntryVersion): Boolean {
         return try {

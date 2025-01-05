@@ -26,6 +26,7 @@ import com.ustadmobile.core.domain.blob.download.EnqueueBlobDownloadClientUseCas
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCase
 import com.ustadmobile.core.domain.blob.download.EnqueueContentManifestDownloadUseCaseJvm
 import com.ustadmobile.core.domain.blob.download.MakeContentEntryAvailableOfflineUseCase
+import com.ustadmobile.core.domain.blob.getmanifest.GetContentManifestUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCaseJvm
@@ -324,15 +325,23 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
+    bind<GetContentManifestUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+        GetContentManifestUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance<UmAppDataLayer>().repository,
+            httpClient = instance(),
+            json = instance(),
+        )
+    }
+
     bind<ContentManifestDownloadUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         val cachePathsProvider: CachePathsProvider = instance()
 
         ContentManifestDownloadUseCase(
             enqueueBlobDownloadClientUseCase = instance(),
             db = instance(tag = DoorTag.TAG_DB),
-            httpClient = instance(),
-            json = instance(),
-            cacheTmpPath = { cachePathsProvider().tmpWorkPath.toString() }
+            cacheTmpPath = { cachePathsProvider().tmpWorkPath.toString() },
+            getManifestUseCase = instance()
         )
     }
 

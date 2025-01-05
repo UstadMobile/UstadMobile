@@ -19,7 +19,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteConte
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.epub.LaunchEpubUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
-import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentAvailabilityUseCase
+import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentLocalAvailabilityUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -159,7 +159,7 @@ class ContentEntryDetailOverviewViewModel(
 
     private val parentEntryUid = savedStateHandle[ARG_PARENT_UID]?.toLong() ?: 0
 
-    private val checkLocalAvailabilityUseCase: CheckContentAvailabilityUseCase? by
+    private val checkLocalAvailabilityUseCase: CheckContentLocalAvailabilityUseCase? by
         di.onActiveEndpoint().instanceOrNull()
 
     init {

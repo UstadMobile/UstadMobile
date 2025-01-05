@@ -213,9 +213,10 @@ import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourc
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.core.domain.blob.getmanifest.GetContentManifestUseCase
 import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
 import com.ustadmobile.core.domain.localsharing.setenabled.SetLocalSharingEnabledUseCase
-import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentAvailabilityUseCase
+import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentLocalAvailabilityUseCase
 import com.ustadmobile.core.domain.localsharing.checkcontentavailability.UstadCacheCheckContentAvailabilityUseCase
 import com.ustadmobile.core.domain.localsharing.devicename.GetLocalSharingDeviceNameUseCase
 import com.ustadmobile.core.domain.localsharing.devicename.GetLocalSharingDeviceNameUseCaseAndroid
@@ -806,15 +807,23 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<GetContentManifestUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            GetContentManifestUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance<UmAppDataLayer>().repository,
+                httpClient = instance(),
+                json = instance(),
+            )
+        }
+
         bind<ContentManifestDownloadUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             val cachePathsProvider: CachePathsProvider = instance()
 
             ContentManifestDownloadUseCase(
                 enqueueBlobDownloadClientUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
-                httpClient = instance(),
-                json = instance(),
-                cacheTmpPath = { cachePathsProvider().tmpWorkPath.toString() }
+                cacheTmpPath = { cachePathsProvider().tmpWorkPath.toString() },
+                getManifestUseCase = instance()
             )
         }
 
@@ -823,6 +832,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 appContext = applicationContext,
                 learningSpace = context,
                 db = instance(tag = DoorTag.TAG_DB),
+                getContentManifestUseCase = instance(),
+                checkContentLocalAvailabilityUseCase = instance(),
             )
         }
 
@@ -1261,7 +1272,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<CheckContentAvailabilityUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+        bind<CheckContentLocalAvailabilityUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             UstadCacheCheckContentAvailabilityUseCase(
                 ustadCache = instance(),
                 httpClient = instance(),

@@ -21,6 +21,7 @@ class EnqueueBlobDownloadClientUseCaseAndroid(
     override suspend fun invoke(
         items: List<EnqueueBlobDownloadClientUseCase.EnqueueBlobDownloadItem>,
         existingTransferJobId: Int,
+        connectivityRequired: Boolean
     ) {
         val transferJob = createTransferJob(items, existingTransferJobId)
         val jobData = Data.Builder()
@@ -32,11 +33,16 @@ class EnqueueBlobDownloadClientUseCaseAndroid(
             .setInputData(jobData)
             .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
             .addTag("offlineitem-${learningSpace.url}-${transferJob.tjOiUid}")
-            .setConstraints(
-                Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
-            ).build()
+            .let {
+                if(connectivityRequired) {
+                    it.setConstraints(
+                        Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+                    )
+                }else {
+                    it
+                }
+            }
+            .build()
 
 
         WorkManager.getInstance(appContext).enqueueUniqueWork(
