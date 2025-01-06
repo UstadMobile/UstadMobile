@@ -66,7 +66,7 @@ it('Student submit assignment', () => {
   cy.get('#assignment_text').click()
   cy.get('.ql-editor').ustadTypeAndVerify('Text 1')
   cy.contains('SUBMIT').click()
-  cy.get('#assignment_text').get('div[contenteditable="true"]').should('not.exist')
+  cy.get('#assignment_text div[contenteditable="true"]').should('not.exist')
   cy.contains("Not submitted").should('not.exist')
   cy.go('back')
   cy.contains('Assignment 1').click()

@@ -65,6 +65,7 @@ kotlin {
                 implementation(libs.mockito.kotlin)
                 implementation(libs.turbine)
                 implementation(project(":lib-test-common"))
+                implementation(project(":lib-ihttp-nanohttpd"))
             }
         }
 

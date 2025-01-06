@@ -44,6 +44,7 @@ import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
 import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
+import com.ustadmobile.core.domain.blob.getmanifest.GetContentManifestUseCase
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -265,6 +266,15 @@ internal fun ustadJsDi(
             learningSpace = context,
             json = instance(),
             repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
+        )
+    }
+
+    bind<GetContentManifestUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+        GetContentManifestUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance<UmAppDataLayer>().repository,
+            httpClient = instance(),
+            json = instance(),
         )
     }
 

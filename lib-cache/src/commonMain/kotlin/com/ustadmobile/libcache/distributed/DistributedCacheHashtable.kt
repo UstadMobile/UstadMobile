@@ -170,23 +170,26 @@ class DistributedCacheHashtable(
                     //If not yet discovered - eg. our neighbor discovered us, but we didn't discover
                     //them yet, then insert (fallback)
                     fun insertNeighborIfNeeded() {
-                        cacheDb.neighborCacheDao.insertOrIgnore(
-                            NeighborCache(
-                                neighborUid = neighborUid,
-                                neighborIp = packet.address.hostAddress,
-                                neighborUdpPort = packet.port,
-                                neighborHttpPort = 0,
+                        cacheDb.withDoorTransaction {
+                            cacheDb.neighborCacheDao.insertOrIgnore(
+                                NeighborCache(
+                                    neighborUid = neighborUid,
+                                    neighborIp = packet.address.hostAddress,
+                                    neighborUdpPort = packet.port,
+                                    neighborHttpPort = dCachePacket.httpPort,
+                                )
                             )
-                        )
+                            cacheDb.neighborCacheDao.updateHttpPort(
+                                neighborUid = neighborUid,
+                                httpPort = dCachePacket.httpPort
+                            )
+                        }
                     }
 
                     when(dCachePacket) {
                         is DistributedHashEntries -> {
                             cacheDb.withDoorTransaction {
                                 insertNeighborIfNeeded()
-                                cacheDb.neighborCacheDao.updateHttpPort(
-                                    neighborUid = neighborUid, httpPort = dCachePacket.httpPort
-                                )
                                 cacheDb.neighborCacheEntryDao.upsertList(
                                     dCachePacket.entries.map {
                                         NeighborCacheEntry(
@@ -202,7 +205,11 @@ class DistributedCacheHashtable(
                         }
 
                         is DistributedCachePing -> {
-                            val pongReply = DistributedCachePong(dCachePacket.id, dCachePacket.payload)
+                            val pongReply = DistributedCachePong(
+                                id = dCachePacket.id,
+                                httpPort = dCachePacket.httpPort,
+                                payload = dCachePacket.payload
+                            )
                             val replyBytes = pongReply.toBytes()
                             val replyPacket = DatagramPacket(
                                 replyBytes, replyBytes.size, packet.address, packet.port
@@ -284,6 +291,7 @@ class DistributedCacheHashtable(
                     val ping = DistributedCachePing(
                         id = pingIdAtomic.incrementAndGet(),
                         deviceName = deviceNameVal,
+                        httpPort = httpPort,
                         payload = ByteArray(0)
                     )
                     pendingPings[ping.id] = PendingPing(ping.id, systemTimeInMillis(), address)
@@ -319,6 +327,9 @@ class DistributedCacheHashtable(
     }
 
     init {
+        if(httpPort == 0)
+            throw IllegalArgumentException("DistributedCacheHashtable: httpPort cannot be 0")
+
         logger.i(DCACHE_LOGTAG, "$logPrefix initialized on udp port $port")
 
         //Observe the database for neighbors, then send them our hashes
@@ -344,7 +355,7 @@ class DistributedCacheHashtable(
     }
 
     /**
-     * Retrieve the given request from a mirror if available
+     * Creates a new HTTP request to retrieve this locally if available.
      */
     fun localRequestFor(request: IHttpRequest): IHttpRequest? {
         if(request.method != IHttpRequest.Companion.Method.GET)
@@ -359,7 +370,7 @@ class DistributedCacheHashtable(
         //Connect to the first result, sanity check the response, then return it
         val selectedNeighbor = localResults.first()
         return iRequestBuilder(
-            "http://${selectedNeighbor.neighborCache.neighborIp}:${selectedNeighbor.neighborCache.neighborHttpPort}/dcache?url=${URLEncoder.encode(request.url)}"
+            "http://${selectedNeighbor.neighborCache.neighborIp}:${selectedNeighbor.neighborCache.neighborHttpPort}/dcache?url=${URLEncoder.encode(request.url, "UTF-8")}"
         ) {
             request.headers.names().forEach { headerName ->
                 request.headers.getAllByName(headerName).forEach { headerVal ->

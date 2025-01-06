@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.blob.download
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentLocalAvailabilityUseCase
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.OfflineItem

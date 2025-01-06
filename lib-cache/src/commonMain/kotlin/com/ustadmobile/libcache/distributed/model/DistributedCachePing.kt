@@ -8,6 +8,7 @@ import java.nio.ByteBuffer
 
 data class DistributedCachePing(
     override val id: Int,
+    override val httpPort: Int,
     val deviceName: String,
     override val payload: ByteArray,
 ): DistributedCachePacket(), DistributedCacheWhatWithIdAndPayload {
@@ -16,6 +17,7 @@ data class DistributedCachePing(
         val size = OVERHEAD_SIZE + payload.size + deviceName.toByteArray().size
         val byteBuffer = ByteBuffer.allocate(size)
         byteBuffer.put(WHAT_PING)
+        byteBuffer.putInt(httpPort)
         byteBuffer.putInt(id)
         byteBuffer.writeShortString(deviceName)
         byteBuffer.writePayload(payload)
@@ -28,6 +30,7 @@ data class DistributedCachePing(
         if (other !is DistributedCachePing) return false
 
         if (id != other.id) return false
+        if (httpPort != other.httpPort) return false
         if (deviceName != other.deviceName) return false
         if (!payload.contentEquals(other.payload)) return false
 
@@ -35,7 +38,8 @@ data class DistributedCachePing(
     }
 
     override fun hashCode(): Int {
-        var result = id.hashCode()
+        var result = id
+        result = 31 * result + httpPort
         result = 31 * result + deviceName.hashCode()
         result = 31 * result + payload.contentHashCode()
         return result
@@ -43,15 +47,15 @@ data class DistributedCachePing(
 
     companion object {
 
-        //What byte, id, device name length, payload length
-        const val OVERHEAD_SIZE = 1 + 4 + 1 + 2
+        //What (byte, httpPort), id, device name length, payload length
+        const val OVERHEAD_SIZE = DCACHE_PACKET_OVERHEAD + 4 + 2 + 2
 
-        fun ByteBuffer.readDistributedCachePing(): DistributedCachePing {
+        fun ByteBuffer.readDistributedCachePing(httpPort: Int): DistributedCachePing {
             val id = getInt()
             val deviceName = readShortString()
             val payload = readPayload()
 
-            return DistributedCachePing(id, deviceName, payload)
+            return DistributedCachePing(id, httpPort, deviceName, payload)
         }
     }
 }

@@ -213,9 +213,10 @@ import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourc
 import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.core.domain.blob.getmanifest.GetContentManifestUseCase
 import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
 import com.ustadmobile.core.domain.localsharing.setenabled.SetLocalSharingEnabledUseCase
-import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentAvailabilityUseCase
+import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentLocalAvailabilityUseCase
 import com.ustadmobile.core.domain.localsharing.checkcontentavailability.UstadCacheCheckContentAvailabilityUseCase
 import com.ustadmobile.core.domain.localsharing.devicename.GetLocalSharingDeviceNameUseCase
 import com.ustadmobile.core.domain.localsharing.devicename.GetLocalSharingDeviceNameUseCaseAndroid
@@ -230,6 +231,7 @@ import com.ustadmobile.libcache.db.addCacheDbMigrations
 import com.ustadmobile.libcache.distributed.DistributedCacheHashtable
 import com.ustadmobile.libcache.distributed.DistributedCacheNsdAndroid
 import com.ustadmobile.libcache.distributed.http.DistributedCacheHttpEndpoint
+import com.ustadmobile.libcache.okhttp.DistributedCacheInterceptor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 
@@ -264,6 +266,12 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                         tmpDirProvider = { File(cachePathProvider().tmpWorkPath.toString()) },
                         logger = NapierLoggingAdapter(),
                         json = instance(),
+                    )
+                )
+                .addInterceptor(
+                    DistributedCacheInterceptor(
+                        distributedCacheHashtable = instance(),
+                        logger = NapierLoggingAdapter(),
                     )
                 )
                 .build()
@@ -799,15 +807,23 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
+        bind<GetContentManifestUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            GetContentManifestUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance<UmAppDataLayer>().repository,
+                httpClient = instance(),
+                json = instance(),
+            )
+        }
+
         bind<ContentManifestDownloadUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             val cachePathsProvider: CachePathsProvider = instance()
 
             ContentManifestDownloadUseCase(
                 enqueueBlobDownloadClientUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
-                httpClient = instance(),
-                json = instance(),
-                cacheTmpPath = { cachePathsProvider().tmpWorkPath.toString() }
+                cacheTmpPath = { cachePathsProvider().tmpWorkPath.toString() },
+                getManifestUseCase = instance()
             )
         }
 
@@ -816,6 +832,8 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 appContext = applicationContext,
                 learningSpace = context,
                 db = instance(tag = DoorTag.TAG_DB),
+                getContentManifestUseCase = instance(),
+                checkContentLocalAvailabilityUseCase = instance(),
             )
         }
 
@@ -880,7 +898,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 staticUmAppFilesDir = null,
                 mimeTypeHelper = FileMimeTypeHelperImpl(),
                 distributedCacheHttpEndpoint = instance(),
-            )
+            ).also {
+                it.start()
+            }
         }
 
         bind<XapiHttpServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
@@ -1252,7 +1272,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             )
         }
 
-        bind<CheckContentAvailabilityUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+        bind<CheckContentLocalAvailabilityUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             UstadCacheCheckContentAvailabilityUseCase(
                 ustadCache = instance(),
                 httpClient = instance(),
@@ -1290,7 +1310,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         }
 
         GlobalScope.launch(Dispatchers.IO) {
-            di.direct.instance<EmbeddedHttpServer>().start()
+            di.direct.instance<EmbeddedHttpServer>()
             di.direct.instance<DistributedCacheNsdAndroid>()
         }
     }

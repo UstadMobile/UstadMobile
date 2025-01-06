@@ -90,7 +90,11 @@ class DistributedCacheNsdAndroid(
                     .toList().flatMap { it.interfaceAddresses }.map { it.address }
 
                 if(neighborHostAddr !in localAddresses) {
-                    listener.onNeighborDiscovered(neighborHostAddr.hostName, serviceInfo.port)
+                    listener.onNeighborDiscovered(
+                        neighborIp = neighborHostAddr.hostName,
+                        neighborUdpPort = serviceInfo.port,
+                        neighborHttpPort = 0
+                    )
                 }else {
                     logger.d(DCACHE_LOGTAG, "$neighborHostAddr is local device")
                 }

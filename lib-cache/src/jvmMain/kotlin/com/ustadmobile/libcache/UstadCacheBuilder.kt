@@ -35,14 +35,14 @@ class UstadCacheBuilder(
             persistentPath = Path(storagePath, "persistent"),
             cachePath = Path(storagePath, "cache")
         )
-    }
-
+    },
+    var db: UstadCacheDb? = null,
 ){
 
     fun build(): UstadCache {
         return UstadCacheImpl(
             pathsProvider = pathsProvider,
-            db = DatabaseBuilder.databaseBuilder(UstadCacheDb::class, dbUrl, 1L)
+            db = db ?: DatabaseBuilder.databaseBuilder(UstadCacheDb::class, dbUrl, 1L)
                 .addCacheDbMigrations()
                 .addMigrations(MIGRATE_8_9)
                 .apply {

@@ -15,7 +15,7 @@ class UstadDbDiscoveryListener(
     private val xxStringHasher: XXStringHasher,
 ): DistributedCacheNeighborDiscoveryListener {
 
-    override fun onNeighborDiscovered(neighborIp: String, neighborUdpPort: Int) {
+    override fun onNeighborDiscovered(neighborIp: String, neighborUdpPort: Int, neighborHttpPort: Int) {
         scope.launch {
             db.neighborCacheDao.upsertAsync(
                 NeighborCache(
@@ -23,6 +23,7 @@ class UstadDbDiscoveryListener(
                     neighborIp = neighborIp,
                     neighborDiscovered = systemTimeInMillis(),
                     neighborPingTime = 0,
+                    neighborHttpPort = neighborHttpPort,
                     neighborUdpPort = neighborUdpPort,
                 )
             )
