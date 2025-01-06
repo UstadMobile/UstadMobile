@@ -15,7 +15,7 @@ unset TEMP
 WORKDIR=$(pwd)
 SCRIPTDIR=$(realpath $(dirname $0))
 SPEC=""
-TESTSERVER_URL="http://localhost:8075/"   # Default value
+CONTROLSERVER="http://localhost:8075/"   # Default value
 LEARNING_SPACE_URL="http://localhost:8087/"  # Default value
 
 # Parse the arguments
@@ -29,7 +29,7 @@ while true; do
             ;;
         '--testservercontrollerUrl')
             echo "Set testserver Controller URL to $2"
-            TESTSERVER_URL=$2
+            CONTROLSERVER=$2
             shift 2
             continue
             ;;
@@ -50,7 +50,7 @@ while true; do
 done
 
 # Export the URL to Cypress environment variables
-export TESTSERVER_URL
+export CONTROLSERVER
 
 # Ensure the results directory exists
 if [ ! -e "$SCRIPTDIR/results" ]; then
@@ -82,7 +82,7 @@ npm install || exit_with_error "Failed to run 'npm install'"
 
 # Run Cypress tests
 echo "Running Cypress tests..."
-npm exec cypress run -- --env TESTSERVER_URL="$TESTSERVER_URL" --spec "$SPECARG" || exit_with_error "Cypress test run failed"
+npm exec cypress run -- --env CONTROLSERVER="$CONTROLSERVER" --spec "$SPECARG" || exit_with_error "Cypress test run failed"
 
 # Capture the exit status of the Cypress test run
 teststatus=$?
