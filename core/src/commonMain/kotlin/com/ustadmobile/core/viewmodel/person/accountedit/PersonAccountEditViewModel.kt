@@ -216,7 +216,7 @@ class PersonAccountEditViewModel(
                     _uiState.update { prev ->
                         prev.copy(
                             fieldsEnabled = true,
-                            usernameError = validationResult.errorMessage?.let { systemImpl.getString(MR.strings.invalid_username) }
+                            usernameError = validationResult.errorMessage?.let { systemImpl.getString(it) }
                         )
                     }
                     return@launch

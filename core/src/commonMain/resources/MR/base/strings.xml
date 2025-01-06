@@ -783,8 +783,7 @@
     <string name="username_too_short">Username must be at least 3 characters</string>
     <string name="username_too_long">Username must be less than 30 characters</string>
     <string name="username_starts_with_number">Username cannot start with a number</string>
-    <string name="username_invalid_chars">Username can only contain letters, numbers, dots and underscores</string>
-    <string name="invalid_username">Username must be 3 to 15 characters, use only letters, avoid spaces or special symbols.</string>
+    <string name="invalid_username">Username must be 3 to 30 characters, use only letters, avoid spaces or special symbols.</string>
     <string name="incorrect_current_password">Current password incorrect</string>
     <string name="sel_question_type_free_text">Free text</string>
     <string name="sel_question_type_multiple_choice">Multiple choice</string>

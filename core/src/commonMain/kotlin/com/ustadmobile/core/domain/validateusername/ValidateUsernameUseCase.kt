@@ -15,7 +15,7 @@ data class ValidationResult(val errorMessage: StringResource? = null) {
         val TooShort = ValidationResult(MR.strings.username_too_short)
         val TooLong = ValidationResult(MR.strings.username_too_long)
         val StartsWithNumber = ValidationResult(MR.strings.username_starts_with_number)
-        val InvalidCharacters = ValidationResult(MR.strings.username_invalid_chars)
+        val InvalidCharacters = ValidationResult(MR.strings.invalid_username)
     }
 }
 
