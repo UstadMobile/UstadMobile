@@ -199,12 +199,11 @@ fi
 
 maestro  --device=$TESTSERIAL  test -e LEARNING_SPACE_URL=$LEARNING_SPACE_URL -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
-         -e TESTSERIAL=$TESTSERIAL $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR \
-        # -e TESTSERVER_URL=$TESTSERVER_URL  #$OUTPUTARGS
+         -e TESTSERIAL=$TESTSERIAL $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR $OUTPUTARGS
 
-#$SCRIPTDIR/../../testserver-controller/stop.sh
+$SCRIPTDIR/../../testserver-controller/stop.sh
 
 #Uninstall when finished
-#adb shell pm uninstall com.toughra.ustadmobile
+adb shell pm uninstall com.toughra.ustadmobile
 
 exit $TESTSTATUS
