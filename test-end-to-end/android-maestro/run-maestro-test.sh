@@ -15,7 +15,7 @@ TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
 TESTAPK=$SCRIPTDIR/../../app-android/build/outputs/apk/release/app-android-release.apk
 TESTRESULTSDIR=""
-TESTSERVER_URL=""
+CONTROLSERVER=""
 USECONSOLEOUTPUT=0
 LEARNING_SPACE_URL=""
 
@@ -78,7 +78,7 @@ while true; do
                 ;;
               '-e'|'--testserverControllerUrl')
                     echo "Set testserver Controller URL to $2"
-                    TESTSERVER_URL=$2
+                    CONTROLSERVER=$2
                     shift 2
                     continue
               ;;
@@ -103,13 +103,16 @@ if [ "$TESTSERIAL" == "" ]; then
 fi
 
 
-# Set default TESTSERVER_URL if not explicitly provided
-if [ "$TESTSERVER_URL" == "" ]; then
-    TESTSERVER_URL="http://localhost:8075/"
+# Set default CONTROLSERVER if not explicitly provided
+if [ "$CONTROLSERVER" == "" ]; then
+    CONTROLSERVER="http://localhost:8075/"
 fi
 
+echo "DEBUG: Using TESTSERVER_URL=$CONTROLSERVER"
+
+
 # Check if the URL provided (or default) is valid
-if [[ ! "$TESTSERVER_URL" =~ ^http://.*$ && ! "$TESTSERVER_URL" =~ ^https://.*$ ]]; then
+if [[ ! "$CONTROLSERVER" =~ ^http://.*$ && ! "$CONTROLSERVER" =~ ^https://.*$ ]]; then
     echo "Error: Invalid testserver Controller URL format. Ensure it starts with http:// or https://."
     exit 1
 fi
@@ -155,7 +158,7 @@ $SCRIPTDIR/../../testserver-controller/start.sh --siteUrl $LEARNING_SPACE_URL --
 export ANDROID_SERIAL=$TESTSERIAL
 
 # Extract the port from the URL
-if [[ "$TESTSERVER_URL" =~ :([0-9]+) ]]; then
+if [[ "$CONTROLSERVER" =~ :([0-9]+) ]]; then
     TESTSERVER_PORT="${BASH_REMATCH[1]}"
 else
     echo "Error: Invalid testserver Controller URL format. Ensure it includes a port (e.g., http://ip:port/)."
@@ -197,11 +200,11 @@ fi
 maestro  --device=$TESTSERIAL  test -e LEARNING_SPACE_URL=$LEARNING_SPACE_URL -e USERNAME=$TESTUSER \
          -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
          -e TESTSERIAL=$TESTSERIAL $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR \
-         -e TESTSERVER_URL=$TESTSERVER_URL  #$OUTPUTARGS
+        # -e TESTSERVER_URL=$TESTSERVER_URL  #$OUTPUTARGS
 
-$SCRIPTDIR/../../testserver-controller/stop.sh
+#$SCRIPTDIR/../../testserver-controller/stop.sh
 
 #Uninstall when finished
-adb shell pm uninstall com.toughra.ustadmobile
+#adb shell pm uninstall com.toughra.ustadmobile
 
 exit $TESTSTATUS
