@@ -8,7 +8,7 @@ env:
 - runFlow:
     file: "../common/startserver.yaml"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
+      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
 #-------Launch App---------------#
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"

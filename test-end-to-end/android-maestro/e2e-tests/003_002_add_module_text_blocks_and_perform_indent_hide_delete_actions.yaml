@@ -7,7 +7,7 @@ env:
 - runFlow:
     file: "../common/startserver.yaml"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
+      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
 

@@ -7,14 +7,14 @@ env:
 - runFlow:
     file: "../common/startserver.yaml"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
+      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
 - runFlow:
     file: "../common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Invalid_Video_Content.mp4
-      CONTROLSERVER: ${CONTROLSERVER}
+      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - assertVisible:  "Invalid file : Exception importing what looked like video"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/invalid_content_type_error"

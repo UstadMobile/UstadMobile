@@ -5,13 +5,13 @@ appId: com.toughra.ustadmobile
 - runFlow:
    file: "../common/startserver.yaml"
    env:
-     CONTROLSERVER: ${CONTROLSERVER}
+     CONTROLSERVER_URL: ${CONTROLSERVER_URL}
      TESTSERIAL: ${TESTSERIAL}
      TESTNAME: ${TESTNAME}
 - launchApp
 - tapOn: "GET STARTED"
 - tapOn: Site link
-- inputText: ${ENDPOINT}
+- inputText: ${LEARNING_SPACE_URL}
 - hideKeyboard
 - tapOn: "NEXT"
 - tapOn: "Username"

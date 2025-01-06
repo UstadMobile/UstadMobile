@@ -6,14 +6,14 @@ env:
 - runFlow:
     file: "../common/startserver.yaml"
     env:
-     CONTROLSERVER: ${CONTROLSERVER}
+     CONTROLSERVER_URL: ${CONTROLSERVER_URL}
      TESTSERIAL: ${TESTSERIAL}
      TESTNAME: ${TESTNAME}
 - runFlow:
     file: "../common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: "H5p_Content.h5p"
-      CONTROLSERVER: ${CONTROLSERVER}
+      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"

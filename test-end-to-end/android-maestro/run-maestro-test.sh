@@ -15,7 +15,7 @@ TEST=""
 SCRIPTDIR=$(realpath $(dirname $0))
 TESTAPK=$SCRIPTDIR/../../app-android/build/outputs/apk/release/app-android-release.apk
 TESTRESULTSDIR=""
-CONTROLSERVER=""
+CONTROLSERVER_URL=""
 USECONSOLEOUTPUT=0
 LEARNING_SPACE_URL=""
 
@@ -32,8 +32,8 @@ while true; do
                   echo "-a | --apk (apk-path) apk to install (defaults to release apk from app-android module)"
                   echo "-c | --console-output use console output mode with Maestro"
                   echo "-r | --result (result-dir) directory to save junit test results"
-                  echo "-e | --testserverControllerUrl url that run the testserver controller"
-                  echo "-l | --learningSpaceUrl (http-endpoint)url for the learning space server to connect to"
+                  echo "-e | --controlserverurl url that run the testserver controller"
+                  echo "-l | --learningspaceurl (http-endpoint)url for the learning space server to connect to"
                   exit 0
                   ;;
 
@@ -76,13 +76,13 @@ while true; do
                     shift 2
                     continue
                 ;;
-              '-e'|'--testserverControllerUrl')
+              '-e'|'--controlserverurl')
                     echo "Set testserver Controller URL to $2"
-                    CONTROLSERVER=$2
+                    CONTROLSERVER_URL=$2
                     shift 2
                     continue
               ;;
-              '-l'|'--learningSpaceUrl')
+              '-l'|'--learningspaceurl')
                     echo "Learning Space Url"
                     LEARNING_SPACE_URL=$2
                     shift 2
@@ -103,16 +103,14 @@ if [ "$TESTSERIAL" == "" ]; then
 fi
 
 
-# Set default CONTROLSERVER if not explicitly provided
-if [ "$CONTROLSERVER" == "" ]; then
-    CONTROLSERVER="http://localhost:8075/"
+# Set default CONTROLSERVER_URL if not explicitly provided
+if [ "$CONTROLSERVER_URL" == "" ]; then
+    CONTROLSERVER_URL="http://localhost:8075/"
 fi
-
-echo "DEBUG: Using TESTSERVER_URL=$CONTROLSERVER"
 
 
 # Check if the URL provided (or default) is valid
-if [[ ! "$CONTROLSERVER" =~ ^http://.*$ && ! "$CONTROLSERVER" =~ ^https://.*$ ]]; then
+if [[ ! "$CONTROLSERVER_URL" =~ ^http://.*$ && ! "$CONTROLSERVER_URL" =~ ^https://.*$ ]]; then
     echo "Error: Invalid testserver Controller URL format. Ensure it starts with http:// or https://."
     exit 1
 fi
@@ -158,7 +156,7 @@ $SCRIPTDIR/../../testserver-controller/start.sh --siteUrl $LEARNING_SPACE_URL --
 export ANDROID_SERIAL=$TESTSERIAL
 
 # Extract the port from the URL
-if [[ "$CONTROLSERVER" =~ :([0-9]+) ]]; then
+if [[ "$CONTROLSERVER_URL" =~ :([0-9]+) ]]; then
     TESTSERVER_PORT="${BASH_REMATCH[1]}"
 else
     echo "Error: Invalid testserver Controller URL format. Ensure it includes a port (e.g., http://ip:port/)."
@@ -198,7 +196,7 @@ if [ "$USECONSOLEOUTPUT" == "1" ]; then
 fi
 
 maestro  --device=$TESTSERIAL  test -e LEARNING_SPACE_URL=$LEARNING_SPACE_URL -e USERNAME=$TESTUSER \
-         -e PASSWORD=$TESTPASS -e CONTROLSERVER=$CONTROLSERVER \
+         -e PASSWORD=$TESTPASS -e CONTROLSERVER_URL=$CONTROLSERVER_URL \
          -e TESTSERIAL=$TESTSERIAL $TESTARG -e TEST=$TEST -e TESTRESULTSDIR=$TESTRESULTSDIR $OUTPUTARGS
 
 $SCRIPTDIR/../../testserver-controller/stop.sh

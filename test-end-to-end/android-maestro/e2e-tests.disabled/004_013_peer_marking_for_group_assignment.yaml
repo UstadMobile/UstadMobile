@@ -8,7 +8,7 @@ env:
 - runFlow:
     file: "../common/startserver.yaml"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
+      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -35,7 +35,7 @@ env:
     file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
-      CONTROLSERVER: ${CONTROLSERVER}
+      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
       TESTSERIAL: ${TESTSERIAL}
 # teacher add an assignment block
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -218,7 +218,7 @@ env:
     file: "../common/add_assignment_file.yaml"
     env:
       TESTFILENAME: "Assignment_File.pdf"
-      CONTROLSERVER: ${CONTROLSERVER}
+      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:

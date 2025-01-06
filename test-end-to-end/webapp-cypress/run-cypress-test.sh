@@ -7,7 +7,7 @@ exit_with_error() {
 }
 
 # Parse command line arguments using getopt
-TEMP=$(getopt -o 'r:' --long 'spec:,testservercontrollerUrl:,learningspaceurl:' -n 'run-cypress-test.sh' -- "$@")
+TEMP=$(getopt -o 'r:' --long 'spec:,controlserverurl:,learningspaceurl:' -n 'run-cypress-test.sh' -- "$@")
 eval set -- "$TEMP"
 unset TEMP
 
@@ -15,7 +15,7 @@ unset TEMP
 WORKDIR=$(pwd)
 SCRIPTDIR=$(realpath $(dirname $0))
 SPEC=""
-CONTROLSERVER="http://localhost:8075/"   # Default value
+CONTROLSERVER_URL="http://localhost:8075/"   # Default value
 LEARNING_SPACE_URL="http://localhost:8087/"  # Default value
 
 # Parse the arguments
@@ -27,9 +27,9 @@ while true; do
             shift 2
             continue
             ;;
-        '--testservercontrollerUrl')
+        '--controlserverurl')
             echo "Set testserver Controller URL to $2"
-            CONTROLSERVER=$2
+            CONTROLSERVER_URL=$2
             shift 2
             continue
             ;;
@@ -50,7 +50,7 @@ while true; do
 done
 
 # Export the URL to Cypress environment variables
-export CONTROLSERVER
+export CONTROLSERVER_URL
 
 # Ensure the results directory exists
 if [ ! -e "$SCRIPTDIR/results" ]; then
@@ -82,7 +82,7 @@ npm install || exit_with_error "Failed to run 'npm install'"
 
 # Run Cypress tests
 echo "Running Cypress tests..."
-npm exec cypress run -- --env CONTROLSERVER="$CONTROLSERVER" --spec "$SPECARG" || exit_with_error "Cypress test run failed"
+npm exec cypress run -- --env CONTROLSERVER_URL="$CONTROLSERVER_URL" --spec "$SPECARG" || exit_with_error "Cypress test run failed"
 
 # Capture the exit status of the Cypress test run
 teststatus=$?

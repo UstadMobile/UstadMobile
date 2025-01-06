@@ -7,7 +7,7 @@ env:
 - runFlow:
     file: "../common/startserver.yaml"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
+      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -34,7 +34,7 @@ env:
     file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
-      CONTROLSERVER: ${CONTROLSERVER}
+      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - tapOn:
     text: "Courses"
