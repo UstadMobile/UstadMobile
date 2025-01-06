@@ -27,3 +27,11 @@ Running:
 Optional args:
 
 * --spec specname (as found in e2e directory, without the .cy.js suffix e.g. ```--spec WEB_001_001_add_content```)
+
+
+How it works (in progress):
+
+* package.json uses start-server-and-test command as [recommended by Cypress docs](https://docs.cypress.io/app/continuous-integration/overview#Solutions) to
+  start the testserver-controller.
+* testserver-controller is called by http request from the test spec and starts a blank new instance 
+  of the actual server on request on a new port for each test (see testserver-controller docs).
