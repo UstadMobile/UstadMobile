@@ -100,9 +100,11 @@ fun Application.testServerController() {
         }
     }
 
+    val srcRootDirProp = environment.config.propertyOrNull("srcRoot")?.getString()
     val userDir = File(System.getProperty("user.dir"))
 
     val rootSrcDir = when {
+        srcRootDirProp != null -> File(srcRootDirProp)
         userDir.name == "testserver-controller" -> userDir.parentFile
         File(userDir, "settings.gradle").exists() -> userDir
         else -> {
