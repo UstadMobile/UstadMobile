@@ -1989,4 +1989,6 @@
     <string name="in_list">In List</string>
     <string name="not_in_list">Not In List</string>
 
+    <string name="other">Other</string>
+
 </resources>

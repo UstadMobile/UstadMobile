@@ -15,7 +15,7 @@ data class ReportSeries2(
 
     var reportSeriesVisualType: ReportSeriesVisualType? = ReportSeriesVisualType.BAR_CHART,
 
-    val reportSeriesSubGroup: ReportXAxis? = ReportXAxis.DAY,
+    val reportSeriesSubGroup: ReportXAxis? = ReportXAxis.NONE,
 
     var reportSeriesFilters: List<ReportFilter3>? = null,
 
@@ -57,7 +57,9 @@ enum class ReportXAxis(val value: Int, val stringResource: StringResource) {
     WEEK(2, MR.strings.weekly),
     MONTH(3, MR.strings.monthly),
     CLASS(4, MR.strings.class_name),
-    GENDER(5, MR.strings.gender_literal);
+    GENDER(5, MR.strings.gender_literal),
+    NONE(6, MR.strings.none);
+
 }
 
 /** Enum representing different filter types for report series */
@@ -71,4 +73,10 @@ enum class FilterType(val value: Int, val stringResource: StringResource) {
 enum class ReportTimeRange(val value: Int, val stringResource: StringResource) {
     LAST_WEEK(1, MR.strings.last_week),
     LAST_MONTH(2, MR.strings.last_month);
+}
+
+enum class GenderType(val value: Int, val stringResource: StringResource){
+    MALE(1, MR.strings.male),
+    FEMALE(2, MR.strings.female),
+    OTHER(3, MR.strings.other);
 }

@@ -4,9 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.Comparisons
 import com.ustadmobile.core.domain.report.model.FilterType
+import com.ustadmobile.core.domain.report.model.GenderType
+import com.ustadmobile.core.domain.report.model.ReportConditionFilterOptions
 import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditUiState
@@ -25,7 +30,7 @@ import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
-import com.ustadmobile.libuicompose.view.report.edit.LabeledDropdownMenu
+import com.ustadmobile.libuicompose.view.report.edit.ExposedDropdownMenu
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -58,9 +63,9 @@ fun ReportFilterEditScreen(
             UstadInputFieldLayout(
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                LabeledDropdownMenu(
+                ExposedDropdownMenu(
                     selectedValue = uiState.filters?.reportFilterField?.value ?: 0,
-                    label = stringResource(MR.strings.field),
+                    label = { Text(stringResource(MR.strings.field) + "*") },
                     options = FilterType.entries.map { filterType ->
                         MessageIdOption2(
                             stringResource = filterType.stringResource,
@@ -72,7 +77,11 @@ fun ReportFilterEditScreen(
                             FilterType.entries.firstOrNull { it.value == selectedOption.value }
                                 ?: FilterType.PERSON_AGE
                         val updatedOptions =
-                            uiState.filters?.copy(reportFilterField = selectedFilterType)
+                            uiState.filters?.copy(
+                                reportFilterField = selectedFilterType,
+                                reportFilterValue = null,
+                                reportFilterCondition = null
+                            )
                         onEntityChanged(updatedOptions)
                     }
                 )
@@ -84,13 +93,9 @@ fun ReportFilterEditScreen(
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
             ) {
-                UstadInputFieldLayout(
-                    modifier = Modifier
-                        .weight(1.5F)
-                        .fillMaxWidth(),
-                ) {
-                    LabeledDropdownMenu(
-                        label = stringResource(MR.strings.condition),
+                    ExposedDropdownMenu(
+                        modifier = Modifier.width(150.dp),
+                        label = { Text(stringResource(MR.strings.condition) + "*") },
                         selectedValue = uiState.filters?.reportFilterCondition?.value ?: 0,
                         options = uiState.filterConditionOptions?.comparisonTypes?.map { comparison ->
                             MessageIdOption2(
@@ -107,21 +112,33 @@ fun ReportFilterEditScreen(
                             onEntityChanged(updatedOptions)
                         }
                     )
-                }
-                Column(
-                    modifier = Modifier
-                        .weight(3F)
-                        .fillMaxWidth()
-                        .defaultScreenPadding(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
 
-                ) {
-                    Text(
-                        text = stringResource(MR.strings.value),
+
+                // Dynamically switch between input types for the value field (weight = 3)
+                if (uiState.filters?.reportFilterField == FilterType.PERSON_GENDER) {
+                    ExposedDropdownMenu(
+                        modifier = Modifier,
+                        label = { Text(stringResource(MR.strings.value) + "*") },
+                        selectedValue = GenderType.entries.firstOrNull { it.name == uiState.filters?.reportFilterValue }?.value ?: 0,
+                        options = GenderType.entries.map { gender ->
+                            MessageIdOption2(
+                                stringResource = gender.stringResource,
+                                value = gender.value
+                            )
+                        },
+                        onOptionSelected = { selectedOption ->
+                            val selectedGender =
+                                GenderType.entries.firstOrNull { it.value == selectedOption.value }
+                                    ?: GenderType.OTHER
+                            val updatedOptions =
+                                uiState.filters?.copy(reportFilterValue = selectedGender.name)
+                            onEntityChanged(updatedOptions)
+                        }
                     )
-                    androidx.compose.material.OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = uiState.filters?.reportFilterValue.toString(),
+                } else {
+                    OutlinedTextField(
+                        label = { Text(stringResource(MR.strings.value) + "*") },
+                        value = uiState.filters?.reportFilterValue?:"",
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         onValueChange = {
                             val updatedOptions = uiState.filters?.copy(reportFilterValue = it)

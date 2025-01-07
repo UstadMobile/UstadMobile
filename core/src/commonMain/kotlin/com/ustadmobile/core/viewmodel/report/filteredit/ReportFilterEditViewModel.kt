@@ -7,7 +7,9 @@ import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,8 +19,8 @@ import org.kodein.di.DI
 
 data class ReportFilterEditUiState(
     val filters: ReportFilter3? = ReportFilter3(),
-    val filterConditionOptions: ReportConditionFilterOptions? = null
-)
+    val filterConditionOptions: ReportConditionFilterOptions? = null,
+    )
 
 class ReportFilterEditViewModel(
     di: DI,
