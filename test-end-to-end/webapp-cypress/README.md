@@ -33,9 +33,12 @@ export TESTCONTROLLER_URL=http://localhost:port/
 npm run test-ci
 ```
 
-How it works (in progress):
+How it works:
 
 * package.json uses start-server-and-test command as [recommended by Cypress docs](https://docs.cypress.io/app/continuous-integration/overview#Solutions) to
-  start the testserver-controller.
-* testserver-controller is called by http request from the test spec and starts a blank new instance 
-  of the actual server on request on a new port for each test (see testserver-controller docs).
+  start the testserver-controller, wait for the testserver-controller to be ready, and then starts 
+  cypress run.
+* The Cypress baseUrl is set to the testserver-controller. Each Cypress test spec makes an http
+  request to the testserver-controller, which starts a blank new instance of the actual ustad server
+  (e.g. the app-ktor-server module) on a random port for each test. The test calls 
+  the testserver-controller stop endpoint as part of the tearDown.
