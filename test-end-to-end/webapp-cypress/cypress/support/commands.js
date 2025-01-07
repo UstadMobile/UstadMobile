@@ -55,11 +55,10 @@ Cypress.Commands.add('ustadStartTestServer', (waitTime = 6000) => {
 Cypress.Commands.add('ustadStopTestServer', () => {
   const testServerUrl = 'http://localhost:8075' // Always use http://localhost:8075
   const stopEndpoint = testServerUrl.endsWith('/') ? `${testServerUrl}stop` : `${testServerUrl}/stop`
-  // Try using GET method if POST is not allowed
    cy.request({
-     method: 'GET',  // Change to GET if POST isn't allowed
+     method: 'GET',
      url: stopEndpoint,
-     failOnStatusCode: false,  // Allow non-2xx status codes to avoid failing the test
+     failOnStatusCode: false,
    }).then((response) => {
      if (response.status === 200) {
        cy.log('Server successfully stopped');
