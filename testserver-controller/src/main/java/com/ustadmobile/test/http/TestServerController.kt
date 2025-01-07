@@ -246,7 +246,10 @@ fun Application.testServerController() {
                     ?: throw IllegalArgumentException("Could not find server command in PATH ${serverArgs[0]}")
             }
 
-            val serverArgsWithSiteUrl = serverArgs + "-P:ktor.ustad.siteUrl=$testHost"
+            val port = findFreePort()
+            val serverArgsWithSiteUrl = serverArgs +
+                    "-P:ktor.ustad.siteUrl=http://$testHost:$port/" +
+                    "-P:ktor.deployment.port=$port"
             serverProcess = ProcessBuilder(serverArgsWithSiteUrl)
                 .directory(serverDir)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
@@ -285,9 +288,9 @@ fun Application.testServerController() {
 
             call.respond(
                 ServerInfo(
-                    url = testHost,
-                    port = Url(testHost).port,
-                    extraInfo = response
+                    url = "http://$testHost:$port/",
+                    port = port,
+                    extraInfo = response,
                 )
             )
         }
