@@ -1,8 +1,8 @@
 describe('WEB_004_001_assignment_creation_submission_grading', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and assignment block', () => {
  // Admin user login
@@ -99,5 +99,10 @@ it('Student can view their grade', () => {
   cy.contains('Keep it up').should('exist')
   cy.contains('9/10 Points').should('exist')
   cy.contains('SUBMIT').should('not.exist') // assertion to make sure multiple submission is not allowed
+})
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
   })
 })

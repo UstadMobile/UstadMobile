@@ -35,31 +35,70 @@ Cypress.on('uncaught:exception', (err) => {
 
 // Start Test Server
 Cypress.Commands.add('ustadStartTestServer', (waitTime = 6000) => {
-  const testServerUrl = Cypress.env('TESTSERVER_URL') || 'http://localhost:8075'
-  const url = testServerUrl.endsWith('/') ? `${testServerUrl}start` : `${testServerUrl}/start`
-  cy.visit(url) // Visit the start endpoint of the test server
-  cy.wait(waitTime)// Wait for the specified time after visiting the start page
+  const testServerUrl = 'http://localhost:8075' // Always use http://localhost:8075
+  const startEndpoint = testServerUrl.endsWith('/') ? `${testServerUrl}start` : `${testServerUrl}/start`
+// Fetch server details from the /start endpoint
+  cy.request('GET', startEndpoint).then((response) => {
+    const { url } = response.body // Use the URL as is
+    const fullUrl = url.endsWith('/') ? url.slice(0, -1) : url // Remove trailing slash if present
+// Set the full URL as an environment variable for subsequent tests
+  cy.log(`Learning Space Server started at: ${fullUrl}`)
+   Cypress.env('LEARNING_SPACE_URL', fullUrl)
+// Debugging log
+  cy.log(`LEARNING_SPACE_URL set to: ${Cypress.env('LEARNING_SPACE_URL')}`)
+  })
+// Wait for the specified time after starting the server
+  cy.wait(waitTime)
 })
 
-
-//User Login
-Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
-
-//below command added as per : https://github.com/thisdot/open-source/blob/main/libs/cypress-indexeddb/README.md
-  cy.log('Clearing IndexedDB');
-  cy.clearIndexedDb('localhost_8087') // clearing index db
-// Adding query parameters on the url- below command added as per - https://docs.cypress.io/api/commands/visit#Add-query-parameters
-  cy.visit('http://localhost:8087/', {timeout:60000},{
-    qs: {
-      username,
-      password,
-    },
-
+// Stop Test Server
+Cypress.Commands.add('ustadStopTestServer', () => {
+  const testServerUrl = 'http://localhost:8075' // Always use http://localhost:8075
+  const stopEndpoint = testServerUrl.endsWith('/') ? `${testServerUrl}stop` : `${testServerUrl}/stop`
+   cy.request({
+     method: 'GET',
+     url: stopEndpoint,
+     failOnStatusCode: false,
+   }).then((response) => {
+     if (response.status === 200) {
+       cy.log('Server successfully stopped');
+     } else if (response.body === 'OK') {
+       cy.log('Server successfully stopped');
+     }
   })
-  cy.get('input#username', { timeout: 10000 }).should('exist').type(username) // 10 seconds
-  cy.get('input#password').type(password)
-  cy.get('button#login_button').click()
+  })
+
+// Clear DB and Login
+Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
+  const learningSpaceUrl = Cypress.env('LEARNING_SPACE_URL')
+
+// Debugging: Log the LEARNING_SPACE_URL
+  cy.log(`LEARNING_SPACE_URL: ${learningSpaceUrl}`)
+
+  if (!learningSpaceUrl) {
+    throw new Error('LEARNING_SPACE_URL is not defined. Did you call ustadStartTestServer first?')
+  }
+
+  // Clearing IndexedDB for the dynamic hostname
+  const hostname = new URL(learningSpaceUrl).hostname
+  const port = new URL(learningSpaceUrl).port
+  const indexedDbName = `${hostname}_${port}`
+  cy.log(`Clearing IndexedDB: ${indexedDbName}`)
+  cy.clearIndexedDb(indexedDbName)
+
+  // Adding query parameters and visiting the login page
+  cy.visit(learningSpaceUrl, {
+    qs: { username, password },
+    timeout: 60000,
+  });
+
+  // Login flow
+  cy.get('input#username', { timeout: 10000 }).should('exist').type(username); // 10 seconds
+  cy.get('input#password').type(password);
+  cy.get('button#login_button').click();
 });
+
+
 
 // Logout Flow
 

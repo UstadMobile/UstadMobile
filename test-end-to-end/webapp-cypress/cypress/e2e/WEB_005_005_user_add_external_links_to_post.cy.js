@@ -4,10 +4,10 @@
  */
 
 describe('005_005_user_add_external_links_to_post', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add discussion board and post', () => {
   // Admin user login
@@ -76,4 +76,9 @@ it('Student able to open the external link in the reply', () => {
   cy.contains('External link').invoke('attr','target', '_self').click()
   cy.url().should('include','https://github.com/UstadMobile/UstadMobile/blob/primary/test-end-to-end/README.md')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

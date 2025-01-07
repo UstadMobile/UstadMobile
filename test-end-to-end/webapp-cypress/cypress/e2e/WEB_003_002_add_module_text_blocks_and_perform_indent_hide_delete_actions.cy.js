@@ -1,8 +1,8 @@
 describe('WEB_003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add module and text blocks, then perform indent_hide_delete actions', () => {
   // Admin user login
@@ -44,4 +44,9 @@ it('Admin add module and text blocks, then perform indent_hide_delete actions', 
   cy.contains("button","Save").click()
   cy.contains("Assignment 1").should('not.exist')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

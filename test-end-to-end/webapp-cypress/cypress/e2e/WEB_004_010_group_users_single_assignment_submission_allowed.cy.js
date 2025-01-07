@@ -1,8 +1,8 @@
 describe('WEB_004_010_group_users_single_assignment_submission_allowed', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and Members', () => {
  // Admin user login
@@ -119,4 +119,9 @@ it('Group 1 - Student2 able to view Group 1 assignment and submit button not vis
   cy.contains("Text 1").should('be.visible')
   cy.contains("SUBMIT").should('not.exist')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

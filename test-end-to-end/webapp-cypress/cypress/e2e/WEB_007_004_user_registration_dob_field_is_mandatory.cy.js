@@ -1,8 +1,8 @@
 describe('WEB_007_004_user_registration_dob_field_is_mandatory', () => {
- it('Start Ustad Test Server ', () => {
-  // Start Test Server
-    cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin enable registration', () => {
  // Admin user login
@@ -20,4 +20,9 @@ it('Admin enable registration', () => {
   cy.get('#accept_button').click()
   cy.contains("label", "First names").should('be.visible')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

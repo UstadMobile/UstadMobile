@@ -1,12 +1,15 @@
-
-
 describe('WEB_001_001_add_content', () => {
- it('Start Ustad Test Server ', () => {
-  // Start Test Server
-    cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin user add content to the library', () => {
+ // Ensure LEARNING_SPACE_URL is defined before using it
+    const learningSpaceUrl = Cypress.env('LEARNING_SPACE_URL')
+    cy.log(`Learning Space URL: ${learningSpaceUrl}`)
+    expect(learningSpaceUrl).to.exist
+
  // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
  // Add H5p File
@@ -37,4 +40,9 @@ it('Admin user add content to the library', () => {
   cy.ustadOpenH5pEpub('Content_002')
   cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })
