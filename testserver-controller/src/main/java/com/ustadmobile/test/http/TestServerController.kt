@@ -5,6 +5,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
+import io.ktor.server.plugins.autohead.AutoHeadResponse
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
@@ -46,7 +47,7 @@ fun Application.testServerController() {
         File(it)
     } ?: File(".")
 
-    val serverSiteUrl = environment.config.property("siteUrl").getString()
+    val serverSiteUrl = environment.config.property("siteHost").getString()
 
     if(adbPath == null || !adbPath.exists()) {
         throw IllegalStateException("ERROR: ADB path does not exist")
@@ -95,14 +96,31 @@ fun Application.testServerController() {
         }
     }
 
-    val srcRootDir = File(environment.config.propertyOrNull("srcRoot")?.getString() ?: ".")
-    val serverDir = File(srcRootDir, "app-ktor-server")
-    val testFilesDir = File(File(srcRootDir, "test-end-to-end"), "test-files")
+    val srcRootDirProp = environment.config.propertyOrNull("srcRoot")?.getString()
+    val userDir = File(System.getProperty("user.dir"))
+
+    val rootSrcDir = when {
+        srcRootDirProp != null -> File(srcRootDirProp)
+        userDir.name == "testserver-controller" -> userDir.parentFile
+        File(userDir, "settings.gradle").exists() -> userDir
+        else -> {
+            val exception = IllegalStateException(
+                "ERROR: Could not find the UstadMobile root source directory. If the current " +
+                "working directory is not the source root directory or child thereof, then this path" +
+                "must be specified using the srcRoot property e.g. P:srcRoot=path"
+            )
+            println(exception.message)
+            throw exception
+        }
+    }
+
+    val serverDir = File(rootSrcDir, "app-ktor-server")
+    val testFilesDir = File(File(rootSrcDir, "test-end-to-end"), "test-files")
     val testContentDir = File(testFilesDir, "content")
     log.info("TEST FILES: ${testContentDir.absolutePath}")
 
     if(!serverDir.exists()) {
-        println("ERROR: Server dir does not exist! testServerManager working directory MUST be the " +
+        println("ERROR: Source root directory ($rootSrcDir) does not exist! testServerManager working directory MUST be the " +
                 "root directory of the source code")
         throw IllegalStateException("ERROR: Server dir does not exist! testServerManager working directory MUST be the " +
                 "root directory of the source code")
@@ -123,6 +141,11 @@ fun Application.testServerController() {
         allowHeader(HttpHeaders.ContentType)
         anyHost()
     }
+
+    /*
+     * Required because NPM start-server uses a HEAD request to check if the server is ready.
+     */
+    install(AutoHeadResponse)
 
     install(CallLogging)
 

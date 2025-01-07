@@ -4,8 +4,8 @@ These are end-to-end tests for the web version of the app built using [Cypress](
 
 Requirements:
 
-* Install Node and NPM as per [NPM official docs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm). 
-  This is tested using NPM10 and Node 18.
+* Install Node and NPM as per [NPM official docs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 
+  e.g. using node version manager. This is tested using NPM10 and Node 18.
 * Install Cypress dependencies as [Cypress docs](https://docs.cypress.io/guides/continuous-integration/introduction#Dependencies)
 * Build the app-ktor-server and testserver-controller (inc) e.g.
   
@@ -16,10 +16,21 @@ Requirements:
  Important: Building MUST use ```-Pktorbundleproductionjs=true``` to include the production webapp
  in the server. See the building for production note in app-ktor-server/README.md.
 
+* Run ```npm install``` to install NPM dependencies.
+
 Running:
 
 ```
-npm test
+npm run test
+```
+
+Continuous integration (CI):
+
+In a CI environment it is likely necessary to set the port to avoid potential conflict with other
+job running.
+```
+export TESTCONTROLLER_URL=http://localhost:port/
+npm run test-ci
 ```
 
 How it works (in progress):

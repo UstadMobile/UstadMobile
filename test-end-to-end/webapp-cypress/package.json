@@ -12,8 +12,12 @@
     "@this-dot/cypress-indexeddb": "^2.0.0"
   },
   "scripts": {
-    "start-server": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar -P:srcRoot=../../ -P:siteUrl=http://localhost:8087/",
+    "start-server-ci": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar $TESTCONTROLLER_URL",
+    "cy:run-ci": "cypress run --config baseUrl=$TESTCONTROLLER_URL",
+    "test-ci": "start-server-and-test start-server-ci $TESTCONTROLLER_URL cy:run-ci",
+
+    "start-server": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar",
     "cy:run": "cypress run",
-    "test": "start-server-and-test start-server http-get://localhost:8075 cy:run"
+    "test": "start-server-and-test start-server http://localhost:8075/ cy:run"
   }
 }
