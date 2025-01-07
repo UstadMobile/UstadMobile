@@ -16,18 +16,11 @@ Requirements:
  Important: Building MUST use ```-Pktorbundleproductionjs=true``` to include the production webapp
  in the server. See the building for production note in app-ktor-server/README.md.
 
-This is currently running/tested on Ubuntu Linux. It should work on Windows, but this is not yet 
-tested.
-
 Running:
+
 ```
-./run-cypress-test.sh
+npm test
 ```
-
-Optional args:
-
-* --spec specname (as found in e2e directory, without the .cy.js suffix e.g. ```--spec WEB_001_001_add_content```)
-
 
 How it works (in progress):
 
