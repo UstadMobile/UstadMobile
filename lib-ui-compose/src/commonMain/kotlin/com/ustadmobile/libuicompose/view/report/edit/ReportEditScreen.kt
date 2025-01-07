@@ -89,9 +89,13 @@ private fun ReportEditScreen(
                         val updatedOptions = uiState.reportOptions2.copy(title = newTitle)
                         onReportChanged(updatedOptions)
                     },
+                    isError = uiState.reportTitleError != null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     supportingText = {
-                    }
+                        Text(
+                            uiState.reportTitleError ?: stringResource(MR.strings.required)
+                        )
+                    },
                 )
             }
         }
@@ -108,6 +112,12 @@ private fun ReportEditScreen(
                 onOptionSelected = {
                     val updatedOptions = uiState.reportOptions2.copy(xAxis = it.value)
                     onReportChanged(updatedOptions)
+                },
+                isError = uiState.xAxisError != null,
+                supportingText = {
+                    Text(
+                        uiState.xAxisError ?: stringResource(MR.strings.required)
+                    )
                 },
             )
         }
@@ -145,6 +155,12 @@ private fun ReportEditScreen(
                                 val updatedSeries = seriesItem.copy(reportSeriesTitle = newTitle)
                                 onSeriesChanged(updatedSeries)
                             },
+                            isError = uiState.seriesTitleError != null,
+                            supportingText = {
+                                Text(
+                                    uiState.seriesTitleError ?: stringResource(MR.strings.required)
+                                )
+                            },
                         )
                         Icon(
                             imageVector = Icons.Filled.Close,
@@ -172,7 +188,13 @@ private fun ReportEditScreen(
                                 ReportSeriesYAxis.entries.firstOrNull { it.value == selectedOption.value }
                                     ?: ReportSeriesYAxis.NONE
                             onSeriesChanged(seriesItem.copy(reportSeriesYAxis = selectedYAxis))
-                        }
+                        },
+                        isError = uiState.yAxisError != null,
+                        supportingText = {
+                            Text(
+                                uiState.yAxisError ?: stringResource(MR.strings.required)
+                            )
+                        },
                     )
 
                     // Subgroup Dropdown
@@ -302,27 +324,33 @@ fun LabeledDropdownMenu(
     label: String,
     options: List<MessageIdOption2>,
     selectedValue: Int,
-    onOptionSelected: (MessageIdOption2) -> Unit
-){
+    onOptionSelected: (MessageIdOption2) -> Unit,
+    supportingText: @Composable (() -> Unit)? = null,
+    isError: Boolean = false
+) {
     Column(
         modifier = Modifier.defaultScreenPadding(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
-
     ) {
         Text(text = label, maxLines = 1)
         ExposedDropdownMenu(
             options = options,
             selectedValue = selectedValue,
-            onOptionSelected = onOptionSelected
+            onOptionSelected = onOptionSelected,
+            supportingText = supportingText,
+            isError = isError
         )
     }
 }
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ExposedDropdownMenu(
     options: List<MessageIdOption2>,
     selectedValue: Int,
-    onOptionSelected: (MessageIdOption2) -> Unit
+    onOptionSelected: (MessageIdOption2) -> Unit,
+    supportingText: @Composable (() -> Unit)? = null,
+    isError: Boolean = false
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val selectedOption = options.firstOrNull { it.value == selectedValue }
@@ -335,11 +363,12 @@ fun ExposedDropdownMenu(
             value = selectedOption?.stringResource?.let { stringResource(it) } ?: "",
             onValueChange = {},
             readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-            }
+            },
+            supportingText = supportingText,
+            isError = isError
         )
         ExposedDropdownMenu(
             expanded = isExpanded,
@@ -347,10 +376,12 @@ fun ExposedDropdownMenu(
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(stringResource(option.stringResource)) },
                     onClick = {
                         onOptionSelected(option)
                         isExpanded = false
+                    },
+                    text = {
+                        Text(stringResource(option.stringResource))
                     }
                 )
             }

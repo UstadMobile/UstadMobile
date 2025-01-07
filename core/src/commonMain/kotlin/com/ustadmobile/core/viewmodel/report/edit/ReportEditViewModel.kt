@@ -11,10 +11,8 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.replace
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
-import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
-import com.ustadmobile.core.viewmodel.report.list.ReportListViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Report
 import kotlinx.coroutines.async
@@ -29,6 +27,12 @@ import org.kodein.di.DI
 
 data class ReportEditUiState(
     val reportOptions2: ReportOptions2 = ReportOptions2(),
+    val reportTitleError: String? = null,
+    val xAxisError: String? = null,
+    val yAxisError: String? = null,
+    val seriesTitleError: String? = null,
+    val subGroupError: String? = null,
+    val chartTypeError: String? = null,
 )
 
 class ReportEditViewModel(
@@ -45,7 +49,7 @@ class ReportEditViewModel(
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
-        val title =  if(entityUid == 0L)
+        val title = if (entityUid == 0L)
             systemImpl.getString(MR.strings.add_a_new_report)
         else
             systemImpl.getString(MR.strings.edit_report)
@@ -73,7 +77,19 @@ class ReportEditViewModel(
                         }
                     },
                     makeDefault = {
-                        ReportOptions2()
+                        ReportOptions2(
+                            title = "",
+                            series = listOf(
+                                ReportSeries2(
+                                    reportSeriesUid = 1,
+                                    reportSeriesVisualType = null,
+                                    reportSeriesSubGroup = null,
+                                    reportTimeRange = null,
+                                    reportSeriesYAxis = null,
+                                    reportSeriesFilters = emptyList()
+                                )
+                            )
+                        )
                     },
                     uiUpdate = { loadedReport ->
                         _uiState.update { prev ->
@@ -107,6 +123,35 @@ class ReportEditViewModel(
     }
 
     fun onClickSave() {
+        val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
+        _uiState.update { prev ->
+            prev.copy(
+                reportTitleError = if (prev.reportOptions2.title.isEmpty()) {
+                    requiredFieldMessage
+                } else {
+                    null
+                },
+                xAxisError =  if (prev.reportOptions2.xAxis == null) {
+                    requiredFieldMessage
+                } else {
+                    null
+                },
+                seriesTitleError = if (prev.reportOptions2.series.any { it.reportSeriesTitle.isNullOrEmpty() }) {
+                    requiredFieldMessage
+                } else {
+                    null
+                },
+                yAxisError = if (prev.reportOptions2.series.any { it.reportSeriesYAxis == null }) {
+                    requiredFieldMessage
+                } else {
+                    null
+                }
+            )
+        }
+        if (_uiState.value.hasErrors()) {
+            loadingState = LoadingUiState.NOT_LOADING
+            return
+        }
         viewModelScope.launch {
             activeRepo.withDoorTransactionAsync {
                 val currentReport = _uiState.value.reportOptions2
@@ -125,19 +170,38 @@ class ReportEditViewModel(
                     }
                 } catch (e: Exception) {
                     println("Error updating report options: ${e.message}")
-                }finally {
+                } finally {
                     finishWithResult(ReportDetailViewModel.DEST_NAME, report.reportUid ?: 0, report)
                 }
             }
         }
-
-
-
     }
 
     fun onEntityChanged(newOptions: ReportOptions2) {
         _uiState.update { currentState ->
-            currentState.copy(reportOptions2 = newOptions)
+            currentState.copy(
+                reportOptions2 = newOptions,
+                reportTitleError = updateErrorMessageOnChange(
+                    currentState.reportOptions2.title,
+                    newOptions.title,
+                    currentState.reportTitleError
+                ),
+                xAxisError = updateErrorMessageOnChange(
+                    currentState.reportOptions2.xAxis,
+                    newOptions.xAxis,
+                    currentState.xAxisError
+                ),
+                seriesTitleError = updateErrorMessageOnChange(
+                    currentState.reportOptions2.series.map { it.reportSeriesTitle },
+                    newOptions.series.map { it.reportSeriesTitle },
+                    currentState.seriesTitleError
+                ),
+                yAxisError = updateErrorMessageOnChange(
+                    currentState.reportOptions2.series.map { it.reportSeriesYAxis },
+                    newOptions.series.map { it.reportSeriesYAxis },
+                    currentState.yAxisError
+                )
+            )
         }
         scheduleEntityCommitToSavedState(
             entity = newOptions,
@@ -145,6 +209,7 @@ class ReportEditViewModel(
             commitDelay = 200
         )
     }
+
 
     fun onSeriesChanged(updatedSeries: ReportSeries2) {
         _uiState.update { prev ->
@@ -245,6 +310,15 @@ class ReportEditViewModel(
                 )
             )
         }
+    }
+
+    private fun ReportEditUiState.hasErrors(): Boolean {
+        return reportTitleError != null ||
+                xAxisError != null ||
+                seriesTitleError != null ||
+                subGroupError != null ||
+                chartTypeError != null ||
+                yAxisError != null
     }
 
     companion object {

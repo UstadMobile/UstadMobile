@@ -59,6 +59,9 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 onTextChange = { newValue ->
                     props.onEntityChanged(props.uiState.reportOptions2.copy(title = newValue))
                 }
+                helperText = ReactNode(props.uiState.reportTitleError ?: strings[MR.strings.required])
+                error = props.uiState.reportTitleError != null
+
             }
 
 
@@ -76,6 +79,8 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 onChange = { selectedValue ->
                     props.onEntityChanged(props.uiState.reportOptions2.copy(xAxis = selectedValue.value))
                 }
+                helperText = ReactNode(props.uiState.xAxisError ?: strings[MR.strings.required])
+                error = (props.uiState.xAxisError != null).toString()
             }
 
             Divider { orientation = Orientation.horizontal }

@@ -86,7 +86,7 @@ fun ReportFilterEditScreen(
             ) {
                 UstadInputFieldLayout(
                     modifier = Modifier
-                        .weight(1F)
+                        .weight(1.5F)
                         .fillMaxWidth(),
                 ) {
                     LabeledDropdownMenu(
