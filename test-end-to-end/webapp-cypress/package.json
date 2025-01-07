@@ -12,11 +12,11 @@
     "@this-dot/cypress-indexeddb": "^2.0.0"
   },
   "scripts": {
-    "start-server-ci": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar $TESTCONTROLLER_URL",
+    "start-server-ci": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar $TESTCONTROLLER_URL -P:srcRoot=../../",
     "cy:run-ci": "cypress run --config baseUrl=$TESTCONTROLLER_URL",
     "test-ci": "start-server-and-test start-server-ci $TESTCONTROLLER_URL cy:run-ci",
 
-    "start-server": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar",
+    "start-server": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar http://localhost:8075/ -P:srcRoot=../../",
     "cy:run": "cypress run",
     "test": "start-server-and-test start-server http://localhost:8075/ cy:run"
   }

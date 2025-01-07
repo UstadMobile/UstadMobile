@@ -1,6 +1,7 @@
 package com.ustadmobile.test.http
 
 import com.ustadmobile.lib.util.SysPathUtil
+import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_URL
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
@@ -47,7 +48,7 @@ fun Application.testServerController() {
         File(it)
     } ?: File(".")
 
-    val serverSiteUrl = environment.config.property("siteHost").getString()
+    val testHost = environment.config.property(PARAM_NAME_URL).getString()
 
     if(adbPath == null || !adbPath.exists()) {
         throw IllegalStateException("ERROR: ADB path does not exist")
@@ -245,7 +246,7 @@ fun Application.testServerController() {
                     ?: throw IllegalArgumentException("Could not find server command in PATH ${serverArgs[0]}")
             }
 
-            val serverArgsWithSiteUrl = serverArgs + "-P:ktor.ustad.siteUrl=$serverSiteUrl"
+            val serverArgsWithSiteUrl = serverArgs + "-P:ktor.ustad.siteUrl=$testHost"
             serverProcess = ProcessBuilder(serverArgsWithSiteUrl)
                 .directory(serverDir)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
@@ -284,8 +285,8 @@ fun Application.testServerController() {
 
             call.respond(
                 ServerInfo(
-                    url = serverSiteUrl,
-                    port = Url(serverSiteUrl).port,
+                    url = testHost,
+                    port = Url(testHost).port,
                     extraInfo = response
                 )
             )

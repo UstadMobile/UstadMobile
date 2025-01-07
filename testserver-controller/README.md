@@ -11,14 +11,12 @@ This is not tested or supported on Windows. It might (or might not) work
 Usage:
 
 Start the test server controller:
-```
-./start.sh --siteUrl http://ip.addr:8087/
-```
 
-The site url must be specified as per the runserver.sh command. See the [main README.md](../README.md) 
-as per "Step 4: Build/run the server".
-
-To start/restart the actual server (e.g. to run an end-to-end test), request the start url:
+```
+./gradlew testserver-controller:run [--args='http://localhost:port/']
+```
+If no URL is specified testserver-controller will automatically use http://localhost:8075/ by 
+default.
 
 ```
 http://localhost:8075/start

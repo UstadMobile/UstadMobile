@@ -12,6 +12,9 @@ class TestServerControllerMain {
         @Suppress("MemberVisibilityCanBePrivate")
         const val DEFAULT_PORT = 8075
 
+        const val PARAM_NAME_URL = "url"
+
+
         /**
          * First parameter, if any parameters are present, must be the url of the testserver controller
          */
@@ -21,7 +24,7 @@ class TestServerControllerMain {
 
             val environmentArgs = buildList {
                 add("-port=${testServerControllerUrl.port}")
-                add("-P:siteHost=${testServerControllerUrl.host}")
+                add("-P:$PARAM_NAME_URL=${testServerControllerUrl.host}")
 
                 if(args.size > 1)
                     addAll(args.drop(1))
