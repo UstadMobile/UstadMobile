@@ -95,8 +95,9 @@ fun Application.testServerController() {
         }
     }
 
-    val serverDir = File("app-ktor-server")
-    val testFilesDir = File("test-end-to-end", "test-files")
+    val srcRootDir = File(environment.config.propertyOrNull("srcRoot")?.getString() ?: ".")
+    val serverDir = File(srcRootDir, "app-ktor-server")
+    val testFilesDir = File(File(srcRootDir, "test-end-to-end"), "test-files")
     val testContentDir = File(testFilesDir, "content")
     log.info("TEST FILES: ${testContentDir.absolutePath}")
 
