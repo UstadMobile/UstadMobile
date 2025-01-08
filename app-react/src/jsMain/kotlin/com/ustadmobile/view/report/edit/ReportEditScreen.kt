@@ -9,21 +9,24 @@ import com.ustadmobile.core.domain.report.model.ReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.util.ext.onTextChange
-import com.ustadmobile.view.components.UstadMessageIdSelectField
 import kotlinx.coroutines.Dispatchers
 import mui.icons.material.Close
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.Divider
+import mui.material.FormControl
+import mui.material.FormHelperText
 import mui.material.Icon
 import mui.material.IconButton
+import mui.material.InputLabel
+import mui.material.MenuItem
 import mui.material.Orientation
+import mui.material.Select
 import mui.material.Stack
 import mui.material.StackDirection
 import mui.material.TextField
@@ -44,6 +47,7 @@ external interface ReportEditScreenProps : Props {
     var onAddFilter: (seriesId: Int) -> Unit
     var onRemoveFilter: (index: Int, seriesId: Int) -> Unit
 }
+
 
 private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
     val strings = useStringProvider()
@@ -66,22 +70,40 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
 
 
             // X Axis Selection
-            UstadMessageIdSelectField {
-                id = "X Axis"
-                value = props.uiState.reportOptions2.xAxis ?: 0
-                options = ReportXAxis.entries.map { xAxis ->
-                    MessageIdOption2(
-                        stringResource = xAxis.stringResource,
-                        value = xAxis.value
-                    )
+            FormControl {
+                fullWidth = true
+                error = props.uiState.xAxisError != null
+
+                InputLabel {
+                    id = "x_axis_label"
+                    shrink = true
+                    +ReactNode(strings[MR.strings.x_axis] + "*")
                 }
-                label = strings[MR.strings.x_axis]
-                onChange = { selectedValue ->
-                    props.onEntityChanged(props.uiState.reportOptions2.copy(xAxis = selectedValue.value))
+
+                Select {
+                    value = props.uiState.reportOptions2.xAxis?.toString() ?: "0"
+                    id = "x_axis"
+                    labelId = "x_axis_label"
+                    fullWidth = true
+                    onChange = { event, _ ->
+                        val selectedValue = ReportXAxis.values().firstOrNull { it.name == event.target.value }
+                            ?: ReportXAxis.NONE // Default to NONE if no match
+                        props.onEntityChanged(props.uiState.reportOptions2.copy(xAxis = selectedValue))
+                    }
+
+                    ReportXAxis.entries.forEach { option ->
+                        MenuItem {
+                            value = option.label
+                            +ReactNode(strings[option.label])
+                        }
+                    }
                 }
-                helperText = ReactNode(props.uiState.xAxisError ?: strings[MR.strings.required])
-                error = (props.uiState.xAxisError != null).toString()
+
+                FormHelperText {
+                    +ReactNode(props.uiState.xAxisError ?: strings[MR.strings.required])
+                }
             }
+
 
             Divider { orientation = Orientation.horizontal }
 
@@ -102,84 +124,138 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     }
 
                     // Y Axis Dropdown
-                    UstadMessageIdSelectField {
-                        id = "Y Axis"
-                        value = series.reportSeriesYAxis?.value ?: 0
-                        options = ReportSeriesYAxis.entries.map { yAxis ->
-                            MessageIdOption2(
-                                stringResource = yAxis.stringResource,
-                                value = yAxis.value
-                            )
+                    FormControl {
+                        fullWidth = true
+                        error = props.uiState.yAxisError != null
+
+                        InputLabel {
+                            id = "Y Axis"
+                            shrink = true
+                            +ReactNode(strings[MR.strings.y_axis] + "*")
                         }
-                        label = strings[MR.strings.y_axis]
-                        onChange = { selectedValue ->
-                            val selectedYAxis =
-                                ReportSeriesYAxis.entries.firstOrNull { it.value == selectedValue.value }
+
+                        Select {
+                            value = series.reportSeriesYAxis
+                            id = "Y Axis"
+                            labelId = "y_axis_label"
+                            fullWidth = true
+                            onChange = { event, _ ->
+                                val selectedValue = ReportSeriesYAxis.entries.firstOrNull { it.name == event.target.value }
                                     ?: ReportSeriesYAxis.NONE
-                            props.onSeriesChanged(series.copy(reportSeriesYAxis = selectedYAxis))
+                                props.onSeriesChanged(series.copy(reportSeriesYAxis = selectedValue))
+                            }
+
+                            ReportSeriesYAxis.entries.forEach { option ->
+                                MenuItem {
+                                    value = option.label
+                                    +ReactNode(strings[option.label])
+                                }
+                            }
+                        }
+
+                        FormHelperText {
+                            +ReactNode(props.uiState.yAxisError ?: strings[MR.strings.required])
                         }
                     }
 
+
                     // Subgroup by Dropdown
-                    UstadMessageIdSelectField {
-                        id = "Subgroup by"
-                        value = series.reportSeriesSubGroup?.value ?: 0
-                        options = ReportXAxis.entries.map { xAxis ->
-                            MessageIdOption2(
-                                stringResource = xAxis.stringResource,
-                                value = xAxis.value
-                            )
+                    FormControl {
+                        fullWidth = true
+                        error = props.uiState.subGroupError != null
+
+                        InputLabel {
+                            id = "Subgroup by"
+                            shrink = true
+                            +ReactNode(strings[MR.strings.subgroup_by] + "*")
                         }
-                        label = strings[MR.strings.subgroup_by]
-                        onChange = { selectedValue ->
-                            val selectedXAxis =
-                                ReportXAxis.entries.firstOrNull { it.value == selectedValue.value }
-                                    ?: ReportXAxis.DAY
-                            val updatedSeries =
-                                series.copy(reportSeriesSubGroup = selectedXAxis)
-                            props.onSeriesChanged(updatedSeries)
+
+                        Select {
+                            value = series.reportSeriesSubGroup
+                            id = "Subgroup by"
+                            labelId = "sub_group_label"
+                            fullWidth = true
+                            onChange = { event, _ ->
+                                val selectedValue = ReportXAxis.entries.firstOrNull { it.name == event.target.value }
+                                    ?: ReportXAxis.NONE
+                                props.onSeriesChanged(series.copy(reportSeriesSubGroup = selectedValue))
+                            }
+
+                            ReportXAxis.entries.forEach { option ->
+                                MenuItem {
+                                    value = option.label
+                                    +ReactNode(strings[option.label])
+                                }
+                            }
+                        }
+
+                        FormHelperText {
+                            +ReactNode(props.uiState.subGroupError ?: strings[MR.strings.required])
                         }
                     }
                 }
 
                 // Chart Type Dropdown
-                UstadMessageIdSelectField {
-                    id = "Chart Type"
-                    value = series.reportSeriesVisualType?.value ?: 0
-                    options = ReportSeriesVisualType.entries.map { visualType ->
-                        MessageIdOption2(
-                            stringResource = visualType.stringResource,
-                            value = visualType.value
-                        )
+                FormControl {
+                    fullWidth = true
+                    error = props.uiState.chartTypeError != null
+
+                    InputLabel {
+                        id = "Chart Type"
+                        shrink = true
+                        +ReactNode(strings[MR.strings.chart_type] + "*")
                     }
-                    label = strings[MR.strings.chart_type]
-                    onChange = { selectedValue ->
-                        val selectedVisualType =
-                            ReportSeriesVisualType.entries.firstOrNull { it.value == selectedValue.value }
+
+                    Select {
+                        value = series.reportSeriesYAxis
+                        id = "Chart Type"
+                        labelId = "y_axis_label"
+                        fullWidth = true
+                        onChange = { event, _ ->
+                            val selectedValue = ReportSeriesVisualType.entries.firstOrNull { it.name == event.target.value }
                                 ?: ReportSeriesVisualType.BAR_CHART
-                        val updatedSeries =
-                            series.copy(reportSeriesVisualType = selectedVisualType)
-                        props.onSeriesChanged(updatedSeries)
+                            props.onSeriesChanged(series.copy(reportSeriesVisualType = selectedValue))
+                        }
+
+                        ReportSeriesVisualType.entries.forEach { option ->
+                            MenuItem {
+                                value = option.label
+                                +ReactNode(strings[option.label])
+                            }
+                        }
+                    }
+
+                    FormHelperText {
+                        +ReactNode(props.uiState.chartTypeError ?: strings[MR.strings.required])
                     }
                 }
 
                 // Time Range Dropdown
-                UstadMessageIdSelectField {
-                    id = "Time Range"
-                    value = series.reportTimeRange?.value ?: 0
-                    options = ReportTimeRange.entries.map { timeRange ->
-                        MessageIdOption2(
-                            stringResource = timeRange.stringResource,
-                            value = timeRange.value
-                        )
+                FormControl {
+                    fullWidth = true
+                    InputLabel {
+                        id = "Time Range"
+                        shrink = true
+                        +ReactNode(strings[MR.strings.chart_type] + "*")
                     }
-                    label = strings[MR.strings.time_range]
-                    onChange = { selectedValue ->
-                        val selectedTimeRange =
-                            ReportTimeRange.entries.firstOrNull { it.value == selectedValue.value }
+
+                    Select {
+                        value = series.reportSeriesYAxis
+                        id = "Time Range"
+                        labelId = "time_range_label"
+                        fullWidth = true
+                        onChange = { event, _ ->
+                            val selectedValue = ReportTimeRange.entries.firstOrNull { it.name == event.target.value }
                                 ?: ReportTimeRange.LAST_WEEK
-                        val updatedSeries = series.copy(reportTimeRange = selectedTimeRange)
-                        props.onSeriesChanged(updatedSeries)
+                            props.onSeriesChanged(series.copy(reportTimeRange = selectedValue))
+                        }
+
+                        ReportTimeRange.entries.forEach { option ->
+                            MenuItem {
+                                value = option.label
+                                +ReactNode(strings[option.label])
+                            }
+                        }
                     }
                 }
                 // Filters section converted to MUI:
@@ -258,3 +334,5 @@ val ReportEditScreen = FC<Props> {
         onRemoveFilter = viewModel::onRemoveFilter
     }
 }
+
+

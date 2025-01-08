@@ -4,6 +4,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.Comparisons
 import com.ustadmobile.core.domain.report.model.FilterType
 import com.ustadmobile.core.domain.report.model.ReportFilter3
+import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.MessageIdOption2
@@ -32,48 +33,66 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
     UstadStandardContainer {
         Stack {
             spacing = responsive(2)
-
-            UstadMessageIdSelectField {
-                id = "Field"
-                value = props.uiState.filters?.reportFilterField?.value ?: 0
-                options = FilterType.entries.map { filterType ->
-                    MessageIdOption2(
-                        stringResource = filterType.stringResource,
-                        value = filterType.value
-                    )
+            FormControl {
+                fullWidth = true
+                InputLabel {
+                    id = "Field"
+                    shrink = true
+                    +ReactNode(strings[MR.strings.y_axis] + "*")
                 }
-                label =strings[MR.strings.field]
-                onChange = { selectedValue ->
-                    val selectedFilterType =
-                        FilterType.entries.firstOrNull { it.value == selectedValue.value }
+
+                Select {
+                    value = props.uiState.filters?.reportFilterField
+                    id = "Field"
+                    labelId = "abel"
+                    fullWidth = true
+                    onChange = { event, _ ->
+                        val selectedValue = FilterType.entries.firstOrNull { it.name == event.target.value }
                             ?: FilterType.PERSON_AGE
-                    val updatedOptions =
-                        props.uiState.filters?.copy(reportFilterField = selectedFilterType)
-                    props.onReportFilterChanged(updatedOptions)
-                    println("updatedOptions: $updatedOptions")                     }
+                        val updatedOptions =
+                            props.uiState.filters?.copy(reportFilterField = selectedValue)
+                        props.onReportFilterChanged(updatedOptions)
+                    }
+
+                    ReportSeriesYAxis.entries.forEach { option ->
+                        MenuItem {
+                            value = option.label
+                            +ReactNode(strings[option.label])
+                        }
+                    }
+                }
             }
 
             Stack {
                 direction = responsive(StackDirection.row)
                 spacing = responsive(10.px)
-
-                UstadMessageIdSelectField {
-                    id = "Condition"
-                    value = props.uiState.filters?.reportFilterCondition?.value ?: 0
-                    options = Comparisons.entries.map { comparison ->
-                        MessageIdOption2(
-                            stringResource = comparison.stringResource,
-                            value = comparison.value
-                        )
+                FormControl {
+                    fullWidth = true
+                    InputLabel {
+                        id = "Condition"
+                        shrink = true
+                        +ReactNode(strings[MR.strings.condition] + "*")
                     }
-                    label = strings[MR.strings.condition]
-                    onChange = { selectedValue ->
-                        val selectedComparison =
-                            Comparisons.entries.firstOrNull { it.value == selectedValue.value }
+
+                    Select {
+                        value = props.uiState.filters?.reportFilterCondition
+                        id = "Condition"
+                        labelId = "condition_label"
+                        fullWidth = true
+                        onChange = { event, _ ->
+                            val selectedValue = Comparisons.entries.firstOrNull { it.name == event.target.value }
                                 ?: Comparisons.EQUALS
-                        val updatedOptions =
-                            props.uiState.filters?.copy(reportFilterCondition = selectedComparison)
-                        props.onReportFilterChanged(updatedOptions)
+                            val updatedOptions =
+                                props.uiState.filters?.copy(reportFilterCondition = selectedValue)
+                            props.onReportFilterChanged(updatedOptions)
+                        }
+
+                        Comparisons.entries.forEach { option ->
+                            MenuItem {
+                                value = option.label
+                                +ReactNode(strings[option.label])
+                            }
+                        }
                     }
                 }
 

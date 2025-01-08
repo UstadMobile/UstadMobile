@@ -28,14 +28,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.model.GenderType
+import com.ustadmobile.core.domain.report.model.OptionWithLabelStringResource
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportXAxis
-import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -77,42 +76,35 @@ private fun ReportEditScreen(
             .defaultItemPadding(bottom = 16.dp)
     ) {
         item {
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth()
-                        .defaultScreenPadding()
-                    ,
-                    value = uiState.reportOptions2.title,
-                    label = {Text(stringResource(MR.strings.title)+ "*")},
-                    singleLine = true,
-                    onValueChange = { newTitle ->
-                        val updatedOptions = uiState.reportOptions2.copy(title = newTitle)
-                        onReportChanged(updatedOptions)
-                    },
-                    isError = uiState.reportTitleError != null,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                    supportingText = {
-                        Text(
-                            uiState.reportTitleError ?: stringResource(MR.strings.required)
-                        )
-                    },
-                )
-
-        }
-        item {
-            ExposedDropdownMenu(
-                modifier = Modifier
-                    .fillMaxWidth()
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth()
                     .defaultScreenPadding(),
-                selectedValue = uiState.reportOptions2.xAxis ?: 0,
-                label = {Text(stringResource(MR.strings.x_axis)+ "*")},
-                options = ReportXAxis.entries.map { xAxis ->
-                    MessageIdOption2(
-                        stringResource = xAxis.stringResource,
-                        value = xAxis.value
+                value = uiState.reportOptions2.title,
+                label = { Text(stringResource(MR.strings.title) + "*") },
+                singleLine = true,
+                onValueChange = { newTitle ->
+                    val updatedOptions = uiState.reportOptions2.copy(title = newTitle)
+                    onReportChanged(updatedOptions)
+                },
+                isError = uiState.reportTitleError != null,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                supportingText = {
+                    Text(
+                        uiState.reportTitleError ?: stringResource(MR.strings.required)
                     )
                 },
+            )
+
+        }
+
+        item {
+
+            ExposedDropdownMenu(
+                selectedValue = uiState.reportOptions2.xAxis,
+                label = { Text(stringResource(MR.strings.x_axis) + "*") },
+                options = ReportXAxis.entries,
                 onOptionSelected = {
-                    val updatedOptions = uiState.reportOptions2.copy(xAxis = it.value)
+                    val updatedOptions = uiState.reportOptions2.copy(xAxis = it)
                     onReportChanged(updatedOptions)
                 },
                 isError = uiState.xAxisError != null,
@@ -150,7 +142,7 @@ private fun ReportEditScreen(
                             value = seriesItem.reportSeriesTitle,
                             label = {
                                 Text(
-                                    stringResource(MR.strings.series_title)+ "*",
+                                    stringResource(MR.strings.series_title) + "*",
                                 )
                             },
                             singleLine = true,
@@ -178,48 +170,21 @@ private fun ReportEditScreen(
 
                     // Y Axis Dropdown
                     ExposedDropdownMenu(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .defaultScreenPadding(),
-                        label = {Text(stringResource(MR.strings.y_axis)+ "*")},
-                        options = ReportSeriesYAxis.entries.map { yAxis ->
-                            MessageIdOption2(
-                                stringResource = yAxis.stringResource,
-                                value = yAxis.value
-                            )
-                        },
-                        selectedValue = seriesItem.reportSeriesYAxis?.value ?: 0,
-                        onOptionSelected = { selectedOption ->
-                            val selectedYAxis =
-                                ReportSeriesYAxis.entries.firstOrNull { it.value == selectedOption.value }
-                                    ?: ReportSeriesYAxis.NONE
-                            onSeriesChanged(seriesItem.copy(reportSeriesYAxis = selectedYAxis))
-                        },
-                        isError = uiState.yAxisError != null,
-                        supportingText = {
-                            Text(
-                                uiState.yAxisError ?: stringResource(MR.strings.required)
-                            )
-                        },
+                        label = { Text(stringResource(MR.strings.y_axis) + "*") },
+                        options = ReportSeriesYAxis.entries,
+                        selectedValue = seriesItem.reportSeriesYAxis,
+                        onOptionSelected = { selectedYAxis ->
+                            val updatedSeries = seriesItem.copy(reportSeriesYAxis = selectedYAxis)
+                            onSeriesChanged(updatedSeries)
+                        }
                     )
 
                     // Subgroup Dropdown
                     ExposedDropdownMenu(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .defaultScreenPadding(),
-                        label = {Text(stringResource(MR.strings.subgroup_by))},
-                        options = ReportXAxis.entries.map { xAxis ->
-                            MessageIdOption2(
-                                stringResource = xAxis.stringResource,
-                                value = xAxis.value
-                            )
-                        },
-                        selectedValue = seriesItem.reportSeriesSubGroup?.value ?: 0,
-                        onOptionSelected = { selectedOption ->
-                            val selectedXAxis =
-                                ReportXAxis.entries.firstOrNull { it.value == selectedOption.value }
-                                    ?: ReportXAxis.DAY
+                        label = { Text(stringResource(MR.strings.subgroup_by)) },
+                        options = ReportXAxis.entries,
+                        selectedValue = seriesItem.reportSeriesSubGroup,
+                        onOptionSelected = { selectedXAxis ->
                             val updatedSeries =
                                 seriesItem.copy(reportSeriesSubGroup = selectedXAxis)
                             onSeriesChanged(updatedSeries)
@@ -229,21 +194,10 @@ private fun ReportEditScreen(
 
                     // Chart Type Dropdown
                     ExposedDropdownMenu(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .defaultScreenPadding(),
-                        label = {Text(stringResource(MR.strings.chart_type))},
-                        options = ReportSeriesVisualType.entries.map { visualType ->
-                            MessageIdOption2(
-                                stringResource = visualType.stringResource,
-                                value = visualType.value
-                            )
-                        },
-                        selectedValue = seriesItem.reportSeriesVisualType?.value ?: 0,
-                        onOptionSelected = { selectedOption ->
-                            val selectedVisualType =
-                                ReportSeriesVisualType.entries.firstOrNull { it.value == selectedOption.value }
-                                    ?: ReportSeriesVisualType.BAR_CHART
+                        label = { Text(stringResource(MR.strings.chart_type)) },
+                        options = ReportSeriesVisualType.entries,
+                        selectedValue = seriesItem.reportSeriesVisualType,
+                        onOptionSelected = { selectedVisualType ->
                             val updatedSeries =
                                 seriesItem.copy(reportSeriesVisualType = selectedVisualType)
                             onSeriesChanged(updatedSeries)
@@ -252,21 +206,10 @@ private fun ReportEditScreen(
 
                     // Time Range Dropdown
                     ExposedDropdownMenu(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .defaultScreenPadding(),
-                        label = {Text(stringResource(MR.strings.time_range))},
-                        options = ReportTimeRange.entries.map { timeRange ->
-                            MessageIdOption2(
-                                stringResource = timeRange.stringResource,
-                                value = timeRange.value
-                            )
-                        },
-                        selectedValue = seriesItem.reportTimeRange?.value ?: 0,
-                        onOptionSelected = { selectedOption ->
-                            val selectedTimeRange =
-                                ReportTimeRange.entries.firstOrNull { it.value == selectedOption.value }
-                                    ?: ReportTimeRange.LAST_WEEK
+                        label = { Text(stringResource(MR.strings.time_range)) },
+                        options = ReportTimeRange.entries,
+                        selectedValue = seriesItem.reportTimeRange,
+                        onOptionSelected = { selectedTimeRange ->
                             val updatedSeries = seriesItem.copy(reportTimeRange = selectedTimeRange)
                             onSeriesChanged(updatedSeries)
                         }
@@ -337,24 +280,23 @@ private fun ReportEditScreen(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ExposedDropdownMenu(
-    options: List<MessageIdOption2>,
-    selectedValue: Int,
-    onOptionSelected: (MessageIdOption2) -> Unit,
-    supportingText: @Composable (() -> Unit)? = null,
+fun <T : OptionWithLabelStringResource> ExposedDropdownMenu(
+    options: List<T>,
+    selectedValue: T?,
+    modifier: Modifier = Modifier.fillMaxWidth(),
     isError: Boolean = false,
     label: @Composable (() -> Unit)? = null,
-    modifier: Modifier = Modifier.fillMaxWidth()
-    ) {
+    supportingText: @Composable (() -> Unit)? = null,
+    onOptionSelected: (T) -> Unit
+) {
     var isExpanded by remember { mutableStateOf(false) }
-    val selectedOption = options.firstOrNull { it.value == selectedValue }
 
     ExposedDropdownMenuBox(
         expanded = isExpanded,
         onExpandedChange = { isExpanded = !isExpanded }
     ) {
         OutlinedTextField(
-            value = selectedOption?.stringResource?.let { stringResource(it) } ?: "",
+            value = selectedValue?.let { stringResource(it.label) } ?: "",
             onValueChange = {},
             readOnly = true,
             modifier = modifier,
@@ -364,7 +306,7 @@ fun ExposedDropdownMenu(
             supportingText = supportingText,
             isError = isError,
             label = label,
-            )
+        )
         ExposedDropdownMenu(
             expanded = isExpanded,
             onDismissRequest = { isExpanded = false }
@@ -376,7 +318,7 @@ fun ExposedDropdownMenu(
                         isExpanded = false
                     },
                     text = {
-                        Text(stringResource(option.stringResource))
+                        Text(stringResource(option.label))
                     }
                 )
             }

@@ -6,15 +6,14 @@ import kotlinx.serialization.Serializable
 
 /** Enum representing different comparison types */
 enum class Comparisons(
-    val value: Int,
-    val stringResource: StringResource,
+    override val label: StringResource,
     val symbol: String
-) {
-    EQUALS(1, MR.strings.equals, "="),
-    NOT_EQUALS(2, MR.strings.not_equals, "!="),
-    GREATER(3, MR.strings.greater, ">"),
-    LESSER(4, MR.strings.lesser, "<"),
-    BETWEEN(5, MR.strings.between, "BETWEEN");
+) : OptionWithLabelStringResource {
+    EQUALS(MR.strings.equals, "="),
+    NOT_EQUALS(MR.strings.not_equals, "!="),
+    GREATER(MR.strings.greater, ">"),
+    LESSER(MR.strings.lesser, "<"),
+    BETWEEN(MR.strings.between, "BETWEEN");
 }
 
 
@@ -24,12 +23,12 @@ sealed class ReportConditionFilterOptions(
     val comparisonTypes: List<Comparisons>,
 ) {
     @Serializable
-     class GenderConditionFilter : ReportConditionFilterOptions(
+    class GenderConditionFilter : ReportConditionFilterOptions(
         comparisonTypes = listOf(Comparisons.EQUALS, Comparisons.NOT_EQUALS)
     )
 
     @Serializable
-     class AgeConditionFilter : ReportConditionFilterOptions(
+    class AgeConditionFilter : ReportConditionFilterOptions(
         comparisonTypes = listOf(
             Comparisons.EQUALS,
             Comparisons.NOT_EQUALS,
@@ -52,3 +51,8 @@ data class ReportFilter3(
 
     var reportFilterValue: String? = ""
 )
+
+
+interface OptionWithLabelStringResource {
+    val label: StringResource
+}
