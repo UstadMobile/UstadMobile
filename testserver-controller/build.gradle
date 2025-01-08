@@ -36,6 +36,7 @@ dependencies {
     implementation libs.kotlinx.serialization
     implementation libs.postgresql
     implementation libs.door.runtime
+    implementation libs.okhttp
 
     testImplementation libs.junit
 }
