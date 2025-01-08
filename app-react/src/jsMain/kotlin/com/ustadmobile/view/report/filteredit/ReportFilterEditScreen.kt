@@ -3,6 +3,7 @@ package com.ustadmobile.view.report.filteredit
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.Comparisons
 import com.ustadmobile.core.domain.report.model.FilterType
+import com.ustadmobile.core.domain.report.model.GenderType
 import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
@@ -33,6 +34,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
         Stack {
             spacing = responsive(2)
 
+            // Filter Type Dropdown
             UstadMessageIdSelectField {
                 id = "Field"
                 value = props.uiState.filters?.reportFilterField?.value ?: 0
@@ -42,21 +44,27 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                         value = filterType.value
                     )
                 }
-                label =strings[MR.strings.field]
+                label = strings[MR.strings.field]
                 onChange = { selectedValue ->
                     val selectedFilterType =
                         FilterType.entries.firstOrNull { it.value == selectedValue.value }
                             ?: FilterType.PERSON_AGE
                     val updatedOptions =
-                        props.uiState.filters?.copy(reportFilterField = selectedFilterType)
+                        props.uiState.filters?.copy(
+                            reportFilterField = selectedFilterType,
+                            reportFilterValue = null, // Reset value
+                            reportFilterCondition = null // Reset condition
+                        )
                     props.onReportFilterChanged(updatedOptions)
-                    println("updatedOptions: $updatedOptions")                     }
+                }
             }
 
+            // Condition and Value Fields
             Stack {
                 direction = responsive(StackDirection.row)
                 spacing = responsive(10.px)
 
+                // Condition Dropdown
                 UstadMessageIdSelectField {
                     id = "Condition"
                     value = props.uiState.filters?.reportFilterCondition?.value ?: 0
@@ -77,13 +85,40 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                     }
                 }
 
-                TextField {
-                    id = "Value"
-                    value = props.uiState.filters?.reportFilterValue ?: ""
-                    label = ReactNode(strings[MR.strings.value] + "*")
-                    onTextChange = {newValue ->
-                        val updatedOptions = props.uiState.filters?.copy(reportFilterValue = newValue)
-                        props.onReportFilterChanged(updatedOptions)
+                // Value Field - Dropdown or Text Input
+                if (props.uiState.filters?.reportFilterField == FilterType.PERSON_GENDER) {
+                    UstadMessageIdSelectField {
+                        id = "Value"
+                        value =
+                            GenderType.entries.firstOrNull { it.name == props.uiState.filters?.reportFilterValue }?.value
+                                ?: 0
+                        options = GenderType.entries.map { gender ->
+                            MessageIdOption2(
+                                stringResource = gender.stringResource,
+                                value = gender.value
+                            )
+                        }
+                        label = strings[MR.strings.value]
+                        onChange = { selectedValue ->
+                            val selectedGender =
+                                GenderType.entries.firstOrNull { it.value == selectedValue.value }
+                                    ?: GenderType.OTHER
+                            val updatedOptions =
+                                props.uiState.filters?.copy(reportFilterValue = selectedGender.name)
+                            props.onReportFilterChanged(updatedOptions)
+                        }
+                    }
+                } else {
+                    TextField {
+                        id = "Value"
+                        value = props.uiState.filters?.reportFilterValue ?: ""
+                        label = ReactNode(strings[MR.strings.value] + "*")
+                        onTextChange = { newValue ->
+                            val updatedOptions =
+                                props.uiState.filters?.copy(reportFilterValue = newValue)
+                            props.onReportFilterChanged(updatedOptions)
+                        }
+                        fullWidth = true
                     }
                 }
             }
@@ -97,7 +132,8 @@ val ReportFilterEditScreenComponent = FC<Props> {
     }
 
     val uiStateVar by viewModel.uiState.collectAsState(
-        ReportFilterEditUiState(), Dispatchers.Main.immediate)
+        ReportFilterEditUiState(), Dispatchers.Main.immediate
+    )
 
     ReportFilterEditScreenComponent2 {
         uiState = uiStateVar
