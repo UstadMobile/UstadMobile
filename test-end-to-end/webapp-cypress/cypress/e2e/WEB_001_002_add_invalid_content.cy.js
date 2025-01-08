@@ -5,18 +5,13 @@ describe('WEB_001_002_add_invalid_content', () => {
   })
 
   it('Admin user create a course and add members to the course', () => {
- // Ensure LEARNING_SPACE_URL is defined before using it
-    const learningSpaceUrl = Cypress.env('LEARNING_SPACE_URL')
-    cy.log(`Learning Space URL: ${learningSpaceUrl}`)
-    expect(learningSpaceUrl).to.exist
-
   // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
   cy.contains("Library").click()
   cy.contains("button","Content").click()
   cy.get('#new_content_from_file').click()
   cy.get('input[type="file"]')
-      .selectFile('../test-files/content/Invalid_Video_Content.mp4',{force:true})
+    .selectFile('../test-files/content/Invalid_Video_Content.mp4',{force:true})
   cy.contains('Invalid file').should('exist')
 })
 

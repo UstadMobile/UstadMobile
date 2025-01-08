@@ -33,75 +33,48 @@ Cypress.on('uncaught:exception', (err) => {
   return true;
 });
 
+
 // Start Test Server
-Cypress.Commands.add('ustadStartTestServer', (waitTime = 6000) => {
-  const testServerUrl = 'http://localhost:8075' // Always use http://localhost:8075
-  const startEndpoint = testServerUrl.endsWith('/') ? `${testServerUrl}start` : `${testServerUrl}/start`
-// Fetch server details from the /start endpoint
-  cy.request('GET', startEndpoint).then((response) => {
-    const { url } = response.body // Use the URL as is
-    const fullUrl = url.endsWith('/') ? url.slice(0, -1) : url // Remove trailing slash if present
-// Set the full URL as an environment variable for subsequent tests
-  cy.log(`Learning Space Server started at: ${fullUrl}`)
-   Cypress.env('LEARNING_SPACE_URL', fullUrl)
-// Debugging log
-  cy.log(`LEARNING_SPACE_URL set to: ${Cypress.env('LEARNING_SPACE_URL')}`)
-  })
-// Wait for the specified time after starting the server
-  cy.wait(waitTime)
+Cypress.Commands.add('ustadStartTestServer', () => {
+// https://docs.cypress.io/api/commands/request#Get-Data-URL-of-an-image
+  cy.request('/start').then((response) => {
+  const { url } = response.body
+  // const { url, username, password } = response.body
+  cy.log(`Learning Space Server started at: ${url}`)
+  Cypress.env('LEARNING_SPACE_URL', url)
+})
 })
 
 // Stop Test Server
 Cypress.Commands.add('ustadStopTestServer', () => {
-  const testServerUrl = 'http://localhost:8075' // Always use http://localhost:8075
-  const stopEndpoint = testServerUrl.endsWith('/') ? `${testServerUrl}stop` : `${testServerUrl}/stop`
-   cy.request({
-     method: 'GET',
-     url: stopEndpoint,
-     failOnStatusCode: false,
-   }).then((response) => {
-     if (response.status === 200) {
-       cy.log('Server successfully stopped');
-     } else if (response.body === 'OK') {
-       cy.log('Server successfully stopped');
-     }
-  })
-  })
+  cy.request('/stop').then((response) => {
+    if (response.body === 'OK'){
+  cy.log('Server successfully stopped');
+  }
+})
+})
 
 // Clear DB and Login
 Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
   const learningSpaceUrl = Cypress.env('LEARNING_SPACE_URL')
-
-// Debugging: Log the LEARNING_SPACE_URL
-  cy.log(`LEARNING_SPACE_URL: ${learningSpaceUrl}`)
-
-  if (!learningSpaceUrl) {
-    throw new Error('LEARNING_SPACE_URL is not defined. Did you call ustadStartTestServer first?')
-  }
-
-  // Clearing IndexedDB for the dynamic hostname
+// Clearing IndexedDB for the dynamic hostname
   const hostname = new URL(learningSpaceUrl).hostname
   const port = new URL(learningSpaceUrl).port
   const indexedDbName = `${hostname}_${port}`
   cy.log(`Clearing IndexedDB: ${indexedDbName}`)
   cy.clearIndexedDb(indexedDbName)
-
-  // Adding query parameters and visiting the login page
+// visit login page
   cy.visit(learningSpaceUrl, {
     qs: { username, password },
     timeout: 60000,
   });
-
-  // Login flow
+// Login to the webapp
   cy.get('input#username', { timeout: 10000 }).should('exist').type(username); // 10 seconds
   cy.get('input#password').type(password);
   cy.get('button#login_button').click();
 });
 
-
-
 // Logout Flow
-
 Cypress.Commands.add('ustadLogout', () => {
    cy.get('#header_avatar').click()
    cy.contains('LOG OUT').click()
