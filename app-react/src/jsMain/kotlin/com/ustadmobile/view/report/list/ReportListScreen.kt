@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemButton
+import mui.material.ListItemIcon
 import mui.material.ListItemText
 import react.FC
 import react.Props
@@ -40,6 +41,7 @@ external interface ReportListProps : Props {
     var refreshCommandFlow: Flow<RefreshCommand>?
     var onListItemClick: (Report) -> Unit
     var onClickAddItem: () -> Unit
+    var onRemoveReport: (Long) -> Unit
 }
 
 val ReportListComponent2 = FC<ReportListProps> { props ->
@@ -77,6 +79,15 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
                             primary = ReactNode(reportAndDetails?.reportTitle ?: "fggfdfdf")
                         }
                     }
+                    ListItemIcon {
+                        mui.material.IconButton {
+                            mui.icons.material.Delete {
+                                onClick = {
+                                    reportAndDetails?.reportUid?.let { props.onRemoveReport(it) }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -104,5 +115,6 @@ val ReportListScreen = FC<Props> {
         this.uiState = uiState
         onListItemClick = viewModel::onClickEntry
         onClickAddItem = viewModel::onClickAdd
+        onRemoveReport = viewModel::onRemoveReport
     }
 }

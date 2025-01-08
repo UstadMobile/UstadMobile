@@ -3,24 +3,29 @@ package com.ustadmobile.view.report.filteredit
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.Comparisons
 import com.ustadmobile.core.domain.report.model.FilterType
+import com.ustadmobile.core.domain.report.model.GenderType
 import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditUiState
 import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.util.ext.onTextChange
-import com.ustadmobile.view.components.UstadMessageIdSelectField
 import kotlinx.coroutines.Dispatchers
-import web.cssom.px
-import mui.material.*
+import mui.material.FormControl
+import mui.material.InputLabel
+import mui.material.MenuItem
+import mui.material.Select
+import mui.material.Stack
+import mui.material.StackDirection
+import mui.material.TextField
 import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
+import web.cssom.px
 
 external interface ReportFilterEditScreenProps : Props {
     var uiState: ReportFilterEditUiState
@@ -47,8 +52,9 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                     labelId = "abel"
                     fullWidth = true
                     onChange = { event, _ ->
-                        val selectedValue = FilterType.entries.firstOrNull { it.name == event.target.value }
-                            ?: FilterType.PERSON_AGE
+                        val selectedValue =
+                            FilterType.entries.firstOrNull { it.name == event.target.value }
+                                ?: FilterType.PERSON_AGE
                         val updatedOptions =
                             props.uiState.filters?.copy(reportFilterField = selectedValue)
                         props.onReportFilterChanged(updatedOptions)
@@ -80,8 +86,9 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                         labelId = "condition_label"
                         fullWidth = true
                         onChange = { event, _ ->
-                            val selectedValue = Comparisons.entries.firstOrNull { it.name == event.target.value }
-                                ?: Comparisons.EQUALS
+                            val selectedValue =
+                                Comparisons.entries.firstOrNull { it.name == event.target.value }
+                                    ?: Comparisons.EQUALS
                             val updatedOptions =
                                 props.uiState.filters?.copy(reportFilterCondition = selectedValue)
                             props.onReportFilterChanged(updatedOptions)
@@ -96,13 +103,51 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                     }
                 }
 
-                TextField {
-                    id = "Value"
-                    value = props.uiState.filters?.reportFilterValue ?: ""
-                    label = ReactNode(strings[MR.strings.value] + "*")
-                    onTextChange = {newValue ->
-                        val updatedOptions = props.uiState.filters?.copy(reportFilterValue = newValue)
-                        props.onReportFilterChanged(updatedOptions)
+                // Value Field - Dropdown or Text Input
+                if (props.uiState.filters?.reportFilterField == FilterType.PERSON_GENDER) {
+                    FormControl {
+                        fullWidth = true
+                        InputLabel {
+                            id = "Value"
+                            shrink = true
+                            +ReactNode(strings[MR.strings.value] + "*")
+                        }
+
+                        Select {
+                            value =
+                                GenderType.entries.firstOrNull { it.name == props.uiState.filters?.reportFilterValue }?.label
+                                    ?: 0
+                            id = "Value"
+                            labelId = "abel"
+                            fullWidth = true
+                            onChange = { event, _ ->
+                                val selectedValue =
+                                    GenderType.entries.firstOrNull { it.name == event.target.value }
+                                        ?: GenderType.FEMALE
+                                val updatedOptions =
+                                    props.uiState.filters?.copy(reportFilterValue = selectedValue.name)
+                                props.onReportFilterChanged(updatedOptions)
+                            }
+
+                            GenderType.entries.forEach { option ->
+                                MenuItem {
+                                    value = option.label
+                                    +ReactNode(strings[option.label])
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    TextField {
+                        id = "Value"
+                        value = props.uiState.filters?.reportFilterValue ?: ""
+                        label = ReactNode(strings[MR.strings.value] + "*")
+                        onTextChange = { newValue ->
+                            val updatedOptions =
+                                props.uiState.filters?.copy(reportFilterValue = newValue)
+                            props.onReportFilterChanged(updatedOptions)
+                        }
+                        fullWidth = true
                     }
                 }
             }
@@ -116,7 +161,8 @@ val ReportFilterEditScreenComponent = FC<Props> {
     }
 
     val uiStateVar by viewModel.uiState.collectAsState(
-        ReportFilterEditUiState(), Dispatchers.Main.immediate)
+        ReportFilterEditUiState(), Dispatchers.Main.immediate
+    )
 
     ReportFilterEditScreenComponent2 {
         uiState = uiStateVar

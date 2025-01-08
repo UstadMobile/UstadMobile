@@ -63,7 +63,8 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 onTextChange = { newValue ->
                     props.onEntityChanged(props.uiState.reportOptions2.copy(title = newValue))
                 }
-                helperText = ReactNode(props.uiState.reportTitleError ?: strings[MR.strings.required])
+                helperText =
+                    ReactNode(props.uiState.reportTitleError ?: strings[MR.strings.required])
                 error = props.uiState.reportTitleError != null
 
             }
@@ -121,6 +122,10 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             props.onSeriesChanged(series.copy(reportSeriesTitle = newValue))
 
                         }
+                        helperText = ReactNode(
+                            props.uiState.seriesTitleError ?: strings[MR.strings.required]
+                        )
+                        error = props.uiState.seriesTitleError != null
                     }
 
                     // Y Axis Dropdown
@@ -273,7 +278,8 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         val fieldName = reportFilter2.reportFilterField?.name?.lowercase()
                             ?.replaceFirstChar { it.uppercase() } ?: ""
                         val comparisonSymbol = reportFilter2.reportFilterCondition?.symbol ?: ""
-                        val filterText = "$fieldName $comparisonSymbol ${reportFilter2.reportFilterValue}"
+                        val filterText =
+                            "$fieldName $comparisonSymbol ${reportFilter2.reportFilterValue}"
 
                         Typography {
                             variant = TypographyVariant.h6

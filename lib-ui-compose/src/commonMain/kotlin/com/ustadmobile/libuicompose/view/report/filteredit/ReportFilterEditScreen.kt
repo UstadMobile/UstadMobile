@@ -105,6 +105,7 @@ fun ReportFilterEditScreen(
 
                 } else {
                     OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
                         label = { Text(stringResource(MR.strings.value) + "*") },
                         value = uiState.filters?.reportFilterValue ?: "",
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
