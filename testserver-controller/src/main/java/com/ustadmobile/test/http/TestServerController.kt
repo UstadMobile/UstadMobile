@@ -179,7 +179,7 @@ fun Application.testServerController() {
     if(mode == RunMode.SINGLE_PORT) {
         intercept(ApplicationCallPipeline.Setup) {
             val requestUri = call.request.uri
-            if(!requestUri.startsWith("/$TESTCONTROLLER_PATH")) {
+            if(!requestUri.startsWith("/$TESTCONTROLLER_PATH") && serverProcess != null) {
                 //reverse proxy it
                 val destUrl = Url("http://$testHost:$currentReverseProxyPort$requestUri")
                 call.respondReverseProxy(destUrl.toString(), okHttpClient)
@@ -189,6 +189,22 @@ fun Application.testServerController() {
     }
 
     install(Routing) {
+        get("/") {
+            /*
+             * When running in SINGLE_PORT mode and a server is already running, then the interceptor
+             * will intercept before reaching this endpoint.
+             *
+             * Responding to / ensures:
+             * a) the start-server-and-test script recognizes the server is ready
+             * b) developers not reading documentation fully don't see an http error and think "It's not working"
+             */
+            call.response.cacheControl(CacheControl.NoStore(null))
+            call.respondText(
+                text = "Test Controller server is running - use the /testcontroller API to start and manage " +
+                        "running the ustad server (e.g. app-ktor-server) for tests as per README docs."
+            )
+        }
+
         route(TESTCONTROLLER_PATH) {
             static("test-files/content/") {
                 //KTOR default files implementation does not cooperate.
