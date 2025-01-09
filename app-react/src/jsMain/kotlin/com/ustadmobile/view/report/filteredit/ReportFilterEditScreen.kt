@@ -5,12 +5,12 @@ import com.ustadmobile.core.domain.report.model.Comparisons
 import com.ustadmobile.core.domain.report.model.FilterType
 import com.ustadmobile.core.domain.report.model.GenderType
 import com.ustadmobile.core.domain.report.model.ReportFilter3
-import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditUiState
 import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.util.ext.onTextChange
 import kotlinx.coroutines.Dispatchers
@@ -22,10 +22,14 @@ import mui.material.Stack
 import mui.material.StackDirection
 import mui.material.TextField
 import mui.system.responsive
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
+import react.useRequiredContext
+import web.cssom.Color
 import web.cssom.px
+import web.html.InputType
 
 external interface ReportFilterEditScreenProps : Props {
     var uiState: ReportFilterEditUiState
@@ -34,6 +38,7 @@ external interface ReportFilterEditScreenProps : Props {
 
 private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> { props ->
     val strings = useStringProvider()
+    val theme by useRequiredContext(ThemeContext)
 
     UstadStandardContainer {
         Stack {
@@ -43,11 +48,14 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                 InputLabel {
                     id = "Field"
                     shrink = true
-                    +ReactNode(strings[MR.strings.y_axis] + "*")
+                    sx {
+                        backgroundColor = Color(theme.palette.background.default)
+                    }
+                    +ReactNode(strings[MR.strings.field] + "*")
                 }
 
                 Select {
-                    value = props.uiState.filters?.reportFilterField
+                    value = props.uiState.filters?.reportFilterField?.name ?: ""
                     id = "Field"
                     labelId = "abel"
                     fullWidth = true
@@ -56,13 +64,17 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                             FilterType.entries.firstOrNull { it.name == event.target.value }
                                 ?: FilterType.PERSON_AGE
                         val updatedOptions =
-                            props.uiState.filters?.copy(reportFilterField = selectedValue)
+                            props.uiState.filters?.copy(
+                                reportFilterField = selectedValue,
+                                reportFilterValue = null,
+                                reportFilterCondition = null
+                            )
                         props.onReportFilterChanged(updatedOptions)
                     }
 
-                    ReportSeriesYAxis.entries.forEach { option ->
+                    FilterType.entries.forEach { option ->
                         MenuItem {
-                            value = option.label
+                            value = option.name
                             +ReactNode(strings[option.label])
                         }
                     }
@@ -77,11 +89,14 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                     InputLabel {
                         id = "Condition"
                         shrink = true
+                        sx {
+                            backgroundColor = Color(theme.palette.background.default)
+                        }
                         +ReactNode(strings[MR.strings.condition] + "*")
                     }
 
                     Select {
-                        value = props.uiState.filters?.reportFilterCondition
+                        value = props.uiState.filters?.reportFilterCondition?.name ?: ""
                         id = "Condition"
                         labelId = "condition_label"
                         fullWidth = true
@@ -96,7 +111,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
 
                         Comparisons.entries.forEach { option ->
                             MenuItem {
-                                value = option.label
+                                value = option.name
                                 +ReactNode(strings[option.label])
                             }
                         }
@@ -110,15 +125,16 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                         InputLabel {
                             id = "Value"
                             shrink = true
+                            sx {
+                                backgroundColor = Color(theme.palette.background.default)
+                            }
                             +ReactNode(strings[MR.strings.value] + "*")
                         }
 
                         Select {
-                            value =
-                                GenderType.entries.firstOrNull { it.name == props.uiState.filters?.reportFilterValue }?.label
-                                    ?: 0
+                            value = props.uiState.filters?.reportFilterValue ?: ""
                             id = "Value"
-                            labelId = "abel"
+                            labelId = "value"
                             fullWidth = true
                             onChange = { event, _ ->
                                 val selectedValue =
@@ -131,7 +147,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
 
                             GenderType.entries.forEach { option ->
                                 MenuItem {
-                                    value = option.label
+                                    value = option.name
                                     +ReactNode(strings[option.label])
                                 }
                             }
@@ -148,6 +164,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                             props.onReportFilterChanged(updatedOptions)
                         }
                         fullWidth = true
+                        type = InputType.number
                     }
                 }
             }

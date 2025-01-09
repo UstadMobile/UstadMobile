@@ -12,6 +12,7 @@ import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.util.ext.onTextChange
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +38,11 @@ import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
+import react.useRequiredContext
+import web.cssom.AlignItems
+import web.cssom.Color
+import web.cssom.JustifyContent
+import web.cssom.pct
 import web.cssom.px
 
 external interface ReportEditScreenProps : Props {
@@ -51,6 +57,7 @@ external interface ReportEditScreenProps : Props {
 
 private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
     val strings = useStringProvider()
+    val theme by useRequiredContext(ThemeContext)
 
     UstadStandardContainer {
         Stack {
@@ -69,7 +76,6 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
 
             }
 
-
             // X Axis Selection
             FormControl {
                 fullWidth = true
@@ -78,33 +84,40 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 InputLabel {
                     id = "x_axis_label"
                     shrink = true
+                    sx {
+                        backgroundColor = Color(theme.palette.background.default)
+                    }
                     +ReactNode(strings[MR.strings.x_axis] + "*")
                 }
 
                 Select {
-                    value = props.uiState.reportOptions2.xAxis?.toString() ?: "0"
+                    value = props.uiState.reportOptions2.xAxis?.name
+                        ?: ""
                     id = "x_axis"
                     labelId = "x_axis_label"
                     fullWidth = true
+
                     onChange = { event, _ ->
-                        val selectedValue = ReportXAxis.values().firstOrNull { it.name == event.target.value }
-                            ?: ReportXAxis.NONE // Default to NONE if no match
+                        val selectedValue = ReportXAxis.entries.firstOrNull {
+                            it.name == event.target.value
+                        } ?: ReportXAxis.NONE
+
                         props.onEntityChanged(props.uiState.reportOptions2.copy(xAxis = selectedValue))
                     }
 
                     ReportXAxis.entries.forEach { option ->
                         MenuItem {
-                            value = option.label
+                            value = option.name
                             +ReactNode(strings[option.label])
                         }
                     }
                 }
 
+
                 FormHelperText {
                     +ReactNode(props.uiState.xAxisError ?: strings[MR.strings.required])
                 }
             }
-
 
             Divider { orientation = Orientation.horizontal }
 
@@ -136,23 +149,27 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         InputLabel {
                             id = "Y Axis"
                             shrink = true
+                            sx {
+                                backgroundColor = Color(theme.palette.background.default)
+                            }
                             +ReactNode(strings[MR.strings.y_axis] + "*")
                         }
 
                         Select {
-                            value = series.reportSeriesYAxis
+                            value = series.reportSeriesYAxis?.name ?: ""
                             id = "Y Axis"
                             labelId = "y_axis_label"
                             fullWidth = true
                             onChange = { event, _ ->
-                                val selectedValue = ReportSeriesYAxis.entries.firstOrNull { it.name == event.target.value }
-                                    ?: ReportSeriesYAxis.NONE
+                                val selectedValue =
+                                    ReportSeriesYAxis.entries.firstOrNull { it.name == event.target.value }
+                                        ?: ReportSeriesYAxis.NONE
                                 props.onSeriesChanged(series.copy(reportSeriesYAxis = selectedValue))
                             }
 
                             ReportSeriesYAxis.entries.forEach { option ->
                                 MenuItem {
-                                    value = option.label
+                                    value = option.name
                                     +ReactNode(strings[option.label])
                                 }
                             }
@@ -163,39 +180,37 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         }
                     }
 
-
                     // Subgroup by Dropdown
                     FormControl {
                         fullWidth = true
-                        error = props.uiState.subGroupError != null
 
                         InputLabel {
                             id = "Subgroup by"
                             shrink = true
+                            sx {
+                                backgroundColor = Color(theme.palette.background.default)
+                            }
                             +ReactNode(strings[MR.strings.subgroup_by] + "*")
                         }
 
                         Select {
-                            value = series.reportSeriesSubGroup
+                            value = series.reportSeriesSubGroup?.name ?: ""
                             id = "Subgroup by"
                             labelId = "sub_group_label"
                             fullWidth = true
                             onChange = { event, _ ->
-                                val selectedValue = ReportXAxis.entries.firstOrNull { it.name == event.target.value }
-                                    ?: ReportXAxis.NONE
+                                val selectedValue =
+                                    ReportXAxis.entries.firstOrNull { it.name == event.target.value }
+                                        ?: ReportXAxis.NONE
                                 props.onSeriesChanged(series.copy(reportSeriesSubGroup = selectedValue))
                             }
 
                             ReportXAxis.entries.forEach { option ->
                                 MenuItem {
-                                    value = option.label
+                                    value = option.name
                                     +ReactNode(strings[option.label])
                                 }
                             }
-                        }
-
-                        FormHelperText {
-                            +ReactNode(props.uiState.subGroupError ?: strings[MR.strings.required])
                         }
                     }
                 }
@@ -203,35 +218,33 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 // Chart Type Dropdown
                 FormControl {
                     fullWidth = true
-                    error = props.uiState.chartTypeError != null
-
                     InputLabel {
                         id = "Chart Type"
                         shrink = true
+                        sx {
+                            backgroundColor = Color(theme.palette.background.default)
+                        }
                         +ReactNode(strings[MR.strings.chart_type] + "*")
                     }
 
                     Select {
-                        value = series.reportSeriesYAxis
+                        value = series.reportSeriesVisualType?.name ?: ""
                         id = "Chart Type"
                         labelId = "y_axis_label"
                         fullWidth = true
                         onChange = { event, _ ->
-                            val selectedValue = ReportSeriesVisualType.entries.firstOrNull { it.name == event.target.value }
-                                ?: ReportSeriesVisualType.BAR_CHART
+                            val selectedValue =
+                                ReportSeriesVisualType.entries.firstOrNull { it.name == event.target.value }
+                                    ?: ReportSeriesVisualType.BAR_CHART
                             props.onSeriesChanged(series.copy(reportSeriesVisualType = selectedValue))
                         }
 
                         ReportSeriesVisualType.entries.forEach { option ->
                             MenuItem {
-                                value = option.label
+                                value = option.name
                                 +ReactNode(strings[option.label])
                             }
                         }
-                    }
-
-                    FormHelperText {
-                        +ReactNode(props.uiState.chartTypeError ?: strings[MR.strings.required])
                     }
                 }
 
@@ -241,23 +254,27 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     InputLabel {
                         id = "Time Range"
                         shrink = true
-                        +ReactNode(strings[MR.strings.chart_type] + "*")
+                        sx {
+                            backgroundColor = Color(theme.palette.background.default)
+                        }
+                        +ReactNode(strings[MR.strings.time_range] + "*")
                     }
 
                     Select {
-                        value = series.reportSeriesYAxis
+                        value = series.reportTimeRange?.name ?: ""
                         id = "Time Range"
                         labelId = "time_range_label"
                         fullWidth = true
                         onChange = { event, _ ->
-                            val selectedValue = ReportTimeRange.entries.firstOrNull { it.name == event.target.value }
-                                ?: ReportTimeRange.LAST_WEEK
+                            val selectedValue =
+                                ReportTimeRange.entries.firstOrNull { it.name == event.target.value }
+                                    ?: ReportTimeRange.LAST_WEEK
                             props.onSeriesChanged(series.copy(reportTimeRange = selectedValue))
                         }
 
                         ReportTimeRange.entries.forEach { option ->
                             MenuItem {
-                                value = option.label
+                                value = option.name
                                 +ReactNode(strings[option.label])
                             }
                         }
@@ -275,6 +292,11 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     Stack {
                         direction = responsive(StackDirection.row)
                         spacing = responsive(8.px)
+                        sx {
+                            width = 100.pct // Ensure the Stack takes the full width of its parent
+                            justifyContent = JustifyContent.spaceBetween
+                            alignItems = AlignItems.center
+                        }
                         val fieldName = reportFilter2.reportFilterField?.name?.lowercase()
                             ?.replaceFirstChar { it.uppercase() } ?: ""
                         val comparisonSymbol = reportFilter2.reportFilterCondition?.symbol ?: ""
@@ -285,7 +307,6 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             variant = TypographyVariant.h6
                             +ReactNode(filterText)
                         }
-                        // Button to remove filter
                         IconButton {
                             onClick = {
                                 props.onRemoveFilter(index, series.reportSeriesUid)
@@ -340,5 +361,3 @@ val ReportEditScreen = FC<Props> {
         onRemoveFilter = viewModel::onRemoveFilter
     }
 }
-
-
