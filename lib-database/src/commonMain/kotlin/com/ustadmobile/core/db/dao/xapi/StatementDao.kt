@@ -404,6 +404,7 @@ expect abstract class StatementDao {
     abstract fun findPersonsWithAttempts(
         contentEntryUid: Long,
         accountPersonUid: Long,
+        searchText: String? = "%"
     ): PagingSource<Int, PersonAndPictureAndNumAttempts>
 
 
