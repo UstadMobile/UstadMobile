@@ -2,6 +2,8 @@ package com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab
 
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
@@ -24,17 +26,19 @@ class ContentEntryDetailAttemptsStatementListViewModel(
 ) {
 
     private val argPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
-    private val argContextRegistrationIdHi = savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_HI]?.toLong() ?: 0
-    private val argContextRegistrationIdLo = savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_LO]?.toLong() ?: 0
+    private val argContextRegistrationIdHi =
+        savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_HI]?.toLong() ?: 0
+    private val argContextRegistrationIdLo =
+        savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_LO]?.toLong() ?: 0
 
     private fun getAttemptsStatementListAsPagingSource(
         contextRegistrationHi: Long,
         contextRegistrationLo: Long,
-
-
-        ): PagingSource<Int, StatementEntityAndVerb> {
+    ): PagingSource<Int, StatementEntityAndVerb> {
         return activeRepo.statementDao().findStatementsBySession(
-            contextRegistrationHi,contextRegistrationLo
+            contextRegistrationHi,
+            contextRegistrationLo,
+            searchText = _appUiState.value.searchState.searchText.toQueryLikeParam()
         )
     }
 
@@ -42,8 +46,9 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         {
             getAttemptsStatementListAsPagingSource(
                 contextRegistrationHi = argContextRegistrationIdHi,
-                contextRegistrationLo =  argContextRegistrationIdLo
-            )
+                contextRegistrationLo = argContextRegistrationIdLo,
+
+                )
         }
 
     init {
@@ -55,8 +60,10 @@ class ContentEntryDetailAttemptsStatementListViewModel(
                     }
                     _appUiState.update { prev ->
                         prev.copy(
-                            title = "${personNames?.firstNames} ${personNames?.lastName}"
-                        )
+                            title = "${personNames?.firstNames} ${personNames?.lastName}",
+                            searchState = createSearchEnabledState(visible = true),
+
+                            )
                     }
                 }
             }
@@ -71,7 +78,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
     }
 
     override fun onUpdateSearchResult(searchText: String) {
-        TODO("Not yet implemented")
+        _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     override fun onClickAdd() {

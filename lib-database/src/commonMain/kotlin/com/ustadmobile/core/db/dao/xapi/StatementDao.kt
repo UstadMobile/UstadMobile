@@ -400,7 +400,7 @@ expect abstract class StatementDao {
                           ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
                           ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
             )      
-                    AND (Person.firstNames LIKE :searchText OR Person.lastName LIKE :searchText OR Person.userName LIKE :searchText)
+                    AND (:searchText = "%" OR Person.firstNames LIKE :searchText OR Person.lastName LIKE :searchText OR Person.userName LIKE :searchText)
 """)
     abstract fun findPersonsWithAttempts(
         contentEntryUid: Long,
@@ -483,11 +483,13 @@ expect abstract class StatementDao {
                            ORDER BY VerbLangMapEntry.vlmeLastModified DESC
                               LIMIT 1)
          WHERE StatementEntity.contextRegistrationHi = :registrationHi
-           AND StatementEntity.contextRegistrationLo = :registrationLo                        
+           AND StatementEntity.contextRegistrationLo = :registrationLo  
+           AND (:searchText = "%" OR VerbEntity.verbUrlId LIKE :searchText)  
     """)
     abstract fun findStatementsBySession(
         registrationHi: Long,
         registrationLo: Long,
+        searchText: String?="%"
     ): PagingSource<Int, StatementEntityAndVerb>
 
 }
