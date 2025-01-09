@@ -16,7 +16,6 @@ enum class Comparisons(
     BETWEEN(MR.strings.between, "BETWEEN");
 }
 
-
 /** Sealed class representing different types of report filters */
 @Serializable
 sealed class ReportConditionFilterOptions(
@@ -41,6 +40,7 @@ sealed class ReportConditionFilterOptions(
 
 @Serializable
 data class ReportFilter3(
+
     var reportFilterUid: Int = 0,
 
     var reportFilterSeriesUid: Int = 0,

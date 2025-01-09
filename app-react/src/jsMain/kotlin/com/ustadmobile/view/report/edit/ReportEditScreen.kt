@@ -121,7 +121,6 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
 
             Divider { orientation = Orientation.horizontal }
 
-            // Iterate over Series
             props.uiState.reportOptions2.series.forEach { series ->
                 Stack {
                     spacing = responsive(16.px)
@@ -280,20 +279,20 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         }
                     }
                 }
-                // Filters section converted to MUI:
+
                 if (series.reportSeriesFilters?.isNotEmpty() == true) {
-                    // Display filters header
                     Typography {
                         variant = TypographyVariant.h6
                         +strings[MR.strings.filters]
                     }
                 }
+
                 series.reportSeriesFilters?.forEachIndexed { index, reportFilter2 ->
                     Stack {
                         direction = responsive(StackDirection.row)
                         spacing = responsive(8.px)
                         sx {
-                            width = 100.pct // Ensure the Stack takes the full width of its parent
+                            width = 100.pct
                             justifyContent = JustifyContent.spaceBetween
                             alignItems = AlignItems.center
                         }

@@ -2,7 +2,6 @@ package com.ustadmobile.view.report.list
 
 import app.cash.paging.PagingSourceLoadResult
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.RefreshCommand
@@ -45,18 +44,16 @@ external interface ReportListProps : Props {
 }
 
 val ReportListComponent2 = FC<ReportListProps> { props ->
-    val strings = useStringProvider()
-
     val remoteMediatorResult = useDoorRemoteMediator(
         pagingSourceFactory = props.uiState.reportList,
         refreshCommandFlow = (props.refreshCommandFlow ?: emptyFlow())
     )
-
     val infiniteQueryResult: UseInfiniteQueryResult<PagingSourceLoadResult<Int, Report>, Throwable> =
         usePagingSource(
             remoteMediatorResult.pagingSourceFactory, true, 50
         )
     val muiAppState = useMuiAppState()
+
     VirtualList {
         style = jso {
             height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
@@ -76,7 +73,7 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
                         }
 
                         ListItemText {
-                            primary = ReactNode(reportAndDetails?.reportTitle ?: "fggfdfdf")
+                            primary = ReactNode(reportAndDetails?.reportTitle ?: "")
                         }
                     }
                     ListItemIcon {
@@ -99,12 +96,9 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
 
 val ReportListScreen = FC<Props> {
     val location = useLocation()
-    val strings = useStringProvider()
-
     val viewModel = useUstadViewModel { di, savedStateHandle ->
         ReportListViewModel(di, savedStateHandle, location.ustadViewName)
     }
-
     val uiState: ReportListUiState by viewModel.uiState.collectAsState(ReportListUiState())
     val appState by viewModel.appUiState.collectAsState(AppUiState())
 

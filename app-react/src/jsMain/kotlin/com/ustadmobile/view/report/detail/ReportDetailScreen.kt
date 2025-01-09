@@ -1,7 +1,6 @@
 package com.ustadmobile.view.report.detail
 
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
@@ -19,25 +18,14 @@ val ReportDetailScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
         ReportDetailViewModel(di, savedStateHandle)
     }
-
     val uiState by viewModel.uiState.collectAsState(ReportDetailUiState())
-
     val appState by viewModel.appUiState.collectAsState(AppUiState())
 
-    UstadFab {
-        fabState = appState.fabState
-    }
-
-
-    ReportDetailComponent2 {
-        this.uiState = uiState
-    }
-
+    UstadFab { fabState = appState.fabState }
+    ReportDetailComponent2 { this.uiState = uiState }
 }
+
 val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
-
-    val strings = useStringProvider()
-
     UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
