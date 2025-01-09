@@ -18,6 +18,9 @@
 
     "start-server": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar  http://localhost:8075/ -P:srcRoot=../../",
     "cy:run": "cypress run",
-    "test": "start-server-and-test start-server  http://localhost:8075/ cy:run"
+    "test": "start-server-and-test start-server  http://localhost:8075/ cy:run",
+
+    "cy:run-spec": "cypress run --spec $CYPRESS_SPEC",
+    "test-spec": "start-server-and-test start-server  http://localhost:8075/ cy:run-spec"
   }
 }

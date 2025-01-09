@@ -33,6 +33,26 @@ export TESTCONTROLLER_URL=http://localhost:port/
 npm run test-ci
 ```
 
+Development/debugging:
+
+Option 1) Run the testserver-controller manually, then use Cypress open
+
+Use Gradle to run testserver controller (run from project root directory)
+```
+./gradlew testserver-controller:run
+```
+Then use cypress open to run/debug test specs (run from webapp-cypress directory):
+```
+npm exec cypress open
+```
+
+Option 2) Command line to run a specific spec
+
+```
+export CYPRESS_SPEC=testname.cy.js
+npm exec test-spec
+```
+
 How it works:
 
 * package.json uses start-server-and-test command as [recommended by Cypress docs](https://docs.cypress.io/app/continuous-integration/overview#Solutions) to
