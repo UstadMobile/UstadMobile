@@ -87,8 +87,6 @@ class SignupEnterUsernamePasswordViewModel(
         SignupEnterUsernamePasswordUiState()
     )
 
-    private val savePasswordUseCase: SavePasswordUseCase? by instanceOrNull()
-
     private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
 
     private var nextDestination: String =
@@ -111,6 +109,8 @@ class SignupEnterUsernamePasswordViewModel(
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
     on(LearningSpace(serverUrl)).instance()
 
+    private val savePasswordUseCase: SavePasswordUseCase? =
+        di.on(LearningSpace(serverUrl)).direct.instanceOrNull()
 
     init {
         loadingState = LoadingUiState.INDETERMINATE

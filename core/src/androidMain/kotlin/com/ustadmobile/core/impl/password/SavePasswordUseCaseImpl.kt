@@ -6,11 +6,16 @@ import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.CreateCredentialNoCreateOptionException
-import io.github.aakira.napier.Napier
+import com.ustadmobile.core.account.LearningSpace
+import io.ktor.http.Url
 
 class SavePasswordUseCaseImpl(
-    val context: Context
-):SavePasswordUseCase{
+    val context: Context,
+    val learningSpace: LearningSpace,
+) : SavePasswordUseCase {
+    private val domain: String by lazy {
+        Url(learningSpace.url).host
+    }
     override suspend fun invoke(username: String, password: String) {
         val credentialManager = CredentialManager.create(context)
         try {
@@ -18,17 +23,17 @@ class SavePasswordUseCaseImpl(
                 context = context,
                 request = CreatePasswordRequest(
                     id = username,
-                    password = password
+                    password = password,
+                    origin = domain
                 )
             )
-            Napier.d { "Password saved successfully for user: $username" }
+            print("Password saved successfully for user: $username")
         } catch (e: CreateCredentialNoCreateOptionException) {
-            Napier.w { "No option to create credentials: ${e.message}" }
+            e.printStackTrace()
         } catch (e: CreateCredentialException) {
-            Napier.e { "Error saving credentials: ${e.message}" }
+            e.printStackTrace()
         } catch (e: Exception) {
-            Napier.e { "Unexpected error: ${e.message}" }
+            e.printStackTrace()
         }
     }
-
 }

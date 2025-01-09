@@ -138,9 +138,10 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
             )
         }
 
-        bind<SavePasswordUseCase>() with singleton {
+        bind<SavePasswordUseCase>() with scoped(LearningSpaceScope.Default).singleton{
             SavePasswordUseCaseImpl(
                 context=this@AbstractAppActivity,
+                learningSpace = context,
             )
         }
 

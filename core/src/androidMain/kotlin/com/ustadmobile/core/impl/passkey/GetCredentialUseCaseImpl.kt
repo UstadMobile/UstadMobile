@@ -36,7 +36,8 @@ class GetCredentialUseCaseImpl(
 
         val getCredentialRequest = GetCredentialRequest(
             credentialOptions = listOf(getPasswordOption, getPublicKeyCredentialOption),
-            preferImmediatelyAvailableCredentials = true
+            preferImmediatelyAvailableCredentials = true,
+            origin = domain
         )
 
         return try {

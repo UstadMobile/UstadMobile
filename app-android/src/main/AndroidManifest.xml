@@ -19,6 +19,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CREDENTIAL_MANAGER_SET_ORIGIN" />
 
     <!-- Appears to be required by Aztec HTML editor as per lint error messages -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
