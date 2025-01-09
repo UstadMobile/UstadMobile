@@ -39,12 +39,8 @@ Cypress.Commands.add('ustadStartTestServer', () => {
 // https://docs.cypress.io/api/commands/request#Get-Data-URL-of-an-image
   cy.request('/testcontroller/start').then((response) => {
   const { url } = response.body
-
-  //const { url, username, password } = response.body
-   cy.log(`Learning Space Server started at: ${url}`)
- // Cypress.env('LEARNING_SPACE_USERNAME', username)
- //Cypress.env('LEARNING_SPACE_PASSWORD', password)
-
+  cy.log(`Learning Space Server started at: ${url}`)
+  cy.wait(6000)
 })
 })
 
@@ -59,28 +55,20 @@ Cypress.Commands.add('ustadStopTestServer', () => {
 
 // Clear DB and Login
 Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
-  //const learningSpaceUsername = Cypress.env('LEARNING_SPACE_USERNAME')
-  //const learningSpacePassword = Cypress.env('LEARNING_SPACE_PASSWORD')
 // Clearing IndexedDB for the dynamic hostname
-     const baseUrl = Cypress.config('baseUrl'); // Get the base URL
-     const url = new URL(baseUrl); // Create a URL object
-     const hostname = url.hostname;
-     const port = url.port;
+  const baseUrl = Cypress.config('baseUrl'); // Get the base URL
+  const url = new URL(baseUrl); // Create a URL object
+  const hostname = url.hostname;
+  const port = url.port;
   const indexedDbName = `${hostname}_${port}`
   cy.log(`Clearing IndexedDB: ${indexedDbName}`)
   cy.clearIndexedDb(indexedDbName)
 // visit login page
-cy.visit('/')
   cy.visit('/', {
     qs: { username, password },
     timeout: 60000,
   });
 // Login to the webapp
-/*
-cy.get('input#username', { timeout: 10000 }).should('exist').type(learningSpaceUsername); // 10 seconds
-  cy.get('input#password').type(learningSpacePassword);
-  cy.get('button#login_button').click();
-*/
   cy.get('input#username', { timeout: 10000 }).should('exist').type(username); // 10 seconds
   cy.get('input#password').type(password);
   cy.get('button#login_button').click();
