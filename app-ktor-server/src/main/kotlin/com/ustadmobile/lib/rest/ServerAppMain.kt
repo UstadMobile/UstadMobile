@@ -14,6 +14,7 @@ import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.helper.HelpScreenException
 import net.sourceforge.argparse4j.inf.ArgumentParserException
 import net.sourceforge.argparse4j.inf.Namespace
+import java.io.File
 import com.ustadmobile.lib.rest.clitools.manageserver.main as manageServerMain
 
 
@@ -31,6 +32,8 @@ class ServerAppMain {
         const val MAX_CHUNK_SIZE = 4096
 
         const val CMD_RUN_SERVER = "runserver"
+
+        const val DEFAULT_CONFIG_FILE_NAME = "ustad-server.conf"
 
         private fun Array<String>.argsAfterFirst(): Array<String> {
             return if(isNotEmpty())
@@ -84,21 +87,31 @@ class ServerAppMain {
                     args.isNotEmpty() && args.firstOrNull() != CMD_RUN_SERVER
                 }?.parseArgs(args)
                 val subCommand = ns?.getString("subparser_name") ?: CMD_RUN_SERVER
-
-                /*
-                 * The application script templates (in src/scripttemplates) will set the default
-                 * path to the KTOR (Hocon) configuration file using the app_config system property.
-                 *
-                 * When this is set it should be passed to the KTOR embedded server as if it was
-                 * added as a command line argument.
-                 */
                 val configSysProp = System.getProperty("app_config")
-                val configArgs = if(
-                    configSysProp != null && !(args.contains("-c") || args.contains("-config"))
-                ) {
-                    arrayOf("-config", configSysProp)
-                }else {
-                    arrayOf()
+
+                val configArgs = when {
+                    //When config argument is explicitly set, leave as-is
+                    (args.contains("-c") || args.contains("-config")) -> emptyArray()
+
+                    /*
+                     * The application script templates (in src/scripttemplates) will set the default
+                     * path to the KTOR (Hocon) configuration file using the app_config system property.
+                     *
+                     * When this is set it should be passed to the KTOR embedded server as if it was
+                     * added as a command line argument.
+                     */
+                    configSysProp != null -> arrayOf("-config", configSysProp)
+
+                    //Else (e.g. if running from source) and default config file name exists, then use it
+                    File(DEFAULT_CONFIG_FILE_NAME).exists() -> {
+                        arrayOf("-config=$DEFAULT_CONFIG_FILE_NAME")
+                    }
+
+                    File("app-ktor-server", DEFAULT_CONFIG_FILE_NAME).exists() -> {
+                        arrayOf("-config=app-ktor-server/$DEFAULT_CONFIG_FILE_NAME")
+                    }
+
+                    else -> emptyArray()
                 }
 
                 when {
