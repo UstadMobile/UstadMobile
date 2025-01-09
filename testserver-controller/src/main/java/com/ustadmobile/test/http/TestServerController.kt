@@ -315,9 +315,13 @@ fun Application.testServerController() {
 
 
             call.response.header("cache-control", "no-cache")
-            call.respondText(
-                text = "<html><body>$response</body></html>",
-                contentType = ContentType.Text.Html
+
+            call.respond(
+                ServerInfo(
+                    url = serverSiteUrl,
+                    port = Url(serverSiteUrl).port,
+                    extraInfo = response
+                )
             )
         }
 
