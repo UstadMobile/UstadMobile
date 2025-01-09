@@ -400,6 +400,7 @@ expect abstract class StatementDao {
                           ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
                           ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
             )      
+                    AND (Person.firstNames LIKE :searchText OR Person.lastName LIKE :searchText OR Person.userName LIKE :searchText)
 """)
     abstract fun findPersonsWithAttempts(
         contentEntryUid: Long,
