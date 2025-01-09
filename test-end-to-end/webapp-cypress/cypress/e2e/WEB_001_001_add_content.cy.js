@@ -5,11 +5,6 @@ describe('WEB_001_001_add_content', () => {
   })
 
 it('Admin user add content to the library', () => {
- // Ensure LEARNING_SPACE_URL is defined before using it
-    const learningSpaceUrl = Cypress.env('LEARNING_SPACE_URL')
-    cy.log(`Learning Space URL: ${learningSpaceUrl}`)
-    expect(learningSpaceUrl).to.exist
-
  // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
  // Add H5p File
