@@ -9,18 +9,25 @@ class SendMessageUseCase(
     private val activeDb: UmAppDatabase,
 
     ) {
-    suspend operator fun invoke(username: String, link: String, personUid: Long) {
+    suspend operator fun invoke(
+        clazzName:String,
+        username: String,
+        link: String,
+        personUid: Long
+    ) {
         try {
-            val person = activeDb.personDao().findByUsername(username)
+            val person = activeDb.personDao().findByUsername(username.drop(1))
             person?.let {
                 activeDb.messageDao().insert(
                     Message(
                         messageSenderPersonUid = personUid,
-                        messageText = link,
+                        messageText = "Invitation to $clazzName $link",
                         messageToPersonUid = it.personUid,
                         messageTimestamp = systemTimeInMillis(),
                     )
                 )
+            }?:  {
+                Napier.e { "SendMessageUseCase $username not found " }
             }
         }catch (e:Exception){
             Napier.d { "SendMessageUseCase ${e.message} " }

@@ -3,6 +3,7 @@ package com.ustadmobile.view.clazz.inviteViaContact
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactChip
 import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactUiState
 import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -20,7 +21,7 @@ import react.*
 
 external interface InviteViaContactProps : Props {
     var uiState: InviteViaContactUiState
-    var onChipSubmitClick: (String) -> Unit
+    var onChipSubmitClick: (String) -> InviteViaContactChip
     var onChipRemoved: (String) -> Unit
 }
 

@@ -14,7 +14,7 @@ class ParseInviteUseCase(
     operator fun invoke(
         text: String
     ): List<InviteViaContactChip> {
-        val parts = text.split(",").map { it.trim() }
+        val parts = text.split(",").map { it.trim() }.distinct()
         val validatedChips: MutableList<InviteViaContactChip> = mutableListOf()
         for (i in parts.indices) {
             val part = parts[i].trim() // Trim to remove any leading or trailing whitespace
@@ -43,7 +43,6 @@ class ParseInviteUseCase(
 
 
     private fun isValidUserName(username: String): Boolean {
-
-        return username.contains("@")
+        return username.startsWith("@")
     }
 }
