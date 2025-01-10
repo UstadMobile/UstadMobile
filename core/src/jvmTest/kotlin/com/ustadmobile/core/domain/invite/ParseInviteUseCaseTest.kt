@@ -19,8 +19,7 @@ class ParseInviteUseCaseTest {
 
     @BeforeTest
     fun setUp() {
-
-        mockEmailUseCase = mock()
+        mockEmailUseCase = ValidateEmailUseCase()
         mockValidatePhoneUseCase = mock {
             on { isValid(any()) }.thenReturn(false)
         }
@@ -39,8 +38,7 @@ class ParseInviteUseCaseTest {
 
     @Test
     fun givenValidUsername_whenInvoke_thenReturnTrue() = runBlocking {
-
-        val result = parseInviteUseCase.invoke("nik@1")
+        val result = parseInviteUseCase.invoke("@nik1")
         assertEquals(1, result.size)
         assertEquals(true, result[0].isValid)
     }
