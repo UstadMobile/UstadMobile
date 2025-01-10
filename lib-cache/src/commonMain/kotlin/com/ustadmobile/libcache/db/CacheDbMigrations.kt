@@ -99,7 +99,9 @@ val MIGRATE_10_11 = DoorMigrationStatementList(10, 11) {
 
 //On client devices - add the new cache entry trigger for distributed caching
 val MIGRATE_11_12_CLIENT = DoorMigrationStatementList(11, 12) {
-    listOf("""
+    listOf(
+        "CREATE TABLE IF NOT EXISTS NewCacheEntry (  cacheEntryKey  TEXT  PRIMARY KEY  NOT NULL , nceUrl  TEXT  NOT NULL )",
+        """
         CREATE TRIGGER NewCacheEntryTrigger 
             AFTER INSERT ON CacheEntry
             BEGIN
@@ -125,11 +127,18 @@ val MIGRATE_13_14 = DoorMigrationStatementList(13, 14) {
     )
 }
 
+//Previous version of migration 11-12 missed creating NewCacheEntry
+val MIGRATE_14_15 = DoorMigrationStatementList(14, 15) {
+    listOf(
+        "CREATE TABLE IF NOT EXISTS NewCacheEntry (  cacheEntryKey  TEXT  PRIMARY KEY  NOT NULL , nceUrl  TEXT  NOT NULL )",
+    )
+}
+
 
 fun DatabaseBuilder<UstadCacheDb>.addCacheDbMigrations(): DatabaseBuilder<UstadCacheDb> {
     return addMigrations(
         MIGRATE_1_2, MIGRATE_2_3, MIGRATE_3_4, MIGRATE_4_5,
         MIGRATE_5_6, MIGRATE_6_7, MIGRATE_7_8, MIGRATE_9_10, MIGRATE_10_11, MIGRATE_12_13,
-        MIGRATE_13_14,
+        MIGRATE_13_14, MIGRATE_14_15,
     )
 }
