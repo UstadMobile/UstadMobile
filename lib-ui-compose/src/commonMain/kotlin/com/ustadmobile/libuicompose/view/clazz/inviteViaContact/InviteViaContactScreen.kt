@@ -32,12 +32,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import com.dokar.chiptextfield.m3.ChipTextFieldDefaults
+import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactChip
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 
 
@@ -66,7 +66,7 @@ class AvatarChip(text: String, val avatar: ImageVector) : Chip(text)
 @Composable
 fun InviteViaContactScreen(
     uiState: InviteViaContactUiState = InviteViaContactUiState(),
-    onChipSubmitClick: (String) -> Unit,
+    onChipSubmitClick: (String) -> InviteViaContactChip,
     onContactError: (String) -> Unit,
     onChipRemoved: (String) -> Unit,
     onValueChanged: () -> Unit,
@@ -88,9 +88,21 @@ fun InviteViaContactScreen(
                 .padding(10.dp).fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             onSubmit = {
-                onChipSubmitClick(it)
+               val inviteViaContactChip= onChipSubmitClick(it)
                 onValueChanged()
-                null
+                // need to return avatarChip but we are handling add and removing
+                //chips from uistate , so returning the last chip from uistate if its not
+                //present in uistate
+                val avatarChip=AvatarChip(
+                    inviteViaContactChip.text,
+                    if (inviteViaContactChip.isValid) Icons.Default.Check else Icons.Default.Close
+                )
+                if (!uiState.chips.contains(inviteViaContactChip)){
+                   avatarChip
+                }else{
+                    null
+                }
+
             },
             chipStyle = ChipTextFieldDefaults.chipStyle(shape = RoundedCornerShape(20.dp)),
             textStyle = MaterialTheme.typography.bodySmall,

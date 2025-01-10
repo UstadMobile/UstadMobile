@@ -12,12 +12,7 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.ClazzInvite
 import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.sqlite.SQLiteException
 
 
 /**
@@ -73,7 +68,7 @@ class ProcessInviteUseCase(
                 effectiveDb.withDoorTransactionAsync {
                     effectiveDb.clazzInviteDao().insertAll(invites)
                 }
-
+                val clazz = effectiveDb.clazzDao().findByUidAsync(clazzUid)?.clazzName?:""
                 invites.forEach { invite ->
                     val inviteLink =
                         UstadUrlComponents(learningSpace.url, ClazzInviteViewModel.DEST_NAME,
@@ -81,15 +76,15 @@ class ProcessInviteUseCase(
 
                     when (invite.inviteType) {
                         1 -> {
-                            invite.inviteContact?.let { sendEmailUseCase.invoke(it, inviteLink) }
+                            invite.inviteContact?.let { sendEmailUseCase.invoke(clazz,it, inviteLink) }
                         }
 
                         2 -> {
-                            invite.inviteContact?.let { sendSmsUseCase.invoke(it, inviteLink) }
+                            invite.inviteContact?.let { sendSmsUseCase.invoke(clazz,it, inviteLink) }
                         }
 
                         3 -> {
-                            invite.inviteContact?.let { sendMessageUseCase.invoke(it, inviteLink, personUid) }
+                            invite.inviteContact?.let { sendMessageUseCase.invoke(clazz,it, inviteLink, personUid) }
                         }
                     }
                 }

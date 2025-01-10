@@ -116,12 +116,13 @@ class InviteViaContactViewModel(
 
     fun onClickChipSubmit(
         text: String,
-    ) {
+    ):InviteViaContactChip {
         _uiState.update { prev ->
             prev.copy(
                 chips = prev.chips + parseInviteUseCase.invoke(text)
             )
         }
+        return _uiState.value.chips.last()
     }
 
     fun onChipRemoved(
