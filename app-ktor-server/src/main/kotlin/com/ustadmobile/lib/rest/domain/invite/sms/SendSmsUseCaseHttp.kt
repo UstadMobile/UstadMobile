@@ -12,6 +12,7 @@ class SendSmsUseCaseHttp(
     private val di: DI,
 ) {
     suspend operator fun invoke(
+        clazzName: String,
         toNumber: String,
         link: String,
     ) {
@@ -25,7 +26,7 @@ class SendSmsUseCaseHttp(
                     append("From", smsProperties.fromPhone)
                     append(
                         "Body",
-                        "Here is a link to join the class course ${link} "
+                        "Invitation to $clazzName course ${link} "
                     )
                 }
             )
