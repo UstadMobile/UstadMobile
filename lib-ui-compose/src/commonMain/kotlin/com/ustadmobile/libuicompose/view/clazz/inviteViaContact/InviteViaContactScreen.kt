@@ -93,9 +93,12 @@ fun InviteViaContactScreen(
                 // need to return avatarChip but we are handling add and removing
                 //chips from uistate , so returning the last chip from uistate if its not
                 //present in uistate
-                val avatarChip=AvatarChip(
-                    inviteViaContactChip.text,
-                    if (inviteViaContactChip.isValid) Icons.Default.Check else Icons.Default.Close
+                val avatarChip = AvatarChip(
+                    text = inviteViaContactChip.text,
+                    avatar = if (inviteViaContactChip.isValid)
+                        Icons.Default.Check
+                    else
+                        Icons.Default.Close
                 )
                 if (!uiState.chips.contains(inviteViaContactChip)){
                    avatarChip
@@ -157,6 +160,7 @@ fun InviteViaContactScreen(
             val removedChips = uiState.chips.filterNot { chip ->
                 stateChips.any { it.text == chip.text }
             }
+
             removedChips.forEach {
                 onChipRemoved(it.text)
             }

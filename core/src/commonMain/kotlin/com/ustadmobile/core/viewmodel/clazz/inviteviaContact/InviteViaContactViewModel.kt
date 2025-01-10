@@ -14,6 +14,7 @@ import com.ustadmobile.core.viewmodel.UstadViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.instance
@@ -117,12 +118,11 @@ class InviteViaContactViewModel(
     fun onClickChipSubmit(
         text: String,
     ):InviteViaContactChip {
-        _uiState.update { prev ->
+        return _uiState.updateAndGet { prev ->
             prev.copy(
                 chips = prev.chips + parseInviteUseCase.invoke(text)
             )
-        }
-        return _uiState.value.chips.last()
+        }.chips.last()
     }
 
     fun onChipRemoved(
