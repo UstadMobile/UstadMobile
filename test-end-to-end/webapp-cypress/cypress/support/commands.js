@@ -40,7 +40,6 @@ Cypress.Commands.add('ustadStartTestServer', () => {
   cy.request('/testcontroller/start').then((response) => {
   const { url } = response.body
   cy.log(`Learning Space Server started at: ${url}`)
-  cy.wait(6000)
 })
 })
 
