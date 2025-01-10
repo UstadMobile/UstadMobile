@@ -316,7 +316,7 @@ fun Application.testServerController() {
 
             call.response.header("cache-control", "no-cache")
 
-            call.respondText(text = "OK", contentType = ContentType.Text.Plain)
+            call.respond("OK")
         }
 
         /**
