@@ -68,7 +68,7 @@ class ProcessInviteUseCase(
                 effectiveDb.withDoorTransactionAsync {
                     effectiveDb.clazzInviteDao().insertAll(invites)
                 }
-                val clazz = effectiveDb.clazzDao().findByUidAsync(clazzUid)?.clazzName?:""
+                val clazzName = effectiveDb.clazzDao().findByUidAsync(clazzUid)?.clazzName?:""
                 invites.forEach { invite ->
                     val inviteLink =
                         UstadUrlComponents(learningSpace.url, ClazzInviteViewModel.DEST_NAME,
@@ -76,15 +76,15 @@ class ProcessInviteUseCase(
 
                     when (invite.inviteType) {
                         1 -> {
-                            invite.inviteContact?.let { sendEmailUseCase.invoke(clazz,it, inviteLink) }
+                            invite.inviteContact?.let { sendEmailUseCase.invoke(clazzName,it, inviteLink) }
                         }
 
                         2 -> {
-                            invite.inviteContact?.let { sendSmsUseCase.invoke(clazz,it, inviteLink) }
+                            invite.inviteContact?.let { sendSmsUseCase.invoke(clazzName,it, inviteLink) }
                         }
 
                         3 -> {
-                            invite.inviteContact?.let { sendMessageUseCase.invoke(clazz,it, inviteLink, personUid) }
+                            invite.inviteContact?.let { sendMessageUseCase.invoke(clazzName,it, inviteLink, personUid) }
                         }
                     }
                 }
