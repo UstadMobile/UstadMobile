@@ -17,6 +17,7 @@ import io.ktor.server.routing.*
 import okhttp3.OkHttpClient
 import java.io.File
 import java.io.FileFilter
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -65,7 +66,8 @@ fun Application.testServerController() {
         File(it)
     } ?: File(".")
 
-    val testHost = environment.config.property(PARAM_NAME_URL).getString()
+    val controllerUrl = environment.config.property(PARAM_NAME_URL).getString()
+    val controllerUrlObj = URL(controllerUrl)
 
     if(adbPath == null || !adbPath.exists()) {
         throw IllegalStateException("ERROR: ADB path does not exist")
@@ -181,7 +183,7 @@ fun Application.testServerController() {
             val requestUri = call.request.uri
             if(!requestUri.startsWith("/$TESTCONTROLLER_PATH") && serverProcess != null) {
                 //reverse proxy it
-                val destUrl = Url("http://$testHost:$currentReverseProxyPort$requestUri")
+                val destUrl = Url("http://${controllerUrlObj.host}:$currentReverseProxyPort$requestUri")
                 call.respondReverseProxy(destUrl.toString(), okHttpClient)
                 return@intercept finish()
             }
@@ -248,107 +250,123 @@ fun Application.testServerController() {
              *  testName: name of the test about to start - used to determine the directory to save video output
              */
             get("start") {
-                val requestDeviceSerial = call.request.queryParameters[DEVICE_SERIAL_PARAM] ?: ""
-                val adbRecordEnabled = call.request.queryParameters[ADB_RECORD_PARAM]?.toBoolean() ?: false
-                val config = call.application.environment.config
-                val clearPgJdbcUrl = config.propertyOrNull("ktor.testServer.clearPgUrl")?.getString()
-                val clearPgUser = config.propertyOrNull("ktor.testServer.clearPgUser")?.getString()
-                val clearPgPass = config.propertyOrNull("ktor.testServer.clearPgPass")?.getString()
+                try {
+                    val requestDeviceSerial = call.request.queryParameters[DEVICE_SERIAL_PARAM] ?: ""
+                    val adbRecordEnabled = call.request.queryParameters[ADB_RECORD_PARAM]?.toBoolean() ?: false
+                    val config = call.application.environment.config
+                    val clearPgJdbcUrl = config.propertyOrNull("ktor.testServer.clearPgUrl")?.getString()
+                    val clearPgUser = config.propertyOrNull("ktor.testServer.clearPgUser")?.getString()
+                    val clearPgPass = config.propertyOrNull("ktor.testServer.clearPgPass")?.getString()
 
 
 
-                var response = SimpleDateFormat.getDateTimeInstance().format(Date()) + "<br/>"
-                serverProcess?.also {
-                    it.destroy()
-                    it.waitFor(5, TimeUnit.SECONDS)
-                    response += "Stopped server: pid #${serverProcess?.pid()}<br/>"
-                    serverProcess = null
-                }
+                    var response = SimpleDateFormat.getDateTimeInstance().format(Date()) + "<br/>"
+                    serverProcess?.also {
+                        it.destroy()
+                        it.waitFor(5, TimeUnit.SECONDS)
+                        response += "Stopped server: pid #${serverProcess?.pid()}<br/>"
+                        serverProcess = null
+                    }
 
-                adbRecordProcess?.also {
-                    stopRecording()
-                    adbRecordProcess = null
-                }
+                    adbRecordProcess?.also {
+                        stopRecording()
+                        adbRecordProcess = null
+                    }
 
-                if(clearPgJdbcUrl != null && clearPgUser != null && clearPgPass != null) {
-                    clearPostgresDb(clearPgJdbcUrl, clearPgUser, clearPgPass)
-                }
+                    if(clearPgJdbcUrl != null && clearPgUser != null && clearPgPass != null) {
+                        clearPostgresDb(clearPgJdbcUrl, clearPgUser, clearPgPass)
+                    }
 
-                currentSerial = requestDeviceSerial
-                adbVideoName = call.request.queryParameters[TESTNAME_PARAM]
-                    ?: System.currentTimeMillis().toString()
+                    currentSerial = requestDeviceSerial
+                    adbVideoName = call.request.queryParameters[TESTNAME_PARAM]
+                        ?: System.currentTimeMillis().toString()
 
-                val port = findFreePort().also {
-                    currentReverseProxyPort = it
-                }
+                    val port = findFreePort().also {
+                        currentReverseProxyPort = it
+                    }
 
-                val siteUrl = "http://$testHost:${call.application.environment.config.port}/"
+                    val siteUrl = if(mode == RunMode.SINGLE_PORT) {
+                        controllerUrl
+                    }else {
+                        "http://${controllerUrlObj.host}:$port/"
+                    }
 
-                val dataDir = File(baseDataDir, sanitizeDbNameFromUrl(siteUrl))
-                if(dataDir.exists()){
-                    dataDir.deleteRecursively()
-                    response += "Cleared data directory: ${dataDir.absolutePath} <br/>"
-                }
+                    val dataDir = File(baseDataDir, sanitizeDbNameFromUrl(siteUrl))
+                    if(dataDir.exists()){
+                        dataDir.deleteRecursively()
+                        response += "Cleared data directory: ${dataDir.absolutePath} <br/>"
+                    }
 
-                val serverArgs = call.application.environment.config
-                    .propertyOrNull("ktor.testServer.command")?.getString()?.split(Regex("\\s+"))
-                    ?.toMutableList()
-                    ?: throw IllegalArgumentException("No testServer command specified in configuration")
+                    val serverArgs = call.application.environment.config
+                        .propertyOrNull("ktor.testServer.command")?.getString()?.split(Regex("\\s+"))
+                        ?.toMutableList()
+                        ?: throw IllegalArgumentException("No testServer command specified in configuration")
 
-                //If the command is not an absolute path or relative path, then look in the PATH variable
-                if(!(serverArgs[0].startsWith(".") || serverArgs[0].startsWith("/"))) {
-                    serverArgs[0] = SysPathUtil.findCommandInPath(serverArgs[0])?.absolutePath
-                        ?: throw IllegalArgumentException("Could not find server command in PATH ${serverArgs[0]}")
-                }
+                    //If the command is not an absolute path or relative path, then look in the PATH variable
+                    if(!(serverArgs[0].startsWith(".") || serverArgs[0].startsWith("/"))) {
+                        serverArgs[0] = SysPathUtil.findCommandInPath(serverArgs[0])?.absolutePath
+                            ?: throw IllegalArgumentException("Could not find server command in PATH ${serverArgs[0]}")
+                    }
 
-                val serverArgsWithSiteUrl = serverArgs +
-                        "-P:ktor.ustad.siteUrl=$siteUrl" +
-                        "-P:ktor.deployment.port=$port" +
-                        "-P:ktor.ustad.datadir=${dataDir.absolutePath}"
+                    val serverArgsWithSiteUrl = serverArgs +
+                            "-P:ktor.ustad.siteUrl=$siteUrl" +
+                            "-P:ktor.deployment.port=$port" +
+                            "-P:ktor.ustad.datadir=${dataDir.absolutePath}"
 
-                serverProcess = ProcessBuilder(serverArgsWithSiteUrl)
-                    .directory(serverDir)
-                    .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                    .redirectError(ProcessBuilder.Redirect.PIPE)
-                    .start()
-
-                response += "Started server process PID #${serverProcess?.pid()} " +
-                        "${serverArgsWithSiteUrl.joinToString( " ")} " +
-                        "(workingDir=${serverDir.absolutePath}<br/>"
-
-                if(adbRecordEnabled) {
-                    ProcessBuilder(
-                        listOf(adbPath.absolutePath, "-s", requestDeviceSerial, "shell",
-                            "screencap", "/sdcard/$adbVideoName.png")
-                    ).start().waitFor(5, TimeUnit.SECONDS)
-                    val screenshotDestFile = File(File(resultDir, adbVideoName ?: "err"),
-                        "screenrecord-poster.png")
-                    adbPullFile(requestDeviceSerial, "/sdcard/$adbVideoName.png",
-                        screenshotDestFile, deleteAfter = true)
-
-                    val recordArgs = listOf(adbPath.absolutePath, "-s", requestDeviceSerial,
-                        "shell", "screenrecord", "/sdcard/$adbVideoName.mp4")
-                    adbRecordProcess = ProcessBuilder(recordArgs)
+                    serverProcess = ProcessBuilder(serverArgsWithSiteUrl)
+                        .directory(serverDir)
                         .redirectOutput(ProcessBuilder.Redirect.PIPE)
                         .redirectError(ProcessBuilder.Redirect.PIPE)
                         .start()
 
-                    response += "Started video recording: ${recordArgs.joinToString(separator = " ")} " +
-                            "PID ${adbRecordProcess?.pid()} <br/>"
-                    application.log.info("Started video recording: ${recordArgs.joinToString(separator = " ")} " +
-                            "PID ${adbRecordProcess?.pid()}")
-                }
+                    response += "Started server process PID #${serverProcess?.pid()} " +
+                            "${serverArgsWithSiteUrl.joinToString( " ")} " +
+                            "(workingDir=${serverDir.absolutePath}<br/>"
+
+                    if(adbRecordEnabled) {
+                        ProcessBuilder(
+                            listOf(adbPath.absolutePath, "-s", requestDeviceSerial, "shell",
+                                "screencap", "/sdcard/$adbVideoName.png")
+                        ).start().waitFor(5, TimeUnit.SECONDS)
+                        val screenshotDestFile = File(File(resultDir, adbVideoName ?: "err"),
+                            "screenrecord-poster.png")
+                        adbPullFile(requestDeviceSerial, "/sdcard/$adbVideoName.png",
+                            screenshotDestFile, deleteAfter = true)
+
+                        val recordArgs = listOf(adbPath.absolutePath, "-s", requestDeviceSerial,
+                            "shell", "screenrecord", "/sdcard/$adbVideoName.mp4")
+                        adbRecordProcess = ProcessBuilder(recordArgs)
+                            .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                            .redirectError(ProcessBuilder.Redirect.PIPE)
+                            .start()
+
+                        response += "Started video recording: ${recordArgs.joinToString(separator = " ")} " +
+                                "PID ${adbRecordProcess?.pid()} <br/>"
+                        application.log.info("Started video recording: ${recordArgs.joinToString(separator = " ")} " +
+                                "PID ${adbRecordProcess?.pid()}")
+                    }
 
 
-                call.response.header("cache-control", "no-cache")
+                    call.response.header("cache-control", "no-cache")
 
-                call.respond(
-                    ServerInfo(
-                        url = siteUrl,
-                        port = Url(siteUrl).port,
-                        extraInfo = response,
+                    val urlToWaitFor = URL(URL(siteUrl), "umapp/")
+
+                    okHttpClient.waitForUrl(urlToWaitFor.toString())
+
+                    call.respond(
+                        ServerInfo(
+                            url = siteUrl,
+                            port = Url(siteUrl).port,
+                            extraInfo = response,
+                        )
                     )
-                )
+                }catch(e: Throwable) {
+                    call.respondText(
+                        status = HttpStatusCode.InternalServerError,
+                        text = "ERROR: ${e.message} \n ${e.stackTraceToString()}",
+                        contentType = ContentType.Text.Plain,
+                    )
+                }
             }
 
             /**

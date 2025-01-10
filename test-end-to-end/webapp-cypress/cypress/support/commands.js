@@ -65,7 +65,6 @@ Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
   cy.clearIndexedDb(indexedDbName)
 // visit login page
   cy.visit('/', {
-    qs: { username, password },
     timeout: 60000,
   });
 // Login to the webapp

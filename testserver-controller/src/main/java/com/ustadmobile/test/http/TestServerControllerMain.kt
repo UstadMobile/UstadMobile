@@ -29,7 +29,7 @@ class TestServerControllerMain {
 
             val environmentArgs = buildList {
                 add("-port=${testServerControllerUrl.port}")
-                add("-P:$PARAM_NAME_URL=${testServerControllerUrl.host}")
+                add("-P:$PARAM_NAME_URL=$testServerControllerUrl")
 
                 if(args.size > 1)
                     addAll(args.drop(1))
