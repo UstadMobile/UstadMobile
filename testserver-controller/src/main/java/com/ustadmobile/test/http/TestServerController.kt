@@ -316,13 +316,7 @@ fun Application.testServerController() {
 
             call.response.header("cache-control", "no-cache")
 
-            call.respond(
-                ServerInfo(
-                    url = serverSiteUrl,
-                    port = Url(serverSiteUrl).port,
-                    extraInfo = response
-                )
-            )
+            call.respondText(text = "OK", contentType = ContentType.Text.Plain)
         }
 
         /**
