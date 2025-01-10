@@ -5,7 +5,6 @@ import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import kotlinx.coroutines.flow.Flow
@@ -38,15 +37,17 @@ class ClazzInviteViewModel(
         ?: throw IllegalArgumentException("no invite code")
 
     init {
-        println("napapap  ${accountManager.currentAccount.endpointUrl}")
-        _appUiState.update { prev ->
-            prev.copy(
-                hideBottomNavigation = true,
-            )
+        ifLoggedInElseNavigateToLoginWithNextDestSet(
+            requireAdultAccount = true,
+            args = mapOf(ARG_INVITE_CODE to argInviteCode)
+        ) {
+            _appUiState.update { prev ->
+                prev.copy(
+                    hideBottomNavigation = true,
+                )
+            }
         }
-        savedStateHandle[UstadView.ARG_RESULT_DEST_KEY]
     }
-
 
     fun processDecision(isAccepting:Boolean) {
         viewModelScope.launch {

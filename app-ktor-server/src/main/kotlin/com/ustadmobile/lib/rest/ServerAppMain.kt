@@ -91,7 +91,7 @@ class ServerAppMain {
 
                 val configArgs = when {
                     //When config argument is explicitly set, leave as-is
-                    (args.contains("-c") || args.contains("-config")) -> emptyArray()
+                    (args.any { it.startsWith("-c=") || it.startsWith("-config=")}) -> emptyArray()
 
                     /*
                      * The application script templates (in src/scripttemplates) will set the default
@@ -100,7 +100,7 @@ class ServerAppMain {
                      * When this is set it should be passed to the KTOR embedded server as if it was
                      * added as a command line argument.
                      */
-                    configSysProp != null -> arrayOf("-config", configSysProp)
+                    configSysProp != null -> arrayOf("-config=$configSysProp")
 
                     //Else (e.g. if running from source) and default config file name exists, then use it
                     File(DEFAULT_CONFIG_FILE_NAME).exists() -> {
