@@ -16,7 +16,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import okhttp3.OkHttpClient
 import java.io.File
-import java.io.FileFilter
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
@@ -34,7 +33,7 @@ const val TEST_FILE_NAME_PARAM = "test-file-name"
 const val DEST_PARAM = "dest"
 
 enum class RunMode {
-    SINGLE_PORT, MULTIPORT
+    CYPRESS, MAESTRO
 }
 
 const val TESTCONTROLLER_PATH = "testcontroller"
@@ -45,7 +44,7 @@ fun Application.testServerController() {
 
     var adbRecordProcess: Process? = null
 
-    val mode = RunMode.SINGLE_PORT
+    val mode = RunMode.CYPRESS
 
     val adbPath = SysPathUtil.findCommandInPath(
         commandName = "adb",
@@ -178,7 +177,7 @@ fun Application.testServerController() {
     }
 
     @Suppress("KotlinConstantConditions")
-    if(mode == RunMode.SINGLE_PORT) {
+    if(mode == RunMode.CYPRESS) {
         intercept(ApplicationCallPipeline.Setup) {
             val requestUri = call.request.uri
             if(!requestUri.startsWith("/$TESTCONTROLLER_PATH") && serverProcess != null) {
@@ -208,17 +207,7 @@ fun Application.testServerController() {
         }
 
         route(TESTCONTROLLER_PATH) {
-            static("test-files/content/") {
-                //KTOR default files implementation does not cooperate.
-                staticRootFolder = testContentDir
-                testContentDir.listFiles(FileFilter {
-                    it.isFile
-                })?.forEach {
-                   file(it.name)
-                }
-
-                default("index.html")
-            }
+            staticFiles("test-files/content/", testContentDir)
 
             get("/") {
                 var response = ""
@@ -285,7 +274,7 @@ fun Application.testServerController() {
                         currentReverseProxyPort = it
                     }
 
-                    val siteUrl = if(mode == RunMode.SINGLE_PORT) {
+                    val siteUrl = if(mode == RunMode.CYPRESS) {
                         controllerUrl
                     }else {
                         "http://${controllerUrlObj.host}:$port/"

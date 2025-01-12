@@ -49,8 +49,8 @@ npm exec cypress open
 Option 2) Command line to run a specific spec
 
 ```
-export CYPRESS_SPEC=testname.cy.js
-npm exec test-spec
+export CYPRESS_SPEC=cypress/e2e/testname.cy.js
+npm run test-spec
 ```
 
 How it works:
