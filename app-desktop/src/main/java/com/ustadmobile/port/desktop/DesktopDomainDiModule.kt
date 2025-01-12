@@ -84,6 +84,8 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
+import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCase
+import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCaseJvmImpl
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJvm
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
@@ -130,8 +132,10 @@ import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.config.UstadBuildConfig
 import com.ustadmobile.core.impl.config.UstadBuildConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
+import com.ustadmobile.core.impl.config.UstadBuildConfig.Companion.MATOMO_API_URL
 import com.ustadmobile.core.launchopenlicenses.LaunchOpenLicensesUseCaseJvm
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
@@ -221,6 +225,13 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             learningSpace = context,
             db = instance(tag = DoorTag.TAG_DB),
             cache = instance()
+        )
+    }
+    bind<RecordMatomoTrackingUseCase>()  with singleton {
+        val appConfig = instance<UstadBuildConfig>()
+        RecordMatomoTrackingUseCaseJvmImpl(
+            scheduler = instance(),
+            endpoint = appConfig[MATOMO_API_URL]?.toNullIfBlank() ?:""
         )
     }
 

@@ -35,6 +35,18 @@ application {
     applicationName = "ustad-server"
 }
 
+tasks.withType(Jar) {
+    manifest {
+        def buildConfigProps = rootProject.ext["buildConfigProperties"] as Properties
+        attributes(
+                "Ustad-Version": rootProject.version,
+                "Implementation-Title": "ustad-server",
+                "Main-Class": mainClassName ?: "com.ustadmobile.lib.rest.ServerAppMain",
+                "com-matomo-url": buildConfigProps.getProperty("com.matomo.url")?:""
+        )
+    }
+}
+
 tasks.withType(CreateStartScripts) {
     unixStartScriptGenerator.template = resources.text.fromFile("$projectDir/src/scripttemplates/unixStartScript.txt")
     windowsStartScriptGenerator.template = resources.text.fromFile("$projectDir/src/scripttemplates/windowsStartScript.txt")

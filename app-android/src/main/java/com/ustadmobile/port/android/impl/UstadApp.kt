@@ -203,6 +203,12 @@ import org.acra.config.httpSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
+import org.matomo.sdk.TrackMe
+import org.matomo.sdk.TrackerBuilder
+import org.matomo.sdk.extra.DimensionQueue
+import org.matomo.sdk.extra.DownloadTracker
+import org.matomo.sdk.extra.MatomoApplication
+import org.matomo.sdk.extra.TrackHelper
 import rawhttp.core.RawHttp
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
@@ -216,13 +222,14 @@ import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
 
 
-class UstadApp : Application(), DIAware, ImageLoaderFactory{
+class UstadApp : MatomoApplication(), DIAware, ImageLoaderFactory{
 
 
     data class DbAndObservers(
         val db: UmAppDatabase,
         val updateCacheLockJoinUseCase: UpdateCacheLockJoinUseCase,
     )
+
 
     private val Context.httpPersistentFilesDir: File
         get() = File(filesDir, "httpfiles")
@@ -1190,7 +1197,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
     override fun onCreate() {
         super.onCreate()
         Napier.base(DebugAntilog())
-
         val metadataPresetLang = appMetaData?.getString(APPCONFIG_KEY_PRESET_LANG)
 
         if(!metadataPresetLang.isNullOrEmpty()) {
@@ -1205,6 +1211,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         GlobalScope.launch(Dispatchers.IO) {
             di.direct.instance<EmbeddedHttpServer>().start()
         }
+        onInitTracker()
+    }
+
+    override fun onCreateTrackerConfig(): TrackerBuilder {
+        val matomoUrl = BuildConfig.MATOMO_URL
+        val siteId = BuildConfig.MATOMO_SITE_ID
+        return TrackerBuilder.createDefault(matomoUrl, siteId)
     }
 
     /**
@@ -1232,6 +1245,25 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                     httpMethod = HttpSender.Method.POST
                 }
             }
+        }
+    }
+
+    private fun onInitTracker() {
+        // Track this app install; this triggers only once per app version.
+        TrackHelper.track().download().identifier(DownloadTracker.Extra.ApkChecksum(this)).with(tracker)
+
+        // Add a test track event
+        TrackHelper.track()
+            .event("UstadApp", "App Initialized")
+            .with(tracker)
+
+        // Dimension Queue setup
+        val dimensionQueue = DimensionQueue(tracker)
+        dimensionQueue.add(0, "UstadApp is tracked")
+
+        // Add tracking callback
+        tracker.addTrackingCallback { trackMe: TrackMe? ->
+            trackMe
         }
     }
 

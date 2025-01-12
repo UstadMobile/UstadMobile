@@ -134,6 +134,7 @@ agp = "8.7.2"
 kotlin-version = "1.9.23"
 xxhashjs = "^0.2.2"
 kotlin-wrappers = "1.0.0-pre.721"
+matomo = "4.3.1"
 
 [plugins]
 
@@ -369,6 +370,7 @@ androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro
 lz4-pure-java = { module = "org.lz4:lz4-pure-java", version.ref = "lz4" }
 kmp-uuid = { module = "com.benasher44:uuid", version.ref = "kmp-uuid" }
 zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }
+matomo-android = { module = "com.github.matomo-org:matomo-sdk-android", version.ref = "matomo" }
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials-version" }
 sqldelight-sqlite-driver-jvm = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
 sqldelight-sqlite-driver-android = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }

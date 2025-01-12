@@ -39,6 +39,8 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
+import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
+import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.PREFKEY_LOCALE
@@ -48,6 +50,7 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.logging.LogbackAntiLog
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
@@ -212,6 +215,7 @@ fun main() {
                     httpFetcher(client = httpClient)
                 }
             }
+            val recordMatomoTrackingUseCase: RecordMatomoTrackingUseCase = di.direct.instance()
 
             LaunchedEffect(Unit) {
                 di.direct.instance<EmbeddedHttpServer>().also {
@@ -239,6 +243,23 @@ fun main() {
                     PreComposeApp {
                         val navigator = rememberNavigator()
                         val currentDestination by navigator.currentEntry.collectAsState(null)
+                        val makeLinkUseCase: MakeLinkUseCase by di.onActiveEndpoint().instance()
+                        val destinationName = currentDestination?.path?.substringAfterLast("/")?:""
+                        val args = currentDestination?.queryString?.map?.mapNotNull { (key, valueList) ->
+                            valueList.firstOrNull()?.let { firstValue ->
+                                key to firstValue
+                            }
+                        }?.toMap() ?: emptyMap()
+                        val shareableLink = makeLinkUseCase(destinationName, args)
+
+                        LaunchedEffect(currentDestination?.path) {
+                            currentDestination?.path?.let { path ->
+                                recordMatomoTrackingUseCase.invoke(
+                                    path = shareableLink,
+                                    title = path
+                                )
+                            }
+                        }
 
                         /**
                          * Set the selected item. Relying on onClick misses when the user switches accounts

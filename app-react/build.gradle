@@ -120,6 +120,7 @@ buildConfig {
     buildConfigField("String", "APP_UI_LANGUAGES", "\"${rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.uilanguages")}\"")
     buildConfigField("String", "APP_UI_GOPTS", "\"${rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.gopts")}\"")
     buildConfigField("String", "APP_UI_SHOW_POWERED_BY", "\"${rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.showpoweredbymsg")}\"")
+    buildConfigField("String", "MATOMO_URL", "\"${rootProject.ext.buildConfigProperties.getProperty("com.matomo.url")}\"")
 
     buildConfigField("String", "SYSTEM_URL", "\"${rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.systemBaseUrl")}\"")
     buildConfigField("String", "PASSKEY_RP_ID", "\"${rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.passkeyRpId")}\"")

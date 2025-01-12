@@ -29,6 +29,8 @@ interface UstadBuildConfig {
 
         const val KEY_NEW_PERSONAL_ACCOUNT_LEARNING_SPACE_URL = "com.ustadmobile.system.newPersonalAccountsLsUrl"
 
+        const val MATOMO_API_URL = "com.matomo.url"
+
     }
 
 }

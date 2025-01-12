@@ -3,12 +3,15 @@ package com.ustadmobile.libuicompose.view.app
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
+import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCase
 import com.ustadmobile.core.account.PassKeyPromptData
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -18,6 +21,7 @@ import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUserTypeViewModel
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
@@ -208,6 +212,27 @@ fun AppNavHost(
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
     val di = localDI()
+    val recordMatomoTrackingUseCase: RecordMatomoTrackingUseCase by di.instance()
+    val makeLinkUseCase: MakeLinkUseCase by di.onActiveEndpoint().instance()
+    val currentLocation by navigator.currentEntry.collectAsState(null)
+
+    LaunchedEffect(currentLocation) {
+        currentLocation?.let { location ->
+            val destinationName = location.path.substringAfterLast("/")
+            val args = location.queryString?.map?.mapNotNull { (key, valueList) ->
+                valueList.firstOrNull()?.let { firstValue ->
+                    key to firstValue
+                }
+            }?.toMap() ?: emptyMap()
+            val shareableLink = makeLinkUseCase(destinationName, args)
+
+            // Trigger event tracking
+            recordMatomoTrackingUseCase.invoke(
+                path = shareableLink,
+                title = location.path
+            )
+        }
+    }
      val accountManager: UstadAccountManager = di.direct.instance()
 
     val popCommandFlow = remember {
@@ -281,9 +306,6 @@ fun AppNavHost(
             }
         }
     }
-
-
-
     val navControllerUriHandler = remember {
         NavControllerUriHandler(
             navController = ustadNavController,

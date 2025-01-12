@@ -2,7 +2,9 @@ package com.ustadmobile.lib.rest.domain.learningspace
 
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.config.ManifestAppConfig
 import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.core.impl.config.UstadBuildConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.ihttp.ktorserver.clientUrl
 import io.github.aakira.napier.Napier
@@ -23,11 +25,13 @@ import org.kodein.di.on
 fun Route.SystemConfigScriptRoute(
     systemDb: CentralAppConfigDb,
     xxStringHasher: XXStringHasher,
+    buildConfig: UstadBuildConfig
 ) {
     get("script") {
         try {
             val clientUrl = call.request.clientUrl()
             val baseUrl = clientUrl.replace("api/sysconfig/script", "")
+            val matomoApiUrl = buildConfig[UstadBuildConfig.MATOMO_API_URL]
 
             val learningSpace = systemDb.learningSpaceQueries.findByUid(
                 uid = xxStringHasher.hash(baseUrl)
@@ -47,7 +51,20 @@ fun Route.SystemConfigScriptRoute(
                 contentType = ContentType.Text.JavaScript,
             ) {
                 "var _ustadLearningSpaceExists = $learningSpaceExists;\n"+
-                "var _ustadRegistrationAllowed = $registrationAllowed;"
+                "var _ustadRegistrationAllowed = $registrationAllowed;\n"+
+                "var _paq = window._paq = window._paq || [];\n" +
+                "        _paq.push(['setDocumentTitle', document.domain + \"/\" + document.title]);\n"+
+                "        _paq.push(['setDocumentTitle', document.domain + \"/\" + document.title]);\n"+
+                "        _paq.push(['trackPageView']);\n" +
+                "        _paq.push(['enableLinkTracking']);\n" +
+                "        (function() {\n" +
+                "           var u = \"${matomoApiUrl}\";\n" +
+                "          _paq.push(['setTrackerUrl', u]);\n" +
+                "          _paq.push(['setSiteId', '1']);\n" +
+                "          var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];\n" +
+                "          g.async = true; g.src = u + 'matomo.js'; s.parentNode.insertBefore(g, s);\n" +
+                "         })();"
+
             }
         } catch (e: Throwable) {
             Napier.d { "ustadLearningSpaceExistsErr:-  ${e.message}" }

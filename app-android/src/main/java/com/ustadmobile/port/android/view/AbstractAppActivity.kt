@@ -23,6 +23,8 @@ import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
+import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCase
+import com.ustadmobile.core.domain.matomo.RecordMatomoTrackingUseCaseAndroidImpl
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseAndroid
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
@@ -73,6 +75,8 @@ import org.kodein.di.registerContextTranslator
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import org.kodein.di.with
+import org.matomo.sdk.Tracker
+import org.matomo.sdk.extra.MatomoApplication
 
 abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
 
@@ -80,6 +84,9 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
 
     //Used to execute navigation when a link is received via OnNewIntent
     protected val commandFlowNavigator = CommandFlowUstadNavController()
+
+    private val tracker: Tracker
+        get() = (application as MatomoApplication).tracker
 
     /**
      * The default initial route (Compose Navigation) to use. This can be overriden on activities
@@ -93,6 +100,9 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         import(commonDomainDiModule(LearningSpaceScope.Default))
         import(AndroidDomainDiModule(applicationContext))
 
+        bind<RecordMatomoTrackingUseCase>() with singleton {
+            RecordMatomoTrackingUseCaseAndroidImpl(tracker)
+        }
 
         bind<ShareAppUseCase>() with singleton { ShareAppUseCaseAndroid(this@AbstractAppActivity) }
 

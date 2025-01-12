@@ -174,6 +174,6 @@ TESTSTATUS=$?
 $SCRIPTDIR/../../testserver-controller/stop.sh
 
 #Uninstall when finished
-adb shell pm uninstall com.toughra.ustadmobile
+ adb shell pm uninstall com.toughra.ustadmobile
 
 exit $TESTSTATUS
