@@ -39,7 +39,7 @@ Option 1) Run the testserver-controller manually, then use Cypress open
 
 Use Gradle to run testserver controller (run from project root directory)
 ```
-./gradlew testserver-controller:run
+./gradlew testserver-controller:run --args='-P:mode=cypress'
 ```
 Then use cypress open to run/debug test specs (run from webapp-cypress directory):
 ```

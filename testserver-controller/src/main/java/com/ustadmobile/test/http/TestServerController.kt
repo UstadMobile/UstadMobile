@@ -1,6 +1,7 @@
 package com.ustadmobile.test.http
 
 import com.ustadmobile.lib.util.SysPathUtil
+import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_LEARNINGSPACE_HOST
 import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_URL
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
@@ -15,6 +16,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import okhttp3.OkHttpClient
 import java.io.File
+import java.net.Inet4Address
+import java.net.Inet6Address
+import java.net.InetAddress
+import java.net.NetworkInterface
 import java.net.URL
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
@@ -47,7 +52,11 @@ fun Application.testServerController() {
 
     var adbRecordProcess: Process? = null
 
-    val mode = RunMode.CYPRESS
+    val mode = environment.config.propertyOrNull("mode")?.getString()?.let { runPropVal ->
+        RunMode.entries.firstOrNull { it.name.equals(runPropVal, ignoreCase = true) }
+    } ?: throw IllegalArgumentException(
+        "Must specify runmode cypress or maestro e.g. -P:mode=cypress or -P:mode=maestro"
+    )
 
     val adbPath = SysPathUtil.findCommandInPath(
         commandName = "adb",
@@ -57,8 +66,6 @@ fun Application.testServerController() {
     var adbVideoName: String? = null
 
     var currentSerial: String? = null
-
-    var currentReverseProxyPort: Int = 0
 
     val okHttpClient = OkHttpClient.Builder()
         .followRedirects(false) //Following redirect would break reverse proxy
@@ -70,6 +77,23 @@ fun Application.testServerController() {
 
     val controllerUrl = environment.config.property(PARAM_NAME_URL).getString()
     val controllerUrlObj = URL(controllerUrl)
+    val learningSpaceHostPropVal = environment.config.propertyOrNull(PARAM_NAME_LEARNINGSPACE_HOST)?.getString()
+
+    val learningSpaceHost = when {
+        mode == RunMode.CYPRESS -> InetAddress.getByName(controllerUrlObj.host)
+        learningSpaceHostPropVal != null -> InetAddress.getByName(learningSpaceHostPropVal)
+        else -> {
+            val allNetInterfaces = NetworkInterface.getNetworkInterfaces().toList()
+
+            allNetInterfaces.firstOrNull { netInterface ->
+                !netInterface.isLoopback && netInterface.isUp && netInterface.inetAddresses.toList().any { addr ->
+                    addr is Inet4Address
+                }
+            }?.interfaceAddresses?.firstOrNull {
+                it.address !is Inet6Address
+            }?.address ?: throw IllegalStateException("Could not determine site host")
+        }
+    }
 
     val runningServers: MutableList<ServerRunner> = CopyOnWriteArrayList()
 
@@ -181,7 +205,6 @@ fun Application.testServerController() {
         json()
     }
 
-    @Suppress("KotlinConstantConditions")
     if(mode == RunMode.CYPRESS) {
         intercept(ApplicationCallPipeline.Setup) {
             val requestUri = call.request.uri
@@ -260,6 +283,7 @@ fun Application.testServerController() {
                         runServerCommand = call.application.environment.config
                             .property("ktor.testServer.command").getString(),
                         controllerUrl = controllerUrlObj,
+                        learningSpaceHost = learningSpaceHost,
                         baseDataDir = baseDataDir,
                     )
 
@@ -268,8 +292,8 @@ fun Application.testServerController() {
 
                     call.respond(
                         ServerInfo(
-                            url = serverRunner.siteUrl,
-                            port = Url(serverRunner.siteUrl).port,
+                            url = serverRunner.learningSpaceUrl,
+                            port = Url(serverRunner.learningSpaceUrl).port,
                             extraInfo = "Using port ${serverRunner.port} pid=${serverRunner.pid}",
                             adminUsername = "admin",
                             //This is currently set in testserver-controller/application.conf,

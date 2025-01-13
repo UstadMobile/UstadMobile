@@ -13,11 +13,11 @@
   },
   "scripts": {
     "delete:reports": "rm results/* cypress/videos/*  cypress/screenshots/* logs/* || true",
-    "start-server-ci": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar $TESTCONTROLLER_URL -P:srcRoot=../../",
+    "start-server-ci": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar $TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=cypress",
     "cy:run-ci": "cypress run --config baseUrl=$TESTCONTROLLER_URL",
     "test-ci": "start-server-and-test start-server-ci $TESTCONTROLLER_URL cy:run-ci",
 
-    "start-server": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar  http://localhost:8075/ -P:srcRoot=../../",
+    "start-server": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar  http://localhost:8075/ -P:srcRoot=../../  -P:mode=cypress",
     "cy:run": "cypress run",
     "test": "start-server-and-test start-server  http://localhost:8075/ cy:run",
 

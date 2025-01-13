@@ -19,20 +19,24 @@ class TestServerControllerMain {
          */
         const val PARAM_NAME_URL = "url"
 
-
         /**
-         * First parameter, if any parameters are present, must be the url of the testserver controller
+         * The host (IP address or host name) that will be used for the learning space url that the
+         * software under test will connect to
          */
+        const val PARAM_NAME_LEARNINGSPACE_HOST = "learningSpaceHost"
+
         @JvmStatic
         fun main(args: Array<String>) {
-            val testServerControllerUrl = Url(args.firstOrNull() ?: "http://localhost:$DEFAULT_PORT/")
+            val testServerControllerUrl = Url(
+                args.firstOrNull { it.startsWith("-P:$PARAM_NAME_URL=") }
+                    ?.substringAfter("=") ?: "http://localhost:$DEFAULT_PORT/"
+            )
 
             val environmentArgs = buildList {
+                addAll(args)
                 add("-port=${testServerControllerUrl.port}")
-                add("-P:$PARAM_NAME_URL=$testServerControllerUrl")
-
-                if(args.size > 1)
-                    addAll(args.drop(1))
+                if(!args.any { it.startsWith("-P:$PARAM_NAME_URL=") })
+                    add("-P:$PARAM_NAME_URL=$testServerControllerUrl")
             }.toTypedArray()
 
 

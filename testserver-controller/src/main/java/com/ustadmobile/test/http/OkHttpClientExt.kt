@@ -14,7 +14,8 @@ fun OkHttpClient.waitForUrl(
     do {
         try {
             newCall(Request.Builder().url(url).build()).execute().use { response ->
-                if(response.isSuccessful) {
+                //For some reason a response code 302 is not considered successful
+                if(response.code == 302 || response.isSuccessful) {
                     System.out.println("$url ready")
                     return
                 }

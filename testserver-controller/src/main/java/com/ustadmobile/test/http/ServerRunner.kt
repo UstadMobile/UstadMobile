@@ -3,6 +3,7 @@ package com.ustadmobile.test.http
 import com.ustadmobile.lib.util.SysPathUtil
 import okhttp3.OkHttpClient
 import java.io.File
+import java.net.InetAddress
 import java.net.URL
 
 class ServerRunner(
@@ -11,6 +12,7 @@ class ServerRunner(
     private val serverDir: File,
     val runServerCommand: String,
     private val controllerUrl: URL,
+    private val learningSpaceHost: InetAddress,
     private val baseDataDir: File,
     @Suppress("unused") //reserved for future use
     private val adbDeviceSerial: String? = null,
@@ -22,10 +24,10 @@ class ServerRunner(
 
     val port = findFreePort()
 
-    val siteUrl = if(mode == RunMode.CYPRESS) {
+    val learningSpaceUrl = if(mode == RunMode.CYPRESS) {
         controllerUrl.toString()
     }else {
-        "http://${controllerUrl.host}:$port/"
+        "http://${learningSpaceHost.hostName}:$port/"
     }
 
     val dataDir = File(baseDataDir, "server-$port")
@@ -33,6 +35,7 @@ class ServerRunner(
     val pid: Long
         get() = serverProcess?.pid() ?: -1
 
+    @Volatile
     private var serverProcess: Process? = null
 
     fun start() {
@@ -46,7 +49,7 @@ class ServerRunner(
         }
 
         val serverArgsWithSiteUrl = serverArgs +
-                "-P:ktor.ustad.siteUrl=$siteUrl" +
+                "-P:ktor.ustad.siteUrl=$learningSpaceUrl" +
                 "-P:ktor.deployment.port=$port" +
                 "-P:ktor.ustad.datadir=${dataDir.absolutePath}"
 
@@ -60,9 +63,9 @@ class ServerRunner(
             .start()
 
         val urlToWaitFor = if(mode == RunMode.CYPRESS)
-            URL(URL(siteUrl), "umapp/")
+            URL(URL(learningSpaceUrl), "umapp/")
         else
-            URL(siteUrl)
+            URL(learningSpaceUrl)
 
         okHttpClient.waitForUrl(urlToWaitFor.toString())
     }
@@ -72,6 +75,7 @@ class ServerRunner(
         serverProcess?.also {
             it.destroy()
             it.waitFor()
+            serverProcess = null
         }
     }
 
