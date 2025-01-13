@@ -3,15 +3,21 @@ env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/005_005_users_can_add_external_links_as_post_on_discussion_board"
   TESTNAME:  "005_005_users_can_add_external_links_as_post_on_discussion_board"
   EXTERNALURL: "${CONTROLSERVER_URL}/"
+onFlowStart:
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        TESTSERIAL: ${TESTSERIAL}
+        TESTNAME: ${TESTNAME}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
 ---
 # Admin login
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:

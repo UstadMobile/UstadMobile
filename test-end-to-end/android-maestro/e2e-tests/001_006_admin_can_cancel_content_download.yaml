@@ -2,14 +2,20 @@ appId: com.toughra.ustadmobile
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/001_006_admin_can_cancel_content_download"
   TESTNAME: "001_006_admin_can_cancel_content_download"
+onFlowStart:
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        TESTSERIAL: ${TESTSERIAL}
+        TESTNAME: ${TESTNAME}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
 - runFlow:
     file: "../common/clear_login_and_add_content.yaml"
     env:

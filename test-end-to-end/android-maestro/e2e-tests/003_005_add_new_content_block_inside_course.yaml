@@ -2,14 +2,20 @@ appId: com.toughra.ustadmobile
 env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/003_005_add_new_content_block_inside_course"
   TESTNAME: "003_005_add_new_content_block_inside_course"
+onFlowStart:
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        TESTSERIAL: ${TESTSERIAL}
+        TESTNAME: ${TESTNAME}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
