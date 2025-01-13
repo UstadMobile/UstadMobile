@@ -3,18 +3,17 @@ env:
   TESTRESULTSDIR: "${TESTRESULTSDIR}/003_006_course_view_and_modules_can_expand_collapse"
   TESTNAME: "003_006_course_view_and_modules_can_expand_collapse"
 onFlowStart:
+  - clearState: com.toughra.ustadmobile
   - runScript:
       file: "../common/startserver.js"
       env:
-        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
-        TESTSERIAL: ${TESTSERIAL}
-        TESTNAME: ${TESTNAME}
-  - clearState: com.toughra.ustadmobile
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+
 onFlowComplete:
   - runScript:
       file: "../common/stopserver.js"
       env:
-        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        CONTROLSERVER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
