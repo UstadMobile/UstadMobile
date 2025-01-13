@@ -22,18 +22,6 @@ import java.net.InetAddress
 import java.net.NetworkInterface
 import java.net.URL
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.TimeUnit
-
-
-const val ADB_RECORD_PARAM = "adbRecord"
-
-const val DEVICE_SERIAL_PARAM = "device"
-
-const val TESTNAME_PARAM = "testName"
-
-const val TEST_FILE_NAME_PARAM = "test-file-name"
-
-const val DEST_PARAM = "dest"
 
 enum class RunMode {
     CYPRESS, MAESTRO
@@ -47,10 +35,8 @@ const val TESTCONTROLLER_PATH = "testcontroller"
  *  1) Test script will run allocate a random port forwarding for emulator
  *  2) Server can recognize which emulator it is based on the port (use host header)
  */
-@Suppress("BlockingMethodInNonBlockingContext", "unused", "SdCardPath")
+@Suppress("unused", "SdCardPath")
 fun Application.testServerController() {
-
-    var adbRecordProcess: Process? = null
 
     val mode = environment.config.propertyOrNull("mode")?.getString()?.let { runPropVal ->
         RunMode.entries.firstOrNull { it.name.equals(runPropVal, ignoreCase = true) }
@@ -63,17 +49,10 @@ fun Application.testServerController() {
         extraSearchPaths = System.getenv("ANDROID_HOME") ?: "",
     )
 
-    var adbVideoName: String? = null
-
-    var currentSerial: String? = null
-
     val okHttpClient = OkHttpClient.Builder()
         .followRedirects(false) //Following redirect would break reverse proxy
         .build()
 
-    val resultDir = environment.config.propertyOrNull("resultDir")?.getString()?.let {
-        File(it)
-    } ?: File(".")
 
     val controllerUrl = environment.config.property(PARAM_NAME_URL).getString()
     val controllerUrlObj = URL(controllerUrl)
@@ -99,49 +78,6 @@ fun Application.testServerController() {
 
     if(adbPath == null || !adbPath.exists()) {
         throw IllegalStateException("ERROR: ADB path does not exist")
-    }
-
-    fun adbPullFile(
-        deviceSerial: String,
-        fromPath: String,
-        destFile: File,
-        deleteAfter: Boolean = false
-    ) {
-        destFile.parentFile.takeIf { !it.exists() }?.mkdirs()
-
-        log.info("Pulling file from device $deviceSerial $fromPath -> ${destFile.absolutePath}")
-        ProcessBuilder(listOf(adbPath.absolutePath, "-s", deviceSerial, "pull",
-                fromPath, destFile.absolutePath))
-            .start()
-            .also {
-                it.waitFor(20, TimeUnit.SECONDS)
-            }
-        if(deleteAfter) {
-            log.info("Delete $fromPath from $deviceSerial")
-            ProcessBuilder(listOf(adbPath.absolutePath, "-s", deviceSerial, "shell", "rm", fromPath))
-                .start()
-                .also {
-                    it.waitFor(20, TimeUnit.SECONDS)
-                }
-        }
-    }
-
-    fun stopRecording() {
-        if(adbRecordProcess != null) {
-            ProcessBuilder(listOf(adbPath.absolutePath, "-s", (currentSerial ?: "err"), "shell", "kill",
-                "-SIGINT", "$(pidof screenrecord)"))
-                .start()
-                .also {
-                    it.waitFor(20, TimeUnit.SECONDS)
-                }
-
-            adbRecordProcess?.waitFor(20, TimeUnit.SECONDS)
-            val destFile = File(File(resultDir, adbVideoName ?: "err"),
-                "screenrecord.mp4")
-            adbPullFile(currentSerial ?: "err", "/sdcard/$adbVideoName.mp4",
-                destFile, true)
-            adbRecordProcess = null
-        }
     }
 
     val srcRootDirProp = environment.config.propertyOrNull("srcRoot")?.getString()
@@ -178,12 +114,12 @@ fun Application.testServerController() {
                 "root directory of the source code")
     }
 
-    var serverProcess: Process? = null
-
-    Runtime.getRuntime().addShutdownHook(Thread {
-        stopRecording()
-        serverProcess?.destroy()
-    })
+    fun stopAllRunningServers() {
+        while(runningServers.isNotEmpty()) {
+            val serverToStop = runningServers.removeAt(0)
+            serverToStop.stop()
+        }
+    }
 
     install(CORS) {
         allowMethod(HttpMethod.Get)
@@ -239,41 +175,37 @@ fun Application.testServerController() {
             staticFiles("test-files/content/", testContentDir)
 
             get("/") {
-                var response = ""
-                if(serverProcess != null) {
-                    response = "Running pid #${serverProcess?.pid()} (running=${serverProcess?.isAlive}<br/>"
-                }else {
-                    response = "Server not running <br/>"
+                val response = buildString {
+                    append("<html><body>")
+                    append("TestServerController running: Mode=${mode.name}<br/>")
+                    append("Running instances (${runningServers.size})<br/>")
+                    append("<ul>")
+                    runningServers.forEach {
+                        append("<li>PID ${it.pid} learning space url: ${it.learningSpaceUrl}</li>")
+                    }
+                    append("</ul>")
+                    append("</body></html>")
                 }
 
                 call.response.header("cache-control", "no-cache")
                 call.respondText(
-                    text = "<html><body>" +
-                            "$response <br/>" +
-                            "<a href=\"start\">Start or restart server now</a>" +
-                            "</body></html>",
+                    text = response,
                     contentType = ContentType.Text.Html,
                 )
             }
 
             /**
-             * Start the test server and Android ADB screen recording as needed.
+             * Start the test server
              *
              * API usage:
              *
-             * GET start?recordAdbDevice=<serial>&testName=<test_name>
+             * GET start
              *
-             * Params:
-             *  recordAdbDevice: the serial of the device to record (as per adb devices command)
-             *  testName: name of the test about to start - used to determine the directory to save video output
              */
             get("start") {
                 try {
                     if(mode == RunMode.CYPRESS) {
-                        while(runningServers.isNotEmpty()) {
-                            val serverToStop = runningServers.removeAt(0)
-                            serverToStop.stop()
-                        }
+                        stopAllRunningServers()
                     }
 
                     val serverRunner = ServerRunner(
@@ -316,82 +248,38 @@ fun Application.testServerController() {
              * finish properly
              */
             get("/stop") {
-                //TODO here - find server/stop. In Cypress mode this isn't an issue.
-                call.response.header("cache-control", "no-cache")
-                call.respond(HttpStatusCode.OK, "OK")
-            }
+                val learningSpaceUrlToStop = call.request.queryParameters["url"]
 
-            /**
-             * Clear the Downloads directory of the device (to avoid running out of space and make
-             * sure that the uploaded content for a given test is visible at the top of the list).
-             *
-             * /cleardownloads?device=<serial>
-             */
-            get("/cleardownloads") {
-                val deviceSerial = call.request.queryParameters[DEVICE_SERIAL_PARAM]
-
-                val adbCommand = SysPathUtil.findCommandInPath("adb")
-                    ?: throw IllegalStateException("Cannot find adb in path")
-
-                val process = ProcessBuilder(listOf(adbCommand.absolutePath,
-                    "-s", deviceSerial, "shell", "rm", "-r", "/sdcard/Download/*"))
-                    .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                    .redirectError(ProcessBuilder.Redirect.PIPE)
-                    .start()
-
-                process.waitFor(5, TimeUnit.SECONDS)
-
-                call.response.header("cache-control", "no-cache")
-                call.respondText(
-                    text = "Cleared download directory /sdcard/Download",
-                    contentType = ContentType.Text.Plain,
-                )
-            }
-
-            /**
-             * Push file from the test content directory to the device Downloads directory using adb
-             *
-             * /pushcontent?device=<serial>&test-file-name=file-name.ext&dest=/sdcard/Pictures
-             *
-             * dest parameter is optional. The argument MUST be url encoded.
-             *
-             * test-file-name should be the name of a file found in the test files directory (
-             * test-end-to-end/test-files/content )
-             */
-            get("/pushcontent") {
-                val deviceSerial = call.request.queryParameters[DEVICE_SERIAL_PARAM]
-                val fileName = call.request.queryParameters[TEST_FILE_NAME_PARAM]
-                    ?: throw IllegalArgumentException("No filename specified")
-                val pushDest = call.request.queryParameters[DEST_PARAM] ?: "/sdcard/Download"
-                val contentFile = File(testContentDir, fileName)
-
-                val adbCommand = SysPathUtil.findCommandInPath("adb")
-                    ?: throw IllegalStateException("Cannot find adb in path")
-
-                call.response.header("cache-control", "no-cache")
-
-                if(!contentFile.exists()) {
+                if(learningSpaceUrlToStop == null) {
+                    stopAllRunningServers()
                     call.respondText(
-                        status = HttpStatusCode.NotFound,
-                        text = "No such file: $contentFile",
+                        status = HttpStatusCode.OK,
                         contentType = ContentType.Text.Plain,
+                        text = "OK - stopped all servers"
                     )
-                    return@get
                 }
 
-                val process = ProcessBuilder(listOf(adbCommand.absolutePath,
-                    "-s", deviceSerial, "push", contentFile.absolutePath, pushDest))
-                    .directory(serverDir)
-                    .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                    .redirectError(ProcessBuilder.Redirect.PIPE)
-                    .start()
+                val serverToStop = runningServers.firstOrNull {
+                    it.learningSpaceUrl == learningSpaceUrlToStop
+                }
 
-                process.waitFor(5, TimeUnit.SECONDS)
+                call.response.header("cache-control", "no-cache")
 
-                call.respondText(
-                    text = "Pushed content to $deviceSerial ${contentFile.absolutePath} -> /sdcard/Download",
-                    contentType = ContentType.Text.Plain
-                )
+                if(serverToStop != null) {
+                    serverToStop.stop()
+                    runningServers.remove(serverToStop)
+                    call.respondText(
+                        status = HttpStatusCode.OK,
+                        contentType = ContentType.Text.Plain,
+                        text = "OK - stopped"
+                    )
+                }else {
+                    call.respondText(
+                        status = HttpStatusCode.BadRequest,
+                        contentType = ContentType.Text.Plain,
+                        text = "Could not stop - url to stop was specified but not found $learningSpaceUrlToStop"
+                    )
+                }
             }
         }
     }
