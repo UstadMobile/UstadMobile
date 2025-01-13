@@ -1,7 +1,6 @@
 package com.ustadmobile.test.http
 
 import com.ustadmobile.lib.util.SysPathUtil
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_URL
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
@@ -17,8 +16,7 @@ import io.ktor.server.routing.*
 import okhttp3.OkHttpClient
 import java.io.File
 import java.net.URL
-import java.text.SimpleDateFormat
-import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 
 
@@ -39,6 +37,11 @@ enum class RunMode {
 const val TESTCONTROLLER_PATH = "testcontroller"
 
 
+/**
+ * Note: to handle multiple emulators:
+ *  1) Test script will run allocate a random port forwarding for emulator
+ *  2) Server can recognize which emulator it is based on the port (use host header)
+ */
 @Suppress("BlockingMethodInNonBlockingContext", "unused", "SdCardPath")
 fun Application.testServerController() {
 
@@ -67,6 +70,8 @@ fun Application.testServerController() {
 
     val controllerUrl = environment.config.property(PARAM_NAME_URL).getString()
     val controllerUrlObj = URL(controllerUrl)
+
+    val runningServers: MutableList<ServerRunner> = CopyOnWriteArrayList()
 
     if(adbPath == null || !adbPath.exists()) {
         throw IllegalStateException("ERROR: ADB path does not exist")
@@ -180,9 +185,10 @@ fun Application.testServerController() {
     if(mode == RunMode.CYPRESS) {
         intercept(ApplicationCallPipeline.Setup) {
             val requestUri = call.request.uri
-            if(!requestUri.startsWith("/$TESTCONTROLLER_PATH") && serverProcess != null) {
+            val serverToForwardTo = runningServers.lastOrNull()
+            if(!requestUri.startsWith("/$TESTCONTROLLER_PATH") && serverToForwardTo != null) {
                 //reverse proxy it
-                val destUrl = Url("http://${controllerUrlObj.host}:$currentReverseProxyPort$requestUri")
+                val destUrl = Url("http://${controllerUrlObj.host}:${serverToForwardTo.port}$requestUri")
                 call.respondReverseProxy(destUrl.toString(), okHttpClient)
                 return@intercept finish()
             }
@@ -240,113 +246,35 @@ fun Application.testServerController() {
              */
             get("start") {
                 try {
-                    val requestDeviceSerial = call.request.queryParameters[DEVICE_SERIAL_PARAM] ?: ""
-                    val adbRecordEnabled = call.request.queryParameters[ADB_RECORD_PARAM]?.toBoolean() ?: false
-                    val config = call.application.environment.config
-                    val clearPgJdbcUrl = config.propertyOrNull("ktor.testServer.clearPgUrl")?.getString()
-                    val clearPgUser = config.propertyOrNull("ktor.testServer.clearPgUser")?.getString()
-                    val clearPgPass = config.propertyOrNull("ktor.testServer.clearPgPass")?.getString()
-
-
-
-                    var response = SimpleDateFormat.getDateTimeInstance().format(Date()) + "<br/>"
-                    serverProcess?.also {
-                        it.destroy()
-                        it.waitFor(5, TimeUnit.SECONDS)
-                        response += "Stopped server: pid #${serverProcess?.pid()}<br/>"
-                        serverProcess = null
+                    if(mode == RunMode.CYPRESS) {
+                        while(runningServers.isNotEmpty()) {
+                            val serverToStop = runningServers.removeAt(0)
+                            serverToStop.stop()
+                        }
                     }
 
-                    adbRecordProcess?.also {
-                        stopRecording()
-                        adbRecordProcess = null
-                    }
+                    val serverRunner = ServerRunner(
+                        mode = mode,
+                        okHttpClient = okHttpClient,
+                        serverDir = serverDir,
+                        runServerCommand = call.application.environment.config
+                            .property("ktor.testServer.command").getString(),
+                        controllerUrl = controllerUrlObj,
+                        baseDataDir = baseDataDir,
+                    )
 
-                    if(clearPgJdbcUrl != null && clearPgUser != null && clearPgPass != null) {
-                        clearPostgresDb(clearPgJdbcUrl, clearPgUser, clearPgPass)
-                    }
-
-                    currentSerial = requestDeviceSerial
-                    adbVideoName = call.request.queryParameters[TESTNAME_PARAM]
-                        ?: System.currentTimeMillis().toString()
-
-                    val port = findFreePort().also {
-                        currentReverseProxyPort = it
-                    }
-
-                    val siteUrl = if(mode == RunMode.CYPRESS) {
-                        controllerUrl
-                    }else {
-                        "http://${controllerUrlObj.host}:$port/"
-                    }
-
-                    val dataDir = File(baseDataDir, sanitizeDbNameFromUrl(siteUrl))
-                    if(dataDir.exists()){
-                        dataDir.deleteRecursively()
-                        response += "Cleared data directory: ${dataDir.absolutePath} <br/>"
-                    }
-
-                    val serverArgs = call.application.environment.config
-                        .propertyOrNull("ktor.testServer.command")?.getString()?.split(Regex("\\s+"))
-                        ?.toMutableList()
-                        ?: throw IllegalArgumentException("No testServer command specified in configuration")
-
-                    //If the command is not an absolute path or relative path, then look in the PATH variable
-                    if(!(serverArgs[0].startsWith(".") || serverArgs[0].startsWith("/"))) {
-                        serverArgs[0] = SysPathUtil.findCommandInPath(serverArgs[0])?.absolutePath
-                            ?: throw IllegalArgumentException("Could not find server command in PATH ${serverArgs[0]}")
-                    }
-
-                    val serverArgsWithSiteUrl = serverArgs +
-                            "-P:ktor.ustad.siteUrl=$siteUrl" +
-                            "-P:ktor.deployment.port=$port" +
-                            "-P:ktor.ustad.datadir=${dataDir.absolutePath}"
-
-                    serverProcess = ProcessBuilder(serverArgsWithSiteUrl)
-                        .directory(serverDir)
-                        .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                        .redirectError(ProcessBuilder.Redirect.PIPE)
-                        .start()
-
-                    response += "Started server process PID #${serverProcess?.pid()} " +
-                            "${serverArgsWithSiteUrl.joinToString( " ")} " +
-                            "(workingDir=${serverDir.absolutePath}<br/>"
-
-                    if(adbRecordEnabled) {
-                        ProcessBuilder(
-                            listOf(adbPath.absolutePath, "-s", requestDeviceSerial, "shell",
-                                "screencap", "/sdcard/$adbVideoName.png")
-                        ).start().waitFor(5, TimeUnit.SECONDS)
-                        val screenshotDestFile = File(File(resultDir, adbVideoName ?: "err"),
-                            "screenrecord-poster.png")
-                        adbPullFile(requestDeviceSerial, "/sdcard/$adbVideoName.png",
-                            screenshotDestFile, deleteAfter = true)
-
-                        val recordArgs = listOf(adbPath.absolutePath, "-s", requestDeviceSerial,
-                            "shell", "screenrecord", "/sdcard/$adbVideoName.mp4")
-                        adbRecordProcess = ProcessBuilder(recordArgs)
-                            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                            .redirectError(ProcessBuilder.Redirect.PIPE)
-                            .start()
-
-                        response += "Started video recording: ${recordArgs.joinToString(separator = " ")} " +
-                                "PID ${adbRecordProcess?.pid()} <br/>"
-                        application.log.info("Started video recording: ${recordArgs.joinToString(separator = " ")} " +
-                                "PID ${adbRecordProcess?.pid()}")
-                    }
-
-
-                    call.response.header("cache-control", "no-cache")
-
-                    val urlToWaitFor = URL(URL(siteUrl), "umapp/")
-
-                    okHttpClient.waitForUrl(urlToWaitFor.toString())
+                    runningServers.add(serverRunner)
+                    serverRunner.start()
 
                     call.respond(
                         ServerInfo(
-                            url = siteUrl,
-                            port = Url(siteUrl).port,
-                            extraInfo = response,
+                            url = serverRunner.siteUrl,
+                            port = Url(serverRunner.siteUrl).port,
+                            extraInfo = "Using port ${serverRunner.port} pid=${serverRunner.pid}",
+                            adminUsername = "admin",
+                            //This is currently set in testserver-controller/application.conf,
+                            //however on learningspace branches it can be randomly generated.
+                            adminPassword = "testpass",
                         )
                     )
                 }catch(e: Throwable) {
@@ -364,11 +292,7 @@ fun Application.testServerController() {
              * finish properly
              */
             get("/stop") {
-                serverProcess?.also {
-                    it.destroy()
-                    it.waitFor()
-                }
-                stopRecording()
+                //TODO here - find server/stop. In Cypress mode this isn't an issue.
                 call.response.header("cache-control", "no-cache")
                 call.respond(HttpStatusCode.OK, "OK")
             }

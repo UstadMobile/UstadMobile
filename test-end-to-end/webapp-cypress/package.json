@@ -22,6 +22,6 @@
     "test": "start-server-and-test start-server  http://localhost:8075/ cy:run",
 
     "cy:run-spec": "cypress run --spec $CYPRESS_SPEC",
-    "test-spec": "start-server-and-test start-server  http://localhost:8075/ cy:run-spec"
+    "test-spec": "start-server-and-test start-server http://localhost:8075/ cy:run-spec"
   }
 }
