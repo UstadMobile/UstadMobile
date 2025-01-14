@@ -1,7 +1,6 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_002-epub"
-  TESTNAME: "001_001_admin_can_add_content_002-epub"
+  TESTRESULTSDIR: "build/results/Screenshots/001_001_admin_can_add_content_002-epub"
 onFlowStart:
   - runScript:
       file: "../common/startserver.js"
@@ -23,7 +22,7 @@ onFlowComplete:
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- takeScreenshot: "screenshots/content_add_to_library"
 - tapOn: "E-book"
 - extendedWaitUntil:
     notVisible: "Importing"
@@ -45,4 +44,4 @@ onFlowComplete:
 - tapOn: Download
 - tapOn: Open
 - assertVisible: "Cover"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/epub_content_download_and_open"
+- takeScreenshot: "screenshots/epub_content_download_and_open"

@@ -1,14 +1,11 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
-  TESTNAME:  "003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
+  TESTRESULTSDIR: "build/results/Screenshots/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
 onFlowStart:
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-        TESTSERIAL: ${TESTSERIAL}
-        TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - runScript:
@@ -20,7 +17,7 @@ onFlowComplete:
 - runFlow: "../common/select_site.yaml"
 #admin login
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 - runFlow:
     file: "../common/add_course.yaml"
     env:

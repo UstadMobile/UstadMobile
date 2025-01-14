@@ -1,14 +1,11 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_003_admin_can_delete_and_restore_content_001"
-  TESTNAME: "001_003_admin_can_delete_and_restore_content_001"
+  TESTRESULTSDIR: "build/results/Screenshots/001_003_admin_can_delete_and_restore_content_001"
 onFlowStart:
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-        TESTSERIAL: ${TESTSERIAL}
-        TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - runScript:
@@ -20,8 +17,6 @@ onFlowComplete:
     file: "../common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/screen_before_hiding_content"
 - longPressOn:
@@ -36,7 +31,7 @@ onFlowComplete:
 - runFlow: "../common/select_site.yaml"
 #admin login
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 - tapOn: "Library"
 - assertNotVisible: "E-book"
 - tapOn: "Settings"
@@ -51,7 +46,7 @@ onFlowComplete:
 - runFlow: "../common/select_site.yaml"
 #admin login
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 - tapOn: "Library"
 - assertVisible: "E-book"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/screen_after_restoring_content_from_library"

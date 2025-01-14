@@ -9,11 +9,6 @@ appId: com.toughra.ustadmobile
  # 4) TESTSERIAL: ${TESTSERIAL} : provides the device serial number
  # 5) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
 
-
-# clear the downloads
-- evalScript: ${http.get(TESTCONTROLLER_URL + "cleardownloads?device=" + TESTSERIAL)}
-# push the test file to the downloads
-- evalScript: ${http.get(TESTCONTROLLER_URL + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 - tapOn: "People"
 - tapOn:
      id: "floating_action_button"
@@ -23,6 +18,15 @@ appId: com.toughra.ustadmobile
     when:
       notVisible: "Downloads"
     file: redirect_to_downloads.yaml
-- tapOn: ${TESTFILENAME}
+- runFlow:
+    when:
+      visible: "Downloads"
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: ${TESTFILENAME}
+          direction: DOWN
+      - tapOn:
+          text: ${TESTFILENAME}
 - tapOn: "Import"
 - tapOn: "Imported: 6"

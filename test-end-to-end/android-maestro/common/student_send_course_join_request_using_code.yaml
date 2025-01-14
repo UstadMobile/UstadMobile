@@ -10,4 +10,4 @@ appId: com.toughra.ustadmobile
 - tapOn: "Paste"
 - hideKeyboard
 - tapOn: "Submit"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/pending_student"
+- takeScreenshot: "screenshots/pending_student"

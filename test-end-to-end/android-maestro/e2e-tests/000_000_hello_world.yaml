@@ -10,7 +10,6 @@ onFlowComplete:
       file: "../common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-
 ---
 - launchApp
 - tapOn: "GET STARTED"

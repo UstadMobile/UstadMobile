@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_003_add_existing_content_in_library_as_block"
+  TESTRESULTSDIR: "build/results/Screenshots/003_003_add_existing_content_in_library_as_block"
   TESTNAME: "003_003_add_existing_content_in_library_as_block"
 onFlowStart:
   - runScript:
@@ -25,12 +25,6 @@ onFlowComplete:
      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
      TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
-#---------add content to library ---------#
-- runFlow:
-   file: "../common/push_test_file_to_downloads.yaml"
-   env:
-    TESTFILENAME: "Epub_Content1.epub"
-
 - launchApp
 # adding content to library
 - tapOn: "Library"

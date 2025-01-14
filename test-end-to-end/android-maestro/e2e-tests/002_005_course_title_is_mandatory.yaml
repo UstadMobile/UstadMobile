@@ -1,14 +1,11 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_004_course_title_is_mandatory"
-  TESTNAME: "002_004_course_title_is_mandatory"
+  TESTRESULTSDIR: "build/results/Screenshots/002_005_course_title_is_mandatory"
 onFlowStart:
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-        TESTSERIAL: ${TESTSERIAL}
-        TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - runScript:
@@ -19,7 +16,7 @@ onFlowComplete:
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 - runFlow:
     file: "../common/add_course.yaml"
     env:

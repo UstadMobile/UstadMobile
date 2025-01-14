@@ -16,5 +16,5 @@ appId: com.toughra.ustadmobile
 - tapOn:
     id: "com.toughra.ustadmobile:id/absent_button"
     index: 1
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/edited_attendance"
+- takeScreenshot: "screenshots/edited_attendance"
 - tapOn: "Save"

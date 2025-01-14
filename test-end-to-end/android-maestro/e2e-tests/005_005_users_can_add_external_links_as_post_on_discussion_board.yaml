@@ -1,15 +1,12 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/005_005_users_can_add_external_links_as_post_on_discussion_board"
-  TESTNAME:  "005_005_users_can_add_external_links_as_post_on_discussion_board"
+  TESTRESULTSDIR: "build/results/Screenshots/005_005_users_can_add_external_links_as_post_on_discussion_board"
   EXTERNALURL: "${TESTCONTROLLER_URL}/"
 onFlowStart:
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-        TESTSERIAL: ${TESTSERIAL}
-        TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - runScript:
@@ -21,7 +18,7 @@ onFlowComplete:
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 # add new course
 - runFlow:
     file: "../common/add_course.yaml"

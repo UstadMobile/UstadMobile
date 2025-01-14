@@ -1,36 +1,31 @@
 appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "build/results/Screenshots/001_001_admin_can_add_content_001-h5p"
 onFlowStart:
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-        TESTSERIAL: ${TESTSERIAL}
-        TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
-#onFlowComplete:
- # - runScript:
-    #  file: "../common/stopserver.js"
-    #  env:
-       # TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-env:
-  TESTNAME: "001_001_admin_can_add_content_001-h5p"
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_001-h5p"
+onFlowComplete:
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow:
     file: "../common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: "H5p_Content.h5p"
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- takeScreenshot: "screenshots/content_add_to_library"
 - tapOn: "True/False Question"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 20000
+    timeout: 60000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 20000
+    timeout: 60000
 - tapOn: Open
 - runFlow:
     file: "../common/chrome-first-run-check.yaml"
@@ -48,6 +43,6 @@ env:
 - extendedWaitUntil:
     visible: "Check"
     timeout: 5000
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/h5p_content_download_and_open"
+- takeScreenshot: "screenshots/h5p_content_download_and_open"
 - tapOn: "Close tab"
 - tapOn: "Back"

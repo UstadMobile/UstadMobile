@@ -1,7 +1,6 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_002_admin_add_invalid_content_gets_error_msg"
-  TESTNAME: "001_002_admin_add_invalid_content_gets_error_msg"
+  TESTRESULTSDIR: "build/results/Screenshots/001_002_admin_add_invalid_content_gets_error_msg"
 onFlowStart:
     - runScript:
         file: "../common/startserver.js"

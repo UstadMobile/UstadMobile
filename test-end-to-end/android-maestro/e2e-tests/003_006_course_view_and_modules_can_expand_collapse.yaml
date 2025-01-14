@@ -1,14 +1,12 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_006_course_view_and_modules_can_expand_collapse"
-  TESTNAME: "003_006_course_view_and_modules_can_expand_collapse"
+  TESTRESULTSDIR: "build/results/Screenshots/003_006_course_view_and_modules_can_expand_collapse"
 onFlowStart:
   - clearState: com.toughra.ustadmobile
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-
 onFlowComplete:
   - runScript:
       file: "../common/stopserver.js"
@@ -18,7 +16,7 @@ onFlowComplete:
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 - runFlow:
     file: "../common/add_course.yaml"
     env:

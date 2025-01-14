@@ -1,14 +1,11 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_001_admin_add_new_course_and_teacher"
-  TESTNAME: "002_001_admin_add_new_course_and_teacher"
+  TESTRESULTSDIR: "build/results/Screenshots/002_001_admin_add_new_course_and_teacher"
 onFlowStart:
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-        TESTSERIAL: ${TESTSERIAL}
-        TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
    - runScript:
@@ -19,7 +16,7 @@ onFlowComplete:
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 # add new course
 - runFlow:
     file: "../common/add_course.yaml"

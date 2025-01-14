@@ -1,14 +1,11 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_004-pdf"
-  TESTNAME: "001_001_admin_can_add_content_004-pdf"
+  TESTRESULTSDIR: "build/results/Screenshots/001_001_admin_can_add_content_004-pdf"
 onFlowStart:
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-        TESTSERIAL: ${TESTSERIAL}
-        TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - runScript:
@@ -20,8 +17,6 @@ onFlowComplete:
     file: "../common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Pdf_Content.pdf
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
 - tapOn: "Document"

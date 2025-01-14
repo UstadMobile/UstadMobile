@@ -5,8 +5,8 @@ appId: com.toughra.ustadmobile
   # 1) USERNAME : provide the user name : 'admin' by default
   # 2) PASSWORD : provide user password : 'testppass' by default
 - tapOn: "Username"
-- inputText: ${USERNAME}
+- inputText: ${output.adminUsername}
 - tapOn: "Password"
-- inputText: ${PASSWORD}
+- inputText: ${output.adminPassword}
 - hideKeyboard
 - tapOn: "LOGIN"
