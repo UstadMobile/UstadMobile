@@ -19,6 +19,11 @@ but that has not been thoroughly tested.
 ```
 adb reverse tcp:8075 tcp:8075
 ```
+* If running test(s) that require files from test-files, push the test-files to the download directory
+  using the adb command:
+```
+adb push ../test-files /sdcard/Download/
+```
 
 ### Running
 
