@@ -2,6 +2,8 @@
 
 SCRIPTDIR=$(realpath $(dirname $0))
 
+cd $SCRIPTDIR
+
 if [ "$ANDROID_HOME" == "" ]; then
     echo "Please set ANDROID_HOME variable (eg. ~/Android/Sdk) then run again"
     exit 1
@@ -35,7 +37,7 @@ if [ "$TESTAPK" == "" ]; then
     TESTAPK=$SCRIPTDIR/../../app-android/build/outputs/apk/release/app-android-release.apk
 fi
 
-NUM_EMULATORS=2
+NUM_EMULATORS=1
 ANDROID_SERIAL=""
 EMULATOR_SERIALS=()
 AVD_NAMES=()
@@ -88,7 +90,11 @@ function cleanup() {
 
 trap cleanup EXIT
 
-echo "no" > no.tmp
+if [ ! -e build ]; then
+    mkdir build
+fi
+
+echo "no" > build/no.tmp
 for ((i = 1; i <= $NUM_EMULATORS; i++)); do
     #avdmanager will ask if you want to create a custom hardware profile (even if set to silent)
     #answer no using < no.tmp
@@ -147,8 +153,8 @@ for serial in ${EMULATOR_SERIALS[@]}; do
     MAESTRO_DEVICE_ARG="$MAESTRO_DEVICE_ARG$serial"
 done
 
-#--shard-split=${#EMULATOR_SERIALS[@]}
-maestro --device=$MAESTRO_DEVICE_ARG test --shard-split=${#EMULATOR_SERIALS[@]} --include-tags=no-files $SCRIPTDIR/e2e-tests
+#--shard-split=${#EMULATOR_SERIALS[@]} --shard-split=${#EMULATOR_SERIALS[@]} --include-tags=no-files
+maestro --device=$MAESTRO_DEVICE_ARG test $SCRIPTDIR/e2e-tests
 TESTSTATUS=$?
 
 exit $TESTSTATUS
