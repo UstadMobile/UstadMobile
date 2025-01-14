@@ -94,13 +94,17 @@ if [ ! -e build ]; then
     mkdir build
 fi
 
+if [ ! -e build/results ]; then
+    mkdir -p build/results
+fi
+
 echo "no" > build/no.tmp
 for ((i = 1; i <= $NUM_EMULATORS; i++)); do
     #avdmanager will ask if you want to create a custom hardware profile (even if set to silent)
     #answer no using < no.tmp
     AVDNAME=maestro-ci-$TESTCONTROLLER_PORT-$i
-    echo $AVDMANAGER_BIN create avd -n $AVDNAME -k 'system-images;android-33;google_apis;x86_64' < no.tmp
-    $AVDMANAGER_BIN create avd -n $AVDNAME -k 'system-images;android-33;google_apis;x86_64' < no.tmp
+    echo $AVDMANAGER_BIN create avd -n $AVDNAME -k 'system-images;android-33;google_apis;x86_64' < build/no.tmp
+    $AVDMANAGER_BIN create avd -n $AVDNAME -k 'system-images;android-33;google_apis;x86_64' < build/no.tmp
     echo "Created $AVDNAME"
     AVD_NAMES+=("$AVDNAME")
     find_free_emulator_port
@@ -134,7 +138,21 @@ for serial in ${EMULATOR_SERIALS[@]}; do
             sleep 15
         fi
     done
-    adb reverse tcp:$TESTCONTROLLER_PORT tcp:$TESTCONTROLLER_PORT
+
+    adb -s $serial reverse tcp:$TESTCONTROLLER_PORT tcp:$TESTCONTROLLER_PORT
+
+    for i in {1..5}; do
+        adb -s $serial push ../test-files/content/* /sdcard/Download/
+        PUSHSTATUS=$?
+        if [ "$PUSHSTATUS" == "0" ]; then
+            echo "run-maestro: push files on $serial succeeded"
+            break 1
+        else
+            echo "run-maestro: push files on $serial failed"
+            sleep 15
+        fi
+    done
+
 done
 
 # Ready to run maestro tests on created/ready devices
@@ -153,7 +171,9 @@ for serial in ${EMULATOR_SERIALS[@]}; do
 done
 
 #--shard-split=${#EMULATOR_SERIALS[@]} --shard-split=${#EMULATOR_SERIALS[@]} --include-tags=no-files
-maestro --device=$MAESTRO_DEVICE_ARG test -e TESTCONTROLLER_URL=$TESTCONTROLLER_URL $SCRIPTDIR/e2e-tests
+maestro --device=$MAESTRO_DEVICE_ARG test -e TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
+  $SCRIPTDIR/e2e-tests \
+  --format junit --output build/results/report.xml
 TESTSTATUS=$?
 
 exit $TESTSTATUS
