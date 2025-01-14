@@ -13,7 +13,7 @@ onFlowComplete:
   - runScript:
       file: "../common/stopserver.js"
       env:
-        CONTROLSERVER_URL: ${TESTCONTROLLER_URL}
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"

@@ -3,7 +3,7 @@ onFlowStart:
   - runScript:
       file: "../common/startserver.js"
       env:
-        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
         TESTSERIAL: ${TESTSERIAL}
         TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
@@ -11,7 +11,7 @@ onFlowStart:
  # - runScript:
     #  file: "../common/stopserver.js"
     #  env:
-       # CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+       # TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 env:
   TESTNAME: "001_001_admin_can_add_content_001-h5p"
   TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_001-h5p"
@@ -20,7 +20,7 @@ env:
     file: "../common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: "H5p_Content.h5p"
-      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"

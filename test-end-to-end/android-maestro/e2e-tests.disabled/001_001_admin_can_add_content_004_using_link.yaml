@@ -6,23 +6,23 @@ env:
   TESTNAME: "001_001_admin_can_add_content_003-video"
   TESTFILENAME: Epub_Content.epub
   TESTCONTENTNAME: AddContentEpubTest
-  CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+  TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   TESTSERIAL: ${TESTSERIAL}
 ---
 - clearState: com.toughra.ustadmobile
 - runFlow:
     file: "../common/startserver.yaml"
     env:
-      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
       TESTNAME: ${TESTNAME}
 
 # clear the app
 - clearState: com.toughra.ustadmobile
 # clear the downloads
-- evalScript: ${http.get(CONTROLSERVER_URL + "cleardownloads?device=" + TESTSERIAL)}
+- evalScript: ${http.get(TESTCONTROLLER_URL + "cleardownloads?device=" + TESTSERIAL)}
 # push the test file to the downloads
-- evalScript: ${http.get(CONTROLSERVER_URL + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+- evalScript: ${http.get(TESTCONTROLLER_URL + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 # get started
 - launchApp
 - hideKeyboard

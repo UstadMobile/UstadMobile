@@ -6,7 +6,7 @@ onFlowStart:
   - runScript:
       file: "../common/startserver.js"
       env:
-        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
         TESTSERIAL: ${TESTSERIAL}
         TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
@@ -14,7 +14,7 @@ onFlowComplete:
   - runScript:
       file: "../common/stopserver.js"
       env:
-        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 # Admin login
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -41,7 +41,7 @@ onFlowComplete:
     file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
-      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 
 - runFlow: "../common/clear_state_and_get_started.yaml"

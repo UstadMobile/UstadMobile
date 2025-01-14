@@ -6,7 +6,7 @@ onFlowStart:
   - runScript:
       file: "../common/startserver.js"
       env:
-        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
         TESTSERIAL: ${TESTSERIAL}
         TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
@@ -14,13 +14,13 @@ onFlowComplete:
   - runScript:
       file: "../common/stopserver.js"
       env:
-        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow:
     file: "../common/add_profile_pic.yaml"
     env:
       TESTFILENAME: "admin_profilePic.jpg"
-      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - assertVisible:
     id: "person_picture"

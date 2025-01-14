@@ -8,7 +8,7 @@ appId: com.toughra.ustadmobile
 # 4) TESTSERIAL: ${TESTSERIAL} : provides the device serial number
 # 5) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
 # push the test file to the downloads
-- evalScript: ${http.get(CONTROLSERVER_URL + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+- evalScript: ${http.get(TESTCONTROLLER_URL + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 # edit the course to add blocks
 - tapOn:
     id: "floating_action_button"

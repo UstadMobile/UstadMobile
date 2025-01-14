@@ -6,7 +6,7 @@ onFlowStart:
   - runScript:
       file: "../common/startserver.js"
       env:
-        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
         TESTSERIAL: ${TESTSERIAL}
         TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
@@ -14,13 +14,13 @@ onFlowComplete:
   - runScript:
       file: "../common/stopserver.js"
       env:
-        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow:
     file: "../common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
-      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/screen_before_hiding_content"

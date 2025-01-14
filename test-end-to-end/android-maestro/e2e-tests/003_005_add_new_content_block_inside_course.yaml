@@ -6,7 +6,7 @@ onFlowStart:
   - runScript:
       file: "../common/startserver.js"
       env:
-        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
         TESTSERIAL: ${TESTSERIAL}
         TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
@@ -14,7 +14,7 @@ onFlowComplete:
   - runScript:
       file: "../common/stopserver.js"
       env:
-        CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -43,7 +43,7 @@ onFlowComplete:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: "H5p_Content.h5p"
-      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
@@ -64,7 +64,7 @@ onFlowComplete:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
-      CONTROLSERVER_URL: ${CONTROLSERVER_URL}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
