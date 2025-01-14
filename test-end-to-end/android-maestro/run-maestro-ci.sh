@@ -105,9 +105,8 @@ for ((i = 1; i <= $NUM_EMULATORS; i++)); do
     AVD_NAMES+=("$AVDNAME")
     find_free_emulator_port
 
-    # removed -no-window
-    echo $EMULATOR_BIN -avd $AVDNAME -no-audio -wipe-data -port $AVD_PORT &
-    $EMULATOR_BIN -avd $AVDNAME -no-audio -wipe-data -port $AVD_PORT &
+    echo $EMULATOR_BIN -avd $AVDNAME -no-window -no-audio -wipe-data -port $AVD_PORT &
+    $EMULATOR_BIN -avd $AVDNAME -no-window -no-audio -wipe-data -port $AVD_PORT &
     echo "Started $AVDNAME"
     EMULATOR_SERIALS+=("emulator-$AVD_PORT")
     AVD_PORT=$((AVD_PORT+2))
@@ -154,7 +153,7 @@ for serial in ${EMULATOR_SERIALS[@]}; do
 done
 
 #--shard-split=${#EMULATOR_SERIALS[@]} --shard-split=${#EMULATOR_SERIALS[@]} --include-tags=no-files
-maestro --device=$MAESTRO_DEVICE_ARG test $SCRIPTDIR/e2e-tests
+maestro --device=$MAESTRO_DEVICE_ARG test -e TESTCONTROLLER_URL=$TESTCONTROLLER_URL $SCRIPTDIR/e2e-tests
 TESTSTATUS=$?
 
 exit $TESTSTATUS
