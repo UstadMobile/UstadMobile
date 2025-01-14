@@ -19,6 +19,10 @@ but that has not been thoroughly tested.
 ```
 adb reverse tcp:8075 tcp:8075
 ```
+Note: ADB port forwarding on localhost is used instead of directly using the IP of the PC/server to 
+ensure that the device and testcontroller can communicate, even if airplane mode is used during
+testing.
+
 * If running test(s) that require files from test-files, push the test-files to the download directory
   using the adb command:
 ```
