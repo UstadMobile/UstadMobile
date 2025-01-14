@@ -1,14 +1,18 @@
 appId: com.toughra.ustadmobile
+#tags:
+#  - no-files
 env:
   TESTRESULTSDIR: "build/results/Screenshots/002_001_admin_add_new_course_and_teacher"
 onFlowStart:
+  - startRecording: video_002_001
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
-   - runScript:
+  - stopRecording
+  - runScript:
       file: "../common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}

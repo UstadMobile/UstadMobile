@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPTDIR=$(realpath $(dirname $0))
+
 if [ "$ANDROID_HOME" == "" ]; then
     echo "Please set ANDROID_HOME variable (eg. ~/Android/Sdk) then run again"
     exit 1
@@ -21,12 +23,19 @@ fi
 AVD_PORT=5554
 
 EMULATOR_CONFIG="system-images;android-33;google_apis;x86_64"
+TESTCONTROLLER_PID=""
 
 if [ "$TESTCONTROLLER_PORT" == "" ]; then
     TESTCONTROLLER_PORT=8075
 fi
 
-NUM_EMULATORS=3
+TESTCONTROLLER_URL=http://localhost:$TESTCONTROLLER_PORT/
+
+if [ "$TESTAPK" == "" ]; then
+    TESTAPK=$SCRIPTDIR/../../app-android/build/outputs/apk/release/app-android-release.apk
+fi
+
+NUM_EMULATORS=2
 ANDROID_SERIAL=""
 EMULATOR_SERIALS=()
 AVD_NAMES=()
@@ -61,6 +70,7 @@ function wait_for_emulator_ready() {
 }
 
 function cleanup() {
+    echo "cleaning up"
     for serial in ${EMULATOR_SERIALS[@]}; do
         adb -s $serial emu kill
         echo "Stopped emulator $serial"
@@ -69,20 +79,29 @@ function cleanup() {
     for avdname in ${AVD_NAMES[@]}; do
         $AVDMANAGER_BIN delete avd -n $avdname
     done
+
+    if [ "$TESTCONTROLLER_PID" != "" ]; then
+        wget -qO- "${TESTCONTROLLER_URL}stop"
+        kill $TESTCONTROLLER_PID
+    fi
 }
 
+trap cleanup EXIT
 
 echo "no" > no.tmp
 for ((i = 1; i <= $NUM_EMULATORS; i++)); do
     #avdmanager will ask if you want to create a custom hardware profile (even if set to silent)
     #answer no using < no.tmp
     AVDNAME=maestro-ci-$TESTCONTROLLER_PORT-$i
+    echo $AVDMANAGER_BIN create avd -n $AVDNAME -k 'system-images;android-33;google_apis;x86_64' < no.tmp
     $AVDMANAGER_BIN create avd -n $AVDNAME -k 'system-images;android-33;google_apis;x86_64' < no.tmp
     echo "Created $AVDNAME"
     AVD_NAMES+=("$AVDNAME")
     find_free_emulator_port
 
-    $EMULATOR_BIN -avd $AVDNAME -no-audio -no-window -wipe-data -port $AVD_PORT &
+    # removed -no-window
+    echo $EMULATOR_BIN -avd $AVDNAME -no-audio -wipe-data -port $AVD_PORT &
+    $EMULATOR_BIN -avd $AVDNAME -no-audio -wipe-data -port $AVD_PORT &
     echo "Started $AVDNAME"
     EMULATOR_SERIALS+=("emulator-$AVD_PORT")
     AVD_PORT=$((AVD_PORT+2))
@@ -94,9 +113,43 @@ for serial in ${EMULATOR_SERIALS[@]}; do
     echo "$ANDROID_SERIAL ready"
 done
 
+# Still need a little extra time
+sleep 15
+
+for serial in ${EMULATOR_SERIALS[@]}; do
+    for i in {1..5}; do
+        echo "Attempting to install on $serial attempt $i"
+        adb -s $serial install $TESTAPK
+        INSTALLSTATUS=$?
+        if [ "$INSTALLSTATUS" == "0" ]; then
+            echo "run-maestro: Install on $serial succeeded"
+            break 1
+        else
+            echo "run-maestro: Install on $serial failed"
+            sleep 15
+        fi
+    done
+    adb reverse tcp:$TESTCONTROLLER_PORT tcp:$TESTCONTROLLER_PORT
+done
+
 # Ready to run maestro tests on created/ready devices
 
 echo "Time to run Maestro tests"
-sleep 20
 
-trap cleanup EXIT
+java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar -P:url=$TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=maestro &
+TESTCONTROLLER_PID=$!
+
+MAESTRO_DEVICE_ARG=""
+for serial in ${EMULATOR_SERIALS[@]}; do
+    if [ "$MAESTRO_DEVICE_ARG" != "" ]; then
+        MAESTRO_DEVICE_ARG="$MAESTRO_DEVICE_ARG,"
+    fi
+    MAESTRO_DEVICE_ARG="$MAESTRO_DEVICE_ARG$serial"
+done
+
+#--shard-split=${#EMULATOR_SERIALS[@]}
+maestro --device=$MAESTRO_DEVICE_ARG test --shard-split=${#EMULATOR_SERIALS[@]} --include-tags=no-files $SCRIPTDIR/e2e-tests
+TESTSTATUS=$?
+
+exit $TESTSTATUS
+
