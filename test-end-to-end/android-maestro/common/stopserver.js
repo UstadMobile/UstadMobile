@@ -1,4 +1,2 @@
-var response = http.get(CONTROLSERVER_URL + "testcontroller/stop?device=" + TESTSERIAL + "&testName=" + TESTNAME + "&adbRecord=true");
-if (response.body && response.body.trim() === "OK") {
-    console.log("Test successfully stopped.");
-    }
+
+http.get(output.testServerControllerUrl + "testcontroller/stop?url=" + encodeURIComponent(output.SERVER_URL));

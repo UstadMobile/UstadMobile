@@ -4,8 +4,6 @@ onFlowStart:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-        TESTSERIAL: ${TESTSERIAL}
-        TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - runScript:
@@ -21,9 +19,9 @@ onFlowComplete:
 - hideKeyboard
 - tapOn: "NEXT"
 - tapOn: "Username"
-- inputText: ${USERNAME}
+- inputText: ${output.adminUsername}
 - tapOn: "Password"
-- inputText: ${PASSWORD}
+- inputText: ${output.adminPassword}
 - hideKeyboard
 - tapOn: "LOGIN"
 - tapOn: "Library"

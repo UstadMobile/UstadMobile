@@ -29,7 +29,7 @@ Start the testserver-controller:
 
 Then use the Maestro command line to run tests:
 ```
-maestro test e2e-tests/testname.yaml
+maestro test e2e-tests/testname.yaml [-e TESTCONTROLLER_URL=http://localhost:8075] 
 ```
 
 ### Continuous integration run

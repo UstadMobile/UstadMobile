@@ -20,7 +20,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "${FIRSTNAME} ${LASTNAME}"
 - tapOn: "CREATE ACCOUNT"
 - tapOn: "Username*"
-- inputText: ${USERNAME}
+- inputText: ${output.adminUsername}
 - tapOn: "New password*"
-- inputText: ${PASSWORD}
+- inputText: ${output.adminPassword}
 - tapOn: "SAVE"

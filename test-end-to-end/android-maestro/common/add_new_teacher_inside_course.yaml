@@ -29,8 +29,8 @@ appId: com.toughra.ustadmobile
   # add account
 - tapOn: "CREATE ACCOUNT"
 - tapOn: "Username*"
-- inputText: ${USERNAME}
+- inputText: ${output.adminUsername}
 - tapOn: "New password*"
-- inputText: ${PASSWORD}
+- inputText: ${output.adminPassword}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_account_for_new_teacher-${TEACHERFIRSTNAME} ${TEACHERLASTNAME}"
