@@ -26,7 +26,7 @@ testing.
 * If running test(s) that require files from test-files, push the test-files to the download directory
   using the adb command:
 ```
-adb push ../test-files /sdcard/Download/
+adb push ../test-files/content/* /sdcard/Download/
 ```
 
 ### Running
