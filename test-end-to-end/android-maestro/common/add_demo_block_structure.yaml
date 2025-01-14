@@ -29,4 +29,3 @@ appId: com.toughra.ustadmobile
     index: 1
 - tapOn: "Indent"
 - tapOn: "SAVE"
-- takeScreenshot: "screenshots/block_structure"

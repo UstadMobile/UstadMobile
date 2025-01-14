@@ -27,4 +27,3 @@ appId: com.toughra.ustadmobile
 - tapOn: "Next"
 - tapOn: "Done"
 - tapOn: "SAVE"
-- takeScreenshot: "screenshots/able_to_add_new_content_block_inside_course"

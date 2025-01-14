@@ -10,4 +10,4 @@ appId: com.toughra.ustadmobile
 - tapOn: "Paste"
 - hideKeyboard
 - tapOn: "Submit"
-- takeScreenshot: "screenshots/pending_student"
+

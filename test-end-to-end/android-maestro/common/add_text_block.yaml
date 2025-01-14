@@ -24,5 +24,4 @@ appId: com.toughra.ustadmobile
 - assertVisible:
         id: "app_title"
         text: "Add text"
-- takeScreenshot: "screenshots/added_text_${TEXTTITLE}"
 - tapOn: "Done"
