@@ -27,7 +27,7 @@ class ServerRunner(
     val learningSpaceUrl = if(mode == RunMode.CYPRESS) {
         controllerUrl.toString()
     }else {
-        "http://${learningSpaceHost.hostName}:$port/"
+        "http://${learningSpaceHost.hostAddress}:$port/"
     }
 
     val dataDir = File(baseDataDir, "server-$port")
