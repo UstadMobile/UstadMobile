@@ -1,14 +1,16 @@
 appId: com.toughra.ustadmobile
 env:
   TESTRESULTSDIR: "build/results/Screenshots/005_005_users_can_add_external_links_as_post_on_discussion_board"
-  EXTERNALURL: "${TESTCONTROLLER_URL}/"
+  #EXTERNALURL: "${TESTCONTROLLER_URL}/"
 onFlowStart:
+  - startRecording: "build/reports/maestro/005_005_users_can_add_external_links_as_post_on_discussion_board/Videos"
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:
