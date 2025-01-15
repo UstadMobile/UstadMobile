@@ -61,8 +61,6 @@ external interface ContentEntryDetailAttemptsPersonListProps : Props {
     var refreshCommandFlow: Flow<RefreshCommand>?
     var onListItemClick: (PersonAndPictureAndNumAttempts) -> Unit
     var onSortOrderChanged: (SortOrderOption) -> Unit
-
-
 }
 
 val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
@@ -194,7 +192,6 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                 }
             }
         }
-
 
     contentEntryDetailAttemptsPersonListComponent2 {
         this.uiState = uiState
