@@ -14,4 +14,8 @@ appId: com.toughra.ustadmobile
     when:
       notVisible: "Downloads"
     file: redirect_to_downloads.yaml
+- scrollUntilVisible:
+    element:
+      text: ${TESTFILENAME}
+    direction: DOWN
 - tapOn: ${TESTFILENAME}
