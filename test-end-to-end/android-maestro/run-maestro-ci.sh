@@ -1,14 +1,20 @@
 #!/bin/bash
 
-SCRIPTDIR=$(realpath $(dirname $0))
+# Run Ustad Mobile Maestro tests in CI Environment. See README.md for background info.
+# Creates, starts, waits for, and then deletes multiple emulators.
+# The test controller port should be in the environment variable TESTCONTROLLER_PORT
 
+SCRIPTDIR=$(realpath $(dirname $0))
 cd $SCRIPTDIR
 
 if [ "$ANDROID_HOME" == "" ]; then
-    echo "Please set ANDROID_HOME variable (eg. ~/Android/Sdk) then run again"
+    echo "run-maestro-ci: Please set ANDROID_HOME variable (eg. ~/Android/Sdk) then run again"
     exit 1
 fi
 
+if [ "$TESTCONTROLLER_PORT" == "" ]; then
+    TESTCONTROLLER_PORT=8075
+fi
 
 if [ "$EMULATOR_BIN" == "" ]; then
     EMULATOR_BIN="$ANDROID_HOME/emulator/emulator"
@@ -18,24 +24,23 @@ if [ "$AVDMANAGER_BIN" == "" ]; then
     AVDMANAGER_BIN="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
 fi
 
-# Run Ustad Mobile Maestro tests in CI Environment.
-# Creates, starts, waits for, and then deletes multiple emulators.
-# The test controller port should be in the environment variable TESTCONTROLLER_PORT
 
+if [ "$TESTAPK" == "" ]; then
+    TESTAPK=$SCRIPTDIR/../../app-android/build/outputs/apk/release/app-android-release.apk
+fi
+
+if [ ! -e "$TESTAPK" ]; then
+    echo "run-maestro-ci: Test APK not found: $TESTAPK"
+    exit 2
+fi
+
+# The next AVD port to use. See find_free_emulator_port function
 AVD_PORT=5554
 
 EMULATOR_CONFIG="system-images;android-33;google_apis;x86_64"
 TESTCONTROLLER_PID=""
 
-if [ "$TESTCONTROLLER_PORT" == "" ]; then
-    TESTCONTROLLER_PORT=8075
-fi
-
 TESTCONTROLLER_URL=http://localhost:$TESTCONTROLLER_PORT/
-
-if [ "$TESTAPK" == "" ]; then
-    TESTAPK=$SCRIPTDIR/../../app-android/build/outputs/apk/release/app-android-release.apk
-fi
 
 NUM_EMULATORS=1
 ANDROID_SERIAL=""
@@ -55,7 +60,7 @@ function find_free_emulator_port() {
         AVD_PORT=$((AVD_PORT+2))
 
         if [ $AVD_PORT -gt 5682 ]; then
-            raise "No emulator ports available"
+            raise "run-maestro-ci: No emulator ports available"
         fi
     done
 }
@@ -64,6 +69,9 @@ function find_free_emulator_port() {
 function wait_for_emulator_ready() {
     RETVAL=1
     adb -s "$ANDROID_SERIAL" wait-for-device
+
+    # Even after wait-for-device returns, the emulator won't really be ready (commands will still
+    # fail. Attempt to run the shell pm list packages command repeatedly until successful.
     while [ "$RETVAL" != "0" ]; do
         adb -s $ANDROID_SERIAL shell pm list packages > /dev/null
         RETVAL=$?
@@ -72,10 +80,10 @@ function wait_for_emulator_ready() {
 }
 
 function cleanup() {
-    echo "cleaning up"
+    echo "run-maestro-ci: cleaning up"
     for serial in ${EMULATOR_SERIALS[@]}; do
         adb -s $serial emu kill
-        echo "Stopped emulator $serial"
+        echo "run-maestro-ci: Stopped emulator $serial"
     done
 
     for avdname in ${AVD_NAMES[@]}; do
@@ -90,12 +98,12 @@ function cleanup() {
 
 trap cleanup EXIT
 
-if [ ! -e build ]; then
-    mkdir build
-fi
-
 if [ ! -e build/results ]; then
     mkdir -p build/results
+fi
+
+if [ ! -e build/reports/maestro ]; then
+    mkdir -p build/reports/maestro
 fi
 
 echo "no" > build/no.tmp
@@ -105,13 +113,13 @@ for ((i = 1; i <= $NUM_EMULATORS; i++)); do
     AVDNAME=maestro-ci-$TESTCONTROLLER_PORT-$i
     echo $AVDMANAGER_BIN create avd -n $AVDNAME -k 'system-images;android-33;google_apis;x86_64' < build/no.tmp
     $AVDMANAGER_BIN create avd -n $AVDNAME -k 'system-images;android-33;google_apis;x86_64' < build/no.tmp
-    echo "Created $AVDNAME"
+    echo "run-maestro-ci: Created $AVDNAME"
     AVD_NAMES+=("$AVDNAME")
     find_free_emulator_port
 
     echo $EMULATOR_BIN -avd $AVDNAME -no-window -no-audio -wipe-data -port $AVD_PORT &
     $EMULATOR_BIN -avd $AVDNAME -no-window -no-audio -wipe-data -port $AVD_PORT &
-    echo "Started $AVDNAME"
+    echo "run-maestro-ci: Started $AVDNAME"
     EMULATOR_SERIALS+=("emulator-$AVD_PORT")
     AVD_PORT=$((AVD_PORT+2))
 done
@@ -119,7 +127,7 @@ done
 for serial in ${EMULATOR_SERIALS[@]}; do
     ANDROID_SERIAL=$serial
     wait_for_emulator_ready
-    echo "$ANDROID_SERIAL ready"
+    echo "run-maestro-ci: $ANDROID_SERIAL ready"
 done
 
 # Still need a little extra time
@@ -127,14 +135,14 @@ sleep 15
 
 for serial in ${EMULATOR_SERIALS[@]}; do
     for i in {1..5}; do
-        echo "Attempting to install on $serial attempt $i"
+        echo "run-maestro-ci: Attempting to install on $serial attempt $i"
         adb -s $serial install $TESTAPK
         INSTALLSTATUS=$?
         if [ "$INSTALLSTATUS" == "0" ]; then
-            echo "run-maestro: Install on $serial succeeded"
+            echo "run-maestro-ci: Install APK on $serial succeeded"
             break 1
         else
-            echo "run-maestro: Install on $serial failed"
+            echo "run-maestro-ci: Install APK on $serial failed"
             sleep 15
         fi
     done
@@ -145,10 +153,10 @@ for serial in ${EMULATOR_SERIALS[@]}; do
         adb -s $serial push ../test-files/content/* /sdcard/Download/
         PUSHSTATUS=$?
         if [ "$PUSHSTATUS" == "0" ]; then
-            echo "run-maestro: push files on $serial succeeded"
+            echo "run-maestro-ci: push files on $serial succeeded"
             break 1
         else
-            echo "run-maestro: push files on $serial failed"
+            echo "run-maestro-ci: push files on $serial failed"
             sleep 15
         fi
     done
@@ -157,7 +165,7 @@ done
 
 # Ready to run maestro tests on created/ready devices
 
-echo "Time to run Maestro tests"
+echo "run-maestro-ci: Time to run Maestro tests"
 
 java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar -P:url=$TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=maestro &
 TESTCONTROLLER_PID=$!
@@ -170,10 +178,11 @@ for serial in ${EMULATOR_SERIALS[@]}; do
     MAESTRO_DEVICE_ARG="$MAESTRO_DEVICE_ARG$serial"
 done
 
-#--shard-split=${#EMULATOR_SERIALS[@]} --shard-split=${#EMULATOR_SERIALS[@]} --include-tags=no-files
+# Could try using sharding here in future e.g. --shard-split=${#EMULATOR_SERIALS[@]}
 maestro --device=$MAESTRO_DEVICE_ARG test -e TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
   $SCRIPTDIR/e2e-tests \
-  --format junit --output build/results/report.xml
+  --format junit --output build/results/report.xml \
+  --debug-output build/reports/maestro
 TESTSTATUS=$?
 
 exit $TESTSTATUS
