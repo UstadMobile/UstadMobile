@@ -11,6 +11,10 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_FIRST_NAME_ASC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_FIRST_NAME_DESC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_LAST_NAME_ASC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_LAST_NAME_DESC
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
@@ -19,10 +23,10 @@ data class ContentEntryDetailAttemptsPersonListUiState(
     val attemptsPersonList: () -> PagingSource<Int, PersonAndPictureAndNumAttempts> =
         { EmptyPagingSource() },
     val sortOptions: List<SortOrderOption> = listOf(
-        SortOrderOption(MR.strings.first_name, PersonDaoCommon.SORT_FIRST_NAME_ASC, true),
-        SortOrderOption(MR.strings.first_name, PersonDaoCommon.SORT_FIRST_NAME_DESC, false),
-        SortOrderOption(MR.strings.last_name, PersonDaoCommon.SORT_LAST_NAME_ASC, true),
-        SortOrderOption(MR.strings.last_name, PersonDaoCommon.SORT_LAST_NAME_DESC, false)
+        SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_ASC, true),
+        SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_DESC, false),
+        SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_ASC, true),
+        SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_DESC, false)
     ),
     val sortOption: SortOrderOption = sortOptions.first(),
     val showSortOptions: Boolean = true,
