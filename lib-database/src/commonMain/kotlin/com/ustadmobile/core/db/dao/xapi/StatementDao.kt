@@ -7,6 +7,10 @@ import androidx.room.RawQuery
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE
+import com.ustadmobile.core.db.dao.PersonDaoCommon.SORT_FIRST_NAME_ASC
+import com.ustadmobile.core.db.dao.PersonDaoCommon.SORT_FIRST_NAME_DESC
+import com.ustadmobile.core.db.dao.PersonDaoCommon.SORT_LAST_NAME_ASC
+import com.ustadmobile.core.db.dao.PersonDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.core.db.dao.SystemPermissionDaoCommon
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.ACTOR_UIDS_FOR_PERSONUIDS_CTE
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
@@ -401,12 +405,23 @@ expect abstract class StatementDao {
                           ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
             )      
                     AND (:searchText = "%" OR Person.firstNames LIKE :searchText OR Person.lastName LIKE :searchText OR Person.userName LIKE :searchText)
+           ORDER BY CASE(:sortOrder)
+               WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
+               WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
+               ELSE ''
+               END ASC,
+               CASE(:sortOrder)
+               WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
+               WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
+               ELSE ''
+               END DESC
 """)
     abstract fun findPersonsWithAttempts(
         contentEntryUid: Long,
         accountPersonUid: Long,
-        searchText: String? = "%"
-    ): PagingSource<Int, PersonAndPictureAndNumAttempts>
+        searchText: String? = "%",
+        sortOrder: Int,
+        ): PagingSource<Int, PersonAndPictureAndNumAttempts>
 
 
     @Query("""
