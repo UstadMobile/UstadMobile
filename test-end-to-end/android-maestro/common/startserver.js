@@ -1,6 +1,9 @@
 
 console.log("TESTCONTROLLER_URL = " + TESTCONTROLLER_URL);
-if(typeof(TESTCONTROLLER_URL) != "undefined" && TESTCONTROLLER_URL != null && TESTCONTROLLER_URL != "null") {
+if(typeof(TESTCONTROLLER_URL) == "string" &&
+    (TESTCONTROLLER_URL.toLowerCase().startsWith("http://") ||
+    TESTCONTROLLER_URL.toLowerCase().startsWith("https://"))
+) {
     output.testServerControllerUrl = TESTCONTROLLER_URL;
     console.log("TESTCONTROLLER_URL set " + output.testServerControllerUrl);
 }else {
