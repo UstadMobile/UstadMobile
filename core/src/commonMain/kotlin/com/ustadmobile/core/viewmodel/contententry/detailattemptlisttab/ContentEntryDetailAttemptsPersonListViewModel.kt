@@ -48,8 +48,6 @@ class ContentEntryDetailAttemptsPersonListViewModel(
                 accountPersonUid = activeUserPersonUid,
                 searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
                 sortOrder = _uiState.value.sortOption.flag,
-
-
                 )
         return pagingSource
     }

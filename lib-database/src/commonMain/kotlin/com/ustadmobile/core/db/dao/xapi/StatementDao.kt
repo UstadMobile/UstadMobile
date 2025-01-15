@@ -27,6 +27,10 @@ import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
+import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_SCORE_ASC
+import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_SCORE_DESC
+import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_TIMESTAMP_ASC
+import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_TIMESTAMP_DESC
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndRelated
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import com.ustadmobile.lib.db.entities.Person
@@ -499,12 +503,29 @@ expect abstract class StatementDao {
                               LIMIT 1)
          WHERE StatementEntity.contextRegistrationHi = :registrationHi
            AND StatementEntity.contextRegistrationLo = :registrationLo  
-           AND (:searchText = "%" OR VerbEntity.verbUrlId LIKE :searchText)  
+           AND (:searchText = "%" OR VerbEntity.verbUrlId LIKE :searchText)
+           ORDER BY  CASE(:sortOrder)
+               WHEN $SORT_BY_TIMESTAMP_DESC THEN StatementEntity.resultDuration
+               ELSE ''
+               END DESC,
+            CASE(:sortOrder)
+               WHEN $SORT_BY_TIMESTAMP_ASC THEN StatementEntity.resultDuration
+               ELSE ''
+               END ASC,
+                 CASE(:sortOrder)
+               WHEN $SORT_BY_SCORE_DESC THEN StatementEntity.resultScoreRaw
+               ELSE ''
+               END DESC,
+            CASE(:sortOrder)
+               WHEN $SORT_BY_SCORE_ASC THEN StatementEntity.resultScoreRaw
+               ELSE ''
+               END ASC
     """)
     abstract fun findStatementsBySession(
         registrationHi: Long,
         registrationLo: Long,
-        searchText: String?="%"
-    ): PagingSource<Int, StatementEntityAndVerb>
+        searchText: String? = "%",
+        sortOrder: Int
+        ): PagingSource<Int, StatementEntityAndVerb>
 
 }
