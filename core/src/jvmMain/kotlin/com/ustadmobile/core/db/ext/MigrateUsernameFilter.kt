@@ -30,7 +30,8 @@ val MIGRATE_USERNAME_SERVER = DoorMigrationStatementList(202, 203) { db ->
                 if (currentUsername != filteredUsername) {
                     statements.add("""
                         UPDATE Person 
-                        SET username = '$filteredUsername'
+                        SET username = '$filteredUsername',
+                            personLct = ${System.currentTimeMillis()}
                         WHERE personUid = $personUid
                     """.trimIndent())
                 }
