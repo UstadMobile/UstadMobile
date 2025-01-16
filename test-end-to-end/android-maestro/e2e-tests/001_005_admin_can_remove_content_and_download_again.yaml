@@ -1,13 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/001_005_admin_can_remove_content_and_download_again"
+  TESTRESULTSDIR: "build/reports/maestro/001_005_admin_can_remove_content_and_download_again/Screenshots"
 onFlowStart:
+  - startRecording: 001_005_admin_can_remove_content_and_download_again
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:
@@ -18,7 +20,7 @@ onFlowComplete:
     env:
       TESTFILENAME: Epub_Content2.epub
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- takeScreenshot: "${TESTRESULTSDIR}/content_add_to_library"
 - tapOn: "E-book"
 - assertNotVisible: "Importing"
 - tapOn: Open
@@ -36,4 +38,4 @@ onFlowComplete:
 - tapOn: Remove
 - tapOn: Download
 - tapOn: Open
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_download_and_open"
+- takeScreenshot: "${TESTRESULTSDIR}/content_download_and_open"

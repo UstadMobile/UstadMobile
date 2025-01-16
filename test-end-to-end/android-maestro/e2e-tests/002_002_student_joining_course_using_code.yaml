@@ -1,13 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/002_002_student_joining_course_using_code"
+  TESTRESULTSDIR: "build/reports/maestro/002_002_student_joining_course_using_code/Screenshots"
 onFlowStart:
+  - startRecording: 002_002_student_joining_course_using_code
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:

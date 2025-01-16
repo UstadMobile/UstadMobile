@@ -1,13 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/004_006_assignment_grace_period_finished"
+  TESTRESULTSDIR: "build/reports/maestro/004_006_assignment_grace_period_finished/Screenshots"
 onFlowStart:
+  - startRecording: 004_006_assignment_grace_period_finished
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:
@@ -108,7 +110,7 @@ onFlowComplete:
     direction: DOWN
 - assertVisible: "Must submit all at once"
 - assertVisible: "Done"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
+- takeScreenshot: "${TESTRESULTSDIR}/added_assignment"
 - tapOn:
     text: "Done"
 - assertNotVisible: "Done"

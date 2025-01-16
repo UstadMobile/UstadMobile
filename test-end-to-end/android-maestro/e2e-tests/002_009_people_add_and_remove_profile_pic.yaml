@@ -1,14 +1,16 @@
 appId: com.toughra.ustadmobile
 env:
   TESTNAME: "002_009_people_add_and_remove_profile_pic"
-  TESTRESULTSDIR: "build/results/Screenshots/002_009_people_add_and_remove_profile_pic"
+  TESTRESULTSDIR: "build/reports/maestro/002_009_people_add_and_remove_profile_pic/Screenshots"
 onFlowStart:
+  - startRecording: 002_009_people_add_and_remove_profile_pic
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:

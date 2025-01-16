@@ -1,13 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/003_001_add_or_edit_course_permission_test"
+  TESTRESULTSDIR: "build/reports/maestro/003_001_add_or_edit_course_permission_test/Screenshots"
 onFlowStart:
+  - startRecording: 003_001_add_or_edit_course_permission_test
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:

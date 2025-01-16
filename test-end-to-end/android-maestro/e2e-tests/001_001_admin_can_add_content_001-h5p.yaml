@@ -1,13 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/001_001_admin_can_add_content_001-h5p"
+  TESTRESULTSDIR: "build/reports/maestro/001_001_admin_can_add_content_001-h5p/Screenshots"
 onFlowStart:
+  - startRecording: 001_001_admin_can_add_content_001-h5p
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:
@@ -18,7 +20,7 @@ onFlowComplete:
     env:
       TESTFILENAME: "H5p_Content.h5p"
 - tapOn: "SAVE"
-- takeScreenshot: "screenshots/content_add_to_library"
+- takeScreenshot: "${TESTRESULTSDIR}/content_add_to_library"
 - tapOn: "True/False Question"
 - extendedWaitUntil:
     notVisible: "Importing"
@@ -43,6 +45,6 @@ onFlowComplete:
 - extendedWaitUntil:
     visible: "Check"
     timeout: 5000
-- takeScreenshot: "screenshots/h5p_content_download_and_open"
+- takeScreenshot: "${TESTRESULTSDIR}/h5p_content_download_and_open"
 - tapOn: "Close tab"
 - tapOn: "Back"

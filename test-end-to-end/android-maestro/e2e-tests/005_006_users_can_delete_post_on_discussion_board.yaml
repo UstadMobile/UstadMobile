@@ -1,13 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/005_006_users_can_delete_post_on_discussion_board"
+  TESTRESULTSDIR: "build/reports/maestro/005_006_users_can_delete_post_on_discussion_board/Screenshots"
 onFlowStart:
+  - startRecording: 005_006_users_can_delete_post_on_discussion_board
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:

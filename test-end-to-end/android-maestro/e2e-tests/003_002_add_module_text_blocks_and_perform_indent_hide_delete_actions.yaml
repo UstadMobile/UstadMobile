@@ -2,9 +2,9 @@ appId: com.toughra.ustadmobile
 tags:
   - no-files
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
+  TESTRESULTSDIR: "build/reports/maestro/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions/Screenshots"
 onFlowStart:
-  - startRecording: video_003_002
+  - startRecording: 002_001_admin_add_new_course_and_teacher
   - runScript:
       file: "../common/startserver.js"
       env:
@@ -53,7 +53,7 @@ onFlowComplete:
 - tapOn: "SAVE"
 - assertNotVisible:
     text: "SEMESTER 1"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/module_block_is_hidden"
+- takeScreenshot: "${TESTRESULTSDIR}/module_block_is_hidden"
 - tapOn:
     id: "floating_action_button"
 #  swipe down to  view  added  blocks
@@ -74,7 +74,7 @@ onFlowComplete:
     direction: DOWN
 - assertVisible:
     text: "SEMESTER 1"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/module_block_unhide"
+- takeScreenshot: "${TESTRESULTSDIR}/module_block_unhide"
 - tapOn:
     id: "floating_action_button"
 # indent the text block ----- 1
@@ -88,7 +88,7 @@ onFlowComplete:
     index: 1
 - tapOn: "Indent"
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_indented"
+- takeScreenshot: "${TESTRESULTSDIR}/text_block_indented"
 # unindent text block ----- 1
 - tapOn:
     id: "floating_action_button"
@@ -102,7 +102,7 @@ onFlowComplete:
     index: 1
 - tapOn: "Unindent"
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_unindented"
+- takeScreenshot: "${TESTRESULTSDIR}/text_block_unindented"
 # Delete text block --- 1
 - tapOn:
     id: "floating_action_button"
@@ -118,4 +118,4 @@ onFlowComplete:
 - tapOn: "SAVE"
 - assertNotVisible:
     text: "PRIMARY COLOURS"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/text_block_deleted"
+- takeScreenshot: "${TESTRESULTSDIR}/text_block_deleted"

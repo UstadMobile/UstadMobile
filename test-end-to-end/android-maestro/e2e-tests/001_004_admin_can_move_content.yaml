@@ -1,13 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/001_004_admin_can_move_content"
+  TESTRESULTSDIR: "build/reports/maestro/001_004_admin_can_move_content/Screenshots"
 onFlowStart:
+  - startRecording: 001_004_admin_can_move_content
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:
@@ -25,13 +27,13 @@ onFlowComplete:
 - tapOn: "Title*"
 - inputText: "Test Folder"
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/before_moving_content_to_new_folder"
+- takeScreenshot: "${TESTRESULTSDIR}//before_moving_content_to_new_folder"
 - longPressOn:
     text: "E-book"
 - tapOn: "Move"
 - tapOn: "Folder"
 - tapOn: "Move entries to this folder"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/after_moving_content_to_new_folder_test"
+- takeScreenshot: "${TESTRESULTSDIR}//after_moving_content_to_new_folder_test"
 - tapOn: "Folder"
 - assertVisible:
     id: "app_title"

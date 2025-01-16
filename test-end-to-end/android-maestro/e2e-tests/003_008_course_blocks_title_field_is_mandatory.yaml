@@ -1,13 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions"
+  TESTRESULTSDIR: "build/reports/maestro/003_008_course_blocks_title_field_is_mandatory/Screenshots"
 onFlowStart:
+  - startRecording: 003_008_course_blocks_title_field_is_mandatory
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:

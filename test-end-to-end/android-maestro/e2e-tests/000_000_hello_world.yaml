@@ -1,11 +1,13 @@
 appId: com.toughra.ustadmobile
 onFlowStart:
+  - startRecording: 000_000_hello_world
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:

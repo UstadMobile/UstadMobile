@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/004_004_multiple_submission_possible_for_student"
+  TESTRESULTSDIR: "build/reports/maestro/004_004_multiple_submission_possible_for_student/Screenshots"
 onFlowStart:
   - startRecording: 004_004_multiple_submission_possible_for_student
   - runScript:
@@ -86,7 +86,7 @@ onFlowComplete:
 - tapOn: "Must submit all at once"
 - tapOn: "Can make multiple submissions"
 - assertVisible: "Done"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
+- takeScreenshot: "${TESTRESULTSDIR}/added_assignment"
 - tapOn: "Done"
 - assertNotVisible: "Done"
 - tapOn: "Save"

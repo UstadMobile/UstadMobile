@@ -1,14 +1,16 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/003_007_all_user_able_to_open_text_block"
+  TESTRESULTSDIR: "build/reports/maestro/003_007_all_user_able_to_open_text_block/Screenshots"
   TEXTTITLE: "PRIMARY COLOURS"
 onFlowStart:
+  - startRecording: 003_007_all_user_able_to_open_text_block
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:

@@ -2,9 +2,9 @@ appId: com.toughra.ustadmobile
 #tags:
 #  - no-files
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/002_001_admin_add_new_course_and_teacher"
+  TESTRESULTSDIR: "build/reports/maestro/002_001_admin_add_new_course_and_teacher/Screenshots"
 onFlowStart:
-  - startRecording: video_002_001
+  - startRecording: 002_001_admin_add_new_course_and_teacher
   - runScript:
       file: "../common/startserver.js"
       env:

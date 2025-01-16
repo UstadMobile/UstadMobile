@@ -1,13 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/001_001_admin_can_add_content_004-pdf"
+  TESTRESULTSDIR: "build/reports/maestro/001_001_admin_can_add_content_004-pdf/Screenshots"
 onFlowStart:
+  - startRecording: 001_001_admin_can_add_content_004-pdf
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:
@@ -18,7 +20,7 @@ onFlowComplete:
     env:
       TESTFILENAME: Pdf_Content.pdf
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- takeScreenshot: "${TESTRESULTSDIR}//content_add_to_library"
 - tapOn: "Document"
 - extendedWaitUntil:
     notVisible: "Importing"
@@ -40,4 +42,4 @@ onFlowComplete:
 - tapOn: Download
 - tapOn: Open
 - assertVisible: "PDF PAGE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/pdf_content_download_and_open"
+- takeScreenshot: "${TESTRESULTSDIR}/pdf_content_download_and_open"

@@ -1,15 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/001_002_admin_add_invalid_content_gets_error_msg"
+  TESTRESULTSDIR: "build/reports/maestro/001_002_admin_add_invalid_content_gets_error_msg/Screenshots"
 onFlowStart:
-    - runScript:
+  - startRecording: 001_002_admin_add_invalid_content_gets_error_msg
+  - runScript:
         file: "../common/startserver.js"
         env:
           TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-          TESTSERIAL: ${TESTSERIAL}
-          TESTNAME: ${TESTNAME}
-    - clearState: com.toughra.ustadmobile
+  - clearState: com.toughra.ustadmobile
 onFlowComplete:
+    - stopRecording
     - runScript:
         file: "../common/stopserver.js"
         env:
@@ -22,4 +22,4 @@ onFlowComplete:
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - assertVisible:  "Invalid file : Exception importing what looked like video"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/invalid_content_type_error"
+- takeScreenshot: "${TESTRESULTSDIR}//invalid_content_type_error"

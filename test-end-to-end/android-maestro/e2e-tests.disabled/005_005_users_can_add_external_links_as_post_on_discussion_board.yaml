@@ -1,17 +1,17 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/005_005_users_can_add_external_links_as_post_on_discussion_board"
-  #EXTERNALURL: "${TESTCONTROLLER_URL}/"
+  TESTRESULTSDIR: "build/reports/maestro/005_005_users_can_add_external_links_as_post_on_discussion_board/Screenshots"
+  EXTERNALURL: "content://com.android.providers.downloads.documents/document/msf%3A1000000061"
 onFlowStart:
-  - startRecording: "build/reports/maestro/005_005_users_can_add_external_links_as_post_on_discussion_board/Videos"
+  - startRecording: 005_005_users_can_add_external_links_as_post_on_discussion_board
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
-onFlowComplete:
-  - stopRecording
-  - runScript:
+onFlowComplete:e2e-tests.disabled
+  - stopRecordinge2e-tests.disabled
+  - runScript:e2e-tests.disabled
       file: "../common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
@@ -158,7 +158,7 @@ onFlowComplete:
     file: "../common/chrome-first-run-check.yaml"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
 - extendedWaitUntil:
-    visible: "Start or restart server now"
+    visible: "This is a test file for external link validation."
     timeout: 10000
 
 

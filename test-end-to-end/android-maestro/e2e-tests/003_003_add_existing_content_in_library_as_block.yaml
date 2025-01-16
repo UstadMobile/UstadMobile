@@ -1,8 +1,9 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/003_003_add_existing_content_in_library_as_block"
+  TESTRESULTSDIR: "build/reports/maestro/003_003_add_existing_content_in_library_as_block/Screenshots"
   TESTNAME: "003_003_add_existing_content_in_library_as_block"
 onFlowStart:
+  - startRecording: 002_001_admin_add_new_course_and_teacher
   - runScript:
       file: "../common/startserver.js"
       env:
@@ -11,6 +12,7 @@ onFlowStart:
         TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:
@@ -88,6 +90,6 @@ onFlowComplete:
     text:  "True/False Question"
 - assertVisible:
     text: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/able_to_add_existing_content_block_inside_course"
+- takeScreenshot: "${TESTRESULTSDIR}/able_to_add_existing_content_block_inside_course"
 
 

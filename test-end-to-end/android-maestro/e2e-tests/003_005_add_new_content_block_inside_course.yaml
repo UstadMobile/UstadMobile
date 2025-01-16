@@ -1,7 +1,8 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/003_005_add_new_content_block_inside_course"
+  TESTRESULTSDIR: "build/reports/maestro/003_005_add_new_content_block_inside_course/Screenshots"
 onFlowStart:
+  - startRecording: 003_005_add_new_content_block_inside_course
   - runScript:
       file: "../common/startserver.js"
       env:
@@ -10,6 +11,7 @@ onFlowStart:
         TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:

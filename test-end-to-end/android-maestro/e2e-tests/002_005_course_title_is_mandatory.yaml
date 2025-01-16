@@ -1,13 +1,15 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/002_005_course_title_is_mandatory"
+  TESTRESULTSDIR: "build/reports/maestro/002_005_course_title_is_mandatory/Screenshots"
 onFlowStart:
+  - startRecording: 002_005_course_title_is_mandatory
   - runScript:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "../common/stopserver.js"
       env:
