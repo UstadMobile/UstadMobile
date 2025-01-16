@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,7 +33,8 @@ data class InviteViaContactUiState(
     private val fromContact: String? = null,
     val contactError: String? = null,
     val onSendClick: Boolean? = null,
-    val chips: List<InviteViaContactChip> = emptyList()
+    val chips: List<InviteViaContactChip> = emptyList(),
+    val textFieldValue: String? = null,
 )
 
 
@@ -78,6 +80,12 @@ class InviteViaContactViewModel(
             val contacts = _uiState.value.chips
 
             if (contacts.isEmpty()) {
+                val textField = _uiState.value.textFieldValue
+                 if (!textField.isNullOrBlank()){
+                    val parsedTextValue= parseInviteUseCase.invoke(textField)
+                     sendContactsToServer(parsedTextValue)
+                     return@launch
+                 }
                 val noContactFoundMessage = systemImpl.getString(MR.strings.no_contact_found)
                 _uiState.update { prev ->
                     prev.copy(contactError = noContactFoundMessage)
@@ -86,29 +94,37 @@ class InviteViaContactViewModel(
                 return@launch
             }
 
-            val validContacts = contacts.filter { it.isValid }
-
-            if (validContacts.isEmpty()) {
-                val noValidContactFoundMessage = systemImpl.getString(MR.strings.no_valid_contact_found)
-                _uiState.update { prev ->
-                    prev.copy(contactError = noValidContactFoundMessage)
-                }
-                onContactError(noValidContactFoundMessage)
-                return@launch
-            }
-
-            val result = contactToServerUseCase.invoke(
-                validContacts.map { it.text },
-                clazzUid,
-                personRole,
-                accountManager.currentUserSession.person.personUid
-            )
-
-            val invitation = Json.decodeFromString<InviteResult>(result)
-
-            snackDispatcher.showSnackBar(Snack(invitation.inviteSent))
+            sendContactsToServer(contacts)
 
         }
+    }
+
+    private suspend fun sendContactsToServer(contacts: List<InviteViaContactChip>) {
+        val validContacts = contacts.filter { it.isValid }
+
+        if (validContacts.isEmpty()) {
+            val noValidContactFoundMessage = systemImpl.getString(MR.strings.no_valid_contact_found)
+            _uiState.update { prev ->
+                prev.copy(contactError = noValidContactFoundMessage)
+            }
+            onContactError(noValidContactFoundMessage)
+            return
+        }
+
+        val result = contactToServerUseCase.invoke(
+            validContacts.map { it.text },
+            clazzUid,
+            personRole,
+            accountManager.currentUserSession.person.personUid
+        )
+
+        val invitation = Json.decodeFromString<InviteResult>(result)
+
+        snackDispatcher.showSnackBar(Snack(invitation.inviteSent))
+        navController.popBackStack(
+            viewName = PersonListViewModel.DEST_NAME,
+            inclusive = true
+        )
     }
 
     fun onContactError(error: String) {
@@ -132,6 +148,13 @@ class InviteViaContactViewModel(
         _uiState.update { prev ->
             prev.copy(
                 chips = newChips
+            )
+        }
+    }
+    fun onTextFieldValueChanged(newValue:String) {
+        _uiState.update { prev ->
+            prev.copy(
+                textFieldValue = newValue
             )
         }
     }
