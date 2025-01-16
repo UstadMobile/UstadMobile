@@ -1,8 +1,8 @@
 describe('003_004_admin_or_teacher_and_content_via_link', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('User able to expand and collapse the module blocks', () => {
   // Admin user login
@@ -28,4 +28,9 @@ it('User able to expand and collapse the module blocks', () => {
     cy.contains('Import from link').click()
    // http://prajwalftp.ustadmobile.com/upload/Ustad%20App%20contents%20-%202021/Ebooks/%e0%a4%86%e0%a4%ab%e0%a5%8d%e0%a4%a8%e0%a5%8b_%e0%a4%95%e0%a5%81%e0%a4%96%e0%a5%81%e0%a4%b0%e0%a4%be_%e0%a4%97%e0%a4%a8___%e0%a4%a8%e0%a5%87%e0%a4%aa%e0%a4%be%e0%a4%b2%e0%a5%80.epub
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

@@ -7,8 +7,7 @@ appId: com.toughra.ustadmobile
 # 3) CONTROLSERVER: ${CONTROLSERVER} : provides the test-control-server address
 # 4) TESTSERIAL: ${TESTSERIAL} : provides the device serial number
 # 5) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
-# push the test file to the downloads
-- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
+
 # edit the course to add blocks
 - tapOn:
     id: "floating_action_button"
@@ -28,4 +27,3 @@ appId: com.toughra.ustadmobile
 - tapOn: "Next"
 - tapOn: "Done"
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/able_to_add_new_content_block_inside_course"

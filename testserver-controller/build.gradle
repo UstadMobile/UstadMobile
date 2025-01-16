@@ -6,7 +6,7 @@ plugins {
 }
 
 
-mainClassName = 'io.ktor.server.netty.EngineMain'
+mainClassName = 'com.ustadmobile.test.http.TestServerControllerMain'
 
 shadowJar {
     manifest {
@@ -28,6 +28,7 @@ dependencies {
     implementation libs.ktor.server.call.logging
     implementation libs.ktor.server.content.negotiation
     implementation libs.ktor.server.conditional.headers
+    implementation libs.ktor.server.auto.head.response
     implementation libs.logback.classic
     implementation libs.kotlinx.html.jvm
     implementation libs.xmlutil.core.jvm
@@ -35,6 +36,7 @@ dependencies {
     implementation libs.kotlinx.serialization
     implementation libs.postgresql
     implementation libs.door.runtime
+    implementation libs.okhttp
 
     testImplementation libs.junit
 }
