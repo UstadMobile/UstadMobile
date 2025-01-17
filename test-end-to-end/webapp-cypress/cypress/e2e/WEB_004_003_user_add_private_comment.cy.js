@@ -1,8 +1,8 @@
 describe('WEB_004_003_user_add_private_comment', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and Members', () => {
  // Admin user login
@@ -70,4 +70,9 @@ it('Student add private comment', () => {
   cy.contains("comment1").ustadScrollUntilVisible()
   cy.contains("comment2").should('exist')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

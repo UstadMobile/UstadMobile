@@ -1,8 +1,8 @@
 describe('WEB_004_013_peer_marking_for_group_assignment', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and Members', () => {
  // Admin user login
@@ -164,4 +164,9 @@ it('Student2 -Group 1 view his grade', () => {
   cy.contains('9/10 Points').should('exist')
   cy.contains('SUBMIT').should('not.exist') // assertion to make sure multiple submission is not allowed
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

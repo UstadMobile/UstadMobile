@@ -11,9 +11,7 @@ appId: com.toughra.ustadmobile
               - swipe:
                       start: 100,400
                       end: 100,100
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/Publiclyaccessible-on"
 - tapOn: "Publicly accessible"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/Publiclyaccessible-off"
 - tapOn: "SAVE"
 - back
 
