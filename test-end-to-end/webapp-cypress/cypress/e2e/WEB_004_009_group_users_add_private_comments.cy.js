@@ -16,7 +16,7 @@ it('Admin add a course and Members', () => {
  // Add account for teacher
   cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacher1','test1234')
+  cy.ustadCreateUserAccount('teach1','testt1')
  //Add a student1
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','1','Male')
@@ -24,7 +24,7 @@ it('Admin add a course and Members', () => {
  //Add account for student1
   cy.contains("Student 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student1','test1234')
+  cy.ustadCreateUserAccount('stud1','tests1')
  //Add a student2
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','2','Male')
@@ -32,7 +32,7 @@ it('Admin add a course and Members', () => {
  //Add account for student1
   cy.contains("Student 2").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student2','test1234')
+  cy.ustadCreateUserAccount('stud2','tests2')
  //Add a student3
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','3','Male')
@@ -40,7 +40,7 @@ it('Admin add a course and Members', () => {
  //Add account for student3
   cy.contains("Student 3").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student3','test1234')
+  cy.ustadCreateUserAccount('stud3','tests3')
  //Add a student4
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','4','Male')
@@ -48,11 +48,11 @@ it('Admin add a course and Members', () => {
  //Add account for student4
   cy.contains("Student 4").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student4','test1234')
+  cy.ustadCreateUserAccount('stud4','tests4')
 })
 
 it('Teacher add assignment and course comment', () => {
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
  // Add Assignment block
   cy.contains("Courses").click()
   cy.contains("004_009").click()
@@ -91,7 +91,7 @@ it('Teacher add assignment and course comment', () => {
 })
 
 it('Group 1 - Student add private comment', () => {
-  cy.ustadClearDbAndLogin('student1','test1234')
+  cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
@@ -101,7 +101,7 @@ it('Group 1 - Student add private comment', () => {
 })
 
 it('Group 2 - Student3 not able to view Group 1 private comments', () => {
-  cy.ustadClearDbAndLogin('student3','test1234')
+  cy.ustadClearDbAndLogin('stud3','tests3')
   cy.contains("Course").click()
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()
@@ -112,7 +112,7 @@ it('Group 2 - Student3 not able to view Group 1 private comments', () => {
 })
 
 it('Group 1 - Student2 able to view Group 1 private comment', () => {
-  cy.ustadClearDbAndLogin('student2','test1234')
+  cy.ustadClearDbAndLogin('stud2','tests2')
   cy.contains("Course").click()
   cy.contains("004_009").click()
   cy.contains('Assignment 1').click()

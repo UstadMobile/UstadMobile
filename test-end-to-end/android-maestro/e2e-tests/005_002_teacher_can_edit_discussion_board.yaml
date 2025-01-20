@@ -23,8 +23,8 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 # edit the course to add blocks
