@@ -23,5 +23,4 @@ appId: com.toughra.ustadmobile
 - assertVisible:
     id: "app_title"
     text: "Add module"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_module_${MODULETITLE}"
 - tapOn: "Done"
