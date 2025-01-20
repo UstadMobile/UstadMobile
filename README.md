@@ -2,6 +2,10 @@
 
 ![Ustad Mobile app screenshots](img/readme/readme-screenshots.png)
 
+![<img src="https://devserver3.ustadmobile.com/jenkins/job/UstadMobile-primary2/badge/icon">](https://devserver3.ustadmobile.com/jenkins/job/UstadMobile-primary2/)
+
+![<img src="https://devserver3.ustadmobile.com/jenkins/job/Primary-End-To-End-Tests/badge/icon?subject=End-To-End-Tests">](https://devserver3.ustadmobile.com/jenkins/job/Primary-End-To-End-Tests/)
+
 Ustad Mobile enables users to teach, learn, and share: online or offline. It is a learning
 management system (LMS) built from the ground up to work with or without connectivity. Features 
 include:
