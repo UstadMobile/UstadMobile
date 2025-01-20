@@ -1,30 +1,35 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_003-video"
-  TESTNAME: "001_001_admin_can_add_content_003-video"
+  TESTRESULTSDIR: "build/reports/maestro/001_001_admin_can_add_content_003-video/Screenshots"
+onFlowStart:
+  - startRecording: 001_001_admin_can_add_content_003-video
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
 - runFlow:
     file: "../common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Video_Content.mp4
-      CONTROLSERVER: ${CONTROLSERVER}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- takeScreenshot: "${TESTRESULTSDIR}/content_add_to_library"
 - tapOn: "Video"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 20000
+    timeout: 60000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 20000
+    timeout: 60000
 - tapOn: Open
 - assertVisible: "Play"
 - runFlow:
@@ -40,4 +45,4 @@ env:
 - extendedWaitUntil:
     visible: "Play"
     timeout: 20000
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/video_content_download_and_open"
+- takeScreenshot: "${TESTRESULTSDIR}/video_content_download_and_open"

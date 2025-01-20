@@ -1,8 +1,8 @@
 describe('WEB_005_004_user_add_internal_links_post_reply', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add discussion board and post', () => {
   // Admin user login
@@ -71,4 +71,9 @@ it('Student able to open the internal link in the reply', () => {
   cy.contains('Internal link').invoke('removeAttr','target').click()
   cy.url().should('include','http://localhost:8087/umapp/#/ContentEntries')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

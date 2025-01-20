@@ -1,8 +1,8 @@
 describe('WEB_005_002_teacher_can_edit_discussion_board', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add discussion board and a post', () => {
   // Admin user login
@@ -45,4 +45,9 @@ it('Teacher able to edit discussion board ', () => {
   cy.get('div[data-placeholder="Description"]').ustadTypeAndVerify("teacher edit discussion description")
   cy.contains("button","Done").click()
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

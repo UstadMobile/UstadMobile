@@ -1,8 +1,8 @@
 describe('WEB_004_005_assignment_after_deadline_and_before_grace_Period', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and assignment block', () => {
  // Admin user login
@@ -101,5 +101,10 @@ it('Student view his grade', () => {
   cy.contains('8/10 Points').should('exist')
   cy.contains('(20% late penalty)').should('exist') // assertion for error message
   cy.contains('SUBMIT').should('not.exist') // assertion to make sure multiple submission is not allowed
+})
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
   })
 })
