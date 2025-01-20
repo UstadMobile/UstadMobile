@@ -24,10 +24,6 @@ import mui.icons.material.Warning as WarningIcon
 private const val BUTTON_STACK_GAP_PX = 12
 private const val CONTENT_MARGIN_TOP_PX = 12
 
-private const val SOCIAL_WARNING_WEB_URL = "https://beinternetawesome.withgoogle.com"
-private const val BUTTON_STACK_GAP_PX = 12
-private const val CONTENT_MARGIN_TOP_PX = 12
-
 external interface SocialWarningProps : Props {
     var onDismiss: () -> Unit
 }
