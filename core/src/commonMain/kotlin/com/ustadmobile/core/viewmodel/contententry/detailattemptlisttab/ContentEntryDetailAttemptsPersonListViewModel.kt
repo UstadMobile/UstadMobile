@@ -3,8 +3,6 @@ package com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.paging.RefreshCommand
-import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
@@ -34,8 +32,6 @@ class ContentEntryDetailAttemptsPersonListViewModel(
             activeRepo.statementDao().findPersonsWithAttempts(
                 contentEntryUid = contentEntryUid,
                 accountPersonUid = activeUserPersonUid,
-                searchText = _appUiState.value.searchState.searchText.toQueryLikeParam()
-
             )
         return pagingSource
     }
@@ -52,13 +48,12 @@ class ContentEntryDetailAttemptsPersonListViewModel(
             )
         }
         _appUiState.update { prev ->
+
             prev.copy(
-                title = appBarTitle,
-                searchState = createSearchEnabledState(visible = true),
-                )
+                title = appBarTitle
+            )
         }
     }
-
 
     fun onClickEntry(
         entry: PersonAndPictureAndNumAttempts
@@ -66,15 +61,14 @@ class ContentEntryDetailAttemptsPersonListViewModel(
         navController.navigate(
             viewName = ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME,
             args = mapOf(
-                UstadView.ARG_PERSON_UID to entry.person.personUid.toString(),
+                UstadView.ARG_PERSON_UID to (entry.person?.personUid ?: 0).toString(),
                 UstadView.ARG_CONTENT_ENTRY_UID to entityUidArg.toString(),
             )
         )
     }
 
     override fun onUpdateSearchResult(searchText: String) {
-        //will use the searchText as per the appUiState
-        _refreshCommandFlow.tryEmit(RefreshCommand())
+        TODO("Not yet implemented")
     }
 
     override fun onClickAdd() {
