@@ -1,8 +1,8 @@
 describe('WEB_001_003_move_content', () => {
- it('Start Ustad Test Server ', () => {
-  // Start Test Server
-    cy.ustadStartTestServer()
-})
+  before(() => {
+     // Start Test Server
+     cy.ustadStartTestServer(6000)
+  })
 
 it('Admin user move content to folder', () => {
  // Admin user login
@@ -36,4 +36,9 @@ it('Validate move content synced', () => {
   cy.contains('Content_001').should('be.visible')
 
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

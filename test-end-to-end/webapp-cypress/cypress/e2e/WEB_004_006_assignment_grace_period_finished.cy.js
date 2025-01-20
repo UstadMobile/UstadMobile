@@ -1,8 +1,8 @@
 describe('WEB_004_006_assignment_after_deadline_and_before_grace_Period', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and assignment block', () => {
  // Admin user login
@@ -66,4 +66,9 @@ it('Student not able to submit assignment', () => {
   cy.contains('Assignment 1').click()
   cy.contains("SUBMIT").should('not.exist')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

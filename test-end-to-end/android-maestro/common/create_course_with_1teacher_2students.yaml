@@ -56,4 +56,3 @@ appId: com.toughra.ustadmobile
       GENDER: "Female"
       PASSWORD: "tests2"
 
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/member_list_of_new_test_course"

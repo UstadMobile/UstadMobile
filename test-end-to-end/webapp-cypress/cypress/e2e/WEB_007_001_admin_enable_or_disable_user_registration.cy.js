@@ -1,8 +1,9 @@
 describe('WEB_007_001_admin_enable_or_disable_user_registration', () => {
- it('Start Ustad Test Server ', () => {
-  // Start Test Server
-    cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
+
   it('Admin enable registration', () => {
 
   // Admin user login
@@ -28,4 +29,9 @@ describe('WEB_007_001_admin_enable_or_disable_user_registration', () => {
   cy.contains('Add another account').click()
   cy.get('#create_account_button').should('not.exist')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

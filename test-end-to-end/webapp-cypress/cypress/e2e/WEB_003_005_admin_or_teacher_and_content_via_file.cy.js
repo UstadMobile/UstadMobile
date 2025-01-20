@@ -1,8 +1,8 @@
 describe('WEB_003_005_admin_or_teacher_and_content_via_file', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin able to add content block from library', () => {
  // Admin user login
@@ -68,4 +68,9 @@ it('Teacher able to add content block from file', () => {
   cy.ustadOpenH5pEpub('The Adopting of Rosa Marie ')
   cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

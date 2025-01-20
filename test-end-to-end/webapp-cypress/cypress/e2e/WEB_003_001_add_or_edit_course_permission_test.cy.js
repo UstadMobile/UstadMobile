@@ -1,8 +1,8 @@
 describe('WEB_003_001_add_or_edit_course_permission_test', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin has course edit permission', () => {
   // Admin user login
@@ -51,4 +51,9 @@ it('Student does not have the course edit permission ', () => {
   // Student doesn't have the course edit permission
   cy.contains('button','Edit').should('not.exist')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

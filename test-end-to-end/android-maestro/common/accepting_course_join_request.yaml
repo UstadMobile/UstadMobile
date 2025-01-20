@@ -15,4 +15,3 @@ appId: com.toughra.ustadmobile
 - tapOn:
    text: "Accept"
    rightOf: "Student 1"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_student_using _code"
