@@ -1,8 +1,8 @@
 describe('WEB_005_001_teacher_add_discussion_and_post', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add teacher and discussion board to the course', () => {
   // Admin user login
@@ -43,4 +43,9 @@ it('Teacher able to add a new discussion board and post to the discussion', () =
   cy.get('.ql-editor').ustadTypeAndVerify('Discusssion post')
   cy.get('#actionBarButton').click()
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

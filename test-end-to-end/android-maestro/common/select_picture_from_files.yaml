@@ -1,7 +1,6 @@
 appId: com.toughra.ustadmobile
 ---
 # this flow directs the user to pictures screen
-
 - repeat:
     while:
       notVisible: "Downloads"
@@ -15,5 +14,9 @@ appId: com.toughra.ustadmobile
       notVisible: ${TESTFILENAME}
     commands:
       - tapOn: "List view"
+      - scrollUntilVisible:
+          element:
+            text: ${TESTFILENAME}
+          direction: DOWN
 - tapOn: ${TESTFILENAME}
 

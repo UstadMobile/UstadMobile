@@ -119,4 +119,3 @@ appId: com.toughra.ustadmobile
       FIRSTNAME: "Student"
       LASTNAME: "6"
       MEMBER: "student"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/member_list_of_new_test_course"
