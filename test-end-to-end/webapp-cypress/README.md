@@ -1,8 +1,18 @@
-# Cypress End-to-end tests
+# Cypress End-to-end testing for web
 
 These are end-to-end tests for the web version of the app built using [Cypress](https://cypress.io).
 
-Requirements:
+How it works:
+
+* package.json uses start-server-and-test command as [recommended by Cypress docs](https://docs.cypress.io/app/continuous-integration/overview#Solutions) to
+  start the testserver-controller, wait for the testserver-controller to be ready, and then starts
+  cypress run.
+* The Cypress baseUrl is set to the testserver-controller. Each Cypress test spec makes an http
+  request to the testserver-controller, which starts a blank new instance of the actual ustad server
+  (e.g. the app-ktor-server module) on a random port for each test. The test calls
+  the testserver-controller stop endpoint as part of the tearDown.
+
+### Prerequisites:
 
 * Install Node and NPM as per [NPM official docs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 
   e.g. using node version manager. This is tested using NPM10 and Node 18.
@@ -18,24 +28,23 @@ Requirements:
 
 * Run ```npm install``` to install NPM dependencies.
 
-Running:
+### Running
 
+Run the full suite of tests:
 ```
 npm run test
 ```
 
-Continuous integration (CI):
+Run a single test:
 
-In a CI environment it is likely necessary to set the port to avoid potential conflict with other
-job running.
+Option 1) Use npm on command line to run a specific spec
+
 ```
-export TESTCONTROLLER_URL=http://localhost:port/
-npm run test-ci
+export CYPRESS_SPEC=cypress/e2e/testname.cy.js
+npm run test-spec
 ```
 
-Development/debugging:
-
-Option 1) Run the testserver-controller manually, then use Cypress open
+Option 2) Run the testserver-controller manually, then use Cypress open
 
 Use Gradle to run testserver controller (run from project root directory)
 ```
@@ -46,19 +55,15 @@ Then use cypress open to run/debug test specs (run from webapp-cypress directory
 npm exec cypress open
 ```
 
-Option 2) Command line to run a specific spec
+### Continuous integration run
 
+In a CI environment it is likely necessary to set the port to avoid potential conflict with other
+job running.
 ```
-export CYPRESS_SPEC=cypress/e2e/testname.cy.js
-npm run test-spec
+export TESTCONTROLLER_URL=http://localhost:port/
+npm run test-ci
 ```
 
-How it works:
+__Outputs__: videos can be found in test-end-to-end/webapp-cypress/cypress/videos . Javascript 
+console logs and cypress logs can be found in test-end-to-end/webapp-cypress/logs/cypress-logs.
 
-* package.json uses start-server-and-test command as [recommended by Cypress docs](https://docs.cypress.io/app/continuous-integration/overview#Solutions) to
-  start the testserver-controller, wait for the testserver-controller to be ready, and then starts 
-  cypress run.
-* The Cypress baseUrl is set to the testserver-controller. Each Cypress test spec makes an http
-  request to the testserver-controller, which starts a blank new instance of the actual ustad server
-  (e.g. the app-ktor-server module) on a random port for each test. The test calls 
-  the testserver-controller stop endpoint as part of the tearDown.
