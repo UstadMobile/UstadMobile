@@ -23,6 +23,7 @@ external interface InviteViaContactProps : Props {
     var uiState: InviteViaContactUiState
     var onChipSubmitClick: (String) -> InviteViaContactChip
     var onChipRemoved: (String) -> Unit
+    var onTextFieldValueChanged: (String) -> Unit
 }
 
 val InviteViaContactScreen = FC<Props> {
@@ -36,6 +37,7 @@ val InviteViaContactScreen = FC<Props> {
         uiState = uiStateVal
         onChipSubmitClick=viewModel::onClickChipSubmit
         onChipRemoved=viewModel::onChipRemoved
+        onTextFieldValueChanged=viewModel::onTextFieldValueChanged
     }
 }
 
@@ -86,7 +88,9 @@ private val InviteViaContactComponent2 = FC<InviteViaContactProps> { props ->
                         +inputParams
                     }
                 }
-
+                onInputChange = { event, value, _ ->
+                    props.onTextFieldValueChanged(value)
+                }
                 value = chipList
                 onChange = { event, value, reason, detail ->
                     detail?.option?.let { props.onChipSubmitClick(it) }
