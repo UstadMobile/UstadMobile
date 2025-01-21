@@ -54,6 +54,8 @@ export TESTCONTROLLER_PORT=[port]
 ./run-maestro-ci.sh
 ```
 
+Optional: ```export MAESTRO_SPEC="e2e-tests/testname.yaml"``` to run only a specific test
+
 __Outputs__: Videos can be found in this ( test-end-to-end/android-maestro ) directory. Maestro debug logs can be
 found in test-end-to-end/android-maestro/build/reports/maestro directory.
 

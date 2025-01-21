@@ -46,6 +46,11 @@ NUM_EMULATORS=1
 ANDROID_SERIAL=""
 EMULATOR_SERIALS=()
 AVD_NAMES=()
+APP_PACKAGE_ID="com.toughra.ustadmobile"
+
+if [ "$MAESTRO_SPEC" == "" ]; then
+    MAESTRO_SPEC="$SCRIPTDIR/e2e-tests"
+fi
 
 # Find a free emulator port
 # As per https://developer.android.com/studio/run/emulator-commandline (-port option)
@@ -60,7 +65,8 @@ function find_free_emulator_port() {
         AVD_PORT=$((AVD_PORT+2))
 
         if [ $AVD_PORT -gt 5682 ]; then
-            raise "run-maestro-ci: No emulator ports available"
+            echo "run-maestro-ci: No emulator ports available"
+            exit 3
         fi
     done
 }
@@ -138,11 +144,17 @@ for serial in ${EMULATOR_SERIALS[@]}; do
         echo "run-maestro-ci: Attempting to install on $serial attempt $i"
         adb -s $serial install $TESTAPK
         INSTALLSTATUS=$?
-        if [ "$INSTALLSTATUS" == "0" ]; then
+        PKGFOUND=$(adb -s $serial shell pm list packages | grep $APP_PACKAGE_ID)
+        if [ "$INSTALLSTATUS" == "0" ] && [ "$PKGFOUND" != "" ]; then
             echo "run-maestro-ci: Install APK on $serial succeeded"
             break 1
         else
             echo "run-maestro-ci: Install APK on $serial failed"
+            if [ "$i" == "5" ]; then
+                echo "Failed to install APK $TESTAPK on $serial after $i attempts"
+                exit 2
+            fi
+
             sleep 15
         fi
     done
@@ -167,7 +179,8 @@ done
 
 echo "run-maestro-ci: Time to run Maestro tests"
 
-java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar -P:url=$TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=maestro &
+java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar \
+  -P:url=$TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=maestro &
 TESTCONTROLLER_PID=$!
 
 MAESTRO_DEVICE_ARG=""
@@ -180,7 +193,7 @@ done
 
 # Could try using sharding here in future e.g. --shard-split=${#EMULATOR_SERIALS[@]}
 maestro --device=$MAESTRO_DEVICE_ARG test -e TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
-  $SCRIPTDIR/e2e-tests \
+  $MAESTRO_SPEC \
   --format junit --output build/results/report.xml \
   --debug-output build/reports/maestro
 TESTSTATUS=$?
