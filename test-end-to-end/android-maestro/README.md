@@ -41,7 +41,7 @@ Then use the Maestro command line to run tests:
 maestro test e2e-tests/testname.yaml [-e TESTCONTROLLER_URL=http://localhost:8075] 
 ```
 If the TESTCONTROLLER_URL is not specified, then the default ( http://localhost:8075/ ) will be used.
-Use ```maestro --help``` for info on Maestro command line interface. 
+Use ```maestro --help``` for info on Maestro command line interface.
 
 ### Continuous integration run
 
@@ -53,6 +53,9 @@ Use ```maestro --help``` for info on Maestro command line interface.
 export TESTCONTROLLER_PORT=[port]
 ./run-maestro-ci.sh
 ```
+
+__Outputs__: Videos can be found in this ( test-end-to-end/android-maestro ) directory. Maestro debug logs can be
+found in test-end-to-end/android-maestro/build/reports/maestro directory.
 
 #### Continuous integration environment setup
 
