@@ -9,47 +9,56 @@ describe('WEB_002_010_username_validation', () => {
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
   cy.contains("Courses").should('be.visible')  // Assertion to check the user logged in successfully
 
- // Add a new course
   cy.contains("People").click()
   cy.contains("button","Person").click()
   cy.contains("Add Person").click()
   cy.contains("label", "First names").parent().find("input").clear().type("User")
-  cy.contains("label", "Last name").parent().find("input").clear().type("1")
+  cy.contains("label", "Last name").parent().find("input").clear().type("A")
   cy.get('div[id="gender"]').click()
   cy.contains("li","Male").click()
   cy.contains("button","Save",{timeout: 2000}).click()
-  // verify space not accepted on username field
+// verify Username cannot start with a number also can't be below 3 characters
   cy.contains("Create account").click()
-  cy.get('#username:not([disabled])').type("user 1")
+  cy.get('#username:not([disabled])').type("1us")
   cy.get('#newpassword').type("test1234")
   cy.contains("button","Save").click()
-  cy.contains("Username must be 3 to 15 characters, use only letters, avoid spaces or special symbols.",{timeout:2000}).should('be.visible')
+  cy.contains("Username cannot start with a number",{timeout:2000}).should('be.visible')
   cy.go('back')
-  // verify special character not accepted on username field
   cy.contains("Create account").click()
-  cy.get('#username:not([disabled])').type("user/1")
+  cy.get('#username:not([disabled])').type("us")
   cy.get('#newpassword').type("test1234")
   cy.contains("button","Save").click()
-  cy.contains("Username must be 3 to 15 characters, use only letters, avoid spaces or special symbols.",{timeout:2000}).should('be.visible')
+  cy.contains("Username must be at least 3 characters",{timeout:2000}).should('be.visible')
   cy.go('back')
-  // verify special character . _ accepted on username field
+ // verify the uppercase, special characters and space are removed automatically
   cy.contains("Create account").click()
-  cy.get('#username:not([disabled])').type("user.1_2")
+  cy.get('#username:not([disabled])').type("UseR@ A")
   cy.get('#newpassword').type("test1234")
   cy.contains("button","Save").click()
+  cy.contains('usera',{timeout:2000}).should('be.visible')
+  cy.contains('Change Password',{timeout:2000}).should('be.visible')
+  cy.contains("People").click()
+  cy.contains("button","Person").click()
+  cy.contains("Add Person").click()
+  cy.contains("label", "First names").parent().find("input").clear().type("User")
+  cy.contains("label", "Last name").parent().find("input").clear().type("B")
+  cy.get('div[id="gender"]').click()
+  cy.contains("li","Male").click()
+  cy.contains("button","Save",{timeout: 2000}).click()
+// verify special character . _ accepted on username field
+  cy.contains("Create account").click()
+  cy.get('#username:not([disabled])').type("user.B_123")
+  cy.get('#newpassword').type("test1234")
+  cy.contains("button","Save").click()
+  cy.contains('user.b_123',{timeout:2000}).should('be.visible')
   cy.contains('Change Password',{timeout:2000}).should('be.visible')
 })
 
 it('Admin user create a person', () => {
-  cy.ustadClearDbAndLogin('user 1','test1234',{timeout:8000})
-  cy.contains("Username must be 3 to 15 characters, use only letters, avoid spaces or special symbols.",{timeout:2000}).should('be.visible')
+  cy.ustadClearDbAndLogin('us','test1234',{timeout:8000})
+  cy.contains("Username must be at least 3 characters",{timeout:2000}).should('be.visible')
   cy.reload()
-  cy.get('input#username', { timeout: 10000 }).should('exist').type("user@1") // 10 seconds
-  cy.get('input#password').type("test1234")
-  cy.get('button#login_button').click()
-  cy.contains("Username must be 3 to 15 characters, use only letters, avoid spaces or special symbols.",{timeout:2000}).should('be.visible')
-  cy.reload()
-  cy.get('input#username', { timeout: 10000 }).should('exist').type("user.1_2") // 10 seconds
+  cy.get('input#username', { timeout: 10000 }).should('exist').type("useR@ a") // 10 seconds
   cy.get('input#password').type("test1234")
   cy.get('button#login_button').click()
   cy.contains("Courses").should('be.visible')
