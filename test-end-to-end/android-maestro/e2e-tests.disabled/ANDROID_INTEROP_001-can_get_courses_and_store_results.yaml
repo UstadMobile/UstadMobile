@@ -1,21 +1,24 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/ANDROID_INTEROP_001-can_get_courses_and_store_results"
-  TESTNAME: "ANDROID_INTEROP_001-can_get_courses_and_store_results"
+  TESTRESULTSDIR: "build/results/Screenshots/001_001_admin_can_add_content_003-video"
+onFlowStart:
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 
 # Login as admin, add a course, student, and teacher
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 - runFlow:
     file: "../common/create_course_with_1teacher_1student.yaml"
     env:

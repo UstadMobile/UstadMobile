@@ -1,8 +1,8 @@
 describe('WEB_002_003_teacher_record_attendance', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin record student attendance', () => {
   // Admin user login
@@ -58,4 +58,9 @@ it('Teacher has permission to edit attendance of students ', () => {
   cy.contains("button","Save").click()
   cy.contains('2 Present, 0 Partial, 0 Absent').should('be.visible')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

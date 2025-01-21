@@ -84,7 +84,7 @@ commons-io = "2.15.0"
 androidx-annotation = "1.7.1"
 androidx-work = "2.9.0"
 klock = "2.4.13"
-acra = "5.11.3"
+acra = "5.12.0"
 androidx-datastore = "1.0.0"
 # Dependencies of Aztec: Versions must be fixed to ensure that they point to versions available
 # on mavenCentral after jcenter shutdown.
@@ -121,7 +121,6 @@ androidx-test-ext-junit = "1.1.5"
 androidx-test-espresso = "3.5.1"
 androidx-test-uiautomator = "2.3.0"
 androidx-benchmark = "1.2.4"
-android-emulator-plugin = "0.4.5"
 lz4 = "1.8.0"
 kmp-uuid = "0.8.4"
 zoomable = "1.6.1"
@@ -136,7 +135,6 @@ serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref 
 conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 license = { id = "com.jaredsburrows.license", version.ref = "plugin-license" }
-android-emulator = { id = "com.quittle.android-emulator", version.ref = "android-emulator-plugin" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrains-kotlin-jvm" }
 
 
@@ -284,6 +282,7 @@ ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negoti
 ktor-server-conditional-headers = { module = "io.ktor:ktor-server-conditional-headers", version.ref = "ktor" }
 ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
 ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor"}
+ktor-server-auto-head-response = { module = "io.ktor:ktor-server-auto-head-response", version.ref = "ktor" }
 sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-jdbc" }
 postgresql = {  module = "org.postgresql:postgresql", version.ref = "postgresql" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }

@@ -1,8 +1,8 @@
 describe('WEB_007_005_student_registered_by_admin_or_teacher_dont_need_parentConsent', () => {
- it('Start Ustad Test Server ', () => {
-  // Start Test Server
-    cy.ustadStartTestServer()
-})
+  before(() => {
+     // Start Test Server
+     cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a student aged below 13', () => {
  // Admin user login
@@ -25,5 +25,10 @@ it('Student login successfully', () => {
  // Student user login
   cy.ustadClearDbAndLogin('stud1','tests1',{timeout:8000})
   cy.contains("People").should('be.visible')
+})
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
   })
 })

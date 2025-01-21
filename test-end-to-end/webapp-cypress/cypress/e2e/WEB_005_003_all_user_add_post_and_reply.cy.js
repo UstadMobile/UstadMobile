@@ -1,8 +1,8 @@
 describe('WEB_005_003_all_user_add_post_and_reply', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add discussion board and post', () => {
   // Admin user login
@@ -84,4 +84,9 @@ it('Student able to add a post and reply', () => {
   cy.get('#actionBarButton').click()
   cy.contains('Topic 3').should('be.visible')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

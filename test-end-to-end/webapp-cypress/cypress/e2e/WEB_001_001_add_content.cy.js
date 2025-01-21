@@ -1,10 +1,8 @@
-
-
 describe('WEB_001_001_add_content', () => {
- it('Start Ustad Test Server ', () => {
-  // Start Test Server
-    cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin user add content to the library', () => {
  // Admin user login
@@ -28,7 +26,7 @@ it('Admin user add content to the library', () => {
   cy.contains("Importing").should("be.visible")
   cy.contains("Importing", { timeout: 20000 }).should("not.exist") //Wait for importing (conversion) to finish
   cy.contains("button","OPEN").click()
-  cy.contains("#courseblock_title", "Content_003").should("be.visible")
+  cy.contains("#appbar_title", "Content_003").should("be.visible")
   cy.ustadVerifyVideo()
 
   cy.go('back')
@@ -37,4 +35,9 @@ it('Admin user add content to the library', () => {
   cy.ustadOpenH5pEpub('Content_002')
   cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

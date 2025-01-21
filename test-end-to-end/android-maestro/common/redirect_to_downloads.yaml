@@ -13,6 +13,10 @@ appId: com.toughra.ustadmobile
     while:
       visible: "Downloads"
     commands:
+      - scrollUntilVisible:
+            element:
+              text: ${TESTFILENAME}
+            direction: DOWN
       - tapOn:
           text: ${TESTFILENAME}
 

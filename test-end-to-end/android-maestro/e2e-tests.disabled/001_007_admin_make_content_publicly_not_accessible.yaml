@@ -1,16 +1,18 @@
 appId: com.toughra.ustadmobile
 env:
- TESTCONTENTNAME: "PubliclyNotAccessibleContentTest"
- TESTRESULTSDIR: "${TESTRESULTSDIR}/001_007_admin_make_content_publicly_not_accessible"
- TESTNAME: "001_007_admin_make_content_publicly_not_accessible"
+ TESTCONTENTNAME: "build/results/Screenshots/001_007_admin_make_content_publicly_not_accessible"
+onFlowStart:
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
 - runFlow:
       file: "../common/clear_login_and_add_content.yaml"
       env:

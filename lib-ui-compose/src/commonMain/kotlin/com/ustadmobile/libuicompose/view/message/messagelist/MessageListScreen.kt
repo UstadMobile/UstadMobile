@@ -23,6 +23,7 @@ import com.ustadmobile.libuicompose.util.linkify.rememberLinkExtractor
 import com.ustadmobile.libuicompose.util.rememberDateFormat
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
+import com.ustadmobile.libuicompose.components.SocialWarningListItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -39,6 +40,8 @@ fun MessageListScreen(
         uiState = uiState,
         onChangeNewMessageText = viewModel::onChangeNewMessageText,
         onClickSend = viewModel::onClickSend,
+        onWarningDismiss = viewModel::onWarningDismiss,
+        onLearnMore = viewModel::onLearnMoreClicked,
     )
 }
 
@@ -47,6 +50,8 @@ fun MessageListScreen(
     uiState: MessageListUiState,
     onChangeNewMessageText: (String) -> Unit = { },
     onClickSend: () -> Unit = { },
+    onWarningDismiss: () -> Unit = {},
+    onLearnMore: () -> Unit = { },
 ){
 
     val mediatorResult = rememberDoorRepositoryPager(
@@ -72,6 +77,16 @@ fun MessageListScreen(
                 state = lazyListState,
                 modifier = Modifier.fillMaxSize().scrollBarPadding()
             ) {
+
+                if (uiState.showSocialWarning) {
+                    item(key = "social-warning") {
+                        SocialWarningListItem(
+                            onDismiss = onWarningDismiss,
+                            onLearnMore = onLearnMore
+                        )
+                    }
+                }
+
                 items(
                     count = lazyPagingItems.itemCount,
                     key = lazyPagingItems.itemKey { it.messageUid  },

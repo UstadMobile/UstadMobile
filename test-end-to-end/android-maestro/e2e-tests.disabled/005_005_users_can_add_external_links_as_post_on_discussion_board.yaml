@@ -1,21 +1,26 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/005_005_users_can_add_external_links_as_post_on_discussion_board"
-  TESTNAME:  "005_005_users_can_add_external_links_as_post_on_discussion_board"
-  EXTERNALURL: "${CONTROLSERVER}/"
+  TESTRESULTSDIR: "build/reports/maestro/005_005_users_can_add_external_links_as_post_on_discussion_board/Screenshots"
+  EXTERNALURL: "content://com.android.providers.downloads.documents/document/msf%3A1000000061"
+onFlowStart:
+  - startRecording: 005_005_users_can_add_external_links_as_post_on_discussion_board
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:e2e-tests.disabled
+  - stopRecordinge2e-tests.disabled
+  - runScript:e2e-tests.disabled
+      file: "../common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 # Admin login
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 # add new course
 - runFlow:
     file: "../common/add_course.yaml"
@@ -36,7 +41,7 @@ env:
     file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
-      CONTROLSERVER: ${CONTROLSERVER}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 # teacher add an discussion board block
 - runFlow: "../common/clear_state_and_get_started.yaml"
@@ -153,7 +158,7 @@ env:
     file: "../common/chrome-first-run-check.yaml"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
 - extendedWaitUntil:
-    visible: "Start or restart server now"
+    visible: "This is a test file for external link validation."
     timeout: 10000
 
 

@@ -1,8 +1,8 @@
 describe('WEB_004_004_multiple_submission_possible _for_student', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and assignment block', () => {
  // Admin user login
@@ -128,4 +128,9 @@ it('Student can see the updated mark', () => {
   cy.contains('Keep it up').should('exist')
   cy.contains('9.5/10 Points').should('exist')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

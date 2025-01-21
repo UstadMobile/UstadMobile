@@ -14,5 +14,4 @@ appId: com.toughra.ustadmobile
 - tapOn:
       id: "com.toughra.ustadmobile:id/late_button"
       index: 1
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/recorded_attendance"
 - tapOn: "Save"
