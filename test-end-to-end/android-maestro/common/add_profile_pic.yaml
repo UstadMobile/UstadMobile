@@ -26,7 +26,7 @@ appId: com.toughra.ustadmobile
 - tapOn: "Add"
 - tapOn: "Select picture from files"
 - runFlow:
-    file: select_picture_from_files.yaml
+    file: "./select_picture_from_files.yaml"
     env:
       TESTFILENAME: ${TESTFILENAME}
 - scrollUntilVisible:

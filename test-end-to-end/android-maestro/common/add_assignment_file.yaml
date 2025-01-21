@@ -11,6 +11,6 @@ appId: com.toughra.ustadmobile
 
 - tapOn: "Add file"
 - runFlow:
-    file: select_file_from_picker.yaml
+    file: "./select_file_from_picker.yaml"
     env:
       TESTFILENAME: ${TESTFILENAME}

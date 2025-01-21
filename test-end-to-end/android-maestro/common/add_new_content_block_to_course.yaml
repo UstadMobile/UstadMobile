@@ -20,11 +20,6 @@ appId: com.toughra.ustadmobile
     file: "./select_file_from_picker.yaml"
     env:
       TESTFILENAME: ${TESTFILENAME}
-#- runFlow:
-    #  when:
-         # notVisible: "Downloads"
-  #    file: select_file_from_picker.yaml
-#- tapOn: ${TESTFILENAME}
 - tapOn: "Next"
 - tapOn: "Done"
 - tapOn: "SAVE"

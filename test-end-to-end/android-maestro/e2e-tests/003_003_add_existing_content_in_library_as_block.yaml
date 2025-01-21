@@ -8,8 +8,6 @@ onFlowStart:
       file: "../common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-        TESTSERIAL: ${TESTSERIAL}
-        TESTNAME: ${TESTNAME}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
@@ -24,8 +22,6 @@ onFlowComplete:
     env:
      TESTFILENAME: "H5p_Content.h5p"
      TESTCONTENTNAME: H5PContent
-     TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-     TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
 - launchApp
 # adding content to library
@@ -34,10 +30,9 @@ onFlowComplete:
     id: "floating_action_button"
 - tapOn: "From file"
 - runFlow:
-    when:
-      notVisible: "Downloads"
     file: "../common/select_file_from_picker.yaml"
-- tapOn: "Epub_Content1.epub"
+    env:
+      TESTFILENAME: Epub_Content1.epub
 - tapOn: "SAVE"
 #---------add course ---------#
 - runFlow:
