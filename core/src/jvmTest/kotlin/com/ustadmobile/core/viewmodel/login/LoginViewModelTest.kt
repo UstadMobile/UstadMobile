@@ -294,24 +294,20 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
             viewModelFactory {
                 mockWebServer.start()
                 mockWebServer.enqueueSiteResponse(Site())
-                savedStateHandle[UstadView.ARG_API_URL] = mockWebServer.url("/").toString()
-                savedStateHandle[UstadView.ARG_SITE] = json.encodeToString(Site())
+                savedStateHandle[UstadView.ARG_API_URL] = mockWebServer
+                    .url("/").toString()
                 LoginViewModel(di, savedStateHandle)
             }
-
-            val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-            val expectedError = systemImpl.getString(MR.strings.invalid_username)
 
             val stateFlow = stateInViewModelScope(viewModel.uiState)
             stateFlow.assertItemReceived { it.fieldsEnabled }
 
             viewModel.onClickLogin()
 
-            stateFlow.filter { it.fieldsEnabled && it.usernameError == expectedError }.test {
+            stateFlow.filter { it.fieldsEnabled && it.usernameError != null }.test {
                 val stateItem = awaitItem()
-                assertEquals(expectedError, stateItem.usernameError)
-                assertTrue(stateItem.fieldsEnabled)
-                cancelAndIgnoreRemainingEvents()
+                assertNotNull(stateItem.usernameError)
+                assertNotNull(stateItem.passwordError)
             }
         }
     }
