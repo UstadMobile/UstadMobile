@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel.clazz.redeem
+package com.ustadmobile.core.viewmodel.clazz.inviteredeem
 
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
@@ -22,16 +22,16 @@ data class ClazzInviteRedeemUiState(
     val onRedeem: Boolean? = null
 )
 
-class ClazzInviteViewModel(
+class ClazzInviteRedeemViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private var _uiState = MutableStateFlow(ClazzInviteRedeemUiState())
+    private val _uiState = MutableStateFlow(ClazzInviteRedeemUiState())
 
     val uiState: Flow<ClazzInviteRedeemUiState> = _uiState.asStateFlow()
 
-    private val clazzInviteRedeemUseCase: ClazzInviteRedeemUseCase by on(LearningSpace(accountManager.activeLearningSpace.url)).instance()
+    private val clazzInviteRedeemUseCase: ClazzInviteRedeemUseCase by instance()
 
     private val argInviteCode = savedStateHandle[ARG_INVITE_CODE]
         ?: throw IllegalArgumentException("no invite code")
@@ -51,12 +51,12 @@ class ClazzInviteViewModel(
 
     fun processDecision(isAccepting:Boolean) {
         viewModelScope.launch {
-
-            val result = clazzInviteRedeemUseCase.invoke(
-                argInviteCode,
-                isAccepting,
-                accountManager.currentAccount.personUid
+            val result = clazzInviteRedeemUseCase(
+                inviteCode = argInviteCode,
+                isAccepting = isAccepting,
+                personUid = accountManager.currentAccount.personUid
             )
+
             if (result.isCodeRedeem) {
                 snackDispatcher.showSnackBar(Snack(result.message))
             } else {
@@ -74,6 +74,7 @@ class ClazzInviteViewModel(
 
     companion object {
 
-        const val DEST_NAME = "clazz_redeem"
+        const val DEST_NAME = "ClazzInviteRedeem"
+
     }
 }

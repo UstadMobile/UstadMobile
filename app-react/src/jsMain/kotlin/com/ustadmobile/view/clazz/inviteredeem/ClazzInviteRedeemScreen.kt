@@ -1,10 +1,10 @@
-package com.ustadmobile.view.clazz.inviteViaContact
+package com.ustadmobile.view.clazz.inviteredeem
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
-import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteRedeemUiState
+import com.ustadmobile.core.viewmodel.clazz.inviteredeem.ClazzInviteRedeemViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteredeem.ClazzInviteRedeemUiState
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadStandardContainer
 import mui.material.Button
@@ -28,7 +28,7 @@ external interface ClazzInviteRedeemProps : Props {
 
 val ClazzInviteRedeemScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
-        ClazzInviteViewModel(di, savedStateHandle)
+        ClazzInviteRedeemViewModel(di, savedStateHandle)
     }
 
     val uiStateVal by viewModel.uiState.collectAsState(ClazzInviteRedeemUiState())
@@ -69,8 +69,6 @@ private val ClazzInviteRedeemComponent2 = FC<ClazzInviteRedeemProps> { props ->
                 variant = ButtonVariant.outlined
                 +strings[MR.strings.accept].uppercase()
             }
-
-
 
             Button {
                 onClick = { props.processDecision(false) }

@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view.clazz.inviteViaContact
+package com.ustadmobile.libuicompose.view.clazz.inviteviacontact
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

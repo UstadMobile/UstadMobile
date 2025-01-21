@@ -1,4 +1,4 @@
-package com.ustadmobile.view.clazz.inviteViaContact
+package com.ustadmobile.view.clazz.inviteviacontact
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
