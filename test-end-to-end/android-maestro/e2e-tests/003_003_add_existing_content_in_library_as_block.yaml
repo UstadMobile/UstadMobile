@@ -36,7 +36,7 @@ onFlowComplete:
 - runFlow:
     when:
       notVisible: "Downloads"
-    file: "../common/redirect_to_downloads.yaml"
+    file: "../common/select_file_from_picker.yaml"
 - tapOn: "Epub_Content1.epub"
 - tapOn: "SAVE"
 #---------add course ---------#

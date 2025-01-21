@@ -26,8 +26,6 @@ appId: com.toughra.ustadmobile
 - tapOn: "Add"
 - tapOn: "Select picture from files"
 - runFlow:
-    when:
-      visible: "Show roots"
     file: select_picture_from_files.yaml
     env:
       TESTFILENAME: ${TESTFILENAME}
