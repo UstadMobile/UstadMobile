@@ -55,10 +55,10 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                 PersonEditViewModel(di, savedStateHandle)
             }
 
-            val systemImpl: UstadMobileSystemImpl = di.direct.instance()
-            viewModel.uiState.test(timeout = 5.seconds) {
-                val state = awaitItemWhere { it.fieldsEnabled && it.person != null }
+            viewModel.uiState.assertItemReceived { it.fieldsEnabled && it.person != null }
 
+            viewModel.uiState.test(timeout = 5.seconds) {
+                val state = awaitItem()
                 viewModel.onEntityChanged(state.person?.shallowCopy {
                     firstNames = "Test"
                     lastName = "User"
@@ -67,11 +67,14 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
 
                 viewModel.onClickSave()
 
+                val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+
                 val stateAfterSave = awaitItemWhere { it.usernameError != null }
-                assertEquals(systemImpl.getString(MR.strings.invalid_username),
-                    stateAfterSave.usernameError)
+                assertEquals(systemImpl.getString(MR.strings.invalid), stateAfterSave.usernameError,
+                    "Username error set")
                 assertEquals(systemImpl.getString(MR.strings.field_required_prompt),
-                    stateAfterSave.passwordError)
+                    stateAfterSave.passwordError,
+                    "Password error set")
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -90,7 +93,6 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
             viewModel.uiState.test(timeout =1000.seconds) {
                 val state = awaitItem()
                 viewModel.onEntityChanged(state.person?.shallowCopy {
-                    username = "a"
                     firstNames = "Test"
                     lastName = "User"
                     gender = Person.GENDER_FEMALE
@@ -311,7 +313,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                 val stateWithError = awaitItemWhere { it.fieldsEnabled && it.parentContactError != null }
                 assertEquals(fieldRequiredErr, stateWithError.parentContactError,
                     "When registering as a minor and contact field is blank, then field" +
-                        " required error is shown ")
+                            " required error is shown ")
 
                 cancelAndIgnoreRemainingEvents()
 
