@@ -1,8 +1,8 @@
 describe('WEB_007_009_user_registration_email_field_verification', () => {
- it('Start Ustad Test Server ', () => {
-  // Start Test Server
-    cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin enable registration', () => {
  // Admin user login
@@ -35,4 +35,9 @@ it('Admin enable registration', () => {
   cy.contains('Register').click()
   cy.contains('Courses').should('be.visible')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

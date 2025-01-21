@@ -1,8 +1,8 @@
 describe('WEB_004_010_group_users_single_assignment_submission_allowed', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and Members', () => {
  // Admin user login
@@ -98,11 +98,11 @@ it('Group 1- Student 1 submit assignment', () => {
   cy.contains("Course").click()
   cy.contains("004_010").click()
   cy.contains('Assignment 1').click()
-  cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
+  cy.get('#assignment_text div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
   cy.get('.ql-editor').ustadTypeAndVerify('Text 1')
   cy.contains('SUBMIT').click()
-  cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('not.exist')
+  cy.get('#assignment_text div[contenteditable="true"]',{timeout:6000}).should('not.exist')
   cy.contains("Not submitted").should('not.exist')
   cy.go('back')
   cy.contains('Assignment 1',{timeout:1000}).click()
@@ -119,4 +119,9 @@ it('Group 1 - Student2 able to view Group 1 assignment and submit button not vis
   cy.contains("Text 1").should('be.visible')
   cy.contains("SUBMIT").should('not.exist')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

@@ -1,19 +1,26 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_005_add_new_content_block_inside_course"
-  TESTNAME: "003_005_add_new_content_block_inside_course"
+  TESTRESULTSDIR: "build/reports/maestro/003_005_add_new_content_block_inside_course/Screenshots"
+onFlowStart:
+  - startRecording: 003_005_add_new_content_block_inside_course
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        TESTSERIAL: ${TESTSERIAL}
+        TESTNAME: ${TESTNAME}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 - runFlow:
     file: "../common/add_course.yaml"
     env:
@@ -37,7 +44,7 @@ env:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: "H5p_Content.h5p"
-      CONTROLSERVER: ${CONTROLSERVER}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
@@ -58,7 +65,7 @@ env:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
-      CONTROLSERVER: ${CONTROLSERVER}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
