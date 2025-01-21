@@ -32,7 +32,7 @@ onFlowComplete:
       TESTCOURSENAME: ${TESTCOURSENAME}
       TEACHERFIRSTNAME: "Teacher"
       TEACHERLASTNAME: "1"
-      USERNAME: "t1"
+      USERNAME: "teach1"
       GENDER: "Female"
       PASSWORD: "testt1"
 # add students to the course through bulk import using .csv file
@@ -48,7 +48,7 @@ onFlowComplete:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "s1"
+      USERNAME: "stud1"
       PASSWORD: "tests1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
@@ -60,7 +60,7 @@ onFlowComplete:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "t1"
+      USERNAME: "teach1"
       PASSWORD: "testt1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
@@ -76,7 +76,7 @@ onFlowComplete:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "s1"
+      USERNAME: "stud1"
       PASSWORD: "tests1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"

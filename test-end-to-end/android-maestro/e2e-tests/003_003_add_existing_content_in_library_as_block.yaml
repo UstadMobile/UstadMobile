@@ -51,9 +51,9 @@ onFlowComplete:
       TESTCOURSENAME: "Existing Content Block Test"
       TEACHERFIRSTNAME: "Teacher"
       TEACHERLASTNAME: "1"
-      USERNAME: "t1"
+      USERNAME: "teach1"
       GENDER: "Female"
-      PASSWORD: "test"
+      PASSWORD: "testt1"
 #--- admin add epub content already in library to course block----#
 - repeat:
     while:
@@ -73,8 +73,8 @@ onFlowComplete:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "courses"
 - tapOn: "Existing Content Block Test"
 - runFlow:

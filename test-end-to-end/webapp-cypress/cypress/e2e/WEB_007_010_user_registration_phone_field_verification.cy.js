@@ -21,8 +21,8 @@ it('Admin enable registration', () => {
   cy.contains("li","Female").click()
  // Phone field should be having valid length according to country code (UAE- +971 : 9 digit)
   cy.get('#person_phone_num').click().clear().type('+97154402147')
-  cy.contains("label", "Username*").parent().find("input").clear().type('studentc')
-  cy.contains("label", "Password").parent().find("input").clear().type('test1234')
+  cy.contains("label", "Username*").parent().find("input").clear().type('stud1')
+  cy.contains("label", "Password").parent().find("input").clear().type('tests1')
   cy.contains('Register').click()
   cy.get('.Mui-error').contains('Phone').should('exist') //phone error
   cy.contains('Invalid').should('be.visible')
