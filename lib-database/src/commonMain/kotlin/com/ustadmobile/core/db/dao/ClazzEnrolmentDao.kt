@@ -603,8 +603,15 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
 
     @Query("""
-        UPDATE ClazzEnrolment 
-          SET clazzEnrolmentInviteUid = :clazzEnrolmentInviteUid
-        WHERE clazzEnrolmentClazzUid = :clazzEnrolmentClazzUid""")
-    abstract suspend fun updateClazzEnrolmentInviteUid(clazzEnrolmentInviteUid: Long, clazzEnrolmentClazzUid: Long)
+       UPDATE ClazzEnrolment 
+          SET clazzEnrolmentInviteUid = :clazzEnrolmentInviteUid,
+              clazzEnrolmentLct = :updateTime
+        WHERE clazzEnrolmentUid = :clazzEnrolmentUid
+    """)
+    abstract suspend fun updateClazzEnrolmentInviteUid(
+        clazzEnrolmentInviteUid: Long,
+        clazzEnrolmentUid: Long,
+        updateTime: Long,
+    )
+
 }

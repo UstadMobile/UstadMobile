@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCase
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentUiState
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -79,7 +79,7 @@ fun VideoContentScreen(
     VlcCheck {
         if(mediaSrc != null) {
             val getLocalUrlForContentUseCase: GetLocalUrlForContentUseCase = remember {
-                di.onActiveEndpoint().direct.instance()
+                di.onActiveLearningSpace().direct.instance()
             }
 
             val url = remember(uiState.contentEntryVersionUid, mediaSrc) {

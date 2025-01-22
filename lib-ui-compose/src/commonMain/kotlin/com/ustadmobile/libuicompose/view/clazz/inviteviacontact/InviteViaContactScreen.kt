@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view.clazz.inviteViaContact
+package com.ustadmobile.libuicompose.view.clazz.inviteviacontact
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -56,6 +56,7 @@ fun InviteViaContactScreen(
         },
         onContactError = { viewModel.onContactError(it) },
         onChipRemoved = { viewModel.onChipRemoved(it) },
+        onTextFieldValueChanged = {viewModel.onTextFieldValueChanged(it)},
         onValueChanged = { viewModel.onValueChanged() }
 
     )
@@ -69,6 +70,7 @@ fun InviteViaContactScreen(
     onChipSubmitClick: (String) -> InviteViaContactChip,
     onContactError: (String) -> Unit,
     onChipRemoved: (String) -> Unit,
+    onTextFieldValueChanged: (String) -> Unit,
     onValueChanged: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -83,6 +85,10 @@ fun InviteViaContactScreen(
 
         OutlinedChipTextField(
             state = state,
+            value = uiState.textFieldValue?:"" ,
+            onValueChange = { newValue ->
+                onTextFieldValueChanged(newValue)
+            },
             modifier = Modifier
                 .weight(1f)
                 .padding(10.dp).fillMaxWidth()
