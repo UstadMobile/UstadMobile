@@ -8,7 +8,7 @@ import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import kotlinx.coroutines.flow.Flow
@@ -34,7 +34,7 @@ class InviteViaLinkViewModel (
 
     val uiState: Flow<InviteViaLinkUiState> = _uiState.asStateFlow()
 
-    private val makeLinkUseCase: MakeLinkUseCase by di.onActiveEndpoint().instance()
+    private val makeLinkUseCase: MakeLinkUseCase by di.onActiveLearningSpace().instance()
 
     private val argInviteCode = savedStateHandle[ARG_INVITE_CODE]
         ?: throw IllegalArgumentException("no invite code")

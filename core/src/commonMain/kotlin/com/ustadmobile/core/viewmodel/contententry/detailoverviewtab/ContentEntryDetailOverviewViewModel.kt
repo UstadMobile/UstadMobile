@@ -24,7 +24,7 @@ import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.viewmodel.clazz.launchSetTitleFromClazzUid
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.door.entities.NodeIdAndAuth
@@ -121,31 +121,31 @@ class ContentEntryDetailOverviewViewModel(
      * Make Content Entry Available Offline Use Case will create the offline item in the database.
      */
     private val makeContentEntryAvailableOfflineUseCase: MakeContentEntryAvailableOfflineUseCase by
-            di.onActiveEndpoint().instance()
+            di.onActiveLearningSpace().instance()
 
-    private val cancelDownloadUseCase: CancelDownloadUseCase by di.onActiveEndpoint().instance()
+    private val cancelDownloadUseCase: CancelDownloadUseCase by di.onActiveLearningSpace().instance()
 
-    val nodeIdAndAuth: NodeIdAndAuth by di.onActiveEndpoint().instance()
+    val nodeIdAndAuth: NodeIdAndAuth by di.onActiveLearningSpace().instance()
 
     val uiState: Flow<ContentEntryDetailOverviewUiState> = _uiState.asStateFlow()
 
     private val defaultLaunchContentEntryUseCase: LaunchContentEntryVersionUseCase by di
-        .onActiveEndpoint().instance()
+        .onActiveLearningSpace().instance()
 
-    private val launchXapiUseCase: LaunchXapiUseCase? by di.onActiveEndpoint().instanceOrNull()
+    private val launchXapiUseCase: LaunchXapiUseCase? by di.onActiveLearningSpace().instanceOrNull()
 
-    private val launchEpubUseCase: LaunchEpubUseCase? by di.onActiveEndpoint().instanceOrNull()
+    private val launchEpubUseCase: LaunchEpubUseCase? by di.onActiveLearningSpace().instanceOrNull()
 
     private val target = savedStateHandle[ARG_TARGET]
 
     private val cancelImportContentEntryUseCase: CancelImportContentEntryUseCase? by
-        di.onActiveEndpoint().instanceOrNull()
+        di.onActiveLearningSpace().instanceOrNull()
 
     private val cancelRemoteContentEntryImportUseCase: CancelRemoteContentEntryImportUseCase by
-        di.onActiveEndpoint().instance()
+        di.onActiveLearningSpace().instance()
 
     private val dismissRemoteContentEntryImportErrorUseCase: DismissRemoteContentEntryImportErrorUseCase by
-        di.onActiveEndpoint().instance()
+        di.onActiveLearningSpace().instance()
 
     private val httpClient: HttpClient by di.instance()
 
