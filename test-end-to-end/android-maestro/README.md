@@ -7,6 +7,20 @@ but that has not been thoroughly tested.
 ### Prerequisites:
 
 * Install Maestro as per the [official instructions](https://maestro.mobile.dev/getting-started/installing-maestro).
+* Build the android release apk from the [app-android](../../app-android/) module and the
+  HTTP server from the [app-ktor-server](../../app-ktor-server/) module. This would be done by the normal
+  **gradlew build** command.
+* Start an Android emulator or connect a physical device and get the serial of the device 
+  (e.g. using the **adb devices** command). It is highly recommended to use a device created by the
+  [Meastro start-device command](https://maestro.mobile.dev/cli/start-device). 
+* MacOS only: install the realpath command.
+* Chrome browser **must** be updated otherwise H5P tests will fail. The version of Chrome that is
+  included with SDK33 will work. To test on devices running earlier versions of Android:
+    * Update Google Play Services (e.g. from [APKMirror](https://www.apkmirror.com/apk/google-inc/google-play-services/google-play-services-24-31-33-release/))
+    * Update Chrome (e.g. from [APKMirror](https://www.apkmirror.com/apk/google-inc/chrome/chrome-127-0-6533-103-release/))
+ 
+### Run all tests:
+=======
 * Build the HTTP server from the [app-ktor-server](../../app-ktor-server/) module (e.g. ```./gradlew app-ktor-server:build```).
 * Use Android SDK 33 emulator as the chrome browser **must** be updated otherwise H5P tests will fail. The version of Chrome that is
   included with SDK33 will work. To test on devices running earlier versions of Android:
@@ -56,6 +70,12 @@ export TESTCONTROLLER_PORT=[port]
 
 Optional: ```export MAESTRO_SPEC="e2e-tests/testname.yaml"``` to run only a specific test
 
+* **--test** specify a test to run as per the test flows found in e2e-tests e.g. --test 001_001_admin_can_add_content_001-h5p
+* **--apk** specify a particular apk file to test and install. By default the test runner expects to
+ use the release APK file built from source
+* **--console-output** use Maestro console output instead of saving to a JUnit XML. Helpful to see 
+more verbose output when designing/running/debugging flows etc.
+=======
 __Outputs__: Videos can be found in this ( test-end-to-end/android-maestro ) directory. Maestro debug logs can be
 found in test-end-to-end/android-maestro/build/reports/maestro directory.
 
@@ -86,6 +106,22 @@ run-maestro-ci script.
 groupadd --users (USER) kvm
 ```
 The server will probably need to be restarted.
+
+
+### Run a single test using Maestro command line:
+
+1. Build and install APK on emulator or device as per [app-android README](../../app-android)
+
+2. Clear Data Folder in app-ktor-server:Start the server using runserver.sh or runserver.bat as per the [Main README development environment setup](../../README.md)
+
+3. Run Maestro command to run test
+
+```
+cd test-end-to-end/android-maestro
+maestro test e2e-tests/<test name>.yaml -e USERNAME=admin -e PASSWORD=testpass -e TESTSERIAL=emulator-5554 -e ENDPOINT=http://<ip address>:8087/
+```
+
+Replace the values for`PASSWORD` with the server admin password, `TESTSERIAL` with the emulator or device serial (as per adb devices command), `ENDPOINT` with the server url as per the --siteUrl parameter used with runserver.
 
 ### Resource IDs (testtags)
 
