@@ -44,8 +44,6 @@ onFlowComplete:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: "H5p_Content.h5p"
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
       text:  "True/False Question"
@@ -65,8 +63,6 @@ onFlowComplete:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
       text:  "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"

@@ -87,10 +87,9 @@ onFlowComplete:
 - tapOn: "My content"
 - tapOn: "Import from file"
 - runFlow:
-    when:
-      notVisible: "Downloads"
-    file: "../common/redirect_to_downloads.yaml"
-- tapOn: H5p_Content.h5p
+    file: "../common/select_file_from_picker.yaml"
+    env:
+        TESTFILENAME: H5p_Content.h5p
 - longPressOn: "True/False Question"
 - tapOn: "Select all"
 - eraseText
