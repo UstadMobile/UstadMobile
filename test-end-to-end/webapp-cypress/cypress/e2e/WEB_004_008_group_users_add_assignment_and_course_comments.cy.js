@@ -1,8 +1,8 @@
 describe('WEB_004_008_group_users_add_assignment_and_course_comments', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and Members', () => {
  // Admin user login
@@ -100,11 +100,11 @@ it('Group 1- Student 1 submit assignment', () => {
   cy.contains("Course").click()
   cy.contains("004_008").click()
   cy.contains('Assignment 1').click()
-  cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
+  cy.get('#assignment_text div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
   cy.get('.ql-editor').ustadTypeAndVerify('Text 1',{maxRetries: 3})
   cy.contains('SUBMIT',{timeout:5000}).click()
-  cy.get('#assignment_text').get('div[contenteditable="true"]').should('not.exist')
+  cy.get('#assignment_text div[contenteditable="true"]').should('not.exist')
   cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','comment2',25)
   cy.contains("comment1").should('exist')
   cy.go('back')
@@ -133,4 +133,9 @@ it('Group 1 - Student2 able to view Group 1 assignment and course comments', () 
   cy.contains("comment1").ustadScrollUntilVisible()
   cy.contains("comment2").should('exist')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

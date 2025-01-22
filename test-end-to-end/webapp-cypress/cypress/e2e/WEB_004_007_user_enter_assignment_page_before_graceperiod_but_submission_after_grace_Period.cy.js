@@ -1,8 +1,8 @@
 describe('WEB_004_007_user_enter_assignment_page_before_graceperiod_but_submission_after_grace_Period', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and assignment block', () => {
  // Admin user login
@@ -88,4 +88,8 @@ it('Teacher checks submissions', () => {
   cy.contains("Not submitted").should('exist')
 })
 
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

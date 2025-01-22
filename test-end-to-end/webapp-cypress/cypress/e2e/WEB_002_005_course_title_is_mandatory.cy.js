@@ -1,8 +1,9 @@
 describe('WEB_002_005_course_title_is_mandatory', () => {
- it('Start Ustad Test Server ', () => {
-  // Start Test Server
-    cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
+
   it('Admin user create a course without title', () => {
 
   // Admin user login
@@ -20,4 +21,9 @@ describe('WEB_002_005_course_title_is_mandatory', () => {
   cy.contains("button","Edit").should('be.visible')
   cy.get('#appbar_title').should('be.visible').invoke('text').should('eq','courseName')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })
