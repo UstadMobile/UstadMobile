@@ -47,6 +47,7 @@ ANDROID_SERIAL=""
 EMULATOR_SERIALS=()
 AVD_NAMES=()
 APP_PACKAGE_ID="com.toughra.ustadmobile"
+AVDPACKAGE="system-images;android-33;google_apis;x86_64"
 
 if [ "$MAESTRO_SPEC" == "" ]; then
     MAESTRO_SPEC="$SCRIPTDIR/e2e-tests"
@@ -112,14 +113,31 @@ if [ ! -e build/reports/maestro ]; then
     mkdir -p build/reports/maestro
 fi
 
+if [ ! -e build/avds ]; then
+    mkdir -p build/avds
+fi
+
 echo "no" > build/no.tmp
 for ((i = 1; i <= $NUM_EMULATORS; i++)); do
     #avdmanager will ask if you want to create a custom hardware profile (even if set to silent)
     #answer no using < no.tmp
     AVDNAME=maestro-ci-$TESTCONTROLLER_PORT-$i
-    echo $AVDMANAGER_BIN create avd -n $AVDNAME -k 'system-images;android-33;google_apis;x86_64' < build/no.tmp
-    $AVDMANAGER_BIN create avd -n $AVDNAME -k 'system-images;android-33;google_apis;x86_64' < build/no.tmp
-    echo "run-maestro-ci: Created $AVDNAME"
+    for ATTEMPT in {1..5}; do
+        $AVDMANAGER_BIN create avd -n $AVDNAME --package "$AVDPACKAGE" --force \
+            --path build/avds/$AVDNAME < build/no.tmp
+
+        if [ -e build/avds/$AVDNAME ]; then
+            echo "run-maestro-ci : Successfully created AVD $AVDNAME (attempt $ATTEMPT)"
+            break 1
+        elif [ "$ATTEMPT" == "5" ]; then
+            echo "run-maestro-ci: Failed to create $AVDNAME after $ATTEMPT attempts"
+            exit 5
+        fi
+
+        echo "run-maestro-ci: attempt $ATTEMPT to create AVD failed. Wait and retry"
+        sleep 15
+    done
+
     AVD_NAMES+=("$AVDNAME")
     find_free_emulator_port
 
