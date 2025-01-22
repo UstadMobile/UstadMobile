@@ -25,7 +25,7 @@ import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase.Companion.SOCIAL_WARNING_WEB_URL
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.viewmodel.clazz.launchSetTitleFromClazzUid
 import com.ustadmobile.core.viewmodel.clazzassignment.asBlobOpenItem
@@ -314,13 +314,13 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: throw IllegalArgumentException("clazzUid arg is required")
 
-    private val saveAndUploadUseCase: SaveAndUploadLocalUrisUseCase by di.onActiveEndpoint()
+    private val saveAndUploadUseCase: SaveAndUploadLocalUrisUseCase by di.onActiveLearningSpace()
         .instance()
 
-    private val cancelTransferJobUseCase: CancelBlobUploadClientUseCase? by di.onActiveEndpoint()
+    private val cancelTransferJobUseCase: CancelBlobUploadClientUseCase? by di.onActiveLearningSpace()
         .instanceOrNull()
 
-    private val openBlobUiUseCase: OpenBlobUiUseCase? by di.onActiveEndpoint().instanceOrNull()
+    private val openBlobUiUseCase: OpenBlobUiUseCase? by di.onActiveLearningSpace().instanceOrNull()
 
     private var openBlobJob: Job? = null
 

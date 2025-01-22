@@ -12,7 +12,7 @@ import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobItem
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 import kotlinx.coroutines.launch
 import org.kodein.di.instance
@@ -38,7 +38,7 @@ class BulkAddPersonSelectFileViewModel(
 
     val uiState: Flow<BulkAddPersonSelectFileUiState> = _uiState.asStateFlow()
 
-    private val openBlobUiUseCase: OpenBlobUiUseCase by di.onActiveEndpoint().instance()
+    private val openBlobUiUseCase: OpenBlobUiUseCase by di.onActiveLearningSpace().instance()
 
     init {
         _appUiState.update { prev ->

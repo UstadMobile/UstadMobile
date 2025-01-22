@@ -2,7 +2,7 @@ package com.ustadmobile.core.viewmodel.xapicontent
 
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.ResolveXapiLaunchHrefUseCase
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import io.github.aakira.napier.Napier
@@ -24,7 +24,7 @@ class XapiContentViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadViewModel(di, savedStateHandle, DEST_NAME){
 
-    private val resolveXapiLaunchHrefUseCase: ResolveXapiLaunchHrefUseCase by di.onActiveEndpoint()
+    private val resolveXapiLaunchHrefUseCase: ResolveXapiLaunchHrefUseCase by di.onActiveLearningSpace()
         .instance()
 
     private val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0

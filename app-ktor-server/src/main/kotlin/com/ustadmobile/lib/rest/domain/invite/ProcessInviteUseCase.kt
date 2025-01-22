@@ -7,7 +7,7 @@ import com.ustadmobile.core.domain.invite.CheckContactTypeUseCase
 import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
-import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteredeem.ClazzInviteRedeemViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.ClazzInvite
 import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
@@ -71,7 +71,7 @@ class ProcessInviteUseCase(
                 val clazzName = effectiveDb.clazzDao().findByUidAsync(clazzUid)?.clazzName?:""
                 invites.forEach { invite ->
                     val inviteLink =
-                        UstadUrlComponents(learningSpace.url, ClazzInviteViewModel.DEST_NAME,
+                        UstadUrlComponents(learningSpace.url, ClazzInviteRedeemViewModel.DEST_NAME,
                             "inviteCode=${invite.inviteToken}").fullUrl()
 
                     when (invite.inviteType) {

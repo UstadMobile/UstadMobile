@@ -9,7 +9,7 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.navigateToLink
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.util.ext.requireHttpPrefix
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.view.UstadView
@@ -38,7 +38,7 @@ class RedirectViewModel(
     private val deepLink = savedStateHandle[UstadView.ARG_OPEN_LINK]
 
     private val apiUrlConfig: SystemUrlConfig by instance()
-    private val makeLinkUseCase: MakeLinkUseCase by di.onActiveEndpoint().instance()
+    private val makeLinkUseCase: MakeLinkUseCase by di.onActiveLearningSpace().instance()
 
     private val settings: Settings by instance()
 
