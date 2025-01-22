@@ -18,7 +18,7 @@ it('Admin able to add content block from library', () => {
  // Add account for teacher
   cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacher1','test1234')
+  cy.ustadCreateUserAccount('teach1','testt1')
  // Add module block
   cy.contains('button','Course').click()
   cy.contains('button','Edit').click()
@@ -35,7 +35,7 @@ it('Admin able to add content block from library', () => {
 })
 
 it('Teacher able to add content block from file', () => {
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
  // Add Assignment block
   cy.contains("Course").click()
   cy.contains("003_005").click()
