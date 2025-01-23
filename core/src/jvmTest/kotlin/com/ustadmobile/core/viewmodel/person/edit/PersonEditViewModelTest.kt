@@ -313,7 +313,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                 val stateWithError = awaitItemWhere { it.fieldsEnabled && it.parentContactError != null }
                 assertEquals(fieldRequiredErr, stateWithError.parentContactError,
                     "When registering as a minor and contact field is blank, then field" +
-                        " required error is shown ")
+                            " required error is shown ")
 
                 cancelAndIgnoreRemainingEvents()
 

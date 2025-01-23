@@ -61,6 +61,8 @@ trickle -s -d 128 -u 128 bash
 
 2.9 [The user can add a profile photo](test-descriptions/002_009_people_add_and_remove_profile_pic_test_description.md)
 
+2.10 [The username validation](test-descriptions/002_010_username_validation_test_description.md)
+
 ### 3: Course block editing
 
 3.1 [Admin or teacher can edit the course](test-descriptions/003_001_add_or_edit_course_permission_test_description.md)

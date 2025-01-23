@@ -1,6 +1,8 @@
 package com.ustadmobile.view.person.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.hooks.useUstadViewModel
@@ -48,7 +50,6 @@ external interface PersonEditScreenProps : Props{
     var onPersonPictureUriChanged: (String?) -> Unit
 
     var onNationalPhoneNumSetChanged: (Boolean) -> Unit
-
 }
 
 val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
@@ -242,6 +243,12 @@ val PersonEditComponent2 = FC <PersonEditScreenProps> { props ->
                     disabled = !props.uiState.fieldsEnabled
                     error = props.uiState.usernameError != null
                     helperText = ReactNode(props.uiState.usernameError ?: strings[MR.strings.required])
+                    onKeyDown = { event ->
+                        val char = event.key.singleOrNull()
+                        if(char != null && !ValidateUsernameUseCase.isValidUsernameChar(char)) {
+                            event.preventDefault()
+                        }
+                    }
                     onTextChange = {
                         props.onPersonChanged(
                             props.uiState.person?.shallowCopy {

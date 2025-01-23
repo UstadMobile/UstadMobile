@@ -5,9 +5,12 @@ import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidationResult
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -78,6 +81,10 @@ class LoginViewModel(
     private val setLanguageUseCase: SetLanguageUseCase by instance()
 
     private val languagesConfig: SupportedLanguagesConfig by instance()
+
+    private val validateUsernameUseCase = ValidateUsernameUseCase()
+
+    private val filterUsernameUseCase = FilterUsernameUseCase()
 
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
@@ -156,10 +163,13 @@ class LoginViewModel(
         }
     }
 
-    fun onUsernameChanged(username: String) {
-        _uiState.update { prev ->
-            prev.copy(username = username)
-        }
+    fun onUsernameChanged(newValue: String) {
+        val filteredValue = filterUsernameUseCase(
+            username = newValue,
+            invalidCharReplacement = ""
+        )
+
+        _uiState.update { it.copy(username = filteredValue) }
     }
 
     fun onPasswordChanged(password: String) {
@@ -196,7 +206,19 @@ class LoginViewModel(
         val username = _uiState.value.username
         val password = _uiState.value.password
 
-        if(username.isNotEmpty() && password.isNotEmpty()){
+        if (username.isNotEmpty() && password.isNotEmpty()) {
+
+            val validationResult = validateUsernameUseCase(username)
+            if (validationResult != ValidationResult.Valid) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        fieldsEnabled = true,
+                        usernameError = validationResult.errorMessage?.let { impl.getString(it) }
+                    )
+                }
+                return
+            }
+
             loadingState = LoadingUiState.INDETERMINATE
             viewModelScope.launch {
                 var errorMessage: String? = null

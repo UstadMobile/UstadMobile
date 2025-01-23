@@ -31,9 +31,9 @@ onFlowComplete:
       TESTCOURSENAME: "New Content Block Test"
       TEACHERFIRSTNAME: "Teacher"
       TEACHERLASTNAME: "1"
-      USERNAME: "t1"
+      USERNAME: "teach1"
       GENDER: "Female"
-      PASSWORD: "test"
+      PASSWORD: "testt1"
 - repeat:
     while:
       notVisible: "Course"
@@ -44,8 +44,6 @@ onFlowComplete:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: "H5p_Content.h5p"
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
       text:  "True/False Question"
@@ -57,16 +55,14 @@ onFlowComplete:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "courses"
 - tapOn: "New Content Block Test"
 - runFlow:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
       text:  "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"

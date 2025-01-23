@@ -1,6 +1,8 @@
 package com.ustadmobile.view.person.accountedit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditUiState
@@ -23,7 +25,6 @@ external interface PersonAccountEditScreenProps : Props {
     var uiState: PersonAccountEditUiState
 
     var onAccountChanged: (PersonUsernameAndPasswordModel?) -> Unit
-
 }
 
 val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
@@ -42,6 +43,12 @@ val PersonAccountEditComponent2 = FC<PersonAccountEditScreenProps> { props ->
                     helperText = ReactNode(props.uiState.usernameError ?: strings[MR.strings.required])
                     error = props.uiState.usernameError != null
                     disabled = !props.uiState.fieldsEnabled
+                    onKeyDown = { event ->
+                        val char = event.key.singleOrNull()
+                        if(char != null && !ValidateUsernameUseCase.isValidUsernameChar(char)) {
+                            event.preventDefault()
+                        }
+                    }
                     onTextChange = {
                         props.onAccountChanged(
                             props.uiState.personAccount?.copy(

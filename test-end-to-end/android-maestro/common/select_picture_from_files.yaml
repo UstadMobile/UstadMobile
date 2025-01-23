@@ -1,8 +1,8 @@
 appId: com.toughra.ustadmobile
 ---
 # this flow directs the user to pictures screen
-- repeat:
-    while:
+- runFlow:
+    when:
       notVisible: "Downloads"
     commands:
       - tapOn:

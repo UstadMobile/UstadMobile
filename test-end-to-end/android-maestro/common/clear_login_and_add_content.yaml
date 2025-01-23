@@ -22,7 +22,7 @@ appId: com.toughra.ustadmobile
      id: "floating_action_button"
 - tapOn: "From file"
 - runFlow:
-    when:
-      visible: "Show roots"
-    file: redirect_to_downloads.yaml
+    file: "./select_file_from_picker.yaml"
+    env:
+      TESTFILENAME: ${TESTFILENAME}
 
