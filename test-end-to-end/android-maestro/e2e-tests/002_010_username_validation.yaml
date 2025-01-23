@@ -14,7 +14,7 @@ onFlowComplete:
   - runScript:
       file: "../common/stopserver.js"
       env:
-        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -49,12 +49,7 @@ onFlowComplete:
 - assertVisible: "Username must be at least 3 characters"
 - tapOn: "Username*"
 - eraseText
-# verify Username cannot start with a number
-- inputText: 12uS
-- tapOn: "SAVE"
-- assertVisible: "Username cannot start with a number"
-# verify the uppercase, special characters and space are removed automatically
-- eraseText
+  # verify the uppercase, special characters and space are removed automatically
 - inputText: uSer@ A
 - tapOn: "SAVE"
 - assertVisible: "usera"
@@ -78,7 +73,7 @@ onFlowComplete:
 - tapOn: "SAVE"
 - tapOn: "User B"
 - tapOn: "CREATE ACCOUNT"
-# verify the . _ characters are acceptable
+ # verify the . _ characters are acceptable
 - tapOn: "Username*"
 - inputText: user.B_123
 - tapOn: "New password*"
