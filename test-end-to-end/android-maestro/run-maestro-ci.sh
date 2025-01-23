@@ -160,11 +160,12 @@ sleep 15
 for serial in ${EMULATOR_SERIALS[@]}; do
     for i in {1..5}; do
         echo "run-maestro-ci: Attempting to install on $serial attempt $i"
+        echo "run-maestro-ci: run adb -s $serial install $TESTAPK"
         adb -s $serial install $TESTAPK
         INSTALLSTATUS=$?
         PKGFOUND=$(adb -s $serial shell pm list packages | grep $APP_PACKAGE_ID)
         if [ "$INSTALLSTATUS" == "0" ] && [ "$PKGFOUND" != "" ]; then
-            echo "run-maestro-ci: Install APK on $serial succeeded"
+            echo "run-maestro-ci: Install APK on $serial succeeded: package found from list packages: $PKGFOUND"
             break 1
         else
             echo "run-maestro-ci: Install APK on $serial failed"
@@ -210,6 +211,10 @@ for serial in ${EMULATOR_SERIALS[@]}; do
 done
 
 # Could try using sharding here in future e.g. --shard-split=${#EMULATOR_SERIALS[@]}
+echo run-maestro-ci: run : maestro --device=$MAESTRO_DEVICE_ARG test -e TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
+                             $MAESTRO_SPEC \
+                             --format junit --output build/results/report.xml \
+                             --debug-output build/reports/maestro
 maestro --device=$MAESTRO_DEVICE_ARG test -e TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
   $MAESTRO_SPEC \
   --format junit --output build/results/report.xml \
