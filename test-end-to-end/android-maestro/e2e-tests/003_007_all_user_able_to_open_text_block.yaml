@@ -30,9 +30,9 @@ onFlowComplete:
       TESTCOURSENAME: "Text Block Test"
       TEACHERFIRSTNAME: "Teacher"
       TEACHERLASTNAME: "1"
-      USERNAME: "t1"
+      USERNAME: "teach1"
       GENDER: "Female"
-      PASSWORD: "test"
+      PASSWORD: "testt1"
 - tapOn:
     text: "Courses"
     index: 1
@@ -42,9 +42,9 @@ onFlowComplete:
       TESTCOURSENAME: "Text Block Test"
       STUDENTFIRSTNAME: "Student"
       STUDENTLASTNAME: "1"
-      USERNAME: "s1"
+      USERNAME: "stud1"
       GENDER: "Male"
-      PASSWORD: "test"
+      PASSWORD: "tests1"
 - repeat:
     while:
       notVisible: "Course"
@@ -74,8 +74,8 @@ onFlowComplete:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "s1"
-      PASSWORD: "test"
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
 - tapOn: "courses"
 - tapOn: "Text Block Test"
 #--- open text block by student---#
@@ -96,8 +96,8 @@ onFlowComplete:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "courses"
 - tapOn: "Text Block Test"
 #--- open text block by teacher ---#

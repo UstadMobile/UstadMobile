@@ -16,7 +16,7 @@ it('Admin add a course and assignment block', () => {
  // Add account for teacher
   cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacher1','test1234')
+  cy.ustadCreateUserAccount('teach1','testt1')
  //Add a student1
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','1','Male')
@@ -24,7 +24,7 @@ it('Admin add a course and assignment block', () => {
  //Add account for student1
   cy.contains("Student 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student1','test1234')
+  cy.ustadCreateUserAccount('stud1','tests1')
  //Add a student2
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','2','Male')
@@ -32,11 +32,11 @@ it('Admin add a course and assignment block', () => {
  //Add account for student2
   cy.contains("Student 2").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student2','test1234')
+  cy.ustadCreateUserAccount('stud2','tests2')
 })
 
 it('Teacher add assignment', () => {
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
  // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_012").click()
@@ -87,7 +87,7 @@ it('Teacher add assignment', () => {
 
 it('Student1 submit assignment', () => {
 
-  cy.ustadClearDbAndLogin('student1','test1234')
+  cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
   cy.contains("004_012").click()
   cy.contains('Assignment 1').click()
@@ -104,7 +104,7 @@ it('Student1 submit assignment', () => {
 })
 
 it('Student2 add assignment mark and course comment', () => {
-  cy.ustadClearDbAndLogin('student2','test1234')
+  cy.ustadClearDbAndLogin('stud2','tests2')
   cy.contains("Course").click()
   cy.contains("004_012").click()
   cy.contains("button","Course").click()
@@ -120,7 +120,7 @@ it('Student2 add assignment mark and course comment', () => {
 })
 
 it('Student1 view his grade', () => {
-  cy.ustadClearDbAndLogin('student1','test1234')
+  cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
   cy.contains("004_012").click()
   cy.contains('Assignment 1').click()

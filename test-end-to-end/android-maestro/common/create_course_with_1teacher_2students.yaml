@@ -26,9 +26,9 @@ appId: com.toughra.ustadmobile
       TESTCOURSENAME: ${TESTCOURSENAME}
       TEACHERFIRSTNAME: "Teacher"
       TEACHERLASTNAME: "1"
-      USERNAME: "t1"
+      USERNAME: "teach1"
       GENDER: "Female"
-      PASSWORD: "test"
+      PASSWORD: "testt1"
 - tapOn:
     text: "Courses"
     index: 1
@@ -39,9 +39,9 @@ appId: com.toughra.ustadmobile
       TESTCOURSENAME: ${TESTCOURSENAME}
       STUDENTFIRSTNAME: "Student"
       STUDENTLASTNAME: "1"
-      USERNAME: "s1"
+      USERNAME: "stud1"
       GENDER: "Male"
-      PASSWORD: "test"
+      PASSWORD: "tests1"
 - tapOn:
     text: "Courses"
     index: 1
@@ -52,7 +52,7 @@ appId: com.toughra.ustadmobile
       TESTCOURSENAME: ${TESTCOURSENAME}
       STUDENTFIRSTNAME: "Student"
       STUDENTLASTNAME: "2"
-      USERNAME: "s2"
+      USERNAME: "stud2"
       GENDER: "Female"
-      PASSWORD: "test"
+      PASSWORD: "tests2"
 
