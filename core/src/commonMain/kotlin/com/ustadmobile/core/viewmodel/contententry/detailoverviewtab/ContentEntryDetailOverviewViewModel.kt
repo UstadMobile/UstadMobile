@@ -160,7 +160,7 @@ class ContentEntryDetailOverviewViewModel(
     private val parentEntryUid = savedStateHandle[ARG_PARENT_UID]?.toLong() ?: 0
 
     private val checkLocalAvailabilityUseCase: CheckContentLocalAvailabilityUseCase? by
-        di.onActiveEndpoint().instanceOrNull()
+        di.onActiveLearningSpace().instanceOrNull()
 
     init {
         _uiState.update { it.copy(activeUserPersonUid = activeUserPersonUid) }
