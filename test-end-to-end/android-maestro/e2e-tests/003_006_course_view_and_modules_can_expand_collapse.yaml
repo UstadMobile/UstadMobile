@@ -33,9 +33,9 @@ onFlowComplete:
       TESTCOURSENAME: "Course view Test"
       STUDENTFIRSTNAME: "Student"
       STUDENTLASTNAME: "1"
-      USERNAME:  "s1"
+      USERNAME:  "stud1"
       GENDER: "Male"
-      PASSWORD: "test"
+      PASSWORD: "tests1"
 - repeat:
     while:
       notVisible: "Course"
@@ -53,8 +53,8 @@ onFlowComplete:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "s1"
-      PASSWORD: "test"
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
 - tapOn: "courses"
 - tapOn: "Course view Test"
 # Collapse the module by tapping it

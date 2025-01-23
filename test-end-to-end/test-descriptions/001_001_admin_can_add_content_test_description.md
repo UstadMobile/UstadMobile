@@ -9,7 +9,7 @@ Admin can add an H5P, Epub, Video, and Pdf content file from the device. Once ad
 1. Login as admin.
 2. Click on "Library."
 3. Click on the "+ Content" button.
-4. Click on the "From file" button.
+4. Click on the "From file" or "From folder" button.
 5. Select the content file.
 6. Click the "Save" button.
 7. Verify that the content is visible in the library.
