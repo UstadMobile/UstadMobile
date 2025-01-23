@@ -93,7 +93,6 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
             viewModel.uiState.test(timeout =1000.seconds) {
                 val state = awaitItem()
                 viewModel.onEntityChanged(state.person?.shallowCopy {
-                    username = "a"
                     firstNames = "Test"
                     lastName = "User"
                     gender = Person.GENDER_FEMALE
@@ -314,7 +313,7 @@ class PersonEditViewModelTest : AbstractMainDispatcherTest(){
                 val stateWithError = awaitItemWhere { it.fieldsEnabled && it.parentContactError != null }
                 assertEquals(fieldRequiredErr, stateWithError.parentContactError,
                     "When registering as a minor and contact field is blank, then field" +
-                        " required error is shown ")
+                            " required error is shown ")
 
                 cancelAndIgnoreRemainingEvents()
 
