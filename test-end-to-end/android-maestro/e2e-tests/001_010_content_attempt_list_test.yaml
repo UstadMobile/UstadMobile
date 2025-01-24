@@ -1,19 +1,24 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_010_content_attempt_list_test"
-  TESTNAME: "001_010_content_attempt_list_test"
+  TESTRESULTSDIR: "build/reports/maestro/001_010_content_attempt_list_test/Screenshots"
+onFlowStart:
+  - startRecording: 001_010_content_attempt_list_test
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 # add new course
 - runFlow:
     file: "../common/add_course.yaml"
@@ -33,8 +38,6 @@ env:
     file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
 - back
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
@@ -42,8 +45,6 @@ env:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: "H5p_Content.h5p"
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
       text:  "True/False Question"
@@ -58,6 +59,9 @@ env:
     notVisible: "Uploading"
     timeout: 30000
 - tapOn: Open
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- assertVisible: "Check"
 - tapOn: "Close tab"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
@@ -65,8 +69,6 @@ env:
     file: "../common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: "Video_Content.mp4"
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
       text: "Video"
@@ -85,7 +87,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "s1"
+      USERNAME: "stud1"
       PASSWORD: "tests1"
 - tapOn: "Test Course Block"
 - scrollUntilVisible:
@@ -99,7 +101,6 @@ env:
     visible: "Play"
     timeout: 20000
 - back
-
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - tapOn: "True/False Question"
@@ -133,26 +134,19 @@ env:
 - assertVisible: "Student 1"
 - assertVisible: "100% Completion"
 - tapOn: "Student 1"
-- assertVisible:
-    text: "Completed"
-    index: 1
-#- runScript:    file: "../common/setDate.js"
-#- assertVisible: ${output.currentDate}
+- assertVisible: "Completed"
 - assertVisible: "100% Completion"
-- tapOn:
-    text: "Completed"
-    index: 1
+- tapOn: "Completed"
 - assertVisible: "Completed"
 - assertVisible:
-    text: "100 %Completion"
+    text: "100% Completion"
     index: 0
 - assertVisible: "Progressed"
-- tapOn:
-    text: "100 %Completion"
+- assertVisible:
+    text: "100% Completion"
     index: 1
-#- runFlow: "../common/clear_state_and_get_started.yaml"
-- tapOn: "S"
-- tapOn: "Log out"
+
+- runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
@@ -184,29 +178,23 @@ env:
 - assertVisible: "Student 1"
 - assertVisible: "100% Completion"
 - tapOn: "Student 1"
-- assertVisible:
-    text: "Completed"
-    index: 1
-#- runScript:    file: "../common/setDate.js"
-#- assertVisible: ${output.currentDate}
+- assertVisible: "Completed"
 - assertVisible: "100% Completion"
-- tapOn:
-    text: "Completed"
-    index: 1
+- tapOn: "Completed"
 - assertVisible: "Completed"
 - assertVisible:
-    text: "100 %Completion"
+    text: "100% Completion"
     index: 0
 - assertVisible: "Progressed"
-- tapOn:
-    text: "100 %Completion"
+- assertVisible:
+    text: "100% Completion"
     index: 1
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "s2"
+      USERNAME: "stud2"
       PASSWORD: "tests2"
 - tapOn: "Test Course Block"
 - tapOn: "True/False Question"
