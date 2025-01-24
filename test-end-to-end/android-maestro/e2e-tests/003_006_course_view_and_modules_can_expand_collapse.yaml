@@ -1,19 +1,26 @@
 appId: com.toughra.ustadmobile
+tags:
+  - no-files
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_006_course_view_and_modules_can_expand_collapse"
-  TESTNAME: "003_006_course_view_and_modules_can_expand_collapse"
+  TESTRESULTSDIR: "build/reports/maestro/003_006_course_view_and_modules_can_expand_collapse/Screenshots"
+onFlowStart:
+  - startRecording: 003_006_course_view_and_modules_can_expand_collapse
+  - clearState: com.toughra.ustadmobile
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 - runFlow:
     file: "../common/add_course.yaml"
     env:
@@ -26,9 +33,9 @@ env:
       TESTCOURSENAME: "Course view Test"
       STUDENTFIRSTNAME: "Student"
       STUDENTLASTNAME: "1"
-      USERNAME:  "s1"
+      USERNAME:  "stud1"
       GENDER: "Male"
-      PASSWORD: "test"
+      PASSWORD: "tests1"
 - repeat:
     while:
       notVisible: "Course"
@@ -46,8 +53,8 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "s1"
-      PASSWORD: "test"
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
 - tapOn: "courses"
 - tapOn: "Course view Test"
 # Collapse the module by tapping it

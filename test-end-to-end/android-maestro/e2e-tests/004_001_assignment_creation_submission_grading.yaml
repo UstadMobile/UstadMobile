@@ -1,20 +1,25 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_001_assignment_creation_submission_grading"
-  TESTNAME:  "004_001_assignment_creation_submission_grading"
+  TESTRESULTSDIR: "build/reports/maestro/004_001_assignment_creation_submission_grading/Screenshots"
+onFlowStart:
+  - startRecording: 004_001_assignment_creation_submission_grading
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 # Admin login
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 # add new course
 - runFlow:
     file: "../common/add_course.yaml"
@@ -27,24 +32,22 @@ env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       TEACHERFIRSTNAME: "Teacher"
       TEACHERLASTNAME: "1"
-      USERNAME: "t1"
+      USERNAME: "teach1"
       GENDER: "Female"
-      PASSWORD: "test"
+      PASSWORD: "testt1"
 # add students to the course through bulk import using .csv file
 - runFlow:
     file: "../common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
 # teacher add an assignment block
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 # edit the course to add blocks
@@ -80,7 +83,7 @@ env:
     direction: DOWN
 - assertVisible: "Must submit all at once"
 - assertVisible: "Done"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
+- takeScreenshot: "${TESTRESULTSDIR}/added_assignment"
 - tapOn:
     text: "Done"
 - assertNotVisible: "Done"
@@ -91,7 +94,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "s1"
+      USERNAME: "stud1"
       PASSWORD: "tests1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
@@ -109,8 +112,6 @@ env:
     file: "../common/add_assignment_file.yaml"
     env:
       TESTFILENAME: "Assignment_File.pdf"
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
       text: "Submit"
@@ -123,8 +124,8 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - scrollUntilVisible:
@@ -165,7 +166,7 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "s1"
+      USERNAME: "stud1"
       PASSWORD: "tests1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
@@ -188,8 +189,8 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - tapOn:

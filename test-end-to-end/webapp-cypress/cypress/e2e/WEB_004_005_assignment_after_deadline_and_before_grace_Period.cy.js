@@ -1,8 +1,8 @@
 describe('WEB_004_005_assignment_after_deadline_and_before_grace_Period', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and assignment block', () => {
  // Admin user login
@@ -16,7 +16,7 @@ it('Admin add a course and assignment block', () => {
  // Add account for teacher
   cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacher1','test1234')
+  cy.ustadCreateUserAccount('teach1','testt1')
  //Add a student1
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','1','Male')
@@ -24,11 +24,11 @@ it('Admin add a course and assignment block', () => {
  //Add account for student1
   cy.contains("Student 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student1','test1234')
+  cy.ustadCreateUserAccount('stud1','tests1')
 })
 
 it('Teacher add assignment', () => {
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
   // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_005").click()
@@ -61,7 +61,7 @@ it('Teacher add assignment', () => {
 
 it('Student submit assignment', () => {
 
-  cy.ustadClearDbAndLogin('student1','test1234')
+  cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
   cy.contains("004_005").click()
   cy.contains('Assignment 1').click()
@@ -75,7 +75,7 @@ it('Student submit assignment', () => {
 })
 
 it('Teacher add assignment mark and course comment', () => {
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
 
  //  Assignment block
   cy.contains("Course").click()
@@ -93,7 +93,7 @@ it('Teacher add assignment mark and course comment', () => {
 })
 
 it('Student view his grade', () => {
-  cy.ustadClearDbAndLogin('student1','test1234')
+  cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
   cy.contains("004_005").click()
   cy.contains('Assignment 1').click()
@@ -101,5 +101,10 @@ it('Student view his grade', () => {
   cy.contains('8/10 Points').should('exist')
   cy.contains('(20% late penalty)').should('exist') // assertion for error message
   cy.contains('SUBMIT').should('not.exist') // assertion to make sure multiple submission is not allowed
+})
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
   })
 })

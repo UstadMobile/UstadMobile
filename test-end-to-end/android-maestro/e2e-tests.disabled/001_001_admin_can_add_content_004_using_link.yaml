@@ -2,27 +2,21 @@ appId: com.toughra.ustadmobile
 tags:
   - checklist1
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_003-video"
-  TESTNAME: "001_001_admin_can_add_content_003-video"
+  TESTRESULTSDIR: "build/results/Screenshots/001_001_admin_can_add_content_003-video"
   TESTFILENAME: Epub_Content.epub
   TESTCONTENTNAME: AddContentEpubTest
-  CONTROLSERVER: ${CONTROLSERVER}
-  TESTSERIAL: ${TESTSERIAL}
+onFlowStart:
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-
-# clear the app
-- clearState: com.toughra.ustadmobile
-# clear the downloads
-- evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
-# push the test file to the downloads
-- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
 # get started
 - launchApp
 - hideKeyboard
@@ -31,7 +25,7 @@ env:
 - runFlow: "../common/select_site.yaml"
 # admin login
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "../common/admin_login.yaml"
 # adding content to library
 - tapOn: "Library"
 - tapOn: "CONTENT"

@@ -1,8 +1,8 @@
 describe('WEB_005_004_user_add_internal_links_post_reply', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add discussion board and post', () => {
   // Admin user login
@@ -26,24 +26,24 @@ it('Admin add discussion board and post', () => {
   //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
-  cy.ustadAddNewPerson('Teacher','A','Female')
+  cy.ustadAddNewPerson('Teacher','1','Female')
   // Add account for teacher
-  cy.contains("Teacher A").click()
+  cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacherA','test1234')
+  cy.ustadCreateUserAccount('teach1','testt1')
   //Add a student
   cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','A','Male')
+  cy.ustadAddNewPerson('Student','1','Male')
   cy.contains("button","Members").should('be.visible')
   //Add account for student
-  cy.contains("Student A").click()
+  cy.contains("Student 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('studentA','test1234')
+  cy.ustadCreateUserAccount('stud1','tests1')
 })
 
 it('Teacher able to add an internal link as reply to the post', () => {
   // Teacher Login
-  cy.ustadClearDbAndLogin('teacherA','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
   cy.contains("Courses").should('be.visible')
   cy.contains('005_003').click()
   // Add reply to the post board
@@ -62,7 +62,7 @@ it('Teacher able to add an internal link as reply to the post', () => {
 
 it('Student able to open the internal link in the reply', () => {
   // Student Login
-  cy.ustadClearDbAndLogin('studentA','test1234')
+  cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Courses").should('be.visible')
   cy.contains('005_003').click()
   // Open link on the post board
@@ -71,4 +71,9 @@ it('Student able to open the internal link in the reply', () => {
   cy.contains('Internal link').invoke('removeAttr','target').click()
   cy.url().should('include','http://localhost:8087/umapp/#/ContentEntries')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

@@ -1,8 +1,8 @@
 describe('WEB_005_002_teacher_can_edit_discussion_board', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add discussion board and a post', () => {
   // Admin user login
@@ -30,12 +30,12 @@ it('Admin add discussion board and a post', () => {
   // Add account for teacher
   cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacher1','test1234')
+  cy.ustadCreateUserAccount('teach1','testt1')
 })
 
 it('Teacher able to edit discussion board ', () => {
   // Teacher Login
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
   cy.contains("Courses").should('be.visible')
   cy.contains('005_002').click()
   // Add discussion board
@@ -45,4 +45,9 @@ it('Teacher able to edit discussion board ', () => {
   cy.get('div[data-placeholder="Description"]').ustadTypeAndVerify("teacher edit discussion description")
   cy.contains("button","Done").click()
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

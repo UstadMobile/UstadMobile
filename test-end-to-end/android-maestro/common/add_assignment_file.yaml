@@ -9,16 +9,8 @@ appId: com.toughra.ustadmobile
  # 4) TESTSERIAL: ${TESTSERIAL} : provides the device serial number
  # 5) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results
 
-
-# clear the downloads
-- evalScript: ${http.get(CONTROLSERVER + "cleardownloads?device=" + TESTSERIAL)}
-# push the test file to the downloads
-- evalScript: ${http.get(CONTROLSERVER + "pushcontent?test-file-name=" + TESTFILENAME +"&device=" + TESTSERIAL)}
-
-
 - tapOn: "Add file"
 - runFlow:
-    when:
-      notVisible: "Downloads"
-    file: redirect_to_downloads.yaml
-- tapOn: ${TESTFILENAME}
+    file: "./select_file_from_picker.yaml"
+    env:
+      TESTFILENAME: ${TESTFILENAME}

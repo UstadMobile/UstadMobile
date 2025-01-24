@@ -105,6 +105,7 @@ import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseC
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCaseAndroid
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseAndroid
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
@@ -132,6 +133,7 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
@@ -982,6 +984,15 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<ValidateEmailUseCase>() with provider {
             ValidateEmailUseCase()
         }
+
+        bind<FilterUsernameUseCase>() with provider {
+            FilterUsernameUseCase()
+        }
+
+        bind<ValidateUsernameUseCase>() with provider {
+            ValidateUsernameUseCase()
+        }
+
 
         bind<CancelRemoteContentEntryImportUseCase>() with scoped(EndpointScope.Default).singleton {
             CancelRemoteContentEntryImportUseCase(

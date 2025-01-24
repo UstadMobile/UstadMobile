@@ -1,8 +1,8 @@
 describe('WEB_004_006_assignment_after_deadline_and_before_grace_Period', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and assignment block', () => {
  // Admin user login
@@ -16,7 +16,7 @@ it('Admin add a course and assignment block', () => {
  // Add account for teacher
   cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacher1','test1234')
+  cy.ustadCreateUserAccount('teach1','testt1')
  //Add a student1
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','1','Male')
@@ -24,11 +24,11 @@ it('Admin add a course and assignment block', () => {
  //Add account for student1
   cy.contains("Student 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student1','test1234')
+  cy.ustadCreateUserAccount('stud1','tests1')
   })
 
 it('Teacher add assignment', () => {
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
   // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_006").click()
@@ -60,10 +60,15 @@ it('Teacher add assignment', () => {
 
 it('Student not able to submit assignment', () => {
 
-  cy.ustadClearDbAndLogin('student1','test1234')
+  cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
   cy.contains("004_00").click()
   cy.contains('Assignment 1').click()
   cy.contains("SUBMIT").should('not.exist')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

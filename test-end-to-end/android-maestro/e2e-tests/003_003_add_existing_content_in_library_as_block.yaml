@@ -1,30 +1,28 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_003_add_existing_content_in_library_as_block"
+  TESTRESULTSDIR: "build/reports/maestro/003_003_add_existing_content_in_library_as_block/Screenshots"
   TESTNAME: "003_003_add_existing_content_in_library_as_block"
+onFlowStart:
+  - startRecording: 002_001_admin_add_new_course_and_teacher
+  - runScript:
+      file: "../common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "../common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-  #---------add content to library ---------#
+#---------add content to library ---------#
 - runFlow:
     file: "../common/clear_login_and_add_content.yaml"
     env:
      TESTFILENAME: "H5p_Content.h5p"
      TESTCONTENTNAME: H5PContent
-     CONTROLSERVER: ${CONTROLSERVER}
-     TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
-#---------add content to library ---------#
-- runFlow:
-   file: "../common/push_test_file_to_downloads.yaml"
-   env:
-    TESTFILENAME: "Epub_Content1.epub"
-
 - launchApp
 # adding content to library
 - tapOn: "Library"
@@ -32,10 +30,9 @@ env:
     id: "floating_action_button"
 - tapOn: "From file"
 - runFlow:
-    when:
-      notVisible: "Downloads"
-    file: "../common/redirect_to_downloads.yaml"
-- tapOn: "Epub_Content1.epub"
+    file: "../common/select_file_from_picker.yaml"
+    env:
+      TESTFILENAME: Epub_Content1.epub
 - tapOn: "SAVE"
 #---------add course ---------#
 - runFlow:
@@ -49,9 +46,9 @@ env:
       TESTCOURSENAME: "Existing Content Block Test"
       TEACHERFIRSTNAME: "Teacher"
       TEACHERLASTNAME: "1"
-      USERNAME: "t1"
+      USERNAME: "teach1"
       GENDER: "Female"
-      PASSWORD: "test"
+      PASSWORD: "testt1"
 #--- admin add epub content already in library to course block----#
 - repeat:
     while:
@@ -71,8 +68,8 @@ env:
 - runFlow:
     file: "../common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "courses"
 - tapOn: "Existing Content Block Test"
 - runFlow:
@@ -88,6 +85,6 @@ env:
     text:  "True/False Question"
 - assertVisible:
     text: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/able_to_add_existing_content_block_inside_course"
+- takeScreenshot: "${TESTRESULTSDIR}/able_to_add_existing_content_block_inside_course"
 
 
