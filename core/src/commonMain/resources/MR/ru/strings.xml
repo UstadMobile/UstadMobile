@@ -1131,4 +1131,21 @@
     <string name="space_available">%1$s доступно</string>
     <string name="decrease_text_size">Уменьшить размер текста</string>
     <string name="select_picture_from_files">Выбрать картинку из файлов</string>
+    <string name="be_careful_interacting_online">Будьте осторожны при общении в Интернете и в приложении!</string>
+    <string name="im_an_individual_learner_description">Я хочу использовать образовательный контент онлайн или офлайн индивидуально и отслеживать свой прогресс</string>
+    <string name="be_careful_not_to_share">Будьте осторожны и не делитесь никакой информацией из реального мира, если вы не уверены полностью, с кем вы общаетесь. Никогда не соглашайтесь на встречу с кем-то, кого вы не знаете в реальной жизни, без вашего родителя или опекуна.</string>
+    <string name="im_an_individual_learner">Я учусь индивидуально</string>
+    <string name="i_want_to_join_my_organization_school">Я хочу присоединиться к своей организации/школе</string>
+    <string name="i_want_to_join_my_organization_school_description">Моя организация/школа уже использует приложение</string>
+    <string name="i_want_to_add_my_organization_school">Я хочу добавить свою организацию/школу</string>
+    <string name="individual_action_title">Индивидуальный учащийся</string>
+    <string name="create_new_local_account_title">Создать новую локальную учетную запись</string>
+    <string name="got_it">Ясно</string>
+    <string name="learn_more">Узнать больше</string>
+    <string name="create_backup">Создать резервную копию</string>
+    <string name="create_backup_description">Резервное копирование данных</string>
+    <string name="i_want_to_add_my_organization_school_description">Добавьте мою организацию/школу, чтобы мои учителя и ученики могли использовать приложение</string>
+    <string name="create_new_local_account_description">Ваши данные будут сохранены только на вашем телефоне. Вы можете вручную сделать резервную копию на SD-карту или USB-накопитель</string>
+    <string name="restore_local_account_title">Восстановить локальную учетную запись из файла</string>
+    <string name="restore_local_account_description">Создать новый файл из выделенного фрагмента</string>
 </resources>
