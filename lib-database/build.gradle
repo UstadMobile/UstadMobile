@@ -10,8 +10,8 @@ plugins {
 group rootProject.group
 version rootProject.version
 
-sourceCompatibility = '17'
-targetCompatibility = '17'
+sourceCompatibility = '21'
+targetCompatibility = '21'
 
 group rootProject.group
 version rootProject.version
@@ -36,13 +36,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = '17'
-        targetCompatibility = '17'
+        sourceCompatibility = '21'
+        targetCompatibility = '21'
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions {
-            jvmTarget = "17"
+            jvmTarget = "21"
         }
     }
 
