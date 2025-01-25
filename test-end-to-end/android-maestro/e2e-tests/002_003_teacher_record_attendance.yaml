@@ -15,6 +15,10 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+- openLink: "${output.testServerControllerUrl}testcontroller/test-files/content/index.html"
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- tapOn: "Ustad_Students_List.csv"
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
 - runFlow:

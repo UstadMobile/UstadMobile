@@ -15,6 +15,10 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+- openLink: "${output.testServerControllerUrl}testcontroller/test-files/content/index.html"
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- tapOn: "Epub_Content1.epub"
 - runFlow:
     file: "../common/clear_login_and_add_content.yaml"
     env:

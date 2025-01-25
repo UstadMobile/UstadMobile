@@ -4,7 +4,7 @@ tags:
 env:
   TESTRESULTSDIR: "build/reports/maestro/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions/Screenshots"
 onFlowStart:
-  - startRecording: 002_001_admin_add_new_course_and_teacher
+  - startRecording: 003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions
   - runScript:
       file: "../common/startserver.js"
       env:

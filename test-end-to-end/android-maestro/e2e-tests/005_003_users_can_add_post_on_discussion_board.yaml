@@ -2,7 +2,7 @@ appId: com.toughra.ustadmobile
 env:
   TESTRESULTSDIR: "build/reports/maestro/005_003_users_can_add_post_on_discussion_board/Screenshots"
 onFlowStart:
-  - startRecording: 005_005_users_can_add_external_links_as_post_on_discussion_board
+  - startRecording: 005_003_users_can_add_post_on_discussion_board
   - runScript:
       file: "../common/startserver.js"
       env:
@@ -15,6 +15,10 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+- openLink: "${output.testServerControllerUrl}testcontroller/test-files/content/index.html"
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- tapOn: "Ustad_Students_List.csv"
 # Admin login
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"

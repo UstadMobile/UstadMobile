@@ -15,6 +15,12 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+- openLink: "${output.testServerControllerUrl}testcontroller/test-files/content/index.html"
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- tapOn: "Ustad_Students_List.csv"
+- openLink: "${output.testServerControllerUrl}testcontroller/test-files/content/index.html"
+- tapOn: "Assignment_File.pdf"
 # Admin login
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -114,8 +120,6 @@ onFlowComplete:
     file: "../common/add_assignment_file.yaml"
     env:
       TESTFILENAME: "Assignment_File.pdf"
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
       text: "Submit"
