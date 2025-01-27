@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - contentH5p
 env:
   TESTRESULTSDIR: "build/reports/maestro/001_001_admin_can_add_content_001-h5p/Screenshots"
 onFlowStart:
@@ -15,6 +17,15 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+- openLink: "${output.testServerControllerUrl}testcontroller/test-files/content/index.html"
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- tapOn: "H5p_Content.h5p"
+- runFlow:
+    when:
+      visible: "Choose where to download"
+    commands:
+      - tapOn: "Download"
 - runFlow:
     file: "common/clear_login_and_add_content.yaml"
     env:
