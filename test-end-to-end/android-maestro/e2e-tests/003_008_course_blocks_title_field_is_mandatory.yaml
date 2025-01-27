@@ -23,6 +23,11 @@ onFlowComplete:
     file: "common/download_file_via_browser.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
+# Download test file
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "H5p_Content.h5p"
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
 #admin login

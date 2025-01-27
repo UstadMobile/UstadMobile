@@ -1,8 +1,8 @@
 appId: com.toughra.ustadmobile
-tags:
-  - contentTest
 env:
   TESTRESULTSDIR: "build/reports/maestro/001_003_admin_can_permanently_delete_the_content_002/Screenshots"
+tags:
+  - contentTest
 onFlowStart:
   - startRecording: 001_003_admin_can_permanently_delete_the_content_002
   - runScript:
