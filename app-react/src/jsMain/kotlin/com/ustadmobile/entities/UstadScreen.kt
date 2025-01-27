@@ -176,7 +176,7 @@ import com.ustadmobile.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
 import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
-import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteredeem.ClazzInviteRedeemViewModel
 import com.ustadmobile.view.clazz.gradebook.ClazzGradebookScreen
 import com.ustadmobile.mui.components.UstadChipsDemo
 import com.ustadmobile.view.person.addaccount.AddAccountSelectNewOrExistingScreen
@@ -189,7 +189,7 @@ import com.ustadmobile.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
 import com.ustadmobile.view.contententry.subtitleedit.SubtitleEditScreen
 
-import com.ustadmobile.view.clazz.inviteViaContact.ClazzInviteRedeemScreen
+import com.ustadmobile.view.clazz.inviteredeem.ClazzInviteRedeemScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -439,7 +439,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(InviteViaLinkViewModel.DEST_NAME, "InviteviaLink", InviteViaLinkScreen),
     UstadScreen(InviteViaContactViewModel.DEST_NAME, "InviteviaContact", InviteViaContactScreen),
     UstadScreen(PendingInviteViewModel.DEST_NAME, "PendingInvite", PendingInviteScreen),
-    UstadScreen(ClazzInviteViewModel.DEST_NAME, "ClazzInviteRedeem", ClazzInviteRedeemScreen),
+    UstadScreen(ClazzInviteRedeemViewModel.DEST_NAME, "ClazzInviteRedeem", ClazzInviteRedeemScreen),
     UstadScreen(CoursePermissionListViewModel.DEST_NAME, "CoursePermissionList", CoursePermissionListScreen),
     UstadScreen(CoursePermissionEditViewModel.DEST_NAME, "CoursePermissionEdit", CoursePermissionEditScreen),
     UstadScreen(CoursePermissionDetailViewModel.DEST_NAME, "CoursePermissionDetail", CoursePermissionDetailScreen),

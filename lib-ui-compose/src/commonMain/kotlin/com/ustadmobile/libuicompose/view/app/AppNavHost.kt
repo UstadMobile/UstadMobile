@@ -9,7 +9,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
-import com.ustadmobile.core.account.PassKeyPromptData
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
@@ -36,7 +35,7 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
-import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteredeem.ClazzInviteRedeemViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
@@ -158,7 +157,7 @@ import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
 import com.ustadmobile.libuicompose.view.clazz.permissiondetail.CoursePermissionDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.permissionedit.CoursePermissionEditScreen
 import com.ustadmobile.libuicompose.view.clazz.permissionlist.CoursePermissionListScreen
-import com.ustadmobile.libuicompose.view.clazz.redeem.ClazzInviteRedeem
+import com.ustadmobile.libuicompose.view.clazz.inviteredeem.ClazzInviteRedeemScreen
 import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailScreen
 import com.ustadmobile.libuicompose.view.contententry.edit.ContentEntryEditScreen
 import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGetMetadataScreen
@@ -893,10 +892,10 @@ fun AppNavHost(
                 )
             }
 
-            contentScene("/${ClazzInviteViewModel.DEST_NAME}") { backStackEntry ->
-                ClazzInviteRedeem(
-                    appViewModel(backStackEntry, ClazzInviteViewModel::class,
-                        ::ClazzInviteViewModel)
+            contentScene("/${ClazzInviteRedeemViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzInviteRedeemScreen(
+                    appViewModel(backStackEntry, ClazzInviteRedeemViewModel::class,
+                        ::ClazzInviteRedeemViewModel)
                 )
             }
 

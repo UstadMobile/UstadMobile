@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view.clazz.redeem
+package com.ustadmobile.libuicompose.view.clazz.inviteredeem
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -14,26 +14,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
-import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteRedeemUiState
+import com.ustadmobile.core.viewmodel.clazz.inviteredeem.ClazzInviteRedeemViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteredeem.ClazzInviteRedeemUiState
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import dev.icerock.moko.resources.compose.stringResource
 
 
 @Composable
-fun ClazzInviteRedeem(
-    viewModel: ClazzInviteViewModel
+fun ClazzInviteRedeemScreen(
+    viewModel: ClazzInviteRedeemViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState(ClazzInviteRedeemUiState())
 
-    InviteViaLinkScreen(
+    ClazzInviteRedeemScreen(
         uiState = uiState,
         processDecision = {viewModel.processDecision(it)},
     )
 }
 
 @Composable
-fun InviteViaLinkScreen(
+fun ClazzInviteRedeemScreen(
     uiState: ClazzInviteRedeemUiState = ClazzInviteRedeemUiState(),
     processDecision: (Boolean) -> Unit,
 ) {
@@ -41,8 +41,6 @@ fun InviteViaLinkScreen(
         modifier = Modifier
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
-
-
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = stringResource(MR.strings.do_you_want_to_join_this_course))
