@@ -2,6 +2,7 @@ package com.ustadmobile.test.http
 
 import com.ustadmobile.lib.util.SysPathUtil
 import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_LEARNINGSPACE_HOST
+import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_LEARNINGSPACE_PORTRANGE
 import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_URL
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
@@ -57,6 +58,15 @@ fun Application.testServerController() {
     val controllerUrl = environment.config.property(PARAM_NAME_URL).getString()
     val controllerUrlObj = URL(controllerUrl)
     val learningSpaceHostPropVal = environment.config.propertyOrNull(PARAM_NAME_LEARNINGSPACE_HOST)?.getString()
+    val learningSpaceHostRangePropVal = environment.config
+        .propertyOrNull(PARAM_NAME_LEARNINGSPACE_PORTRANGE)?.getString() ?: "$DEFAULT_FROM_PORT-$DEFAULT_UNTIL_PORT"
+    val split = learningSpaceHostRangePropVal.split("-").map { it.toInt() }
+    if(split.size != 2) {
+        throw IllegalArgumentException("$PARAM_NAME_LEARNINGSPACE_PORTRANGE must be in the form of x-y e.g. $DEFAULT_FROM_PORT-$DEFAULT_UNTIL_PORT")
+    }
+
+    val learningSpaceFromPort = split.first()
+    val learningSpaceUntilPort = split.last()
 
     val learningSpaceHost = when {
         mode == RunMode.CYPRESS -> InetAddress.getByName(controllerUrlObj.host)
@@ -217,6 +227,8 @@ fun Application.testServerController() {
                         controllerUrl = controllerUrlObj,
                         learningSpaceHost = learningSpaceHost,
                         baseDataDir = baseDataDir,
+                        fromPort = learningSpaceFromPort,
+                        untilPort = learningSpaceUntilPort,
                     )
 
                     runningServers.add(serverRunner)

@@ -47,6 +47,14 @@ if(rootProject.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
 }
 
+compileKotlin {
+    kotlinOptions.jvmTarget = "17"
+}
+
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "17"
+}
 
 sourceCompatibility = "17"
 targetCompatibility = "17"
