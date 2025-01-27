@@ -419,6 +419,8 @@ expect abstract class StatementDao {
                WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
                ELSE ''
                END DESC
+           
+            
 """)
     abstract fun findPersonsWithAttempts(
         contentEntryUid: Long,

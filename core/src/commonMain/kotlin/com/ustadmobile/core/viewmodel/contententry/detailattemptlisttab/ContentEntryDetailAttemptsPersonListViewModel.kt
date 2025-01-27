@@ -11,6 +11,8 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_BY_SCORE_ASC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_BY_SCORE_DESC
 import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_FIRST_NAME_ASC
 import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_FIRST_NAME_DESC
 import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_LAST_NAME_ASC
@@ -26,7 +28,10 @@ data class ContentEntryDetailAttemptsPersonListUiState(
         SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_ASC, true),
         SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_DESC, false),
         SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_ASC, true),
-        SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_DESC, false)
+        SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_DESC, false),
+        SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_ASC, false),
+        SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_DESC, false),
+
     ),
     val sortOption: SortOrderOption = sortOptions.first(),
     val showSortOptions: Boolean = true,
