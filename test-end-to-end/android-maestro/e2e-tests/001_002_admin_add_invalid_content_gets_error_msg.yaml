@@ -1,6 +1,7 @@
 appId: com.toughra.ustadmobile
 tags:
   - invalidContent
+  - contentTest
 env:
   TESTRESULTSDIR: "build/reports/maestro/001_002_admin_add_invalid_content_gets_error_msg/Screenshots"
 onFlowStart:
@@ -17,15 +18,6 @@ onFlowComplete:
         env:
           TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- openLink: "${output.testServerControllerUrl}testcontroller/test-files/content/index.html"
-- runFlow:
-    file: "../common/chrome-first-run-check.yaml"
-- tapOn: "Invalid_Video_Content.mp4"
-- runFlow:
-    when:
-      visible: "Choose where to download"
-    commands:
-      - tapOn: "Download"
 - runFlow:
     file: "common/clear_login_and_add_content.yaml"
     env:

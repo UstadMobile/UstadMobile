@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - contentTest
 env:
   TESTRESULTSDIR: "build/reports/maestro/001_003_admin_can_delete_and_restore_content_001/Screenshots"
 onFlowStart:

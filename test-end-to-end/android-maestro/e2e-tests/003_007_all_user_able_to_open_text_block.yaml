@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseBlocks
 env:
   TESTRESULTSDIR: "build/reports/maestro/003_007_all_user_able_to_open_text_block/Screenshots"
   TEXTTITLE: "PRIMARY COLOURS"

@@ -1,0 +1,13 @@
+appId: com.toughra.ustadmobile
+---
+# test files are downloaded from browser
+
+- openLink: "${output.testServerControllerUrl}testcontroller/test-files/content/index.html"
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- tapOn: ${TESTFILENAME}
+- runFlow:
+    when:
+      visible: "Choose where to download"
+    commands:
+      - tapOn: "Download"

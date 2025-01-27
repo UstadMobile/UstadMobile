@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - contentTest
 env:
   TESTRESULTSDIR: "build/reports/maestro/001_006_admin_can_cancel_content_download/Screenshots"
 onFlowStart:

@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - assignments
 env:
   TESTRESULTSDIR: "build/reports/maestro/004_001_assignment_creation_submission_grading/Screenshots"
 onFlowStart:
@@ -15,6 +17,16 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+# Download student list
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
+# download the assignment file
+- runFlow:
+    file:  "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Assignment_File.pdf"
 # Admin login
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"

@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseTest
 env:
   TESTNAME: "002_010_username_validation"
   TESTRESULTSDIR: "build/reports/maestro/002_010_username_validation/Screenshots"

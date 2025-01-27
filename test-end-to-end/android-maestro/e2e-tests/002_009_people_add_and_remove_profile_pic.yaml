@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseTest
 env:
   TESTNAME: "002_009_people_add_and_remove_profile_pic"
   TESTRESULTSDIR: "build/reports/maestro/002_009_people_add_and_remove_profile_pic/Screenshots"

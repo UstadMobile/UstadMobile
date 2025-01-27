@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseTest
 env:
   TESTRESULTSDIR: "build/reports/maestro/002_002_student_joining_course_using_code/Screenshots"
 onFlowStart:

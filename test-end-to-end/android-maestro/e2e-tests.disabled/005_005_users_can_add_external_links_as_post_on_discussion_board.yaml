@@ -1,7 +1,7 @@
 appId: com.toughra.ustadmobile
 env:
   TESTRESULTSDIR: "build/reports/maestro/005_005_users_can_add_external_links_as_post_on_discussion_board/Screenshots"
-  EXTERNALURL: "content://com.android.providers.downloads.documents/document/msf%3A1000000061"
+  EXTERNALURL: "${output.testServerControllerUrl}testcontroller/test-files/content/example.html"
 onFlowStart:
   - startRecording: 005_005_users_can_add_external_links_as_post_on_discussion_board
   - runScript:
@@ -9,13 +9,18 @@ onFlowStart:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
-onFlowComplete:e2e-tests.disabled
-  - stopRecordinge2e-tests.disabled
-  - runScript:e2e-tests.disabled
+onFlowComplete:
+  - stopRecording
+  - runScript:
       file: "../common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+# Download test file
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
 # Admin login
 - runFlow: "../common/clear_state_and_get_started.yaml"
 - runFlow: "../common/select_site.yaml"
@@ -158,7 +163,7 @@ onFlowComplete:e2e-tests.disabled
     file: "../common/chrome-first-run-check.yaml"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/verify_external_link"
 - extendedWaitUntil:
-    visible: "This is a test file for external link validation."
+    visible: "Welcome to Ustad Test Page"
     timeout: 10000
 
 

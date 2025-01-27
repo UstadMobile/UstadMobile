@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - assignments
 env:
   TESTRESULTSDIR: "build/reports/maestro/004_004_multiple_submission_possible_for_student/Screenshots"
 onFlowStart:
@@ -15,6 +17,16 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+# Download student list
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
+# download the assignment file
+- runFlow:
+    file:  "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Assignment_File.pdf"
 # Admin login
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
@@ -40,8 +52,6 @@ onFlowComplete:
     file: "common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
 # teacher add an assignment block
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
@@ -114,8 +124,6 @@ onFlowComplete:
     file: "common/add_assignment_file.yaml"
     env:
       TESTFILENAME: "Assignment_File.pdf"
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
       text: "Submit"

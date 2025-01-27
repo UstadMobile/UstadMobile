@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - discussionBoard
 env:
   TESTRESULTSDIR: "build/reports/maestro/005_003_users_can_add_post_on_discussion_board/Screenshots"
 onFlowStart:
@@ -15,6 +17,11 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+# Download test file
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
 # Admin login
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"

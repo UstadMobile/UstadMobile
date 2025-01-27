@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - discussionBoard
 env:
   TESTRESULTSDIR: "build/reports/maestro/005_002_teacher_can_edit_discussion_board/Screenshots"
 onFlowStart:

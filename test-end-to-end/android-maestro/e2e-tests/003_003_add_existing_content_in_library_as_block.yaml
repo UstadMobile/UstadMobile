@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseBlocks
 env:
   TESTRESULTSDIR: "build/reports/maestro/003_003_add_existing_content_in_library_as_block/Screenshots"
   TESTNAME: "003_003_add_existing_content_in_library_as_block"
@@ -16,7 +18,11 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-#---------add content to library ---------#
+# Download test file
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Epub_Content1.epub"
 - runFlow:
     file: "common/clear_login_and_add_content.yaml"
     env:

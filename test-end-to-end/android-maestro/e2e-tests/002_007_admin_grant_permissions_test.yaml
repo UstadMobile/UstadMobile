@@ -1,4 +1,6 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseTest
 env:
   TESTRESULTSDIR: "build/reports/maestro/002_007_admin_grant_permissions_test/Screenshots"
 onFlowStart:
@@ -15,6 +17,11 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+# Download student list
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
 # Admin login
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"

@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
-#tags:
-#  - no-files
+tags:
+  - courseTest
 env:
   TESTRESULTSDIR: "build/reports/maestro/002_001_admin_add_new_course_and_teacher/Screenshots"
 onFlowStart:

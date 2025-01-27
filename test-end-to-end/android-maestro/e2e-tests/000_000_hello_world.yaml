@@ -1,6 +1,6 @@
 appId: com.toughra.ustadmobile
 tags:
-  - hello
+  - hello_world
 onFlowStart:
   - startRecording: 000_000_hello_world
   - runScript:

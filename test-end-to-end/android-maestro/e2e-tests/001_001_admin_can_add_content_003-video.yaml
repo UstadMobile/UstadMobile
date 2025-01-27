@@ -1,6 +1,7 @@
 appId: com.toughra.ustadmobile
 tags:
   - contentVideo
+  - contentTest
 env:
   TESTRESULTSDIR: "build/reports/maestro/001_001_admin_can_add_content_003-video/Screenshots"
 onFlowStart:
@@ -17,21 +18,10 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- openLink: "${output.testServerControllerUrl}testcontroller/test-files/content/index.html"
-- runFlow:
-    file: "../common/chrome-first-run-check.yaml"
-- tapOn: "Video_Content.mp4"
-- runFlow:
-    when:
-      visible: "Choose where to download"
-    commands:
-      - tapOn: "Download"
 - runFlow:
     file: "common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Video_Content.mp4
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/content_add_to_library"
 - tapOn: "Video"
