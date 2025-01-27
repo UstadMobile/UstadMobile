@@ -25,6 +25,11 @@ class TestServerControllerMain {
          */
         const val PARAM_NAME_LEARNINGSPACE_HOST = "learningSpaceHost"
 
+        /**
+         *
+         */
+        const val PARAM_NAME_LEARNINGSPACE_PORTRANGE = "portRange"
+
         @JvmStatic
         fun main(args: Array<String>) {
             val testServerControllerUrl = Url(

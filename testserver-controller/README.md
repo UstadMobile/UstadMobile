@@ -9,10 +9,13 @@ Usage:
 Start the test server controller:
 
 ```
-./gradlew testserver-controller:run --args='-P:mode=cypress|maestro [-P:url=http://localhost:8075/]'
+./gradlew testserver-controller:run --args='-P:mode=cypress|maestro [-P:url=http://localhost:8075/] [-P:portRange=1025-65534]'
 ```
 If no URL is specified testserver-controller will automatically use http://localhost:8075/ by 
 default.
+
+```-P:portRange```: Specifies the port range that will be used to run the actual server. This is 
+useful in a CI environment where a specific port range is allowed by the firewall.
 
 Testserver-controller has two modes:
 

@@ -20,9 +20,11 @@ class ServerRunner(
     private val adbRecordEnabled: Boolean = false,
     @Suppress("unused") //reserved for future use
     private val adbVideoName: String? = null,
+    private val fromPort: Int = DEFAULT_FROM_PORT,
+    private val untilPort: Int = DEFAULT_UNTIL_PORT,
 ) {
 
-    val port = findFreePort()
+    val port = findFreePort(from = fromPort, until = untilPort)
 
     val learningSpaceUrl = if(mode == RunMode.CYPRESS) {
         controllerUrl.toString()
