@@ -149,6 +149,7 @@ import com.ustadmobile.view.message.messagelist.MessageListScreenPreview
 import com.ustadmobile.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.PendingInviteViewModel
 import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.view.about.OpenLicensesScreen
 import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
@@ -158,6 +159,7 @@ import com.ustadmobile.view.clazz.joinwithcode.JoinWithCodeScreen
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.view.clazz.invitevialink.InviteViaLinkScreen
 import com.ustadmobile.view.clazz.inviteViaContact.InviteViaContactScreen
+import com.ustadmobile.view.clazz.inviteViaContact.PendingInviteScreen
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
 import com.ustadmobile.view.clazz.permissionlist.CoursePermissionListScreen
 import com.ustadmobile.view.clazz.permissionedit.CoursePermissionEditScreen
@@ -436,6 +438,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(JoinWithCodeViewModel.DEST_NAME, "JoinWithCode", JoinWithCodeScreen),
     UstadScreen(InviteViaLinkViewModel.DEST_NAME, "InviteviaLink", InviteViaLinkScreen),
     UstadScreen(InviteViaContactViewModel.DEST_NAME, "InviteviaContact", InviteViaContactScreen),
+    UstadScreen(PendingInviteViewModel.DEST_NAME, "PendingInvite", PendingInviteScreen),
     UstadScreen(ClazzInviteViewModel.DEST_NAME, "ClazzInviteRedeem", ClazzInviteRedeemScreen),
     UstadScreen(CoursePermissionListViewModel.DEST_NAME, "CoursePermissionList", CoursePermissionListScreen),
     UstadScreen(CoursePermissionEditViewModel.DEST_NAME, "CoursePermissionEdit", CoursePermissionEditScreen),

@@ -153,6 +153,8 @@ import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.centralappconfigdb.datasource.LearningSpaceDataSource
 import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.lib.rest.domain.invite.ResendInviteRoute
+import com.ustadmobile.lib.rest.domain.invite.ResendInviteUseCase
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -908,6 +910,16 @@ fun Application.umRestApplication(
                 repo = null
                 )
         }
+        bind<ResendInviteUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            ResendInviteUseCase(
+                sendEmailUseCase = instance(),
+                sendSmsUseCase = instance(),
+                sendMessageUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                learningSpace = context,
+                repo = null
+            )
+        }
         registerContextTranslator { call: ApplicationCall ->
             call.callLearningSpace
         }
@@ -1039,6 +1051,13 @@ fun Application.umRestApplication(
                 }
                 route("inviteuser") {
                     ProcessInviteRoute(
+                        useCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+                }
+                route("resendinvite") {
+                    ResendInviteRoute(
                         useCase = { call ->
                             di.on(call).direct.instance()
                         }

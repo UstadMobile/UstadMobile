@@ -53,6 +53,7 @@ external interface PersonListProps: Props {
     var onClickInviteWithLink: () -> Unit
     var onClickInviteViaContact: () -> Unit
     var onClickCopyInviteCode: () -> Unit
+    var onClickPendingInvites: () -> Unit
 }
 
 val PersonListComponent2 = FC<PersonListProps> { props ->
@@ -137,6 +138,27 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
                     }
                 }
             }
+            if(props.uiState.showInviteViaContact) {
+                item("pending_invite_button") {
+                    ListItem.create {
+                        ListItemButton {
+                            id = "pending_invite_button"
+                            onClick = {
+                                props.onClickPendingInvites()
+                            }
+
+                            ListItemIcon {
+                                LinkIcon()
+                            }
+
+                            ListItemText {
+                                primary = ReactNode(strings[MR.strings.pending_invites])
+                            }
+                        }
+                    }
+                }
+            }
+
             if(props.uiState.showInviteViaLink) {
                 item("invite_with_link") {
                     ListItem.create {
@@ -278,6 +300,7 @@ val PersonListScreen = FC<Props> {
         onClickInviteWithLink = viewModel::onClickInviteWithLink
         onClickCopyInviteCode = viewModel::onClickCopyInviteCode
         onClickInviteViaContact = viewModel::onClickInviteViaContact
+        onClickPendingInvites = viewModel::onClickPendingInvites
     }
 
 

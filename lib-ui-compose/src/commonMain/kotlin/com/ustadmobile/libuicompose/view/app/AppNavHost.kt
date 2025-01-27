@@ -30,6 +30,7 @@ import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.PendingInviteViewModel
 import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
@@ -151,6 +152,7 @@ import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
 import com.ustadmobile.libuicompose.view.clazz.inviteViaContact.InviteViaContactScreen
+import com.ustadmobile.libuicompose.view.clazz.inviteViaContact.PendingInviteScreen
 import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
 import com.ustadmobile.libuicompose.view.clazz.permissiondetail.CoursePermissionDetailScreen
@@ -401,6 +403,17 @@ fun AppNavHost(
                         backStackEntry, LearningSpaceListViewModel::class,
                     ) { di, savedStateHandle ->
                         LearningSpaceListViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${PendingInviteViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                PendingInviteScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, PendingInviteViewModel::class,
+                    ) { di, savedStateHandle ->
+                        PendingInviteViewModel(di, savedStateHandle)
                     }
                 )
             }

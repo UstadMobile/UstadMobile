@@ -57,11 +57,9 @@ class ClazzInviteViewModel(
                 isAccepting,
                 accountManager.currentAccount.personUid
             )
-            if (result.isCodeRedeem) {
-                snackDispatcher.showSnackBar(Snack(result.message))
-            } else {
-                snackDispatcher.showSnackBar(Snack(result.message))
-            }
+
+            snackDispatcher.showSnackBar(Snack(result.message))
+
 
             navController.navigate(
                 ClazzListViewModel.DEST_NAME_HOME,

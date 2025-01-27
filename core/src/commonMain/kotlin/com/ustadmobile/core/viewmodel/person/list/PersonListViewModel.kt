@@ -27,6 +27,7 @@ import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.PendingInviteViewModel
 import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_POPUP_TO_ON_PERSON_SELECTED
 import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
@@ -214,6 +215,14 @@ class PersonListViewModel(
             setClipboardStringUseCase(inviteCode)
             snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.copied_to_clipboard)))
         }
+    }
+    fun onClickPendingInvites() {
+        navController.navigate(
+            viewName = PendingInviteViewModel.DEST_NAME,
+            args = buildMap {
+                put(InviteViaContactViewModel.ARG_CLAZZ_UID, filterExcludeMembersOfClazz.toString())
+            }
+        )
     }
     fun onClickInviteViaContact() {
         val args = buildMap {

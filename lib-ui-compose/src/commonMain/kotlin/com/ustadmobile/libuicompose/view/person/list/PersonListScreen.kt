@@ -53,6 +53,7 @@ fun PersonListScreen(
         onClickInviteWithLink = viewModel::onClickInviteWithLink,
         onClickCopyInviteCode = viewModel::onClickCopyInviteCode,
         onClickInviteViaContact = viewModel::onClickInviteViaContact,
+        onClickPendingInvites = viewModel::onClickPendingInvites,
     )
 
     if(uiState.addSheetOrDialogVisible) {
@@ -99,6 +100,7 @@ fun PersonListScreen(
     onClickInviteWithLink: () -> Unit = {},
     onClickCopyInviteCode: () -> Unit = { },
     onClickInviteViaContact: () -> Unit = { },
+    onClickPendingInvites: () -> Unit = { },
 ){
 
     val doorRepoPager = rememberDoorRepositoryPager(
@@ -152,6 +154,13 @@ fun PersonListScreen(
                         .testTag("invite_via_contact")
                         .clickable { onClickInviteViaContact() },
                     headlineContent = { Text(stringResource(MR.strings.invite_via_contact)) },
+                    leadingContent = { Icon(Icons.Default.Contacts, contentDescription = null) },
+                )
+                ListItem(
+                    modifier = Modifier
+                        .testTag("pending_invites")
+                        .clickable { onClickPendingInvites() },
+                    headlineContent = { Text(stringResource(MR.strings.pending_invites)) },
                     leadingContent = { Icon(Icons.Default.Contacts, contentDescription = null) },
                 )
             }

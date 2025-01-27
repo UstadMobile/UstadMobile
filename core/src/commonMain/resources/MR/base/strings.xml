@@ -2029,5 +2029,9 @@
 
     <string name="do_you_want_to_join_this_course">Do you want to join this course?</string>
 
+    <string name="pending_invites">Pending invite</string>
+
+    <string name="reminder">Reminder</string>
+
 
 </resources>

@@ -3,14 +3,12 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzInvite
 import com.ustadmobile.lib.db.entities.ClazzInviteWithTimeZone
-import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.Person
-import io.ktor.http.HttpMethod
 
 
 @DoorDao
@@ -57,5 +55,26 @@ expect abstract class ClazzInviteDao : BaseDao<ClazzInvite> {
     abstract suspend fun updateInviteStatus(status:Int,ciUid:Long)
 
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""SELECT * FROM ClazzInvite WHERE ciPersonUid = :ciPersonUid AND ciClazzUid = :clazzUid
+      AND inviteExpire > :currentTime AND inviteStatus = 0""")
+    abstract fun findPendingInviteByPersonUid(
+        ciPersonUid:Long,
+        clazzUid: Long,
+        currentTime: Long
+    ): PagingSource<Int, ClazzInvite>
+
+
+    @Query("""
+        UPDATE ClazzInvite 
+          SET inviteStatus = 3
+        WHERE inviteContact = :inviteContact""")
+    abstract suspend fun updateClazzInviteToRevokeInvite(inviteContact: String): Int
+
+
+    @Query("""SELECT * FROM ClazzInvite WHERE inviteContact = :inviteContact""")
+    abstract suspend fun findClazzInviteFromContact(inviteContact: String): ClazzInvite
 
 }
