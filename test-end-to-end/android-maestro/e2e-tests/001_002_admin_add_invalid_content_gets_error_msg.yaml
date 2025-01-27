@@ -22,6 +22,11 @@ onFlowComplete:
     file: "../common/chrome-first-run-check.yaml"
 - tapOn: "Invalid_Video_Content.mp4"
 - runFlow:
+    when:
+      visible: "Choose where to download"
+    commands:
+      - tapOn: "Download"
+- runFlow:
     file: "common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Invalid_Video_Content.mp4
