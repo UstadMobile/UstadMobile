@@ -7,28 +7,28 @@ onFlowStart:
   - startRecording: 003_006_course_view_and_modules_can_expand_collapse
   - clearState: com.toughra.ustadmobile
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/admin_login.yaml"
+    file: "common/admin_login.yaml"
 - runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/add_course.yaml"
     env:
       TESTCOURSENAME: "Course view Test"
 - tapOn:
     text: "Courses"
 - runFlow:
-    file: "../common/add_new_student_inside_course.yaml"
+    file: "common/add_new_student_inside_course.yaml"
     env:
       TESTCOURSENAME: "Course view Test"
       STUDENTFIRSTNAME: "Student"
@@ -43,15 +43,15 @@ onFlowComplete:
       - back
 - tapOn: "Course"
 - runFlow:
-    file: "../common/add_demo_block_structure.yaml"
+    file: "common/add_demo_block_structure.yaml"
     env:
       MODULETITLE: "SEMESTER 1"
       TEXTTITLE: "PRIMARY COLOURS"
       TEXT: "RED,BLUE,GREEN"
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"

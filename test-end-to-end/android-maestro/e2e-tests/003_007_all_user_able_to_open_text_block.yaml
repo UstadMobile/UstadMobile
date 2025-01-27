@@ -5,27 +5,27 @@ env:
 onFlowStart:
   - startRecording: 003_007_all_user_able_to_open_text_block
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/admin_login.yaml"
+    file: "common/admin_login.yaml"
 - runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/add_course.yaml"
     env:
       TESTCOURSENAME: "Text Block Test"
 - runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
+    file: "common/add_new_teacher_inside_course.yaml"
     env:
       TESTCOURSENAME: "Text Block Test"
       TEACHERFIRSTNAME: "Teacher"
@@ -37,7 +37,7 @@ onFlowComplete:
     text: "Courses"
     index: 1
 - runFlow:
-    file: "../common/add_new_student_inside_course.yaml"
+    file: "common/add_new_student_inside_course.yaml"
     env:
       TESTCOURSENAME: "Text Block Test"
       STUDENTFIRSTNAME: "Student"
@@ -52,7 +52,7 @@ onFlowComplete:
       - back
 - tapOn: "Course"
 - runFlow:
-    file: "../common/add_demo_block_structure.yaml"
+    file: "common/add_demo_block_structure.yaml"
     env:
       MODULETITLE: "SEMESTER 1"
       TEXTTITLE: "PRIMARY COLOURS"
@@ -69,10 +69,10 @@ onFlowComplete:
 - assertVisible:
           text: "RED,BLUE,GREEN"
 - takeScreenshot: "${TESTRESULTSDIR}/text_block_admin_view"
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"
@@ -91,10 +91,10 @@ onFlowComplete:
     text: "RED,BLUE,GREEN"
 - takeScreenshot: "${TESTRESULTSDIR}/text_block_student_view"
 #---------Launch App & Teacher Login------------------#
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "teach1"
       PASSWORD: "testt1"

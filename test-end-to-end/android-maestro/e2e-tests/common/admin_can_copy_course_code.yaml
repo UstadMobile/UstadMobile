@@ -1,0 +1,9 @@
+appId: com.toughra.ustadmobile
+---
+# 1) TESTCOURSENAME: provide course name of string type
+
+# admin copy the course code
+- launchApp
+-  tapOn: "Courses"
+- tapOn: ${TESTCOURSENAME}
+- tapOn: "Course code"

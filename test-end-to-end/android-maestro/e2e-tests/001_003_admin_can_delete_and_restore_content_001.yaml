@@ -4,19 +4,19 @@ env:
 onFlowStart:
   - startRecording: 001_003_admin_can_delete_and_restore_content_001
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow:
-    file: "../common/clear_login_and_add_content.yaml"
+    file: "common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
 - tapOn: "SAVE"
@@ -29,11 +29,11 @@ onFlowComplete:
 
 # login to make sure the content is hidden
 #clear state and launch app
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 #admin login
 - runFlow:
-    file: "../common/admin_login.yaml"
+    file: "common/admin_login.yaml"
 - tapOn: "Library"
 - assertNotVisible: "E-book"
 - tapOn: "Settings"
@@ -44,11 +44,11 @@ onFlowComplete:
 
 # login to make sure the content is restored
 #clear state and launch app
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 #admin login
 - runFlow:
-    file: "../common/admin_login.yaml"
+    file: "common/admin_login.yaml"
 - tapOn: "Library"
 - assertVisible: "E-book"
 - takeScreenshot: "${TESTRESULTSDIR}//screen_after_restoring_content_from_library"

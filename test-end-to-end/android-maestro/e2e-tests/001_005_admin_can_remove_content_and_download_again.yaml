@@ -4,19 +4,19 @@ env:
 onFlowStart:
   - startRecording: 001_005_admin_can_remove_content_and_download_again
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow:
-    file: "../common/clear_login_and_add_content.yaml"
+    file: "common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Epub_Content2.epub
 - tapOn: "SAVE"
@@ -26,7 +26,7 @@ onFlowComplete:
 - tapOn: Open
 - tapOn: "Back"
 - runFlow:
-    file: "../common/login_download_and_open_content.yaml"
+    file: "common/login_download_and_open_content.yaml"
 #Download and open content
 - tapOn: "Library"
 - extendedWaitUntil:

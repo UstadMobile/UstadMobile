@@ -1,0 +1,5 @@
+appId: com.toughra.ustadmobile
+# Newer versions of Chrome show an "Enhanced ad privacy in Chrome" screen
+---
+- tapOn: "More"
+- tapOn: "Got it"

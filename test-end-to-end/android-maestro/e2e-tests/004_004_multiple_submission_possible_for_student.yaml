@@ -4,30 +4,30 @@ env:
 onFlowStart:
   - startRecording: 004_004_multiple_submission_possible_for_student
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 # Admin login
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/admin_login.yaml"
+    file: "common/admin_login.yaml"
 # add new course
 - runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/add_course.yaml"
     env:
       TESTCOURSENAME: "Test Course Block"
 # add new teacher using flow - add_new_teacher_inside_course ---------
 - runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
+    file: "common/add_new_teacher_inside_course.yaml"
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       TEACHERFIRSTNAME: "Teacher"
@@ -37,16 +37,16 @@ onFlowComplete:
       PASSWORD: "testt1"
 # add students to the course through bulk import using .csv file
 - runFlow:
-    file: "../common/student_bulk_upload_csv.yaml"
+    file: "common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 # teacher add an assignment block
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "teach1"
       PASSWORD: "testt1"
@@ -91,10 +91,10 @@ onFlowComplete:
 - assertNotVisible: "Done"
 - tapOn: "Save"
 # student submit assignment
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"
@@ -111,7 +111,7 @@ onFlowComplete:
 - inputText: "Assignment done by student 1"
 - tapOn: "Done"
 - runFlow:
-    file: "../common/add_assignment_file.yaml"
+    file: "common/add_assignment_file.yaml"
     env:
       TESTFILENAME: "Assignment_File.pdf"
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
@@ -123,10 +123,10 @@ onFlowComplete:
 - tapOn: "Submit"
 - assertVisible: "Submitted"
 # teacher view and mark the assignment submitted by student
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "teach1"
       PASSWORD: "testt1"
@@ -165,10 +165,10 @@ onFlowComplete:
     direction: UP
 - assertVisible: "9.0/10.0 Points"
 # student able to view his grade
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"
@@ -212,10 +212,10 @@ onFlowComplete:
     direction: DOWN
 - assertVisible: "Submission 1"
 # teacher view and mark the assignment submitted by student
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "teach1"
       PASSWORD: "testt1"
@@ -247,10 +247,10 @@ onFlowComplete:
     direction: UP
 - assertVisible: "9.5/10.0 Points"
 # student able to view his updated grade
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"

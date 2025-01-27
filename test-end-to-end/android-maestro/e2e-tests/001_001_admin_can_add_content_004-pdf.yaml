@@ -4,19 +4,19 @@ env:
 onFlowStart:
   - startRecording: 001_001_admin_can_add_content_004-pdf
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow:
-    file: "../common/clear_login_and_add_content.yaml"
+    file: "common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Pdf_Content.pdf
 - tapOn: "SAVE"
@@ -32,7 +32,7 @@ onFlowComplete:
 - assertVisible: "PDF PAGE"
 - tapOn: "Back"
 - runFlow:
-    file: "../common/login_download_and_open_content.yaml"
+    file: "common/login_download_and_open_content.yaml"
 #Download and open content
 - tapOn: "Library"
 - extendedWaitUntil:

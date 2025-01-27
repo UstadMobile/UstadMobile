@@ -1,0 +1,8 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn: "Use without an account"
+- runFlow:
+    when:
+      visible: "Enhanced ad privacy in Chrome"
+    file: "chrome-first-run-accept-ad-privacy.yaml"
+
