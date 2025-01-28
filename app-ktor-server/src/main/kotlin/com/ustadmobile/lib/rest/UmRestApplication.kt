@@ -837,9 +837,12 @@ fun Application.umRestApplication(
             }
 
             instance<Scheduler>().start()
-            Runtime.getRuntime().addShutdownHook(Thread{
-                instance<Scheduler>().shutdown()
-            })
+            Runtime.getRuntime().addShutdownHook(
+                Thread{
+                    Napier.i("UmRestApplication: Shutdown hook")
+                    instance<Scheduler>().shutdown()
+                }
+            )
         }
     }
 

@@ -10,7 +10,6 @@ class ServerRunner(
     val mode: RunMode,
     private val okHttpClient: OkHttpClient,
     private val serverDir: File,
-    val runServerCommand: String,
     private val controllerUrl: URL,
     private val learningSpaceHost: InetAddress,
     private val baseDataDir: File,
@@ -44,6 +43,11 @@ class ServerRunner(
         if(dataDir.exists())
             dataDir.deleteRecursively()
 
+        val logDir = File(dataDir, "log")
+        logDir.mkdirs()
+
+        val runServerCommand = "java -Dlogs_dir=${logDir.absolutePath} -jar build/libs/ustad-server-all.jar "
+
         val serverArgs = runServerCommand.split(Regex("\\s+")).toMutableList()
         if(!(serverArgs[0].startsWith(".") || serverArgs[0].startsWith("/"))) {
             serverArgs[0] = SysPathUtil.findCommandInPath(serverArgs[0])?.absolutePath
@@ -53,10 +57,11 @@ class ServerRunner(
         val serverArgsWithSiteUrl = serverArgs +
                 "-P:ktor.ustad.siteUrl=$learningSpaceUrl" +
                 "-P:ktor.deployment.port=$port" +
-                "-P:ktor.ustad.datadir=${dataDir.absolutePath}"
+                "-P:ktor.ustad.datadir=${dataDir.absolutePath}" +
+                "-P:ktor.ustad.adminpass=testpass"
 
         val commandLine = serverArgsWithSiteUrl.joinToString(separator = " ")
-        println("exec $commandLine")
+        println("TestServerController: exec $commandLine")
 
         serverProcess = ProcessBuilder(serverArgsWithSiteUrl)
             .directory(serverDir)
@@ -74,6 +79,7 @@ class ServerRunner(
 
 
     fun stop() {
+        println("TestServerController: stopping server on port: $port")
         serverProcess?.also {
             it.destroy()
             it.waitFor()
