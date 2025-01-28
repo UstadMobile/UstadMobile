@@ -59,7 +59,7 @@ Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
   const url = new URL(baseUrl); // Create a URL object
   const hostname = url.hostname;
   const port = url.port;
-  const indexedDbName = `${hostname}_${port}`
+  const indexedDbName = `${hostname.replace(/\./g, '_')}_${port}`
   cy.log(`Clearing IndexedDB: ${indexedDbName}`)
   cy.clearIndexedDb(indexedDbName)
 // visit login page
