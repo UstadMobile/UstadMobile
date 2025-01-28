@@ -76,7 +76,8 @@ maestro cloud \
     --app-file=../../app-android/build/outputs/apk/release/app-android-release.apk \
     --flows=e2e-tests \
     --format=junit \
-     --output build/results/report.xml \
+    --output build/results/report.xml \
+    --timeout=180
     -e TESTCONTROLLER_URL=$TESTCONTROLLER_URL
 
 
