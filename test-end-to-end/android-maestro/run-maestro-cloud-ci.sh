@@ -75,7 +75,6 @@ maestro cloud \
     --project-id=$MAESTRO_CLOUD_PROJECTID \
     --app-file=../../app-android/build/outputs/apk/release/app-android-release.apk \
     --flows=e2e-tests \
-    --include-tags=hello_world \
     --format=junit \
      --output build/results/report.xml \
     -e TESTCONTROLLER_URL=$TESTCONTROLLER_URL
