@@ -1,6 +1,7 @@
 appId: com.toughra.ustadmobile
 tags:
   - discussionBoard
+  - deletePost
 env:
   TESTRESULTSDIR: "build/reports/maestro/005_006_users_can_delete_post_on_discussion_board/Screenshots"
 onFlowStart:
