@@ -32,9 +32,12 @@ class CreateLearningSpaceUseCase(
     data class CreateLearningSpaceRequest(
         val url: String,
         val title: String,
+        val subdomain: String,
+        val organisationLogo: String,
         val dbUrl: String?,
         val dbUsername: String?,
         val dbPassword: String?,
+        val adminContact: String,
         val adminUsername: String,
         val adminPassword: String,
     )
@@ -56,6 +59,9 @@ class CreateLearningSpaceUseCase(
                     url = request.url,
                     name = request.title,
                     description = request.title,
+                    subdomain = request.subdomain,
+                    organisationLogo = request.organisationLogo,
+                    adminContact = request.adminContact,
                     lastModified = systemTimeInMillis()
                 )
             )

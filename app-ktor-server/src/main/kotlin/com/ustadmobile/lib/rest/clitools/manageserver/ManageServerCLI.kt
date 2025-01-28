@@ -35,6 +35,17 @@ internal fun Subparsers.addNewLearningSpaceParser() {
         it.addArgument("-t", "--title")
             .required(true)
             .help("Learning space title")
+        it.addArgument("--subdomain")
+            .help("Subdomain for the learning space (e.g. schoolname.ustadmobile.app)")
+            .required(true)
+
+        it.addArgument("--organisationLogo")
+            .help("Base64-encoded organisation logo")
+            .required(true)
+
+        it.addArgument("--adminContact")
+            .help("Admin contact email or phone number")
+            .required(true)
         it.addArgument("-u", "--url")
             .required(true)
             .help("The URL for users to access the learning space via \n" +
@@ -68,6 +79,12 @@ internal fun Subparsers.addUpdateLearningSpaceSubcommand() {
         it.addArgument("-u", "--url")
             .required(true)
             .help("Learning Space url")
+        it.addArgument("--subdomain")
+            .help("Subdomain for the learning space (if updating)")
+        it.addArgument("--organisationLogo")
+            .help("Base64-encoded organisation logo (if updating)")
+        it.addArgument("--adminContact")
+            .help("Admin contact email or phone number (if updating)")
         it.addArgument("-d", "--dburl")
             .help("Database JDBC URL")
         it.addArgument("-n", "--dbusername")
@@ -139,12 +156,16 @@ fun main(ns: Namespace) {
                     val request = CreateLearningSpaceUseCase.CreateLearningSpaceRequest(
                         url = ns.getString("url"),
                         title = ns.getString("title"),
+                        subdomain = ns.getString("subdomain"),
+                        organisationLogo = ns.getString("organisationLogo"),
                         dbUrl = ns.getString("dburl"),
                         dbUsername = ns.getString("dbusername"),
                         dbPassword = ns.getString("dbpassword"),
+                        adminContact = ns.getString("adminContact"),
                         adminUsername = ns.getString("adminusername"),
                         adminPassword = ns.getString("adminpassword")
                     )
+
                     println(request)
 
                     val response = httpClient.post("${serverUrl}config/api/learningspaces/create") {
