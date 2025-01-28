@@ -35,20 +35,36 @@ function cleanup() {
 
 trap cleanup EXIT
 
-if [ ! -e build/results ]; then
-    mkdir -p build/results
+#Delete all previous results.
+if [ -e build ]; then
+    rm -r build
 fi
 
-if [ ! -e build/reports/maestro ]; then
-    mkdir -p build/reports/maestro
+if [ -e log ]; then
+    rm -r log
 fi
 
-echo "run-maestro-cloud-ci: Time to run Maestro tests"
+mkdir -p build/results
+mkdir -p build/reports/maestro
+
+
+echo "run-maestro-cloud-ci: Starting testserver-controller on URL: $TESTCONTROLLER_URL"
 
 java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar \
   -P:url=$TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=maestro \
   -P:portRange=$TEST_LEARNINGSPACE_PORTRANGE &
 TESTCONTROLLER_PID=$!
+
+wait-port $TESTCONTROLLER_HOST:$TESTCONTROLLER_PORT
+WAIT_PORT_STATUS=$?
+
+if [ "$WAIT_PORT_STATUS" != "0" ]; then
+    echo "run-maestro-cloud-ci: wait-port on $TESTCONTROLLER_HOST:$TESTCONTROLLER_PORT failed!"
+    exit 2
+fi
+
+echo "run-maestro-cloud-ci: Time to run Maestro tests"
+
 
 maestro cloud \
     --api-key=$MAESTRO_CLOUD_APIKEY \
