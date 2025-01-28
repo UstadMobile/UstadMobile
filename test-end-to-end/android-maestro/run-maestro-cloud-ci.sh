@@ -50,6 +50,10 @@ mkdir -p build/reports/maestro
 
 echo "run-maestro-cloud-ci: Starting testserver-controller on URL: $TESTCONTROLLER_URL"
 
+echo run-maestro-cloud-ci: run server: java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar \
+       -P:url=$TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=maestro \
+       -P:portRange=$TEST_LEARNINGSPACE_PORTRANGE
+
 java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar \
   -P:url=$TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=maestro \
   -P:portRange=$TEST_LEARNINGSPACE_PORTRANGE &
