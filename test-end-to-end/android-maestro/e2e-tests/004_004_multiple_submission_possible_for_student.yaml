@@ -94,6 +94,10 @@ onFlowComplete:
       text: "Must submit all at once"
     direction: DOWN
 - tapOn: "Must submit all at once"
+- scrollUntilVisible:
+    element:
+      text: "Can make multiple submissions"
+    direction: DOWN
 - tapOn: "Can make multiple submissions"
 - assertVisible: "Done"
 - takeScreenshot: "${TESTRESULTSDIR}/added_assignment"
