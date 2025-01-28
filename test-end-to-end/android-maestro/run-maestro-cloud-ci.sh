@@ -21,8 +21,8 @@ if [ "$TESTCONTROLLER_URL" == "" ]; then
   exit 1
 fi
 
-if [ "$TESTCONTROLLER_PORT_RANGE" == "" ]; then
-  echo "TESTCONTROLLER_PORT_RANGE environment var must be set: e.g. 8000-9000 as allowed by firewall"
+if [ "$TEST_LEARNINGSPACE_PORTRANGE" == "" ]; then
+  echo "TEST_LEARNINGSPACE_PORTRANGE environment var must be set: e.g. 8000-9000 as allowed by firewall"
   exit 1
 fi
 
