@@ -17,7 +17,7 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-# Download test file
+# Download student list
 - runFlow:
     file: "common/download_file_via_browser.yaml"
     env:
