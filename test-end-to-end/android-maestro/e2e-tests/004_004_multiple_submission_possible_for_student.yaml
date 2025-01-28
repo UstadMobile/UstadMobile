@@ -1,6 +1,7 @@
 appId: com.toughra.ustadmobile
 tags:
   - assignments
+  - multipleSubmission
 env:
   TESTRESULTSDIR: "build/reports/maestro/004_004_multiple_submission_possible_for_student/Screenshots"
 onFlowStart:
