@@ -18,6 +18,13 @@ fi
 
 if [ "$TESTCONTROLLER_URL" == "" ]; then
   echo "TESTCONTROLLER_URL environment var must be set"
+  exit 1
+fi
+
+if [ "$TESTCONTROLLER_PORT_RANGE" == "" ]; then
+  echo "TESTCONTROLLER_PORT_RANGE environment var must be set: e.g. 8000-9000 as allowed by firewall"
+  exit 1
+fi
 
 function cleanup() {
     if [ "$TESTCONTROLLER_PID" != "" ]; then
@@ -39,7 +46,8 @@ fi
 echo "run-maestro-cloud-ci: Time to run Maestro tests"
 
 java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar \
-  -P:url=$TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=maestro &
+  -P:url=$TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=maestro \
+  -P:portRange=$TEST_LEARNINGSPACE_PORTRANGE &
 TESTCONTROLLER_PID=$!
 
 maestro cloud \
