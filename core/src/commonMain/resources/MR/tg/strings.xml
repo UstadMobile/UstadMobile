@@ -88,9 +88,7 @@
     <string name="download_continue_btn_label">Идома диҳед</string>
     <string name="download_wifi_only">Танҳо Wi-Fi</string>
     <string name="download_calculating">Ҳисоб карда истодааст …</string>
-    <string name="download_state_download">&lt;![&lt;b&gt;Боргирӣ&lt;/b&gt;]]&gt; ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$sи захирахагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="schools">Муассисаҳои таълимӣ</string>
-    <string name="download_state_downloading">&lt;![&lt;b&gt;Боргирӣ&lt;/b&gt;]]&gt; ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s -и захираи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="download_downloading_placeholder">Боргирии %1$s аз %2$s</string>
     <string name="download_summary_title">Боргирии фаъол %1$s</string>
     <string name="download_cancel_label">Бекор кардани боргирӣ</string>
@@ -335,7 +333,6 @@
     <string name="content">Мазмун</string>
     <string name="student_progress">Пешрафти хонанда</string>
     <string name="use_device_language">Забони дастгоҳ</string>
-    <string name="download_state_downloaded">&lt;![&lt;b&gt;Бор гардид &lt;/b&gt;]]&gt; ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s-и захирагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="download_storage_option_device">Истифодаи %1$s - %2$s озод</string>
     <string name="insufficient_space">Ҷойи кофии нигоҳдории мундариҷа мавҷуд нест</string>
     <string name="no_app_found">Ягон барнома барои кушодани файл ёфт нашуд</string>
