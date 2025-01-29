@@ -10,11 +10,11 @@ onFlowStart:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
-#onFlowComplete:
- # - runScript:
-     # file: "common/stopserver.js"
-      #env:
-       # TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+onFlowComplete:
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 # get started
 - launchApp
