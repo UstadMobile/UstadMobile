@@ -77,7 +77,7 @@ maestro cloud \
     --flows=e2e-tests \
     --format=junit \
     --output build/results/report.xml \
-    --timeout=180 \
+    --timeout=300 \
     -e TESTCONTROLLER_URL=$TESTCONTROLLER_URL
 
 
