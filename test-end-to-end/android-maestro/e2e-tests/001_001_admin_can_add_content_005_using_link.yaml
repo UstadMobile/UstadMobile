@@ -1,6 +1,7 @@
 appId: com.toughra.ustadmobile
 tags:
-  - checklist1
+  - contentTest
+  - contentViaLink
 env:
   TESTRESULTSDIR: "build/results/Screenshots/001_001_admin_can_add_content_003-video"
 onFlowStart:
