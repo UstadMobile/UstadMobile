@@ -27,9 +27,6 @@
     <string name="save_as_template">တင်းပလိတ်အဖြစ်သိမ်းဆည်းပါ</string>
     <string name="download_wifi_only">ဝိုင်ဖိုင်သာ</string>
     <string name="download_calculating">ဆက်လက်တွက်ချက်သည်…</string>
-    <string name="download_state_download"><b>ဒေါင်းလုပ်</b> စုစုပေါင်းပစ္စည်းများ၏ %1$s, သူတို့သည်သင်၏ device ကိုသိုလှောင်မှုအပေါ် %2$s စုစုပေါင်းသုံးပါလိမ့်မယ်။.</string>
-    <string name="download_state_downloading"><b>ဒေါင်းလုပ်လက်ရှိလုပ်ဆောင်နေသော</b> စုစုပေါင်းပစ္စည်းများ၏ %1$s, သင်၏စက်သိုလှောင်မှုတွင်စုစုပေါင်း %2$s ကိုအသုံးပြုလိမ့်မည်။.</string>
-    <string name="download_state_downloaded"><b>ဒေါင်းလုပ်ပြီးစီးပါပြီ</b>စုစုပေါင်းပစ္စည်းများ၏ %1$s,သင်၏ကိရိယာသိုလှောင်မှု၏ %2$s ခန့်ကိုအသုံးပြုနေသည်။.</string>
     <string name="no_app_found">ဖိုင်ဖွင့်ရန်အက်ပလီကေးရှင်းမရှိပါ</string>
     <string name="multiple_choice">ရွေးချယ်မှုများစွာ</string>
     <string name="file_required_prompt">တင်သွင်းမည့်ဖိုင်ကိုမရွေးပါ၊ ထပ်မံကြိုးစားပါ</string>

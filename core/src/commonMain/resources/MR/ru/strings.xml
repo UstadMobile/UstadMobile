@@ -54,7 +54,6 @@
     <string name="onboarding_get_started_label">Начать</string>
     <string name="download_continue_stacked_label">Продолжить скачивание</string>
     <string name="download_wifi_only">Только через Wi-Fi</string>
-    <string name="download_state_downloading">&lt;![CDATA[&lt;b&gt;&lt;b&gt;Скачивание&lt;/b&gt;]&gt; всего %1$s элементов. Всего на вашем устройстве будет использовано %2$s.</string>
     <string name="download_storage_option_device">Используйте %1$s - %2$s бесплатно</string>
     <string name="content_creation_storage_option_title">Вариант хранения</string>
     <string name="file_required_prompt">Файл для импорта не выбран, попробуйте еще раз</string>
@@ -171,8 +170,6 @@
     <string name="xapi_options_data_set">Набор данных</string>
     <string name="open">Открыть</string>
     <string name="download_calculating">Расчет…</string>
-    <string name="download_state_download"><![CDATA[<b>Загрузите</b>]]> всего %1$s элементов, это займёт в общей сложности %2$s в памяти устройства.</string>
-    <string name="download_state_downloaded"><![CDATA[<b>Загружено</b>]]> всего %1$s объектов, которые занимают около %2$s памяти вашего устройства.</string>
     <string name="download_downloading_placeholder">Скачивание %1$s из %2$s</string>
     <string name="download_summary_title">%1$s активных загрузок</string>
     <string name="download_cancel_label">Отменить скачивание</string>

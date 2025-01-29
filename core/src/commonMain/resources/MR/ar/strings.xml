@@ -107,10 +107,6 @@
     <string name="download_continue_btn_label">استمرار</string>
     <string name="download_calculating">يتم الحساب…</string>
     <string name="download_wifi_only">WiFi فقط</string>
-    <string name="download_state_download">
-        <b>تنزيل</b> ما مجموعه %1$s بند، الذي سيستخدم %2$s من مساحة التخزين.</string>
-    <string name="download_state_downloading">
-        <b>جاري تحميل</b> ما مجموعه %1$s بند، الذي سيستخدم %2$s من مساحة التخزين.</string>
     <string name="download_pause_download">إيقاف مؤقت</string>
     <string name="download_downloading_placeholder">جاري تحميل %1$s من %2$s</string>
     <string name="download_locally_availability">متوفر عن قرب</string>
@@ -128,8 +124,6 @@
     <string name="download_cancel_label">الغاء التنزيل</string>
     <string name="file_not_found">الملف غير موجود</string>
     <string name="first_name">الاسم الأول</string>
-    <string name="download_state_downloaded">
-        <b>تم تنزيل</b> ما مجموعه %1$s بند، الذي سيستخدم %2$s من مساحة التخزين.</string>
     <string name="content_editor_save_error">خطأ اثناء الحفظ، حاول مرة اخرى</string>
     <string name="content_entry_export_inprogress">جاري التصدير</string>
     <string name="enter_register_code">ادخل رمز التسجيل</string>

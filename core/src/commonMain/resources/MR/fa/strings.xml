@@ -94,11 +94,8 @@
     <string name="also_available_in">همچنان موجود است در</string>
     <string name="download_wifi_only">تنها وای‌فای</string>
     <string name="download_calculating">در حال شمارش…</string>
-    <string name="download_state_download"><b>دانلود</b> مجموعاً %1$s اشیأ، که مجموعاً %2$s جای را در حافظه دستگاه شما خواهد گرفت.</string>
     <string name="download_summary_title">%1$s دانلودهای فعال</string>
     <string name="download_pause_download">مکث</string>
-    <string name="download_state_downloading"><b> در حال دانلود </b> مجموعاً %1$s اشیأ، که مجموعاً %2$s جای را در حافظه دستگاه شما خواهد گرفت.</string>
-    <string name="download_state_downloaded"><b> دانلود گردید </b> مجموعاً %1$s اشیأ، که در حافظۀ دستگاه شما %2$s جای را گرفته است.</string>
     <string name="download_downloading_placeholder">در حال دانلود %1$s از مجموع %2$s</string>
     <string name="insufficient_space">فضای ذخیره سازی کافی نیست</string>
     <string name="download_cancel_label">لغو دانلود</string>

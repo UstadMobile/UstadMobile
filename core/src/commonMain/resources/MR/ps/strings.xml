@@ -92,7 +92,6 @@
     <string name="download_continue_btn_label">ادامه ورکول</string>
     <string name="download_wifi_only">یوازی وایفای</string>
     <string name="download_calculating">اټکلول…</string>
-    <string name="download_state_downloaded"><b>راکښته شو</b> ټولټال %1$s توکي، چې ستاسو د وزلې په حافظه کې یې %2$s ځای نیولی.</string>
     <string name="download_downloading_placeholder">د کښته کېدو په حالت کې%1$s کښته شوی له %2$sڅخه</string>
     <string name="download_storage_option_device">%1$sډک - %2$s خالی</string>
     <string name="download_locally_availability">نژدې موجود دی</string>
@@ -111,8 +110,6 @@
     <string name="file_not_found">دوتنه و نه موندل شو</string>
     <string name="multiple_choice">ګڼ ځوابه</string>
     <string name="video">ویډیو</string>
-    <string name="download_state_download"><b>راکښته کول</b> ټول %1$s توکي، چې ستاسو په وزله کې ټولټال %2$s ځای نیسي.</string>
-    <string name="download_state_downloading"><b>راښکته کول</b> ټولټال %1$s توکي، چې ستاسو په وزله کې به %2$s ځای ونیسی.</string>
     <string name="download_cancel_label">د کښته کولو ړنګول</string>
     <string name="content_editor_create_new_category">نوی پوښه</string>
     <string name="licence">منښتلیک</string>
