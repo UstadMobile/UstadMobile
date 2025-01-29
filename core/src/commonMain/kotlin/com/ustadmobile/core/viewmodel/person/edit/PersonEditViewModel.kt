@@ -157,7 +157,7 @@ class PersonEditViewModel(
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
         on(accountManager.activeLearningSpace).instance()
 
-    private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
+    private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveLearningSpace().instance()
 
     private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
         ?.toBoolean() ?: false

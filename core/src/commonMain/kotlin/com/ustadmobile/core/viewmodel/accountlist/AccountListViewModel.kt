@@ -17,7 +17,6 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.isGuestUser
 import com.ustadmobile.core.util.ext.isTemporary
 import com.ustadmobile.core.util.ext.navigateToLink
-import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView

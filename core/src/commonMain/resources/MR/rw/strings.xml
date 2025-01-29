@@ -64,10 +64,7 @@
     <string name="xapi_options_visual_type">Ubwoko bw\'imfashanyigisho</string>
     <string name="open">Fungura</string>
     <string name="download_calculating">Birikubarwa…</string>
-    <string name="download_state_download"><b>vanayo</b>Igiteranyo cya%1$s ibyavanyweyo, birakoresha umwanya uhwanye na%2$s ku bubiko bw\'igikoresho cyawe.</string>
     <string name="select_subtitle_video">Hitamo ururimi inyigisho ziri busobanurwemo</string>
-    <string name="download_state_downloading"><b> vanayo</b>igiteranyo cya%1$scy\'ibivanwayo, ari byo biribuze kuba bikoresha umwanya wa %2$s kububiko bw\'igikoresho cyawe.</string>
-    <string name="download_state_downloaded"><b>Byavanweyo</b> igiteranyo cya %1$s cy\'ibyavanweyo, aribyo bikoresha umwanya ungana na%2$s kububiko bw\'igikoresho cyawe.</string>
     <string name="download_downloading_placeholder">Biri kuvanywa kuri murandasi%1$s ya %2$s</string>
     <string name="download_summary_title">%1$s Garagaza ibyavanyweyo</string>
     <string name="download_cancel_label">Subika Ibyavanyweyo</string>

@@ -11,7 +11,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
@@ -35,10 +35,10 @@ class DeletedItemListViewModel(
         )
     }
 
-    private val restoreDeletedItemUseCase: RestoreDeletedItemUseCase by di.onActiveEndpoint()
+    private val restoreDeletedItemUseCase: RestoreDeletedItemUseCase by di.onActiveLearningSpace()
         .instance()
 
-    private val deletePermanentlyUseCase: DeletePermanentlyUseCase by di.onActiveEndpoint()
+    private val deletePermanentlyUseCase: DeletePermanentlyUseCase by di.onActiveLearningSpace()
         .instance()
 
     init {

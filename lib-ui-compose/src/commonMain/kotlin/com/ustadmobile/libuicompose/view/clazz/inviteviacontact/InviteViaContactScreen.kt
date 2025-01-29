@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.view.clazz.inviteViaContact
+package com.ustadmobile.libuicompose.view.clazz.inviteviacontact
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,12 +32,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import com.dokar.chiptextfield.m3.ChipTextFieldDefaults
+import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactChip
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 
 
@@ -56,6 +56,7 @@ fun InviteViaContactScreen(
         },
         onContactError = { viewModel.onContactError(it) },
         onChipRemoved = { viewModel.onChipRemoved(it) },
+        onTextFieldValueChanged = {viewModel.onTextFieldValueChanged(it)},
         onValueChanged = { viewModel.onValueChanged() }
 
     )
@@ -66,9 +67,10 @@ class AvatarChip(text: String, val avatar: ImageVector) : Chip(text)
 @Composable
 fun InviteViaContactScreen(
     uiState: InviteViaContactUiState = InviteViaContactUiState(),
-    onChipSubmitClick: (String) -> Unit,
+    onChipSubmitClick: (String) -> InviteViaContactChip,
     onContactError: (String) -> Unit,
     onChipRemoved: (String) -> Unit,
+    onTextFieldValueChanged: (String) -> Unit,
     onValueChanged: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -83,14 +85,33 @@ fun InviteViaContactScreen(
 
         OutlinedChipTextField(
             state = state,
+            value = uiState.textFieldValue?:"" ,
+            onValueChange = { newValue ->
+                onTextFieldValueChanged(newValue)
+            },
             modifier = Modifier
                 .weight(1f)
                 .padding(10.dp).fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             onSubmit = {
-                onChipSubmitClick(it)
+               val inviteViaContactChip= onChipSubmitClick(it)
                 onValueChanged()
-                null
+                // need to return avatarChip but we are handling add and removing
+                //chips from uistate , so returning the last chip from uistate if its not
+                //present in uistate
+                val avatarChip = AvatarChip(
+                    text = inviteViaContactChip.text,
+                    avatar = if (inviteViaContactChip.isValid)
+                        Icons.Default.Check
+                    else
+                        Icons.Default.Close
+                )
+                if (!uiState.chips.contains(inviteViaContactChip)){
+                   avatarChip
+                }else{
+                    null
+                }
+
             },
             chipStyle = ChipTextFieldDefaults.chipStyle(shape = RoundedCornerShape(20.dp)),
             textStyle = MaterialTheme.typography.bodySmall,
@@ -145,6 +166,7 @@ fun InviteViaContactScreen(
             val removedChips = uiState.chips.filterNot { chip ->
                 stateChips.any { it.text == chip.text }
             }
+
             removedChips.forEach {
                 onChipRemoved(it.text)
             }

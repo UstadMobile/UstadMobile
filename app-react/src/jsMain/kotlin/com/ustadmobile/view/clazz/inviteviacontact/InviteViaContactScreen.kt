@@ -1,8 +1,9 @@
-package com.ustadmobile.view.clazz.inviteViaContact
+package com.ustadmobile.view.clazz.inviteviacontact
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactChip
 import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactUiState
 import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -20,8 +21,9 @@ import react.*
 
 external interface InviteViaContactProps : Props {
     var uiState: InviteViaContactUiState
-    var onChipSubmitClick: (String) -> Unit
+    var onChipSubmitClick: (String) -> InviteViaContactChip
     var onChipRemoved: (String) -> Unit
+    var onTextFieldValueChanged: (String) -> Unit
 }
 
 val InviteViaContactScreen = FC<Props> {
@@ -35,6 +37,7 @@ val InviteViaContactScreen = FC<Props> {
         uiState = uiStateVal
         onChipSubmitClick=viewModel::onClickChipSubmit
         onChipRemoved=viewModel::onChipRemoved
+        onTextFieldValueChanged=viewModel::onTextFieldValueChanged
     }
 }
 
@@ -85,7 +88,9 @@ private val InviteViaContactComponent2 = FC<InviteViaContactProps> { props ->
                         +inputParams
                     }
                 }
-
+                onInputChange = { event, value, _ ->
+                    props.onTextFieldValueChanged(value)
+                }
                 value = chipList
                 onChange = { event, value, reason, detail ->
                     detail?.option?.let { props.onChipSubmitClick(it) }

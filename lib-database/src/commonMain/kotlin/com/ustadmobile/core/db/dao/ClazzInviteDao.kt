@@ -6,11 +6,10 @@ import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.composites.ClazzInviteAndClazz
 import com.ustadmobile.lib.db.entities.ClazzInvite
-import com.ustadmobile.lib.db.entities.ClazzInviteWithTimeZone
-import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.Person
-import io.ktor.http.HttpMethod
+import com.ustadmobile.lib.db.composites.ClazzInviteWithTimeZone
+import kotlinx.coroutines.flow.Flow
 
 
 @DoorDao
@@ -19,8 +18,6 @@ expect abstract class ClazzInviteDao : BaseDao<ClazzInvite> {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun replace(entity: ClazzInvite): Long
-
-
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun insertAll(entity: List<ClazzInvite>)
@@ -51,10 +48,33 @@ expect abstract class ClazzInviteDao : BaseDao<ClazzInvite> {
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
     )
-    @Query("""
-        UPDATE ClazzInvite SET inviteStatus = :status WHERE ClazzInvite.ciUid =:ciUid
+    @Query(
+    """
+    SELECT ClazzInvite.*, Clazz.*
+      FROM ClazzInvite
+           JOIN Clazz 
+                ON Clazz.clazzUid = ClazzInvite.ciClazzUid
+     WHERE ClazzInvite.inviteToken = :inviteTokenUid
     """)
-    abstract suspend fun updateInviteStatus(status:Int,ciUid:Long)
+    abstract fun findClazzInviteEntityForInviteTokenAsFlow(
+        inviteTokenUid: String
+    ): Flow<ClazzInviteAndClazz?>
+
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        UPDATE ClazzInvite 
+           SET inviteStatus = :status,
+               inviteLct = :updateTime
+         WHERE ClazzInvite.ciUid =:ciUid
+    """)
+    abstract suspend fun updateInviteStatus(
+        status:Int,
+        ciUid:Long,
+        updateTime: Long,
+    )
 
 
 
