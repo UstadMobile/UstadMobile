@@ -1,13 +1,18 @@
 appId: com.toughra.ustadmobile
+tags:
+  - assignments
+  - courseComments
 env:
-  TESTRESULTSDIR: "build/results/Screenshots/001_001_admin_can_add_content_003-video"
+  TESTRESULTSDIR: "build/reports/maestro/004_002_users_add_course_comments/Screenshots"
 onFlowStart:
+  - startRecording: "004_002_users_add_course_comments"
   - runScript:
       file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
+  - stopRecording
   - runScript:
       file: "common/stopserver.js"
       env:
@@ -87,7 +92,7 @@ onFlowComplete:
     direction: DOWN
 - assertVisible: "Must submit all at once"
 - assertVisible: "Done"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
+- takeScreenshot: "${TESTRESULTSDIR}/added_assignment"
 - tapOn:
     text: "Done"
 - assertNotVisible: "Done"
