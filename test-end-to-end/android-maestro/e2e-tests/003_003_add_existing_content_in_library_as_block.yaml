@@ -1,24 +1,30 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseBlocks
 env:
   TESTRESULTSDIR: "build/reports/maestro/003_003_add_existing_content_in_library_as_block/Screenshots"
   TESTNAME: "003_003_add_existing_content_in_library_as_block"
 onFlowStart:
   - startRecording: 002_001_admin_add_new_course_and_teacher
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-#---------add content to library ---------#
+# Download test file
 - runFlow:
-    file: "../common/clear_login_and_add_content.yaml"
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Epub_Content1.epub"
+- runFlow:
+    file: "common/clear_login_and_add_content.yaml"
     env:
      TESTFILENAME: "H5p_Content.h5p"
      TESTCONTENTNAME: H5PContent
@@ -30,18 +36,18 @@ onFlowComplete:
     id: "floating_action_button"
 - tapOn: "From file"
 - runFlow:
-    file: "../common/select_file_from_picker.yaml"
+    file: "common/select_file_from_picker.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
 - tapOn: "SAVE"
 #---------add course ---------#
 - runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/add_course.yaml"
     env:
       TESTCOURSENAME: "Existing Content Block Test"
 #----add teacher to the course----#
 - runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
+    file: "common/add_new_teacher_inside_course.yaml"
     env:
       TESTCOURSENAME: "Existing Content Block Test"
       TEACHERFIRSTNAME: "Teacher"
@@ -57,23 +63,23 @@ onFlowComplete:
       - back
 - tapOn: "Course"
 - runFlow:
-    file: "../common/add_existing_content_block_to_course.yaml"
+    file: "common/add_existing_content_block_to_course.yaml"
 - tapOn: "E-book"
 - tapOn: "Done"
 - tapOn: "SAVE"
 
 # teacher add existing content in library to course as a content block
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "teach1"
       PASSWORD: "testt1"
 - tapOn: "courses"
 - tapOn: "Existing Content Block Test"
 - runFlow:
-    file: "../common/add_existing_content_block_to_course.yaml"
+    file: "common/add_existing_content_block_to_course.yaml"
 - tapOn: "Interactive"
 - tapOn: "Done"
 - tapOn: "SAVE"

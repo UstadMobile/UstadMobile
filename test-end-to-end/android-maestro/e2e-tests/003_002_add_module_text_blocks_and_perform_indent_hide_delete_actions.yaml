@@ -1,29 +1,34 @@
 appId: com.toughra.ustadmobile
 tags:
-  - no-files
+  - courseBlocks
 env:
   TESTRESULTSDIR: "build/reports/maestro/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions/Screenshots"
 onFlowStart:
   - startRecording: 002_001_admin_add_new_course_and_teacher
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+# Download student list
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Ustad_Students_List.csv"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 #admin login
 - runFlow:
-    file: "../common/admin_login.yaml"
+    file: "common/admin_login.yaml"
 - runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/add_course.yaml"
     env:
      TESTCOURSENAME: "Test Course Block Test"
 # edit the course to add blocks
@@ -31,12 +36,12 @@ onFlowComplete:
     id: "floating_action_button"
 # add module ------ 1
 - runFlow:
-    file: "../common/add_module_block.yaml"
+    file: "common/add_module_block.yaml"
     env:
       MODULETITLE: "SEMESTER 1"
 #add text block ------ 1
 - runFlow:
-    file: "../common/add_text_block.yaml"
+    file: "common/add_text_block.yaml"
     env:
       TEXTTITLE: "PRIMARY COLOURS"
       TEXT: "RED,BLUE,GREEN"
