@@ -11,12 +11,7 @@ appId: com.toughra.ustadmobile
       visible: "Choose where to download"
     commands:
       - tapOn: "Download"
-- runFlow:
-      when:
-        visible:
-          id: "com.google.android.apps.docs:id/pdf_view"
-      commands:
-           - openLink: "${output.testServerControllerUrl}testcontroller/test-files/content/index.html"
+- openLink: "${output.testServerControllerUrl}testcontroller/test-files/content/index.html"
 - tapOn: More options
 - tapOn: Downloads
 - repeat:
