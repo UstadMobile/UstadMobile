@@ -482,11 +482,30 @@ expect abstract class StatementDao {
                                AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0) THEN 0
                        ELSE NULL
                        END) AS isSuccessful
-          FROM DistinctRegistrationUids       
+          FROM DistinctRegistrationUids     
+           ORDER BY  
+    CASE :sortOrder
+        WHEN 1 THEN timeStarted
+        ELSE ''
+    END DESC,
+    CASE :sortOrder
+        WHEN 2 THEN timeStarted
+        ELSE ''
+    END ASC,
+    CASE :sortOrder
+        WHEN 4 THEN maxScore
+        ELSE ''
+    END ASC,
+    CASE :sortOrder
+        WHEN 3 THEN maxScore
+        ELSE ''
+    END DESC
+          
     """)
     abstract fun findSessionsByPersonAndContent(
         contentEntryUid: Long,
-        personUid: Long
+        personUid: Long,
+        sortOrder: Int
     ): PagingSource<Int, SessionTimeAndProgressInfo>
 
 

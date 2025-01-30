@@ -33,6 +33,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.TimeZone
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.libuicompose.components.UstadListSortHeader
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 
 @Composable
 fun ContentEntryDetailAttemptsSessionListScreen(
@@ -53,7 +56,9 @@ fun ContentEntryDetailAttemptsSessionListScreen(
     uiState: ContentEntryDetailAttemptsSessionListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
     onClickEntry: (SessionTimeAndProgressInfo) -> Unit = {},
-) {
+    onSortOrderChanged: (SortOrderOption) -> Unit = { },
+
+    ) {
     val attemptsSessionListPager =
         rememberDoorRepositoryPager(uiState.attemptsSessionList, refreshCommandFlow)
     val attemptsSessionListItems = attemptsSessionListPager.lazyPagingItems
@@ -71,6 +76,18 @@ fun ContentEntryDetailAttemptsSessionListScreen(
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
+        if(uiState.showSortOptions) {
+            item("sort_options") {
+                UstadListSortHeader(
+                    modifier = Modifier
+                        .defaultItemPadding()
+                        .fillMaxWidth(),
+                    activeSortOrderOption = uiState.sortOption,
+                    sortOptions = uiState.sortOptions,
+                    onClickSortOption =  onSortOrderChanged,
+                )
+            }
+        }
         if (attemptsSessionListPager.isSettledEmpty) {
             item("empty_state") {
                 UstadNothingHereYet()
