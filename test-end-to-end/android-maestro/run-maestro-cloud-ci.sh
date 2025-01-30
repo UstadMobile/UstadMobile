@@ -69,6 +69,27 @@ fi
 
 echo "run-maestro-cloud-ci: Time to run Maestro tests"
 
+BRANCH_ARG=""
+PULLREQUEST_ARG=""
+NAME_ARG=""
+COMMIT_ARG=""
+BRANCH_ARG=""
+
+if [ "$BUILD_TAG" != "" ]; then
+    NAME_ARG="--name=$BUILD_TAG"
+fi
+
+if [ "$GIT_BRANCH" != "" ]; then
+    BRANCH_ARG="--branch=$BRANCH"
+fi
+
+if [ "$GIT_COMMIT" != "" ]; then
+    COMMIT_ARG="--commit-sha=$GIT_COMMIT"
+fi
+
+if [ "$PULLREQUEST" != "" ]; then
+    PULLREQUEST_ARG="--pull-request-id=$PULLREQUEST"
+fi
 
 maestro cloud \
     --api-key=$MAESTRO_CLOUD_APIKEY \
@@ -78,7 +99,13 @@ maestro cloud \
     --format=junit \
     --output build/results/report.xml \
     --timeout=300 \
+    $NAME_ARG \
+    --repo-name=UstadMobile \
+    --repo-owner=UstadMobile \
+    $COMMIT_ARG \
+    $BRANCH_ARG \
+    $PULLREQUEST_ARG \
     -e TESTCONTROLLER_URL=$TESTCONTROLLER_URL
+TESTSTATUS=$?
 
-
-
+exit $TESTSTATUS
