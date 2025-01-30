@@ -3,6 +3,8 @@ package com.ustadmobile.core.domain.person.bulkadd
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
+import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.AlreadyEnroledInClassException
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
@@ -12,6 +14,7 @@ import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
+import io.github.aakira.napier.Napier
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -24,9 +27,53 @@ class BulkAddPersonsUseCaseImpl(
     private val validatePhoneNumUseCase: PhoneNumValidatorUseCase,
     private val authManager: AuthManager,
     private val enrolUseCase: EnrolIntoCourseUseCase,
+    private val createNewClazzUseCase: CreateNewClazzUseCase,
     private val activeDb: UmAppDatabase,
     private val activeRepo: UmAppDatabase?,
 ): BulkAddPersonsUseCase {
+
+    private fun String?.parseCourseNames(): List<String> {
+        return this?.split(";")
+            ?.map { it.trim() }
+            ?.filter { it.isNotBlank() } ?: emptyList()
+    }
+
+    data class EnrolmentResult(
+        val errors: List<String>
+    )
+
+    /**
+     *
+     */
+    private suspend fun processEnrolments(
+        personUid: Long,
+        courseNameListCol: String?,
+        role: Int,
+        courseUidMap: Map<String, Clazz>,
+    ) : EnrolmentResult{
+        val errors = mutableListOf<String>()
+        courseNameListCol.parseCourseNames().forEach { clazzName ->
+            courseUidMap[clazzName]?.also { clazz ->
+                try {
+                    enrolUseCase(
+                        enrolment = ClazzEnrolment(
+                            clazzUid = clazz.clazzUid,
+                            personUid = personUid,
+                            role = role
+                        ),
+                        timeZoneId = clazz.clazzTimeZone ?: "UTC"
+                    )
+                }catch(e: AlreadyEnroledInClassException) {
+                    //do nothing
+                }catch(e: Throwable) {
+                    Napier.d("BulkAddPersonsUseCase: Exception enrolling $personUid into $clazzName")
+                    errors += ("Exception enrolling $personUid into $clazzName: $e")
+                }
+            }
+        }
+
+        return EnrolmentResult(errors = errors.toList())
+    }
 
     override suspend fun invoke(
         csv: String,
@@ -99,16 +146,17 @@ class BulkAddPersonsUseCaseImpl(
                 errors += BulkAddPersonsDataError(lineNum, HEADER_PHONE, phoneNum)
             }
 
-            val courseNames = row[HEADER_COURSES]
-            if(courseNames != null) {
-                allCourseNames += courseNames
-                    .split(";")
-                    .map { it.trim() }
-                    .filter { it.isNotBlank() }
+            row[HEADER_COURSES_ENROL_AS_STUDENT]?.also {
+                allCourseNames += it.parseCourseNames()
+            }
+
+            row[HEADER_COURSES_ENROL_AS_TEACHER]?.also {
+                allCourseNames += it.parseCourseNames()
             }
         }
 
         if(errors.isNotEmpty()) {
+            Napier.w("ERRORS: BulkAddPersonsUseCase: ${errors.joinToString()}")
             throw BulkAddPersonException(errors = errors)
         }
 
@@ -136,9 +184,16 @@ class BulkAddPersonsUseCaseImpl(
             val clazzesFound = effectiveDb.clazzDao().getCoursesByName(nameList)
             val clazzNamesFound = clazzesFound.mapNotNull { it.clazzName }.toSet()
 
-            missingCourseNames.addAll(nameList.filter { it !in clazzNamesFound } )
             clazzesFound.forEach {
                 courseUidMap[it.clazzName ?: ""] = it
+            }
+
+            nameList.filter { it !in clazzNamesFound }.forEach { clazzName ->
+                val newClazz = Clazz(clazzName = clazzName).also {
+                    it.clazzUid = createNewClazzUseCase(it)
+                }
+
+                courseUidMap[clazzName] = newClazz
             }
         }
 
@@ -170,22 +225,19 @@ class BulkAddPersonsUseCaseImpl(
                     )
                     authManager.setAuth(personUid, row[HEADER_PASSWORD]!!.trim())
 
-                    val coursesToEnrolIn = row[HEADER_COURSES]?.split(";")
-                        ?.map { it.trim() }
-                        ?.filter { it.isNotBlank() } ?: emptyList()
+                    processEnrolments(
+                        personUid = personUid,
+                        courseNameListCol = row[HEADER_COURSES_ENROL_AS_STUDENT],
+                        role = ClazzEnrolment.ROLE_STUDENT,
+                        courseUidMap = courseUidMap
+                    )
 
-                    coursesToEnrolIn.forEach { clazzName ->
-                        courseUidMap[clazzName]?.also { clazz ->
-                            enrolUseCase(
-                                enrolment = ClazzEnrolment(
-                                    clazzUid = clazz.clazzUid,
-                                    personUid = personUid,
-                                    role = ClazzEnrolment.ROLE_STUDENT
-                                ),
-                                timeZoneId = clazz.clazzTimeZone ?: "UTC"
-                            )
-                        }
-                    }
+                    processEnrolments(
+                        personUid = personUid,
+                        courseNameListCol = row[HEADER_COURSES_ENROL_AS_TEACHER],
+                        role = ClazzEnrolment.ROLE_TEACHER,
+                        courseUidMap = courseUidMap
+                    )
                 }
 
                 onProgress(chunkIndex * chunkSize, csvData.size)
@@ -217,7 +269,9 @@ class BulkAddPersonsUseCaseImpl(
 
         const val HEADER_PASSWORD = "password"
 
-        const val HEADER_COURSES = "courses"
+        const val HEADER_COURSES_ENROL_AS_STUDENT = "courses-student-enrolments"
+
+        const val HEADER_COURSES_ENROL_AS_TEACHER = "courses-teacher-enrolments"
 
         val REQUIRED_COLUMNS = listOf(
             HEADER_USERNAME, HEADER_FIRSTNAMES,
