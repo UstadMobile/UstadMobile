@@ -5,7 +5,9 @@ appId: com.toughra.ustadmobile
 # 2) Clicking the file that we want (index.html link includes download attribute to ensure links
 #    are downloaded, not opened directly)
 # 3) Opening the downloads to check the download was completed, and repeating if needed to avoid
-#    flakiness. Chrome has (rarely) been seen to miss a download.
+#    flakiness. Chrome has (rarely) been seen to miss a download. Opening downloads is done by
+#    launching the Ustad app with an argument - and it will launch an intent with
+#    action=DownloadManager.ACTION_VIEW_DOWNLOADS (see AbstractAppActivity.kt)
 
 - repeat:
     while:
@@ -26,6 +28,7 @@ appId: com.toughra.ustadmobile
           arguments:
             showDownloads: true
 
+      # Ensure that launching view downloads is done so that the loop condition works as expected
       - assertVisible: "Downloads"
 
 - stopApp
