@@ -28,7 +28,7 @@ import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel.InviteResult
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -104,7 +104,7 @@ class ClazzMemberListViewModel(
 ): UstadListViewModel<ClazzMemberListUiState>(
     di, savedStateHandle, ClazzMemberListUiState(), ClazzDetailViewModel.DEST_NAME,
 ) {
-    private val resendInviteUseCase: ResendInviteUseCase by di.onActiveEndpoint().instance()
+    private val resendInviteUseCase: ResendInviteUseCase by di.onActiveLearningSpace().instance()
 
     private val approveOrDeclinePendingEnrolmentUseCase: IApproveOrDeclinePendingEnrolmentRequestUseCase by
         on(accountManager.activeLearningSpace).instance()

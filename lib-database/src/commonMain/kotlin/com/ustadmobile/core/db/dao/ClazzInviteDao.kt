@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.composites.ClazzInviteAndClazz
 import com.ustadmobile.lib.db.entities.ClazzInvite
 import com.ustadmobile.lib.db.composites.ClazzInviteWithTimeZone
 import kotlinx.coroutines.flow.Flow
-import com.ustadmobile.lib.db.entities.ClazzInviteWithTimeZone
+
 
 
 @DoorDao

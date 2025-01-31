@@ -48,11 +48,11 @@ fun ClazzMemberListScreenPreview() {
         addTeacherVisible = true
     )
 
-    ClazzMemberListScreen(
-        uiState = uiStateVal,
-        onClickPendingRequest = {
-                enrolment: EnrolmentRequest,
-                approved: Boolean ->  {}
-        }
-    )
+//    ClazzMemberListScreen(
+//        uiState = uiStateVal,
+//        onClickPendingRequest = {
+//                enrolment: EnrolmentRequest,
+//                approved: Boolean ->  {}
+//        }
+//    )
 }

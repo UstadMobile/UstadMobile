@@ -149,7 +149,6 @@ import com.ustadmobile.view.message.messagelist.MessageListScreenPreview
 import com.ustadmobile.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.PendingInviteViewModel
 import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.view.about.OpenLicensesScreen
 import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
