@@ -24,6 +24,7 @@ import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst
 import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
@@ -409,35 +410,30 @@ expect abstract class StatementDao {
                           ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
             )      
                     AND (:searchText = "%" OR Person.firstNames LIKE :searchText OR Person.lastName LIKE :searchText OR Person.userName LIKE :searchText)
-           ORDER BY CASE(:sortOrder)
-               WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
-               WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
-               ELSE ''
-               END ASC,   CASE :sortOrder
-        WHEN 4 THEN maxScore
-        ELSE ''
+     ORDER BY 
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_FIRST_NAME_ASC} THEN Person.firstNames
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_LAST_NAME_ASC} THEN Person.lastName
+        ELSE NULL
     END ASC,
-    CASE :sortOrder
-        WHEN 3 THEN maxScore
-        ELSE ''
-    END DESC
-          
-               CASE(:sortOrder)
-               WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
-               WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
-               ELSE ''
-               END DESC,
-                  CASE :sortOrder
-        WHEN 5 THEN maxScore
-        ELSE ''
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_SCORE_ASC} THEN maxScore
+        ELSE NULL
     END ASC,
-    CASE :sortOrder
-        WHEN 6 THEN maxScore
-        ELSE ''
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_LAST_NAME_DESC} THEN maxScore
+        ELSE NULL
+    END DESC,
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_FIRST_NAME_DESC} THEN Person.firstNames
+        ELSE NULL
+    END DESC,
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_SCORE_DESC} THEN maxScore
+        ELSE NULL
     END DESC
-          
-           
-            
+
+
 """)
     abstract fun findPersonsWithAttempts(
         contentEntryUid: Long,
