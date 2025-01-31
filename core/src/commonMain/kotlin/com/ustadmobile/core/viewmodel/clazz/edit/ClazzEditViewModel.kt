@@ -112,12 +112,12 @@ class ClazzEditViewModel(
     private val updateCourseBlocksOnReorderOrCommitUseCase: UpdateCourseBlocksOnReorderOrCommitUseCase =
         UpdateCourseBlocksOnReorderOrCommitUseCase(),
     private val saveContentEntryUseCase: SaveContentEntryUseCase = SaveContentEntryUseCase(
-        db = di.onActiveEndpoint().direct.instance(tag = DoorTag.TAG_DB),
-        repo = di.onActiveEndpoint().direct.instance<UmAppDataLayer>().repository,
-        enqueueSavePictureUseCase = di.onActiveEndpoint().direct.instance(),
+        db = di.onActiveLearningSpace().direct.instance(tag = DoorTag.TAG_DB),
+        repo = di.onActiveLearningSpace().direct.instance<UmAppDataLayer>().repository,
+        enqueueSavePictureUseCase = di.onActiveLearningSpace().direct.instance(),
     ),
-    private val importContentUseCase: EnqueueContentEntryImportUseCase = di.onActiveEndpoint().direct.instance(),
-    private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase = di.onActiveEndpoint().direct
+    private val importContentUseCase: EnqueueContentEntryImportUseCase = di.onActiveLearningSpace().direct.instance(),
+    private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase = di.onActiveLearningSpace().direct
         .instance(),
 ): UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
@@ -133,7 +133,7 @@ class ClazzEditViewModel(
     private val effectiveClazzUid = savedStateHandle[ARG_ENTITY_UID]?.toLong()
         ?: activeDb.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)
 
-    private val createNewClazzUseCase: CreateNewClazzUseCase by di.onActiveEndpoint().instance()
+    private val createNewClazzUseCase: CreateNewClazzUseCase by di.onActiveLearningSpace().instance()
 
     init {
         val title = createEditTitle(MR.strings.add_a_new_course, MR.strings.edit_course)

@@ -4,7 +4,7 @@ import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonException
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsDataError
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.door.DoorUri
 import io.github.aakira.napier.Napier
@@ -50,7 +50,7 @@ class BulkAddPersonRunImportViewModel(
 
     private val fileUri = savedStateHandle[ARG_URI] ?: throw IllegalArgumentException("No fileUri")
 
-    private val bulkAddFromUriUseCase: BulkAddPersonsFromLocalUriUseCase by di.onActiveEndpoint()
+    private val bulkAddFromUriUseCase: BulkAddPersonsFromLocalUriUseCase by di.onActiveLearningSpace()
         .instance()
 
     init {

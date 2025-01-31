@@ -13,7 +13,7 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.util.ext.replaceOrAppend
 import com.ustadmobile.core.util.ext.setIfNoValueSetYet
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
@@ -91,9 +91,9 @@ class ContentEntryEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     private val saveContentEntryUseCase: SaveContentEntryUseCase =
-        di.onActiveEndpoint().direct.instance(),
+        di.onActiveLearningSpace().direct.instance(),
     private val enqueueContentEntryImportUseCase: EnqueueContentEntryImportUseCase =
-        di.onActiveEndpoint().direct.instance(),
+        di.onActiveLearningSpace().direct.instance(),
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME){
 
     private val _uiState = MutableStateFlow(

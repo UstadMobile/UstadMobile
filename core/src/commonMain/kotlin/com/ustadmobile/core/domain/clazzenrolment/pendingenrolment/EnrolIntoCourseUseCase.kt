@@ -5,6 +5,7 @@ import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.toLocalEndOfDay
 import com.ustadmobile.core.util.ext.toLocalMidnight
 import com.ustadmobile.door.ext.withDoorTransactionAsync
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import kotlinx.datetime.Instant
 
@@ -24,6 +25,17 @@ class EnrolIntoCourseUseCase(
         enrolment: ClazzEnrolment,
         timeZoneId: String,
     ) : Long {
+        val currentEnrolment = (repo ?: db).clazzEnrolmentDao()
+            .getAllEnrolmentsAtTimeByClazzAndPerson(
+                clazzUid = enrolment.clazzEnrolmentClazzUid,
+                accountPersonUid = enrolment.clazzEnrolmentPersonUid,
+                time = systemTimeInMillis(),
+            )
+
+        if(currentEnrolment.isNotEmpty()) {
+            throw AlreadyEnroledInClassException()
+        }
+
         enrolment.clazzEnrolmentDateJoined = Instant
             .fromEpochMilliseconds(enrolment.clazzEnrolmentDateJoined)
             .toLocalMidnight(timeZoneId).toEpochMilliseconds()

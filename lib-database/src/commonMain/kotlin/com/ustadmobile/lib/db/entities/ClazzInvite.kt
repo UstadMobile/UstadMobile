@@ -26,7 +26,6 @@ import kotlinx.serialization.Serializable
     )
 )
 
-
 @Serializable
 data class ClazzInvite(
     @PrimaryKey(autoGenerate = true)

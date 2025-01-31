@@ -15,7 +15,7 @@ import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.AlreadyEnrole
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.AlreadyHasPendingRequestException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 
 data class JoinWithCodeUiState(
@@ -42,7 +42,7 @@ class JoinWithCodeViewModel(
 
     val uiState: Flow<JoinWithCodeUiState> = _uiState.asStateFlow()
 
-    private val requestEnrolmentUseCase: RequestEnrolmentUseCase by di.onActiveEndpoint().instance()
+    private val requestEnrolmentUseCase: RequestEnrolmentUseCase by di.onActiveLearningSpace().instance()
 
     init {
         ifLoggedInElseNavigateToLoginWithNextDestSet(

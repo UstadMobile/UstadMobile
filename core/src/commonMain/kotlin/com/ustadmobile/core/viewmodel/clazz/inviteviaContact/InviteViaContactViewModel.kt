@@ -9,7 +9,7 @@ import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import kotlinx.coroutines.flow.Flow
@@ -43,7 +43,7 @@ class InviteViaContactViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
     private val parseInviteUseCase: ParseInviteUseCase by instance()
-    private val contactToServerUseCase: ContactToServerUseCase by di.onActiveEndpoint().instance()
+    private val contactToServerUseCase: ContactToServerUseCase by di.onActiveLearningSpace().instance()
     private val clazzUid = savedStateHandle[ARG_CLAZZ_UID]?.toLong() ?: 0L
     private val personRole = savedStateHandle[ARG_ROLE]?.toLong() ?: 0L
     private var _uiState = MutableStateFlow(InviteViaContactUiState())

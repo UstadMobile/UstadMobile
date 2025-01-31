@@ -18,7 +18,7 @@ import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpeningBlobState
 import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.viewmodel.clazzassignment.asBlobOpenItem
 import com.ustadmobile.core.viewmodel.clazzassignment.combineWithSubmissionFiles
@@ -226,9 +226,9 @@ class ClazzAssignmentSubmitterDetailViewModel(
 
     private var openBlobJob: Job? = null
 
-    private val openBlobUiUseCase: OpenBlobUiUseCase? by di.onActiveEndpoint().instanceOrNull()
+    private val openBlobUiUseCase: OpenBlobUiUseCase? by di.onActiveLearningSpace().instanceOrNull()
 
-    private val submitMarkUseCase: SubmitMarkUseCase by di.onActiveEndpoint().instance()
+    private val submitMarkUseCase: SubmitMarkUseCase by di.onActiveLearningSpace().instance()
 
     init {
         _uiState.update { prev ->
