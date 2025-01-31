@@ -2,11 +2,6 @@ package com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab
 
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.db.dao.PersonDaoCommon
-import com.ustadmobile.core.db.dao.PersonDaoCommon.SORT_FIRST_NAME_ASC
-import com.ustadmobile.core.db.dao.PersonDaoCommon.SORT_FIRST_NAME_DESC
-import com.ustadmobile.core.db.dao.PersonDaoCommon.SORT_LAST_NAME_ASC
-import com.ustadmobile.core.db.dao.PersonDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
@@ -15,6 +10,10 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_FIRST_NAME_ASC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_FIRST_NAME_DESC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_LAST_NAME_ASC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_LAST_NAME_DESC
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
