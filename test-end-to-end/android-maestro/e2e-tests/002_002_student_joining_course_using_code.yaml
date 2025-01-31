@@ -3,6 +3,7 @@ tags:
   - courseTest
 env:
   TESTRESULTSDIR: "build/reports/maestro/002_002_student_joining_course_using_code/Screenshots"
+  TESTCOURSENAME: "Test Course Block"
 onFlowStart:
   - startRecording: 002_002_student_joining_course_using_code
   - runScript:
@@ -17,35 +18,20 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+- runScript:
+    file: "common/import_users_via_http.js"
+    env:
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_And_Unenrolled_Student.csv"
+
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "common/admin_login.yaml"
-#---------Add Course with members------------------#
-# add new course
-- runFlow:
-    file: "common/add_course.yaml"
+    file: "common/user_login.yaml"
     env:
-      TESTCOURSENAME: "Test Course"
-- runFlow:
-    file: "common/add_new_teacher_inside_course.yaml"
-    env:
-      TESTCOURSENAME: "Test Course"
-      TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "1"
       USERNAME: "teach1"
-      GENDER: "Female"
       PASSWORD: "testt1"
-- runFlow:
-    file: "common/add_new_people.yaml"
-    env:
-      FIRSTNAME: "Student"
-      LASTNAME: "1"
-      USERNAME: "stud1"
-      GENDER: "Male"
-      PASSWORD: "tests1"
-- back
-- tapOn: "Courses"
+
 - tapOn: ${TESTCOURSENAME}
 - scrollUntilVisible:
     element:

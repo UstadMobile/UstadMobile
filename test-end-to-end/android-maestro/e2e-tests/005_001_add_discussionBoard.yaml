@@ -22,7 +22,7 @@ onFlowComplete:
     file: "common/import_users_via_http.js"
     env:
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTFILENAME: "Ustad_Teacher_and_Students.csv"
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
