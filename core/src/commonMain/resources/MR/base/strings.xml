@@ -2031,7 +2031,25 @@
 
     <string name="pending_invites">Pending invite</string>
 
+    <string name="expires">Expires: </string>
+
     <string name="reminder">Reminder</string>
+
+    <string name="resend">Resend</string>
+
+    <string name="revoke">Revoke</string>
+
+    <string name="invite_code_redeemed">Invite code redeemed successfully</string>
+
+    <string name="invite_code_invalid">Invite code is invalid</string>
+
+    <string name="invite_declined">Invitation Declined</string>
+
+    <string name="invite_code_already_redeemed">Invite code is already redeemed</string>
+
+    <string name="invite_code_expired">Invite code is expired</string>
+
+    <string name="invitation_is_revoked">Invitation is revoked</string>
 
 
 </resources>

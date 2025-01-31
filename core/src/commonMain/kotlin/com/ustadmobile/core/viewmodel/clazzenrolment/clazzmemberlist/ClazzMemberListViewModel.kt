@@ -23,15 +23,19 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.domain.invite.ResendInviteUseCase
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
+import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel.InviteResult
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonDetails
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
+import com.ustadmobile.lib.db.entities.ClazzInvite
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
@@ -41,6 +45,7 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -54,10 +59,13 @@ data class ClazzMemberListUiState(
     val pendingStudentList: ListPagingSourceFactory<EnrolmentRequestAndPersonDetails> = {
         EmptyPagingSource()
     },
+    val pendingInviteList: ListPagingSourceFactory<ClazzInvite> = { EmptyPagingSource() },
 
     val addTeacherVisible: Boolean = false,
 
     val addStudentVisible: Boolean = false,
+
+    val pendingInviteListVisible: Boolean = false,
 
     val sortOptions: List<SortOrderOption> = listOf(
         SortOrderOption(MR.strings.first_name, ClazzEnrolmentDaoCommon.SORT_FIRST_NAME_ASC, true),
@@ -96,6 +104,7 @@ class ClazzMemberListViewModel(
 ): UstadListViewModel<ClazzMemberListUiState>(
     di, savedStateHandle, ClazzMemberListUiState(), ClazzDetailViewModel.DEST_NAME,
 ) {
+    private val resendInviteUseCase: ResendInviteUseCase by di.onActiveEndpoint().instance()
 
     private val approveOrDeclinePendingEnrolmentUseCase: IApproveOrDeclinePendingEnrolmentRequestUseCase by
         on(accountManager.activeLearningSpace).instance()
@@ -125,7 +134,14 @@ class ClazzMemberListViewModel(
     private val studentListPagingSource: ListPagingSourceFactory<PersonAndClazzMemberListDetails> = {
         getMembersAsPagingSource(ClazzEnrolment.ROLE_STUDENT)
     }
+    private val pendingInvitesPagingSource: () -> PagingSource<Int, ClazzInvite> = {
+        activeRepoWithFallback.clazzInviteDao().findPendingInviteByPersonUid(
+            ciPersonUid = accountManager.currentUserSession.userSession.usPersonUid,
+            clazzUid = clazzUid,
+            currentTime = systemTimeInMillis()
 
+        )
+    }
     private val pendingStudentListPagingSource: ListPagingSourceFactory<EnrolmentRequestAndPersonDetails> = {
         activeRepoWithFallback.enrolmentRequestDao().findPendingEnrolmentsForCourse(
             clazzUid = clazzUid,
@@ -159,6 +175,11 @@ class ClazzMemberListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
+                _uiState.update { prev ->
+                    prev.copy(
+                        pendingInviteList = pendingInvitesPagingSource
+                    )
+                }
                 launch {
                     activeRepoWithFallback.clazzDao().getClazzNameAndTerminologyAsFlow(clazzUid).collect { nameAndTerminology ->
                         parseAndUpdateTerminologyStringsIfNeeded(
@@ -188,7 +209,8 @@ class ClazzMemberListViewModel(
                         _uiState.update { prev ->
                             prev.copy(
                                 addTeacherVisible = it.firstPermission,
-                                addStudentVisible = it.secondPermission
+                                addStudentVisible = it.secondPermission,
+                                pendingInviteListVisible = it.secondPermission
                             )
                         }
                     }
@@ -301,7 +323,24 @@ class ClazzMemberListViewModel(
         }
         _refreshCommandFlow.tryEmit(RefreshCommand())
     }
+    fun onClickRevokeInvite(contact: String) {
+        viewModelScope.launch {
+            activeRepoWithFallback.clazzInviteDao().updateClazzInviteToRevokeInvite(contact)
+        }
+    }
 
+    fun onClickResendInvite(contact: String) {
+        viewModelScope.launch {
+            val result = resendInviteUseCase.invoke(
+                contact,
+                accountManager.currentUserSession.person.personUid
+            )
+
+            val invitation = Json.decodeFromString<InviteResult>(result)
+
+            snackDispatcher.showSnackBar(Snack(invitation.inviteSent))
+        }
+    }
     companion object {
 
         const val DEST_NAME = "CourseMembers"

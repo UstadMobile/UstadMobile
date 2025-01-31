@@ -6,12 +6,16 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,6 +40,7 @@ import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberDateFormat
 import com.ustadmobile.libuicompose.util.rememberDayOrDate
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import com.ustadmobile.libuicompose.util.rememberTimeFormatter
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
@@ -58,6 +63,8 @@ fun ClazzMemberListScreen(
         onClickPendingRequest = viewModel::onClickRespondToPendingEnrolment,
         onSortOrderChanged = viewModel::onSortOrderChanged,
         onClickFilterChip = viewModel::onClickFilterChip,
+        onClickRevokeInvite =  viewModel::onClickRevokeInvite,
+        onClickResendInvite = viewModel::onClickResendInvite,
     )
 }
 
@@ -73,6 +80,8 @@ fun ClazzMemberListScreen(
     ) -> Unit = {_, _ -> },
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
+    onClickRevokeInvite:(String) -> Unit,
+    onClickResendInvite:(String) -> Unit
 ) {
 
     val teacherListPager = rememberDoorRepositoryPager(
@@ -87,6 +96,11 @@ fun ClazzMemberListScreen(
         uiState.pendingStudentList, refreshCommandFlow
     )
     val pendingStudentListItems = pendingStudentListPager.lazyPagingItems
+
+    val pendingInvitesListPager = rememberDoorRepositoryPager(
+        uiState.pendingInviteList, refreshCommandFlow
+    )
+    val pendingInvitesListItems = pendingInvitesListPager.lazyPagingItems
 
     val timeFormatter = rememberTimeFormatter()
     val dateFormatter = rememberDateFormat(TimeZone.getDefault().id)
@@ -197,7 +211,7 @@ fun ClazzMemberListScreen(
                 )
             }
         }
-        
+
         ustadPagedItems(
             pagingItems = pendingStudentListItems,
             key = { Pair(3, it.enrolmentRequest?.erUid ?: -1) }
@@ -210,6 +224,25 @@ fun ClazzMemberListScreen(
                 dateFormatter = dateFormatter,
                 dayOfWeekStringMap = uiState.dayOfWeekStrings,
             )
+        }
+        if (uiState.pendingInviteListVisible){
+            item {
+                ListItem(
+                    headlineContent = {
+                        Text(text = stringResource(MR.strings.pending_invites))
+                    }
+                )
+            }
+            ustadPagedItems(
+                pagingItems = pendingInvitesListItems,
+                key = { it.ciUid ?: 0 }
+            ) {clazzInviteWithDaysRemaining->
+                PendingInvitesListItem(
+                    item = clazzInviteWithDaysRemaining,
+                    onClickResendInvite = onClickResendInvite,
+                    onClickRevokeInvite = onClickRevokeInvite
+                )
+            }
         }
     }
 }
@@ -234,7 +267,64 @@ fun ClazzMemberListScreen(
          }
      )
  }
-
+@Composable
+fun PendingInvitesListItem(
+    item: ClazzInvite?,
+    onClickResendInvite:(String)->Unit,
+    onClickRevokeInvite:(String)->Unit
+) {
+    var menuExpanded by remember { mutableStateOf(false) }
+    val expireTime = rememberFormattedDateTime(
+        timeInMillis = item?.inviteExpire ?: 0,
+        timeZoneId = kotlinx.datetime.TimeZone.currentSystemDefault().id,
+    )
+    ListItem(
+        modifier =
+        Modifier.clickable {
+        },
+        headlineContent = {
+            Text(
+                text = item?.inviteContact.toString(),
+                maxLines = 1,
+            )
+        },
+        supportingContent = {
+            Text(
+                text = stringResource(MR.strings.expires)+expireTime,
+                maxLines = 1,
+            )
+        },
+        trailingContent = {
+            IconButton(
+                onClick = { menuExpanded = true },
+            ) {
+                Icon(
+                    Icons.Default.MoreVert,
+                    contentDescription = stringResource(MR.strings.more_options)
+                )
+            }
+            DropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(MR.strings.resend)) },
+                    onClick = {
+                        menuExpanded = false
+                        item?.inviteContact?.let { onClickResendInvite(it) }
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(MR.strings.revoke)) },
+                    onClick = {
+                        menuExpanded = false
+                        item?.inviteContact?.let { onClickRevokeInvite(it) }
+                    }
+                )
+            }
+        },
+    )
+}
 @Composable
 fun PendingStudentListItem(
     request: EnrolmentRequestAndPersonDetails?,

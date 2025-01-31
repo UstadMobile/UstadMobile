@@ -592,6 +592,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             enrolIntoCourseUseCase = instance(),
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance<UmAppDataLayer>().repository,
+            systemImpl = instance(),
         )
     }
 

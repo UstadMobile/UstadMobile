@@ -1,10 +1,10 @@
 package com.ustadmobile.core.viewmodel.clazz.inviteredeem
 
-import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
-import org.kodein.di.on
 
 
 data class ClazzInviteRedeemUiState(
@@ -31,7 +30,8 @@ class ClazzInviteRedeemViewModel(
 
     val uiState: Flow<ClazzInviteRedeemUiState> = _uiState.asStateFlow()
 
-    private val clazzInviteRedeemUseCase: ClazzInviteRedeemUseCase by instance()
+    private val clazzInviteRedeemUseCase: ClazzInviteRedeemUseCase by di.onActiveEndpoint()
+        .instance()
 
     private val argInviteCode = savedStateHandle[ARG_INVITE_CODE]
         ?: throw IllegalArgumentException("no invite code")

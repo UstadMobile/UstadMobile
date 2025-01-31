@@ -1,7 +1,9 @@
 package com.ustadmobile.core.domain.invite
 
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzInvite
@@ -9,7 +11,8 @@ import com.ustadmobile.lib.db.entities.ClazzInvite
 class ClazzInviteRedeemUseCase(
     private val enrolIntoCourseUseCase: EnrolIntoCourseUseCase,
     private val db: UmAppDatabase,
-    private val repo: UmAppDatabase?
+    private val repo: UmAppDatabase?,
+    private val systemImpl: UstadMobileSystemImpl,
 ) {
     suspend operator fun invoke(
         inviteCode: String,
@@ -18,7 +21,7 @@ class ClazzInviteRedeemUseCase(
     ): ClazzRedeemResult {
         val effectiveDb = (repo ?: db)
         val clazzInviteWithTimeZone = effectiveDb.clazzInviteDao().findClazzInviteEntityForInviteToken(inviteCode)
-                ?: return ClazzRedeemResult("Invite code is invalid")
+                ?: return ClazzRedeemResult(systemImpl.getString(MR.strings.invite_code_invalid))
 
         val clazz = clazzInviteWithTimeZone.clazzInvite?.ciUid?.let {
 
@@ -26,14 +29,18 @@ class ClazzInviteRedeemUseCase(
         }
 
         if (clazz != null) {
-            return ClazzRedeemResult("Invite code is already redeemed")
+            return ClazzRedeemResult(systemImpl.getString(MR.strings.invite_code_already_redeemed))
         } else {
             clazzInviteWithTimeZone.clazzInvite?.let { clazzInvite ->
 
                 if (isAccepting) {
                     if (clazzInvite.inviteExpire < systemTimeInMillis()){
                         return ClazzRedeemResult("Invite code is expired")
-                    }else{
+                    }
+                    else if(clazzInvite.inviteStatus==ClazzInvite.STATUS_REVOKED){
+                        return ClazzRedeemResult(systemImpl.getString(MR.strings.invitation_is_revoked))
+                    }
+                    else{
                         enrolIntoCourseUseCase.invoke(
                             enrolment = ClazzEnrolment(
                                 clazzUid = clazzInvite.ciClazzUid,
@@ -50,7 +57,7 @@ class ClazzInviteRedeemUseCase(
 
                         //Update the status of clazz invite that invite code is accepted
                         effectiveDb.clazzInviteDao().updateInviteStatus(ClazzInvite.STATUS_ACCEPTED, clazzInvite.ciUid)
-                        return ClazzRedeemResult("Invite code redeemed successfully")
+                        return ClazzRedeemResult(systemImpl.getString(MR.strings.invite_code_redeemed))
                     }
 
 
@@ -58,10 +65,10 @@ class ClazzInviteRedeemUseCase(
 
                     //Update the status of clazz invite that invite code is declined
                     effectiveDb.clazzInviteDao().updateInviteStatus(ClazzInvite.STATUS_DECLINED, clazzInvite.ciUid)
-                    return ClazzRedeemResult("Invitation Declined")
+                    return ClazzRedeemResult(systemImpl.getString(MR.strings.invite_declined))
 
                 }
-            } ?: return ClazzRedeemResult("Invite code is invalid")
+            } ?: return ClazzRedeemResult(systemImpl.getString(MR.strings.invite_code_invalid))
 
         }
 

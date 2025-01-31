@@ -58,8 +58,9 @@ expect abstract class ClazzInviteDao : BaseDao<ClazzInvite> {
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
     )
-    @Query("""SELECT * FROM ClazzInvite WHERE ciPersonUid = :ciPersonUid AND ciClazzUid = :clazzUid
-      AND inviteExpire > :currentTime AND inviteStatus = 0""")
+    @Query("""SELECT * FROM ClazzInvite 
+                 WHERE ciPersonUid = :ciPersonUid AND ciClazzUid = :clazzUid 
+              AND inviteExpire > :currentTime AND inviteStatus = 0""")
     abstract fun findPendingInviteByPersonUid(
         ciPersonUid:Long,
         clazzUid: Long,

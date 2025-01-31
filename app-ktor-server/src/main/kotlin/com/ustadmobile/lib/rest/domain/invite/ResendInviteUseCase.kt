@@ -3,9 +3,9 @@ package com.ustadmobile.lib.rest.domain.invite
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadUrlComponents
+import com.ustadmobile.core.viewmodel.clazz.inviteredeem.ClazzInviteRedeemViewModel
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
-import com.ustadmobile.core.viewmodel.clazz.redeem.ClazzInviteViewModel
 import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.Serializable
@@ -41,7 +41,7 @@ class ResendInviteUseCase(
 
             val inviteLink =
                 UstadUrlComponents(
-                    learningSpace.url, ClazzInviteViewModel.DEST_NAME,
+                    learningSpace.url, ClazzInviteRedeemViewModel.DEST_NAME,
                     "inviteCode=${clazzInvite.inviteToken}"
                 ).fullUrl()
 

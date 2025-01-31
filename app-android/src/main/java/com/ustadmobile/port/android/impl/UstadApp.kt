@@ -1085,6 +1085,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 enrolIntoCourseUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance<UmAppDataLayer>().repository,
+                systemImpl = instance(),
             )
         }
 
