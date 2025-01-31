@@ -17,42 +17,16 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-# Download student list
-- runFlow:
-    file: "common/download_file_via_browser.yaml"
+- runScript:
+    file: "common/import_users_via_http.js"
     env:
-      TESTFILENAME: "Ustad_Students_List.csv"
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
 # download the assignment file
 - runFlow:
     file:  "common/download_file_via_browser.yaml"
     env:
       TESTFILENAME: "Assignment_File.pdf"
-# Admin login
-- runFlow: "common/clear_state_and_get_started.yaml"
-- runFlow: "common/select_site.yaml"
-- runFlow:
-    file: "common/admin_login.yaml"
-# add new course
-- runFlow:
-    file: "common/add_course.yaml"
-    env:
-      TESTCOURSENAME: "Test Course Block"
-# add new teacher using flow - add_new_teacher_inside_course ---------
-- runFlow:
-    file: "common/add_new_teacher_inside_course.yaml"
-    env:
-      TESTCOURSENAME: ${TESTCOURSENAME}
-      TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "1"
-      USERNAME: "teach1"
-      GENDER: "Female"
-      PASSWORD: "testt1"
-# add students to the course through bulk import using .csv file
-- runFlow:
-    file: "common/student_bulk_upload_csv.yaml"
-    env:
-      TESTFILENAME: "Ustad_Students_List.csv"
-# teacher add an assignment block
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
