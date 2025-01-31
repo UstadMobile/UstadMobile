@@ -10,11 +10,13 @@ import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.util.ext.duplicates
+import com.ustadmobile.core.util.ext.toLocalMidnight
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
 import io.github.aakira.napier.Napier
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -189,7 +191,11 @@ class BulkAddPersonsUseCaseImpl(
             }
 
             nameList.filter { it !in clazzNamesFound }.forEach { clazzName ->
-                val newClazz = Clazz(clazzName = clazzName).also {
+                val newClazz = Clazz(
+                    clazzName = clazzName,
+                ).also {
+                    it.clazzStartTime = Clock.System.now()
+                        .toLocalMidnight(TimeZone.currentSystemDefault()).toEpochMilliseconds()
                     it.clazzUid = createNewClazzUseCase(it)
                 }
 

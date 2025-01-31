@@ -19,7 +19,7 @@ onFlowComplete:
 ---
 # Add students to the course through bulk import using .csv file
 - runScript:
-    file: "common/set_bulkadd.js"
+    file: "common/import_users_via_http.js"
     env:
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTFILENAME: "Ustad_Teacher_and_Students.csv"
