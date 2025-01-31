@@ -413,12 +413,29 @@ expect abstract class StatementDao {
                WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
                WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
                ELSE ''
-               END ASC,
+               END ASC,   CASE :sortOrder
+        WHEN 4 THEN maxScore
+        ELSE ''
+    END ASC,
+    CASE :sortOrder
+        WHEN 3 THEN maxScore
+        ELSE ''
+    END DESC
+          
                CASE(:sortOrder)
                WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
                WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
                ELSE ''
-               END DESC
+               END DESC,
+                  CASE :sortOrder
+        WHEN 5 THEN maxScore
+        ELSE ''
+    END ASC,
+    CASE :sortOrder
+        WHEN 6 THEN maxScore
+        ELSE ''
+    END DESC
+          
            
             
 """)
