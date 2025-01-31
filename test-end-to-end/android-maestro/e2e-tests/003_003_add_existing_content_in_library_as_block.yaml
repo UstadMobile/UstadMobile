@@ -4,6 +4,7 @@ tags:
 env:
   TESTRESULTSDIR: "build/reports/maestro/003_003_add_existing_content_in_library_as_block/Screenshots"
   TESTNAME: "003_003_add_existing_content_in_library_as_block"
+  TESTCOURSENAME: "Test Course Block"
 onFlowStart:
   - startRecording: 002_001_admin_add_new_course_and_teacher
   - runScript:
@@ -23,6 +24,11 @@ onFlowComplete:
     file: "common/download_file_via_browser.yaml"
     env:
       TESTFILENAME: "Epub_Content1.epub"
+- runScript:
+    file: "common/import_users_via_http.js"
+    env:
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
 - runFlow:
     file: "common/clear_login_and_add_content.yaml"
     env:
@@ -40,33 +46,7 @@ onFlowComplete:
     env:
       TESTFILENAME: Epub_Content1.epub
 - tapOn: "SAVE"
-#---------add course ---------#
-- runFlow:
-    file: "common/add_course.yaml"
-    env:
-      TESTCOURSENAME: "Existing Content Block Test"
-#----add teacher to the course----#
-- runFlow:
-    file: "common/add_new_teacher_inside_course.yaml"
-    env:
-      TESTCOURSENAME: "Existing Content Block Test"
-      TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "1"
-      USERNAME: "teach1"
-      GENDER: "Female"
-      PASSWORD: "testt1"
-#--- admin add epub content already in library to course block----#
-- repeat:
-    while:
-      notVisible: "Course"
-    commands:
-      - back
-- tapOn: "Course"
-- runFlow:
-    file: "common/add_existing_content_block_to_course.yaml"
-- tapOn: "E-book"
-- tapOn: "Done"
-- tapOn: "SAVE"
+- assertVisible: "Library"
 
 # teacher add existing content in library to course as a content block
 - runFlow: "common/clear_state_and_get_started.yaml"
@@ -77,7 +57,12 @@ onFlowComplete:
       USERNAME: "teach1"
       PASSWORD: "testt1"
 - tapOn: "courses"
-- tapOn: "Existing Content Block Test"
+- tapOn: ${TESTCOURSENAME}
+- runFlow:
+    file: "common/add_existing_content_block_to_course.yaml"
+- tapOn: "E-book"
+- tapOn: "Done"
+- tapOn: "SAVE"
 - runFlow:
     file: "common/add_existing_content_block_to_course.yaml"
 - tapOn: "Interactive"

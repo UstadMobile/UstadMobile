@@ -18,11 +18,6 @@ onFlowComplete:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 
 ---
-# Download student list
-- runFlow:
-    file: "common/download_file_via_browser.yaml"
-    env:
-      TESTFILENAME: "Ustad_Students_List.csv"
 # Download test file
 - runFlow:
     file: "common/download_file_via_browser.yaml"
