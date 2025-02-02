@@ -3,29 +3,29 @@ env:
   TESTRESULTSDIR: "build/results/Screenshots/001_001_admin_can_add_content_003-video"
 onFlowStart:
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 # Admin login
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/admin_login.yaml"
+    file: "common/admin_login.yaml"
 # add new course
 - runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/add_course.yaml"
     env:
       TESTCOURSENAME: "Test Course Block"
 # add new teacher using flow - add_new_teacher_inside_course ---------
 - runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
+    file: "common/add_new_teacher_inside_course.yaml"
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       TEACHERFIRSTNAME: "Teacher"
@@ -35,16 +35,16 @@ onFlowComplete:
       PASSWORD: "test"
 # add students to the course through bulk import using .csv file
 - runFlow:
-    file: "../common/student_bulk_upload_csv.yaml"
+    file: "common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 # teacher add an assignment block
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "t1"
       PASSWORD: "test"
@@ -83,20 +83,20 @@ onFlowComplete:
     direction: DOWN
 - tapOn: "Deadline"
 - runScript:
-    file: "../common/setDate.js"
+    file: "common/setDate.js"
 - inputText: ${output.yesterdayDate}
 - tapOn: "hh:mm"
 - runScript:
-    file: "../common/setDate.js"
+    file: "common/setDate.js"
 - inputText: ${output.currentTime}
 - hideKeyboard
 - tapOn: "End of grace period"
 - runScript:
-    file: "../common/setDate.js"
+    file: "common/setDate.js"
 - inputText: ${output.currentDate}
 - tapOn: "hh:mm"
 - runScript:
-    file: "../common/setDate.js"
+    file: "common/setDate.js"
 - inputText: ${output.testTime}
 - hideKeyboard
 - tapOn: "Late submission penalty"
@@ -114,10 +114,10 @@ onFlowComplete:
 - assertNotVisible: "Done"
 - tapOn: "Save"
 # student open the assignment submission page before the deadline
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "s1"
       PASSWORD: "tests1"

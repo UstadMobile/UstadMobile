@@ -1,3 +1,7 @@
+/*
+ * Disabled 28/Jan/25 - failed to apply penalty. Might be fixed in dev-simplified-onboarding
+*/
+
 describe('WEB_004_005_assignment_after_deadline_and_before_grace_Period', () => {
   before(() => {
     // Start Test Server
