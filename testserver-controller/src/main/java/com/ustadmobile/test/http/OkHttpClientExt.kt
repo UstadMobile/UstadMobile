@@ -6,7 +6,7 @@ import okhttp3.Request
 fun OkHttpClient.waitForUrl(
     url: String,
     requestTimeout: Long = 1_000,
-    totalTimeout: Long = 15_000,
+    totalTimeout: Long = 6_000,
     interval: Long = 500,
 ) {
     val timeNow = System.currentTimeMillis()
