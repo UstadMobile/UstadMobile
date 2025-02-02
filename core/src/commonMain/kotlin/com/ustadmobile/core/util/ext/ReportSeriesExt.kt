@@ -39,15 +39,23 @@ data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParam
  *      X Axis is the day
  *      Subgrouped by clazz
  *
+ *      The user wants the total usage time per day, subgrouped by class.
+ *
+ * The query would look something like:
  * SELECT SUM(ResultSource.resultDuration) AS yAxis,
  *        -- Turn the timestamp into the day
  *        GROUP BY (strftime('%d/%m/%Y', ResultSource.timestamp/1000, 'unixepoch')) AS xAxis,
  *        GROUP BY ResultSource.clazzUid AS subgroup
  *
  * So we should get results like:
+ *   yAxis   | xAxis      | subgroup
+ *   --------------------------------
+ *   20000   | 01/01/2024 | clazzUid1
+ *   10000   | 01/01/2024 | clazzUid2
+ *   50000   | 01/02/2024 | clazzUid1
+ *   20000   | 01/02/2024 | clazzUid2
  *
- *   yAxis   | xAxis | subGroup
- *   20k(ms) | 01/01 | clazzUid
+ * Note: duration columns are always stored in milliseconds.  The subgroup column is optional.
  */
 fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): QueryParts {
 

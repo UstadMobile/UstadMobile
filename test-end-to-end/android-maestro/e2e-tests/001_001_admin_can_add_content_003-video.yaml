@@ -1,26 +1,27 @@
 appId: com.toughra.ustadmobile
+tags:
+  - contentVideo
+  - contentTest
 env:
   TESTRESULTSDIR: "build/reports/maestro/001_001_admin_can_add_content_003-video/Screenshots"
 onFlowStart:
   - startRecording: 001_001_admin_can_add_content_003-video
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow:
-    file: "../common/clear_login_and_add_content.yaml"
+    file: "common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Video_Content.mp4
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/content_add_to_library"
 - tapOn: "Video"
@@ -33,7 +34,7 @@ onFlowComplete:
 - tapOn: Open
 - assertVisible: "Play"
 - runFlow:
-    file: "../common/login_download_and_open_content.yaml"
+    file: "common/login_download_and_open_content.yaml"
 - tapOn: "Library"
 - extendedWaitUntil:
     visible: "Video"

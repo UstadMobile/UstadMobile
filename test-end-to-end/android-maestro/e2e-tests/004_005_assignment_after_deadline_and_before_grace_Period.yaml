@@ -1,56 +1,36 @@
 appId: com.toughra.ustadmobile
+tags:
+  - assignments
 env:
   TESTRESULTSDIR: "build/reports/maestro/004_005_assignment_after_deadline_and_before_grace_Period/Screenshots"
 onFlowStart:
   - startRecording: 004_005_assignment_after_deadline_and_before_grace_Period
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-# Admin login
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
-- runFlow:
-    file: "../common/admin_login.yaml"
-# add new course
-- runFlow:
-    file: "../common/add_course.yaml"
+- runScript:
+    file: "common/import_users_via_http.js"
     env:
-      TESTCOURSENAME: "Test Course Block"
-# add new teacher using flow - add_new_teacher_inside_course ---------
-- runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
-    env:
-      TESTCOURSENAME: ${TESTCOURSENAME}
-      TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "1"
-      USERNAME: "teach1"
-      GENDER: "Female"
-      PASSWORD: "testt1"
-# add students to the course through bulk import using .csv file
-- runFlow:
-    file: "../common/student_bulk_upload_csv.yaml"
-    env:
-      TESTFILENAME: "Ustad_Students_List.csv"
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      TESTSERIAL: ${TESTSERIAL}
-# teacher add an assignment block
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
+
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "teach1"
       PASSWORD: "testt1"
-- tapOn: "Courses"
+
 - tapOn: "Test Course Block"
 # edit the course to add blocks
 - tapOn:
@@ -85,20 +65,20 @@ onFlowComplete:
     direction: DOWN
 - tapOn: "Deadline"
 - runScript:
-    file: "../common/setDate.js"
+    file: "common/setDate.js"
 - inputText: ${output.yesterdayDate}
 - tapOn: "hh:mm"
 - runScript:
-    file: "../common/setDate.js"
+    file: "common/setDate.js"
 - inputText: ${output.currentTime}
 - hideKeyboard
 - tapOn: "End of grace period"
 - runScript:
-    file: "../common/setDate.js"
+    file: "common/setDate.js"
 - inputText: ${output.tomorrowDate}
 - tapOn: "hh:mm"
 - runScript:
-    file: "../common/setDate.js"
+    file: "common/setDate.js"
 - inputText: ${output.currentTime}
 - hideKeyboard
 - tapOn: "Late submission penalty"
@@ -116,10 +96,10 @@ onFlowComplete:
 - assertNotVisible: "Done"
 - tapOn: "Save"
 # student submit assignment
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"
@@ -146,10 +126,10 @@ onFlowComplete:
 - tapOn: "Submit"
 - assertVisible: "Submitted"
 # teacher view and mark the assignment submitted by student
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "teach1"
       PASSWORD: "testt1"
@@ -183,10 +163,10 @@ onFlowComplete:
     direction: UP
 - assertVisible: "8.1/10.0 Points (10% late penalty)"
 # student able to view his grade
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"

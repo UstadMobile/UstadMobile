@@ -2,6 +2,7 @@ package com.ustadmobile.test.http
 
 import com.ustadmobile.lib.util.SysPathUtil
 import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_LEARNINGSPACE_HOST
+import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_LEARNINGSPACE_PORTRANGE
 import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_URL
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
@@ -28,6 +29,8 @@ enum class RunMode {
 }
 
 const val TESTCONTROLLER_PATH = "testcontroller"
+
+const val START_SERVER_MAX_ATTEMPTS = 4
 
 
 /**
@@ -57,6 +60,15 @@ fun Application.testServerController() {
     val controllerUrl = environment.config.property(PARAM_NAME_URL).getString()
     val controllerUrlObj = URL(controllerUrl)
     val learningSpaceHostPropVal = environment.config.propertyOrNull(PARAM_NAME_LEARNINGSPACE_HOST)?.getString()
+    val learningSpaceHostRangePropVal = environment.config
+        .propertyOrNull(PARAM_NAME_LEARNINGSPACE_PORTRANGE)?.getString() ?: "$DEFAULT_FROM_PORT-$DEFAULT_UNTIL_PORT"
+    val split = learningSpaceHostRangePropVal.split("-").map { it.toInt() }
+    if(split.size != 2) {
+        throw IllegalArgumentException("$PARAM_NAME_LEARNINGSPACE_PORTRANGE must be in the form of x-y e.g. $DEFAULT_FROM_PORT-$DEFAULT_UNTIL_PORT")
+    }
+
+    val learningSpaceFromPort = split.first()
+    val learningSpaceUntilPort = split.last()
 
     val learningSpaceHost = when {
         mode == RunMode.CYPRESS -> InetAddress.getByName(controllerUrlObj.host)
@@ -115,10 +127,12 @@ fun Application.testServerController() {
     }
 
     fun stopAllRunningServers() {
+        println("TestServerController: stopping all servers")
         while(runningServers.isNotEmpty()) {
             val serverToStop = runningServers.removeAt(0)
             serverToStop.stop()
         }
+        println("TestServerController: all stopped")
     }
 
     install(CORS) {
@@ -204,39 +218,51 @@ fun Application.testServerController() {
              */
             get("start") {
                 try {
+                    println("TestServerController: start server requested")
                     if(mode == RunMode.CYPRESS) {
                         stopAllRunningServers()
                     }
 
-                    val serverRunner = ServerRunner(
-                        mode = mode,
-                        okHttpClient = okHttpClient,
-                        serverDir = serverDir,
-                        runServerCommand = call.application.environment.config
-                            .property("ktor.testServer.command").getString(),
-                        controllerUrl = controllerUrlObj,
-                        learningSpaceHost = learningSpaceHost,
-                        baseDataDir = baseDataDir,
-                    )
+                    for(i in 1..START_SERVER_MAX_ATTEMPTS) {
+                        try {
+                            val serverRunner = ServerRunner(
+                                mode = mode,
+                                okHttpClient = okHttpClient,
+                                serverDir = serverDir,
+                                controllerUrl = controllerUrlObj,
+                                learningSpaceHost = learningSpaceHost,
+                                baseDataDir = baseDataDir,
+                                fromPort = learningSpaceFromPort,
+                                untilPort = learningSpaceUntilPort,
+                            )
 
-                    runningServers.add(serverRunner)
-                    serverRunner.start()
+                            runningServers.add(serverRunner)
+                            serverRunner.start()
 
-                    call.respond(
-                        ServerInfo(
-                            url = serverRunner.learningSpaceUrl,
-                            port = Url(serverRunner.learningSpaceUrl).port,
-                            extraInfo = "Using port ${serverRunner.port} pid=${serverRunner.pid}",
-                            adminUsername = "admin",
-                            //This is currently set in testserver-controller/application.conf,
-                            //however on learningspace branches it can be randomly generated.
-                            adminPassword = "testpass",
-                        )
-                    )
+                            call.respond(
+                                ServerInfo(
+                                    url = serverRunner.learningSpaceUrl,
+                                    port = Url(serverRunner.learningSpaceUrl).port,
+                                    extraInfo = "Using port ${serverRunner.port} pid=${serverRunner.pid}",
+                                    adminUsername = "admin",
+                                    //This is currently set in testserver-controller/application.conf,
+                                    //however on learningspace branches it can be randomly generated.
+                                    adminPassword = "testpass",
+                                )
+                            )
+                            break
+                        }catch(e: Throwable) {
+                            println("TestServerController: attempt: $i failed to start server - will try again: ${e.message}")
+
+                            if(i == START_SERVER_MAX_ATTEMPTS)
+                                throw IllegalStateException("Failed to start server after $i attempts", e)
+                        }
+                    }
                 }catch(e: Throwable) {
+                    println("TestServerController: Failed to start")
                     call.respondText(
                         status = HttpStatusCode.InternalServerError,
-                        text = "ERROR: ${e.message} \n ${e.stackTraceToString()}",
+                        text = "ERROR Starting Server: ${e.message} \n ${e.stackTraceToString()}",
                         contentType = ContentType.Text.Plain,
                     )
                 }
@@ -247,38 +273,40 @@ fun Application.testServerController() {
              * properly save things as needed. Using the shutdown hook does not seem to allow video to
              * finish properly
              */
-            get("/stop") {
-                val learningSpaceUrlToStop = call.request.queryParameters["url"]
+            get("stop") {
+                if(mode == RunMode.CYPRESS) {
+                    call.respondText("OK - Ignoring in Cypress mode. Will stop before running again")
+                }
+                val learningSpaceUrlToStopParam = call.request.queryParameters["url"]
+                call.response.header("cache-control", "no-cache")
 
-                if(learningSpaceUrlToStop == null) {
+                if(learningSpaceUrlToStopParam == null) {
                     stopAllRunningServers()
                     call.respondText(
                         status = HttpStatusCode.OK,
                         contentType = ContentType.Text.Plain,
                         text = "OK - stopped all servers"
                     )
-                }
-
-                val serverToStop = runningServers.firstOrNull {
-                    it.learningSpaceUrl == learningSpaceUrlToStop
-                }
-
-                call.response.header("cache-control", "no-cache")
-
-                if(serverToStop != null) {
-                    serverToStop.stop()
-                    runningServers.remove(serverToStop)
-                    call.respondText(
-                        status = HttpStatusCode.OK,
-                        contentType = ContentType.Text.Plain,
-                        text = "OK - stopped"
-                    )
                 }else {
-                    call.respondText(
-                        status = HttpStatusCode.BadRequest,
-                        contentType = ContentType.Text.Plain,
-                        text = "Could not stop - url to stop was specified but not found $learningSpaceUrlToStop"
-                    )
+                    val serverToStop = runningServers.firstOrNull {
+                        it.learningSpaceUrl == learningSpaceUrlToStopParam
+                    }
+
+                    if(serverToStop != null) {
+                        serverToStop.stop()
+                        runningServers.remove(serverToStop)
+                        call.respondText(
+                            status = HttpStatusCode.OK,
+                            contentType = ContentType.Text.Plain,
+                            text = "OK - stopped"
+                        )
+                    }else {
+                        call.respondText(
+                            status = HttpStatusCode.BadRequest,
+                            contentType = ContentType.Text.Plain,
+                            text = "Could not stop - url to stop was specified but not found $learningSpaceUrlToStopParam"
+                        )
+                    }
                 }
             }
         }
