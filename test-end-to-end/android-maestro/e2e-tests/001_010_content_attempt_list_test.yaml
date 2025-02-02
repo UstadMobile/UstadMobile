@@ -4,28 +4,28 @@ env:
 onFlowStart:
   - startRecording: 001_010_content_attempt_list_test
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/admin_login.yaml"
+    file: "common/admin_login.yaml"
 # add new course
 - runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/add_course.yaml"
     env:
       TESTCOURSENAME: "Test Course Block"
 - runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
+    file: "common/add_new_teacher_inside_course.yaml"
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       TEACHERFIRSTNAME: "Teacher"
@@ -35,14 +35,14 @@ onFlowComplete:
       PASSWORD: "testt1"
 # add students to the course through bulk import using .csv file
 - runFlow:
-    file: "../common/student_bulk_upload_csv.yaml"
+    file: "common/student_bulk_upload_csv.yaml"
     env:
       TESTFILENAME: "Ustad_Students_List.csv"
 - back
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - runFlow:
-    file: "../common/add_new_content_block_to_course.yaml"
+    file: "common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: "H5p_Content.h5p"
 - scrollUntilVisible:
@@ -60,13 +60,13 @@ onFlowComplete:
     timeout: 30000
 - tapOn: Open
 - runFlow:
-    file: "../common/chrome-first-run-check.yaml"
+    file: "common/chrome-first-run-check.yaml"
 - assertVisible: "Check"
 - tapOn: "Close tab"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - runFlow:
-    file: "../common/add_new_content_block_to_course.yaml"
+    file: "common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: "Video_Content.mp4"
 - scrollUntilVisible:
@@ -82,10 +82,10 @@ onFlowComplete:
     timeout: 20000
 - tapOn: Open
 - assertVisible: "Play"
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"
@@ -106,7 +106,7 @@ onFlowComplete:
 - tapOn: "True/False Question"
 - tapOn: Open
 - runFlow:
-    file: "../common/chrome-first-run-check.yaml"
+    file: "common/chrome-first-run-check.yaml"
 - tapOn: "Yes "
 - tapOn: "Check"
 - tapOn: "Close tab"
@@ -146,10 +146,10 @@ onFlowComplete:
     text: "100% Completion"
     index: 1
 
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "teach1"
       PASSWORD: "testt1"
@@ -189,10 +189,10 @@ onFlowComplete:
 - assertVisible:
     text: "100% Completion"
     index: 1
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "stud2"
       PASSWORD: "tests2"
