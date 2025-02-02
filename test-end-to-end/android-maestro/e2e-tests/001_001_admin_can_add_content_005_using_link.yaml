@@ -1,29 +1,41 @@
 appId: com.toughra.ustadmobile
 tags:
-  - contentH5p
   - contentTest
+  - contentViaLink
 env:
-  TESTRESULTSDIR: "build/reports/maestro/001_001_admin_can_add_content_001-h5p/Screenshots"
+  TESTRESULTSDIR: "build/results/Screenshots/001_001_admin_can_add_content_003-video"
 onFlowStart:
-  - startRecording: 001_001_admin_can_add_content_001-h5p
   - runScript:
       file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
-  - stopRecording
   - runScript:
       file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+# get started
+- launchApp
+- tapOn: "GET STARTED"
+# select site
+- runFlow: "common/select_site.yaml"
+# admin login
 - runFlow:
-    file: "common/clear_login_and_add_content.yaml"
-    env:
-      TESTFILENAME: "H5p_Content.h5p"
-- tapOn: "SAVE"
+    file: "common/admin_login.yaml"
+# adding content to library
+- tapOn: "Library"
+- tapOn:
+    id: "floating_action_button"
+# download folder and download content from inside folder
+- tapOn: "From link"
+- tapOn: "Enter Url*"
+- inputText: "${output.testServerControllerUrl}testcontroller/test-files/content/H5p_Content.h5p"
+- tapOn: "Next"
+- assertVisible: "True/False Question"
 - takeScreenshot: "${TESTRESULTSDIR}/content_add_to_library"
+- tapOn: "SAVE"
 - tapOn: "True/False Question"
 - extendedWaitUntil:
     notVisible: "Importing"

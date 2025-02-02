@@ -1,10 +1,11 @@
 appId: com.toughra.ustadmobile
 tags:
   - assignments
+  - courseComments
 env:
-  TESTRESULTSDIR: "build/reports/maestro/004_006_assignment_grace_period_finished/Screenshots"
+  TESTRESULTSDIR: "build/reports/maestro/004_002_users_add_course_comments/Screenshots"
 onFlowStart:
-  - startRecording: 004_006_assignment_grace_period_finished
+  - startRecording: "004_002_users_add_course_comments"
   - runScript:
       file: "common/startserver.js"
       env:
@@ -31,7 +32,6 @@ onFlowComplete:
       USERNAME: "teach1"
       PASSWORD: "testt1"
 - tapOn: "Test Course Block"
-
 # edit the course to add blocks
 - tapOn:
     id: "floating_action_button"
@@ -61,31 +61,6 @@ onFlowComplete:
 - tapOn: "Done"
 - scrollUntilVisible:
     element:
-      text: "Deadline"
-    direction: DOWN
-- tapOn: "Deadline"
-- runScript:
-    file: "common/setDate.js"
-- inputText: ${output.yesterdayDate}
-- tapOn: "hh:mm"
-- runScript:
-    file: "common/setDate.js"
-- inputText: ${output.currentTime}
-- hideKeyboard
-- tapOn: "End of grace period"
-- runScript:
-    file: "common/setDate.js"
-- inputText: ${output.currentDate}
-- tapOn: "hh:mm"
-- runScript:
-    file: "common/setDate.js"
-- inputText: ${output.delayTime}
-- hideKeyboard
-- tapOn: "Late submission penalty"
-- inputText: "10"
-- hideKeyboard
-- scrollUntilVisible:
-    element:
       text: "Submission policy"
     direction: DOWN
 - assertVisible: "Must submit all at once"
@@ -95,7 +70,16 @@ onFlowComplete:
     text: "Done"
 - assertNotVisible: "Done"
 - tapOn: "Save"
-# student not able to view submit button
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- tapOn: "Add a class comment"
+- inputText: "Comment from teacher"
+- hideKeyboard
+- tapOn: "Send"
+# student add course comment
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
@@ -110,4 +94,13 @@ onFlowComplete:
       text: "Assignment 1"
     direction: DOWN
 - tapOn: "Assignment 1"
-- assertNotVisible: "Submit"
+- scrollUntilVisible:
+    element:
+      text: "Add a class comment"
+    direction: DOWN
+- tapOn: "Add a class comment"
+- inputText: "Comment from student"
+- hideKeyboard
+- tapOn: "Send"
+- assertVisible: "Comment from student"
+- assertVisible: "Comment from teacher"
