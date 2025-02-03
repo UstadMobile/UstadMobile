@@ -8,12 +8,7 @@ onFlowStart:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
-onFlowComplete:
-  - stopRecording
-  - runScript:
-      file: "common/stopserver.js"
-      env:
-        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+
 ---
 - runScript:
     file: "common/import_users_via_http.js"
