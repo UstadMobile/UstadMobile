@@ -1,4 +1,5 @@
 username,givenName,familyName,sex,dateOfBirth,identifier,email,phone,password,courses-student-enrolments,courses-teacher-enrolments
+teach1,Teacher,1,female,2009-01-01,Project-ID,teacher@email.com,12345678900,testt1,,Test Course Block
 stud1,Student,1,female,2009-01-01,Project-ID,student1@email.com,12345678900,tests1,Test Course Block,
 stud2,Student,2,male,2009-01-02,Project-ID,student2@email.com,12345678901,tests2,Test Course Block,
 stud3,Student,3,female,2009-01-03,Project-ID,student3@email.com,12345678902,tests3,Test Course Block,
