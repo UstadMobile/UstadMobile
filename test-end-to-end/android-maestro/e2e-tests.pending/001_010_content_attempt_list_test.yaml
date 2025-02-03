@@ -1,0 +1,126 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_010_content_attempt_list_test"
+  TESTNAME: "001_010_content_attempt_list_test"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+      TESTNAME: ${TESTNAME}
+- runFlow:
+    file: "../common/clear_login_and_add_content.yaml"
+    env:
+      TESTFILENAME: Video_Content.mp4
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- tapOn: "Video"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 30000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 30000
+# add new course
+- runFlow:
+    file: "../common/add_course.yaml"
+    env:
+      TESTCOURSENAME: "Test Course Block"
+- runFlow:
+    file: "../common/add_new_teacher_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      TEACHERFIRSTNAME: "Teacher"
+      TEACHERLASTNAME: "1"
+      USERNAME: "teach1"
+      GENDER: "Female"
+      PASSWORD: "testt1"
+- runFlow:
+    file: "../common/add_new_student_inside_course.yaml"
+    env:
+      TESTCOURSENAME: ${TESTCOURSENAME}
+      STUDENTFIRSTNAME: "Student"
+      STUDENTLASTNAME: "1"
+      USERNAME: "stud1"
+      GENDER: "Female"
+      PASSWORD: "tests1"
+- back
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- runFlow:
+    file: "../common/add_new_content_block_to_course.yaml"
+    env:
+      TESTFILENAME: "H5p_Content.h5p"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- scrollUntilVisible:
+    element:
+      text:  "True/False Question"
+    direction: DOWN
+- assertVisible:
+    text:  "True/False Question"
+- tapOn: "True/False Question"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 30000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 30000
+- tapOn: Open
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+  # Verify student able to see attempts made in library
+- assertVisible: "Test Course Block"
+- tapOn: "Library"
+- tapOn: "Video"
+- tapOn: Open
+- tapOn: "Play"
+- extendedWaitUntil:
+    visible: "Play"
+    timeout: 20000
+- back
+- tapOn: "Attempts"
+- tapOn: "Student 1"
+- tapOn:
+    text: "Completed"
+    index: 0
+- assertVisible: "Completed"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+- tapOn: Open
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- tapOn: "Yes "
+- tapOn: "Check"
+- tapOn: "Close tab"
+- tapOn: "Attempts"
+- assertVisible: "Student 1"
+- assertVisible: "100% Score"
+- tapOn: "Student 1"
+- tapOn:
+    text: "Passed"
+- runFlow: "../common/clear_state_and_get_started.yaml"
+- runFlow: "../common/select_site.yaml"
+- runFlow:
+    file: "../common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+- tapOn: "Attempts"
+- assertVisible: "100% Completion"
+- tapOn: "Student 1"
+- tapOn:
+    text: "Scored 100%"
+    index: 0
