@@ -42,7 +42,7 @@ it('Admin user add content to the library', () => {
    cy.get("#add_content_block").click()
    cy.contains('Import from file').click()
    cy.get('input[type="file"]')
-     .selectFile('../test-files/content/H5p_Content2.h5p',{force: true})
+     .selectFile('../test-files/content/H5p_Content.h5p',{force: true})
 
 //Continue import
    cy.contains('#actionBarButton', 'Next').click()
@@ -51,6 +51,8 @@ it('Admin user add content to the library', () => {
    cy.contains("#appbar_title", "Edit content block").should("be.visible")
    cy.get('input[id="title"]').click()
    cy.get('input[id="title"]').clear().type('Content_001',{timeout: 2000})
+   cy.get('input[id="cbMaxPoints"]').click()
+   cy.get('input[id="cbMaxPoints"]').type("10")
    cy.contains('#actionBarButton', 'Done').click()
    cy.contains("button","Save").click()
    cy.contains('button','Edit').should('exist')
@@ -67,7 +69,7 @@ it('Admin user add content to the library', () => {
    cy.get("#add_content_block").click()
    cy.contains('Import from file').click()
    cy.get('input[type="file"]')
-     .selectFile('../test-files/content/Pdf_Content.pdf',{force: true})
+     .selectFile('../test-files/content/Epub_Content1.epub',{force: true})
 //Continue import
    cy.contains('#actionBarButton', 'Next').click()
 //Set CourseBlock title
@@ -92,36 +94,44 @@ it('Student user attempt Video content', () => {
   cy.ustadOpenH5P("Content_001")
   cy.ustadGetH5pBody().find(".h5p-question-check-answer.h5p-joubelui-button","Check").should("be.visible")
   cy.ustadGetH5pBody().find(".h5p-true-false-answer","Yes").first().click()
+  cy.wait(2000)
+ /* cy.go('back')
   cy.contains('Courses').click()
   cy.contains('Test Course').click()
-  cy.contains("Content_001").click()
-  cy.contains("button","Attempts",{timeout:8000}).click()
-  cy.contains("Student 1").should('exist')
-  cy.contains("1 Attempts").should('exist')
-//Assert progress bar visible
- cy.contains("Student 1").should('exist')
- cy.contains("1 Attempts").should('exist')
- //cy.contains('0% Completion').should('exist')
- cy.contains("Student 1").click()
-// Assert attempt score,completion,duration visible
-  cy.contains('Incomplete').should('exist')
-  cy.contains('0% Completion').should('exist')
+  cy.contains('Content_002').click()
+  cy.contains('OPEN').click()
+  cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
+  cy.ustadVerifyEpub('The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)')*/
+
 })
 
 it('Student user attempt Epub content', () => {
   cy.ustadClearDbAndLogin('stud1','tests1',{timeout:8000})
+  cy.contains('Courses').click()
   cy.contains('Test Course').click()
+  cy.contains("Content_001").click()
+    cy.contains("button","Attempts",{timeout:8000}).click()
+    cy.contains("Student 1").should('exist')
+    cy.contains("1 Attempts").should('exist')
+  //Assert progress bar visible
+   cy.contains("Student 1").should('exist')
+   cy.contains("1 Attempts").should('exist')
+   //cy.contains('0% Completion').should('exist')
+   cy.contains("Student 1").click()
+  // Assert attempt score,completion,duration visible
+    cy.contains('Incomplete').should('exist')
+    cy.contains('0% Completion').should('exist')
+    cy.contains('Courses').click()
+    cy.contains('Test Course').click()
   cy.contains('Content_002').click()
   cy.contains('OPEN').click()
- //  cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
-  //cy.ustadVerifyEpub('The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)')
- //cy.contains("button","Attempts").click()
+  cy.contains("button","Attempts").click()
 //Assert progress bar visible
- // cy.contains('0% Completion').should('exist')
- // cy.contains("Student 1").click()
+  cy.contains('0% Completion').should('exist')
+  cy.contains("Student 1").click()
 // Assert attempt score,completion,duration visible
- // cy.contains('Incomplete').should('exist')
- // cy.contains('0% Completion').should('exist')
+  cy.contains('Incomplete').should('exist')
+  cy.contains('0% Completion').should('exist')
 })
 
 /*it('Teacher user can see student users attempts', () => {
