@@ -32,6 +32,10 @@ internal fun Subparsers.addNewLearningSpaceParser() {
             .setDefault("http://localhost:8087/")
             .help(FeatureControl.SUPPRESS)
 
+        it.addArgument("--self-registered")
+            .type(Boolean::class.java)
+            .help("Indicates the learning space is self-registered (true/false)")
+
         it.addArgument("-t", "--title")
             .required(true)
             .help("Learning space title")
@@ -163,7 +167,8 @@ fun main(ns: Namespace) {
                         dbPassword = ns.getString("dbpassword"),
                         adminContact = ns.getString("adminContact"),
                         adminUsername = ns.getString("adminusername"),
-                        adminPassword = ns.getString("adminpassword")
+                        adminPassword = ns.getString("adminpassword"),
+                        selfRegistered = ns.getBoolean("self_registered") ?: false
                     )
 
                     println(request)

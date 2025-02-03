@@ -40,12 +40,13 @@ class CreateLearningSpaceUseCase(
         val adminContact: String,
         val adminUsername: String,
         val adminPassword: String,
+        val selfRegistered: Boolean
     )
 
     suspend operator fun invoke(request: CreateLearningSpaceRequest) {
         val uid = xxStringHasher.hash(request.url)
         val effectiveDbUrl = request.dbUrl ?:
-            "jdbc:sqlite:${serverDataDir.absolutePath}/${sanitizeDbNameFromUrl(request.url)}.db"
+        "jdbc:sqlite:${serverDataDir.absolutePath}/${sanitizeDbNameFromUrl(request.url)}.db"
 
         learningSpaceServerRepo.add(
             LearningSpaceConfigAndInfo(
@@ -59,9 +60,9 @@ class CreateLearningSpaceUseCase(
                     url = request.url,
                     name = request.title,
                     description = request.title,
-                    subdomain = request.subdomain,
-                    organisationLogo = request.organisationLogo,
-                    adminContact = request.adminContact,
+//                    subdomain = request.subdomain,
+//                    organisationLogo = request.organisationLogo,
+//                    adminContact = request.adminContact,
                     lastModified = systemTimeInMillis()
                 )
             )
@@ -80,8 +81,8 @@ class CreateLearningSpaceUseCase(
             val personUid = addPersonUseCase(
                 person = Person(
                     username = request.adminUsername,
-                    firstNames = "Admin",
-                    lastName = "User"
+                    firstNames = if (request.selfRegistered) "Self" else "Admin",
+                    lastName = if (request.selfRegistered) "Registered" else "User"
                 ),
                 systemPermissions = PermissionFlags.ALL,
             )

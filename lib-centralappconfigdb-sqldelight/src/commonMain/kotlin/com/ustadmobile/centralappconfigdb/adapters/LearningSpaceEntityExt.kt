@@ -5,12 +5,15 @@ import com.ustadmobile.centralappconfigdb.model.LearningSpaceConfig
 import com.ustadmobile.centralappconfigdb.model.LearningSpaceConfigAndInfo
 import com.ustadmobile.centralappconfigdb.model.LearningSpaceInfo
 
-fun LearningSpaceEntity.asLearningSpaceConfigAndInfo()= LearningSpaceConfigAndInfo(
+fun LearningSpaceEntity.asLearningSpaceConfigAndInfo() = LearningSpaceConfigAndInfo(
     info = LearningSpaceInfo(
         url = lsUrl,
         name = lsName,
         description = lsDescription,
-        lastModified = lsLastModified
+//        subdomain = lsSubdomain ,
+//        organisationLogo = lsOrganisationLogo,
+//        adminContact = lsAdminContact ,
+        lastModified = lsLastModified,
     ),
     config = LearningSpaceConfig(
         url = lsUrl,
