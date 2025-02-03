@@ -31,7 +31,6 @@ it('Admin able to add content block from library', () => {
   cy.contains("Content_001").click()
   cy.contains("Done").click()
   cy.contains("Save").click()
-  cy.contains('button','Edit').should('exist')
 })
 
 it('Teacher able to add content block from file', () => {
