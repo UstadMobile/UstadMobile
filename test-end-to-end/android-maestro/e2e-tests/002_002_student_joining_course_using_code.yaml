@@ -1,49 +1,37 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseTest
 env:
   TESTRESULTSDIR: "build/reports/maestro/002_002_student_joining_course_using_code/Screenshots"
+  TESTCOURSENAME: "Test Course Block"
 onFlowStart:
   - startRecording: 002_002_student_joining_course_using_code
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
-- runFlow:
-    file: "../common/admin_login.yaml"
-#---------Add Course with members------------------#
-# add new course
-- runFlow:
-    file: "../common/add_course.yaml"
+- runScript:
+    file: "common/import_users_via_http.js"
     env:
-      TESTCOURSENAME: "Test Course"
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_And_Unenrolled_Student.csv"
+
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
+    file: "common/user_login.yaml"
     env:
-      TESTCOURSENAME: "Test Course"
-      TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "1"
       USERNAME: "teach1"
-      GENDER: "Female"
       PASSWORD: "testt1"
-- runFlow:
-    file: "../common/add_new_people.yaml"
-    env:
-      FIRSTNAME: "Student"
-      LASTNAME: "1"
-      USERNAME: "stud1"
-      GENDER: "Male"
-      PASSWORD: "tests1"
-- back
-- tapOn: "Courses"
+
 - tapOn: ${TESTCOURSENAME}
 - scrollUntilVisible:
     element:
@@ -57,27 +45,27 @@ onFlowComplete:
     commands:
       - tapOn:
           id: "com.android.systemui:id/dismiss_image"
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"
-- runFlow:  "../common/student_send_course_join_request_using_code.yaml"
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow:  "common/student_send_course_join_request_using_code.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "teach1"
       PASSWORD: "testt1"
-- runFlow: "../common/accepting_course_join_request.yaml"
+- runFlow: "common/accepting_course_join_request.yaml"
 #---------Launch App & Student Login------------------#
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"

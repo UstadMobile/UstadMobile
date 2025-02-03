@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.app.DownloadManager
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -150,6 +151,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 validatePhoneNumUseCase = instance(),
                 authManager = instance(),
                 enrolUseCase = instance(),
+                createNewClazzUseCase = instance(),
                 activeDb = instance(tag = DoorTag.TAG_DB),
                 activeRepo = instance(tag = DoorTag.TAG_REPO),
             )
@@ -192,6 +194,18 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
          * UstadLocaleChangeChannelProvider for an explanation of this.
          */
         enableEdgeToEdge()
+
+        /*
+         * End-to-end Maestro test downloads require a way to check if a file has been downloaded,
+         * however Maestro itself does not support launching an intent using just an action, which
+         * is how Downloads are viewed. Regrettably, for the moment, it is unavoidable to have this
+         * snippet of code which is used by Maestro end-to-end tests to verify that a download
+         * was completed.
+         */
+        intent.extras?.getBoolean("showDownloads")?.also {
+            startActivity(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS))
+        }
+
         val openLink = intent.getUstadDeepLink()
 
         val initialRoute = defaultInitialRoute ?: ("/" + RedirectViewModel.DEST_NAME.appendQueryArgs(
