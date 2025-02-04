@@ -45,6 +45,13 @@ data class LearningSpaceInfo(
     var lsiLastModified: Long = 0,
 
     var lsiStored: Long = 0,
+
+    var subdomain: String? = "",
+
+    var adminContact: String? = "",
+
+    var organisationLogo: String? = ""
+
 ) {
     companion object {
         const val TABLE_ID = 2

@@ -18,6 +18,7 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.encodeBase64
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import net.sourceforge.argparse4j.impl.Arguments
 import net.sourceforge.argparse4j.inf.FeatureControl
 import net.sourceforge.argparse4j.inf.Namespace
 import net.sourceforge.argparse4j.inf.Subparsers
@@ -32,6 +33,10 @@ internal fun Subparsers.addNewLearningSpaceParser() {
             .setDefault("http://localhost:8087/")
             .help(FeatureControl.SUPPRESS)
 
+        it.addArgument("--isSelfRegistered")
+            .action(Arguments.storeTrue())
+            .help("Flag to indicate if the learning space allows self-registration")
+
         it.addArgument("-t", "--title")
             .required(true)
             .help("Learning space title")
@@ -40,6 +45,17 @@ internal fun Subparsers.addNewLearningSpaceParser() {
             .help("The URL for users to access the learning space via \n" +
                     "the browser or mobile/desktop apps. If you are using a reverse proxy (as recommended)" +
                     "this URL must be the URL as it would be entered by the user, not the ProxyPass parameter.")
+
+        it.addArgument("--subdomain")
+            .help("Custom subdomain for the learning space")
+
+        it.addArgument("-c", "--admincontact")
+            .required(true)
+            .help("Admin contact email or phone number")
+
+        it.addArgument("-l", "--organisationlogo")
+            .help("URL of the organisation's logo")
+
         it.addArgument("-d", "--dburl")
             .help("Learning space database JDBC URL")
         it.addArgument("-n", "--dbusername")
@@ -143,7 +159,11 @@ fun main(ns: Namespace) {
                         dbUsername = ns.getString("dbusername"),
                         dbPassword = ns.getString("dbpassword"),
                         adminUsername = ns.getString("adminusername"),
-                        adminPassword = ns.getString("adminpassword")
+                        adminPassword = ns.getString("adminpassword"),
+                        isSelfRegistered = ns.getBoolean("isSelfRegistered"),
+                        subdomain = ns.getString("subdomain"),
+                        adminContact = ns.getString("admincontact"),
+                        organisationLogo = ns.getString("organisationlogo")
                     )
                     println(request)
 

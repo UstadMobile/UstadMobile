@@ -20,4 +20,5 @@ class LearningSpaceConfig(
     var lscDbUrl: String = "",
     var lscDbUsername: String? = null,
     var lscDbPassword: String? = null,
+    var lscSelfRegistered: Boolean = false
 )

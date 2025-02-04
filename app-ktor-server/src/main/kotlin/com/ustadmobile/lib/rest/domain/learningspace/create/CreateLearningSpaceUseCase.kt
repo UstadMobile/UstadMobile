@@ -34,6 +34,10 @@ class CreateLearningSpaceUseCase(
         val dbPassword: String?,
         val adminUsername: String,
         val adminPassword: String,
+        val isSelfRegistered: Boolean = false,
+        val subdomain: String?,
+        val adminContact: String?,
+        val organisationLogo: String?
     )
 
     suspend operator fun invoke(request: CreateLearningSpaceRequest) {
@@ -49,11 +53,15 @@ class CreateLearningSpaceUseCase(
                     lscDbUrl = effectiveDbUrl,
                     lscDbUsername = request.dbUsername,
                     lscDbPassword = request.dbPassword,
+                    lscSelfRegistered = request.isSelfRegistered
                 ),
                 info = LearningSpaceInfo(
                     lsiUid = uid,
                     lsiUrl = request.url,
                     lsiName = request.title,
+                    subdomain = request.subdomain,
+                    adminContact = request.adminContact,
+                    organisationLogo = request.organisationLogo
                 )
             )
         )
