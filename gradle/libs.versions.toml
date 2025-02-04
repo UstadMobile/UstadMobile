@@ -125,6 +125,8 @@ lz4 = "1.8.0"
 kmp-uuid = "0.8.4"
 zoomable = "1.6.1"
 jetbrains-kotlin-jvm = "1.9.23"
+koalaplot-version = "0.7.0"
+
 
 [plugins]
 
@@ -139,7 +141,7 @@ jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrai
 
 
 [libraries]
-
+koalaplot = {module = "io.github.koalaplot:koalaplot-core",version.ref = "koalaplot-version"}
 moko-resources = { module = "dev.icerock.moko:resources", version.ref = "version-moko-resources" }
 moko-resources-compose = { module = "dev.icerock.moko:resources-compose", version.ref = "version-moko-resources" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
