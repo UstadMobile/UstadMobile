@@ -51,12 +51,20 @@ Teachers and students can add course comments which are visible for all who can 
 43. Click on the "Save" button.
 44. Click on assignment name.
 45. Enter a comment on "Add a class comment" field.
-46. Click on "Send" icon.
-47. Clear the app storage
-48. Login to the app using the student username and password.
-49. Click on "Courses" tab.
-50. Click on the course name.
-51. Click on the assignment added by teacher.
-52. Enter a comment on "Add a class comment" field.
-53. Click on "Send" icon.
-54. Verify that student's and teacher's class comment is visible for the student.
+46. Click on "Send" icon. 
+47. Click on assignment name.
+48. Click on the "Submission" tab
+49. Click on a specific student name.
+50. Enter a comment on "Add a private comment" field.
+51. Click on "Send" icon.
+52. Clear the app storage
+53. Login to the app using the student username and password.
+54. Click on "Courses" tab.
+55. Click on the course name.
+56. Click on the assignment added by teacher.
+57. Enter a comment on "Add a class comment" field.
+58. Click on "Send" icon.
+59. Verify that student's and teacher's class comment is visible for the student.
+60. Enter a comment on "Add a private comment" field.
+61. Click on "Send" icon. 
+62. Verify that student's and teacher's private comment is visible for the student.

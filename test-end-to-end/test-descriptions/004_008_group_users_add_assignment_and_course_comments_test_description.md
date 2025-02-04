@@ -60,16 +60,25 @@ Teacher can create assignment as per 4.1 by groups. When another group member lo
 52. Click on the assignment.
 53. Enter a comment on "Add a class comment" field. 
 54. Click on "Send" icon. 
-55. Clear the app storage 
-56. Login to the app using the student username and password in group 1.
-57. Click on "Courses" tab. 
-58. Click on the course name. 
-59. Click on the assignment added by teacher.
-60. Enter a comment on "Add a class comment" field. 
-61. Click on "Send" icon. 
-62. Verify that student's and teacher's class comment is visible for the student in group 1.
-63. Login to the app using the student username and password in group 2.
-64. Click on "Courses" tab. 
-65. Click on the course name. 
-66. Click on the assignment added by teacher. 
-67. Verify that group 1-student's and teacher's class comment is visible for the student in group 2.
+55. Click on the assignment.
+56. Click on the "Submission" tab
+57. Click on group 1.
+58. Enter a comment on "Add a private comment" field.
+59. Click on "Send" icon.
+60. Clear the app storage 
+61. Login to the app using the student username and password in group 1.
+62. Click on "Courses" tab. 
+63. Click on the course name. 
+64. Click on the assignment added by teacher.
+65. Enter a comment on "Add a class comment" field. 
+66. Click on "Send" icon.
+67. Verify that student's and teacher's class comment is visible for the student in group 1. 
+68. Enter a comment on "Add a private comment" field.
+69. Click on "Send" icon.
+70. Verify that student's and teacher's private comment is visible for the students in group 1
+71. Login to the app using the student username and password in group 2.
+72. Click on "Courses" tab. 
+73. Click on the course name. 
+74. Click on the assignment added by teacher. 
+75. Verify that group 1-student's and teacher's class comment is visible for the student in group 2.
+76. Verify that private comments are not visible for the students in group 2.

@@ -45,4 +45,11 @@ Teacher can add discussion board to course
 37. Click on "Save" to save the course changes. 
 38. Verify the "Discussion board" is visible inside the course. 
 39. Click on the discussion board name. 
-40. Verify the "+ Post" button is visible inside the discussion board.
+40. Verify the "+ Post" button is visible inside the discussion board. 
+41. Click on "Edit" button.
+42. Click on discussion board.
+43. Click on the description.
+44. Enter a description.
+45. Click on "Done" to save the description.
+46. Verify the description is visible
+47. Click on "Done" to save the discussion board.
