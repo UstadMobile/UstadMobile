@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "cypress": "^13.6.6",
+    "cypress": "^13.17.0",
     "cypress-multi-reporters": "^1.6.3",
     "cypress-recurse": "^1.35.3",
     "cypress-terminal-report": "^5.3.10",
@@ -16,11 +16,9 @@
     "start-server-ci": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar -P:url=$TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=cypress",
     "cy:run-ci": "cypress run --config baseUrl=$TESTCONTROLLER_URL",
     "test-ci": "start-server-and-test start-server-ci $TESTCONTROLLER_URL cy:run-ci",
-
     "start-server": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar  http://localhost:8075/ -P:srcRoot=../../  -P:mode=cypress",
     "cy:run": "cypress run",
     "test": "start-server-and-test start-server  http://localhost:8075/ cy:run",
-
     "cy:run-spec": "cypress run --spec $CYPRESS_SPEC",
     "test-spec": "start-server-and-test start-server http://localhost:8075/ cy:run-spec"
   }
