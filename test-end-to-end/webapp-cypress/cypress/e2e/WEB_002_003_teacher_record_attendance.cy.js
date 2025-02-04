@@ -8,7 +8,7 @@ it('Admin record student attendance', () => {
   // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass')
   // Add a new course
-  cy.ustadAddCourse('002_003')
+  cy.ustadAddCourse('Test Course')
   //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
@@ -47,7 +47,7 @@ it('Admin record student attendance', () => {
 it('Teacher has permission to edit attendance of students ', () => {
   // Teacher Login
   cy.ustadClearDbAndLogin('teach1','testt1')
-  cy.contains('002_003').click()
+  cy.contains('Test Course').click()
   cy.contains("button","Attendance").click()
   // Edit recorded attendance
   cy.contains('1 Present, 0 Partial, 1 Absent').should('be.visible')

@@ -7,8 +7,7 @@ describe('WEB_002_010_username_validation', () => {
 
   // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
-  cy.contains("Courses").should('be.visible')  // Assertion to check the user logged in successfully
-
+  cy.contains("Courses").should('be.visible')
   cy.contains("People").click()
   cy.contains("button","Person").click()
   cy.contains("Add Person").click()
