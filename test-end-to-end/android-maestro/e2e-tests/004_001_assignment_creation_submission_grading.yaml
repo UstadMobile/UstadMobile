@@ -179,6 +179,10 @@ onFlowComplete:
       PASSWORD: "testt1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
+# verify teacher able to see student score in gradebook
+- tapOn: "Gradebook"
+- assertVisible: "9"
+- tapOn: "Course"
 - tapOn:
     id: "floating_action_button"
 - scrollUntilVisible:

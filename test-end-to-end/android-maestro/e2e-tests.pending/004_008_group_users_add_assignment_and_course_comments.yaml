@@ -152,6 +152,17 @@ onFlowComplete:
 - tapOn: "Add a class comment"
 - inputText: "Comment from teacher"
 - tapOn: "Send"
+  # teacher send a private comment to group1
+- tapOn: "Submissions"
+- tapOn: "Group 1"
+- scrollUntilVisible:
+    element:
+      text: "Add a private comment"
+    direction: DOWN
+- tapOn: "Add a private comment"
+- inputText: "Private comment from teacher"
+- tapOn: "Send"
+- assertVisible: "Private comment from teacher"
 # student add course comment
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
@@ -176,3 +187,41 @@ onFlowComplete:
 - tapOn: "Send"
 - assertVisible: "Comment from student"
 - assertVisible: "Comment from teacher"
+# Group 1 -student send a private comment to teacher
+- tapOn: "Assignment 1"
+- scrollUntilVisible:
+    element:
+      text: "Add a private comment"
+    direction: DOWN
+- tapOn: "Add a private comment"
+- inputText: "Private comment from student"
+- tapOn: "Send"
+- scrollUntilVisible:
+    element:
+      text: "Private comment from teacher"
+    direction: DOWN
+- assertVisible: "Private comment from student"
+- assertVisible: "Private comment from teacher"
+# Verify Group 2 - student able to see course comments but not private comments
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "s1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- scrollUntilVisible:
+    element:
+      text: "Add a class comment"
+    direction: DOWN
+- assertVisible: "Comment from student"
+- assertVisible: "Comment from teacher"
+- assertNotVisible: "Private comment from student"
+- assertNotVisible: "Private comment from teacher"
