@@ -4,19 +4,39 @@ import app.cash.paging.PagingSource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_BY_SCORE_ASC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_BY_SCORE_DESC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_FIRST_NAME_ASC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_FIRST_NAME_DESC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_LAST_NAME_ASC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_LAST_NAME_DESC
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
+import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfoConst
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 
 data class ContentEntryDetailAttemptsPersonListUiState(
     val attemptsPersonList: () -> PagingSource<Int, PersonAndPictureAndNumAttempts> =
         { EmptyPagingSource() },
-)
+    val sortOptions: List<SortOrderOption> = listOf(
+        SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_ASC, true),
+        SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_DESC, false),
+        SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_ASC, true),
+        SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_DESC, false),
+        SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_ASC, true),
+        SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_DESC, false),
+
+    ),
+    val sortOption: SortOrderOption = sortOptions.first(),
+    val showSortOptions: Boolean = true,
+
+    )
 
 class ContentEntryDetailAttemptsPersonListViewModel(
     di: DI, savedStateHandle: UstadSavedStateHandle, destinationName: String = DEST_NAME,
@@ -28,15 +48,16 @@ class ContentEntryDetailAttemptsPersonListViewModel(
 
     val appBarTitle = systemImpl.getString(MR.strings.library)
 
+
     private fun getAttemptsPersonListAsPagingSource(contentEntryUid: Long):
             PagingSource<Int, PersonAndPictureAndNumAttempts> {
         val pagingSource =
             activeRepo.statementDao().findPersonsWithAttempts(
                 contentEntryUid = contentEntryUid,
                 accountPersonUid = activeUserPersonUid,
-                searchText = _appUiState.value.searchState.searchText.toQueryLikeParam()
-
-            )
+                searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
+                sortOrder = _uiState.value.sortOption.flag,
+                )
         return pagingSource
     }
 
@@ -81,6 +102,14 @@ class ContentEntryDetailAttemptsPersonListViewModel(
         TODO("Not yet implemented")
     }
 
+    fun onSortOrderChanged(sortOption: SortOrderOption) {
+        _uiState.update { prev ->
+            prev.copy(
+                sortOption = sortOption
+            )
+        }
+        _refreshCommandFlow.tryEmit(RefreshCommand())
+    }
 
     companion object {
         const val DEST_NAME = "ContentEntryDetailAttemptsPersonList"

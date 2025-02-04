@@ -18,11 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberFormattedDuration
 import dev.icerock.moko.resources.compose.stringResource
@@ -36,7 +39,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
     ContentEntryDetailAttemptsStatementListScreen(
         uiState = uiState.value,
         refreshCommandFlow = viewModel.refreshCommandFlow,
-
+        onSortOrderChanged = viewModel::onSortOrderChanged,
         )
 }
 
@@ -44,7 +47,9 @@ fun ContentEntryDetailAttemptsStatementListScreen(
 fun ContentEntryDetailAttemptsStatementListScreen(
     uiState: ContentEntryDetailAttemptsStatementListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
-) {
+    onSortOrderChanged: (SortOrderOption) -> Unit = { },
+
+    ) {
     val attemptsStatementListPager =
         rememberDoorRepositoryPager(uiState.attemptsStatementList, refreshCommandFlow)
     val attemptsStatementListItems = attemptsStatementListPager.lazyPagingItems
@@ -54,6 +59,18 @@ fun ContentEntryDetailAttemptsStatementListScreen(
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
+        if(uiState.showSortOptions) {
+            item("sort_options") {
+                UstadListSortHeader(
+                    modifier = Modifier
+                        .defaultItemPadding()
+                        .fillMaxWidth(),
+                    activeSortOrderOption = uiState.sortOption,
+                    sortOptions = uiState.sortOptions,
+                    onClickSortOption =  onSortOrderChanged,
+                )
+            }
+        }
         if(attemptsStatementListPager.isSettledEmpty) {
             item("empty_state") {
                 UstadNothingHereYet()

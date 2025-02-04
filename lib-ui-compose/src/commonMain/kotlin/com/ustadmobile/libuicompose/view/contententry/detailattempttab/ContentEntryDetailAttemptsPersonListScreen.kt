@@ -16,14 +16,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.UstadNothingHereYet
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
@@ -39,7 +42,8 @@ fun ContentEntryDetailAttemptsPersonListScreen(
         uiState = uiState,
         refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickEntry = viewModel::onClickEntry,
-    )
+        onSortOrderChanged = viewModel::onSortOrderChanged,
+        )
 }
 
 @Composable
@@ -47,7 +51,9 @@ fun ContentEntryDetailAttemptsPersonListScreen(
     uiState: ContentEntryDetailAttemptsPersonListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
     onClickEntry: (PersonAndPictureAndNumAttempts) -> Unit = {},
-) {
+    onSortOrderChanged: (SortOrderOption) -> Unit = { },
+
+    ) {
     val attemptsPersonListPager =
         rememberDoorRepositoryPager(uiState.attemptsPersonList, refreshCommandFlow)
 
@@ -59,6 +65,18 @@ fun ContentEntryDetailAttemptsPersonListScreen(
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
+        if(uiState.showSortOptions) {
+            item("sort_options") {
+                UstadListSortHeader(
+                    modifier = Modifier
+                        .defaultItemPadding()
+                        .fillMaxWidth(),
+                    activeSortOrderOption = uiState.sortOption,
+                    sortOptions = uiState.sortOptions,
+                    onClickSortOption =  onSortOrderChanged,
+                )
+            }
+        }
         if (attemptsPersonListPager.isSettledEmpty) {
             item("empty_state") {
                 UstadNothingHereYet()

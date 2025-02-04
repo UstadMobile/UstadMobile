@@ -6,6 +6,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
@@ -15,6 +16,7 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import com.ustadmobile.mui.components.ThemeContext
+import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.mui.components.UstadNothingHereYet
 import com.ustadmobile.util.ext.isSettledEmpty
 import com.ustadmobile.view.components.virtuallist.VirtualList
@@ -52,6 +54,8 @@ private const val WIDTH = 100
 external interface ContentEntryDetailAttemptsStatementListProps : Props {
     var uiState: ContentEntryDetailAttemptsStatementListUiState
     var refreshCommandFlow: Flow<RefreshCommand>?
+    var onSortOrderChanged: (SortOrderOption) -> Unit
+
 }
 
 val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
@@ -92,6 +96,16 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                 }
 
                 content = virtualListContent {
+                    item("sort_list_opts") {
+                        UstadListSortHeader.create {
+                            activeSortOrderOption = props.uiState.sortOption
+                            sortOptions = props.uiState.sortOptions
+                            enabled = true
+                            onClickSort = {
+                                props.onSortOrderChanged(it)
+                            }
+                        }
+                    }
                     if (isSettledEmpty) {
                         item("empty_state") {
                             UstadNothingHereYet.create()
@@ -182,6 +196,8 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
     contentEntryDetailAttemptsStatementListComponent2 {
         this.uiState = uiState
         refreshCommandFlow = viewModel.refreshCommandFlow
+        onSortOrderChanged = viewModel::onSortOrderChanged
+
 
     }
 

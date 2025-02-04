@@ -12,3 +12,14 @@ data class SessionTimeAndProgressInfo(
     var isCompleted: Boolean = false,
     var isSuccessful: Boolean? = null,
 )
+
+object SessionTimeAndProgressInfoConst{
+    const val SORT_BY_TIMESTAMP_DESC = 1
+
+    const val SORT_BY_TIMESTAMP_ASC = 2
+
+
+    const val SORT_BY_SCORE_ASC = 3
+    const val SORT_BY_SCORE_DESC = 4
+
+}

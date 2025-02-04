@@ -7,6 +7,10 @@ import androidx.room.RawQuery
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE
+import com.ustadmobile.core.db.dao.PersonDaoCommon.SORT_FIRST_NAME_ASC
+import com.ustadmobile.core.db.dao.PersonDaoCommon.SORT_FIRST_NAME_DESC
+import com.ustadmobile.core.db.dao.PersonDaoCommon.SORT_LAST_NAME_ASC
+import com.ustadmobile.core.db.dao.PersonDaoCommon.SORT_LAST_NAME_DESC
 import com.ustadmobile.core.db.dao.SystemPermissionDaoCommon
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.ACTOR_UIDS_FOR_PERSONUIDS_CTE
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
@@ -20,9 +24,14 @@ import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst
 import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
+import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_SCORE_ASC
+import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_SCORE_DESC
+import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_TIMESTAMP_ASC
+import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_TIMESTAMP_DESC
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndRelated
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import com.ustadmobile.lib.db.entities.Person
@@ -401,12 +410,37 @@ expect abstract class StatementDao {
                           ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
             )      
                     AND (:searchText = "%" OR Person.firstNames LIKE :searchText OR Person.lastName LIKE :searchText OR Person.userName LIKE :searchText)
+     ORDER BY 
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_FIRST_NAME_ASC} THEN Person.firstNames
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_LAST_NAME_ASC} THEN Person.lastName
+        ELSE NULL
+    END ASC,
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_SCORE_ASC} THEN maxScore
+        ELSE NULL
+    END ASC,
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_LAST_NAME_DESC} THEN maxScore
+        ELSE NULL
+    END DESC,
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_FIRST_NAME_DESC} THEN Person.firstNames
+        ELSE NULL
+    END DESC,
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_SCORE_DESC} THEN maxScore
+        ELSE NULL
+    END DESC
+
+
 """)
     abstract fun findPersonsWithAttempts(
         contentEntryUid: Long,
         accountPersonUid: Long,
-        searchText: String? = "%"
-    ): PagingSource<Int, PersonAndPictureAndNumAttempts>
+        searchText: String? = "%",
+        sortOrder: Int,
+        ): PagingSource<Int, PersonAndPictureAndNumAttempts>
 
 
     @Query("""
@@ -461,11 +495,30 @@ expect abstract class StatementDao {
                                AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0) THEN 0
                        ELSE NULL
                        END) AS isSuccessful
-          FROM DistinctRegistrationUids       
+          FROM DistinctRegistrationUids     
+           ORDER BY  
+    CASE :sortOrder
+        WHEN 1 THEN timeStarted
+        ELSE ''
+    END DESC,
+    CASE :sortOrder
+        WHEN 2 THEN timeStarted
+        ELSE ''
+    END ASC,
+    CASE :sortOrder
+        WHEN 4 THEN maxScore
+        ELSE ''
+    END ASC,
+    CASE :sortOrder
+        WHEN 3 THEN maxScore
+        ELSE ''
+    END DESC
+          
     """)
     abstract fun findSessionsByPersonAndContent(
         contentEntryUid: Long,
-        personUid: Long
+        personUid: Long,
+        sortOrder: Int
     ): PagingSource<Int, SessionTimeAndProgressInfo>
 
 
@@ -484,12 +537,29 @@ expect abstract class StatementDao {
                               LIMIT 1)
          WHERE StatementEntity.contextRegistrationHi = :registrationHi
            AND StatementEntity.contextRegistrationLo = :registrationLo  
-           AND (:searchText = "%" OR VerbEntity.verbUrlId LIKE :searchText)  
+           AND (:searchText = "%" OR VerbEntity.verbUrlId LIKE :searchText)
+           ORDER BY  CASE(:sortOrder)
+               WHEN $SORT_BY_TIMESTAMP_DESC THEN StatementEntity.resultDuration
+               ELSE ''
+               END DESC,
+            CASE(:sortOrder)
+               WHEN $SORT_BY_TIMESTAMP_ASC THEN StatementEntity.resultDuration
+               ELSE ''
+               END ASC,
+                 CASE(:sortOrder)
+               WHEN $SORT_BY_SCORE_DESC THEN StatementEntity.resultScoreRaw
+               ELSE ''
+               END DESC,
+            CASE(:sortOrder)
+               WHEN $SORT_BY_SCORE_ASC THEN StatementEntity.resultScoreRaw
+               ELSE ''
+               END ASC
     """)
     abstract fun findStatementsBySession(
         registrationHi: Long,
         registrationLo: Long,
-        searchText: String?="%"
-    ): PagingSource<Int, StatementEntityAndVerb>
+        searchText: String? = "%",
+        sortOrder: Int
+        ): PagingSource<Int, StatementEntityAndVerb>
 
 }
