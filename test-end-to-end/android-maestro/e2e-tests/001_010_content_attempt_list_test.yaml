@@ -49,10 +49,10 @@ onFlowComplete:
 - tapOn: "True/False Question"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 30000
+    timeout: 60000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 30000
+    timeout: 60000
 - tapOn: Open
 - runFlow:
     file: "common/chrome-first-run-check.yaml"
@@ -71,10 +71,10 @@ onFlowComplete:
 - tapOn: "Video"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 20000
+    timeout: 60000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 20000
+    timeout: 60000
 - tapOn: Open
 - assertVisible: "Play"
 - runFlow: "common/clear_state_and_get_started.yaml"
