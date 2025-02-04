@@ -11,12 +11,7 @@ onFlowStart:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
-onFlowComplete:
-  - stopRecording
-  - runScript:
-      file: "common/stopserver.js"
-      env:
-        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+
 ---
 - runScript:
     file: "common/import_users_via_http.js"
@@ -79,6 +74,17 @@ onFlowComplete:
 - inputText: "Comment from teacher"
 - hideKeyboard
 - tapOn: "Send"
+  # teacher send a private comment to student1
+- tapOn: "Submissions"
+- tapOn: "Student 1"
+- scrollUntilVisible:
+    element:
+      text: "Add a private comment"
+    direction: DOWN
+- tapOn: "Add a private comment"
+- inputText: "Private comment from teacher"
+- tapOn: "Send"
+- assertVisible: "Private comment from teacher"
 # student add course comment
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
@@ -104,3 +110,18 @@ onFlowComplete:
 - tapOn: "Send"
 - assertVisible: "Comment from student"
 - assertVisible: "Comment from teacher"
+# student 1 send a private comment to teacher
+- tapOn: "Assignment 1"
+- scrollUntilVisible:
+    element:
+      text: "Add a private comment"
+    direction: DOWN
+- tapOn: "Add a private comment"
+- inputText: "Private comment from student"
+- tapOn: "Send"
+- scrollUntilVisible:
+    element:
+      text: "Private comment from teacher"
+    direction: DOWN
+- assertVisible: "Private comment from student"
+- assertVisible: "Private comment from teacher"
