@@ -1,28 +1,35 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseBlocks
 env:
   TESTRESULTSDIR: "build/reports/maestro/003_008_course_blocks_title_field_is_mandatory/Screenshots"
 onFlowStart:
   - startRecording: 003_008_course_blocks_title_field_is_mandatory
   - runScript:
-      file: "../common/startserver.js"
+      file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
   - runScript:
-      file: "../common/stopserver.js"
+      file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 
 ---
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+# Download test file
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "H5p_Content.h5p"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 #admin login
 - runFlow:
-    file: "../common/admin_login.yaml"
+    file: "common/admin_login.yaml"
 - runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/add_course.yaml"
     env:
      TESTCOURSENAME: "Test Course Block Test"
 # edit the course to add blocks
@@ -87,7 +94,7 @@ onFlowComplete:
 - tapOn: "My content"
 - tapOn: "Import from file"
 - runFlow:
-    file: "../common/select_file_from_picker.yaml"
+    file: "common/select_file_from_picker.yaml"
     env:
         TESTFILENAME: H5p_Content.h5p
 - longPressOn: "True/False Question"

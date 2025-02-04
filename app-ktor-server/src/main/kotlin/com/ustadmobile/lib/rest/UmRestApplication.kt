@@ -17,6 +17,7 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
 import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseSox
@@ -583,11 +584,16 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<CreateNewClazzUseCase>() with scoped(EndpointScope.Default).singleton {
+            CreateNewClazzUseCase(repoOrDb = instance(tag = DoorTag.TAG_DB))
+        }
+
         bind<BulkAddPersonsUseCase>() with scoped(EndpointScope.Default).provider {
             BulkAddPersonsUseCaseImpl(
                 addNewPersonUseCase = instance(),
                 validateEmailUseCase  = instance(),
                 validatePhoneNumUseCase = instance(),
+                createNewClazzUseCase = instance(),
                 authManager = instance(),
                 enrolUseCase = instance(),
                 activeDb = instance(tag = DoorTag.TAG_DB),
@@ -837,9 +843,12 @@ fun Application.umRestApplication(
             }
 
             instance<Scheduler>().start()
-            Runtime.getRuntime().addShutdownHook(Thread{
-                instance<Scheduler>().shutdown()
-            })
+            Runtime.getRuntime().addShutdownHook(
+                Thread{
+                    Napier.i("UmRestApplication: Shutdown hook")
+                    instance<Scheduler>().shutdown()
+                }
+            )
         }
     }
 
@@ -963,6 +972,9 @@ fun Application.umRestApplication(
                         BulkAddPersonRoute(
                             enqueueBulkAddPersonServerUseCase = { call -> di.on(call).direct.instance() },
                             bulkAddPersonStatusMap = { call -> di.on(call).direct.instance() },
+                            bulkAddPersonUseCase = { call -> di.on(call).direct.instance() },
+                            authManager = { call -> di.on(call).direct.instance() },
+                            db = { call -> di.on(call).direct.instance(tag = DoorTag.TAG_DB) },
                             json = json,
                         )
                     }

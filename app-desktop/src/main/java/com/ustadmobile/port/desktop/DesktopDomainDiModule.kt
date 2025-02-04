@@ -528,6 +528,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             validatePhoneNumUseCase = instance(),
             authManager = instance(),
             enrolUseCase = instance(),
+            createNewClazzUseCase = instance(),
             activeDb = instance(tag = DoorTag.TAG_DB),
             activeRepo = instance(tag = DoorTag.TAG_REPO),
         )
