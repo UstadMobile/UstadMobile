@@ -1,20 +1,28 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseTest
 env:
   TESTNAME: "002_009_people_add_and_remove_profile_pic"
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_009_people_add_and_remove_profile_pic"
+  TESTRESULTSDIR: "build/reports/maestro/002_009_people_add_and_remove_profile_pic/Screenshots"
+onFlowStart:
+  - startRecording: 002_009_people_add_and_remove_profile_pic
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
 - runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow:
-    file: "../common/add_profile_pic.yaml"
+    file: "common/add_profile_pic.yaml"
     env:
       TESTFILENAME: "admin_profilePic.jpg"
-      CONTROLSERVER: ${CONTROLSERVER}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - assertVisible:
     id: "person_picture"

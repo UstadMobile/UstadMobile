@@ -1,21 +1,28 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseTest
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_004_course_title_is_mandatory"
-  TESTNAME: "002_004_course_title_is_mandatory"
+  TESTRESULTSDIR: "build/reports/maestro/002_005_course_title_is_mandatory/Screenshots"
+onFlowStart:
+  - startRecording: 002_005_course_title_is_mandatory
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+    file: "common/admin_login.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
-- runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/add_course.yaml"
     env:
       TESTCOURSENAME: " "
 # assert to make sure the course is not saved because of blank course title

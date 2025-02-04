@@ -235,6 +235,10 @@ app-ktor-server/src/main/resources/umapp
 test-end-to-end/android-maestro/results
 test-end-to-end/android-maestro/e2e-tests/results
 
+# Ignore only .mp4 and .png files inside android-maestro
+test-end-to-end/android-maestro/*.mp4
+test-end-to-end/android-maestro/*.png
+
 # Dependency directory
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
 test-end-to-end/webapp-cypress/node_modules

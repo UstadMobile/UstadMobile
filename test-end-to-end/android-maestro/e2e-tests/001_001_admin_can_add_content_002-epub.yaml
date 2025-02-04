@@ -1,23 +1,30 @@
 appId: com.toughra.ustadmobile
+tags:
+  - contentEpub
+  - contentTest
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_002-epub"
-  TESTNAME: "001_001_admin_can_add_content_002-epub"
+  TESTRESULTSDIR: "build/reports/maestro/001_001_admin_can_add_content_002-epub/Screenshots"
+onFlowStart:
+  - startRecording: 001_001_admin_can_add_content_002-epub
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+
 ---
-- clearState: com.toughra.ustadmobile
 - runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow:
-    file: "../common/clear_login_and_add_content.yaml"
+    file: "common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- takeScreenshot: "${TESTRESULTSDIR}/content_add_to_library"
 - tapOn: "E-book"
 - extendedWaitUntil:
     notVisible: "Importing"
@@ -29,7 +36,7 @@ env:
 - assertVisible: "Cover"
 - tapOn: "Back"
 - runFlow:
-    file: "../common/login_download_and_open_content.yaml"
+    file: "common/login_download_and_open_content.yaml"
 #Download and open content
 - tapOn: "Library"
 - extendedWaitUntil:
@@ -39,4 +46,4 @@ env:
 - tapOn: Download
 - tapOn: Open
 - assertVisible: "Cover"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/epub_content_download_and_open"
+- takeScreenshot: "${TESTRESULTSDIR}/epub_content_download_and_open"

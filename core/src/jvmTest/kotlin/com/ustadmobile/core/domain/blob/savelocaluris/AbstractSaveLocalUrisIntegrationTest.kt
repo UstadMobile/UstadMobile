@@ -9,6 +9,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJvm
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
+import com.ustadmobile.core.util.network.findFreePort
 import com.ustadmobile.lib.rest.CacheRoute
 import com.ustadmobile.lib.rest.api.blob.BlobUploadServerRoute
 import com.ustadmobile.libcache.UstadCache
@@ -82,9 +83,12 @@ abstract class AbstractSaveLocalUrisIntegrationTest {
     @Rule
     val temporaryFolder = TemporaryFolder()
 
+    var port: Int = 0
+
     open fun setup() {
         initNapierLog()
-        endpoint = Endpoint("http://localhost:8094/")
+        port = findFreePort()
+        endpoint = Endpoint("http://localhost:$port/")
         serverRootTmpDir = temporaryFolder.newFolder("tmproot-server")
         clientCacheDir = temporaryFolder.newFolder("httpfiles-client")
         clientCache = UstadCacheBuilder(
@@ -135,7 +139,7 @@ abstract class AbstractSaveLocalUrisIntegrationTest {
             saveLocalUrisAsBlobsUseCase = serverSaveLocalUriAsBlobUseCase,
         )
 
-        ktorServer = embeddedServer(Netty, 8094) {
+        ktorServer = embeddedServer(Netty, port) {
 
             install(ContentNegotiation) {
                 json(json = json)

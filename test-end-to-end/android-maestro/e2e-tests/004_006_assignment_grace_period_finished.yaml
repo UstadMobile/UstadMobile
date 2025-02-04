@@ -1,52 +1,37 @@
 appId: com.toughra.ustadmobile
+tags:
+  - assignments
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_006_assignment_grace_period_finished"
-  TESTNAME:  "004_006_assignment_grace_period_finished"
+  TESTRESULTSDIR: "build/reports/maestro/004_006_assignment_grace_period_finished/Screenshots"
+onFlowStart:
+  - startRecording: 004_006_assignment_grace_period_finished
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-# Admin login
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
+- runScript:
+    file: "common/import_users_via_http.js"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
+
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
-# add new course
-- runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/user_login.yaml"
     env:
-      TESTCOURSENAME: "Test Course Block"
-# add new teacher using flow - add_new_teacher_inside_course ---------
-- runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
-    env:
-      TESTCOURSENAME: ${TESTCOURSENAME}
-      TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "1"
-      USERNAME: "t1"
-      GENDER: "Female"
-      PASSWORD: "test"
-# add students to the course through bulk import using .csv file
-- runFlow:
-    file: "../common/student_bulk_upload_csv.yaml"
-    env:
-      TESTFILENAME: "Ustad_Students_List.csv"
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-# teacher add an assignment block
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
-- runFlow:
-    file: "../common/user_login.yaml"
-    env:
-      USERNAME: "t1"
-      PASSWORD: "test"
-- tapOn: "Courses"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "Test Course Block"
+
 # edit the course to add blocks
 - tapOn:
     id: "floating_action_button"
@@ -80,20 +65,20 @@ env:
     direction: DOWN
 - tapOn: "Deadline"
 - runScript:
-    file: "../common/setDate.js"
+    file: "common/setDate.js"
 - inputText: ${output.yesterdayDate}
 - tapOn: "hh:mm"
 - runScript:
-    file: "../common/setDate.js"
+    file: "common/setDate.js"
 - inputText: ${output.currentTime}
 - hideKeyboard
 - tapOn: "End of grace period"
 - runScript:
-    file: "../common/setDate.js"
+    file: "common/setDate.js"
 - inputText: ${output.currentDate}
 - tapOn: "hh:mm"
 - runScript:
-    file: "../common/setDate.js"
+    file: "common/setDate.js"
 - inputText: ${output.delayTime}
 - hideKeyboard
 - tapOn: "Late submission penalty"
@@ -105,18 +90,18 @@ env:
     direction: DOWN
 - assertVisible: "Must submit all at once"
 - assertVisible: "Done"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
+- takeScreenshot: "${TESTRESULTSDIR}/added_assignment"
 - tapOn:
     text: "Done"
 - assertNotVisible: "Done"
 - tapOn: "Save"
 # student not able to view submit button
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "s1"
+      USERNAME: "stud1"
       PASSWORD: "tests1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"

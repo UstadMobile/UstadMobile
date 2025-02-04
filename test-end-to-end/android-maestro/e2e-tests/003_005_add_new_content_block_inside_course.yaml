@@ -1,65 +1,62 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseBlocks
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_005_add_new_content_block_inside_course"
-  TESTNAME: "003_005_add_new_content_block_inside_course"
+  TESTRESULTSDIR: "build/reports/maestro/003_005_add_new_content_block_inside_course/Screenshots"
+  TESTCOURSENAME: "Test Course Block"
+onFlowStart:
+  - startRecording: 003_005_add_new_content_block_inside_course
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
+# Import course, students, and teacher
+- runScript:
+    file: "common/import_users_via_http.js"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
+# Download test file 1
 - runFlow:
-    file: "../common/user_login.yaml"
-- runFlow:
-    file: "../common/add_course.yaml"
-    env:
-      TESTCOURSENAME: "New Content Block Test"
-- runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
-    env:
-      TESTCOURSENAME: "New Content Block Test"
-      TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "1"
-      USERNAME: "t1"
-      GENDER: "Female"
-      PASSWORD: "test"
-- repeat:
-    while:
-      notVisible: "Course"
-    commands:
-      - back
-- tapOn: "Course"
-- runFlow:
-    file: "../common/add_new_content_block_to_course.yaml"
+    file: "common/download_file_via_browser.yaml"
     env:
       TESTFILENAME: "H5p_Content.h5p"
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
+# Download test file2
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Epub_Content1.epub"
+
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: ${TESTCOURSENAME}
+- runFlow:
+    file: "common/add_new_content_block_to_course.yaml"
+    env:
+      TESTFILENAME: "H5p_Content.h5p"
 - scrollUntilVisible:
     element:
       text:  "True/False Question"
     direction: DOWN
 - assertVisible:
     text:  "True/False Question"
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
-    env:
-      USERNAME: "t1"
-      PASSWORD: "test"
-- tapOn: "courses"
-- tapOn: "New Content Block Test"
-- runFlow:
-    file: "../common/add_new_content_block_to_course.yaml"
+    file: "common/add_new_content_block_to_course.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
       text:  "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"

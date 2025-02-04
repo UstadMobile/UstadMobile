@@ -33,34 +33,46 @@ Cypress.on('uncaught:exception', (err) => {
   return true;
 });
 
+
 // Start Test Server
 Cypress.Commands.add('ustadStartTestServer', () => {
-  cy.visit('http://localhost:8075/start'); // Use cy.visit to navigate to the start page
-  cy.wait(6000); // Wait for 6 seconds after visiting the start page
-});
+// https://docs.cypress.io/api/commands/request#Get-Data-URL-of-an-image
+  cy.request('/testcontroller/start').then((response) => {
+  const { url } = response.body
+  cy.log(`Learning Space Server started at: ${url}`)
+})
+})
 
+//Stop Test Server
+Cypress.Commands.add('ustadStopTestServer', () => {
+  cy.request('/testcontroller/stop').then((response) => {
+    if (response.body === 'OK'){
+  cy.log('Server successfully stopped');
+  }
+})
+})
 
-//User Login
+// Clear DB and Login
 Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
-
-//below command added as per : https://github.com/thisdot/open-source/blob/main/libs/cypress-indexeddb/README.md
-  cy.log('Clearing IndexedDB');
-  cy.clearIndexedDb('localhost_8087') // clearing index db
-// Adding query parameters on the url- below command added as per - https://docs.cypress.io/api/commands/visit#Add-query-parameters
-  cy.visit('http://localhost:8087/', {timeout:60000},{
-    qs: {
-      username,
-      password,
-    },
-
-  })
-  cy.get('input#username', { timeout: 10000 }).should('exist').type(username) // 10 seconds
-  cy.get('input#password').type(password)
-  cy.get('button#login_button').click()
+// Clearing IndexedDB for the dynamic hostname
+  const baseUrl = Cypress.config('baseUrl'); // Get the base URL
+  const url = new URL(baseUrl); // Create a URL object
+  const hostname = url.hostname;
+  const port = url.port;
+  const indexedDbName = `${hostname.replace(/\./g, '_')}_${port}`
+  cy.log(`Clearing IndexedDB: ${indexedDbName}`)
+  cy.clearIndexedDb(indexedDbName)
+// visit login page
+  cy.visit('/', {
+    timeout: 60000,
+  });
+// Login to the webapp
+  cy.get('input#username', { timeout: 10000 }).should('exist').type(username); // 10 seconds
+  cy.get('input#password').type(password);
+  cy.get('button#login_button').click();
 });
 
 // Logout Flow
-
 Cypress.Commands.add('ustadLogout', () => {
    cy.get('#header_avatar').click()
    cy.contains('LOG OUT').click()

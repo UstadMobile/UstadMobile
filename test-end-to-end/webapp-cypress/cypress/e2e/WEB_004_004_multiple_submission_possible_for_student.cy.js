@@ -1,8 +1,8 @@
 describe('WEB_004_004_multiple_submission_possible _for_student', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a course and assignment block', () => {
  // Admin user login
@@ -16,7 +16,7 @@ it('Admin add a course and assignment block', () => {
  // Add account for teacher
   cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacher1','test1234')
+  cy.ustadCreateUserAccount('teach1','testt1')
  //Add a student1
   cy.contains("span","Add a student").click()
   cy.ustadAddNewPerson('Student','1','Male')
@@ -24,11 +24,11 @@ it('Admin add a course and assignment block', () => {
  //Add account for student1
   cy.contains("Student 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student1','test1234')
+  cy.ustadCreateUserAccount('stud1','tests1')
   })
 
 it('Teacher add assignment', () => {
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
   // Add Assignment block
   cy.contains("Course").click()
   cy.contains("004_004").click()
@@ -59,7 +59,7 @@ it('Teacher add assignment', () => {
 
 it('Student submit assignment', () => {
 
-  cy.ustadClearDbAndLogin('student1','test1234')
+  cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
   cy.contains("004_004").click()
   cy.contains('Assignment 1').click()
@@ -71,7 +71,7 @@ it('Student submit assignment', () => {
 })
 
 it('Teacher can mark assignment and add course comment', () => {
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
   cy.contains("Course").click()
   cy.contains("004_004").click()
   cy.contains("button","Course").click()
@@ -87,7 +87,7 @@ it('Teacher can mark assignment and add course comment', () => {
 })
 
 it('Student can add another submission', () => {
-  cy.ustadClearDbAndLogin('student1','test1234')
+  cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
   cy.contains("004_004").click()
   cy.contains('Assignment 1').click()
@@ -102,7 +102,7 @@ it('Student can add another submission', () => {
 })
 
 it('Teacher can update mark', () => {
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
   cy.contains("Course").click()
   cy.contains("004_004").click()
   cy.contains("button","Course").click()
@@ -119,7 +119,7 @@ it('Teacher can update mark', () => {
 })
 
 it('Student can see the updated mark', () => {
-  cy.ustadClearDbAndLogin('student1','test1234')
+  cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
   cy.contains("004_004").click()
   cy.contains('Assignment 1').click()
@@ -128,4 +128,9 @@ it('Student can see the updated mark', () => {
   cy.contains('Keep it up').should('exist')
   cy.contains('9.5/10 Points').should('exist')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

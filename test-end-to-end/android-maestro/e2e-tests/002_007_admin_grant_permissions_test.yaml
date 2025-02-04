@@ -1,61 +1,46 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseTest
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_007_admin_grant_permissions_test"
-  TESTNAME:  "002_007_admin_grant_permissions_test"
+  TESTRESULTSDIR: "build/reports/maestro/002_007_admin_grant_permissions_test/Screenshots"
+onFlowStart:
+  - startRecording: 002_007_admin_grant_permissions_test
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-# Admin login
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
+- runScript:
+    file: "common/import_users_via_http.js"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
-- runFlow:
-    file: "../common/user_login.yaml"
-# add new course
-- runFlow:
-    file: "../common/add_course.yaml"
-    env:
-      TESTCOURSENAME: "Test Course Block"
-# add new teacher using flow - add_new_teacher_inside_course ---------
-- runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
-    env:
-      TESTCOURSENAME: ${TESTCOURSENAME}
-      TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "1"
-      USERNAME: "t1"
-      GENDER: "Female"
-      PASSWORD: "testt1"
-# add students to the course through bulk import using .csv file
-- runFlow:
-    file: "../common/student_bulk_upload_csv.yaml"
-    env:
-      TESTFILENAME: "Ustad_Students_List.csv"
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
 
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "s1"
+      USERNAME: "stud1"
       PASSWORD: "tests1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - tapOn: "Members"
 - assertVisible: "Student 2"
 
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "t1"
+      USERNAME: "teach1"
       PASSWORD: "testt1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
@@ -66,12 +51,12 @@ env:
 - tapOn: "View members"
 - tapOn: "Save"
 
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "s1"
+      USERNAME: "stud1"
       PASSWORD: "tests1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
