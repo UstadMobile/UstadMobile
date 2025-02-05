@@ -69,5 +69,4 @@ it('User login and adding profile pic', () => {
   cy.contains("button","Save").click()
   cy.get('img[alt="user image"]').should('exist')
 })
-
 })
