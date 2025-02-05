@@ -3,10 +3,9 @@ tags:
   - courseTest
   - usernameValidation
 env:
-  TESTNAME: "002_010_username_validation"
-  TESTRESULTSDIR: "build/reports/maestro/002_010_username_validation/Screenshots"
+  TESTRESULTSDIR: "build/reports/maestro/007_004_username_validation_and_add_profile_pic/Screenshots"
 onFlowStart:
-  - startRecording: 002_010_username_validation
+  - startRecording: 007_004_username_validation_and_add_profile_pic
   - runScript:
       file: "common/startserver.js"
       env:

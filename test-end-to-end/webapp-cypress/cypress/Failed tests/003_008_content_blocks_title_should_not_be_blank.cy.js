@@ -1,4 +1,4 @@
-describe('003_006_user_able_to_expand _and_collapse_modules', () => {
+describe('003_008_content_blocks_title_should_not_be_blank', () => {
   before(() => {
     // Start Test Server
     cy.ustadStartTestServer(6000)
