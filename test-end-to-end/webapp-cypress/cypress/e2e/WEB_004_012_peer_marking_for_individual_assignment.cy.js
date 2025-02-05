@@ -4,44 +4,11 @@ describe('WEB_004_012_peer_marking_for_individual_assignment', () => {
     cy.ustadStartTestServer(6000)
   })
 
-it('Admin add a course and assignment block', () => {
- // Admin user login
-  cy.ustadClearDbAndLogin('admin','testpass')
- // Add a new course
-  cy.ustadAddCourse('004_012')
- //Add a teacher
-  cy.contains("button","Members").click()
-  cy.contains("span","Add a teacher").click()
-  cy.ustadAddNewPerson('Teacher','1','Female')
- // Add account for teacher
-  cy.contains("Teacher 1").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teach1','testt1')
- //Add a student1
-  cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','1','Male')
-  cy.contains("button","Members").should('be.visible')
- //Add account for student1
-  cy.contains("Student 1").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('stud1','tests1')
- //Add a student2
-  cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','2','Male')
-  cy.contains("button","Members").should('be.visible')
- //Add account for student2
-  cy.contains("Student 2").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('stud2','tests2')
-})
-
 it('Teacher add assignment', () => {
+  cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv");
   cy.ustadClearDbAndLogin('teach1','testt1')
- // Add Assignment block
   cy.contains("Course").click()
-  cy.contains("004_012").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
-  cy.contains("button","Course").click()
+  cy.contains("Test Course Block").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
   cy.contains("Assignment").click()
@@ -89,7 +56,7 @@ it('Student1 submit assignment', () => {
 
   cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
-  cy.contains("004_012").click()
+  cy.contains("Test Course Block").click()
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
@@ -106,7 +73,7 @@ it('Student1 submit assignment', () => {
 it('Student2 add assignment mark and course comment', () => {
   cy.ustadClearDbAndLogin('stud2','tests2')
   cy.contains("Course").click()
-  cy.contains("004_012").click()
+  cy.contains("Test Course Block").click()
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Peers to review').click()
@@ -122,7 +89,7 @@ it('Student2 add assignment mark and course comment', () => {
 it('Student1 view his grade', () => {
   cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
-  cy.contains("004_012").click()
+  cy.contains("Test Course Block").click()
   cy.contains('Assignment 1').click()
   cy.contains('Keep it up').should('exist')
   cy.contains('9/10 Points').should('exist')

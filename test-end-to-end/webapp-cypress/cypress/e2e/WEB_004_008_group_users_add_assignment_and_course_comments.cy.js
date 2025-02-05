@@ -4,60 +4,11 @@ describe('WEB_004_008_group_users_add_assignment_and_course_comments', () => {
     cy.ustadStartTestServer(6000)
   })
 
-it('Admin add a course and Members', () => {
- // Admin user login
-  cy.ustadClearDbAndLogin('admin','testpass')
- // Add a new course
-  cy.ustadAddCourse('004_008')
- //Add a teacher
-  cy.contains("button","Members").click()
-  cy.contains("span","Add a teacher").click()
-  cy.ustadAddNewPerson('Teacher','1','Female')
- // Add account for teacher
-  cy.contains("Teacher 1").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teach1','testt1')
- //Add a student1
-  cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','1','Male')
-  cy.contains("button","Members").should('be.visible')
- //Add account for student1
-  cy.contains("Student 1").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('stud1','tests1')
- //Add a student2
-  cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','2','Male')
-  cy.contains("button","Members").should('be.visible')
- //Add account for student1
-  cy.contains("Student 2").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('stud2','tests2')
- //Add a student3
-  cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','3','Male')
-  cy.contains("button","Members").should('be.visible')
- //Add account for student3
-  cy.contains("Student 3").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('stud3','tests3')
- //Add a student4
-  cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','4','Male')
-  cy.contains("button","Members").should('be.visible')
- //Add account for student4
-  cy.contains("Student 4").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('stud4','tests4')
-})
-
 it('Teacher add assignment and course comment', () => {
+  cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv");
   cy.ustadClearDbAndLogin('teach1','testt1')
- // Add Assignment block
-  cy.contains("Courses").click()
-  cy.contains("004_008").click()
-  cy.contains("button","Members").click()  // This is a temporary command to make sure member list is loaded
-  cy.contains("button","Course").click()
+  cy.contains("Course").click()
+  cy.contains("Test Course Block").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
   cy.contains("Assignment").click()
@@ -75,13 +26,17 @@ it('Teacher add assignment and course comment', () => {
     })
   cy.get('#cgs_name').type('Assignment Team')
   cy.get('#cgs_total_groups').clear().type('2')
-  cy.contains('Unassigned').eq(0).click()  // s1
+  cy.contains('Unassigned').eq(0).click()  // s1 -G1
   cy.contains('Group 1').click()
-  cy.contains('Unassigned').eq(0).click()  //s2
+  cy.contains('Unassigned').eq(0).click()  //s2 - G1
   cy.get('li[data-value="1"]').click()
-  cy.contains('Unassigned').eq(0).click()  //s3
+  cy.contains('Unassigned').eq(0).click()  //s3 - G2
   cy.contains('Group 2').click()
-  cy.contains('Unassigned').eq(0).click()  //s4
+  cy.contains('Unassigned').eq(0).click()  //s4 - G2
+  cy.get('li[data-value="2"]').click()
+  cy.contains('Unassigned').eq(0).click()  //s5 - G1
+  cy.get('li[data-value="1"]').click()
+  cy.contains('Unassigned').eq(0).click()  //s6 - G2
   cy.get('li[data-value="2"]').click()
   cy.contains("button","Save").should('be.visible')
   cy.contains("button","Save").click()
@@ -92,46 +47,63 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Save").click()
   cy.contains("button","Members").should('be.visible')
   cy.contains('Assignment 1').click()
-  cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','comment1')
+  cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','course comment by teacher')
+  cy.contains("Assignment 1").click()
+  cy.contains('Submissions').click()
+  cy.ustadReloadUntilVisible("Group 1")
+  cy.contains("Group 1").click()
+  cy.ustadTypeAndSubmitAssignmentComment('#private_comment_textfield','#private_comment_textfield_send_button','private comment by teacher')
 })
 
 it('Group 1- Student 1 submit assignment', () => {
   cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
-  cy.contains("004_008").click()
+  cy.contains("Test Course Block").click()
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
   cy.get('.ql-editor').ustadTypeAndVerify('Text 1',{maxRetries: 3})
   cy.contains('SUBMIT',{timeout:5000}).click()
   cy.get('#assignment_text div[contenteditable="true"]').should('not.exist')
-  cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','comment2',25)
-  cy.contains("comment1").should('exist')
-  cy.go('back')
-  cy.contains('Assignment 1',{timeout:1000}).click()
-  cy.contains("Not submitted").should('not.exist')
+  cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','course comment by Group 1',25)
+  cy.contains("course comment by Group 1").should('exist')
+  cy.contains("course comment by teacher").should('exist')
+  cy.contains("private comment by teacher").ustadScrollUntilVisible()
+  cy.get(".VirtualList").scrollTo('bottom')
+  cy.ustadTypeAndSubmitAssignmentComment('#private_comment_textfield','#private_comment_textfield_send_button','private comment by Group 1')
+  cy.contains("private comment by teacher").ustadScrollUntilVisible()
+  cy.contains("private comment by Group 1").should('exist')
+  cy.contains("private comment by teacher").should('exist')
 })
 
 it('Group 2 Student can view  Group 1 course comment ', () => {
   cy.ustadClearDbAndLogin('stud3','tests3')
   cy.contains("Course").click()
-  cy.contains("004_008").click()
+  cy.contains("Test Course Block").click()
   cy.contains('Assignment 1').click()
   cy.get("#VirtualList").scrollTo('bottom')
-  cy.contains("comment2").should('exist')
-  cy.contains("comment1").should('exist')
+  cy.contains("course comment by teacher").ustadScrollUntilVisible()
+  cy.contains("course comment by Group 1").should('exist')
+  cy.contains("course comment by teacher").should('exist')
+  cy.contains("private comment by Group 1").should('not.exist')
+  cy.contains("private comment by teacher").should('not.exist')
 })
 
 it('Group 1 - Student2 able to view Group 1 assignment and course comments', () => {
   cy.ustadClearDbAndLogin('stud2','tests2')
   cy.contains("Course").click()
-  cy.contains("004_008").click()
+  cy.contains("Test Course Block").click()
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.get("#VirtualList").scrollTo('bottom')
   cy.contains("Text 1").ustadScrollUntilVisible()
-  cy.contains("comment1").ustadScrollUntilVisible()
-  cy.contains("comment2").should('exist')
+  cy.contains("course comment by teacher").ustadScrollUntilVisible()
+  cy.contains("course comment by Group 1").should('exist')
+  cy.contains("course comment by teacher").should('exist')
+  cy.get("#VirtualList").scrollTo('bottom')
+  cy.contains("private comment by teacher").ustadScrollUntilVisible()
+  cy.contains("private comment by Group 1").should('exist')
+  cy.contains("private comment by teacher").should('exist')
 })
 
   after(() => {

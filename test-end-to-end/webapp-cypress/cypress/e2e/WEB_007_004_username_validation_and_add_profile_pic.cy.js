@@ -1,4 +1,4 @@
-describe('WEB_002_010_username_validation', () => {
+describe('WEB_007_004_username_validation_and_add_profile_pic', () => {
  it('Start Ustad Test Server ', () => {
   // Start Test Server
     cy.ustadStartTestServer()
@@ -53,7 +53,7 @@ describe('WEB_002_010_username_validation', () => {
   cy.contains('Change Password',{timeout:2000}).should('be.visible')
 })
 
-it('Admin user create a person', () => {
+it('User login and adding profile pic', () => {
   cy.ustadClearDbAndLogin('us','test1234',{timeout:8000})
   cy.contains("Username must be at least 3 characters",{timeout:2000}).should('be.visible')
   cy.reload()
@@ -61,5 +61,13 @@ it('Admin user create a person', () => {
   cy.get('input#password').type("test1234")
   cy.get('button#login_button').click()
   cy.contains("Courses").should('be.visible')
+  cy.get('button#header_avatar').click()
+  cy.get('button#profile_button').click()
+  cy.contains("button","Edit").click()
+  cy.get('svg[data-testid="AddAPhotoIcon"]').click()
+  cy.get('input[type="file"]').selectFile('../test-files/content/admin_profilePic.jpg',{force:true})
+  cy.contains("button","Save").click()
+  cy.get('img[alt="user image"]').should('exist')
 })
+
 })

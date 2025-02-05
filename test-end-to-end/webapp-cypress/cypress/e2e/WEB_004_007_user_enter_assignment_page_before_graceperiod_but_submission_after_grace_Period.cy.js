@@ -4,35 +4,11 @@ describe('WEB_004_007_user_enter_assignment_page_before_graceperiod_but_submissi
     cy.ustadStartTestServer(6000)
   })
 
-it('Admin add a course and assignment block', () => {
- // Admin user login
-  cy.ustadClearDbAndLogin('admin','testpass')
- // Add a new course
-  cy.ustadAddCourse('004_007')
- //Add a teacher
-  cy.contains("button","Members").click()
-  cy.contains("span","Add a teacher").click()
-  cy.ustadAddNewPerson('Teacher','1','Female')
- // Add account for teacher
-  cy.contains("Teacher 1").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teach1','testt1')
- //Add a student1
-  cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','1','Male')
-  cy.contains("button","Members").should('be.visible')
- //Add account for student1
-  cy.contains("Student 1").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('stud1','tests1')
-})
-
 it('Teacher add assignment', () => {
+  cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv");
   cy.ustadClearDbAndLogin('teach1','testt1')
-  // Add Assignment block
   cy.contains("Course").click()
-  cy.contains("004_007").click()
-  cy.contains("button","Course").click()
+  cy.contains("Test Course Block").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
   cy.contains("Assignment").click()
@@ -62,7 +38,7 @@ it('Student not able to submit assignment', () => {
 
   cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
-  cy.contains("004_007").click()
+  cy.contains("Test Course Block").click()
   cy.contains('Assignment 1').click()
   cy.get('#assignment_text').get('div[contenteditable="true"]',{timeout:6000}).should('be.visible')
   cy.get('#assignment_text').click()
@@ -79,7 +55,7 @@ it('Teacher checks submissions', () => {
   cy.ustadClearDbAndLogin('teach1','testt1')
  //  Assignment block
   cy.contains("Course").click()
-  cy.contains("004_007").click()
+  cy.contains("Test Course Block").click()
   cy.contains("button","Course").click()
   cy.contains("Assignment 1").click()
   cy.contains('Submissions').click()

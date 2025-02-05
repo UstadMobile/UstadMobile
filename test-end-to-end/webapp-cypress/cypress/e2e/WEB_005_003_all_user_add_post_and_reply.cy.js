@@ -5,17 +5,18 @@ describe('WEB_005_003_all_user_add_post_and_reply', () => {
   })
 
 it('Admin add discussion board and post', () => {
+  cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv");
   // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass')
-  // Add a new course
-  cy.ustadAddCourse('005_003')
+  cy.contains("Course").click()
+  cy.contains("Test Course Block").click()
   // Add discussion board
   cy.contains('button','Edit').click()
   cy.ustadAddDiscussionBoard('Discussion 1')
   cy.contains('Edit course').should('be.visible')
   cy.contains("button","Save").click()
   // Add post to the discussion
-  cy.contains('005_003').should('be.visible')
+  cy.contains('Test Course Block').should('be.visible')
   cy.contains('.MuiTypography-root','Discussion 1').click()
   cy.contains('Post').click()
   cy.get('#discussion_post_title').type('Topic 1')
@@ -23,29 +24,13 @@ it('Admin add discussion board and post', () => {
   cy.get('#actionBarButton').click()
   cy.go('back')
   cy.go('back')
-  //Add a teacher
-  cy.contains("button","Members").click()
-  cy.contains("span","Add a teacher").click()
-  cy.ustadAddNewPerson('Teacher','1','Female')
-  // Add account for teacher
-  cy.contains("Teacher 1").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teach1','testt1')
-  //Add a student
-  cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','1','Male')
-  cy.contains("button","Members").should('be.visible')
-  //Add account for student
-  cy.contains("Student 1").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('stud1','tests1')
 })
 
 it('Teacher able to add a new post and reply', () => {
   // Teacher Login
   cy.ustadClearDbAndLogin('teach1','testt1')
   cy.contains("Courses").should('be.visible')
-  cy.contains('005_003').click()
+  cy.contains('Test Course Block').click()
   // Add reply to the post board
   cy.contains('.MuiTypography-root','Discussion 1').click()
   cy.contains('Topic 1').click()
@@ -66,7 +51,7 @@ it('Student able to add a post and reply', () => {
   // Student Login
   cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Courses").should('be.visible')
-  cy.contains('005_003').click()
+  cy.contains('Test Course Block').click()
   // Add reply to the post board
   cy.contains('Discussion 1').click()
   cy.contains('Topic 1').click()
