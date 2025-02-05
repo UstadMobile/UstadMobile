@@ -21,7 +21,7 @@ onFlowComplete:
 - runFlow:
     file: "common/add_profile_pic.yaml"
     env:
-      TESTFILENAME: "admin_profilePic.jpg"
+      TESTFILENAME: "profile_Pic.jpg"
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 - assertVisible:

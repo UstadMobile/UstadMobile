@@ -65,7 +65,7 @@ it('User login and adding profile pic', () => {
   cy.get('button#profile_button').click()
   cy.contains("button","Edit").click()
   cy.get('svg[data-testid="AddAPhotoIcon"]').click()
-  cy.get('input[type="file"]').selectFile('../test-files/content/admin_profilePic.jpg',{force:true})
+  cy.get('input[type="file"]').selectFile('../test-files/content/profile_Pic.jpg',{force:true})
   cy.contains("button","Save").click()
   cy.get('img[alt="user image"]').should('exist')
 })
