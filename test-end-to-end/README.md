@@ -69,8 +69,6 @@ trickle -s -d 128 -u 128 bash
 
 3.7 [Text blocks can open and all text is visible](test-descriptions/003_007_all_user_able_to_open_text_block_test_description.md)
 
-3.8 [The course block title is mandatory.d](test-descriptions/003_008_course_blocks_title_field_is_mandatory_test_description.md)
-
 ### 4: Assignments
 
 4.1 [Assignment creation,submission and grading](test-descriptions/004_001_assignment_creation_submission_gradebook_test_description.md)
