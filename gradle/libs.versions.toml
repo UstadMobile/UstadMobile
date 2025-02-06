@@ -125,7 +125,7 @@ lz4 = "1.8.0"
 kmp-uuid = "0.8.4"
 zoomable = "1.6.1"
 jetbrains-kotlin-jvm = "1.9.23"
-koalaplot-version = "0.7.0"
+koalaplot-version = "0.6.4"
 
 
 [plugins]
