@@ -50,7 +50,12 @@ onFlowComplete:
           from:
             text: "Drag handle"
           direction: UP
+# verify title is mandatory for discussion board
 - tapOn: "Discussion board"
+- tapOn: "Title*"
+- tapOn: "Done"
+- assertNotVisible:
+    text: "Add block"
 - tapOn: "Title*"
 - inputText: "Discussion 1"
 - hideKeyboard

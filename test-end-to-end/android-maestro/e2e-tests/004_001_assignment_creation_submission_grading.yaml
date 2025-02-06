@@ -56,6 +56,12 @@ onFlowComplete:
           direction: UP
 - tapOn: "Assignment"
 - tapOn: "Title*"
+- hideKeyboard
+- tapOn: "Done"
+#Assertion to make sure the page is not saved because title is blank
+- assertNotVisible:
+    text: "Add block"
+- tapOn: "Title*"
 - inputText: "Assignment 1"
 - hideKeyboard
 - tapOn: "Description"
@@ -86,9 +92,9 @@ onFlowComplete:
 - tapOn: "Test Course Block"
 - scrollUntilVisible:
     element:
-      text: "Assignment 1"
+      text: "Assignment"
     direction: DOWN
-- tapOn: "Assignment 1"
+- tapOn: "Assignment"
 - tapOn: "Text"
 - tapOn:
      id: "com.toughra.ustadmobile:id/editor"
@@ -116,9 +122,9 @@ onFlowComplete:
 - tapOn: "Test Course Block"
 - scrollUntilVisible:
     element:
-      text: "Assignment 1"
+      text: "Assignment"
     direction: DOWN
-- tapOn: "Assignment 1"
+- tapOn: "Assignment"
 - tapOn: "Submissions"
 - assertVisible: "Student 1"
 - tapOn: "Student 1"
@@ -158,9 +164,9 @@ onFlowComplete:
 - tapOn: "Test Course Block"
 - scrollUntilVisible:
     element:
-      text: "Assignment 1"
+      text: "Assignment"
     direction: DOWN
-- tapOn: "Assignment 1"
+- tapOn: "Assignment"
 - assertVisible: "Marked"
 - scrollUntilVisible:
     element:

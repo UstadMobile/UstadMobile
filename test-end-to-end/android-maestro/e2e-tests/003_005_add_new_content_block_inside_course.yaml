@@ -43,6 +43,29 @@ onFlowComplete:
       USERNAME: "teach1"
       PASSWORD: "testt1"
 - tapOn: ${TESTCOURSENAME}
+# verify content block title is mandatory
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add block"
+- tapOn: "Content"
+- tapOn: "My content"
+- tapOn: "Import from file"
+- runFlow:
+    file: "common/select_file_from_picker.yaml"
+    env:
+      TESTFILENAME: H5p_Content.h5p
+- longPressOn: "True/False Question"
+- tapOn: "Select all"
+- eraseText
+- tapOn: "Next"
+#Assertion to make sure the page is not saved because title is blank
+- assertNotVisible:
+    id: "app_title"
+    text: "Edit content block"
+- hideKeyboard
+- back
+- back
+- tapOn: "Save"
 - runFlow:
     file: "common/add_new_content_block_to_course.yaml"
     env:

@@ -13,19 +13,21 @@ Teacher can add discussion board to course
 5. Click on the "Edit" button. 
 6. Click on the "Add block" button. 
 7. Click on the "Discussion board" button. 
-8. Enter "Title" for the discussion board. 
-9. Click on "Description"
-10. Enter description 
-11. Click on "Done" to save the description. 
-12. Click on "Done" to save the discussion board. 
-13. Click on "Save" to save the course changes. 
-14. Verify the "Discussion board" is visible inside the course. 
-15. Click on the discussion board name. 
-16. Verify the "+ Post" button is visible inside the discussion board. 
-17. Click on "Edit" button.
-18. Click on discussion board.
-19. Click on the description.
-20. Enter a description.
-21. Click on "Done" to save the description.
-22. Verify the description is visible
-23. Click on "Done" to save the discussion board.
+8. Leave the title blank and click on Save
+9. User gets error the Discussion board block title is mandatory
+10. Enter "Title" for the discussion board. 
+11. Click on "Description"
+12. Enter description 
+13. Click on "Done" to save the description. 
+14. Click on "Done" to save the discussion board. 
+15. Click on "Save" to save the course changes. 
+16. Verify the "Discussion board" is visible inside the course. 
+17. Click on the discussion board name. 
+18. Verify the "+ Post" button is visible inside the discussion board. 
+19. Click on "Edit" button.
+20. Click on discussion board.
+21. Click on the description.
+22. Enter a description.
+23. Click on "Done" to save the description.
+24. Verify the description is visible
+25. Click on "Done" to save the discussion board.
