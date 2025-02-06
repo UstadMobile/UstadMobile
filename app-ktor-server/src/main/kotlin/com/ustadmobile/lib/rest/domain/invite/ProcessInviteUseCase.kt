@@ -5,12 +5,12 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.invite.CheckContactTypeUseCase
 import com.ustadmobile.core.util.UstadUrlComponents
-import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
 import com.ustadmobile.core.viewmodel.clazz.inviteredeem.ClazzInviteRedeemViewModel
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.ClazzInvite
 import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
+import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
 import io.github.aakira.napier.Napier
 import kotlinx.html.currentTimeMillis
 import kotlinx.serialization.Serializable

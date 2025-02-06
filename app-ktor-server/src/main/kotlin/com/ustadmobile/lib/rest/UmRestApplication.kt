@@ -155,6 +155,10 @@ import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourc
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.lib.rest.domain.invite.ResendInviteRoute
 import com.ustadmobile.lib.rest.domain.invite.ResendInviteUseCase
+import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockSendEmailUseCase
+import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCaseImpl
+import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockEmailSender
+import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.TestEmailRoute
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -291,6 +295,8 @@ fun Application.umRestApplication(
 
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
 
+    val useMockEmail = environment.config.propertyOrNull("ktor.ustad.useMockEmail")?.getString().toBoolean()
+
     val json = Json {
         encodeDefaults = true
         ignoreUnknownKeys = true
@@ -360,6 +366,9 @@ fun Application.umRestApplication(
         )
         import(ContentImportersDiModuleJvm)
 
+        if (useMockEmail){
+            bind<MockEmailSender>() with singleton { MockEmailSender() }
+        }
 
         bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
 
@@ -894,7 +903,11 @@ fun Application.umRestApplication(
         }
 
         bind<SendEmailUseCase>() with scoped(LearningSpaceScope.Default).provider {
-            SendEmailUseCase(NotificationSender(di))
+            if (useMockEmail) {
+                MockSendEmailUseCase(mockEmailSender = instance())
+            } else {
+                SendEmailUseCaseImpl(notificationSender = NotificationSender(di))
+            }
         }
         bind<SendSmsUseCase>() with singleton {
             SendSmsUseCase(di)
@@ -1027,6 +1040,13 @@ fun Application.umRestApplication(
             }
 
             route("api") {
+                if(useMockEmail){
+                    route("testemail") {
+                        TestEmailRoute(
+                            mockEmailSender = di.direct.instance()
+                        )
+                    }
+                }
                 route("sysconfig") {
                     SystemConfigScriptRoute(
                         systemDb = di.direct.instance(),

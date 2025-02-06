@@ -496,7 +496,7 @@ private val PendingInvitesListItem = FC<PendingInvitesListItemProps> { props ->
                 }
                 MenuItem {
                     onClick = {
-                        props.onClickResendInvite("")
+                        props.onClickResendInvite(props.item?.inviteContact?:"")
                         point = null
                     }
                     + strings[MR.strings.resend]
