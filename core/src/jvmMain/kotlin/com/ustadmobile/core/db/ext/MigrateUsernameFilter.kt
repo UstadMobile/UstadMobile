@@ -24,7 +24,9 @@ val MIGRATE_USERNAME_SERVER = DoorMigrationStatementList(202, 203) { db ->
                     }
                 }
             }
-            if(users.isEmpty()) break
+            if(users.isEmpty())
+                break
+
             users.forEach { (personUid, currentUsername) ->
                 val filteredUsername = filterUsernameUseCase(currentUsername, "_")
                 if (currentUsername != filteredUsername) {
@@ -40,7 +42,4 @@ val MIGRATE_USERNAME_SERVER = DoorMigrationStatementList(202, 203) { db ->
         }
     }
     statements
-}
-val MIGRATE_USERNAME_CLIENT = DoorMigrationStatementList(202, 203) { _ ->
-    emptyList()
 }
