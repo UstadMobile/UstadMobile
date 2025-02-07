@@ -43,25 +43,15 @@ trickle -s -d 128 -u 128 bash
 
 ### 2: Course creation, enrolment, attendance, progress
 
-2.1 [Admin add new course and new members to that course](test-descriptions%2F002_001_admin_add_new_course_and_teacher_test_description.md)
+2.1 [Add new course, add members to that course and add a course banner](test-descriptions/002_001_admin_add_new_course_members_and_set_course_banner_test_description.md))
 
 2.2 [Students can join class using class code or link](test-descriptions/002_002_student_joining_course_using_code_test_description.md)
 
 2.3 [Teacher can record attendance.](test-descriptions/002_003_teacher_record_attendance_test_description.md)
 
-2.4 [Teacher can view progress report showing each students' result in Gradebook](test-descriptions/002_004_teacher_can_view_progress_report_showing_each_students_result_in_gradebook_test_description.md)
+2.4 [Teacher/admin can remove people from a course](test-descriptions/002_004_teacher_or_admin_can%20remove_people_from_a_course_test_description.md)
 
-2.5 [The course title is mandatory](test-descriptions/002_005_course_title_is_mandatory_test_description.md)
-
-2.6 [Teacher/admin can remove people from a course](test-descriptions/002_006_teacher_or_admin_can%20remove_people_from_a_course_test_description.md)
-
-2.7 [Teacher and admin user can grant permission for the course to other users](test-descriptions/002_007_admin_grant_permissions_test_description.md)
-
-2.8 [Teacher/admin can add banner photo to the course](test-descriptions/002_008_teacher_or_admin_can_add_banner_photo_to_the_course_test_description.md)
-
-2.9 [The user can add a profile photo](test-descriptions/002_009_people_add_and_remove_profile_pic_test_description.md)
-
-2.10 [The username validation](`<a< test-descriptions/002_010_username_validation_test_description.md)
+2.5 [Teacher and admin user can grant permission for the course to other users](test-descriptions/002_005_admin_grant_permissions_test_description.md)
 
 ### 3: Course block editing
 
@@ -79,53 +69,45 @@ trickle -s -d 128 -u 128 bash
 
 3.7 [Text blocks can open and all text is visible](test-descriptions/003_007_all_user_able_to_open_text_block_test_description.md)
 
-3.8 [The course block title is mandatory.d](test-descriptions/003_008_course_blocks_title_field_is_mandatory_test_description.md)
-
 ### 4: Assignments
 
-4.1 [ssignment creation,submission and grading](test-descriptions/004_001_assignment_creation_submission_grading_test_description.md)
+4.1 [Assignment creation,submission and grading](test-descriptions/004_001_assignment_creation_submission_gradebook_test_description.md)
 
-4.2 [Teachers and students can add course comments which are visible for all who can view the assignment](test-descriptions/004_002_users_add_course_comments_test_description.md)
+4.2 [Teachers and students can add course comments and private comments to the assignment](test-descriptions/004_002_users_add_assignment_course_and_private_comments_test_description.md)
 
-4.3 [Teachers and students can submit and view private comments](test-descriptions/004_003_user_add_private_comment_test_description.md)
+4.3 [Assignment is set to allow multiple submissions](test-descriptions/004_003_multiple_submission_possible_for_student_test_description.md)
 
-4.4 [Assignment is set to allow multiple submissions](test-descriptions/004_004_multiple_submission_possible_for_student_test_description.md)
+4.4 [Assignment is submitted after the deadline but before the grace period, the submission should be accepted](test-descriptions/004_004_assignment_after_deadline_and_before_grace_period_test_description.md)
 
-4.5 [Assignment is submitted after the deadline but before the grace period, the submission should be accepted](test-descriptions/004_005_assignment_after_deadline_and_before_grace_period_test_description.md)
+4.5 [Assignment submission page is open after the deadline the submit button won't be visible](test-descriptions/004_005_assignment_grace_period_finished_test_description.md)
 
-4.6 [Assignment submission page is open after the deadline the submit button won't be visible](test-descriptions/004_006_assignment_grace_period_finished_test_description.md)
+4.6 [Assignment submission page is open before the deadline, and the deadline passes whilst the screen is open, the student will not be able to submit](test-descriptions/004_006_user_enter_assignment_page_before_graceperiod_but_submission_after_grace_Period_test_description.md)
 
-4.7 [Assignment submission page is open before the deadline, and the deadline passes whilst the screen is open, the student will not be able to submit](test-descriptions/004_007_user_enter_assignment_page_before_graceperiod_but_submission_after_grace_Period_test_description.md)
+4.7 [Group users can add assignment course comments and private comments](test-descriptions/004_007_group_users_add_assignment_course_and_private_comments_test_description.md)
 
-4.8 [Group users can add assignment and course comments](test-descriptions/004_008_group_users_add_assignment_and_course_comments_test_description.md)
+4.8 [Group assignment is set that only one submission is allowed](test-descriptions/004_008_group_users_single_assignment_submission_allowed_test_description.md)
 
-4.9 [Group users can add assignment and private comments](test-descriptions/004_009_group_users_add_private_comments_test_description.md)
+4.9 [Group assignment is set to allow multiple submission](test-descriptions/004_009_group_users_multiple_assignment_submission_allowed_test_description.md)
 
-4.10 [Group assignment is set that only one submission is allowed](test-descriptions/004_010_group_users_single_assignment_submission_allowed_test_description.md)
+4.10 [Assignment is set to be marked by peers and submitted by individual users](test-descriptions/004_010_peer_marking_for_individual_assignment_test_description.md)
 
-4.11 [Group assignment is set to allow multiple submission](test-descriptions/004_011_group_users_multiple_assignment_submission_allowed_test_description.md)
+4.11 [Assignment is set to be marked by peers and submitted by groups](test-descriptions/004_011_peer_marking_for_group_assignment_test_description.md)
 
-4.12 [Assignment is set to be marked by peers and submitted by individual users](test-descriptions/004_012_peer_marking_for_individual_assignment_test_description.md)
+4.12 [Teacher or admin can delete private comments and course comments](test-descriptions/004_012_teacher_or_admin_can_delete_private_comments_and_course_comments_test_description.md)
 
-4.13 [Assignment is set to be marked by peers and submitted by groups](test-descriptions/004_013_peer_marking_for_group_assignment_test_description.md)
-
-4.14 [Teacher or admin can delete private comments and course comments](test-descriptions/004_014_teacher_or_admin_can_delete_private_comments_and_course_comments_test_description.md)
-
-4.15 [Admin or teacher can enable or disable the file submission and can limit maximum file size](test-descriptions/004_015_teacher_or_admin_enable_or_disable_file_submission_test_description.md)
+4.13 [Admin or teacher can enable or disable the file submission and can limit maximum file size](test-descriptions/004_013_teacher_or_admin_enable_or_disable_file_submission_test_description.md)
 
 ### 5	Discussion board
 
 5.1 [Teacher can add discussion board to course](test-descriptions/005_001_add_discussionBoard_test_description.md)
 
-5.2 [Teacher can edit discussion board](test-descriptions/005_002_teacher_can_edit_discussion_board_test_description.md)
+5.2 [All users on course can post on discussion board](test-descriptions/005_002_users_can_add_post_on_discussion_board_test_description.md)
 
-5.3 [All users on course can post on discussion board](test-descriptions/005_003_users_can_add_post_on_discussion_board_test_description.md)
+5.3 [Users can include internal links in their post](test-descriptions/005_003_user_add_internal_links_to_post_test_description.md) 
 
-5.4 [Users can include internal links in their post](test-descriptions%2F005_004_user_add_internal_links_to_post_test_description.md) 
+5.4 [Users can include external links to websites in their post](test-descriptions/005_004_users_can_add_external_links_as_post_on_discussion_board_test_description.md)
 
-5.5 [Users can include external links to websites in their post](test-descriptions/005_005_users_can_add_external_links_as_post_on_discussion_board_test_description.md)
-
-5.6 [All users with permission can delete posts and replies](test-descriptions/005_006_users_can_delete_post_on_discussion_board_test_description.md)
+5.5 [All users with permission can delete posts and replies](test-descriptions/005_005_users_can_delete_post_on_discussion_board_test_description.md)
 
 ### 6 Messaging
 
@@ -141,19 +123,13 @@ trickle -s -d 128 -u 128 bash
 
 7.3 [When registration is enabled: Users under 13 can register using parental approval link](test-descriptions/007_003_users_under_13_can_register_using_parental_approval_link_test_description.md)
 
-7.4 [For user registration date of birth field is mandatory](test-descriptions/007_004_user_registration_dob_field_is_mandatory_test_description.md)
+7.4 [The username validation and adding a profile photo](test-descriptions/007_004_username_validation_and_add_profile_pic_test_description.md)
 
 7.5 [Students user under 13 is added by a teacher/admin, don't require parental approval](test-descriptions/007_005_student_registered_by_admin_or_teacher_dont_need_parentConsent_test_description.md)
 
 7.6 [Admin can enable/disable guest login](test-descriptions/007_006_admin_enable_or_disable_guest_login_test_description.md)
 
 7.7 [Admin or teacher send invitation via message or phone numbers or email addresses](test-descriptions/007_007_admin_or_teacher_send_group_invitation_to_join_course_test_description.md)
-
-7.8 [On user registration page first name, last name, gender, username and password are mandatory fields](test-descriptions/007_008_user_registration_mandatory_fields_test_description.md)
-
-7.9 [For user registration email id field should have valid email address](test-descriptions/007_009_user_registration_email_field_verification_test_description.md)
-
-7.10 [For user registration phone number field should have valid phone number](test-descriptions/007_010_user_registration_phone_field_verification_test_description.md)
 
 ### 8 Accessibility
 

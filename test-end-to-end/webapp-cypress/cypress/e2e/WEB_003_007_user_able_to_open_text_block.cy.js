@@ -8,7 +8,7 @@ it('User able to expand and collapse the module blocks', () => {
   // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass')
   // Add a new course
-  cy.ustadAddCourse('003_002')
+  cy.ustadAddCourse('Test Course Block')
   // Add module block
   cy.contains('button','Edit').click()
   cy.ustadAddModuleBlock('module 1')

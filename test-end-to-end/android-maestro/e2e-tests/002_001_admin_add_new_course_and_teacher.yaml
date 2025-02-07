@@ -17,15 +17,43 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+# download the banner pic
+- runFlow:
+    file:  "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "courseBannerPic.jpg"
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/admin_login.yaml"
+# verify the course title is mandatory
+- runFlow:
+    file: "common/add_course.yaml"
+    env:
+      TESTCOURSENAME: " "
+# assert to make sure the course is not saved because of blank course title
+- assertVisible:
+    id: "app_title"
+    text: "Add a new course"
+- tapOn: "Back"
 # add new course
 - runFlow:
     file: "common/add_course.yaml"
     env:
       TESTCOURSENAME: "Test Course Block"
+# Adding course banner pic
+- tapOn: "Test Course Block"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add"
+- tapOn: "Select picture from files"
+- runFlow:
+    file: "common/select_picture_from_files.yaml"
+    env:
+      TESTFILENAME: "courseBannerPic.jpg"
+- tapOn: "Save"
+- assertVisible:
+    id: "course_banner"
 - runFlow:
     file: "common/add_new_teacher_inside_course.yaml"
     env:
@@ -44,7 +72,7 @@ onFlowComplete:
       USERNAME: "stud1"
       GENDER: "Female"
       PASSWORD: "tests1"
-- back
+- tapOn: "Back"
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
@@ -61,3 +89,4 @@ onFlowComplete:
       USERNAME: "stud1"
       PASSWORD: "tests1"
 - assertVisible: "Test Course Block"
+
