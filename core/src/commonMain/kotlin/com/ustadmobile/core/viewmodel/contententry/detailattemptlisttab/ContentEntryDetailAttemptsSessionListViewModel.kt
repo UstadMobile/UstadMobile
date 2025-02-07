@@ -97,11 +97,15 @@ class ContentEntryDetailAttemptsSessionListViewModel(
     fun onSortOrderChanged(sortOption: SortOrderOption) {
         _uiState.update { prev ->
             prev.copy(
-                sortOption = sortOption
+                sortOption = sortOption,
+                attemptsSessionList = {
+                    getAttemptsSessionListAsPagingSource(entityUidArg, argPersonUid)
+                }
             )
         }
         _refreshCommandFlow.tryEmit(RefreshCommand())
     }
+
     override fun onUpdateSearchResult(searchText: String) {
         TODO("Not yet implemented")
     }

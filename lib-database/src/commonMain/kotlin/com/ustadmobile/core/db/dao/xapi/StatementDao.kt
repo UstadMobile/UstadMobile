@@ -63,24 +63,28 @@ expect abstract class StatementDao {
     @Query("SELECT * FROM PERSON LIMIT 1")
     abstract fun getPerson(): Person?
 
-    @Query("""
+    @Query(
+        """
         SELECT StatementEntity.*
           FROM StatementEntity
          WHERE (    (:statementIdHi = 0 AND :statementIdLo = 0) 
                  OR (statementIdHi = :statementIdHi AND statementIdLo = :statementIdLo))
                   
-    """)
+    """
+    )
     abstract suspend fun getStatements(
         statementIdHi: Long,
         statementIdLo: Long,
     ): List<StatementEntity>
 
-    @Query("""
+    @Query(
+        """
         SELECT StatementEntity.*
           FROM StatementEntity
          WHERE statementIdHi = :statementIdHi 
            AND statementIdLo = :statementIdLo       
-    """)
+    """
+    )
     abstract suspend fun findById(
         statementIdHi: Long,
         statementIdLo: Long,
@@ -92,27 +96,32 @@ expect abstract class StatementDao {
      * given ContentEntry for a given user (e.g. they match the content entry, person,
      * StatementEntity.completionOrProgress is true, and (progress > 0 OR completion = true)
      */
-    @Query("""
+    @Query(
+        """
         SELECT StatementEntity.*
                $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
-    """)
+    """
+    )
     abstract suspend fun findStatusStatementsByContentEntryUid(
         contentEntryUid: Long,
         courseBlockUid: Long,
         accountPersonUid: Long,
     ): List<StatementEntity>
 
-    @Query("""
+    @Query(
+        """
         SELECT StatementEntity.*
                $FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
-    """)
+    """
+    )
     abstract suspend fun findStatusStatementByParentContentEntryUid(
         parentUid: Long,
         accountPersonUid: Long,
     ): List<StatementEntity>
 
 
-    @Query("""
+    @Query(
+        """
         WITH PersonUids(personUid) AS (
             SELECT :accountPersonUid AS personUid
         ),
@@ -121,13 +130,15 @@ expect abstract class StatementDao {
         
         SELECT StatementEntity.*
                $FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
-    """)
+    """
+    )
     abstract suspend fun findStatusStatementsForStudentByClazzUid(
         clazzUid: Long,
         accountPersonUid: Long,
     ): List<StatementEntity>
 
-    @Query("""
+    @Query(
+        """
         -- Get the PersonUids for those that are within the current page as per studentsLimit and 
         -- studentsOffset
         WITH $PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE,
@@ -135,7 +146,8 @@ expect abstract class StatementDao {
         $ACTOR_UIDS_FOR_PERSONUIDS_CTE
 
         $SELECT_STATUS_STATEMENTS_FOR_ACTOR_PERSON_UIDS
-    """)
+    """
+    )
     /**
      * This query will fetch the StatementEntity and related (e.g. ActorEntity, GroupMemberActorJoin)
      * required by ClazzGradebook to show the Gradebook results. The query uses the same parameters
@@ -164,7 +176,8 @@ expect abstract class StatementDao {
      * Get all the xapi statements required to determine the status of each block for a
      * given list of students in a given class.
      */
-    @Query("""
+    @Query(
+        """
         WITH PersonUids(personUid) AS (
             SELECT Person.personUid
               FROM Person
@@ -174,7 +187,8 @@ expect abstract class StatementDao {
         $ACTOR_UIDS_FOR_PERSONUIDS_CTE
         
         $SELECT_STATUS_STATEMENTS_FOR_ACTOR_PERSON_UIDS
-    """)
+    """
+    )
     abstract suspend fun findStatusForStudentsInClazzByUidList(
         clazzUid: Long,
         studentPersonUids: List<Long>,
@@ -187,7 +201,8 @@ expect abstract class StatementDao {
      * ActorEntity representing the group, so we need to get (separately) the ActorEntity that
      * represents the student.
      */
-    @Query("""
+    @Query(
+        """
         WITH PersonUids(personUid) AS (
             SELECT Person.personUid
               FROM Person
@@ -203,7 +218,8 @@ expect abstract class StatementDao {
                   FROM PersonUids)
            AND :clazzUid = :clazzUid
            AND :accountPersonUid = :accountPersonUid
-    """)
+    """
+    )
     abstract suspend fun findActorEntitiesForStudentInClazzByUidList(
         clazzUid: Long,
         studentPersonUids: List<Long>,
@@ -253,7 +269,8 @@ expect abstract class StatementDao {
     /**
      * Look for a registration that has not been completed.
      */
-    @Query("""
+    @Query(
+        """
         WITH MostRecentRegistration(statementIdHi, statementIdLo, contextRegistrationHi, contextRegistrationLo) AS (
              SELECT StatementEntity.statementIdHi, StatementEntity.contextRegistrationLo,
                     StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo
@@ -285,7 +302,8 @@ expect abstract class StatementDao {
                   FROM ActorEntity
                  WHERE ActorEntity.actorUid = :actorUid)          
                      
-    """)
+    """
+    )
     abstract suspend fun findResumableRegistration(
         activityUid: Long,
         accountPersonUid: Long,
@@ -296,7 +314,8 @@ expect abstract class StatementDao {
     /**
      * Get StatementEntities required for findPersonsWithAttempts when running over http
      */
-    @Query("""
+    @Query(
+        """
         SELECT StatementEntity.*
           FROM StatementEntity
                LEFT JOIN ClazzEnrolment 
@@ -323,7 +342,8 @@ expect abstract class StatementDao {
                           ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
                           ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
                           
-    """)
+    """
+    )
     abstract suspend fun findPersonsWithAttemptsStatements(
         contentEntryUid: Long,
         accountPersonUid: Long,
@@ -336,7 +356,8 @@ expect abstract class StatementDao {
             HttpServerFunctionCall("findPersonsWithAttemptsStatements")
         )
     )
-    @Query("""
+    @Query(
+        """
      SELECT Person.*, PersonPicture.*,
             (SELECT COUNT(*)
                FROM (SELECT DISTINCT StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo
@@ -434,16 +455,18 @@ expect abstract class StatementDao {
     END DESC
 
 
-""")
+"""
+    )
     abstract fun findPersonsWithAttempts(
         contentEntryUid: Long,
         accountPersonUid: Long,
         searchText: String? = "%",
         sortOrder: Int,
-        ): PagingSource<Int, PersonAndPictureAndNumAttempts>
+    ): PagingSource<Int, PersonAndPictureAndNumAttempts>
 
 
-    @Query("""
+    @Query(
+        """
           WITH DistinctRegistrationUids(contextRegistrationHi, contextRegistrationLo) AS (
                SELECT DISTINCT StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo
                           FROM StatementEntity
@@ -514,7 +537,8 @@ expect abstract class StatementDao {
         ELSE ''
     END DESC
           
-    """)
+    """
+    )
     abstract fun findSessionsByPersonAndContent(
         contentEntryUid: Long,
         personUid: Long,
@@ -522,44 +546,35 @@ expect abstract class StatementDao {
     ): PagingSource<Int, SessionTimeAndProgressInfo>
 
 
-    @HttpAccessible
-    @Query("""
-        SELECT StatementEntity.*, VerbEntity.*, VerbLangMapEntry.*
-          FROM StatementEntity
-               LEFT JOIN VerbEntity
-                         ON StatementEntity.statementVerbUid = VerbEntity.verbUid
-               LEFT JOIN VerbLangMapEntry 
-                         ON (VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash) = 
-                            (SELECT VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash
-                               FROM VerbLangMapEntry
-                              WHERE VerbLangMapEntry.vlmeVerbUid = VerbEntity.verbUid
-                           ORDER BY VerbLangMapEntry.vlmeLastModified DESC
-                              LIMIT 1)
-         WHERE StatementEntity.contextRegistrationHi = :registrationHi
-           AND StatementEntity.contextRegistrationLo = :registrationLo  
-           AND (:searchText = "%" OR VerbEntity.verbUrlId LIKE :searchText)
-           ORDER BY  CASE(:sortOrder)
-               WHEN $SORT_BY_TIMESTAMP_DESC THEN StatementEntity.resultDuration
-               ELSE ''
-               END DESC,
-            CASE(:sortOrder)
-               WHEN $SORT_BY_TIMESTAMP_ASC THEN StatementEntity.resultDuration
-               ELSE ''
-               END ASC,
-                 CASE(:sortOrder)
-               WHEN $SORT_BY_SCORE_DESC THEN StatementEntity.resultScoreRaw
-               ELSE ''
-               END DESC,
-            CASE(:sortOrder)
-               WHEN $SORT_BY_SCORE_ASC THEN StatementEntity.resultScoreRaw
-               ELSE ''
-               END ASC
-    """)
+    @Query(
+        """
+SELECT DISTINCT StatementEntity.*, VerbEntity.*, VerbLangMapEntry.*
+FROM StatementEntity
+LEFT JOIN VerbEntity ON StatementEntity.statementVerbUid = VerbEntity.verbUid
+LEFT JOIN VerbLangMapEntry ON VerbLangMapEntry.vlmeVerbUid = VerbEntity.verbUid
+WHERE StatementEntity.contextRegistrationHi = :registrationHi
+AND StatementEntity.contextRegistrationLo = :registrationLo
+AND (:searchText = '%' OR VerbEntity.verbUrlId LIKE :searchText)
+AND (:isExperience = 0 OR VerbEntity.verbUrlId LIKE '%experienced%')
+AND (:isAnswered = 0 OR VerbEntity.verbUrlId LIKE '%answered%')
+AND (:isFailed = 0 OR (StatementEntity.resultSuccess IS NOT NULL AND StatementEntity.resultSuccess = 0))
+AND (:isCompleted = 0 OR (StatementEntity.resultCompletion IS NOT NULL AND StatementEntity.resultCompletion = 1))
+GROUP BY StatementEntity.statementIdHi  -- Ensuring uniqueness in results
+ORDER BY 
+    CASE WHEN :sortOrder = 1 THEN StatementEntity.resultDuration END DESC,
+    CASE WHEN :sortOrder = 2 THEN StatementEntity.resultDuration END ASC,
+    CASE WHEN :sortOrder = 3 THEN StatementEntity.resultScoreRaw END DESC,
+    CASE WHEN :sortOrder = 4 THEN StatementEntity.resultScoreRaw END ASC
+"""
+    )
     abstract fun findStatementsBySession(
         registrationHi: Long,
         registrationLo: Long,
-        searchText: String? = "%",
-        sortOrder: Int
-        ): PagingSource<Int, StatementEntityAndVerb>
-
+        searchText: String = "%",
+        sortOrder: Int,
+        isExperience: Int = 0,
+        isAnswered: Int = 0,
+        isFailed: Int = 0,
+        isCompleted: Int = 0
+    ): PagingSource<Int, StatementEntityAndVerb>
 }
