@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.app
 
+import ContentEntryDetailAttemptsStatementListScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -158,7 +159,6 @@ import com.ustadmobile.libuicompose.view.epubcontent.EpubContentScreen
 import com.ustadmobile.libuicompose.view.clazzlog.edit.ClazzLogEditScreen
 import com.ustadmobile.libuicompose.view.contententry.detailattempttab.ContentEntryDetailAttemptsPersonListScreen
 import com.ustadmobile.libuicompose.view.contententry.detailattempttab.ContentEntryDetailAttemptsSessionListScreen
-import com.ustadmobile.libuicompose.view.contententry.detailattempttab.ContentEntryDetailAttemptsStatementListScreen
 import com.ustadmobile.libuicompose.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.libuicompose.view.contententry.subtitleedit.SubtitleEditScreen
 import com.ustadmobile.libuicompose.view.interop.externalapppermissionrequest.ExternalAppPermissionRequestScreen

@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
-data class FilterOption(val label: String, val isSelected: Boolean = false)
 
 data class ContentEntryDetailAttemptsStatementListUiState(
     val attemptsStatementList: () -> PagingSource<Int, StatementEntityAndVerb> = { EmptyPagingSource() },
@@ -29,18 +28,7 @@ data class ContentEntryDetailAttemptsStatementListUiState(
     ),
     val sortOption: SortOrderOption = sortOptions.first(),
     val showSortOptions: Boolean = true,
-    val isExperienceSelected: Boolean = false,
-    val isAnsweredSelected: Boolean = false,
-    val isFailedSelected: Boolean = false,
-    val isCompletedSelected: Boolean = false
 )
-
-data class StatementEntity(
-    val isCompleted: Boolean = false,
-    val isFailed: Boolean = false,
-    val isInProgress: Boolean = false
-)
-
 
 class ContentEntryDetailAttemptsStatementListViewModel(
     di: DI, savedStateHandle: UstadSavedStateHandle, destinationName: String = DEST_NAME,
@@ -58,25 +46,20 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         contextRegistrationHi: Long,
         contextRegistrationLo: Long,
     ): PagingSource<Int, StatementEntityAndVerb> {
-        val state = _uiState.value
         return activeRepo.statementDao().findStatementsBySession(
-            registrationHi = contextRegistrationHi,
-            registrationLo = contextRegistrationLo,
+            contextRegistrationHi,
+            contextRegistrationLo,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
-            sortOrder = state.sortOption.flag,
-            isExperience = if (state.isExperienceSelected) 1 else 0,
-            isAnswered = if (state.isAnsweredSelected) 1 else 0,
-            isFailed = if (state.isFailedSelected) 1 else 0,
-            isCompleted = if (state.isCompletedSelected) 1 else 0
-        )
+            sortOrder = _uiState.value.sortOption.flag
+            )
     }
 
     private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementEntityAndVerb> =
         {
             getAttemptsStatementListAsPagingSource(
                 contextRegistrationHi = argContextRegistrationIdHi,
-                contextRegistrationLo = argContextRegistrationIdLo
-            )
+                contextRegistrationLo = argContextRegistrationIdLo,
+                )
         }
 
     init {
@@ -90,15 +73,18 @@ class ContentEntryDetailAttemptsStatementListViewModel(
                         prev.copy(
                             title = "${personNames?.firstNames} ${personNames?.lastName}",
                             searchState = createSearchEnabledState(visible = true),
-                        )
+                            )
                     }
                 }
             }
+
         }
     }
 
     companion object {
         const val DEST_NAME = "ContentEntryDetailAttemptsStatementList"
+
+
     }
 
     override fun onUpdateSearchResult(searchText: String) {
@@ -108,23 +94,11 @@ class ContentEntryDetailAttemptsStatementListViewModel(
     override fun onClickAdd() {
         TODO("Not yet implemented")
     }
-
     fun onSortOrderChanged(sortOption: SortOrderOption) {
         _uiState.update { prev ->
-            prev.copy(sortOption = sortOption)
-        }
-        _refreshCommandFlow.tryEmit(RefreshCommand())
-    }
-
-    fun onFilterChanged(filterOption: FilterOption) {
-        _uiState.update { prev ->
-            when (filterOption.label) {
-                "Experience" -> prev.copy(isExperienceSelected = !prev.isExperienceSelected)
-                "Answered" -> prev.copy(isAnsweredSelected = !prev.isAnsweredSelected)
-                "Failed" -> prev.copy(isFailedSelected = !prev.isFailedSelected)
-                "Completed" -> prev.copy(isCompletedSelected = !prev.isCompletedSelected)
-                else -> prev
-            }
+            prev.copy(
+                sortOption = sortOption
+            )
         }
         _refreshCommandFlow.tryEmit(RefreshCommand())
     }
