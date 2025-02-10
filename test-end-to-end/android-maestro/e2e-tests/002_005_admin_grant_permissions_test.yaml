@@ -1,0 +1,65 @@
+appId: com.toughra.ustadmobile
+tags:
+  - courseTest
+env:
+  TESTRESULTSDIR: "build/reports/maestro/002_005_admin_grant_permissions_test/Screenshots"
+onFlowStart:
+  - startRecording: 002_005_admin_grant_permissions_test
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+---
+- runScript:
+    file: "common/import_users_via_http.js"
+    env:
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
+
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn: "Members"
+- assertVisible: "Student 2"
+
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn: "Permissions"
+- tapOn: "Students"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "View members"
+- tapOn: "Save"
+
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- assertNotVisible:
+    id: "ustad_screen_tabs"
+    text: "Members"
