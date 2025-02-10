@@ -126,6 +126,7 @@ kmp-uuid = "0.8.4"
 zoomable = "1.6.1"
 jetbrains-kotlin-jvm = "1.9.23"
 koalaplot-version = "0.6.4"
+plotly="0.7.1.1"
 
 
 [plugins]
@@ -359,3 +360,4 @@ androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro
 lz4-pure-java = { module = "org.lz4:lz4-pure-java", version.ref = "lz4" }
 kmp-uuid = { module = "com.benasher44:uuid", version.ref = "kmp-uuid" }
 zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }
+plotlykt-core = { module = "space.kscience:plotlykt-core", version.ref = "plotly" }
