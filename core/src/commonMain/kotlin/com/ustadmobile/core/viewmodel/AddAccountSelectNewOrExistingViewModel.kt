@@ -95,6 +95,7 @@ class AddAccountSelectNewOrExistingViewModel(
         val userType = if (isNewUser) "new" else "existing"
         val arg = buildMap {
             putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+            putFromSavedStateIfPresent(ARG_NEXT)
             put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, userType)
             apiUrlConfig.presetLearningSpaceUrl?.let {
                 put(ARG_LEARNINGSPACE_URL, it)

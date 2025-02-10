@@ -25,6 +25,7 @@ import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
+import com.ustadmobile.mui.components.UstadRawHtml
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -51,11 +52,12 @@ import mui.material.List
 import mui.system.responsive
 import mui.system.sx
 import react.*
+import react.dom.aria.AriaHasPopup
+import react.dom.aria.ariaExpanded
+import react.dom.aria.ariaHasPopup
 import react.dom.aria.ariaLabel
-import react.dom.events.MouseEvent
-import react.dom.events.MouseEventHandler
 import react.dom.html.ReactHTML
-import web.cssom.ClassName
+import web.dom.Element
 
 
 external interface ClazzMemberListScreenProps : Props {
@@ -441,72 +443,58 @@ private val PendingInvitesListItem = FC<PendingInvitesListItemProps> { props ->
         timeInMillis = props.item?.inviteExpire ?: 0,
         timezoneId = TimeZone.currentSystemDefault().id
     )
-    data class Point(
-        val x: Double = 10.0,
-        val y: Double = 10.0,
-    )
+
+    var overflowAnchor by useState<Element?> { null }
+
+    val overflowAnchorVal = overflowAnchor
     ListItem {
+
         ListItemText {
-            primary = ReactNode(props.item?.inviteContact?: "")
+            primary = ReactNode(props.item?.inviteContact ?: "")
             secondary = ReactNode(strings[MR.strings.expires] + expireTime)
 
         }
-        val strings = useStringProvider()
 
-        var point by useState<Point>()
+        IconButton {
+            ariaHasPopup = AriaHasPopup.`true`
+            ariaExpanded = overflowAnchorVal != null
 
-        val handleContextMenu = { event: MouseEvent<*, *> ->
-            event.preventDefault()
-            point = if (point == null) {
-                Point(
-                    x = event.clientX - 2,
-                    y = event.clientY - 4,
-                )
-            } else {
-                null
-            }
-        }
-
-        val handleClose: MouseEventHandler<*> = {
-            point = null
-        }
-
-        ReactHTML.div {
-
-            IconButton{
-                onClick = handleContextMenu
-                ariaLabel = strings[MR.strings.more_options]
-                className = ClassName("pendinginvitepopup")
-
-                + MoreVert.create()
-            }
-
-            Menu {
-                open = point != null
-                onClose = handleClose
-
-                anchorReference = PopoverReference.anchorPosition
-                anchorPosition = if (point != null) {
-                    jso {
-                        top = point!!.y
-                        left = point!!.x
-                    }
+            onClick = {
+                overflowAnchor = if (overflowAnchor == null) {
+                    it.currentTarget
                 } else {
-                    undefined
+                    null
+                }
+            }
+
+            MoreVert()
+        }
+
+        if (overflowAnchorVal != null) {
+            Menu {
+                open = true
+                anchorEl = {
+                    overflowAnchorVal
+                }
+
+                onClose = {
+                    overflowAnchor = null
                 }
                 MenuItem {
                     onClick = {
-                        props.onClickResendInvite(props.item?.inviteContact?:"")
-                        point = null
+                        props.onClickResendInvite(props.item?.inviteContact ?: "")
+                        overflowAnchor = null
                     }
-                    + strings[MR.strings.resend]
+
+                    +strings[MR.strings.resend]
                 }
                 MenuItem {
                     onClick = {
-                        props.onClickRevokeInvite(props.item?.inviteContact?:"")
-                        point = null
+                        props.onClickRevokeInvite(props.item?.inviteContact ?: "")
+                        overflowAnchor = null
                     }
-                    + strings[MR.strings.revoke]
+
+                    +strings[MR.strings.revoke]
                 }
             }
         }

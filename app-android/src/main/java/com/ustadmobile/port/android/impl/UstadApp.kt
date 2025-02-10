@@ -214,6 +214,7 @@ import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
@@ -1086,6 +1087,12 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance<UmAppDataLayer>().repository,
                 systemImpl = instance(),
+            )
+        }
+
+        bind<EnrollToCourseFromInviteCodeUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            EnrollToCourseFromInviteCodeUseCase(
+               clazzInviteRedeemUseCase = instance()
             )
         }
 

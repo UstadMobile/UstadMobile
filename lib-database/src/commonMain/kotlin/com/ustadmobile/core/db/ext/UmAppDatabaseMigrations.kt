@@ -1695,7 +1695,7 @@ val MIGRATION_205_206 = DoorMigrationStatementList(205, 206) { db ->
         if(db.dbType() == DoorDbType.SQLITE) {
             add("ALTER TABLE ClazzInvite ADD COLUMN inviteExpire INTEGER NOT NULL DEFAULT 0")
         }else {
-            add("ALTER TABLE ClazzInvite ADD COLUMN inviteExpire INTEGER NOT NULL DEFAULT 0")
+            add("ALTER TABLE ClazzInvite ADD COLUMN inviteExpire BIGINT NOT NULL DEFAULT 0")
         }
     }
 }
