@@ -25,6 +25,8 @@ data class ContentEntryDetailAttemptsSessionListUiState(
         SortOrderOption(MR.strings.by_timestamp, SessionTimeAndProgressInfoConst.SORT_BY_TIMESTAMP_ASC, false),
         SortOrderOption(MR.strings.by_score, SessionTimeAndProgressInfoConst.SORT_BY_SCORE_ASC, true),
         SortOrderOption(MR.strings.by_score, SessionTimeAndProgressInfoConst.SORT_BY_SCORE_DESC, false),
+        SortOrderOption(MR.strings.by_completion, SessionTimeAndProgressInfoConst.SORT_BY_COMPLETION_ASC, true),
+        SortOrderOption(MR.strings.by_completion, SessionTimeAndProgressInfoConst.SORT_BY_COMPLETION_DESC, false),
     ),
     val sortOption: SortOrderOption = sortOptions.first(),
     val showSortOptions: Boolean = true,
@@ -58,18 +60,14 @@ class ContentEntryDetailAttemptsSessionListViewModel(
         }
 
     init {
-        viewModelScope.launch {
-            _uiState.whenSubscribed {
-                activeRepo.personDao().getNamesByUid(argPersonUid).collect { personNames ->
-                    _uiState.update {
+        _uiState.update { it.copy(attemptsSessionList = attemptsSessionListPagingSource) }
 
-                        it.copy(attemptsSessionList = attemptsSessionListPagingSource)
-                    }
-                    _appUiState.update { prev ->
-                        prev.copy(
-                            title = "${personNames?.firstNames} ${personNames?.lastName}"
-                        )
-                    }
+        viewModelScope.launch {
+            activeRepo.personDao().getNamesByUid(argPersonUid).collect { personNames ->
+                _appUiState.update { prev ->
+                    prev.copy(
+                        title = "${personNames?.firstNames} ${personNames?.lastName}"
+                    )
                 }
             }
 
@@ -90,10 +88,6 @@ class ContentEntryDetailAttemptsSessionListViewModel(
         )
     }
 
-    companion object {
-        const val DEST_NAME = "ContentEntryDetailAttemptsSessionList"
-
-    }
     fun onSortOrderChanged(sortOption: SortOrderOption) {
         _uiState.update { prev ->
             prev.copy(
@@ -112,5 +106,9 @@ class ContentEntryDetailAttemptsSessionListViewModel(
 
     override fun onClickAdd() {
         TODO("Not yet implemented")
+    }
+
+    companion object {
+        const val DEST_NAME = "ContentEntryDetailAttemptsSessionList"
     }
 }

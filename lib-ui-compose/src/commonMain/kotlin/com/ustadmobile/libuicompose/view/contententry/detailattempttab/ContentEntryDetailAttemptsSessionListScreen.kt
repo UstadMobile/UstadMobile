@@ -193,5 +193,3 @@ fun ContentEntryDetailAttemptsSessionListScreen(
         }
     }
 }
-
-

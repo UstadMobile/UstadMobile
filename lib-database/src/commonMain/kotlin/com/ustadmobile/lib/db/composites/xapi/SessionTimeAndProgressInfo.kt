@@ -22,4 +22,7 @@ object SessionTimeAndProgressInfoConst{
     const val SORT_BY_SCORE_ASC = 3
     const val SORT_BY_SCORE_DESC = 4
 
+    const val SORT_BY_COMPLETION_ASC = 5
+    const val SORT_BY_COMPLETION_DESC = 6
+
 }

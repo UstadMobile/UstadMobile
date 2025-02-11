@@ -33,5 +33,10 @@ object AttemptsPersonListConst
     const val SORT_BY_SCORE_ASC = 5
     const val SORT_BY_SCORE_DESC = 6
 
+    const val SORT_BY_COMPLETION_ASC = 7
+    const val SORT_BY_COMPLETION_DESC = 8
+
+    const val SORT_BY_RECENT_ATTEMPT_ASC = 9
+    const val SORT_BY_RECENT_ATTEMPT_DESC = 10
 
 }

@@ -9,7 +9,10 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.FilterOption
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.FilterType
 import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useFormattedDuration
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
@@ -28,6 +31,15 @@ import kotlinx.coroutines.flow.emptyFlow
 import mui.icons.material.Check
 import mui.icons.material.Star
 import mui.icons.material.Timer
+import mui.material.Box
+import mui.material.Chip
+import mui.material.ChipColor
+import mui.material.ChipVariant
+import mui.material.LinearProgress
+import kotlinx.datetime.TimeZone
+import mui.icons.material.Close
+import mui.material.LinearProgressVariant
+import mui.material.Typography
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemButton
@@ -43,6 +55,7 @@ import react.ReactNode
 import react.create
 import react.useRequiredContext
 import tanstack.react.query.UseInfiniteQueryResult
+import web.cssom.AlignItems
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
@@ -55,7 +68,7 @@ external interface ContentEntryDetailAttemptsStatementListProps : Props {
     var uiState: ContentEntryDetailAttemptsStatementListUiState
     var refreshCommandFlow: Flow<RefreshCommand>?
     var onSortOrderChanged: (SortOrderOption) -> Unit
-
+    var onFilterChanged: (FilterOption) -> Unit
 }
 
 val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
@@ -106,6 +119,81 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                             }
                         }
                     }
+
+                    item("filter_row") {
+                        Box.create {
+                            sx {
+                                padding = theme.spacing(1)
+                                overflowX = Overflow.scroll
+                            }
+
+                            Stack.create {
+                                direction = responsive(StackDirection.row)
+                                spacing = responsive(1)
+
+                                Chip.create {
+                                    label = ReactNode(stringsXml[MR.strings.experience])
+                                    variant = ChipVariant.outlined
+                                    color = if (props.uiState.isExperienceSelected) ChipColor.primary else ChipColor.default
+                                    onClick = {
+                                        props.onFilterChanged(
+                                            FilterOption(
+                                                labelResId = MR.strings.experience,
+                                                isSelected = !props.uiState.isExperienceSelected,
+                                                filterType = FilterType.EXPERIENCE
+                                            )
+                                        )
+                                    }
+                                }.also { +it }
+
+                                Chip.create {
+                                    label = ReactNode(stringsXml[MR.strings.answered])
+                                    variant = ChipVariant.outlined
+                                    color = if (props.uiState.isAnsweredSelected) ChipColor.primary else ChipColor.default
+                                    onClick = {
+                                        props.onFilterChanged(
+                                            FilterOption(
+                                                labelResId = MR.strings.answered,
+                                                isSelected = !props.uiState.isAnsweredSelected,
+                                                filterType = FilterType.ANSWERED
+                                            )
+                                        )
+                                    }
+                                }.also { +it }
+
+                                Chip.create {
+                                    label = ReactNode(stringsXml[MR.strings.failed])
+                                    variant = ChipVariant.outlined
+                                    color = if (props.uiState.isFailedSelected) ChipColor.primary else ChipColor.default
+                                    onClick = {
+                                        props.onFilterChanged(
+                                            FilterOption(
+                                                labelResId = MR.strings.failed,
+                                                isSelected = !props.uiState.isFailedSelected,
+                                                filterType = FilterType.FAILED
+                                            )
+                                        )
+                                    }
+                                }.also { +it }
+
+                                Chip.create {
+                                    label = ReactNode(stringsXml[MR.strings.completed])
+                                    variant = ChipVariant.outlined
+                                    color = if (props.uiState.isCompletedSelected) ChipColor.primary else ChipColor.default
+                                    onClick = {
+                                        props.onFilterChanged(
+                                            FilterOption(
+                                                labelResId = MR.strings.completed,
+                                                isSelected = !props.uiState.isCompletedSelected,
+                                                filterType = FilterType.COMPLETED
+                                            )
+                                        )
+                                    }
+                                }.also { +it }
+                            }.also { +it }
+                        }.also { +it }
+                    }
+
                     if (isSettledEmpty) {
                         item("empty_state") {
                             UstadNothingHereYet.create()
@@ -121,23 +209,47 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                     timeInMillis = it1,
                                 )
                             }
+
+                        val formattedDateAndTime = attemptsStatementListItems?.statementEntity?.resultDuration?.let { it1 ->
+                            useFormattedDateAndTime(
+                                timeInMillis = it1,
+                                timezoneId = TimeZone.currentSystemDefault().id
+                            )
+                        }
+
+                        val progress = attemptsStatementListItems?.statementEntity?.extensionProgress?.takeIf { it > 0 }?.div(100f)
+                            ?: attemptsStatementListItems?.statementEntity?.let { entity ->
+                                val raw = entity.resultScoreRaw ?: 0f
+                                val max = entity.resultScoreMax?.takeIf { it > 0 }
+                                    ?: 100f
+                                (raw / max).coerceIn(0f, 1f)
+                            } ?: 0f
+
                         ListItem.create {
                             Stack {
                                 direction = responsive(StackDirection.column)
+                                spacing = responsive(1)
 
                                 sx {
                                     width = WIDTH.pct
                                 }
                                 ListItemButton {
                                     ListItemIcon {
-                                        Check()
+                                        when {
+                                            attemptsStatementListItems?.statementEntity?.resultScoreRaw != null -> Star()
+                                            attemptsStatementListItems?.statementEntity?.extensionProgress != null -> Close()
+                                            else -> Check()
+                                        }
                                     }
                                     ListItemText {
                                         primary = ReactNode(
-                                            attemptsStatementListItems?.verb?.verbUrlId.toString()
-                                                .substringAfterLast("/")
-                                                .replaceFirstChar { it.uppercaseChar() }
-
+                                            when {
+                                                attemptsStatementListItems?.statementEntity?.resultScoreRaw != null ->
+                                                    "${stringsXml[MR.strings.answered]}- ${formattedDuration ?: ""}"
+                                                attemptsStatementListItems?.statementEntity?.extensionProgress != null ->
+                                                    "${stringsXml[MR.strings.experience]}- ${formattedDuration ?: ""}"
+                                                else -> stringsXml[MR.strings.completed]
+                                            }
                                         )
                                     }
                                 }
@@ -156,31 +268,37 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
                                         }
                                     }
                                 }
-                                if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null || attemptsStatementListItems?.statementEntity?.extensionProgress != null)
-                                    ListItemButton {
-                                        ListItemIcon {
-                                            Star()
-                                            sx {
-                                                padding = theme.spacing(1, 1, 1, 5)
-                                            }
-                                        }
-                                        ListItemText {
-                                            ReactNode(
-                                                if (attemptsStatementListItems.statementEntity?.resultScoreRaw != null) {
-                                                    "${
-                                                        attemptsStatementListItems.statementEntity?.resultScoreRaw?.toInt()
-                                                            .toString()
-                                                    }/${
-                                                        attemptsStatementListItems.statementEntity?.resultScoreMax?.toInt()
-                                                            .toString()
-                                                    } $score"
-                                                } else {
-                                                    "${attemptsStatementListItems.statementEntity?.extensionProgress}% $percentageCompletion"
-                                                }
-                                            ).also { secondary = it }
-                                        }
+
+                                Box.create {
+                                    sx {
+                                        padding = theme.spacing(0, 2, 1, 6)
+                                        width = 100.pct
                                     }
 
+                                    Stack.create {
+                                        direction = responsive(StackDirection.row)
+                                        spacing = responsive(2)
+                                        sx {
+                                            alignItems = AlignItems.center
+                                        }
+
+                                        LinearProgress.create {
+                                            variant = LinearProgressVariant.determinate
+                                            value = (progress * 100).toInt()
+                                            sx {
+                                                width = 70.pct
+                                            }
+                                        }.also { +it }
+
+                                        Typography.create {
+                                            if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
+                                                "$score: ${(progress * 100).toInt()}%"
+                                            } else {
+                                                "$percentageCompletion: ${(progress * 100).toInt()}%"
+                                            }
+                                        }.also { +it }
+                                    }.also { +it }
+                                }.also { +it }
                             }
                         }
                     }
@@ -197,9 +315,6 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
         this.uiState = uiState
         refreshCommandFlow = viewModel.refreshCommandFlow
         onSortOrderChanged = viewModel::onSortOrderChanged
-
-
+        onFilterChanged = viewModel::onFilterChanged
     }
-
-
 }

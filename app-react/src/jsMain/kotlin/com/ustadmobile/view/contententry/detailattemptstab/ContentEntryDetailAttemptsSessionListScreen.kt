@@ -27,15 +27,18 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.datetime.TimeZone
 import mui.icons.material.Check
 import mui.icons.material.Close
-import mui.icons.material.Star
 import mui.icons.material.Timer
+import mui.material.Box
 import mui.material.Container
+import mui.material.LinearProgress
+import mui.material.LinearProgressVariant
 import mui.material.ListItem
 import mui.material.ListItemButton
 import mui.material.ListItemIcon
 import mui.material.ListItemText
 import mui.material.Stack
 import mui.material.StackDirection
+import mui.material.Typography
 import mui.system.responsive
 import mui.system.sx
 import react.FC
@@ -44,9 +47,12 @@ import react.ReactNode
 import react.create
 import react.useRequiredContext
 import tanstack.react.query.UseInfiniteQueryResult
+import web.cssom.AlignItems
 import web.cssom.Contain
+import web.cssom.Display
 import web.cssom.Height
 import web.cssom.Overflow
+import web.cssom.number
 import web.cssom.pct
 private const val LOAD_SIZE = 50
 private const val WIDTH = 100
@@ -188,27 +194,39 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                         }
                                     }
                                 }
-                                if (attemptsSessionListItems?.maxScore != null || attemptsSessionListItems?.maxProgress != null)
-                                    ListItemButton {
-                                        ListItemIcon {
-                                            Star()
 
+                                if (attemptsSessionListItems?.maxScore != null || attemptsSessionListItems?.maxProgress != null) {
+                                    ListItemButton {
+                                        Box {
                                             sx {
-                                                padding = theme.spacing(1, 1, 1, 5)
+                                                display = Display.flex
+                                                alignItems = AlignItems.center
+                                                gap = theme.spacing(2)
+                                                width = 100.pct
+                                                paddingLeft = theme.spacing(5)
+                                            }
+
+                                            val progressValue = listOfNotNull(
+                                                attemptsSessionListItems.maxProgress?.toFloat(),
+                                                attemptsSessionListItems.maxScore?.times(100)
+                                            ).maxOrNull()?.coerceIn(0f, 100f)?.div(100f) ?: 0f
+
+                                            LinearProgress {
+                                                sx { flexGrow = number(1.0) }
+                                                variant = LinearProgressVariant.determinate
+                                                value = progressValue * 100
+                                            }
+
+                                            Typography {
+                                                sx { color = theme.palette.text.secondary }
+                                                +(if (attemptsSessionListItems.maxScore != null)
+                                                    "${(progressValue * 100).toInt()}% $percentageScore"
+                                                else
+                                                    "${(progressValue * 100).toInt()}% $percentageCompletion")
                                             }
                                         }
-                                        ListItemText {
-                                            secondary = ReactNode(
-                                                if (attemptsSessionListItems.maxScore != null) {
-                                                    "${((attemptsSessionListItems.maxScore ?: 0f) * 100).toInt()}% $percentageScore"
-
-                                                } else {
-                                                    "${attemptsSessionListItems.maxProgress}% $percentageCompletion"
-
-                                                }
-                                            )
-                                        }
                                     }
+                                }
                             }
                         }
                     }

@@ -13,6 +13,7 @@ import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.mui.components.UstadNothingHereYet
 import com.ustadmobile.util.ext.isSettledEmpty
@@ -23,6 +24,7 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import mui.material.Box
 import mui.material.Container
 import mui.material.LinearProgress
 import mui.material.LinearProgressVariant
@@ -32,18 +34,23 @@ import mui.material.ListItemIcon
 import mui.material.ListItemText
 import mui.material.Stack
 import mui.material.StackDirection
+import mui.material.Typography
 import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.useRequiredContext
 import tanstack.react.query.UseInfiniteQueryResult
 import web.cssom.AlignItems
 import web.cssom.Contain
+import web.cssom.Display
+import web.cssom.FlexDirection
 import web.cssom.Height
 import web.cssom.Overflow
-import web.cssom.VerticalAlign
+import web.cssom.TextAlign
+import web.cssom.number
 import web.cssom.pct
 import web.cssom.px
 
@@ -90,6 +97,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
             val percentageCompletion = stringsXml[MR.strings.content_percentage_completion]
             val percentageScore = stringsXml[MR.strings.content_score]
             val isSettledEmpty = infiniteQueryResult.isSettledEmpty(remoteMediatorResult)
+            val theme by useRequiredContext(ThemeContext)
 
             VirtualList {
                 style = jso {
@@ -142,45 +150,86 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                                         ?: ""
                                                 )
                                             secondary = ReactNode(
-                                                "${attemptsPersonListItems?.numAttempts.toString()} $attempts"
+                                                "$attempts: ${attemptsPersonListItems?.numAttempts.toString()}" ?: "$attempts: 0"
+                                                    ?: "0 attempts"
                                             )
                                         }
 
 
                                     }
                                     if (attemptsPersonListItems?.maxScore != null || attemptsPersonListItems?.maxProgress != null) {
-                                        Stack {
-                                            direction = responsive(StackDirection.row) // Ensure horizontal layout
-                                            sx {
-                                                verticalAlign = VerticalAlign.middle // Align stack elements in the middle
-                                                marginLeft = MARGIN_LEFT.px
-                                                paddingTop = PADDING_TOP.px
-                                                alignItems = AlignItems.center // This ensures vertical centering of all stack children
-                                            }
-                                            LinearProgress {
+                                        ListItemButton {
+                                            Box {
                                                 sx {
-                                                    width = LINEAR_PROGRESS_WIDTH.px
-                                                    height = LINEAR_PROGRESS_HEIGHT.px
+                                                    display = Display.flex
+                                                    flexDirection = FlexDirection.column
+                                                    gap = theme.spacing(2)
+                                                    width = 100.pct
+                                                    paddingLeft = theme.spacing(5)
                                                 }
-                                                variant = LinearProgressVariant.determinate
-                                                value = attemptsPersonListItems.maxProgress
-                                                    ?: (attemptsPersonListItems.maxScore?.times(100) ?: 0)
-                                            }
-                                            ListItemText {
-                                                primary = ReactNode(
-                                                    attemptsPersonListItems.maxProgress?.let {
-                                                        "${it}% $percentageCompletion"
-                                                    } ?: "${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}% $percentageScore"
-                                                )
-                                                sx {
-                                                    verticalAlign = VerticalAlign.middle // Ensure vertical alignment within the item
-                                                    marginLeft = MARGIN_LEFT.px
-                                                    paddingTop = PADDING_TOP.px
+
+                                                Box {
+                                                    sx {
+                                                        display = Display.flex
+                                                        alignItems = AlignItems.center
+                                                        gap = theme.spacing(2)
+                                                        width = LINEAR_PROGRESS_WIDTH.px
+                                                    }
+
+                                                    LinearProgress {
+                                                        sx {
+                                                            flexGrow = number(1.0)
+                                                            height = LINEAR_PROGRESS_HEIGHT.px
+                                                        }
+                                                        variant = LinearProgressVariant.determinate
+                                                        value =
+                                                            (attemptsPersonListItems.maxProgress?.toFloat()
+                                                                ?: 0f).coerceIn(0f, 100f)
+                                                    }
+
+                                                    Typography {
+                                                        sx {
+                                                            color = theme.palette.text.secondary
+                                                            marginLeft = MARGIN_LEFT.px
+                                                            width = 80.px
+                                                            textAlign = TextAlign.end
+                                                        }
+                                                        +"${(attemptsPersonListItems.maxProgress ?: 0f).toInt()}% $percentageCompletion"
+                                                    }
+                                                }
+
+                                                Box {
+                                                    sx {
+                                                        display = Display.flex
+                                                        alignItems = AlignItems.center
+                                                        gap = theme.spacing(2)
+                                                        width = LINEAR_PROGRESS_WIDTH.px
+                                                        marginTop = PADDING_TOP.px
+                                                    }
+
+                                                    LinearProgress {
+                                                        sx {
+                                                            flexGrow = number(1.0)
+                                                            height = LINEAR_PROGRESS_HEIGHT.px
+                                                        }
+                                                        variant = LinearProgressVariant.determinate
+                                                        value = ((attemptsPersonListItems.maxScore
+                                                            ?: 0f) * 100).coerceIn(0f, 100f)
+                                                    }
+
+                                                    Typography {
+                                                        sx {
+                                                            color = theme.palette.text.secondary
+                                                            marginLeft = MARGIN_LEFT.px
+                                                            width = 80.px
+                                                            textAlign = TextAlign.end
+                                                        }
+                                                        +"${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}% $percentageScore"
+                                                    }
                                                 }
                                             }
                                         }
                                     }
-
                                 }
 
                             }

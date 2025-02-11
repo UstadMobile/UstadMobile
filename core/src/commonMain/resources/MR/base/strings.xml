@@ -49,6 +49,8 @@
     <string name="last_name">Last name</string>
     <string name="first_name">First name</string>
     <string name="by_score">By Score</string>
+    <string name="by_completion">By Completion</string>
+    <string name="by_recent_attempt">By Recent Attempt</string>
     <string name="by_timestamp">By Timestamp</string>
     <string name="register_now">Register Now</string>
     <string name="new_password">New password</string>
@@ -105,6 +107,8 @@
     <string name="failure">Failure</string>
     <string name="incomplete">Incomplete</string>
     <string name="completed">Completed</string>
+    <string name="experience">Experience</string>
+    <string name="answered">Answered</string>
     <string name="select_subtitle_video">Select Subtitle Language</string>
     <string name="no_subtitle">No Subtitles</string>
     <string name="no_video_file_found">No video file found</string>

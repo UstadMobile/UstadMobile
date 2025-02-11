@@ -95,45 +95,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                     Text(text = attemptsPersonListItems?.person?.fullName() ?: "")
                 },
                 supportingContent = {
-                    Column {
-                        Text(text = "${attemptsPersonListItems?.numAttempts ?: 0} $attempts")
-
-                        if (attemptsPersonListItems?.maxScore != null || attemptsPersonListItems?.maxProgress != null) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    LinearProgressIndicator(
-                                        progress = (attemptsPersonListItems?.maxProgress?.toFloat() ?: 0f) / 100f, // ✅ This is correct
-                                        modifier = Modifier.weight(0.7f)
-                                    )
-
-                                    Text(
-                                        text = "${(attemptsPersonListItems?.maxProgress ?: 0)}% $percentageCompletion",
-                                        modifier = Modifier.padding(start = 8.dp).weight(0.3f),
-                                    )
-                                }
-
-                                // Score Progress Bar
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    LinearProgressIndicator(
-                                        progress = (attemptsPersonListItems?.maxScore?.toFloat() ?: 0f), // ❌ /100f Removed ✅
-                                        modifier = Modifier.weight(0.7f)
-                                    )
-                                    Text(
-                                        text = "${((attemptsPersonListItems?.maxScore?.toFloat() ?: 0f) * 100).toInt()}% $percentageScore",
-                                        modifier = Modifier.padding(start = 8.dp).weight(0.3f),
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    Text(text = "${attemptsPersonListItems?.numAttempts.toString()} $attempts")
                 },
                 leadingContent = {
                     UstadPersonAvatar(
@@ -142,7 +104,43 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                     )
                 }
             )
-        }
+            if (attemptsPersonListItems?.maxScore != null || attemptsPersonListItems?.maxProgress != null) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        LinearProgressIndicator(
+                            progress = (attemptsPersonListItems?.maxProgress?.toFloat()
+                                ?: 0f) / 100f,
+                            modifier = Modifier.weight(0.7f).padding(start = 12.dp),
+                        )
 
+                        Text(
+                            text = "${(attemptsPersonListItems?.maxProgress ?: 0)}% $percentageCompletion",
+                            modifier = Modifier.padding(start = 8.dp).weight(0.3f),
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        LinearProgressIndicator(
+                            progress = (attemptsPersonListItems?.maxScore?.toFloat()
+                                ?: 0f),
+                            modifier = Modifier.weight(0.7f).padding(start = 12.dp),
+                        )
+
+                        Text(
+                            text = "${((attemptsPersonListItems?.maxScore?.toFloat() ?: 0f) * 100).toInt()}% $percentageScore",
+                            modifier = Modifier.padding(start = 8.dp).weight(0.3f),
+                        )
+                    }
+                }
+            }
+        }
     }
 }

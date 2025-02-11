@@ -10,6 +10,10 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_BY_COMPLETION_ASC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_BY_COMPLETION_DESC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_BY_RECENT_ATTEMPT_ASC
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_BY_RECENT_ATTEMPT_DESC
 import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_BY_SCORE_ASC
 import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_BY_SCORE_DESC
 import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_FIRST_NAME_ASC
@@ -17,8 +21,8 @@ import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_FIRST_NAME
 import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_LAST_NAME_ASC
 import com.ustadmobile.lib.db.composites.AttemptsPersonListConst.SORT_LAST_NAME_DESC
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
-import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfoConst
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 data class ContentEntryDetailAttemptsPersonListUiState(
@@ -31,7 +35,10 @@ data class ContentEntryDetailAttemptsPersonListUiState(
         SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_DESC, false),
         SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_ASC, true),
         SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_DESC, false),
-
+        SortOrderOption(MR.strings.by_completion, SORT_BY_COMPLETION_ASC, true),
+        SortOrderOption(MR.strings.by_completion, SORT_BY_COMPLETION_DESC, false),
+        SortOrderOption(MR.strings.by_recent_attempt, SORT_BY_RECENT_ATTEMPT_DESC, true),
+        SortOrderOption(MR.strings.by_recent_attempt, SORT_BY_RECENT_ATTEMPT_ASC, false),
     ),
     val sortOption: SortOrderOption = sortOptions.first(),
     val showSortOptions: Boolean = true,
@@ -48,6 +55,35 @@ class ContentEntryDetailAttemptsPersonListViewModel(
 
     val appBarTitle = systemImpl.getString(MR.strings.library)
 
+    private suspend fun buildSortOptions(): List<SortOrderOption> {
+        val options = mutableListOf(
+            SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_ASC, true),
+            SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_DESC, false),
+            SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_ASC, true),
+            SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_DESC, false)
+        )
+
+        if (activeRepo.statementDao().hasScoreData(entityUidArg)) {
+            options.addAll(listOf(
+                SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_ASC, true),
+                SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_DESC, false)
+            ))
+        }
+
+        if (activeRepo.statementDao().hasCompletionData(entityUidArg)) {
+            options.addAll(listOf(
+                SortOrderOption(MR.strings.by_completion, SORT_BY_COMPLETION_ASC, true),
+                SortOrderOption(MR.strings.by_completion, SORT_BY_COMPLETION_DESC, false)
+            ))
+        }
+
+        options.addAll(listOf(
+            SortOrderOption(MR.strings.by_recent_attempt, SORT_BY_RECENT_ATTEMPT_DESC, true),
+            SortOrderOption(MR.strings.by_recent_attempt, SORT_BY_RECENT_ATTEMPT_ASC, false)
+        ))
+
+        return options
+    }
 
     private fun getAttemptsPersonListAsPagingSource(contentEntryUid: Long):
             PagingSource<Int, PersonAndPictureAndNumAttempts> {
@@ -67,6 +103,16 @@ class ContentEntryDetailAttemptsPersonListViewModel(
         }
 
     init {
+        viewModelScope.launch {
+            val availableSortOptions = buildSortOptions()
+            _uiState.update { prev ->
+                prev.copy(
+                    sortOptions = availableSortOptions,
+                    sortOption = availableSortOptions.firstOrNull()!!
+                )
+            }
+        }
+
         _uiState.update { prev ->
             prev.copy(
                 attemptsPersonList = attemptsPersonListPagingSource,

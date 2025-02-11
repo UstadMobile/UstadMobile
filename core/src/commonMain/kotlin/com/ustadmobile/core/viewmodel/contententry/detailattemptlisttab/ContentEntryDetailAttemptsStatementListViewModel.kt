@@ -13,10 +13,20 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.xapi.StatementConst
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
+data class FilterOption(
+    val labelResId: StringResource,
+    val isSelected: Boolean = false,
+    val filterType: FilterType
+)
+
+enum class FilterType {
+    EXPERIENCE, ANSWERED, FAILED, COMPLETED
+}
 
 data class ContentEntryDetailAttemptsStatementListUiState(
     val attemptsStatementList: () -> PagingSource<Int, StatementEntityAndVerb> = { EmptyPagingSource() },
@@ -28,6 +38,12 @@ data class ContentEntryDetailAttemptsStatementListUiState(
     ),
     val sortOption: SortOrderOption = sortOptions.first(),
     val showSortOptions: Boolean = true,
+    val activeFilters: Set<String> = emptySet(),
+    val isExperienceSelected: Boolean = false,
+    val isAnsweredSelected: Boolean = false,
+    val isFailedSelected: Boolean = false,
+    val isCompletedSelected: Boolean = false,
+    val selectedVerbId: Long = 0,
 )
 
 class ContentEntryDetailAttemptsStatementListViewModel(
@@ -46,12 +62,17 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         contextRegistrationHi: Long,
         contextRegistrationLo: Long,
     ): PagingSource<Int, StatementEntityAndVerb> {
+        val state = _uiState.value
         return activeRepo.statementDao().findStatementsBySession(
-            contextRegistrationHi,
-            contextRegistrationLo,
+            registrationHi = contextRegistrationHi,
+            registrationLo = contextRegistrationLo,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
-            sortOrder = _uiState.value.sortOption.flag
-            )
+            sortOrder = state.sortOption.flag,
+            isExperience = if (state.isExperienceSelected) 1 else 0,
+            isAnswered = if (state.isAnsweredSelected) 1 else 0,
+            isFailed = if (state.isFailedSelected) 1 else 0,
+            isCompleted = if (state.isCompletedSelected) 1 else 0,
+        )
     }
 
     private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementEntityAndVerb> =
@@ -97,8 +118,27 @@ class ContentEntryDetailAttemptsStatementListViewModel(
     fun onSortOrderChanged(sortOption: SortOrderOption) {
         _uiState.update { prev ->
             prev.copy(
-                sortOption = sortOption
-            )
+                sortOption = sortOption)
+        }
+        _refreshCommandFlow.tryEmit(RefreshCommand())
+    }
+
+    fun onFilterChanged(filterOption: FilterOption) {
+        _uiState.update { prev ->
+            when (filterOption.filterType) {
+                FilterType.EXPERIENCE -> prev.copy(
+                    isExperienceSelected = !prev.isExperienceSelected
+                )
+                FilterType.ANSWERED -> prev.copy(
+                    isAnsweredSelected = !prev.isAnsweredSelected
+                )
+                FilterType.FAILED -> prev.copy(
+                    isFailedSelected = !prev.isFailedSelected
+                )
+                FilterType.COMPLETED -> prev.copy(
+                    isCompletedSelected = !prev.isCompletedSelected
+                )
+            }
         }
         _refreshCommandFlow.tryEmit(RefreshCommand())
     }

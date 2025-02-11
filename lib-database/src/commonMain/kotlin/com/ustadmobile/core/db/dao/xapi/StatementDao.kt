@@ -28,6 +28,7 @@ import com.ustadmobile.lib.db.composites.AttemptsPersonListConst
 import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
+import com.ustadmobile.lib.db.composites.xapi.StatementConst
 import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_SCORE_ASC
 import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_SCORE_DESC
 import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_TIMESTAMP_ASC
@@ -369,16 +370,20 @@ expect abstract class StatementDao {
                             AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 0
                     ELSE NULL
                     END) AS isSuccessful,
-            (SELECT MAX(StatementEntity.extensionProgress)
+            (SELECT COALESCE(MAX(StatementEntity.extensionProgress), 0)
                FROM StatementEntity
               WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
                 AND StatementEntity.statementActorPersonUid = Person.personUid
                 AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1) AS maxProgress,
-            (SELECT MAX(StatementEntity.resultScoreScaled)
+            (SELECT COALESCE(MAX(StatementEntity.resultScoreScaled), 0)
                FROM StatementEntity
               WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
                 AND StatementEntity.statementActorPersonUid = Person.personUid
-                AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1) AS maxScore    
+                AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1) AS maxScore,
+            (SELECT MAX(StatementEntity.timestamp)
+               FROM StatementEntity
+              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                AND StatementEntity.statementActorPersonUid = Person.personUid) AS mostRecentAttemptTime    
        FROM Person
             LEFT JOIN PersonPicture
                  ON PersonPicture.personPictureUid = Person.personUid
@@ -409,27 +414,22 @@ expect abstract class StatementDao {
                           ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
                           ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
             )      
-                    AND (:searchText = "%" OR Person.firstNames LIKE :searchText OR Person.lastName LIKE :searchText OR Person.userName LIKE :searchText)
+            AND (:searchText = "%" OR Person.firstNames LIKE :searchText OR Person.lastName LIKE :searchText OR Person.userName LIKE :searchText)
      ORDER BY 
     CASE 
         WHEN :sortOrder = ${AttemptsPersonListConst.SORT_FIRST_NAME_ASC} THEN Person.firstNames
         WHEN :sortOrder = ${AttemptsPersonListConst.SORT_LAST_NAME_ASC} THEN Person.lastName
-        ELSE NULL
-    END ASC,
-    CASE 
         WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_SCORE_ASC} THEN maxScore
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_COMPLETION_ASC} THEN maxProgress
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_RECENT_ATTEMPT_ASC} THEN mostRecentAttemptTime
         ELSE NULL
     END ASC,
-    CASE 
-        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_LAST_NAME_DESC} THEN maxScore
-        ELSE NULL
-    END DESC,
     CASE 
         WHEN :sortOrder = ${AttemptsPersonListConst.SORT_FIRST_NAME_DESC} THEN Person.firstNames
-        ELSE NULL
-    END DESC,
-    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_LAST_NAME_DESC} THEN Person.lastName
         WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_SCORE_DESC} THEN maxScore
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_COMPLETION_DESC} THEN maxProgress
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_RECENT_ATTEMPT_DESC} THEN mostRecentAttemptTime
         ELSE NULL
     END DESC
 
@@ -522,44 +522,54 @@ expect abstract class StatementDao {
     ): PagingSource<Int, SessionTimeAndProgressInfo>
 
 
-    @HttpAccessible
-    @Query("""
-        SELECT StatementEntity.*, VerbEntity.*, VerbLangMapEntry.*
-          FROM StatementEntity
-               LEFT JOIN VerbEntity
-                         ON StatementEntity.statementVerbUid = VerbEntity.verbUid
-               LEFT JOIN VerbLangMapEntry 
-                         ON (VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash) = 
-                            (SELECT VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash
-                               FROM VerbLangMapEntry
-                              WHERE VerbLangMapEntry.vlmeVerbUid = VerbEntity.verbUid
-                           ORDER BY VerbLangMapEntry.vlmeLastModified DESC
-                              LIMIT 1)
-         WHERE StatementEntity.contextRegistrationHi = :registrationHi
-           AND StatementEntity.contextRegistrationLo = :registrationLo  
-           AND (:searchText = "%" OR VerbEntity.verbUrlId LIKE :searchText)
-           ORDER BY  CASE(:sortOrder)
-               WHEN $SORT_BY_TIMESTAMP_DESC THEN StatementEntity.resultDuration
-               ELSE ''
-               END DESC,
-            CASE(:sortOrder)
-               WHEN $SORT_BY_TIMESTAMP_ASC THEN StatementEntity.resultDuration
-               ELSE ''
-               END ASC,
-                 CASE(:sortOrder)
-               WHEN $SORT_BY_SCORE_DESC THEN StatementEntity.resultScoreRaw
-               ELSE ''
-               END DESC,
-            CASE(:sortOrder)
-               WHEN $SORT_BY_SCORE_ASC THEN StatementEntity.resultScoreRaw
-               ELSE ''
-               END ASC
-    """)
+    @Query(
+        """
+SELECT DISTINCT StatementEntity.*, VerbEntity.*, VerbLangMapEntry.*
+FROM StatementEntity
+LEFT JOIN VerbEntity ON StatementEntity.statementVerbUid = VerbEntity.verbUid
+LEFT JOIN VerbLangMapEntry ON VerbLangMapEntry.vlmeVerbUid = VerbEntity.verbUid
+WHERE StatementEntity.contextRegistrationHi = :registrationHi
+AND StatementEntity.contextRegistrationLo = :registrationLo
+AND (:searchText = '%' OR VerbEntity.verbUrlId LIKE :searchText)
+AND (:isExperience = 0 OR VerbEntity.verbUrlId LIKE '%experienced%')
+AND (:isAnswered = 0 OR VerbEntity.verbUrlId LIKE '%answered%')
+AND (:isFailed = 0 OR (StatementEntity.resultSuccess IS NOT NULL AND StatementEntity.resultSuccess = 0))
+AND (:isCompleted = 0 OR (StatementEntity.resultCompletion IS NOT NULL AND StatementEntity.resultCompletion = 1))
+GROUP BY StatementEntity.statementIdHi
+ORDER BY 
+    CASE WHEN :sortOrder = ${StatementConst.SORT_BY_TIMESTAMP_DESC} THEN StatementEntity.timestamp END DESC,
+    CASE WHEN :sortOrder = ${StatementConst.SORT_BY_TIMESTAMP_ASC} THEN StatementEntity.timestamp END ASC,
+    CASE WHEN :sortOrder = ${StatementConst.SORT_BY_SCORE_DESC} THEN StatementEntity.resultScoreRaw END DESC,
+    CASE WHEN :sortOrder = ${StatementConst.SORT_BY_SCORE_ASC} THEN StatementEntity.resultScoreRaw END ASC
+"""
+    )
     abstract fun findStatementsBySession(
         registrationHi: Long,
         registrationLo: Long,
-        searchText: String? = "%",
-        sortOrder: Int
-        ): PagingSource<Int, StatementEntityAndVerb>
+        searchText: String = "%",
+        sortOrder: Int,
+        isExperience: Int = 0,
+        isAnswered: Int = 0,
+        isFailed: Int = 0,
+        isCompleted: Int = 0,
+    ): PagingSource<Int, StatementEntityAndVerb>
+
+    @Query("""
+    SELECT EXISTS(
+        SELECT 1 FROM StatementEntity 
+        WHERE statementContentEntryUid = :contentEntryUid 
+        AND resultScoreScaled IS NOT NULL
+    )
+""")
+    abstract suspend fun hasScoreData(contentEntryUid: Long): Boolean
+
+    @Query("""
+    SELECT EXISTS(
+        SELECT 1 FROM StatementEntity 
+        WHERE statementContentEntryUid = :contentEntryUid 
+        AND extensionProgress IS NOT NULL
+    )
+""")
+    abstract suspend fun hasCompletionData(contentEntryUid: Long): Boolean
 
 }
