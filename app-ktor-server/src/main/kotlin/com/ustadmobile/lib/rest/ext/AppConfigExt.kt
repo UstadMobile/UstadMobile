@@ -89,7 +89,7 @@ fun ApplicationConfig.fileProperty(
     propertyName: String, defaultPath: String
 ): File {
     val path = propertyOrNull(propertyName)?.getString() ?: defaultPath
-    val file = File(propertyName)
+    val file = File(path)
 
     return if(file.isAbsolute) {
         file

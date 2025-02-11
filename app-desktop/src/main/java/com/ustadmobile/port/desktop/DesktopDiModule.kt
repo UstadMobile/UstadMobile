@@ -15,6 +15,7 @@ import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.db.UmAppDataLayer
+import com.ustadmobile.core.db.MIGRATE_USERNAME_CLIENT
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
@@ -416,6 +417,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             .addMigrations(MIGRATION_155_156_CLIENT)
             .addMigrations(MIGRATION_161_162_CLIENT)
             .addMigrations(MIGRATION_169_170_CLIENT)
+            .addMigrations(MIGRATE_USERNAME_CLIENT)
             .addCallback(AddOfflineItemInactiveTriggersCallback())
             .build()
 

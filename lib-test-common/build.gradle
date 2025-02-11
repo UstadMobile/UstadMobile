@@ -18,6 +18,12 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
+
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion rootProject.ext.version_android_target_sdk

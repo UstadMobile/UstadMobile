@@ -1,0 +1,43 @@
+appId: com.toughra.ustadmobile
+tags:
+  - contentTest
+env:
+  TESTRESULTSDIR: "build/reports/maestro/001_006_admin_can_cancel_content_download/Screenshots"
+onFlowStart:
+  - startRecording: 001_006_admin_can_cancel_content_download
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+---
+- runFlow:
+    file: "common/clear_login_and_add_content.yaml"
+    env:
+      TESTFILENAME: Epub_Content2.epub
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/content_add_to_library"
+- tapOn: "E-book"
+- assertNotVisible: "Importing"
+- tapOn: Open
+- tapOn: "Back"
+- runFlow:
+    file: "common/login_download_and_open_content.yaml"
+#Download and open content
+- tapOn: "Library"
+- extendedWaitUntil:
+    visible: "E-book"
+    timeout: 3000
+- tapOn: "E-book"
+- tapOn: Download
+- tapOn: Cancel
+- assertVisible: "Download"
+- tapOn: Download
+- tapOn: Open
+- takeScreenshot: "${TESTRESULTSDIR}/content_download_and_open"

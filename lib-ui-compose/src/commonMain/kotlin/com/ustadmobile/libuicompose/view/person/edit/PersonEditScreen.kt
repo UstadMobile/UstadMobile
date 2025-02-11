@@ -10,12 +10,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditUiState
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -221,16 +226,26 @@ fun PersonEditScreen(
 
         if (uiState.usernameVisible){
             OutlinedTextField(
-                modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier
+                    .testTag("username")
+                    .fillMaxWidth()
+                    .defaultItemPadding()
+                    .onKeyEvent { keyEvent ->
+                        if (keyEvent.type == KeyEventType.KeyDown) {
+                            !ValidateUsernameUseCase.isValidUsernameChar(keyEvent.utf16CodePoint.toChar())
+                        } else false
+                    },
                 value = uiState.person?.username ?: "",
                 label = { Text(stringResource(MR.strings.username)) },
                 enabled = uiState.fieldsEnabled,
                 isError = uiState.usernameError != null,
                 singleLine = true,
-                onValueChange = {
-                    onPersonChanged(uiState.person?.shallowCopy{
-                        username = it
-                    })
+                onValueChange = { newValue ->
+                    onPersonChanged(
+                        uiState.person?.shallowCopy {
+                            username = newValue
+                        }
+                    )
                 },
                 supportingText = {
                     Text(uiState.usernameError ?: stringResource(MR.strings.required))

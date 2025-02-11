@@ -7,4 +7,6 @@ data class ServerInfo(
     val url: String,
     val port: Int,
     val extraInfo: String,
+    val adminUsername: String,
+    val adminPassword: String,
 )

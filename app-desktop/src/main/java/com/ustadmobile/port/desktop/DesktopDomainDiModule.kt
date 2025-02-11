@@ -79,6 +79,7 @@ import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
@@ -110,6 +111,7 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
@@ -158,6 +160,15 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             settings = instance()
         )
     }
+
+    bind<FilterUsernameUseCase>() with provider {
+        FilterUsernameUseCase()
+    }
+
+    bind<ValidateUsernameUseCase>() with provider {
+        ValidateUsernameUseCase()
+    }
+
 
     bind<OpenExternalLinkUseCase>() with provider {
         OpenExternalLinkUseCaseJvm()
@@ -538,6 +549,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             validatePhoneNumUseCase = instance(),
             authManager = instance(),
             enrolUseCase = instance(),
+            createNewClazzUseCase = instance(),
             activeDb = instance(tag = DoorTag.TAG_DB),
             activeRepo = instance<UmAppDataLayer>().repository,
         )

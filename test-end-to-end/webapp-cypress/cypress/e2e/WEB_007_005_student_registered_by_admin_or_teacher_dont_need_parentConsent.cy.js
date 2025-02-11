@@ -1,8 +1,8 @@
 describe('WEB_007_005_student_registered_by_admin_or_teacher_dont_need_parentConsent', () => {
- it('Start Ustad Test Server ', () => {
-  // Start Test Server
-    cy.ustadStartTestServer()
-})
+  before(() => {
+     // Start Test Server
+     cy.ustadStartTestServer(6000)
+  })
 
 it('Admin add a student aged below 13', () => {
  // Admin user login
@@ -18,12 +18,17 @@ it('Admin add a student aged below 13', () => {
   cy.ustadBirthDate(cy.get("#person_date_of_birth"),new Date(Date.now()-(365 * 24 * 60 * 60 * 1000 * 5)))
   cy.wait(2000)
   cy.contains("button","Save",{timeout: 2000}).click()
-  cy.ustadCreateUserAccount('student1','test1234')
+  cy.ustadCreateUserAccount('stud1','tests1')
 })
 
 it('Student login successfully', () => {
  // Student user login
-  cy.ustadClearDbAndLogin('student1','test1234',{timeout:8000})
+  cy.ustadClearDbAndLogin('stud1','tests1',{timeout:8000})
   cy.contains("People").should('be.visible')
+})
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
   })
 })

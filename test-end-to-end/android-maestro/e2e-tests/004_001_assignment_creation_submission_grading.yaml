@@ -1,50 +1,39 @@
 appId: com.toughra.ustadmobile
+tags:
+  - assignments
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/004_001_assignment_creation_submission_grading"
-  TESTNAME:  "004_001_assignment_creation_submission_grading"
+  TESTRESULTSDIR: "build/reports/maestro/004_001_assignment_creation_submission_grading/Screenshots"
+onFlowStart:
+  - startRecording: 004_001_assignment_creation_submission_grading
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-# Admin login
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
+- runScript:
+    file: "common/import_users_via_http.js"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
+# download the assignment file
 - runFlow:
-    file: "../common/user_login.yaml"
-# add new course
-- runFlow:
-    file: "../common/add_course.yaml"
+    file:  "common/download_file_via_browser.yaml"
     env:
-      TESTCOURSENAME: "Test Course Block"
-# add new teacher using flow - add_new_teacher_inside_course ---------
+      TESTFILENAME: "Assignment_File.pdf"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
+    file: "common/user_login.yaml"
     env:
-      TESTCOURSENAME: ${TESTCOURSENAME}
-      TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "1"
-      USERNAME: "t1"
-      GENDER: "Female"
-      PASSWORD: "test"
-# add students to the course through bulk import using .csv file
-- runFlow:
-    file: "../common/student_bulk_upload_csv.yaml"
-    env:
-      TESTFILENAME: "Ustad_Students_List.csv"
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-# teacher add an assignment block
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
-- runFlow:
-    file: "../common/user_login.yaml"
-    env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 # edit the course to add blocks
@@ -67,6 +56,12 @@ env:
           direction: UP
 - tapOn: "Assignment"
 - tapOn: "Title*"
+- hideKeyboard
+- tapOn: "Done"
+#Assertion to make sure the page is not saved because title is blank
+- assertNotVisible:
+    text: "Add block"
+- tapOn: "Title*"
 - inputText: "Assignment 1"
 - hideKeyboard
 - tapOn: "Description"
@@ -80,37 +75,35 @@ env:
     direction: DOWN
 - assertVisible: "Must submit all at once"
 - assertVisible: "Done"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/added_assignment"
+- takeScreenshot: "${TESTRESULTSDIR}/added_assignment"
 - tapOn:
     text: "Done"
 - assertNotVisible: "Done"
 - tapOn: "Save"
 # student submit assignment
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "s1"
+      USERNAME: "stud1"
       PASSWORD: "tests1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - scrollUntilVisible:
     element:
-      text: "Assignment 1"
+      text: "Assignment"
     direction: DOWN
-- tapOn: "Assignment 1"
+- tapOn: "Assignment"
 - tapOn: "Text"
 - tapOn:
      id: "com.toughra.ustadmobile:id/editor"
 - inputText: "Assignment done by student 1"
 - tapOn: "Done"
 - runFlow:
-    file: "../common/add_assignment_file.yaml"
+    file: "common/add_assignment_file.yaml"
     env:
       TESTFILENAME: "Assignment_File.pdf"
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
 - scrollUntilVisible:
     element:
       text: "Submit"
@@ -118,20 +111,20 @@ env:
 - tapOn: "Submit"
 - assertVisible: "Submitted"
 # teacher view and mark the assignment submitted by student
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - scrollUntilVisible:
     element:
-      text: "Assignment 1"
+      text: "Assignment"
     direction: DOWN
-- tapOn: "Assignment 1"
+- tapOn: "Assignment"
 - tapOn: "Submissions"
 - assertVisible: "Student 1"
 - tapOn: "Student 1"
@@ -160,20 +153,20 @@ env:
     direction: UP
 - assertVisible: "9.0/10.0 Points"
 # student able to view his grade
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "s1"
+      USERNAME: "stud1"
       PASSWORD: "tests1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - scrollUntilVisible:
     element:
-      text: "Assignment 1"
+      text: "Assignment"
     direction: DOWN
-- tapOn: "Assignment 1"
+- tapOn: "Assignment"
 - assertVisible: "Marked"
 - scrollUntilVisible:
     element:
@@ -183,15 +176,19 @@ env:
 #  Submission policy - Must submit all at once , so make sure Submit button is not visible
 - assertNotVisible: "Submit"
 # teacher can delete the course
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
+# verify teacher able to see student score in gradebook
+- tapOn: "Gradebook"
+- assertVisible: "9"
+- tapOn: "Course"
 - tapOn:
     id: "floating_action_button"
 - scrollUntilVisible:

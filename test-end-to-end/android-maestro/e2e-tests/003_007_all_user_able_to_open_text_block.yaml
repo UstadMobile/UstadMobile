@@ -1,56 +1,41 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseBlocks
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_007_all_user_able_to_open_text_block"
-  TESTNAME: "003_007_all_user_able_to_open_text_block"
+  TESTRESULTSDIR: "build/reports/maestro/003_007_all_user_able_to_open_text_block/Screenshots"
   TEXTTITLE: "PRIMARY COLOURS"
+  TESTCOURSENAME: "Test Course Block"
+onFlowStart:
+  - startRecording: 003_007_all_user_able_to_open_text_block
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
+# Import course, students, and teacher
+- runScript:
+    file: "common/import_users_via_http.js"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
+
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
-- runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/user_login.yaml"
     env:
-      TESTCOURSENAME: "Text Block Test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: ${TESTCOURSENAME}
 - runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
-    env:
-      TESTCOURSENAME: "Text Block Test"
-      TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "1"
-      USERNAME: "t1"
-      GENDER: "Female"
-      PASSWORD: "test"
-- tapOn:
-    text: "Courses"
-    index: 1
-- assertVisible:
-    id: "app_title"
-    text: "Courses"
-- runFlow:
-    file: "../common/add_new_student_inside_course.yaml"
-    env:
-      TESTCOURSENAME: "Text Block Test"
-      STUDENTFIRSTNAME: "Student"
-      STUDENTLASTNAME: "1"
-      USERNAME: "s1"
-      GENDER: "Male"
-      PASSWORD: "test"
-- repeat:
-    while:
-      notVisible: "Course"
-    commands:
-      - back
-- tapOn: "Course"
-- runFlow:
-    file: "../common/add_demo_block_structure.yaml"
+    file: "common/add_demo_block_structure.yaml"
     env:
       MODULETITLE: "SEMESTER 1"
       TEXTTITLE: "PRIMARY COLOURS"
@@ -67,15 +52,14 @@ env:
 - assertVisible:
           text: "RED,BLUE,GREEN"
 - takeScreenshot: "${TESTRESULTSDIR}/text_block_admin_view"
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "s1"
-      PASSWORD: "test"
-- tapOn: "courses"
-- tapOn: "Text Block Test"
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: ${TESTCOURSENAME}
 #--- open text block by student---#
 - scrollUntilVisible:
     element:
@@ -89,15 +73,15 @@ env:
     text: "RED,BLUE,GREEN"
 - takeScreenshot: "${TESTRESULTSDIR}/text_block_student_view"
 #---------Launch App & Teacher Login------------------#
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "courses"
-- tapOn: "Text Block Test"
+- tapOn: ${TESTCOURSENAME}
 #--- open text block by teacher ---#
 - scrollUntilVisible:
     element:
