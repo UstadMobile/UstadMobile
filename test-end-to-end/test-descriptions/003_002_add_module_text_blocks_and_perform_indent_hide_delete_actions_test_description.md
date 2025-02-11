@@ -19,38 +19,42 @@ unindented, edited, deleted.
 10. Click on the "Edit" button.
 11. Click on the "Add block" button.
 12. Click on the "Module" button.
-13. Enter the title for Module block.
-14. Enter description.
-15. Click on "Done" to save the description.
-16. Click on "Done" to save the module block.
-17. Click on the "Add block" button. 
-18. Click on the "Text" button. 
-19. Enter the title for Text block. 
-20. Click on "Description" field. 
-21. Enter description. 
-22. Click on "Done" to save the description. 
-23. Enter text inside text editor field 
-24. Click on "Done" to save the text block. 
-25. Verify the module block and Text blocks are visible.
-26. Click on "More options" icon next to the module block.
-27. Click on "Hide" button.
-28. Click on "Save" to save the course.
-29. Verify that the module block is not visible.
-30. Click on "Edit" button to edit course
-31. Click on "More options" icon next to the module block. 
-32. Click on "Unhide" button. 
-33. Click on "Save" to save the course. 
-34. Verify that the module block is visible. 
-35. Click on "Edit" button to edit course 
-36. Click on "More options" icon next to the text block. 
-37. Click on "Indent" button. 
-38. Click on "Save" to save the course.
+13. Leave the title blank and click on Save
+14. User gets error the module block title is mandatory
+15. Enter the title for Module block.
+16. Enter description.
+17. Click on "Done" to save the description.
+18. Click on "Done" to save the module block.
+19. Click on the "Add block" button. 
+20. Click on the "Text" button. 
+21. Leave the title blank and click on Save
+22. User gets error the text block title is mandatory
+23. Enter the title for Text block. 
+24. Click on "Description" field. 
+25. Enter description. 
+26. Click on "Done" to save the description. 
+27. Enter text inside text editor field 
+28. Click on "Done" to save the text block. 
+29. Verify the module block and Text blocks are visible.
+30. Click on "More options" icon next to the module block.
+31. Click on "Hide" button.
+32. Click on "Save" to save the course.
+33. Verify that the module block is not visible.
+34. Click on "Edit" button to edit course
+35. Click on "More options" icon next to the module block. 
+36. Click on "Unhide" button. 
+37. Click on "Save" to save the course. 
+38. Verify that the module block is visible. 
 39. Click on "Edit" button to edit course 
 40. Click on "More options" icon next to the text block. 
-41. Click on "Unindent" button. 
+41. Click on "Indent" button. 
 42. Click on "Save" to save the course.
 43. Click on "Edit" button to edit course 
 44. Click on "More options" icon next to the text block. 
-45. Click on "Delete" button. 
+45. Click on "Unindent" button. 
 46. Click on "Save" to save the course.
-47. Verify that the text block is not visible.
+47. Click on "Edit" button to edit course 
+48. Click on "More options" icon next to the text block. 
+49. Click on "Delete" button. 
+50. Click on "Save" to save the course.
+51. Verify that the text block is not visible.

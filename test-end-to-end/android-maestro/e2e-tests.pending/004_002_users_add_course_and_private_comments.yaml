@@ -1,0 +1,127 @@
+appId: com.toughra.ustadmobile
+tags:
+  - assignments
+  - courseComments
+env:
+  TESTRESULTSDIR: "build/reports/maestro/004_002_users_add_course_comments/Screenshots"
+onFlowStart:
+  - startRecording: "004_002_users_add_course_comments"
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+
+---
+- runScript:
+    file: "common/import_users_via_http.js"
+    env:
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
+
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: "Test Course Block"
+# edit the course to add blocks
+- tapOn:
+    id: "floating_action_button"
+# add assignment block ------ 1
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
+- tapOn: "Add block"
+- runFlow:
+    when:
+      notVisible:
+        text: "Assignment"
+    commands:
+      - swipe:
+          from:
+            text: "Drag handle"
+          direction: UP
+- tapOn: "Assignment"
+- tapOn: "Title*"
+- inputText: "Assignment 1"
+- hideKeyboard
+- tapOn: "Description"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "test block"
+- tapOn: "Done"
+- scrollUntilVisible:
+    element:
+      text: "Submission policy"
+    direction: DOWN
+- assertVisible: "Must submit all at once"
+- assertVisible: "Done"
+- takeScreenshot: "${TESTRESULTSDIR}/added_assignment"
+- tapOn:
+    text: "Done"
+- assertNotVisible: "Done"
+- tapOn: "Save"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- tapOn: "Add a class comment"
+- inputText: "Comment from teacher"
+- hideKeyboard
+- tapOn: "Send"
+  # teacher send a private comment to student1
+- tapOn: "Submissions"
+- tapOn: "Student 1"
+- scrollUntilVisible:
+    element:
+      text: "Add a private comment"
+    direction: DOWN
+- tapOn: "Add a private comment"
+- inputText: "Private comment from teacher"
+- tapOn: "Send"
+- assertVisible: "Private comment from teacher"
+# student add course comment
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- scrollUntilVisible:
+    element:
+      text: "Add a class comment"
+    direction: DOWN
+- tapOn: "Add a class comment"
+- inputText: "Comment from student"
+- hideKeyboard
+- tapOn: "Send"
+- assertVisible: "Comment from student"
+- assertVisible: "Comment from teacher"
+# student 1 send a private comment to teacher
+- tapOn: "Assignment 1"
+- scrollUntilVisible:
+    element:
+      text: "Add a private comment"
+    direction: DOWN
+- tapOn: "Add a private comment"
+- inputText: "Private comment from student"
+- tapOn: "Send"
+- scrollUntilVisible:
+    element:
+      text: "Private comment from teacher"
+    direction: DOWN
+- assertVisible: "Private comment from student"
+- assertVisible: "Private comment from teacher"
