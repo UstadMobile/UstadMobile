@@ -52,6 +52,54 @@ Cypress.Commands.add('ustadStopTestServer', () => {
 })
 })
 
+/*
+ *
+ * cy.importUsersViaHttp("your_csv_file.csv");
+ *
+*/
+Cypress.Commands.add("importUsersViaHttp", (csvFileName) => {
+    const maxAttempts = 4;
+
+    const attemptImport = (attempt) => {
+        cy.request({
+            method: "GET",
+            url: `/testcontroller/test-files/content/${csvFileName}`
+        }).then((response) => {
+            cy.log(`Received CSV content (Attempt ${attempt}):`);
+            cy.log(response.body); // Log full response body for debugging
+
+            if (!response.body || response.body.trim().length === 0) {
+                cy.log("Error: Received empty CSV content!");
+                return;
+            }
+
+            cy.request({
+                method: "POST",
+                url: `/api/person/bulkadd/import`, // Using relative URL
+                body: response.body,
+                headers: {
+                    Authorization: "Basic " + "YWRtaW46dGVzdHBhc3M="
+                }
+            }).then(() => {
+                cy.log(`importUsersViaHttp: SUCCESS : attempt: ${attempt}`);
+            }, () => {
+                cy.log(`POST request failed, retrying attempt ${attempt + 1}...`);
+                if (attempt < maxAttempts - 1) {
+                    attemptImport(attempt + 1);
+                }
+            });
+        }, () => {
+            cy.log(`GET request failed, retrying attempt ${attempt + 1}...`);
+            if (attempt < maxAttempts - 1) {
+                attemptImport(attempt + 1);
+            }
+        });
+    };
+
+    attemptImport(0);
+});
+
+
 // Clear DB and Login
 Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
 // Clearing IndexedDB for the dynamic hostname
@@ -377,6 +425,8 @@ Cypress.Commands.add("ustadBirthDate", (element, date) => {
      String(date.getDate()).padStart(2, '0')
      );
 });
+
+
 
 
 

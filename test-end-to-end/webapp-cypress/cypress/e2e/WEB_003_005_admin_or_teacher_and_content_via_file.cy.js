@@ -10,7 +10,7 @@ it('Admin able to add content block from library', () => {
   cy.ustadAddContentToLibrary('../test-files/content/H5p_Content.h5p','Content_001')
  // Add a new course
   cy.contains("Courses").click()
-  cy.ustadAddCourse('003_005')
+  cy.ustadAddCourse('Test Course Block')
  //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
@@ -38,7 +38,7 @@ it('Teacher able to add content block from file', () => {
   cy.ustadClearDbAndLogin('teach1','testt1')
  // Add Assignment block
   cy.contains("Course").click()
-  cy.contains("003_005").click()
+  cy.contains("Test Course Block").click()
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()

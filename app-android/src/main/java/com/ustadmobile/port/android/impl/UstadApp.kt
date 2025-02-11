@@ -366,6 +366,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(MIGRATION_155_156_CLIENT)
                 .addMigrations(MIGRATION_161_162_CLIENT)
                 .addMigrations(MIGRATION_169_170_CLIENT)
+                .addMigrations(MIGRATE_USERNAME_CLIENT)
                 .build()
 
             Log.i("MigrateIssue", "Database built: name=$dbName")
