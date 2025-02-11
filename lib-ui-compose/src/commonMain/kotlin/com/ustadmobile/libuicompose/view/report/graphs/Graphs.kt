@@ -1,9 +1,9 @@
 package com.ustadmobile.libuicompose.view.report.graphs
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
+import io.github.aakira.napier.Napier
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.bar.DefaultVerticalBar
@@ -54,7 +55,6 @@ data class GraphSeries(
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 fun CombinedGraph(
-    title: String,
     series: List<GraphSeries>,
     modifier: Modifier = Modifier
 ) {
@@ -130,7 +130,6 @@ fun CombinedGraph(
 
     ChartLayout(
         modifier = modifier.defaultScreenPadding(),
-        title = { ChartTitles(title) },
         legend = { CombinedLegend(series, colorMap) },
         legendLocation = LegendLocation.BOTTOM
     ) {
@@ -154,19 +153,19 @@ fun CombinedGraph(
                     Modifier.defaultItemPadding(top = 4.dp)
                 )
             },
-            xAxisTitle = { AxisTitles("Date") },
+            xAxisTitle = { AxisLabels("Date") },
             yAxisLabels = {
                 AxisLabels(
-                    "%.1f %s".format(it, unit),
+                    "%.1f".format(it),
                     Modifier
                         .defaultItemPadding(end = 4.dp)
                 )
             },
             yAxisTitle = {
-                AxisTitles(
-                    "Duration",
+                AxisLabels(
+                    "Content usage (hours)",
                     Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
-                        .defaultScreenPadding()
+
                 )
             }
         ) {
@@ -187,7 +186,7 @@ fun CombinedGraph(
                             }
                         }
                     },
-                    maxBarGroupWidth = 2f / allSubgroups.size.coerceAtLeast(1)
+                    maxBarGroupWidth = 1f / allSubgroups.size.coerceAtLeast(1)
                 )
             }
 
@@ -236,8 +235,22 @@ private fun CombinedLegend(
         .groupBy { it.name }
         .mapValues { entry -> entry.value.flatMap { it.data }.map { it.subgroup }.distinct() }
 
-    Surface(shadowElevation = 2.dp) {
-        Column(modifier = Modifier) {
+    Surface(
+        shadowElevation = 2.dp,
+        modifier = Modifier.border(
+            width = 1.dp,
+            color = Color.Black,
+            shape = RoundedCornerShape(5.dp)
+        )
+    ) {
+        Column(
+            modifier = Modifier.defaultItemPadding(
+                start = 5.dp,
+                end = 5.dp,
+                top = 5.dp,
+                bottom = 5.dp
+            )
+        ) {
             barSeriesMap.forEach { (seriesName, subgroups) ->
                 if (subgroups.isNotEmpty()) {
                     Text(seriesName)
@@ -283,32 +296,14 @@ private fun CombinedLegend(
 
 
 @Composable
-private fun ChartTitles(title: String) {
-    androidx.compose.material3.Text(
-        title,
-        style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-    )
-}
-
-@Composable
-private fun AxisTitles(title: String, modifier: Modifier = Modifier) {
-    androidx.compose.material3.Text(
-        title,
-        style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-        modifier = modifier
-    )
-}
-
-@Composable
 private fun AxisLabels(label: String, modifier: Modifier = Modifier) {
     androidx.compose.material3.Text(
         label,
         style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         overflow = TextOverflow.Ellipsis,
-        maxLines = 1
+        maxLines = 1,
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center
     )
 }
 

@@ -18,7 +18,8 @@ import org.kodein.di.DI
 
 data class ReportDetailUiState(
     val report: Report? = null,
-)
+    val dialogVisible: Boolean = false,
+    )
 
 class ReportDetailViewModel(
     di: DI,
@@ -50,8 +51,9 @@ class ReportDetailViewModel(
                     text = systemImpl.getString(MR.strings.edit),
                     icon = FabUiState.FabIcon.EDIT,
                     onClick = this@ReportDetailViewModel::onClickEdit
+                ),
+                title = "Graph title",
                 )
-            )
         }
 
         launchIfHasPermission(
@@ -90,6 +92,14 @@ class ReportDetailViewModel(
             ReportEditViewModel.DEST_NAME,
             mapOf(ARG_ENTITY_UID to reportUid.toString())
         )
+    }
+    fun onDismissDialog(){
+        _uiState.update { prev -> prev.copy(dialogVisible = false) }
+
+    }
+    fun onShowDialog(){
+        _uiState.update { prev -> prev.copy(dialogVisible = true) }
+
     }
 
     companion object {

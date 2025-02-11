@@ -1994,5 +1994,12 @@
     <string name="not_in_list">Not In List</string>
 
     <string name="other">Other</string>
+    <string name="export_data">Export data</string>
+    <string name="x_axis">xAxis</string>
+    <string name="y_axis">yAxis</string>
+    <string name="sub_group">subgroup</string>
+    <string name="graph_data">Graph data</string>
+    <string name="raw_data">Raw data</string>
+
 
 </resources>
