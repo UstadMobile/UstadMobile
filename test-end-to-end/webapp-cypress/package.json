@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "cypress": "^14.0.1",
+    "cypress": "^14.0.2",
     "cypress-multi-reporters": "^1.6.3",
     "cypress-recurse": "^1.35.3",
     "cypress-terminal-report": "^5.3.10",
