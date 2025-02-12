@@ -4,6 +4,8 @@ import com.ustadmobile.lib.rest.CONF_DBMODE_SINGLETON
 import io.ktor.server.config.*
 import java.io.File
 
+const val DEFAULT_DATA_DIR_NAME = "data"
+
 fun ApplicationConfig.dbModeProperty(): String {
     return propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 }
@@ -72,8 +74,10 @@ fun ktorAppHomeDir(): File {
  * This is secure because anyone who has access to the server.properties file would also have access
  * to the server directory itself.
  */
-fun ktorServerPropertiesFile(): File {
-    return File(ktorAppSourceDir() ?: ktorAppHomeDir(), "server.properties")
+fun ktorServerPropertiesFile(
+    dataDir: File
+): File {
+    return File(dataDir, "server.properties")
 }
 
 /**
@@ -100,6 +104,6 @@ fun ApplicationConfig.fileProperty(
 
 
 fun ApplicationConfig.absoluteDataDir() = fileProperty(
-    propertyName = "ktor.ustad.datadir", defaultPath = "data"
+    propertyName = "ktor.ustad.datadir", defaultPath = DEFAULT_DATA_DIR_NAME
 )
 

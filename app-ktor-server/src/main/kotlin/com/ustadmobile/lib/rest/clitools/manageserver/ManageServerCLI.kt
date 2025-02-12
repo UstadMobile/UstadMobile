@@ -4,6 +4,7 @@ import com.ustadmobile.lib.rest.SERVER_PROPERTIES_KEY_PORT
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
+import com.ustadmobile.lib.rest.ext.DEFAULT_DATA_DIR_NAME
 import com.ustadmobile.lib.rest.ext.ktorAppHomeDir
 import com.ustadmobile.lib.rest.ext.ktorServerPropertiesFile
 import io.ktor.client.HttpClient
@@ -55,6 +56,10 @@ internal fun Subparsers.addNewLearningSpaceParser() {
             .help("Learning space initial admin password (the default username for the initial admin " +
                     "user will be admin unless set otherwise.")
             .required(true)
+        it.addArgument("-i", "--datadir")
+            .help("Explicitly set the data directory, used to locate the server properties file. " +
+                    "Normally only required when started by testserver-controller")
+            .required(false)
     }
 }
 
@@ -107,8 +112,11 @@ fun main(ns: Namespace) {
         }
     }
 
-    val dataDir = File("${ktorAppHomeDir().absolutePath}/data")
-    val serverPropertiesFile = ktorServerPropertiesFile()
+    val dataDir = ns.getString("datadir")?.let { File(it) }
+        ?: File("${ktorAppHomeDir().absolutePath}/$DEFAULT_DATA_DIR_NAME")
+    println("DataDir=$dataDir")
+
+    val serverPropertiesFile = ktorServerPropertiesFile(dataDir = dataDir)
 
     if(!serverPropertiesFile.exists()) {
         println("Error: Server is not running: server.properties does not exist")

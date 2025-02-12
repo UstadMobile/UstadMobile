@@ -46,19 +46,30 @@ class ServerRunner(
         val logDir = File(dataDir, "log")
         logDir.mkdirs()
 
-        val runServerCommand = "java -Dlogs_dir=${logDir.absolutePath} -jar build/libs/ustad-server-all.jar "
+        val runServerCommand = "java -Dlogs_dir=${logDir.absolutePath} -jar build/libs/ustad-server-all.jar"
 
-        val serverArgs = runServerCommand.split(Regex("\\s+")).toMutableList()
+        val serverArgs = runServerCommand.split(Regex("\\s+")).filter {
+            it.isNotEmpty()
+        }.toMutableList()
+
         if(!(serverArgs[0].startsWith(".") || serverArgs[0].startsWith("/"))) {
             serverArgs[0] = SysPathUtil.findCommandInPath(serverArgs[0])?.absolutePath
                 ?: throw IllegalArgumentException("Could not find server command in PATH ${serverArgs[0]}")
         }
 
+        val configFile = File(serverDir, "src/main/resources/application.conf")
+
+        /*
+         * Manually force use of the source code resources application.conf because
+         * a) ensure that any local ustad-server.conf will not interfere with the test run
+         * b) application.conf in resources has been seen not to be loaded as it should be when running
+         *    on command line.
+         */
         val serverArgsWithSiteUrl = serverArgs +
-                "-P:ktor.ustad.siteUrl=$learningSpaceUrl" +
+                "runserver" +
+                "-config=${configFile.absolutePath}" +
                 "-P:ktor.deployment.port=$port" +
-                "-P:ktor.ustad.datadir=${dataDir.absolutePath}" +
-                "-P:ktor.ustad.adminpass=testpass"
+                "-P:ktor.ustad.datadir=${dataDir.absolutePath}"
 
         val commandLine = serverArgsWithSiteUrl.joinToString(separator = " ")
         println("TestServerController: exec $commandLine")
@@ -72,9 +83,36 @@ class ServerRunner(
         val urlToWaitFor = if(mode == RunMode.CYPRESS)
             URL(URL(learningSpaceUrl), "umapp/")
         else
-            URL(learningSpaceUrl)
+            URL(URL(learningSpaceUrl), "api/centralappconfig/learningspace/getAll")
 
         okHttpClient.waitForUrl(urlToWaitFor.toString())
+
+        val createLearningSpaceCommandArgs = buildList {
+            addAll(serverArgs)
+            add("newlearningspace")
+            add("--title")
+            add("TestLearningSpace")
+            add("--url")
+            add(learningSpaceUrl)
+            add("--adminpassword")
+            add("testpass")
+            add("--datadir")
+            add(dataDir.absolutePath)
+        }
+
+        val addingLearningSpaceProcess = ProcessBuilder(createLearningSpaceCommandArgs)
+            .directory(serverDir)
+            .redirectOutput(ProcessBuilder.Redirect.PIPE)
+            .redirectError(ProcessBuilder.Redirect.PIPE)
+            .start()
+        val status = addingLearningSpaceProcess.waitFor()
+
+        val output = addingLearningSpaceProcess.inputStream.bufferedReader().readText()
+        println(output)
+        val errorOutput = addingLearningSpaceProcess.errorStream.bufferedReader().readText()
+        println(errorOutput)
+        if(status != 0)
+            throw IllegalStateException("Could not add learning space")
     }
 
 

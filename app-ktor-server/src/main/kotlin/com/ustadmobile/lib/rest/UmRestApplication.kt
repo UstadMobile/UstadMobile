@@ -284,7 +284,9 @@ fun Application.umRestApplication(
         setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
     }
 
-    ktorServerPropertiesFile().writer().use { serverPropWriter ->
+    ktorServerPropertiesFile(
+        dataDir = environment.config.absoluteDataDir()
+    ).writer().use { serverPropWriter ->
         serverProperties.store(serverPropWriter, null)
     }
 
@@ -344,8 +346,10 @@ fun Application.umRestApplication(
         if(!it.exists())
             it.mkdirs()
     }
+    Napier.i("UstadServer dataDir=$dataDirPath")
+    println("UstadServer dataDir=$dataDirPath")
 
-    val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
+    val wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
 
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
@@ -1177,7 +1181,7 @@ fun Application.umRestApplication(
         appConfig.siteUrl()
     }
 
-    println("Ustad server is running on $printableServerUrl . Logging to $logDir .")
+    println("Ustad server is running on $printableServerUrl\ndataDir=$dataDirPath logDir=$logDir . ")
     println()
     println("You can connect the Android client to this address as per README.md .")
     println()
