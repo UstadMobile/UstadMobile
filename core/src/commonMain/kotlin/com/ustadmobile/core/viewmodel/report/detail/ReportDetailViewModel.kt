@@ -1,6 +1,8 @@
 package com.ustadmobile.core.viewmodel.report.detail
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.INDETERMINATE
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.NOT_LOADING
@@ -9,17 +11,20 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import com.ustadmobile.lib.db.entities.Report
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 data class ReportDetailUiState(
     val report: Report? = null,
     val dialogVisible: Boolean = false,
-    )
+    val reportOptions2: ReportOptions2 = ReportOptions2()
+)
 
 class ReportDetailViewModel(
     di: DI,
@@ -53,19 +58,54 @@ class ReportDetailViewModel(
                     onClick = this@ReportDetailViewModel::onClickEdit
                 ),
                 title = "Graph title",
-                )
+            )
         }
-
         launchIfHasPermission(
             setLoadingState = true,
             permissionCheck = { true }
         ) {
-            launch {
-                navResultReturner.filteredResultFlowForKey(RESULT_KEY_REPORT_DETAIL)
-                    .collect { result ->
-                        val report = result.result as? Report ?: return@collect
-                        getReport(report)
+            async {
+                loadEntity(
+                    serializer = ReportOptions2.serializer(),
+                    onLoadFromDb = { db ->
+                        val report = db.reportDao().findByUid(reportUid)
+                        report?.let {
+                            it.reportOptions?.takeIf { options -> options.isNotBlank() }
+                                ?.let { options ->
+                                    Json.decodeFromString(ReportOptions2.serializer(), options)
+                                } ?: ReportOptions2(title = it.reportTitle ?: "")
+                        }
+                    },
+                    makeDefault = {
+                        ReportOptions2(
+                            title = "",
+                            series = listOf(
+                                ReportSeries2(
+                                    reportSeriesUid = 1,
+                                    reportSeriesVisualType = null,
+                                    reportSeriesSubGroup = null,
+                                    reportTimeRange = null,
+                                    reportSeriesYAxis = null,
+                                    reportSeriesFilters = emptyList()
+                                )
+                            )
+                        )
+                    },
+                    uiUpdate = { loadedReport ->
+                        _uiState.update { prev ->
+                            prev.copy(
+                                reportOptions2 = loadedReport ?: ReportOptions2()
+                            )
+                        }
                     }
+                )
+                launch {
+                    navResultReturner.filteredResultFlowForKey(RESULT_KEY_REPORT_DETAIL)
+                        .collect { result ->
+                            val report = result.result as? Report ?: return@collect
+                            getReport(report)
+                        }
+                }
             }
         }
     }
@@ -93,11 +133,13 @@ class ReportDetailViewModel(
             mapOf(ARG_ENTITY_UID to reportUid.toString())
         )
     }
-    fun onDismissDialog(){
+
+    fun onDismissDialog() {
         _uiState.update { prev -> prev.copy(dialogVisible = false) }
 
     }
-    fun onShowDialog(){
+
+    fun onShowDialog() {
         _uiState.update { prev -> prev.copy(dialogVisible = true) }
 
     }

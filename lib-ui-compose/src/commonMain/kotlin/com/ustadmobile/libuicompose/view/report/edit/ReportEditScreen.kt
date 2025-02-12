@@ -11,6 +11,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.ExposedDropdownMenuDefaults
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
@@ -35,6 +37,7 @@ import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportXAxis
+import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -70,6 +73,11 @@ private fun ReportEditScreen(
     onRemoveFilter: (Int, Int) -> Unit = { _, _ -> },
     onRemoveSeries: (Int) -> Unit = { },
 ) {
+    val requiredYAxisType: YAxisTypes? = uiState.reportOptions2.series
+        .mapNotNull { it.reportSeriesYAxis?.type }
+        .distinct()
+        .singleOrNull()
+
     UstadLazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -169,6 +177,7 @@ private fun ReportEditScreen(
                     }
 
                     // Y Axis Dropdown
+                    // Y Axis Dropdown
                     ExposedDropdownMenu(
                         label = { Text(stringResource(MR.strings.y_axis) + "*") },
                         options = ReportSeriesYAxis.entries,
@@ -176,8 +185,12 @@ private fun ReportEditScreen(
                         onOptionSelected = { selectedYAxis ->
                             val updatedSeries = seriesItem.copy(reportSeriesYAxis = selectedYAxis)
                             onSeriesChanged(updatedSeries)
-                        }
+                        },
+                        disabledOptions = requiredYAxisType?.let { requiredType ->
+                            ReportSeriesYAxis.entries.filter { it.type != requiredType }
+                        } ?: emptyList()
                     )
+
 
                     // Subgroup Dropdown
                     ExposedDropdownMenu(
@@ -283,6 +296,7 @@ private fun ReportEditScreen(
 fun <T : OptionWithLabelStringResource> ExposedDropdownMenu(
     options: List<T>,
     selectedValue: T?,
+    disabledOptions: List<T> = emptyList(),
     modifier: Modifier = Modifier.fillMaxWidth(),
     isError: Boolean = false,
     label: @Composable (() -> Unit)? = null,
@@ -312,14 +326,21 @@ fun <T : OptionWithLabelStringResource> ExposedDropdownMenu(
             onDismissRequest = { isExpanded = false }
         ) {
             options.forEach { option ->
+                val isDisabled = option in disabledOptions
                 DropdownMenuItem(
                     onClick = {
-                        onOptionSelected(option)
-                        isExpanded = false
+                        if (!isDisabled) {
+                            onOptionSelected(option)
+                            isExpanded = false
+                        }
                     },
                     text = {
-                        Text(stringResource(option.label))
-                    }
+                        Text(
+                            stringResource(option.label),
+                            color = if (isDisabled) Color.Gray else LocalContentColor.current
+                        )
+                    },
+                    enabled = !isDisabled
                 )
             }
         }

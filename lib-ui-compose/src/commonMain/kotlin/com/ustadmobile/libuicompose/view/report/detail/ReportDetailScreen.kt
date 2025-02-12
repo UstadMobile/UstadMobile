@@ -33,6 +33,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
@@ -64,7 +66,7 @@ fun ReportDetailScreen(
     onDismissDialog: () -> Unit = { },
     onShowDialog: () -> Unit = { },
 ) {
-    BarGraphSampleScreen(onShowDialog = onShowDialog)
+    BarGraphSampleScreen(onShowDialog = onShowDialog,reportOptions = uiState.reportOptions2)
     if (uiState.dialogVisible) {
         ModalBottomSheet(
             onDismissRequest = onDismissDialog
@@ -74,7 +76,7 @@ fun ReportDetailScreen(
                 },
                 headlineContent = {
 
-                    Text( stringResource(MR.strings.graph_data))
+                    Text(stringResource(MR.strings.graph_data))
                 },
             )
 
@@ -82,7 +84,7 @@ fun ReportDetailScreen(
                 modifier = Modifier.clickable {
                 },
                 headlineContent = {
-                    Text( stringResource(MR.strings.raw_data))
+                    Text(stringResource(MR.strings.raw_data))
                 },
             )
         }
@@ -93,6 +95,7 @@ fun ReportDetailScreen(
 @Composable
 fun BarGraphSampleScreen(
     onShowDialog: () -> Unit = { },
+    reportOptions :ReportOptions2
 ) {
     val barSeries1 = listOf(
         ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 5000000.0, subgroup = "Category A"),
@@ -107,29 +110,37 @@ fun BarGraphSampleScreen(
         ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 9000000.0, subgroup = "Category N"),
         ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 7000000.0, subgroup = "Category M"),
         ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 1000000.0, subgroup = "Category N"),
-        )
-    val lineSeries1 = listOf(
-        ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 2000000.0, subgroup = "Category C"),
-        ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 6000000.0, subgroup = "Category D"),
-        ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 1000000.0, subgroup = "Category C"),
     )
-
+    val lineSeries1 = listOf(
+        ReportResultQueryRow(xAxis = "female", yAxis = 20.0, subgroup = "Category A"),
+        ReportResultQueryRow(xAxis = "male", yAxis = 90.0, subgroup = "Category A"),
+        ReportResultQueryRow(xAxis = "female", yAxis = 20.0, subgroup = "Category B"),
+        ReportResultQueryRow(xAxis = "male", yAxis = 900.0, subgroup = "Category B"),
+    )
+    val yAxisLabel = if (reportOptions.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }) {
+        "Duration"
+    } else {
+        "Count"
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         CombinedGraph(
             series = listOf(
-                GraphSeries(SeriesType.BAR, barSeries1, "Bar Series 1"),
-                GraphSeries(SeriesType.LINE, lineSeries, "Line Series 1"),
-//            GraphSeries(SeriesType.LINE, lineSeries1, "Line Series 2"),
+//                GraphSeries(SeriesType.BAR, barSeries1, "Bar Series 1"),
+//                GraphSeries(SeriesType.LINE, lineSeries, "Line Series 1"),
+            GraphSeries(SeriesType.BAR, lineSeries1, "Line Series 2"),
             ),
             modifier = Modifier
                 .weight(0.6f)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            xAxisLabel = reportOptions.xAxis?.name?:"",
+            yAxisLabel = yAxisLabel
+
         )
         MoreOptionsSection(
             data = listOf(
-                GraphSeries(SeriesType.BAR, barSeries1, "Bar Series 1"),
-                GraphSeries(SeriesType.LINE, lineSeries, "Line Series 1"),
-//                GraphSeries(SeriesType.LINE, lineSeries1, "Line Series 2"),
+//                GraphSeries(SeriesType.BAR, barSeries1, "Bar Series 1"),
+//                GraphSeries(SeriesType.LINE, lineSeries, "Line Series 1"),
+                GraphSeries(SeriesType.BAR, lineSeries1, "Line Series 2"),
             ),
             onShowDialog = onShowDialog,
             modifier = Modifier.weight(0.4f)
@@ -207,11 +218,10 @@ fun DataTable(data: List<ReportResultQueryRow>) {
     )
     Card(
         modifier = Modifier
-            .width(IntrinsicSize.Min),
+            .width(IntrinsicSize.Max),
         elevation = 2.dp
     ) {
-        Column(modifier = Modifier.padding(2.dp)) {
-
+        Column {
             // Header Row
             Row(
                 modifier = Modifier
@@ -236,7 +246,7 @@ fun DataTable(data: List<ReportResultQueryRow>) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
+                        .padding(4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -254,7 +264,7 @@ fun DataTable(data: List<ReportResultQueryRow>) {
                     VerticalDivider(modifier = Modifier.height(20.dp), color = Color.Black)
 
                     Text(
-                        text = row.subgroup ?: "",
+                        text = row.subgroup ?: "-",
                         modifier = Modifier.weight(0.5f),
                         style = MaterialTheme.typography.bodySmall,
                     )

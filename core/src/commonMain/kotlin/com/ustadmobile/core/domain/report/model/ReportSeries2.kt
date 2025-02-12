@@ -23,27 +23,32 @@ data class ReportSeries2(
 
 )
 
-
+enum class YAxisTypes {
+    COUNT, DURATION,
+}
 /** Enum representing different Y-axis or report series options */
-enum class ReportSeriesYAxis(override val label: StringResource) : OptionWithLabelStringResource {
-    TOTAL_DURATION(MR.strings.total_duration),
-    AVERAGE_DURATION(MR.strings.average_duration),
-    NUMBER_SESSIONS(MR.strings.number_sessions),
-    INTERACTIONS_RECORDED(MR.strings.interactions_recorded),
-    NUMBER_ACTIVE_USERS(MR.strings.number_active_users),
-    AVERAGE_USAGE_TIME_PER_USER(MR.strings.average_usage_time_per_user),
-    NUMBER_OF_STUDENTS_COMPLETED_CONTENT(MR.strings.number_of_students_completed_content),
-    PERCENT_OF_STUDENTS_COMPLETED_CONTENT(MR.strings.percent_of_students_completed_content),
-    TOTAL_ATTENDANCE(MR.strings.total_attendance),
-    TOTAL_ABSENCES(MR.strings.total_absences),
-    TOTAL_LATES(MR.strings.total_lates),
-    PERCENTAGE_STUDENTS_ATTENDED(MR.strings.percentage_students_attended),
-    PERCENTAGE_STUDENTS_ATTENDED_OR_LATE(MR.strings.percentage_students_attended_or_late),
-    TOTAL_CLASSES(MR.strings.total_classes),
-    NUMBER_UNIQUE_STUDENTS_ATTENDING(MR.strings.number_unique_students_attending),
-    NONE(MR.strings.none),
-    ATTENDANCE_QUERY(MR.strings.attendance_query),
-    STATEMENT_QUERY(MR.strings.statement_query);
+enum class ReportSeriesYAxis(
+    override val label: StringResource,
+    val type: YAxisTypes
+) : OptionWithLabelStringResource {
+    TOTAL_DURATION(MR.strings.total_duration, YAxisTypes.DURATION),
+    AVERAGE_DURATION(MR.strings.average_duration, YAxisTypes.DURATION),
+    NUMBER_SESSIONS(MR.strings.number_sessions, YAxisTypes.COUNT),
+    INTERACTIONS_RECORDED(MR.strings.interactions_recorded, YAxisTypes.COUNT),
+    NUMBER_ACTIVE_USERS(MR.strings.number_active_users, YAxisTypes.COUNT),
+    AVERAGE_USAGE_TIME_PER_USER(MR.strings.average_usage_time_per_user, YAxisTypes.DURATION),
+    NUMBER_OF_STUDENTS_COMPLETED_CONTENT(MR.strings.number_of_students_completed_content, YAxisTypes.COUNT),
+    PERCENT_OF_STUDENTS_COMPLETED_CONTENT(MR.strings.percent_of_students_completed_content, YAxisTypes.COUNT),
+    TOTAL_ATTENDANCE(MR.strings.total_attendance, YAxisTypes.COUNT),
+    TOTAL_ABSENCES(MR.strings.total_absences, YAxisTypes.COUNT),
+    TOTAL_LATES(MR.strings.total_lates, YAxisTypes.COUNT),
+    PERCENTAGE_STUDENTS_ATTENDED(MR.strings.percentage_students_attended, YAxisTypes.COUNT),
+    PERCENTAGE_STUDENTS_ATTENDED_OR_LATE(MR.strings.percentage_students_attended_or_late, YAxisTypes.COUNT),
+    TOTAL_CLASSES(MR.strings.total_classes, YAxisTypes.COUNT),
+    NUMBER_UNIQUE_STUDENTS_ATTENDING(MR.strings.number_unique_students_attending, YAxisTypes.COUNT),
+    NONE(MR.strings.none, YAxisTypes.COUNT),
+    ATTENDANCE_QUERY(MR.strings.attendance_query, YAxisTypes.COUNT),
+    STATEMENT_QUERY(MR.strings.statement_query, YAxisTypes.COUNT);
 }
 
 /** Enum representing different visual types for report series */

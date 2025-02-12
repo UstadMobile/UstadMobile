@@ -15,9 +15,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
-import io.github.aakira.napier.Napier
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.bar.DefaultVerticalBar
@@ -35,35 +35,44 @@ import io.github.koalaplot.core.util.rotateVertically
 import io.github.koalaplot.core.xygraph.DefaultPoint
 import io.github.koalaplot.core.xygraph.FloatLinearAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 enum class SeriesType { BAR, LINE }
 
 data class ReportResultQueryRow(
     val yAxis: Double,
     val xAxis: String,
-    val subgroup: String?
+    val subgroup: String? = null
 )
 
 data class GraphSeries(
     val type: SeriesType,
     val data: List<ReportResultQueryRow>,
-    val name: String
+    val name: String,
 )
+
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 fun CombinedGraph(
     series: List<GraphSeries>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    xAxisLabel: String,
+    yAxisLabel: String
 ) {
-    val dateFormatter = remember { DateTimeFormatter.ofPattern("dd/MM/yyyy") }
+    // Collect all unique xAxis values from all series
+    val allXValues = remember(series) {
+        series.flatMap { it.data.map { row -> row.xAxis } }.distinct().sorted()
+    }
 
-    // Collect all unique subgroups from all series
+    // Create a map from xAxis value to its index
+    val xValueToIndex = remember(allXValues) {
+        allXValues.withIndex().associate { (index, xValue) -> xValue to index }
+    }
+
+    // Collect all unique subgroups, treating null as a separate group
     val allSubgroups = remember(series) {
         series.flatMap { s ->
-            s.data.mapNotNull { it.subgroup }
+            s.data.map { it.subgroup ?: "Default" }
         }.distinct()
     }
 
@@ -75,43 +84,32 @@ fun CombinedGraph(
         }
     }
 
-    // Get all dates from all series
-    val allDates = remember(series) {
-        series.flatMap { it.data.map { row -> LocalDate.parse(row.xAxis, dateFormatter) } }
-            .toSortedSet()
-            .toList()
-    }
-
     // Determine Y-axis unit and conversion factor
-    val (conversionFactor, unit) = remember(series) {
-        val maxY = series.flatMap { it.data.map { row -> row.yAxis } }.maxOrNull() ?: 0.0
-        when {
-            maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, "hr")
-            maxY >= 60_000 -> Pair(1.0 / 60_000, "min")
-            else -> Pair(1.0 / 1_000, "sec")
+    val (conversionFactor, unit) = remember(yAxisLabel) {
+        if (yAxisLabel.equals(YAxisTypes.DURATION.name, ignoreCase = true)) {
+            val maxY = series.flatMap { it.data.map { row -> row.yAxis } }.maxOrNull() ?: 0.0
+            when {
+                maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, "hr")
+                maxY >= 60_000 -> Pair(1.0 / 60_000, "min")
+                else -> Pair(1.0 / 1_000, "sec")
+            }
+        } else {
+            Pair(1.0, yAxisLabel)
         }
     }
 
     // Process bar series data
     val barSeries = series.filter { it.type == SeriesType.BAR }
-    val barDataGrouped = remember(barSeries, allDates) {
-        barSeries.flatMap { bs ->
-            bs.data.groupBy { LocalDate.parse(it.xAxis, dateFormatter) }
-                .map { (date, rows) -> date to rows.groupBy { it.subgroup } }
-        }.toMap()
-    }
-
-    // Prepare bar entries for each date considering all subgroups
-    val barEntries = remember(barSeries, allDates, conversionFactor, allSubgroups) {
-        allDates.map { date ->
+    val barEntries = remember(barSeries, allXValues, conversionFactor, allSubgroups) {
+        allXValues.map { xValue ->
             val subgroupValues = allSubgroups.map { subgroup ->
                 barSeries.flatMap { bs ->
-                    barDataGrouped[date]?.get(subgroup) ?: emptyList()
+                    bs.data.filter { it.xAxis == xValue && (it.subgroup ?: "Default") == subgroup }
                 }.firstOrNull()?.yAxis ?: 0.0
             }.map { (it * conversionFactor).toFloat() }
 
             DefaultVerticalBarPlotGroupedPointEntry(
-                x = date.toEpochDay().toFloat(),
+                x = xValueToIndex[xValue]!!.toFloat(),
                 y = subgroupValues.map { DefaultVerticalBarPosition(0f, it) }
             )
         }
@@ -128,6 +126,30 @@ fun CombinedGraph(
         0f..(maxY * 1.1f)
     }
 
+    // Determine step size for count-based Y-axis
+    val tickIncrement = remember(yRange, yAxisLabel) {
+        val range = yRange.endInclusive - yRange.start
+        val defaultIncrement = when {
+            yAxisLabel.equals(YAxisTypes.COUNT.name, ignoreCase = true) -> {
+                when {
+                    range < 10 -> 1f
+                    range < 100 -> 10f
+                    range < 1000 -> 50f
+                    else -> 100f
+                }
+            }
+
+            else -> { // For duration
+                when (unit) {
+                    "hr" -> 0.5f
+                    "min" -> 15f
+                    else -> 30f
+                }
+            }
+        }
+        defaultIncrement.coerceAtMost(range / 5) // Prevents `tickIncrement` from exceeding range
+    }
+
     ChartLayout(
         modifier = modifier.defaultScreenPadding(),
         legend = { CombinedLegend(series, colorMap) },
@@ -135,25 +157,21 @@ fun CombinedGraph(
     ) {
         XYGraph(
             xAxisModel = FloatLinearAxisModel(
-                range = (allDates.first().toEpochDay().toFloat() - 0.5f)..
-                        (allDates.last().toEpochDay().toFloat() + 0.5f),
+                range = (-0.5f)..(allXValues.size - 0.5f),
                 minimumMajorTickIncrement = 1f
             ),
             yAxisModel = FloatLinearAxisModel(
                 range = yRange,
-                minimumMajorTickIncrement = when (unit) {
-                    "hr" -> 0.5f
-                    "min" -> 15f
-                    else -> 30f
-                }
+                minimumMajorTickIncrement = tickIncrement
             ),
             xAxisLabels = {
+                val index = it.toInt()
                 AxisLabels(
-                    formatDates(LocalDate.ofEpochDay(it.toLong())),
+                    allXValues.getOrNull(index) ?: "",
                     Modifier.defaultItemPadding(top = 4.dp)
                 )
             },
-            xAxisTitle = { AxisLabels("Date") },
+            xAxisTitle = { AxisLabels(xAxisLabel) },
             yAxisLabels = {
                 AxisLabels(
                     "%.1f".format(it),
@@ -163,9 +181,8 @@ fun CombinedGraph(
             },
             yAxisTitle = {
                 AxisLabels(
-                    "Content usage (hours)",
+                    yAxisLabel,
                     Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
-
                 )
             }
         ) {
@@ -186,7 +203,7 @@ fun CombinedGraph(
                             }
                         }
                     },
-                    maxBarGroupWidth = 1f / allSubgroups.size.coerceAtLeast(1)
+                    maxBarGroupWidth = 1f / allSubgroups.size.coerceAtLeast(2)
                 )
             }
 
@@ -195,7 +212,7 @@ fun CombinedGraph(
                 series.data.groupBy { it.subgroup }.forEach { (subgroup, dataPoints) ->
                     val points = dataPoints.map {
                         DefaultPoint(
-                            x = LocalDate.parse(it.xAxis, dateFormatter).toEpochDay().toFloat(),
+                            x = xValueToIndex[it.xAxis]!!.toFloat(),
                             y = (it.yAxis * conversionFactor).toFloat()
                         )
                     }
@@ -229,11 +246,11 @@ private fun CombinedLegend(
 ) {
     val barSeriesMap = series.filter { it.type == SeriesType.BAR }
         .groupBy { it.name }
-        .mapValues { entry -> entry.value.flatMap { it.data }.map { it.subgroup }.distinct() }
+        .mapValues { entry -> entry.value.flatMap { it.data }.map { it.subgroup ?: "" }.distinct() }
 
     val lineSeriesMap = series.filter { it.type == SeriesType.LINE }
         .groupBy { it.name }
-        .mapValues { entry -> entry.value.flatMap { it.data }.map { it.subgroup }.distinct() }
+        .mapValues { entry -> entry.value.flatMap { it.data }.map { it.subgroup ?: "" }.distinct() }
 
     Surface(
         shadowElevation = 2.dp,
@@ -260,12 +277,12 @@ private fun CombinedLegend(
                             val subgroup = subgroups[index]
                             Symbol(
                                 modifier = Modifier.size(16.dp),
-                                fillBrush = SolidColor(colorMap[subgroup] ?: Color.Gray),
+                                fillBrush = colorMap[subgroup]?.let { SolidColor(it) },
                                 shape = RoundedCornerShape(4.dp)
                             )
                         },
                         label = { index ->
-                            subgroups[index]?.let { Text(it) }
+                            subgroups[index].let { Text(it) }
                         },
                     )
                 }
@@ -280,7 +297,7 @@ private fun CombinedLegend(
                             val subgroup = subgroups[index]
                             Symbol(
                                 modifier = Modifier.size(16.dp),
-                                fillBrush = SolidColor(colorMap[subgroup] ?: Color.Gray),
+                                fillBrush = colorMap[subgroup]?.let { SolidColor(it) },
                                 shape = RoundedCornerShape(4.dp)
                             )
                         },
@@ -320,6 +337,3 @@ private fun HoverSurface(content: @Composable () -> Unit) {
         }
     }
 }
-
-private fun formatDates(date: LocalDate): String =
-    date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
