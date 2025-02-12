@@ -947,7 +947,7 @@ fun Application.umRestApplication(
 
     /*
      * Use the devserver mode when:
-     *  a) there is an explicitly set development server to connect wtih
+     *  a) there is an explicitly set development server to connect with
      *  b) the server is being run from source
      *
      * See comments on the jsDevServer property in application.conf for expected behavior
