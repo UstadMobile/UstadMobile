@@ -168,63 +168,64 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                                     paddingLeft = theme.spacing(5)
                                                 }
 
-                                                Box {
-                                                    sx {
-                                                        display = Display.flex
-                                                        alignItems = AlignItems.center
-                                                        gap = theme.spacing(2)
-                                                        width = LINEAR_PROGRESS_WIDTH.px
-                                                    }
-
-                                                    LinearProgress {
+                                                if ((attemptsPersonListItems.maxProgress ?: 0) > 0) {
+                                                    Box {
                                                         sx {
-                                                            flexGrow = number(1.0)
-                                                            height = LINEAR_PROGRESS_HEIGHT.px
+                                                            display = Display.flex
+                                                            alignItems = AlignItems.center
+                                                            gap = theme.spacing(2)
+                                                            width = LINEAR_PROGRESS_WIDTH.px
                                                         }
-                                                        variant = LinearProgressVariant.determinate
-                                                        value =
-                                                            (attemptsPersonListItems.maxProgress?.toFloat()
-                                                                ?: 0f).coerceIn(0f, 100f)
-                                                    }
 
-                                                    Typography {
-                                                        sx {
-                                                            color = theme.palette.text.secondary
-                                                            marginLeft = MARGIN_LEFT.px
-                                                            width = 80.px
-                                                            textAlign = TextAlign.end
+                                                        LinearProgress {
+                                                            sx {
+                                                                flexGrow = number(1.0)
+                                                                height = LINEAR_PROGRESS_HEIGHT.px
+                                                            }
+                                                            variant = LinearProgressVariant.determinate
+                                                            value = (attemptsPersonListItems.maxProgress?.toFloat() ?: 0f).coerceIn(0f, 100f)
                                                         }
-                                                        +"${(attemptsPersonListItems.maxProgress ?: 0f).toInt()}% $percentageCompletion"
+
+                                                        Typography {
+                                                            sx {
+                                                                color = theme.palette.text.secondary
+                                                                marginLeft = MARGIN_LEFT.px
+                                                                width = 80.px
+                                                                textAlign = TextAlign.end
+                                                            }
+                                                            +"${(attemptsPersonListItems.maxProgress ?: 0f).toInt()}% $percentageCompletion"
+                                                        }
                                                     }
                                                 }
 
-                                                Box {
-                                                    sx {
-                                                        display = Display.flex
-                                                        alignItems = AlignItems.center
-                                                        gap = theme.spacing(2)
-                                                        width = LINEAR_PROGRESS_WIDTH.px
-                                                        marginTop = PADDING_TOP.px
-                                                    }
-
-                                                    LinearProgress {
+                                                if ((attemptsPersonListItems.maxScore ?: 0f) > 0f) {
+                                                    Box {
                                                         sx {
-                                                            flexGrow = number(1.0)
-                                                            height = LINEAR_PROGRESS_HEIGHT.px
+                                                            display = Display.flex
+                                                            alignItems = AlignItems.center
+                                                            gap = theme.spacing(2)
+                                                            width = LINEAR_PROGRESS_WIDTH.px
+                                                            marginTop = PADDING_TOP.px
                                                         }
-                                                        variant = LinearProgressVariant.determinate
-                                                        value = ((attemptsPersonListItems.maxScore
-                                                            ?: 0f) * 100).coerceIn(0f, 100f)
-                                                    }
 
-                                                    Typography {
-                                                        sx {
-                                                            color = theme.palette.text.secondary
-                                                            marginLeft = MARGIN_LEFT.px
-                                                            width = 80.px
-                                                            textAlign = TextAlign.end
+                                                        LinearProgress {
+                                                            sx {
+                                                                flexGrow = number(1.0)
+                                                                height = LINEAR_PROGRESS_HEIGHT.px
+                                                            }
+                                                            variant = LinearProgressVariant.determinate
+                                                            value = ((attemptsPersonListItems.maxScore ?: 0f) * 100).coerceIn(0f, 100f)
                                                         }
-                                                        +"${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}% $percentageScore"
+
+                                                        Typography {
+                                                            sx {
+                                                                color = theme.palette.text.secondary
+                                                                marginLeft = MARGIN_LEFT.px
+                                                                width = 80.px
+                                                                textAlign = TextAlign.end
+                                                            }
+                                                            +"${((attemptsPersonListItems.maxScore ?: 0f) * 100).toInt()}% $percentageScore"
+                                                        }
                                                     }
                                                 }
                                             }

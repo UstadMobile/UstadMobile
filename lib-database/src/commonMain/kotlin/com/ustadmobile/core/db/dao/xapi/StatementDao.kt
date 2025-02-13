@@ -40,6 +40,7 @@ import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
 import com.ustadmobile.lib.db.entities.xapi.ActorEntity
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
+import com.ustadmobile.lib.db.entities.xapi.VerbEntity
 import kotlinx.coroutines.flow.Flow
 
 @DoorDao
@@ -374,7 +375,15 @@ expect abstract class StatementDao {
                FROM StatementEntity
               WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
                 AND StatementEntity.statementActorPersonUid = Person.personUid
-                AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1) AS maxProgress,
+                AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                AND (StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo) IN (
+                    SELECT s2.contextRegistrationHi, s2.contextRegistrationLo
+                    FROM StatementEntity s2
+                    WHERE s2.statementContentEntryUid = :contentEntryUid
+                      AND s2.statementActorPersonUid = Person.personUid
+                    ORDER BY s2.timestamp DESC
+                    LIMIT 1
+                )) AS maxProgress,
             (SELECT COALESCE(MAX(StatementEntity.resultScoreScaled), 0)
                FROM StatementEntity
               WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
@@ -531,11 +540,21 @@ LEFT JOIN VerbLangMapEntry ON VerbLangMapEntry.vlmeVerbUid = VerbEntity.verbUid
 WHERE StatementEntity.contextRegistrationHi = :registrationHi
 AND StatementEntity.contextRegistrationLo = :registrationLo
 AND (:searchText = '%' OR VerbEntity.verbUrlId LIKE :searchText)
-AND (:isExperience = 0 OR VerbEntity.verbUrlId LIKE '%experienced%')
-AND (:isAnswered = 0 OR VerbEntity.verbUrlId LIKE '%answered%')
-AND (:isFailed = 0 OR (StatementEntity.resultSuccess IS NOT NULL AND StatementEntity.resultSuccess = 0))
-AND (:isCompleted = 0 OR (StatementEntity.resultCompletion IS NOT NULL AND StatementEntity.resultCompletion = 1))
-GROUP BY StatementEntity.statementIdHi
+AND (
+    :selectedVerbIds = '' 
+    OR VerbEntity.verbUrlId IN (
+        WITH RECURSIVE split(word, rest) AS (
+            SELECT '', :selectedVerbIds || ','
+            UNION ALL
+            SELECT
+                substr(rest, 0, instr(rest, ',')),
+                substr(rest, instr(rest, ',') + 1)
+            FROM split
+            WHERE rest <> ''
+        )
+        SELECT trim(word) FROM split WHERE word <> ''
+    )
+)
 ORDER BY 
     CASE WHEN :sortOrder = ${StatementConst.SORT_BY_TIMESTAMP_DESC} THEN StatementEntity.timestamp END DESC,
     CASE WHEN :sortOrder = ${StatementConst.SORT_BY_TIMESTAMP_ASC} THEN StatementEntity.timestamp END ASC,
@@ -548,11 +567,20 @@ ORDER BY
         registrationLo: Long,
         searchText: String = "%",
         sortOrder: Int,
-        isExperience: Int = 0,
-        isAnswered: Int = 0,
-        isFailed: Int = 0,
-        isCompleted: Int = 0,
+        selectedVerbIds: String = "",
     ): PagingSource<Int, StatementEntityAndVerb>
+
+    @Query("""
+    SELECT DISTINCT VerbEntity.*
+    FROM StatementEntity
+    JOIN VerbEntity ON StatementEntity.statementVerbUid = VerbEntity.verbUid
+    WHERE StatementEntity.contextRegistrationHi = :registrationHi
+    AND StatementEntity.contextRegistrationLo = :registrationLo
+""")
+    abstract fun getUniqueVerbsForSession(
+        registrationHi: Long,
+        registrationLo: Long
+    ): Flow<List<VerbEntity>>
 
     @Query("""
     SELECT EXISTS(
