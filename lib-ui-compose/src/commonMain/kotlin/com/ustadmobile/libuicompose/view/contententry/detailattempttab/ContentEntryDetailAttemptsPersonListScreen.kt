@@ -108,36 +108,41 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        LinearProgressIndicator(
-                            progress = (attemptsPersonListItems?.maxProgress?.toFloat()
-                                ?: 0f) / 100f,
-                            modifier = Modifier.weight(0.7f).padding(start = 12.dp),
-                        )
+                    if ((attemptsPersonListItems?.maxProgress ?: 0) > 0) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            LinearProgressIndicator(
+                                progress = (attemptsPersonListItems?.maxProgress?.toFloat()
+                                    ?: 0f) / 100f,
+                                modifier = Modifier.weight(0.7f).padding(start = 12.dp),
+                            )
 
-                        Text(
-                            text = "${(attemptsPersonListItems?.maxProgress ?: 0)}% $percentageCompletion",
-                            modifier = Modifier.padding(start = 8.dp).weight(0.3f),
-                        )
+                            Text(
+                                text = "${(attemptsPersonListItems?.maxProgress ?: 0)}% $percentageCompletion",
+                                modifier = Modifier.padding(start = 8.dp).weight(0.3f),
+                            )
+                        }
                     }
+                    if ((attemptsPersonListItems?.maxScore ?: 0f) > 0f) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            LinearProgressIndicator(
+                                progress = (attemptsPersonListItems?.maxScore?.toFloat()
+                                    ?: 0f),
+                                modifier = Modifier
+                                    .weight(0.7f)
+                                    .padding(start = 12.dp),
+                            )
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        LinearProgressIndicator(
-                            progress = (attemptsPersonListItems?.maxScore?.toFloat()
-                                ?: 0f),
-                            modifier = Modifier.weight(0.7f).padding(start = 12.dp),
-                        )
-
-                        Text(
-                            text = "${((attemptsPersonListItems?.maxScore?.toFloat() ?: 0f) * 100).toInt()}% $percentageScore",
-                            modifier = Modifier.padding(start = 8.dp).weight(0.3f),
-                        )
+                            Text(
+                                text = "${((attemptsPersonListItems?.maxScore?.toFloat() ?: 0f) * 100).toInt()}% $percentageScore",
+                                modifier = Modifier.padding(start = 8.dp).weight(0.3f),
+                            )
+                        }
                     }
                 }
             }

@@ -32,8 +32,7 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
-import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.FilterOption
-import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.FilterType
+import com.ustadmobile.lib.db.entities.xapi.VerbEntity
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
 import com.ustadmobile.libuicompose.components.UstadNothingHereYet
@@ -54,7 +53,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
         uiState = uiState.value,
         refreshCommandFlow = viewModel.refreshCommandFlow,
         onSortOrderChanged = viewModel::onSortOrderChanged,
-        onFilterChanged = { filterOption -> viewModel.onFilterChanged(filterOption) },
+        onVerbFilterToggled = viewModel::onVerbFilterToggled,
     )
 }
 
@@ -63,8 +62,8 @@ fun ContentEntryDetailAttemptsStatementList(
     uiState: ContentEntryDetailAttemptsStatementListUiState,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
-    onFilterChanged: (FilterOption) -> Unit = { },
-   ) {
+    onVerbFilterToggled: (String) -> Unit = { },
+) {
     val attemptsStatementListPager =
         rememberDoorRepositoryPager(uiState.attemptsStatementList, refreshCommandFlow)
     val attemptsStatementListItems = attemptsStatementListPager.lazyPagingItems
@@ -82,70 +81,43 @@ fun ContentEntryDetailAttemptsStatementList(
                         .fillMaxWidth(),
                     activeSortOrderOption = uiState.sortOption,
                     sortOptions = uiState.sortOptions,
-                    onClickSortOption =  onSortOrderChanged,
+                    onClickSortOption = onSortOrderChanged,
                 )
             }
         }
 
-        item("row") {
+        item("verb_filters") {
             FilterRow(
-                filterOptions = listOf(
-                    FilterOption(
-                        labelResId = MR.strings.experience,
-                        isSelected = uiState.isExperienceSelected,
-                        filterType = FilterType.EXPERIENCE
-                    ),
-                    FilterOption(
-                        labelResId = MR.strings.answered,
-                        isSelected = uiState.isAnsweredSelected,
-                        filterType = FilterType.ANSWERED
-                    ),
-                    FilterOption(
-                        labelResId = MR.strings.failed,
-                        isSelected = uiState.isFailedSelected,
-                        filterType = FilterType.FAILED
-                    ),
-                    FilterOption(
-                        labelResId = MR.strings.completed,
-                        isSelected = uiState.isCompletedSelected,
-                        filterType = FilterType.COMPLETED
-                    )
-                ),
-                onFilterChanged = onFilterChanged
+                availableVerbs = uiState.availableVerbs,
+                selectedVerbIds = uiState.selectedVerbIds,
+                onVerbFilterToggled = onVerbFilterToggled
             )
         }
-
-
 
         if(attemptsStatementListPager.isSettledEmpty) {
             item("empty_state") {
                 UstadNothingHereYet()
             }
         }
+
         ustadPagedItems(
             pagingItems = attemptsStatementListItems,
             key = { it.statementEntity?.statementIdHi ?: -1 }
         ) { attemptsStatementListItems ->
-
             val statementEntity = attemptsStatementListItems?.statementEntity
-
-            val formattedDuration =
-                attemptsStatementListItems?.statementEntity?.resultDuration?.let {
-                    rememberFormattedDuration(
-                        timeInMillis = it,
-                    )
-                }
+            val formattedDuration = statementEntity?.resultDuration?.let {
+                rememberFormattedDuration(timeInMillis = it)
+            }
 
             val progress = statementEntity?.extensionProgress?.takeIf { it > 0 }?.div(100f)
                 ?: statementEntity?.let { entity ->
                     val raw = entity.resultScoreRaw ?: 0f
-                    val max = entity.resultScoreMax?.takeIf { it > 0 }
-                        ?: 100f
+                    val max = entity.resultScoreMax?.takeIf { it > 0 } ?: 100f
                     (raw / max).coerceIn(0f, 1f)
                 } ?: 0f
+
             val rawScore = statementEntity?.resultScoreRaw
             val maxScore = statementEntity?.resultScoreMax
-
             val scoreText = if (rawScore != null && maxScore != null) {
                 "$score: ${rawScore.toInt()} / ${maxScore.toInt()}"
             } else {
@@ -153,8 +125,7 @@ fun ContentEntryDetailAttemptsStatementList(
             }
 
             androidx.compose.material3.ListItem(
-                modifier = Modifier.clickable {
-                },
+                modifier = Modifier.clickable { },
                 leadingContent = {
                     Icon(
                         imageVector = Icons.Filled.Work,
@@ -163,12 +134,12 @@ fun ContentEntryDetailAttemptsStatementList(
                     )
                 },
                 headlineContent = {
-                    Text(
-                        text = attemptsStatementListItems?.verb?.verbUrlId.toString()
-                            .substringAfterLast("/").replaceFirstChar { it.uppercaseChar() }
-                    )
+                    attemptsStatementListItems?.verb?.verbUrlId?.let { verbId ->
+                        Text(
+                            text = verbId.substringAfterLast("/").replaceFirstChar { it.uppercaseChar() }
+                        )
+                    } ?: Text(text = "N/A")
                 },
-
                 supportingContent = {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
@@ -180,10 +151,8 @@ fun ContentEntryDetailAttemptsStatementList(
                             Icon(
                                 imageVector = Icons.Filled.CalendarToday,
                                 contentDescription = null,
-                                modifier = Modifier
-                                    .padding(end = 8.dp)
+                                modifier = Modifier.padding(end = 8.dp)
                             )
-
                             Text(
                                 text = formattedDuration ?: "N/A",
                                 style = MaterialTheme.typography.bodySmall
@@ -202,7 +171,6 @@ fun ContentEntryDetailAttemptsStatementList(
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-
                             Text(
                                 text = scoreText,
                                 style = MaterialTheme.typography.bodySmall,
@@ -221,8 +189,9 @@ fun ContentEntryDetailAttemptsStatementList(
 
 @Composable
 fun FilterRow(
-    filterOptions: List<FilterOption>,
-    onFilterChanged: (FilterOption) -> Unit
+    availableVerbs: List<VerbEntity>,
+    selectedVerbIds: Set<String>,
+    onVerbFilterToggled: (String) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -232,23 +201,24 @@ fun FilterRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        filterOptions.forEach { filterOption ->
-            FilterChip(
-                selected = filterOption.isSelected,
-                onClick = {
-                    onFilterChanged(filterOption.copy(isSelected = !filterOption.isSelected))
-                },
-                label = {
-                    Text(
-                        text = stringResource(filterOption.labelResId),
-                        style = MaterialTheme.typography.bodyMedium
+        availableVerbs.forEach { verb ->
+            verb.verbUrlId?.let { verbId ->
+                val verbName = verbId.substringAfterLast("/").replaceFirstChar { it.uppercase() }
+                FilterChip(
+                    selected = verbId in selectedVerbIds,
+                    onClick = { onVerbFilterToggled(verbId) },
+                    label = {
+                        Text(
+                            text = verbName,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
-                },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-            )
+            }
         }
     }
 }
