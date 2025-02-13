@@ -2,7 +2,6 @@ package com.ustadmobile.core.viewmodel.report.detail
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.ReportOptions2
-import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.INDETERMINATE
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.NOT_LOADING
@@ -11,7 +10,6 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import com.ustadmobile.lib.db.entities.Report
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -60,51 +58,31 @@ class ReportDetailViewModel(
                 title = "Graph title",
             )
         }
-        launchIfHasPermission(
-            setLoadingState = true,
-            permissionCheck = { true }
-        ) {
-            async {
-                loadEntity(
-                    serializer = ReportOptions2.serializer(),
-                    onLoadFromDb = { db ->
-                        val report = db.reportDao().findByUid(reportUid)
-                        report?.let {
-                            it.reportOptions?.takeIf { options -> options.isNotBlank() }
-                                ?.let { options ->
-                                    Json.decodeFromString(ReportOptions2.serializer(), options)
-                                } ?: ReportOptions2(title = it.reportTitle ?: "")
-                        }
-                    },
-                    makeDefault = {
-                        ReportOptions2(
-                            title = "",
-                            series = listOf(
-                                ReportSeries2(
-                                    reportSeriesUid = 1,
-                                    reportSeriesVisualType = null,
-                                    reportSeriesSubGroup = null,
-                                    reportTimeRange = null,
-                                    reportSeriesYAxis = null,
-                                    reportSeriesFilters = emptyList()
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                launchIfHasPermission(
+                    setLoadingState = true,
+                    permissionCheck = { true }
+                ) {
+                    val siteFlow =activeRepo.reportDao().findByUidLive(reportUid)
+                    launch {
+                        siteFlow.collect{
+                            val reportOptions = it?.let { optn ->
+                                optn.reportOptions?.takeIf { options -> options.isNotBlank() }
+                                    ?.let { options ->
+                                        Json.decodeFromString(
+                                            ReportOptions2.serializer(),
+                                            options
+                                        )
+                                    } ?: ReportOptions2(title = optn.reportTitle ?: "")
+                            }
+                            _uiState.update { prev ->
+                                prev.copy(
+                                    reportOptions2 = reportOptions ?: ReportOptions2()
                                 )
-                            )
-                        )
-                    },
-                    uiUpdate = { loadedReport ->
-                        _uiState.update { prev ->
-                            prev.copy(
-                                reportOptions2 = loadedReport ?: ReportOptions2()
-                            )
+                            }
                         }
                     }
-                )
-                launch {
-                    navResultReturner.filteredResultFlowForKey(RESULT_KEY_REPORT_DETAIL)
-                        .collect { result ->
-                            val report = result.result as? Report ?: return@collect
-                            getReport(report)
-                        }
                 }
             }
         }
