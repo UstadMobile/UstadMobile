@@ -91,6 +91,9 @@ it('Teacher generate report', () => {
   cy.get('#Value').click().type('13')
   cy.get('#actionBarButton').click()
   cy.get('#actionBarButton').click()
+  cy.contains("Report").click()
+  cy.contains("Test Report").should("exist")
+  cy.get("svg[data-testid='DeleteIcon']").should("exist")
  })
 
   after(() => {

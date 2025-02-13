@@ -1,0 +1,152 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "build/reports/maestro/012_001_user_generate_report/Screenshots"
+onFlowStart:
+  - startRecording: 012_001_user_generate_report
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+---
+- runScript:
+    file: "common/import_users_via_http.js"
+    env:
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
+# Download test file 1
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "H5p_Content.h5p"
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/admin_login.yaml"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- runFlow:
+    file: "common/add_new_content_block_to_course.yaml"
+    env:
+      TESTFILENAME: "H5p_Content.h5p"
+- scrollUntilVisible:
+    element:
+      text:  "True/False Question"
+    direction: DOWN
+- assertVisible:
+    text:  "True/False Question"
+- tapOn: "True/False Question"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 60000
+- tapOn: Open
+- runFlow:
+    file: "common/chrome-first-run-check.yaml"
+- assertVisible: "Check"
+- tapOn: "Close tab"
+  # Student 1 attempt H5p content
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+- tapOn: Open
+- runFlow:
+    file: "common/chrome-first-run-check.yaml"
+# Student answered wrong
+- tapOn: "No "
+- tapOn: "Check"
+- tapOn: "Close tab"
+
+# Student 2 makes attempt on H5p content
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud2"
+      PASSWORD: "tests2"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+- tapOn: Open
+- tapOn: "Yes "
+- tapOn: "Check"
+- tapOn: "Close tab"
+
+# Student 3 makes attempt on H5p content
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud3"
+      PASSWORD: "tests3"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+- tapOn: Open
+- tapOn: "Yes "
+- tapOn: "Check"
+- tapOn: "Close tab"
+
+# verify teacher able to generate Report
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: "Report"
+- tapOn:
+    id: "floating_action_button"      #    +Report button
+- tapOn: "Title*"
+- inputText: "Test Report"
+- tapOn: "X Axis*"
+- tapOn: "Day"
+- tapOn: "Series Title*"
+- inputText: "Usage time by day this week"
+- tapOn: "Y Axis*"
+- tapOn: "Total Duration"
+- tapOn: "Subgroup by"
+- tapOn: "Gender"
+- tapOn: "Chart type"
+- tapOn: "Bar Chart"
+- tapOn: "Time range"
+- tapOn: "Last week"
+- tapOn: "Done"
+- tapOn:
+    id: "floating_action_button"
+- scrollUntilVisible:
+    element:
+      text: "Add filter"
+    direction: DOWN
+- tapOn: "Add filter"
+- tapOn: "Field*"
+- tapOn: "Person age"
+- tapOn: "Condition*"
+- tapOn: "Greater"
+- tapOn: "Value*"
+- inputText: "13"
+- tapOn: "Done"
+- tapOn: "Done"
+- assertVisible: "Detail Screen"
+- tapOn: "Report"
+- assertVisible: "Test Report"
+- tapOn: "Test Report"
+- assertVisible: "Detail Screen"
