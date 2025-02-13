@@ -49,8 +49,7 @@ An attempts list on content page shows the completion status or score of user at
    * Click on "Content_001" (the video content). 
    * Click "OPEN". 
    * Verify that the video player is displayed. 
-   * Attempt to play the video. 
-   * Pause the video.
+   * Play the video.
 8. Student 2 - EPUB Attempt 1:
    * Log in as Student 2 (stud2/tests2). 
    * Navigate to "Test Course Block". 
@@ -87,11 +86,11 @@ An attempts list on content page shows the completion status or score of user at
     * Click the "Attempts" button.
   Verify:
     * "Attempts: 1" is displayed.
-    * "0% Completion" is displayed.
+    * "100% Completion" is displayed.
     * "0% Score" is displayed. 
     * Click on "Student 1".
-    * "Incomplete" is displayed.
-    * "0% Completion" is displayed.
+    * "Completed" is displayed.
+    * "100% Completion" is displayed.
 12. Student 2 - View Attempts:
     * Log in as Student 2 (stud2/tests2). 
     * Navigate to "Courses". 
@@ -107,7 +106,9 @@ An attempts list on content page shows the completion status or score of user at
     * A timer icon is displayed.
     * "62% Completion" is displayed. 
     * Click on "Incomplete".
-    * "Experience-" is displayed.
+    * 2 "Experience-" should be displayed.
+    * When user click on Experience filter chip
+    * Experience should be visible
 13. Student 3 - View Attempts:
     * Log in as Student 3 (stud3/tests3). 
     * Navigate to "Courses". 
