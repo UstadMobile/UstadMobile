@@ -6,74 +6,160 @@ An attempts list on content page shows the completion status or score of user at
 
 ## Step-by-Step Procedure:
 
-1. Login as admin.
-2. Click on "Courses."
-3. Click on the "+ Course" button.
-4. Click on the "Add a new course" button.
-5. Enter a course name.
-6. Click on the "Description" field.
-7. New text block appears.
-8. Enter the description.
-9. Click on the "Done" button.
-10. Click "Save" button to save the course.
-11. Click on the "Courses"
-12. Click on the course name.
-13. Click on the "Members" tab.
-14. Click on the "Add a teacher" button
-15. Click on "Add a new person" button
-16. Enter the teacher's first name, last name and Gender.
-17. Click on the "Save" button and save the person details.
-18. Click on the "Save" button to save the enrollment details.
-19. Click on the teacher name.
-20. Click on the "View profile" button.
-21. Click on the "Create account" button.
-22. Enter the username.
-23. Enter the password.
-24. Click on the "Save button"
-25. Click on "People".
-26. Click on "+ Person" button.
-27. Click on "Bulk import" button.
-28. Click on "Select file" button.
-29. Select the csv file.
-30. Click on "Import"
-31. Verify the import success message.
-32. Click on "Courses"
-33. Click on Course name.
-34. Click on the "Edit" button.
-35. Click on the "Add block" button.
-36. Click on the "Content" button.
-37. Click on "Import from file".
-38. Select the H5p content.
-39. Click on "Done" to save the content block.
-40. Click on "Save" to save the course.
-41. Clear app storage.
-42. Login to the app using the student username and password.
-43. Click on "Courses"
-44. Click on Course name
-45. Click on the content name
-46. Download and open the content
-47. View the content and close
-48. Click on Attempts tab
-49. Validate the student completion and score progress bar is visible
-50. Click on student name
-51. Validate the student result title, date and time,completion percent,score percent are visible
-52. Click on Result
-53. Validate the student result status title, duration,completion percent and score percent are visible
-54. Clear app storage.
-55. Login to the app using the teacher username and password.
-56. Click on "Courses"
-57. Click on Course name
-58. Click on the content name
-59. Click on Attempts tab
-60. Validate the student completion and score progress bar is visible
-61. Click on student name
-62. Validate the student result title, date and time,completion percent,score percent are visible
-63. Click on Result
-64. Validate the student result status title, duration,completion percent and score percent are visible
-65. Clear app storage.
-66. Login to the app using the student 2's username and password.
-67. Click on "Courses"
-68. Click on Course name
-69. Click on the content name
-70. Click on Attempts tab
-71. Validate this student user not able to see any attempts
+### Part 1: Admin Setup
+1. Import Users:
+   Use the importUsersViaHttp function to import users from the "Ustad_Teacher_and_Students. csv"  file.
+2. Admin Login:
+   Log in to the application as the Admin user (admin/testpass).
+3. Add Content to Library:
+   Add the "Video_Content.mp4" file to the content library with the name "Content_001".
+4. Add Content Block to Course:
+   * Navigate to the "Courses" section. 
+   * Open the "Test Course Block" course. 
+   * Click the "Edit" button. 
+   * Click "Add block". 
+   * Select "Content". 
+   * In the content entry filter, click "Library". 
+   * Select "Content_001" from the library. 
+   * Set the maximum points to "10". 
+   * Click "Done". 
+   * Click "Save".
+5. Add EPUB Content Block:
+   * Navigate to the "Course" section. 
+   * Open the "Test Course Block" course. 
+   * Click the "Course" button. 
+   * Click the "Edit" button. 
+   * Click "Add block". 
+   * Click "Add content block". 
+   * Click "Import from file". 
+   * Select the "Epub_Content1.epub"  file. 
+   * Click "Next". 
+   * Set the content block title to "Content_002". 
+   * Set the maximum points to "10". 
+   * Click "Done". 
+   * Click "Save".
+6. Verify Content Blocks:
+   * Navigate to "Courses". 
+   * Open "Test Course Block". 
+   * Verify that both "Content_001" and "Content_002" are visible in the course.
+### Part 2: Student Interactions
+7. Student 1 - Video Attempt:
+   * Log in as Student 1 (stud1/tests1).
+   * Navigate to "Test Course Block". 
+   * Click on "Content_001" (the video content). 
+   * Click "OPEN". 
+   * Verify that the video player is displayed. 
+   * Attempt to play the video. 
+   * Pause the video.
+8. Student 2 - EPUB Attempt 1:
+   * Log in as Student 2 (stud2/tests2). 
+   * Navigate to "Test Course Block". 
+   * Click on "Content_002" (the EPUB content). 
+   * Click "OPEN". 
+   * Verify that the EPUB content is displayed. 
+   * Verify that the text "THE ADOPTING OF ROSA MARIE" is visible. 
+   * Verify that the text "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)" is visible. 
+   * Click on "THE PERSONS OF THE STORY".
+9. Student 3 - EPUB Attempt 1:
+   * Log in as Student 3 (stud3/tests3). 
+   * Navigate to "Test Course Block". 
+   * Click on "Content_002" (the EPUB content). 
+   * Click "OPEN". 
+   * Verify that the EPUB content is displayed. 
+   * Verify that the text "THE ADOPTING OF ROSA MARIE" is visible. 
+   * Verify that the text "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)" is visible. 
+   * Scroll to and click on "CHAPTER VII Discovery".
+10. Student 2 - EPUB Attempt 2:
+    * Log in as Student 2 (stud2/tests2). 
+    * Navigate to "Test Course Block". 
+    * Click on "Content_002" (the EPUB content). 
+    * Click "OPEN". 
+    * Verify that the EPUB content is displayed. 
+    * Verify that the text "THE ADOPTING OF ROSA MARIE" is visible. 
+    * Verify that the text "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)" is visible. 
+    * Scroll to and click on "CHAPTER XXX An April Harvest".
+### Part 3: Verify Attempt Lists
+11. Student 1 - View Attempts:
+    * Log in as Student 1 (stud1/tests1). 
+    * Navigate to "Courses". 
+    * Open "Test Course Block". 
+    * Click on "Content_001". 
+    * Click the "Attempts" button.
+  Verify:
+    * "Attempts: 1" is displayed.
+    * "0% Completion" is displayed.
+    * "0% Score" is displayed. 
+    * Click on "Student 1".
+    * "Incomplete" is displayed.
+    * "0% Completion" is displayed.
+12. Student 2 - View Attempts:
+    * Log in as Student 2 (stud2/tests2). 
+    * Navigate to "Courses". 
+    * Open "Test Course Block". 
+    * Click on "Content_002". 
+    * Click the "Attempts" button.
+  Verify:
+    * "Attempts: 2" is displayed.
+    * "62% Completion" is displayed.
+    * "0% Score" is displayed. 
+    * Click on "Student 2".
+    * "Incomplete" is displayed. 
+    * A timer icon is displayed.
+    * "62% Completion" is displayed. 
+    * Click on "Incomplete".
+    * "Experience-" is displayed.
+13. Student 3 - View Attempts:
+    * Log in as Student 3 (stud3/tests3). 
+    * Navigate to "Courses". 
+    * Open "Test Course Block". 
+    * Click on "Content_002". 
+    * Click the "Attempts" button.
+  Verify:
+    * "Attempts: 1" is displayed.
+    * "25% Completion" is displayed.
+    * "0% Score" is displayed. 
+    * Click on "Student 3".
+    * "Incomplete" is displayed. 
+    * A timer icon is displayed.
+    * "25% Completion" is displayed. 
+    * Click on "Incomplete".
+    * "Experience-" is displayed.
+14. Teacher - View Attempts:
+    * Log in as Teacher 1 (teach1/testt1). 
+    * Open "Test Course Block". 
+    * Click on "Content_002". 
+    * Click the "Attempts" button.
+  Verify:
+    * "62% Completion" is displayed.
+    * "0% Score" is displayed.
+    * "Attempts: 1" is displayed. 
+    * Click on "Student 2".
+    * "Incomplete" is displayed. 
+    * A timer icon is displayed.
+    * "62% Completion" is displayed. 
+    * Click on "Incomplete".
+    * "Experience-" is displayed. 
+    * Navigate to "Courses". 
+    * Open "Test Course Block".
+    * Open "Test Course Block". 
+    * Click on "Content_002". 
+    * Click the "Attempts" button.
+  Verify:
+    * "Student 3" is displayed.
+    * "25% Completion" is displayed.
+    * "0% Score" is displayed.
+    * "Attempts: 1" is displayed.
+    * Click on "Student 3".
+    * "Incomplete" is displayed.
+    * A timer icon is displayed.
+    * "25% Completion" is displayed.
+    * Click on "Incomplete".
+    * "Experience-" is displayed.
+15. Student 1 - Not able to view Attempts made by Student 2:
+    * Log in as Student 1 (stud1/tests1).
+    * Navigate to "Courses".
+    * Open "Test Course Block".
+    * Click on "Content_002".
+    * Click the "Attempts" button.
+  Verify:
+    * "Nothing here, yet" is visible
