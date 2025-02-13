@@ -117,7 +117,6 @@ it('Student2 user able to see epub content attempts made', () => {
   cy.contains('Courses').click();
   cy.contains('Test Course Block').click();
   cy.contains('Content_002').click();
-  cy.contains('OPEN').click();
   cy.contains("button", "Attempts").click();
  // Assert progress bar visible
   cy.contains("Attempts: 2").should('exist'); // student-2 made 2 attempts - Test failing here
@@ -136,7 +135,6 @@ it('Teacher user can see student users attempts', () => {
   cy.ustadClearDbAndLogin('teach1', 'testt1', { timeout: 8000 });
   cy.contains('Test Course Block').click();
   cy.contains('Content_002').click();
-  cy.contains('OPEN').click();
   cy.contains("button", "Attempts").click();
  // Assert progress bar visible
   cy.contains('62% Completion').should('exist');
