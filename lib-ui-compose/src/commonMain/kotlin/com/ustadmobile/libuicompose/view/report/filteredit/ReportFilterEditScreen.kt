@@ -1,226 +1,121 @@
 package com.ustadmobile.libuicompose.view.report.filteredit
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.impl.locale.entityconstants.ConditionConstants
-import com.ustadmobile.core.impl.locale.entityconstants.ContentCompletionStatusConstants
-import com.ustadmobile.core.impl.locale.entityconstants.FieldConstants
-import com.ustadmobile.core.viewmodel.ReportFilterEditUiState
-import com.ustadmobile.lib.db.entities.ReportFilter
-import com.ustadmobile.lib.db.entities.UidAndLabel
-import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
-import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
-import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.core.domain.report.model.FilterType
+import com.ustadmobile.core.domain.report.model.GenderType
+import com.ustadmobile.core.domain.report.model.ReportFilter3
+import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditUiState
+import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
+import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
+import com.ustadmobile.libuicompose.components.UstadLazyColumn
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.libuicompose.view.report.edit.ExposedDropdownMenu
+import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.Dispatchers
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
+@Composable
+fun ReportFilterEditScreen(
+    viewModel: ReportFilterEditViewModel
+) {
+    val uiState: ReportFilterEditUiState by viewModel.uiState.collectAsStateWithLifecycle(
+        ReportFilterEditUiState(), Dispatchers.Main.immediate
+    )
+    ReportFilterEditScreen(
+        uiState,
+        onEntityChanged = viewModel::onEntityChanged
+    )
+}
 
 @Composable
 fun ReportFilterEditScreen(
     uiState: ReportFilterEditUiState = ReportFilterEditUiState(),
-    onClickNewItemFilter: () -> Unit = {},
-    onReportFilterChanged: (ReportFilter?) -> Unit = {},
-    onClickEditFilter: (UidAndLabel?) -> Unit = {},
-    onClickRemoveFilter: (UidAndLabel?) -> Unit = {},
+    onEntityChanged: (ReportFilter3?) -> Unit = {}
 ) {
-    LazyColumn(
+    UstadLazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-    )  {
-
+            .defaultItemPadding(),
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
         item {
             UstadInputFieldLayout(
                 modifier = Modifier.fillMaxWidth(),
-                errorText = uiState.fieldError,
             ) {
-                UstadMessageIdOptionExposedDropDownMenuField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = uiState.reportFilter?.reportFilterField ?: 0,
-                    label = stringResource(MR.strings.report_filter_edit_field),
-                    options = FieldConstants.FIELD_MESSAGE_IDS,
-                    isError = uiState.fieldError != null,
-                    enabled = uiState.fieldsEnabled,
-                    onOptionSelected = {
-                        onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                            reportFilterField = it.value
-                        })
-                    },
+                ExposedDropdownMenu(
+                    selectedValue = uiState.filters?.reportFilterField,
+                    label = { Text(stringResource(MR.strings.field) + "*") },
+                    options = FilterType.entries,
+                    onOptionSelected = { selectedOption ->
+                        val updatedOptions =
+                            uiState.filters?.copy(
+                                reportFilterField = selectedOption,
+                                reportFilterValue = null,
+                                reportFilterCondition = null
+                            )
+                        onEntityChanged(updatedOptions)
+                    }
                 )
             }
-
         }
-
         item {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
             ) {
-
-                UstadInputFieldLayout(
-                    modifier = Modifier.fillMaxWidth(),
-                    errorText = uiState.conditionsError,
-                ) {
-                    UstadMessageIdOptionExposedDropDownMenuField(
-                        modifier = Modifier.weight(0.5F),
-                        value = uiState.reportFilter?.reportFilterCondition ?: 0,
-                        label = stringResource(MR.strings.report_filter_edit_condition),
-                        options = ConditionConstants.CONDITION_MESSAGE_IDS,
-                        isError = uiState.conditionsError != null,
-                        enabled = uiState.fieldsEnabled,
-                        onOptionSelected = {
-                            onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                                reportFilterCondition = it.value
-                            })
-                        },
-                    )
-                }
-
-
-                UstadInputFieldLayout(
-                    modifier = Modifier.fillMaxWidth(),
-                    errorText = uiState.valuesError,
-                ) {
-                    UstadMessageIdOptionExposedDropDownMenuField(
-                        modifier = Modifier.weight(0.5F),
-                        value = uiState.reportFilter?.reportFilterDropDownValue ?: 0,
-                        label = stringResource(MR.strings.report_filter_edit_values),
-                        options = ContentCompletionStatusConstants.CONTENT_COMPLETION_STATUS_MESSAGE_IDS,
-                        isError = uiState.valuesError != null,
-                        enabled = uiState.fieldsEnabled,
-                        onOptionSelected = {
-                            onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                                reportFilterDropDownValue = it.value
-                            })
-                        },
-                    )
-                }
-
-            }
-        }
-
-        if (uiState.reportFilterValueVisible){
-            item {
-                OutlinedTextField(
-                    value = uiState.reportFilter?.reportFilterValue ?: "",
-                    label = { Text(stringResource(MR.strings.report_filter_edit_values)) },
-                    supportingText = uiState.valuesError?.let{
-                        { Text(it) }
-                    },
-                    isError = uiState.valuesError != null,
-                    enabled = uiState.fieldsEnabled,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    onValueChange = {
-                        onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                            reportFilterValue = it
-                        })
+                ExposedDropdownMenu(
+                    modifier = Modifier.fillMaxWidth(0.5f),
+                    label = { Text(stringResource(MR.strings.condition) + "*") },
+                    selectedValue = uiState.filters?.reportFilterCondition,
+                    options = uiState.filterConditionOptions?.comparisonTypes ?: emptyList(),
+                    onOptionSelected = { selectedOption ->
+                        val updatedOptions =
+                            uiState.filters?.copy(reportFilterCondition = selectedOption)
+                        onEntityChanged(updatedOptions)
                     }
                 )
-            }
-        }
 
-        if (uiState.reportFilterBetweenValueVisible){
-            item {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    OutlinedTextField(
-                        modifier = Modifier.weight(0.5F),
-                        value = uiState.reportFilter?.reportFilterValueBetweenX ?: "",
-                        label = {
-                            Text(stringResource(MR.strings.from))
-                        },
-                        onValueChange = {
-                            onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                                reportFilterValueBetweenX = it
-                            })
-                        },
-                        enabled = uiState.fieldsEnabled,
-                        isError = uiState.valuesError != null,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        supportingText = uiState.valuesError?.let {
-                            { Text(it) }
-                        },
+
+                // Dynamically switch between input types for the value field (weight = 3)
+                if (uiState.filters?.reportFilterField == FilterType.PERSON_GENDER) {
+                    ExposedDropdownMenu(
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(MR.strings.value) + "*") },
+                        selectedValue = GenderType.entries.firstOrNull { it.name == uiState.filters?.reportFilterValue },
+                        options = GenderType.entries,
+                        onOptionSelected = { selectedGender ->
+                            val updatedFilter =
+                                uiState.filters?.copy(reportFilterValue = selectedGender.name)
+                            onEntityChanged(updatedFilter)
+                        }
                     )
 
+                } else {
                     OutlinedTextField(
-                        modifier = Modifier.weight(0.5F),
-                        value = uiState.reportFilter?.reportFilterValueBetweenY ?: "",
-                        label = {
-                            Text(stringResource(MR.strings.toC))
-                        },
-                        supportingText = uiState.valuesError?.let {
-                            { Text(it) }
-                        },
-                        isError = uiState.valuesError != null,
-                        enabled = uiState.fieldsEnabled,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(MR.strings.value) + "*") },
+                        value = uiState.filters?.reportFilterValue ?: "",
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         onValueChange = {
-                            onReportFilterChanged(uiState.reportFilter?.shallowCopy{
-                                reportFilterValueBetweenY = it
-                            })
+                            val updatedOptions = uiState.filters?.copy(reportFilterValue = it)
+                            onEntityChanged(updatedOptions)
                         }
                     )
                 }
             }
         }
-
-        item {
-            ListItem(
-                modifier = Modifier.clickable {
-                    onClickNewItemFilter()
-                },
-                headlineContent = { Text(uiState.createNewFilter) },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "",
-                    )
-                }
-            )
-        }
-
-        if (uiState.reportFilterUidAndLabelListVisible){
-            items(
-                items = uiState.uidAndLabelList,
-                key = { it.uid }
-            ){ uidAndLabel ->
-
-                ListItem(
-                    modifier = Modifier.clickable { onClickEditFilter(uidAndLabel) },
-                    leadingContent = { Spacer(modifier = Modifier.size(24.dp)) },
-                    headlineContent = { Text(uidAndLabel.labelName ?: "") },
-                    trailingContent = {
-                        IconButton(onClick = { onClickRemoveFilter(uidAndLabel) }) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = stringResource(MR.strings.delete),
-                            )
-                        }
-                    }
-                )
-            }
-        }
-
     }
 }

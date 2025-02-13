@@ -160,3 +160,7 @@ trickle -s -d 128 -u 128 bash
 11.3 [Handling conflicting offline edits](test-descriptions/011_003_handling_conflicting_offline_edits_test_description.md)
 
 11.4 [User visits a screen whilst offline that cannot be loaded gets an error](test-descriptions/011_004_user_visits_a_screen_whilst_offline_that_cannot_be_loaded_gets_an_error_test_description.md)
+
+### 12 Reports
+
+12.1 [Users can generate a bar chart report.](test-descriptions/012_001_user_can_create_bar_chart_report.md)

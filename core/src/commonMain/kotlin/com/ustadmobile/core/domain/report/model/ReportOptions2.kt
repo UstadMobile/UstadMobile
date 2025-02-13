@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class ReportOptions2(
-    val title: String,
-    val series: List<ReportSeries2>
+    val title: String = "",
+    val xAxis:ReportXAxis? = null,
+    val series: List<ReportSeries2> = emptyList()
 )
