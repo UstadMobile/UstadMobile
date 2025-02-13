@@ -107,8 +107,10 @@ An attempts list on content page shows the completion status or score of user at
     * "62% Completion" is displayed. 
     * Click on "Incomplete".
     * 2 "Experience-" should be displayed.
-    * When user click on Experience filter chip
+    * user clicks on Experience filter chip
     * Experience should be visible
+    * User clicks on Completed filter chip
+    * "Nothing here, yet" should be displayed
 13. Student 3 - View Attempts:
     * Log in as Student 3 (stud3/tests3). 
     * Navigate to "Courses". 
