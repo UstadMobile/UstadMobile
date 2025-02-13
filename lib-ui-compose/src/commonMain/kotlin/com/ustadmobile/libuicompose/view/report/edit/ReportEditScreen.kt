@@ -177,7 +177,6 @@ private fun ReportEditScreen(
                     }
 
                     // Y Axis Dropdown
-                    // Y Axis Dropdown
                     ExposedDropdownMenu(
                         label = { Text(stringResource(MR.strings.y_axis) + "*") },
                         options = ReportSeriesYAxis.entries,

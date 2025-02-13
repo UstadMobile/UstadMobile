@@ -7,6 +7,7 @@ import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportXAxis
+import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
@@ -58,6 +59,10 @@ external interface ReportEditScreenProps : Props {
 private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
     val strings = useStringProvider()
     val theme by useRequiredContext(ThemeContext)
+    val requiredYAxisType: YAxisTypes? =props.uiState.reportOptions2.series
+        .mapNotNull { it.reportSeriesYAxis?.type }
+        .distinct()
+        .singleOrNull()
 
     UstadStandardContainer {
         Stack {
@@ -167,8 +172,10 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             }
 
                             ReportSeriesYAxis.entries.forEach { option ->
+                                val isDisabled = requiredYAxisType != null && option.type != requiredYAxisType
                                 MenuItem {
                                     value = option.name
+                                    disabled = isDisabled  // Disable if it doesn’t match requiredYAxisType
                                     +ReactNode(strings[option.label])
                                 }
                             }
@@ -178,6 +185,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             +ReactNode(props.uiState.yAxisError ?: strings[MR.strings.required])
                         }
                     }
+
 
                     // Subgroup by Dropdown
                     FormControl {

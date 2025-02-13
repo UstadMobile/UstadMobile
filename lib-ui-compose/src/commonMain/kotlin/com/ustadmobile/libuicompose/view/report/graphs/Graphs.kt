@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.ustadmobile.core.domain.report.model.GraphSeries
+import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
@@ -36,19 +38,6 @@ import io.github.koalaplot.core.xygraph.DefaultPoint
 import io.github.koalaplot.core.xygraph.FloatLinearAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
 
-enum class SeriesType { BAR, LINE }
-
-data class ReportResultQueryRow(
-    val yAxis: Double,
-    val xAxis: String,
-    val subgroup: String? = null
-)
-
-data class GraphSeries(
-    val type: SeriesType,
-    val data: List<ReportResultQueryRow>,
-    val name: String,
-)
 
 
 @OptIn(ExperimentalKoalaPlotApi::class)

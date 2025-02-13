@@ -1,5 +1,7 @@
 package com.ustadmobile.view.report.detail
 
+import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
+import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
@@ -35,7 +37,10 @@ import space.kscience.plotly.models.ScatterMode
 import space.kscience.plotly.models.TraceType
 import kotlin.random.Random
 import kotlinx.html.dom.append
+import moe.tlaster.precompose.viewmodel.viewModel
 import react.dom.html.ReactHTML
+import web.console.Console
+
 external interface ReportDetailProps : Props {
     var uiState: ReportDetailUiState
 }
@@ -57,21 +62,69 @@ val ReportDetailScreen = FC<Props> {
  * https://github.com/SciProgCentre/plotly.kt/blob/master/examples/js-demo/src/main/kotlin/space/kscience/plotly/jsdemo/main.kt
  */
 @OptIn(DelicateCoroutinesApi::class)
-fun TagConsumer<HTMLElement>.plot() {
+fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
     div {
         style = "height:50%; width=100%;"
-        h1 { +"Histogram demo" }
+        h1 { +"Report Graph" }
+
+        // Example data
+        val barSeries1 = listOf(
+            ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 5000000.0, subgroup = "Category A"),
+            ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 4000000.0, subgroup = "Category B"),
+            ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 1000000.0, subgroup = "Category A"),
+            ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 5000000.0, subgroup = "Category B"),
+            ReportResultQueryRow(xAxis = "03/01/2024", yAxis = 4000000.0, subgroup = "Category B")
+        )
+
+        val lineSeries = listOf(
+            ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 2000000.0, subgroup = "Category M"),
+            ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 9000000.0, subgroup = "Category N"),
+            ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 7000000.0, subgroup = "Category M"),
+            ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 1000000.0, subgroup = "Category N"),
+        )
+
+        val lineSeries1 = listOf(
+            ReportResultQueryRow(xAxis = "female", yAxis = 20.0, subgroup = "Category A"),
+            ReportResultQueryRow(xAxis = "male", yAxis = 90.0, subgroup = "Category A"),
+            ReportResultQueryRow(xAxis = "female", yAxis = 20.0, subgroup = "Category B"),
+            ReportResultQueryRow(xAxis = "male", yAxis = 900.0, subgroup = "Category B"),
+        )
+        val yAxis = if (uiState.reportOptions2.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }) {
+            "Duration"
+        } else {
+            "Count"
+        }
+        console.log("yAxis key = ${uiState.reportOptions2}")
+
         plotDiv {
-            val rnd = Random(222)
-            histogram {
-                name = "Random data"
-                x.numbers = List(500) { rnd.nextDouble() }
+            // Bar Series
+            bar {
+                name = "Bar Series 1"
+                x.strings = barSeries1.map { it.xAxis }
+                y.numbers = barSeries1.map { it.yAxis }
             }
 
+            // Line Series
+            scatter {
+                name = "Line Series"
+                x.strings = lineSeries.map { it.xAxis }
+                y.numbers = lineSeries.map { it.yAxis }
+                mode = ScatterMode.lines
+                type = TraceType.scatter
+            }
+
+            // Line Series 1
+//            scatter {
+//                name = "Line Series 1"
+//                x.strings = lineSeries1.map { it.xAxis }
+//                y.numbers = lineSeries1.map { it.yAxis }
+//                mode = ScatterMode.lines
+//                type = TraceType.scatter
+//            }
+
             layout {
-                bargap = 0.1
                 title {
-                    text = "Basic Histogram"
+                    text = uiState.reportOptions2?.xAxis?.name ?: "X Axis"
                     font {
                         size = 20
                         color("black")
@@ -79,7 +132,7 @@ fun TagConsumer<HTMLElement>.plot() {
                 }
                 xaxis {
                     title {
-                        text = "Value"
+                        text = uiState.reportOptions2?.xAxis?.name ?: "X Axis"
                         font {
                             size = 16
                         }
@@ -87,7 +140,7 @@ fun TagConsumer<HTMLElement>.plot() {
                 }
                 yaxis {
                     title {
-                        text = "Count"
+                        text = yAxis
                         font {
                             size = 16
                         }
@@ -96,85 +149,23 @@ fun TagConsumer<HTMLElement>.plot() {
             }
         }
     }
-
-    div {
-        style = "height:50%; width=100%;"
-        h1 { +"Dynamic trace demo" }
-        plotDiv {
-            scatter {
-                x(1, 2, 3, 4)
-                y(10, 15, 13, 17)
-                mode = ScatterMode.markers
-                type = TraceType.scatter
-            }
-            scatter {
-                x(2, 3, 4, 5)
-                y(10, 15, 13, 17)
-                mode = ScatterMode.lines
-                type = TraceType.scatter
-
-                GlobalScope.launch {
-                    while (isActive) {
-                        delay(500)
-                        marker {
-                            if (Random.nextBoolean()) {
-                                color("magenta")
-                            } else {
-                                color("blue")
-                            }
-                        }
-                    }
-                }
-            }
-            scatter {
-                x(1, 2, 3, 4)
-                y(12, 5, 2, 12)
-                mode = ScatterMode.`lines+markers`
-                type = TraceType.scatter
-                marker {
-                    color("red")
-                }
-            }
-            layout {
-                title = "Line and Scatter Plot"
-            }
-        }
-    }
-    div {
-        style = "height:50%; width=100%;"
-        h1 { +"Deserialization" }
-        val plot = Plotly.plot {
-            scatter {
-                x(1, 2, 3, 4)
-                y(10, 15, 13, 17)
-                mode = ScatterMode.markers
-                type = TraceType.scatter
-            }
-        }
-        val serialized = plot.toJsonString()
-        console.log(serialized)
-        val deserialized = Plot(Json.decodeFromString(MetaSerializer, serialized))
-        plotDiv(plot = deserialized).on(PlotlyEventListenerType.CLICK){
-            console.info(it.toString())
-        }
-    }
 }
 
 val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
     val canvasRef = useRef<web.html.HTMLElement>()
 
-    //Use a reference to get the HTMLElement (DOM object) when it is added by React.
+    // Use a reference to get the HTMLElement (DOM object) when it is added by React.
     val canvasRefVal = canvasRef.current
 
-    //useEffect function arguments should include the canvas reference itself
-    useEffect(canvasRefVal) {
-        if(canvasRefVal == null)
+    // useEffect function arguments should include the canvas reference itself and props.uiState
+    useEffect(canvasRefVal, props.uiState) {
+        if (canvasRefVal == null)
             return@useEffect
 
         console.log("Plotting time")
         (canvasRefVal as HTMLElement).clear()
         (canvasRefVal as HTMLElement).append {
-            plot()
+            plot(props.uiState)
         }
     }
 
