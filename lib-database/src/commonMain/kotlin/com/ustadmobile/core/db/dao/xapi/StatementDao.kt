@@ -19,6 +19,7 @@ import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.composites.BlockStatus
+import com.ustadmobile.lib.db.composites.StatementReportRow
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndRelated
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
@@ -38,8 +39,13 @@ expect abstract class StatementDao {
     abstract fun getOneStatement(): Flow<StatementEntity?>
 
     @RawQuery
+    abstract suspend fun runReportQuery(query: DoorQuery): List<StatementReportRow>
+
+    @Deprecated("To be removed")
+    @RawQuery
     abstract suspend fun getResults(query: DoorQuery): List<StatementReportData>
 
+    @Deprecated("To be removed")
     @RawQuery(observedEntities = [StatementEntity::class, Person::class])
     @QueryLiveTables(["StatementEntity", "Person"])
     abstract fun getListResults(query: DoorQuery): PagingSource<Int, StatementEntityAndDisplayDetails>
