@@ -1,6 +1,8 @@
 package com.ustadmobile.view.report.detail
 
+import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
+import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -10,36 +12,28 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadFab
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.dom.clear
+import kotlinx.html.TagConsumer
+import kotlinx.html.dom.append
+import kotlinx.html.h1
+import kotlinx.html.js.div
+import kotlinx.html.style
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
+import org.w3c.dom.HTMLElement
 import react.FC
 import react.Props
+import react.dom.html.ReactHTML
 import react.useEffect
 import react.useRef
-import web.cssom.px
-import kotlinx.html.TagConsumer
-import kotlinx.html.js.div
-import kotlinx.html.style
-import org.w3c.dom.HTMLElement
-import kotlinx.html.h1
-import kotlinx.serialization.json.Json
-import space.kscience.dataforge.meta.MetaSerializer
-import space.kscience.plotly.plotDiv
-import space.kscience.plotly.*
-import space.kscience.plotly.events.PlotlyEventListenerType
+import space.kscience.plotly.bar
+import space.kscience.plotly.layout
 import space.kscience.plotly.models.ScatterMode
 import space.kscience.plotly.models.TraceType
-import kotlin.random.Random
-import kotlinx.html.dom.append
-import moe.tlaster.precompose.viewmodel.viewModel
-import react.dom.html.ReactHTML
-import web.console.Console
+import space.kscience.plotly.plotDiv
+import space.kscience.plotly.scatter
+import web.cssom.px
 
 external interface ReportDetailProps : Props {
     var uiState: ReportDetailUiState
@@ -89,47 +83,57 @@ fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
             ReportResultQueryRow(xAxis = "female", yAxis = 20.0, subgroup = "Category B"),
             ReportResultQueryRow(xAxis = "male", yAxis = 900.0, subgroup = "Category B"),
         )
-        val yAxis = if (uiState.reportOptions2.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }) {
-            "Duration"
-        } else {
-            "Count"
+
+        // Convert the example data into GraphSeries
+        val graphSeriesList = listOf(
+            GraphSeries(type = SeriesType.BAR, data = barSeries1, name = "Bar Series 1"),
+            GraphSeries(type = SeriesType.LINE, data = lineSeries, name = "Line Series"),
+//            GraphSeries(type = SeriesType.LINE, data = lineSeries1, name = "Line Series 1")
+        )
+
+        // Determine Y-axis type
+        val isDuration = uiState.reportOptions2.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }
+        val yAxisTitle = if (isDuration) "Duration (hours)" else "Count"
+
+        // Function to transform Y-axis values based on type
+        fun transformYAxisValues(data: List<ReportResultQueryRow>): List<Double> {
+            return data.map { row ->
+                if (isDuration) {
+                    // Convert milliseconds to hours
+                    row.yAxis / (1000 * 60 * 60)
+                } else {
+                    // Keep as is for count
+                    row.yAxis
+
+                }
+            }
         }
-        console.log("yAxis key = ${uiState.reportOptions2}")
 
         plotDiv {
-            // Bar Series
-            bar {
-                name = "Bar Series 1"
-                x.strings = barSeries1.map { it.xAxis }
-                y.numbers = barSeries1.map { it.yAxis }
-            }
-
-            // Line Series
-            scatter {
-                name = "Line Series"
-                x.strings = lineSeries.map { it.xAxis }
-                y.numbers = lineSeries.map { it.yAxis }
-                mode = ScatterMode.lines
-                type = TraceType.scatter
-            }
-
-            // Line Series 1
-//            scatter {
-//                name = "Line Series 1"
-//                x.strings = lineSeries1.map { it.xAxis }
-//                y.numbers = lineSeries1.map { it.yAxis }
-//                mode = ScatterMode.lines
-//                type = TraceType.scatter
-//            }
-
-            layout {
-                title {
-                    text = uiState.reportOptions2?.xAxis?.name ?: "X Axis"
-                    font {
-                        size = 20
-                        color("black")
+            // Iterate through the graphSeriesList and render each series
+            graphSeriesList.forEach { series ->
+                val transformedYValues = transformYAxisValues(series.data)
+                when (series.type) {
+                    SeriesType.BAR -> {
+                        bar {
+                            name = series.name
+                            x.strings = series.data.map { it.xAxis }
+                            y.numbers = transformedYValues
+                        }
+                    }
+                    SeriesType.LINE -> {
+                        scatter {
+                            name = series.name
+                            x.strings = series.data.map { it.xAxis }
+                            y.numbers = transformedYValues
+                            mode = ScatterMode.lines
+                            type = TraceType.scatter
+                        }
                     }
                 }
+            }
+
+            layout {
                 xaxis {
                     title {
                         text = uiState.reportOptions2?.xAxis?.name ?: "X Axis"
@@ -140,7 +144,7 @@ fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
                 }
                 yaxis {
                     title {
-                        text = yAxis
+                        text = yAxisTitle
                         font {
                             size = 16
                         }
