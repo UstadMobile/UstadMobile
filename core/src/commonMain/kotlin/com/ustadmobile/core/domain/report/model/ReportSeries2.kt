@@ -32,18 +32,7 @@ enum class ReportSeriesYAxis(override val label: StringResource) : OptionWithLab
     INTERACTIONS_RECORDED(MR.strings.interactions_recorded),
     NUMBER_ACTIVE_USERS(MR.strings.number_active_users),
     AVERAGE_USAGE_TIME_PER_USER(MR.strings.average_usage_time_per_user),
-    NUMBER_OF_STUDENTS_COMPLETED_CONTENT(MR.strings.number_of_students_completed_content),
-    PERCENT_OF_STUDENTS_COMPLETED_CONTENT(MR.strings.percent_of_students_completed_content),
-    TOTAL_ATTENDANCE(MR.strings.total_attendance),
-    TOTAL_ABSENCES(MR.strings.total_absences),
-    TOTAL_LATES(MR.strings.total_lates),
-    PERCENTAGE_STUDENTS_ATTENDED(MR.strings.percentage_students_attended),
-    PERCENTAGE_STUDENTS_ATTENDED_OR_LATE(MR.strings.percentage_students_attended_or_late),
-    TOTAL_CLASSES(MR.strings.total_classes),
-    NUMBER_UNIQUE_STUDENTS_ATTENDING(MR.strings.number_unique_students_attending),
-    NONE(MR.strings.none),
-    ATTENDANCE_QUERY(MR.strings.attendance_query),
-    STATEMENT_QUERY(MR.strings.statement_query);
+    NONE(MR.strings.none);
 }
 
 /** Enum representing different visual types for report series */
@@ -54,12 +43,15 @@ enum class ReportSeriesVisualType(override val label: StringResource) :
 }
 
 /** Enum representing different X-axis or sub-group options for report series */
-enum class ReportXAxis(override val label: StringResource) : OptionWithLabelStringResource {
+enum class ReportXAxis(
+    override val label: StringResource,
+    val personJoinRequired: Boolean = false,
+) : OptionWithLabelStringResource {
     DAY(MR.strings.day),
     WEEK(MR.strings.weekly),
     MONTH(MR.strings.monthly),
     CLASS(MR.strings.class_name),
-    GENDER(MR.strings.gender_literal),
+    GENDER(MR.strings.gender_literal, personJoinRequired = true),
     NONE(MR.strings.none);
 }
 
