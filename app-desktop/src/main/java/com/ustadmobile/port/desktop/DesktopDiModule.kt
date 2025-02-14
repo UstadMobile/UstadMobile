@@ -32,6 +32,7 @@ import com.ustadmobile.core.domain.compress.video.FindHandBrakeUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportContentEntryUseCaseRemote
+import com.ustadmobile.core.domain.db.UmAppDatabaseMigration203_204
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaInfoUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
@@ -411,6 +412,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             .addMigrations(MIGRATION_161_162_CLIENT)
             .addMigrations(MIGRATION_169_170_CLIENT)
             .addMigrations(MIGRATE_USERNAME_CLIENT)
+            .addMigrations(UmAppDatabaseMigration203_204(xxHasher64Factory = instance()))
             .addCallback(AddOfflineItemInactiveTriggersCallback())
             .build()
 

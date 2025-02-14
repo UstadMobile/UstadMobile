@@ -82,7 +82,7 @@ class GenerateReportQueriesUseCase {
                 }
 
                 ReportSeriesYAxis.INTERACTIONS_RECORDED -> {
-                    sql += "COUNT(ResultSource.statementId)"
+                    sql += "COUNT(*)"
                 }
 
                 ReportSeriesYAxis.NUMBER_ACTIVE_USERS -> {

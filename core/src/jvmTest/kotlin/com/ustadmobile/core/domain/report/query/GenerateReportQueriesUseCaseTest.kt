@@ -30,11 +30,16 @@ class GenerateReportQueriesUseCaseTest {
             .build()
     }
 
-    @Test
-    fun givenStatementsInDatabase_whenDurationPerDayQueried_thenResultsAsExpected() {
-        val numStatementsPerDay = 2
-        val durationPerStatement = 2_000L
-        val numDays = 3
+    private val defaultNumStatementsPerDay = 2
+    private val defaultDurationPerStatement = 2_000L
+    private val defaultNumDays = 3
+
+
+    fun insertStatementsPerDay(
+        numStatementsPerDay: Int = defaultNumStatementsPerDay,
+        durationPerStatement: Long = defaultDurationPerStatement,
+        numDays: Int = defaultNumDays,
+    ) {
         val statementList = (0 until numDays).flatMap { day ->
             (1..numStatementsPerDay).map {
                 val statementUid = uuid4()
@@ -50,7 +55,12 @@ class GenerateReportQueriesUseCaseTest {
         runBlocking {
             db.statementDao().insertOrIgnoreListAsync(statementList)
         }
+    }
 
+
+    @Test
+    fun givenStatementsInDatabase_whenDurationPerDayQueried_thenResultsAsExpected() {
+        insertStatementsPerDay()
         val out = GenerateReportQueriesUseCase().invoke(
             reportOptions = ReportOptions2(
                 xAxis = ReportXAxis.DAY,
@@ -69,18 +79,24 @@ class GenerateReportQueriesUseCaseTest {
             db.statementDao().runReportQuery(query)
         }
 
-        assertEquals(numDays, results.size, "results size equals number of days")
+        assertEquals(defaultNumDays, results.size, "results size equals number of days")
         assertTrue(
-            results.all { it.yAxis == (durationPerStatement * numStatementsPerDay).toDouble() },
+            results.all { it.yAxis == (defaultDurationPerStatement * defaultNumStatementsPerDay).toDouble() },
             "all results have expected total duration per day"
         )
-        (1..numDays).forEach { day ->
+
+        (1..defaultNumDays).forEach { day ->
             assertEquals(
-                expected = (numStatementsPerDay * durationPerStatement).toDouble(),
+                expected = (defaultDurationPerStatement * defaultNumStatementsPerDay).toDouble(),
                 actual = results.find { it.xAxis == "0$day/02/2025" }!!.yAxis,
                 message = "day $day has expected total duration"
             )
         }
     }
 
+
+    @Test
+    fun givenStatementsAndPersonInDatabase_whenDurationByGenderQueried_thenResultsAsExpected() {
+
+    }
 }

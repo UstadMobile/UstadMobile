@@ -7,19 +7,17 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ReportSeries2(
 
-    var reportSeriesUid: Int = 0,
+    val reportSeriesUid: Int = 0,
 
-    var reportSeriesTitle: String = "",
+    val reportSeriesTitle: String = "",
 
-    var reportSeriesYAxis: ReportSeriesYAxis? = ReportSeriesYAxis.TOTAL_DURATION,
+    val reportSeriesYAxis: ReportSeriesYAxis? = ReportSeriesYAxis.TOTAL_DURATION,
 
-    var reportSeriesVisualType: ReportSeriesVisualType? = ReportSeriesVisualType.BAR_CHART,
+    val reportSeriesVisualType: ReportSeriesVisualType? = ReportSeriesVisualType.BAR_CHART,
 
     val reportSeriesSubGroup: ReportXAxis? = ReportXAxis.NONE,
 
-    var reportSeriesFilters: List<ReportFilter3>? = null,
-
-    var reportTimeRange: ReportTimeRange? = ReportTimeRange.LAST_WEEK
+    val reportSeriesFilters: List<ReportFilter3>? = null,
 
 )
 
@@ -61,11 +59,6 @@ enum class FilterType(override val label: StringResource) : OptionWithLabelStrin
     PERSON_GENDER(MR.strings.person_gender);
 }
 
-/** Enum representing different time range options for report series */
-enum class ReportTimeRange(override val label: StringResource) : OptionWithLabelStringResource {
-    LAST_WEEK(MR.strings.last_week),
-    LAST_MONTH(MR.strings.last_month);
-}
 
 enum class GenderType(override val label: StringResource) : OptionWithLabelStringResource {
     MALE(MR.strings.male),
