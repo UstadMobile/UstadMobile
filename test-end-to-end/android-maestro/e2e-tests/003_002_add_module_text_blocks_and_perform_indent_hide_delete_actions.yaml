@@ -17,7 +17,7 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 #admin login
 - runFlow:

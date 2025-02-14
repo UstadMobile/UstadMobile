@@ -11,7 +11,13 @@ appId: com.toughra.ustadmobile
        TESTFILENAME: ${TESTFILENAME}
 # get started
 - launchApp
-- tapOn: "GET STARTED"
+- tapOn: "Existing user"
+- runFlow:
+    when:
+      visible: "Personal"
+    commands:
+      - tapOn: "Join Learning Space"
+- tapOn: "Enter link manually"
 # select site
 - runFlow: "./select_site.yaml"
 # admin login

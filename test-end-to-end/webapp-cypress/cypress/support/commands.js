@@ -103,6 +103,35 @@ Cypress.Commands.add("importUsersViaHttp", (csvFileName) => {
 // Clear DB and Login
 Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
 // Clearing IndexedDB for the dynamic hostname
+  cy.ustadClearIndexDb()
+// visit login page
+  cy.visit('/', {
+    timeout: 60000,
+  });
+   cy.wait(1000) //This wait helps the login screen to load
+   cy.get('body').then((body) =>
+  {
+  // Check if the "Existing user" button is present
+   if (body.find('#existing_user').length > 0) {
+  // User is on the "New user/Existing user" page
+   cy.log('User is on the New user/Existing user page');
+   cy.get('#existing_user').should('be.visible').click();
+  } else
+  {
+ // If the "Existing user" button is not found, user is on the login page
+   cy.log('User is on the login page');
+  }
+})
+
+// Login to the webapp
+  cy.get('input#username', { timeout: 10000 }).should('exist').type(username); // 10 seconds
+  cy.get('input#password').type(password);
+  cy.get('button#login_button').click();
+});
+
+// Clearing IndexedDB
+Cypress.Commands.add('ustadClearIndexDb', () => {
+// Clearing IndexedDB for the dynamic hostname
   const baseUrl = Cypress.config('baseUrl'); // Get the base URL
   const url = new URL(baseUrl); // Create a URL object
   const hostname = url.hostname;
@@ -110,15 +139,7 @@ Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
   const indexedDbName = `${hostname.replace(/\./g, '_')}_${port}`
   cy.log(`Clearing IndexedDB: ${indexedDbName}`)
   cy.clearIndexedDb(indexedDbName)
-// visit login page
-  cy.visit('/', {
-    timeout: 60000,
-  });
-// Login to the webapp
-  cy.get('input#username', { timeout: 10000 }).should('exist').type(username); // 10 seconds
-  cy.get('input#password').type(password);
-  cy.get('button#login_button').click();
-});
+})
 
 // Logout Flow
 Cypress.Commands.add('ustadLogout', () => {

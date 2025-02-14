@@ -1,8 +1,8 @@
 describe('WEB_007_002b_user_registration_above_age_13_join_learning_space_username_password', () => {
- it('Start Ustad Test Server ', () => {
-  // Start Test Server
-    cy.ustadStartTestServer()
-})
+ before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin enable registration', () => {
   // Admin user login
@@ -11,9 +11,8 @@ it('Admin enable registration', () => {
   })
 
 it('User age above 13 register as a new user', () => {
-  cy.log('Clearing IndexedDB');
-  cy.clearIndexedDb('localhost_8087') // clearing index db
-  cy.visit('http://localhost:8087/', {timeout:60000})
+  cy.ustadClearIndexDb()
+  cy.visit('/', {timeout:60000})
   cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').click();
   cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date("2010-06-01"));
   cy.contains('button','Next').click()
@@ -28,4 +27,9 @@ it('User age above 13 register as a new user', () => {
   cy.contains('SIGN-UP').click()
   cy.contains('Courses',{timeout:2000}).should('be.visible')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })
