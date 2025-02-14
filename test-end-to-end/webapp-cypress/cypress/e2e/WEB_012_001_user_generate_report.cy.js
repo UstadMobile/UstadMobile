@@ -65,10 +65,9 @@ it('Student-3 user makes attempts on epub', () => {
 it('Teacher generate report', () => {
  // Admin user login
   cy.ustadClearDbAndLogin('teach1','testt1',{timeout:8000})
-  cy.contains("Report").click()
+  cy.contains("Reports").click()
   cy.get("svg[data-testid='AddIcon']").click()
-  cy.get('#Title').click();
-  cy.get('#Title').type("Test Report")
+  cy.get("#Title").click().type("Test1")
   cy.get('div[id="x_axis"]').click()
   cy.contains("Day").click()
   cy.get('input[id="Series Title"]').type("Usage time by day this week")
@@ -80,7 +79,7 @@ it('Teacher generate report', () => {
   cy.contains("Bar Chart").click()
   cy.get('div[id="Time Range"]').click()
   cy.contains("Last week").click()
-  cy.get('#actionBarButton').click()
+  cy.contains('button','Done').click()
   cy.contains('button','Edit').click()
   cy.contains('Add filter').scrollIntoView();
   cy.contains('Add filter').click()
@@ -91,8 +90,8 @@ it('Teacher generate report', () => {
   cy.get('#Value').click().type('13')
   cy.get('#actionBarButton').click()
   cy.get('#actionBarButton').click()
-  cy.contains("Report").click()
-  cy.contains("Test Report").should("exist")
+  cy.contains("Reports").click()
+  cy.contains("Test1").should("exist")
   cy.get("svg[data-testid='DeleteIcon']").should("exist")
  })
 

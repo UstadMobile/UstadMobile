@@ -112,7 +112,7 @@ onFlowComplete:
     env:
       USERNAME: "teach1"
       PASSWORD: "testt1"
-- tapOn: "Report"
+- tapOn: "Reports"
 - tapOn:
     id: "floating_action_button"      #    +Report button
 - tapOn: "Title*"
@@ -146,7 +146,7 @@ onFlowComplete:
 - tapOn: "Done"
 - tapOn: "Done"
 - assertVisible: "Detail Screen"
-- tapOn: "Report"
+- tapOn: "Reports"
 - assertVisible: "Test Report"
 - tapOn: "Test Report"
 - assertVisible: "Detail Screen"
