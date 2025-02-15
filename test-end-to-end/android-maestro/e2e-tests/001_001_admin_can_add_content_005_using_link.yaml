@@ -16,9 +16,7 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-# get started
-- launchApp
-- tapOn: "GET STARTED"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 # select site
 - runFlow: "common/select_site.yaml"
 # admin login
