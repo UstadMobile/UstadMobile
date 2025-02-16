@@ -117,7 +117,8 @@ fun ContentEntryDetailAttemptsSessionListScreen(
             val statusText = when {
                 attemptsSessionListItem?.isSuccessful == true -> "$passed"
                 attemptsSessionListItem?.isSuccessful == false -> "$failed"
-                else -> completed
+                attemptsSessionListItem?.isCompleted == true -> completed
+                else -> incomplete
             }
 
             androidx.compose.material3.ListItem(
@@ -163,10 +164,14 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                                     .fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                val progressValue = listOfNotNull(
-                                    attemptsSessionListItem.maxProgress?.toFloat(),
-                                    attemptsSessionListItem.maxScore?.toFloat()?.times(100)
-                                ).maxOrNull()?.coerceIn(0f, 100f)?.div(100f) ?: 0f
+                                val progressValue = when {
+                                    attemptsSessionListItem.maxProgress != null -> {
+                                        attemptsSessionListItem.maxProgress!!.toFloat() / 100f
+                                    }
+                                    attemptsSessionListItem.maxScore != null ->
+                                        attemptsSessionListItem.maxScore!!.toFloat()
+                                    else -> 0f
+                                }.coerceIn(0f, 1f)
 
                                 LinearProgressIndicator(
                                     progress = progressValue,
