@@ -21,11 +21,18 @@ import kotlinx.html.dom.append
 import kotlinx.html.h1
 import kotlinx.html.js.div
 import kotlinx.html.style
+import mui.icons.material.GroupAdd
 import mui.icons.material.ImportExport
+import mui.icons.material.PersonAdd
 import mui.icons.material.Share
 import mui.material.Box
 import mui.material.Card
+import mui.material.Dialog
 import mui.material.Divider
+import mui.material.ListItem
+import mui.material.ListItemButton
+import mui.material.ListItemIcon
+import mui.material.ListItemText
 import mui.material.Orientation
 import mui.material.Typography
 import mui.system.Stack
@@ -35,6 +42,7 @@ import mui.system.sx
 import org.w3c.dom.HTMLElement
 import react.FC
 import react.Props
+import react.ReactNode
 import react.create
 import react.dom.html.ReactHTML
 import react.useEffect
@@ -49,6 +57,8 @@ import web.cssom.px
 
 external interface ReportDetailProps : Props {
     var uiState: ReportDetailUiState
+    var onDismissDialog: () -> Unit
+    var onShowDialog: () -> Unit
 }
 
 val ReportDetailScreen = FC<Props> {
@@ -57,9 +67,54 @@ val ReportDetailScreen = FC<Props> {
     }
     val uiState by viewModel.uiState.collectAsState(ReportDetailUiState())
     val appState by viewModel.appUiState.collectAsState(AppUiState())
+    val strings = useStringProvider()
 
     UstadFab { fabState = appState.fabState }
-    ReportDetailComponent2 { this.uiState = uiState }
+    Dialog {
+        open = uiState.dialogVisible
+
+        onClose = { _, _ ->
+            viewModel.onDismissDialog()
+        }
+
+        mui.material.List {
+            ListItem {
+                ListItemButton {
+                    id = "share"
+                    onClick = {
+                    }
+
+                    ListItemIcon {
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MR.strings.share])
+                    }
+                }
+            }
+
+            ListItem {
+                ListItemButton {
+                    id = "export data"
+
+                    onClick = {
+                    }
+
+                    ListItemIcon {
+                    }
+
+                    ListItemText {
+                        primary = ReactNode(strings[MR.strings.export_data])
+                    }
+                }
+            }
+        }
+    }
+    ReportDetailComponent2 {
+        this.uiState = uiState
+        onShowDialog = viewModel::onShowDialog
+        onDismissDialog = viewModel::onDismissDialog
+    }
 }
 
 /**
@@ -192,7 +247,11 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
             ReactHTML.div {
                 ref = canvasRef
             }
-            moreOption()
+            moreOption{
+                uiState = props.uiState
+                onShowDialog = props.onShowDialog
+                onDismissDialog = props.onDismissDialog
+            }
         }
     }
 }
@@ -222,6 +281,7 @@ private  val moreOption = FC<ReportDetailProps> { props ->
                     icon = ImportExport.create()
                     text = strings[MR.strings.export_data]
                     onClick = {
+                        props.onShowDialog()
                     }
                 }
 
