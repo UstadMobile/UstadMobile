@@ -47,7 +47,7 @@ val ROOT_SCREENS = listOf(
     RootScreen(ContentEntryListViewModel.DEST_NAME_HOME, MR.strings.library, LibraryBooks),
     RootScreen(ConversationListViewModel.DEST_NAME_HOME, MR.strings.messages, Chat),
     RootScreen(PersonListViewModel.DEST_NAME_HOME, MR.strings.people, Person),
-    RootScreen(ReportListViewModel.DEST_NAME_HOME, MR.strings.report, Report)
+    RootScreen(ReportListViewModel.DEST_NAME_HOME, MR.strings.reports, Report)
 
 )
 
