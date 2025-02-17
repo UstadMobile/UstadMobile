@@ -29,8 +29,10 @@ import react.useEffect
 import react.useRef
 import space.kscience.plotly.bar
 import space.kscience.plotly.layout
+import space.kscience.plotly.models.Color
 import space.kscience.plotly.models.ScatterMode
 import space.kscience.plotly.models.TraceType
+import space.kscience.plotly.models.color
 import space.kscience.plotly.plotDiv
 import space.kscience.plotly.scatter
 import web.cssom.px
@@ -104,30 +106,52 @@ fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
                 } else {
                     // Keep as is for count
                     row.yAxis
-
                 }
             }
         }
 
+        // Function to generate distinct colors for subgroups
+        fun generateColors(numColors: Int): List<String> {
+            val colors = mutableListOf<String>()
+            val hueStep = 360.0 / numColors
+            for (i in 0 until numColors) {
+                val hue = (i * hueStep) % 360
+                colors.add("hsl($hue, 70%, 50%)") // HSL format for distinct colors
+            }
+            return colors
+        }
+
+        // Get all unique subgroups
+        val allSubgroups = graphSeriesList.flatMap { it.data.map { row -> row.subgroup } }.toSet()
+
+        // Generate colors for each subgroup
+        val subgroupColors = generateColors(allSubgroups.size).zip(allSubgroups.toList()).toMap()
+
         plotDiv {
             // Iterate through the graphSeriesList and render each series
             graphSeriesList.forEach { series ->
-                val transformedYValues = transformYAxisValues(series.data)
-                when (series.type) {
-                    SeriesType.BAR -> {
-                        bar {
-                            name = series.name
-                            x.strings = series.data.map { it.xAxis }
-                            y.numbers = transformedYValues
+                // Group data by subgroup
+                val groupedData = series.data.groupBy { it.subgroup }
+
+                groupedData.forEach { (subgroup, data) ->
+                    val transformedYValues = transformYAxisValues(data)
+                    when (series.type) {
+                        SeriesType.BAR -> {
+                            bar {
+                                name = "${series.name} - $subgroup"
+                                x.strings = data.map { it.xAxis }
+                                y.numbers = transformedYValues
+
+                            }
                         }
-                    }
-                    SeriesType.LINE -> {
-                        scatter {
-                            name = series.name
-                            x.strings = series.data.map { it.xAxis }
-                            y.numbers = transformedYValues
-                            mode = ScatterMode.lines
-                            type = TraceType.scatter
+                        SeriesType.LINE -> {
+                            scatter {
+                                name = "${series.name} - $subgroup"
+                                x.strings = data.map { it.xAxis }
+                                y.numbers = transformedYValues
+                                mode = ScatterMode.lines
+                                type = TraceType.scatter
+                            }
                         }
                     }
                 }
@@ -150,6 +174,8 @@ fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
                         }
                     }
                 }
+                // Add a legend to distinguish subgroups
+                showlegend = true
             }
         }
     }
