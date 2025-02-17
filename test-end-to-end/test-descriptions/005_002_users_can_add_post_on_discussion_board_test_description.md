@@ -7,34 +7,38 @@ All users on course can post on discussion board, see posts from other users. Ea
 ## Step-by-Step Procedure:
 
 1. Using http api endpoint created a class with students and teachers already enrolled and setup.
-2. Login to the app using the teacher username and password.
-3. Click on "Courses"
-4. Click on Course name.
-5. Click on the "Edit" button.
-6. Click on the "Add block" button.
-7. Click on the "Discussion board" button.
-8. Enter "Title" for the discussion board.
-9. Click on "Description"
-10. Enter description
-11. Click on "Done" to save the description.
-12. Click on "Done" to save the discussion board.
-13. Click on "Save" to save the course changes.
-14. Verify the "Discussion board" is visible inside the course.
-15. Click on the discussion board name.
-16. Click on "+ Post" button.
-17. Click on "Title".
-18. Enter a title for the post.
-19. Enter a post inside the text editor.
-20. Click on the "Post" button.
-21. Verify the post is visible.
-22. Clear the app storage.
-23. Login to the app using the student username and password.
-24. Click on "Courses".
-25. Click on course name.
-26. Click on the existing discussion board.
-27. Click on "+ Post" button
-28. Enter title on "Title" field.
-29. Enter the text inside the text editor.
-30. Click on the "Post" button.
-31. Click "Back" icon.
-32. Verify the 2 posts are visible to the student.
+2. Launch ustad app
+3. Click on "Existing User" button
+4. Click on "Enter link manually" button
+5. Enter the site link and click Next
+6. Login to the app using the teacher username and password.
+7. Click on "Courses"
+8. Click on Course name.
+9. Click on the "Edit" button.
+10. Click on the "Add block" button.
+11. Click on the "Discussion board" button.
+12. Enter "Title" for the discussion board.
+13. Click on "Description"
+14. Enter description
+15. Click on "Done" to save the description.
+16. Click on "Done" to save the discussion board.
+17. Click on "Save" to save the course changes.
+18. Verify the "Discussion board" is visible inside the course.
+19. Click on the discussion board name.
+20. Click on "+ Post" button.
+21. Click on "Title".
+22. Enter a title for the post.
+23. Enter a post inside the text editor.
+24. Click on the "Post" button.
+25. Verify the post is visible.
+26. Clear the app storage.
+27. Login to the app using the student username and password.
+28. Click on "Courses".
+29. Click on course name.
+30. Click on the existing discussion board.
+31. Click on "+ Post" button
+32. Enter title on "Title" field.
+33. Enter the text inside the text editor.
+34. Click on the "Post" button.
+35. Click "Back" icon.
+36. Verify the 2 posts are visible to the student.

@@ -6,28 +6,29 @@ If a download is started on WiFi and WiFi is stopped midway, the download will s
 
 ## Step-by-Step Procedure:
 
-1. Launch Ustad app
-2. Click on "Existing User" button
-3. Click on "Enter link manually" button
-4. Enter the site link
-5. Log in as admin.
-6. Click on "Library."
-7. Click on the "+ Content" button. 
-8. Click on the "From file" button. 
-9. Select the content file. 
-10. Click the "Save" button. 
-11. Verify that the content is visible in the library.
-12. Click on the content .
-13. Ensure the content opens without issues. 
-14. Click "Back" to return to the library. 
-15. Clear app storage and restart the app.
-16. Login as admin.
-17. Click on "Library" 
-18. Click on the content to select it. 
-19. Click the "Download" button.
-20. Switch off the wifi/data on the device. 
-21. Verify the downloading got paused.
-22. Reconnect the wifi/data on the device.
-23. Verify the downloading got resumed. 
-24. Once "Remove" button is visible, Click on the "Open" button.  
-25. Verify the content appears as expected.
+1. Go to File-Downloads and make sure content file is there in downloads for test
+2. Launch Ustad app
+3. Click on "Existing User" button
+4. Click on "Enter link manually" button
+5. Enter the site link
+6. Log in as admin.
+7. Click on "Library."
+8. Click on the "+ Content" button. 
+9. Click on the "From file" button. 
+10. Select the content file. 
+11. Click the "Save" button. 
+12. Verify that the content is visible in the library.
+13. Click on the content .
+14. Ensure the content opens without issues. 
+15. Click "Back" to return to the library. 
+16. Clear app storage and restart the app.
+17. Login as admin.
+18. Click on "Library" 
+19. Click on the content to select it. 
+20. Click the "Download" button.
+21. Switch off the wifi/data on the device. 
+22. Verify the downloading got paused.
+23. Reconnect the wifi/data on the device.
+24. Verify the downloading got resumed. 
+25. Once "Remove" button is visible, Click on the "Open" button.  
+26. Verify the content appears as expected.
