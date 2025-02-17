@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.view.UstadView
@@ -55,6 +56,8 @@ class OtherSignUpOptionSelectionViewModel(
 
     private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]?: "http://localhost"
     private val isParent = savedStateHandle[IS_PARENT].toBoolean()
+
+    private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val getLocalAccountsSupportedUseCase: GetLocalAccountsSupportedUseCase by instance()
 
@@ -118,6 +121,7 @@ class OtherSignUpOptionSelectionViewModel(
                     doorNodeId = di.doorIdentityHashCode.toString(),
                     usStartTime = systemTimeInMillis(),
                     serverUrl = serverUrl,
+                    masterUrl = apiUrlConfig.systemBaseUrl,
                     person = savePerson
                 )
             )

@@ -293,6 +293,7 @@ class SignUpViewModel(
                             doorNodeId = di.doorIdentityHashCode.toString(),
                             usStartTime = systemTimeInMillis(),
                             serverUrl = serverUrl,
+                            masterUrl = apiUrlConfig.systemBaseUrl,
                             person = savePerson
                         )
                     )

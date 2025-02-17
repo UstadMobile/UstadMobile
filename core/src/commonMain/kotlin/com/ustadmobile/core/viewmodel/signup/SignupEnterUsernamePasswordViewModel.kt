@@ -279,8 +279,9 @@ class SignupEnterUsernamePasswordViewModel(
                 }
 
                 savePasswordUseCase?.invoke(
-                    username =savePerson.username.toString(),
-                    password = _uiState.value.password.toString()
+                    username = savePerson.username.toString(),
+                    password = _uiState.value.password.toString(),
+                    learningSpace = serverUrl
                 )
 
                 try {

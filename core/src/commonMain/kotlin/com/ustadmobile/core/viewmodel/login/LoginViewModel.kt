@@ -311,7 +311,7 @@ class LoginViewModel(
         viewModelScope.launch {
             try {
                 credentialUseCase?.let { useCase ->
-                    when (val credentialResult = useCase.invoke()) {
+                    when (val credentialResult = useCase.invoke(apiUrlConfig.systemBaseUrl)) {
                         is CredentialResult.PasskeyCredentialResult -> {
                             val account = accountManager.loginWithPasskey(
                                 credentialResult.passKeySignInData,
