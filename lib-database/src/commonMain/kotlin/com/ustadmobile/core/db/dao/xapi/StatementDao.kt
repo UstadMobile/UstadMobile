@@ -587,13 +587,14 @@ expect abstract class StatementDao {
     ): PagingSource<Int, StatementEntityAndVerb>
 
     @Query("""
-    SELECT DISTINCT v.* 
-    FROM StatementEntity s
-    JOIN VerbEntity v ON s.statementVerbUid = v.verbUid
-    WHERE s.contextRegistrationHi = :registrationHi
-    AND s.contextRegistrationLo = :registrationLo
-    AND NOT v.verbDeleted
-    ORDER BY s.timestamp DESC
+    SELECT DISTINCT VerbEntity.* 
+    FROM StatementEntity
+    JOIN VerbEntity ON StatementEntity.statementVerbUid = VerbEntity.verbUid
+    WHERE StatementEntity.contextRegistrationHi = :registrationHi
+    AND StatementEntity.contextRegistrationLo = :registrationLo
+    AND NOT VerbEntity.verbDeleted
+    GROUP BY VerbEntity.verbUid
+    ORDER BY StatementEntity.timestamp DESC
 """)
     abstract fun getUniqueVerbsForSession(
         registrationHi: Long,
