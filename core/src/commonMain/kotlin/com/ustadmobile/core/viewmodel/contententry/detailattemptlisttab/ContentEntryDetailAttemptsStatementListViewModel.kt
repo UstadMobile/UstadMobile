@@ -37,7 +37,6 @@ class ContentEntryDetailAttemptsStatementListViewModel(
 ) : UstadListViewModel<ContentEntryDetailAttemptsStatementListUiState>(
     di, savedStateHandle, ContentEntryDetailAttemptsStatementListUiState(), destinationName
 ) {
-
     private val argPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
     private val argContextRegistrationIdHi =
         savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_HI]?.toLong() ?: 0
@@ -54,41 +53,41 @@ class ContentEntryDetailAttemptsStatementListViewModel(
             registrationLo = contextRegistrationLo,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             sortOrder = state.sortOption.flag,
-            selectedVerbIds = state.selectedVerbIds.joinToString(",")
+            selectedVerbsString = state.selectedVerbIds.joinToString(",")
         )
     }
 
-    private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementEntityAndVerb> =
-        {
-            getAttemptsStatementListAsPagingSource(
-                contextRegistrationHi = argContextRegistrationIdHi,
-                contextRegistrationLo = argContextRegistrationIdLo,
-            )
-        }
+    private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementEntityAndVerb> = {
+        getAttemptsStatementListAsPagingSource(
+            contextRegistrationHi = argContextRegistrationIdHi,
+            contextRegistrationLo = argContextRegistrationIdLo,
+        )
+    }
 
     init {
+        _uiState.update {
+            it.copy(attemptsStatementList = attemptsStatementListPagingSource)
+        }
+
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                launch {
-                    activeRepo.personDao().getNamesByUid(argPersonUid).collect { personNames ->
-                        _uiState.update {
-                            it.copy(attemptsStatementList = attemptsStatementListPagingSource)
-                        }
-                        _appUiState.update { prev ->
-                            prev.copy(
-                                title = "${personNames?.firstNames} ${personNames?.lastName}",
-                                searchState = createSearchEnabledState(visible = true),
-                            )
-                        }
-                    }
-                }
-
                 launch {
                     activeRepo.statementDao().getUniqueVerbsForSession(
                         registrationHi = argContextRegistrationIdHi,
                         registrationLo = argContextRegistrationIdLo
                     ).collect { verbs ->
                         _uiState.update { it.copy(availableVerbs = verbs) }
+                    }
+                }
+
+                launch {
+                    activeRepo.personDao().getNamesByUid(argPersonUid).collect { personNames ->
+                        _appUiState.update { prev ->
+                            prev.copy(
+                                title = "${personNames?.firstNames} ${personNames?.lastName}",
+                                searchState = createSearchEnabledState(visible = true),
+                            )
+                        }
                     }
                 }
             }
@@ -99,28 +98,31 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
-    override fun onClickAdd() {
-        TODO("Not yet implemented")
-    }
-
     fun onSortOrderChanged(sortOption: SortOrderOption) {
         _uiState.update { prev ->
-            prev.copy(sortOption = sortOption)
+            prev.copy(
+                sortOption = sortOption,
+                attemptsStatementList = attemptsStatementListPagingSource
+            )
         }
         _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     fun onVerbFilterToggled(verbUrlId: String) {
         _uiState.update { state ->
-            val newSelectedVerbIds = state.selectedVerbIds.toMutableSet()
-            if (verbUrlId in newSelectedVerbIds) {
-                newSelectedVerbIds.remove(verbUrlId)
-            } else {
-                newSelectedVerbIds.add(verbUrlId)
+            val newSelectedVerbIds = state.selectedVerbIds.toMutableSet().apply {
+                if (verbUrlId in this) remove(verbUrlId) else add(verbUrlId)
             }
-            state.copy(selectedVerbIds = newSelectedVerbIds)
+            state.copy(
+                selectedVerbIds = newSelectedVerbIds,
+                attemptsStatementList = attemptsStatementListPagingSource
+            )
         }
         _refreshCommandFlow.tryEmit(RefreshCommand())
+    }
+
+    override fun onClickAdd() {
+        TODO("Not yet implemented")
     }
 
     companion object {

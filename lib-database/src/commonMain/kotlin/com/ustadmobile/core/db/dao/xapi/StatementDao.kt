@@ -530,52 +530,70 @@ expect abstract class StatementDao {
         sortOrder: Int
     ): PagingSource<Int, SessionTimeAndProgressInfo>
 
-
-    @Query(
-        """
-SELECT DISTINCT StatementEntity.*, VerbEntity.*, VerbLangMapEntry.*
-FROM StatementEntity
-LEFT JOIN VerbEntity ON StatementEntity.statementVerbUid = VerbEntity.verbUid
-LEFT JOIN VerbLangMapEntry ON VerbLangMapEntry.vlmeVerbUid = VerbEntity.verbUid
-WHERE StatementEntity.contextRegistrationHi = :registrationHi
-AND StatementEntity.contextRegistrationLo = :registrationLo
-AND (:searchText = '%' OR VerbEntity.verbUrlId LIKE :searchText)
-AND (
-    :selectedVerbIds = '' 
-    OR VerbEntity.verbUrlId IN (
-        WITH RECURSIVE split(word, rest) AS (
-            SELECT '', :selectedVerbIds || ','
-            UNION ALL
-            SELECT
-                substr(rest, 0, instr(rest, ',')),
-                substr(rest, instr(rest, ',') + 1)
-            FROM split
-            WHERE rest <> ''
+    @HttpAccessible
+    @Query("""
+    SELECT StatementEntity.*, VerbEntity.*, VerbLangMapEntry.*
+    FROM StatementEntity
+    LEFT JOIN VerbEntity
+        ON StatementEntity.statementVerbUid = VerbEntity.verbUid
+    LEFT JOIN VerbLangMapEntry 
+        ON (VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash) = 
+            (SELECT VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash
+            FROM VerbLangMapEntry
+            WHERE VerbLangMapEntry.vlmeVerbUid = VerbEntity.verbUid
+            ORDER BY VerbLangMapEntry.vlmeLastModified DESC
+            LIMIT 1)
+    WHERE StatementEntity.contextRegistrationHi = :registrationHi
+    AND StatementEntity.contextRegistrationLo = :registrationLo  
+    AND (:searchText = "%" OR VerbEntity.verbUrlId LIKE :searchText)
+    AND (:selectedVerbsString = '' OR VerbEntity.verbUrlId IN 
+        (SELECT word FROM 
+            (WITH split(word, rest) AS (
+                SELECT '', :selectedVerbsString || ','
+                UNION ALL
+                SELECT
+                    substr(rest, 1, instr(rest, ',') - 1),
+                    substr(rest, instr(rest, ',') + 1)
+                FROM split
+                WHERE rest <> ''
+            )
+            SELECT word FROM split WHERE word <> '')
         )
-        SELECT trim(word) FROM split WHERE word <> ''
     )
-)
-ORDER BY 
-    CASE WHEN :sortOrder = ${StatementConst.SORT_BY_TIMESTAMP_DESC} THEN StatementEntity.timestamp END DESC,
-    CASE WHEN :sortOrder = ${StatementConst.SORT_BY_TIMESTAMP_ASC} THEN StatementEntity.timestamp END ASC,
-    CASE WHEN :sortOrder = ${StatementConst.SORT_BY_SCORE_DESC} THEN StatementEntity.resultScoreRaw END DESC,
-    CASE WHEN :sortOrder = ${StatementConst.SORT_BY_SCORE_ASC} THEN StatementEntity.resultScoreRaw END ASC
-"""
-    )
+    ORDER BY 
+        CASE :sortOrder
+            WHEN $SORT_BY_TIMESTAMP_DESC THEN StatementEntity.resultDuration
+            ELSE NULL
+        END DESC,
+        CASE :sortOrder
+            WHEN $SORT_BY_TIMESTAMP_ASC THEN StatementEntity.resultDuration
+            ELSE NULL
+        END ASC,
+        CASE :sortOrder
+            WHEN $SORT_BY_SCORE_DESC THEN StatementEntity.resultScoreRaw
+            ELSE NULL
+        END DESC,
+        CASE :sortOrder
+            WHEN $SORT_BY_SCORE_ASC THEN StatementEntity.resultScoreRaw
+            ELSE NULL
+        END ASC
+""")
     abstract fun findStatementsBySession(
         registrationHi: Long,
         registrationLo: Long,
         searchText: String = "%",
         sortOrder: Int,
-        selectedVerbIds: String = "",
+        selectedVerbsString: String = ""
     ): PagingSource<Int, StatementEntityAndVerb>
 
     @Query("""
-    SELECT DISTINCT VerbEntity.*
-    FROM StatementEntity
-    JOIN VerbEntity ON StatementEntity.statementVerbUid = VerbEntity.verbUid
-    WHERE StatementEntity.contextRegistrationHi = :registrationHi
-    AND StatementEntity.contextRegistrationLo = :registrationLo
+    SELECT DISTINCT v.* 
+    FROM StatementEntity s
+    JOIN VerbEntity v ON s.statementVerbUid = v.verbUid
+    WHERE s.contextRegistrationHi = :registrationHi
+    AND s.contextRegistrationLo = :registrationLo
+    AND NOT v.verbDeleted
+    ORDER BY s.timestamp DESC
 """)
     abstract fun getUniqueVerbsForSession(
         registrationHi: Long,

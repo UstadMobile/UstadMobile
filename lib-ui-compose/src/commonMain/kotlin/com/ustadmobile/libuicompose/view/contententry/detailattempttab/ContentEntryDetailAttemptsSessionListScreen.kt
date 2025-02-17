@@ -160,31 +160,30 @@ fun ContentEntryDetailAttemptsSessionListScreen(
 
                         if (attemptsSessionListItem?.maxScore != null || attemptsSessionListItem?.maxProgress != null) {
                             Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 val progressValue = when {
-                                    attemptsSessionListItem.maxProgress != null -> {
-                                        attemptsSessionListItem.maxProgress!!.toFloat() / 100f
+                                    attemptsSessionListItem?.maxProgress != null -> {
+                                        (attemptsSessionListItem.maxProgress!!.toFloat() / 100f).coerceIn(0f, 1f)
                                     }
-                                    attemptsSessionListItem.maxScore != null ->
-                                        attemptsSessionListItem.maxScore!!.toFloat()
+                                    attemptsSessionListItem?.maxScore != null -> {
+                                        attemptsSessionListItem.maxScore!!.toFloat().coerceIn(0f, 1f)
+                                    }
                                     else -> 0f
-                                }.coerceIn(0f, 1f)
+                                }
 
                                 LinearProgressIndicator(
                                     progress = progressValue,
-                                    modifier = Modifier
-                                        .weight(0.7f)
+                                    modifier = Modifier.weight(0.7f)
                                 )
                                 Text(
                                     text = when {
-                                        attemptsSessionListItem.maxScore != null ->
-                                            "${(progressValue * 100).toInt()}% $percentageScore"
-
-                                        else ->
-                                            "${(progressValue * 100).toInt()}% $percentageCompletion"
+                                        attemptsSessionListItem?.maxScore != null ->
+                                            "${(attemptsSessionListItem.maxScore!! * 100).toInt()}% $percentageScore"
+                                        attemptsSessionListItem?.maxProgress != null ->
+                                            "${attemptsSessionListItem.maxProgress}% $percentageCompletion"
+                                        else -> "0% $percentageCompletion"
                                     },
                                     modifier = Modifier
                                         .padding(start = 8.dp)

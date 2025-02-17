@@ -206,10 +206,15 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                                 paddingLeft = theme.spacing(5)
                                             }
 
-                                            val progressValue = listOfNotNull(
-                                                attemptsSessionListItems.maxProgress?.toFloat(),
-                                                attemptsSessionListItems.maxScore?.times(100)
-                                            ).maxOrNull()?.coerceIn(0f, 100f)?.div(100f) ?: 0f
+                                            val progressValue = when {
+                                                attemptsSessionListItems?.maxProgress != null -> {
+                                                    (attemptsSessionListItems.maxProgress!!.toFloat() / 100f).coerceIn(0f, 1f)
+                                                }
+                                                attemptsSessionListItems?.maxScore != null -> {
+                                                    attemptsSessionListItems.maxScore!!.toFloat().coerceIn(0f, 1f)
+                                                }
+                                                else -> 0f
+                                            }
 
                                             LinearProgress {
                                                 sx { flexGrow = number(1.0) }
@@ -219,10 +224,13 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
 
                                             Typography {
                                                 sx { color = theme.palette.text.secondary }
-                                                +(if (attemptsSessionListItems.maxScore != null)
-                                                    "${(progressValue * 100).toInt()}% $percentageScore"
-                                                else
-                                                    "${(progressValue * 100).toInt()}% $percentageCompletion")
+                                                +(when {
+                                                    attemptsSessionListItems?.maxScore != null ->
+                                                        "${(attemptsSessionListItems.maxScore!!* 100).toInt()}% $percentageScore"
+                                                    attemptsSessionListItems?.maxProgress != null ->
+                                                        "${attemptsSessionListItems.maxProgress}% $percentageCompletion"
+                                                    else -> "0% $percentageCompletion"
+                                                })
                                             }
                                         }
                                     }
