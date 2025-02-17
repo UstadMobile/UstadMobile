@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -201,28 +202,34 @@ fun FilterRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        availableVerbs.forEach { verb ->
-            verb.verbUrlId?.let { verbId ->
-                val verbName = verbId.substringAfterLast("/").replaceFirstChar { it.uppercase() }
-                FilterChip(
-                    selected = verbId in selectedVerbIds,
-                    onClick = { onVerbFilterToggled(verbId) },
-                    label = {
-                        Text(
-                            text = verbName,
-                            style = MaterialTheme.typography.bodyMedium
+        availableVerbs
+            .distinctBy { it.verbUrlId }
+            .forEach { verb ->
+                verb.verbUrlId?.let { verbId ->
+                    val verbName = verbId.substringAfterLast("/")
+                        .replaceFirstChar { it.uppercase() }
+
+                    key(verbId) {
+                        FilterChip(
+                            selected = verbId in selectedVerbIds,
+                            onClick = { onVerbFilterToggled(verbId) },
+                            label = {
+                                Text(
+                                    text = verbName,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = verbId in selectedVerbIds
+                            )
                         )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-                    border = FilterChipDefaults.filterChipBorder(
-                        enabled = true,
-                        selected = verbId in selectedVerbIds
-                    )
-                )
+                    }
+                }
             }
-        }
     }
 }

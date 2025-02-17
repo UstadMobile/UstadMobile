@@ -111,7 +111,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
     fun onVerbFilterToggled(verbUrlId: String) {
         _uiState.update { state ->
             val newSelectedVerbIds = state.selectedVerbIds.toMutableSet().apply {
-                if (verbUrlId in this) remove(verbUrlId) else add(verbUrlId)
+                if (contains(verbUrlId)) remove(verbUrlId) else add(verbUrlId)
             }
             state.copy(
                 selectedVerbIds = newSelectedVerbIds,

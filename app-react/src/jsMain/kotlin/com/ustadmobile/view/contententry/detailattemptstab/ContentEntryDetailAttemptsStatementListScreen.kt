@@ -112,23 +112,24 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                         direction = responsive(StackDirection.row)
                         spacing = responsive(1)
 
-                        props.uiState.availableVerbs.forEach { verb ->
+                        props.uiState.availableVerbs.distinctBy { it.verbUrlId }.forEach { verb ->
                             verb.verbUrlId?.let { verbId ->
                                 val verbName = verbId.substringAfterLast("/")
                                     .replaceFirstChar { it.uppercase() }
 
-                                Chip.create {
-                                    label = ReactNode(verbName)
-                                    variant = ChipVariant.outlined
-                                    color = if (verbId in props.uiState.selectedVerbIds) {
-                                        ChipColor.primary
-                                    } else {
-                                        ChipColor.default
-                                    }
-                                    onClick = {
-                                        props.onVerbFilterToggled(verbId)
-                                    }
-                                }.also { +it }
+                            Chip.create {
+                                key = verbId
+                                label = ReactNode(verbName)
+                                variant = ChipVariant.outlined
+                                color = if (verbId in props.uiState.selectedVerbIds) {
+                                    ChipColor.primary
+                                } else {
+                                    ChipColor.default
+                                }
+                                onClick = {
+                                    props.onVerbFilterToggled(verbId)
+                                }
+                            }.also { +it }
                             }
                         }
                     }.also { +it }
@@ -141,27 +142,16 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
             }
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
-                key = { it.statementEntity?.statementLct.toString() }
+                key = { it?.statementEntity?.statementLct?.toString() ?: "empty" }
             ) { attemptsStatementListItems ->
-                val formattedDuration =
-                    attemptsStatementListItems?.statementEntity?.resultDuration?.let { it1 ->
-                        useFormattedDuration(
-                            timeInMillis = it1,
-                        )
-                    }
 
-                val formattedDateAndTime = attemptsStatementListItems?.statementEntity?.resultDuration?.let { it1 ->
-                    useFormattedDateAndTime(
-                        timeInMillis = it1,
-                        timezoneId = TimeZone.currentSystemDefault().id
-                    )
-                }
+                val resultDuration = attemptsStatementListItems?.statementEntity?.resultDuration ?: 0L
+                val formattedDuration = useFormattedDuration(timeInMillis = resultDuration)
 
                 val progress = attemptsStatementListItems?.statementEntity?.extensionProgress?.takeIf { it > 0 }?.div(100f)
                     ?: attemptsStatementListItems?.statementEntity?.let { entity ->
                         val raw = entity.resultScoreRaw ?: 0f
-                        val max = entity.resultScoreMax?.takeIf { it > 0 }
-                            ?: 100f
+                        val max = entity.resultScoreMax?.takeIf { it > 0 } ?: 100f
                         (raw / max).coerceIn(0f, 1f)
                     } ?: 0f
 
