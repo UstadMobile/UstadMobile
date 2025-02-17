@@ -86,7 +86,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
         destRoute = ReportListViewModel.DEST_NAME_HOME,
         icon = Icons.Outlined.Analytics,
-        label = MR.strings.report,
+        label = MR.strings.reports,
     )
 
 )
