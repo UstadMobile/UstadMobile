@@ -3,6 +3,7 @@
 ## Description:
 
 When personal accounts are enabled by setting a personal learning space URL: parents can register and add child profiles
+
 ## Step-by-Step Procedure:
 
 1. Open the app 

@@ -1,3 +1,23 @@
+appId: com.toughra.ustadmobile
+tags:
+    - contentH5p
+    - contentTest
+env:
+    TESTRESULTSDIR: "build/reports/maestro/001_001_admin_can_add_content_001-h5p/Screenshots"
+onFlowStart:
+    - startRecording: 001_001_admin_can_add_content_001-h5p
+    - runScript:
+          file: "common/startserver.js"
+          env:
+              TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+    - clearState: com.toughra.ustadmobile
+onFlowComplete:
+    - stopRecording
+    - runScript:
+          file: "common/stopserver.js"
+          env:
+              TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+---
 - runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "../common/select_site.yaml"
 #admin enable user registration

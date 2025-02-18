@@ -2,7 +2,7 @@
 
 ## Description:
 
-When registration is enabled: Users over 13 can register directly 
+When registration is enabled: Users over 13 can register directly on learning space by creating a username and password
 
 ## Step-by-Step Procedure:
 

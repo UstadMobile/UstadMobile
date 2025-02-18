@@ -2,7 +2,7 @@
 
 ## Description:
 
-When personal accounts are enabled by setting a personal learning space URL: users over 13 can register a personal account directly by creating a passkey
+When personal accounts are enabled by setting a personal learning space URL: users over 13 can register a personal account directly by creating a username and password
 
 ## Step-by-Step Procedure:
 

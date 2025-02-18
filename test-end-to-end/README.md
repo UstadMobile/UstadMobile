@@ -119,13 +119,13 @@ trickle -s -d 128 -u 128 bash
 
 7.1 [Admin can enable/disable registration for users](test-descriptions/007_001_admin_enable_or_disable_user_registration_test_description.md)
 
-7.2a [When registration is enabled: Users over 13 can register directly on learning space by creating a passkey](test-descriptions/007_002a_user_registration_above_age_13_test_description.md)
+7.2a [When registration is enabled: Users over 13 can register directly on learning space by creating a passkey](test-descriptions/007_002a_users_over_13_can_register_directly_on_learning_space_by_creating_passkey_test_description.md)
 
-7.2b [When registration is enabled: Users over 13 can register directly on learning space by creating a username and password](test-descriptions/007_002b_user_registration_above_age_13_test_description.md)
+7.2b [When registration is enabled: Users over 13 can register directly on learning space by creating a username and password](test-descriptions/007_002b_user_registration_above_age_13_register_directly_on_learning_space_by_creating_a_username_and_password_test_description.md)
 
-7.2c [When personal accounts are enabled by setting a personal learning space URL: users over 13 can register a personal account directly by creating a passkey](test-descriptions/007_002c_user_registration_above_age_13_test_description.md)
+7.2c [When personal accounts are enabled by setting a personal learning space URL: users over 13 can register a personal account directly by creating a passkey](test-descriptions/007_002c_personal_accounts_enabled_users_over_13_register_personal_account_directly_by_creating_passkey_test_description.md)
 
-7.2d [When personal accounts are enabled by setting a personal learning space URL: users over 13 can register a personal account directly by creating a username and password](test-descriptions/007_002d_user_registration_above_age_13_test_description.md)
+7.2d [When personal accounts are enabled by setting a personal learning space URL: users over 13 can register a personal account directly by creating a username and password](test-descriptions/007_002d_personal_accounts_enabled_users_over_13_register_personal_account_directly_by_creating_username_and_password_test_description.md)
 
 7.2e [When personal accounts are enabled by setting a personal learning space URL: parents can register and add child profiles](test-descriptions/007_002e_user_registration_personalal_account_can_add_child_profiles.md)
 
