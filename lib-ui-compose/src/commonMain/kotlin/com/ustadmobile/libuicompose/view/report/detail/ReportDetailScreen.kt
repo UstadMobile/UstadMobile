@@ -214,7 +214,7 @@ fun DataTable(data: List<ReportResultQueryRow>) {
     val header = listOf(
         stringResource(MR.strings.x_axis),
         stringResource(MR.strings.y_axis),
-        stringResource(MR.strings.sub_group)
+        stringResource(MR.strings.subgroup_by)
     )
     Card(
         modifier = Modifier
