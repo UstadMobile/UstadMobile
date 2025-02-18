@@ -38,7 +38,6 @@ import react.create
 import react.useRequiredContext
 import tanstack.react.query.UseInfiniteQueryResult
 import web.cssom.*
-import kotlinx.datetime.TimeZone
 import mui.icons.material.Close
 
 private const val LOAD_SIZE = 50
@@ -117,19 +116,19 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                                 val verbName = verbId.substringAfterLast("/")
                                     .replaceFirstChar { it.uppercase() }
 
-                            Chip.create {
-                                key = verbId
-                                label = ReactNode(verbName)
-                                variant = ChipVariant.outlined
-                                color = if (verbId in props.uiState.selectedVerbIds) {
-                                    ChipColor.primary
-                                } else {
-                                    ChipColor.default
-                                }
-                                onClick = {
-                                    props.onVerbFilterToggled(verbId)
-                                }
-                            }.also { +it }
+                                Chip.create {
+                                    key = verbId
+                                    label = ReactNode(verbName)
+                                    variant = ChipVariant.outlined
+                                    color = if (verbId in props.uiState.selectedVerbIds) {
+                                        ChipColor.primary
+                                    } else {
+                                        ChipColor.default
+                                    }
+                                    onClick = {
+                                        props.onVerbFilterToggled(verbId)
+                                    }
+                                }.also { +it }
                             }
                         }
                     }.also { +it }
@@ -140,20 +139,28 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                     UstadNothingHereYet.create()
                 }
             }
+
+            val FormattedDurationComponent = FC<Props> { props ->
+                val duration = props.asDynamic().duration as Long
+                val formattedDuration = useFormattedDuration(timeInMillis = duration)
+                ListItemText {
+                    secondary = ReactNode(formattedDuration)
+                }
+            }
+
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
                 key = { it?.statementEntity?.statementLct?.toString() ?: "empty" }
             ) { attemptsStatementListItems ->
 
-                val resultDuration = attemptsStatementListItems?.statementEntity?.resultDuration ?: 0L
-                val formattedDuration = useFormattedDuration(timeInMillis = resultDuration)
-
-                val progress = attemptsStatementListItems?.statementEntity?.extensionProgress?.takeIf { it > 0 }?.div(100f)
-                    ?: attemptsStatementListItems?.statementEntity?.let { entity ->
-                        val raw = entity.resultScoreRaw ?: 0f
-                        val max = entity.resultScoreMax?.takeIf { it > 0 } ?: 100f
-                        (raw / max).coerceIn(0f, 1f)
-                    } ?: 0f
+                val progress =
+                    attemptsStatementListItems?.statementEntity?.extensionProgress?.takeIf { it > 0 }
+                        ?.div(100f)
+                        ?: attemptsStatementListItems?.statementEntity?.let { entity ->
+                            val raw = entity.resultScoreRaw ?: 0f
+                            val max = entity.resultScoreMax?.takeIf { it > 0 } ?: 100f
+                            (raw / max).coerceIn(0f, 1f)
+                        } ?: 0f
 
                 ListItem.create {
                     Stack {
@@ -163,6 +170,7 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                         sx {
                             width = WIDTH.pct
                         }
+
                         ListItemButton {
                             ListItemIcon {
                                 when {
@@ -173,24 +181,23 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                             }
                             ListItemText {
                                 primary = ReactNode(
-                                    attemptsStatementListItems?.verb?.verbUrlId?.substringAfterLast("/")
+                                    attemptsStatementListItems?.verb?.verbUrlId?.substringAfterLast(
+                                        "/"
+                                    )
                                         ?.replaceFirstChar { it.uppercase() } ?: ""
                                 )
                             }
                         }
-                        if (formattedDuration != null) {
-                            ListItemButton {
-                                ListItemIcon {
-                                    Timer()
-                                    sx {
-                                        padding = theme.spacing(1, 1, 1, 5)
-                                    }
+
+                        ListItemButton {
+                            ListItemIcon {
+                                Timer()
+                                sx {
+                                    padding = theme.spacing(1, 1, 1, 5)
                                 }
-                                ListItemText {
-                                    secondary = ReactNode(
-                                        formattedDuration
-                                    )
-                                }
+                            }
+                            FormattedDurationComponent {
+                                this.asDynamic().duration = attemptsStatementListItems?.statementEntity?.resultDuration ?: 0L
                             }
                         }
 
