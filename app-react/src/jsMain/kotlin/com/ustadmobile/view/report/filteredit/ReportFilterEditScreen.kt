@@ -46,7 +46,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
             FormControl {
                 fullWidth = true
                 InputLabel {
-                    id = "Field"
+                    id = "field"
                     shrink = true
                     sx {
                         backgroundColor = Color(theme.palette.background.default)
@@ -56,8 +56,8 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
 
                 Select {
                     value = props.uiState.filters?.reportFilterField?.name ?: ""
-                    id = "Field"
-                    labelId = "abel"
+                    id = "field"
+                    labelId = "field_label"
                     fullWidth = true
                     onChange = { event, _ ->
                         val selectedValue =
@@ -87,7 +87,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                 FormControl {
                     fullWidth = true
                     InputLabel {
-                        id = "Condition"
+                        id = "condition"
                         shrink = true
                         sx {
                             backgroundColor = Color(theme.palette.background.default)
@@ -97,7 +97,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
 
                     Select {
                         value = props.uiState.filters?.reportFilterCondition?.name ?: ""
-                        id = "Condition"
+                        id = "condition"
                         labelId = "condition_label"
                         fullWidth = true
                         onChange = { event, _ ->
@@ -123,7 +123,7 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                     FormControl {
                         fullWidth = true
                         InputLabel {
-                            id = "Value"
+                            id = "value"
                             shrink = true
                             sx {
                                 backgroundColor = Color(theme.palette.background.default)
@@ -133,8 +133,8 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
 
                         Select {
                             value = props.uiState.filters?.reportFilterValue ?: ""
-                            id = "Value"
-                            labelId = "value"
+                            id = "value"
+                            labelId = "value_label"
                             fullWidth = true
                             onChange = { event, _ ->
                                 val selectedValue =
