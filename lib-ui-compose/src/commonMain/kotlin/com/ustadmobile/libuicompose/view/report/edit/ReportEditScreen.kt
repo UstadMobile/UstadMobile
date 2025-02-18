@@ -86,7 +86,7 @@ private fun ReportEditScreen(
     ) {
         item {
             OutlinedTextField(
-                modifier = Modifier.testTag("title").fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
                     .defaultScreenPadding(),
                 value = uiState.reportOptions2.title,
                 label = { Text(stringResource(MR.strings.title) + "*") },
@@ -109,7 +109,6 @@ private fun ReportEditScreen(
         item {
 
             ExposedDropdownMenu(
-                modifier = Modifier.testTag("xAxis"),
                 selectedValue = uiState.reportOptions2.xAxis,
                 label = { Text(stringResource(MR.strings.x_axis) + "*") },
                 options = ReportXAxis.entries,
@@ -148,7 +147,7 @@ private fun ReportEditScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         OutlinedTextField(
-                            modifier = Modifier.testTag("series_title").weight(1f),
+                            modifier = Modifier.weight(1f),
                             value = seriesItem.reportSeriesTitle,
                             label = {
                                 Text(
@@ -210,7 +209,6 @@ private fun ReportEditScreen(
 
                     // Chart Type Dropdown
                     ExposedDropdownMenu(
-                        modifier = Modifier.testTag("chart_type"),
                         label = { Text(stringResource(MR.strings.chart_type)) },
                         options = ReportSeriesVisualType.entries,
                         selectedValue = seriesItem.reportSeriesVisualType,
@@ -223,7 +221,6 @@ private fun ReportEditScreen(
 
                     // Time Range Dropdown
                     ExposedDropdownMenu(
-                        modifier = Modifier.testTag("time_range"),
                         label = { Text(stringResource(MR.strings.time_range)) },
                         options = ReportTimeRange.entries,
                         selectedValue = seriesItem.reportTimeRange,
@@ -276,7 +273,7 @@ private fun ReportEditScreen(
             item {
                 Button(
                     onClick = { onAddFilter(seriesItem.reportSeriesUid) },
-                    modifier = Modifier.testTag("add_filter").fillMaxWidth().defaultScreenPadding()
+                    modifier = Modifier.fillMaxWidth().defaultScreenPadding()
                 ) {
                     Text(
                         text = stringResource(MR.strings.add_filter),
@@ -286,7 +283,7 @@ private fun ReportEditScreen(
         }
 
         item {
-            Button(onClick = { onAddSeries() }, modifier = Modifier.testTag("add_series").fillMaxWidth()) {
+            Button(onClick = { onAddSeries() }, modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(MR.strings.add_series),
                 )
