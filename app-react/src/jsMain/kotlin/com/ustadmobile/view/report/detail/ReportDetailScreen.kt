@@ -248,7 +248,7 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
 }
 private  val moreOption = FC<ReportDetailProps> { props ->
     val strings = useStringProvider()
-    val header = listOf(strings[MR.strings.x_axis], strings[MR.strings.y_axis], strings[MR.strings.sub_group]) // Replace with string resources if available
+    val header = listOf(strings[MR.strings.x_axis], strings[MR.strings.y_axis], strings[MR.strings.subgroup_by])
     // Example data
     // Use the shared data
     val data = sharedGraphSeriesList
