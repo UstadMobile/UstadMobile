@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
@@ -85,7 +86,7 @@ private fun ReportEditScreen(
     ) {
         item {
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.testTag("title").fillMaxWidth()
                     .defaultScreenPadding(),
                 value = uiState.reportOptions2.title,
                 label = { Text(stringResource(MR.strings.title) + "*") },
@@ -108,6 +109,7 @@ private fun ReportEditScreen(
         item {
 
             ExposedDropdownMenu(
+                modifier = Modifier.testTag("xAxis"),
                 selectedValue = uiState.reportOptions2.xAxis,
                 label = { Text(stringResource(MR.strings.x_axis) + "*") },
                 options = ReportXAxis.entries,
@@ -146,7 +148,7 @@ private fun ReportEditScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         OutlinedTextField(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.testTag("series_title").weight(1f),
                             value = seriesItem.reportSeriesTitle,
                             label = {
                                 Text(
@@ -178,6 +180,7 @@ private fun ReportEditScreen(
 
                     // Y Axis Dropdown
                     ExposedDropdownMenu(
+                        modifier = Modifier.testTag("yAxis"),
                         label = { Text(stringResource(MR.strings.y_axis) + "*") },
                         options = ReportSeriesYAxis.entries,
                         selectedValue = seriesItem.reportSeriesYAxis,
@@ -193,6 +196,7 @@ private fun ReportEditScreen(
 
                     // Subgroup Dropdown
                     ExposedDropdownMenu(
+                        modifier = Modifier.testTag("subgroup_by"),
                         label = { Text(stringResource(MR.strings.subgroup_by)) },
                         options = ReportXAxis.entries,
                         selectedValue = seriesItem.reportSeriesSubGroup,
@@ -206,6 +210,7 @@ private fun ReportEditScreen(
 
                     // Chart Type Dropdown
                     ExposedDropdownMenu(
+                        modifier = Modifier.testTag("chart_type"),
                         label = { Text(stringResource(MR.strings.chart_type)) },
                         options = ReportSeriesVisualType.entries,
                         selectedValue = seriesItem.reportSeriesVisualType,
@@ -218,6 +223,7 @@ private fun ReportEditScreen(
 
                     // Time Range Dropdown
                     ExposedDropdownMenu(
+                        modifier = Modifier.testTag("time_range"),
                         label = { Text(stringResource(MR.strings.time_range)) },
                         options = ReportTimeRange.entries,
                         selectedValue = seriesItem.reportTimeRange,
@@ -270,7 +276,7 @@ private fun ReportEditScreen(
             item {
                 Button(
                     onClick = { onAddFilter(seriesItem.reportSeriesUid) },
-                    modifier = Modifier.fillMaxWidth().defaultScreenPadding()
+                    modifier = Modifier.testTag("add_filter").fillMaxWidth().defaultScreenPadding()
                 ) {
                     Text(
                         text = stringResource(MR.strings.add_filter),
@@ -280,7 +286,7 @@ private fun ReportEditScreen(
         }
 
         item {
-            Button(onClick = { onAddSeries() }, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = { onAddSeries() }, modifier = Modifier.testTag("add_series").fillMaxWidth()) {
                 Text(
                     text = stringResource(MR.strings.add_series),
                 )
