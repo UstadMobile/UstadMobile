@@ -87,7 +87,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 error = props.uiState.xAxisError != null
 
                 InputLabel {
-                    id = "x_axis_label"
+                    id = "X Axis"
                     shrink = true
                     sx {
                         backgroundColor = Color(theme.palette.background.default)
@@ -98,7 +98,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 Select {
                     value = props.uiState.reportOptions2.xAxis?.name
                         ?: ""
-                    id = "x_axis"
+                    id = "X Axis"
                     labelId = "x_axis_label"
                     fullWidth = true
 

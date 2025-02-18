@@ -83,10 +83,6 @@ val ReportDetailScreen = FC<Props> {
                     id = "share"
                     onClick = {
                     }
-
-                    ListItemIcon {
-                    }
-
                     ListItemText {
                         primary = ReactNode(strings[MR.strings.share])
                     }
@@ -96,13 +92,8 @@ val ReportDetailScreen = FC<Props> {
             ListItem {
                 ListItemButton {
                     id = "export data"
-
                     onClick = {
                     }
-
-                    ListItemIcon {
-                    }
-
                     ListItemText {
                         primary = ReactNode(strings[MR.strings.export_data])
                     }
@@ -199,7 +190,7 @@ fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
             layout {
                 xaxis {
                     title {
-                        text = uiState.reportOptions2?.xAxis?.name ?: "X Axis"
+                        text = uiState.reportOptions2.xAxis?.name ?: "X Axis"
                         font {
                             size = 16
                         }
@@ -308,7 +299,7 @@ private  val moreOption = FC<ReportDetailProps> { props ->
                     }
                     // Data Rows
                     data.forEach { row ->
-                        row.data.forEach { it ->
+                        row.data.forEach {
                             Stack {
                                 direction = responsive(StackDirection.row)
                                 spacing = responsive(8.px)
