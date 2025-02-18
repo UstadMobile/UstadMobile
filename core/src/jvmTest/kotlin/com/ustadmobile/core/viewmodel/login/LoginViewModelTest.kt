@@ -230,10 +230,10 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
             val stateFlow = stateInViewModelScope(viewModel.uiState)
             stateFlow.assertItemReceived { it.fieldsEnabled }
 
-            viewModel.onUsernameChanged(" $VALID_USER ")
-            viewModel.onPasswordChanged(" $VALID_PASS ")
+            viewModel.onUsernameChanged("$VALID_USER")
+            viewModel.onPasswordChanged("$VALID_PASS")
 
-            stateFlow.assertItemReceived { it.username == " $VALID_USER " && it.password == " $VALID_PASS " }
+            stateFlow.assertItemReceived { it.username == "$VALID_USER" && it.password == "$VALID_PASS" }
 
             viewModel.onClickLogin()
             val accountManager: UstadAccountManager = di.direct.instance()
@@ -272,7 +272,7 @@ class LoginViewModelTest : AbstractMainDispatcherTest(){
 
     companion object {
 
-        private const val VALID_USER = "JohnDoe"
+        private const val VALID_USER = "johndoe"
 
         private const val VALID_PASS = "password"
     }

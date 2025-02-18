@@ -1,0 +1,185 @@
+appId: com.toughra.ustadmobile
+tags:
+  - assignments
+env:
+  TESTRESULTSDIR: "build/reports/maestro/004_004_assignment_after_deadline_and_before_grace_Period/Screenshots"
+onFlowStart:
+  - startRecording: 004_004_assignment_after_deadline_and_before_grace_Period
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+---
+- runScript:
+    file: "common/import_users_via_http.js"
+    env:
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
+
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+
+- tapOn: "Test Course Block"
+# edit the course to add blocks
+- tapOn:
+    id: "floating_action_button"
+# add assignment block ------ 1
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
+- tapOn: "Add block"
+- runFlow:
+    when:
+      notVisible:
+        text: "Assignment"
+    commands:
+      - swipe:
+          from:
+            text: "Drag handle"
+          direction: UP
+- tapOn: "Assignment"
+- tapOn: "Title*"
+- inputText: "Assignment 1"
+- hideKeyboard
+- tapOn: "Description"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "test block"
+- tapOn: "Done"
+- scrollUntilVisible:
+    element:
+      text: "Deadline"
+    direction: DOWN
+- tapOn: "Deadline"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.yesterdayDate}
+- tapOn: "hh:mm"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.currentTime}
+- hideKeyboard
+- tapOn: "End of grace period"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.tomorrowDate}
+- tapOn: "hh:mm"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.currentTime}
+- hideKeyboard
+- tapOn: "Late submission penalty"
+- inputText: "10"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Submission policy"
+    direction: DOWN
+- assertVisible: "Must submit all at once"
+- assertVisible: "Done"
+- takeScreenshot: "${TESTRESULTSDIR}/added_assignment"
+- tapOn:
+    text: "Done"
+- assertNotVisible: "Done"
+- tapOn: "Save"
+# student submit assignment
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- scrollUntilVisible:
+    element:
+      text: "Add file"
+    direction: DOWN
+- tapOn: "Text"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "Assignment done by student 1"
+- tapOn: "Done"
+- scrollUntilVisible:
+    element:
+      text: "Submit"
+    direction: DOWN
+- tapOn: "Submit"
+- assertVisible: "Submitted"
+# teacher view and mark the assignment submitted by student
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- tapOn: "Submissions"
+- assertVisible: "Student 1"
+- tapOn: "Student 1"
+# assert that teacher able to view text submitted by student
+- assertVisible: "Assignment done by student 1"
+- assertVisible: "Mark comment"
+- tapOn: "Mark comment"
+- inputText: "Good job"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Mark*"
+    direction: DOWN
+- tapOn: "Mark*"
+- inputText: "9"
+- hideKeyboard
+- tapOn: "Submit grade"
+- scrollUntilVisible:
+    element:
+      text: "Result"
+    direction: UP
+- assertVisible: "8.1/10.0 Points (10% late penalty)"
+# student able to view his grade
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Assignment 1"
+    direction: DOWN
+- tapOn: "Assignment 1"
+- assertVisible: "Marked"
+- scrollUntilVisible:
+    element:
+      text: "Grades"
+    direction: DOWN
+- assertVisible: "8.1/10.0 Points (10% late penalty)"

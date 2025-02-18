@@ -1,54 +1,54 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseBlocks
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/003_006_course_view_and_modules_can_expand_collapse"
-  TESTNAME: "003_006_course_view_and_modules_can_expand_collapse"
+  TESTRESULTSDIR: "build/reports/maestro/003_006_course_view_and_modules_can_expand_collapse/Screenshots"
+  TESTCOURSENAME: "Test Course Block"
+onFlowStart:
+  - startRecording: 003_006_course_view_and_modules_can_expand_collapse
+  - clearState: com.toughra.ustadmobile
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-    file: "../common/startserver.yaml"
+# Import course, students, and teacher
+- runScript:
+    file: "common/import_users_via_http.js"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
+
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
-- runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/user_login.yaml"
     env:
-      TESTCOURSENAME: "Course view Test"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+
+- tapOn: ${TESTCOURSENAME}
 - runFlow:
-    file: "../common/add_new_student_inside_course.yaml"
-    env:
-      TESTCOURSENAME: "Course view Test"
-      STUDENTFIRSTNAME: "Student"
-      STUDENTLASTNAME: "1"
-      USERNAME:  "s1"
-      GENDER: "Male"
-      PASSWORD: "test"
-- tapOn:
-    text: "Courses"
-    index: 1
-- assertVisible:
-    id: "app_title"
-    text: "Courses"
-- tapOn: "Course view Test"
-- runFlow:
-    file: "../common/add_demo_block_structure.yaml"
+    file: "common/add_demo_block_structure.yaml"
     env:
       MODULETITLE: "SEMESTER 1"
       TEXTTITLE: "PRIMARY COLOURS"
       TEXT: "RED,BLUE,GREEN"
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "s1"
-      PASSWORD: "test"
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
 - tapOn: "courses"
-- tapOn: "Course view Test"
+- tapOn: ${TESTCOURSENAME}
 # Collapse the module by tapping it
 - tapOn: "SEMESTER 1"
 - assertNotVisible:

@@ -17,6 +17,7 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
 import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseSox
@@ -283,7 +284,9 @@ fun Application.umRestApplication(
         setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
     }
 
-    ktorServerPropertiesFile().writer().use { serverPropWriter ->
+    ktorServerPropertiesFile(
+        dataDir = environment.config.absoluteDataDir()
+    ).writer().use { serverPropWriter ->
         serverProperties.store(serverPropWriter, null)
     }
 
@@ -343,8 +346,10 @@ fun Application.umRestApplication(
         if(!it.exists())
             it.mkdirs()
     }
+    Napier.i("UstadServer dataDir=$dataDirPath")
+    println("UstadServer dataDir=$dataDirPath")
 
-    val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
+    val wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
 
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
@@ -597,11 +602,16 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<CreateNewClazzUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            CreateNewClazzUseCase(repoOrDb = instance(tag = DoorTag.TAG_DB))
+        }
+
         bind<BulkAddPersonsUseCase>() with scoped(LearningSpaceScope.Default).provider {
             BulkAddPersonsUseCaseImpl(
                 addNewPersonUseCase = instance(),
                 validateEmailUseCase  = instance(),
                 validatePhoneNumUseCase = instance(),
+                createNewClazzUseCase = instance(),
                 authManager = instance(),
                 enrolUseCase = instance(),
                 activeDb = instance(tag = DoorTag.TAG_DB),
@@ -916,9 +926,12 @@ fun Application.umRestApplication(
             instance<Scheduler>().start()
             instance<CentralAppConfigDb>()
 
-            Runtime.getRuntime().addShutdownHook(Thread{
-                instance<Scheduler>().shutdown()
-            })
+            Runtime.getRuntime().addShutdownHook(
+                Thread{
+                    Napier.i("UmRestApplication: Shutdown hook")
+                    instance<Scheduler>().shutdown()
+                }
+            )
         }
     }
 
@@ -934,7 +947,7 @@ fun Application.umRestApplication(
 
     /*
      * Use the devserver mode when:
-     *  a) there is an explicitly set development server to connect wtih
+     *  a) there is an explicitly set development server to connect with
      *  b) the server is being run from source
      *
      * See comments on the jsDevServer property in application.conf for expected behavior
@@ -1098,6 +1111,9 @@ fun Application.umRestApplication(
                         BulkAddPersonRoute(
                             enqueueBulkAddPersonServerUseCase = { call -> di.on(call).direct.instance() },
                             bulkAddPersonStatusMap = { call -> di.on(call).direct.instance() },
+                            bulkAddPersonUseCase = { call -> di.on(call).direct.instance() },
+                            authManager = { call -> di.on(call).direct.instance() },
+                            db = { call -> di.on(call).direct.instance(tag = DoorTag.TAG_DB) },
                             json = json,
                         )
                     }
@@ -1165,7 +1181,7 @@ fun Application.umRestApplication(
         appConfig.siteUrl()
     }
 
-    println("Ustad server is running on $printableServerUrl . Logging to $logDir .")
+    println("Ustad server is running on $printableServerUrl\ndataDir=$dataDirPath logDir=$logDir . ")
     println()
     println("You can connect the Android client to this address as per README.md .")
     println()

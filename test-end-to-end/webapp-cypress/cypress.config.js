@@ -26,9 +26,10 @@ module.exports = defineConfig({
          };
 
         require('cypress-terminal-report/src/installLogsPrinter')(on, options);
-
+     // ...
+   },
+      baseUrl: 'http://localhost:8075/',
    }
-  },
   });
 
 

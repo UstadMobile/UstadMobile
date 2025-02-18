@@ -1,8 +1,8 @@
 describe('WEB_003_005_admin_or_teacher_and_content_via_file', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Admin able to add content block from library', () => {
  // Admin user login
@@ -10,7 +10,7 @@ it('Admin able to add content block from library', () => {
   cy.ustadAddContentToLibrary('../test-files/content/H5p_Content.h5p','Content_001')
  // Add a new course
   cy.contains("Courses").click()
-  cy.ustadAddCourse('003_005')
+  cy.ustadAddCourse('Test Course Block')
  //Add a teacher
   cy.contains("button","Members").click()
   cy.contains("span","Add a teacher").click()
@@ -18,7 +18,7 @@ it('Admin able to add content block from library', () => {
  // Add account for teacher
   cy.contains("Teacher 1").click()
   cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacher1','test1234')
+  cy.ustadCreateUserAccount('teach1','testt1')
  // Add module block
   cy.contains('button','Course').click()
   cy.contains('button','Edit').click()
@@ -35,10 +35,10 @@ it('Admin able to add content block from library', () => {
 })
 
 it('Teacher able to add content block from file', () => {
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.ustadClearDbAndLogin('teach1','testt1')
  // Add Assignment block
   cy.contains("Course").click()
-  cy.contains("003_005").click()
+  cy.contains("Test Course Block").click()
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
   cy.contains("Add block").click()
@@ -68,4 +68,9 @@ it('Teacher able to add content block from file', () => {
   cy.ustadOpenH5pEpub('The Adopting of Rosa Marie ')
   cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

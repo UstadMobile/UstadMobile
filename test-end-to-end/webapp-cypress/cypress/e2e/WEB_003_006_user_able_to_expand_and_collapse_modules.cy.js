@@ -1,14 +1,14 @@
 describe('WEB_003_006_user_able_to_expand _and_collapse_modules', () => {
-it('Start Ustad Test Server ', () => {
-  // Start Test Server
-  cy.ustadStartTestServer()
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('User able to expand and collapse the module blocks', () => {
   // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass')
   // Add a new course
-  cy.ustadAddCourse('003_002')
+  cy.ustadAddCourse('Test Course Block')
   // Add module block
   cy.contains('button','Edit').click()
   cy.ustadAddModuleBlock('module 1')
@@ -36,4 +36,9 @@ it('User able to expand and collapse the module blocks', () => {
   cy.contains(".MuiListItem-root", "module 1").find('button[aria-label="Expand"]').click()
   cy.contains('text 1').should('exist');
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

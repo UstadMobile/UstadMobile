@@ -12,10 +12,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditUiState
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonUsernameAndPasswordModel
 import com.ustadmobile.libuicompose.components.UstadPasswordField
@@ -33,7 +38,7 @@ fun PersonAccountEditScreen(
 
     PersonAccountEditScreen(
         uiState = uiState,
-        onChange = viewModel::onEntityChanged
+        onChange = viewModel::onEntityChanged,
     )
 }
 
@@ -52,19 +57,18 @@ fun PersonAccountEditScreen(
 
         if (uiState.usernameVisible){
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth().testTag("username"),
+                modifier = Modifier.fillMaxWidth().testTag("username").onKeyEvent { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyDown) {
+                        !ValidateUsernameUseCase.isValidUsernameChar(keyEvent.utf16CodePoint.toChar())
+                    } else false
+                },
                 value = uiState.personAccount?.username ?: "",
                 maxLines = 1,
                 label = {
                     Text(stringResource(MR.strings.username) + "*")
                 },
-                onValueChange = {
-                    onChange(
-                        uiState.personAccount?.copy(
-                            username = it
-                        )
-                    )
-
+                onValueChange = { newValue ->
+                    onChange(uiState.personAccount?.copy(username = newValue))
                 },
                 isError = uiState.usernameError != null,
                 enabled = uiState.fieldsEnabled,

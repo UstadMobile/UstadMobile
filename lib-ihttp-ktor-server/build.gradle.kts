@@ -5,6 +5,11 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.jvm)
 }
 
+
+kotlin {
+    jvmToolchain(17)
+}
+
 tasks.withType<KotlinCompile> {
     compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
 }

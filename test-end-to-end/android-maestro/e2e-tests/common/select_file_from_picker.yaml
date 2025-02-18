@@ -1,0 +1,25 @@
+appId: com.toughra.ustadmobile
+---
+# this flow directs the user to select file from device
+
+- runFlow:
+    when:
+      visible: "Recent"
+    commands:
+      - tapOn:
+            text: "Show roots"
+      - tapOn:
+            text: "Downloads"
+
+- runFlow:
+    when:
+      visible: "Downloads"
+    commands:
+      - scrollUntilVisible:
+            element:
+              text: ${TESTFILENAME}
+            direction: DOWN
+      - tapOn:
+          text: ${TESTFILENAME}
+
+

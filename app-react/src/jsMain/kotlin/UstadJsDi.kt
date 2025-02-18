@@ -6,6 +6,7 @@ import com.ustadmobile.BuildConfigJs
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
@@ -16,6 +17,7 @@ import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseC
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.UstadBuildConfig
@@ -100,6 +102,14 @@ internal fun ustadJsDi(
         GenderConfig(
             genderConfigStr = BuildConfigJs.APP_UI_GOPTS.toNullIfBlank() ?: GenderConfig.DEFAULT_GENDER_OPTIONS
         )
+    }
+
+    bind<FilterUsernameUseCase>() with singleton {
+        FilterUsernameUseCase()
+    }
+
+    bind<ValidateUsernameUseCase>() with singleton {
+        ValidateUsernameUseCase()
     }
 
     bind<Settings>() with singleton {
