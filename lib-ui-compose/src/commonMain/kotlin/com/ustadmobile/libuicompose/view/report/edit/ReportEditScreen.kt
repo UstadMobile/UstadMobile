@@ -179,7 +179,6 @@ private fun ReportEditScreen(
 
                     // Y Axis Dropdown
                     ExposedDropdownMenu(
-                        modifier = Modifier.testTag("yAxis"),
                         label = { Text(stringResource(MR.strings.y_axis) + "*") },
                         options = ReportSeriesYAxis.entries,
                         selectedValue = seriesItem.reportSeriesYAxis,
@@ -195,7 +194,6 @@ private fun ReportEditScreen(
 
                     // Subgroup Dropdown
                     ExposedDropdownMenu(
-                        modifier = Modifier.testTag("subgroup_by"),
                         label = { Text(stringResource(MR.strings.subgroup_by)) },
                         options = ReportXAxis.entries,
                         selectedValue = seriesItem.reportSeriesSubGroup,
