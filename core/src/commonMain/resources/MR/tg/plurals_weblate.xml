@@ -2,34 +2,34 @@
 <resources>
     <plurals name="number_of_attempts">
         <item quantity="one">%d кушиш</item>
-        <item quantity="other"></item>
+        <item quantity="other">%d кушиш</item>
     </plurals>
     <plurals name="duration_hours">
         <item quantity="one">%d соат</item>
-        <item quantity="other"></item>
+        <item quantity="other">%d соат</item>
     </plurals>
     <plurals name="duration_minutes">
         <item quantity="one">%d дақиқа</item>
-        <item quantity="other"></item>
+        <item quantity="other">%d дақиқа</item>
     </plurals>
     <plurals name="duration_seconds">
         <item quantity="one">%d сония</item>
-        <item quantity="other"></item>
+        <item quantity="other">%d сония</item>
     </plurals>
     <plurals name="items_selected">
         <item quantity="one">%d адад интихобшуда</item>
-        <item quantity="other"></item>
+        <item quantity="other">%d адад интихобшуда</item>
     </plurals>
     <plurals name="items_deleted">
         <item quantity="one">%d ашё нест карда шуданд</item>
-        <item quantity="other"></item>
+        <item quantity="other">%d ашё нест карда шуданд</item>
     </plurals>
     <plurals name="items_restored">
         <item quantity="one">%d ашё барқарор карда шуд</item>
-        <item quantity="other"></item>
+        <item quantity="other">%d ашё барқарор карда шуд</item>
     </plurals>
     <plurals name="are_you_sure_you_want_to_permanently_delete">
         <item quantity="one">Шумо мутмаин ҳастед, ки мехоҳед %d ашёро ба таври доимӣ нест кунед?</item>
-        <item quantity="other"></item>
+        <item quantity="other">Шумо мутмаин ҳастед, ки мехоҳед %d ашёро ба таври доимӣ нест кунед?</item>
     </plurals>
 </resources>
