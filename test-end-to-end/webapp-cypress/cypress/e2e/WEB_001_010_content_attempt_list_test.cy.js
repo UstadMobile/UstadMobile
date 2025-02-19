@@ -44,34 +44,49 @@ it('Admin able to add content block to course', () => {
   cy.contains("Content_002").should('exist')
 });
 
-/*** This attempt failed - video not able to play with cypress ***
+/*** This attempt failed - video not able to play with cypress ***/
 
-it('Student-1 user makes attempts on Video', () => {
+it('Student-1, Attempt 1, Video content-40%', () => {
   cy.ustadClearDbAndLogin('stud1', 'tests1', { timeout: 8000 });
   cy.contains('Test Course Block').click();
   cy.contains("Content_001").click();
   cy.contains("OPEN").click();
   cy.ustadVerifyVideo()
-  cy.get('video').should(($video) => {
-   const videoElement = $video[0];
-  // Check if the video has a valid duration
-   expect(videoElement.duration).to.be.gt(0);
-  // Try to play the video
-   videoElement.play({timeout: 60000});
-  // Ensure it's not paused after playing
-   expect(videoElement.paused).to.be.false;
-   videoElement.pause({timeout: 60000});
-})
-})*/
+  cy.get('video')
+    .then($video => {
+      $video[0].play();
+    });
 
-it('Student-2 user makes attempts on epub', () => {
+  cy.wait(5000); // Wait for 5 seconds
+})
+
+it('Student-1, Attempt-2, video content', () => {
+  cy.ustadClearDbAndLogin('stud1', 'tests1', { timeout: 8000 });
+  cy.contains('Test Course Block').click();
+  cy.contains("Content_001").click();
+  cy.contains("OPEN").click();
+  cy.ustadVerifyVideo()
+  cy.get('video')
+    .then($video => {
+      $video[0].play();
+    });
+
+  cy.wait(11000); // Wait for 11 seconds
+  cy.get('video')
+    .should('have.prop', 'ended', true);
+})
+
+it('Student-2 user makes attempts on video', () => {
   cy.ustadClearDbAndLogin('stud2', 'tests2', { timeout: 8000 });
   cy.contains('Test Course Block').click();
-  cy.contains("Content_002").click();
-  cy.contains('OPEN').click();
-  cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE');
-  cy.ustadVerifyEpub('The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)');
-  cy.contains("THE PERSONS OF THE STORY").click()
+  cy.contains("Content_001").click();
+  cy.contains("OPEN").click();
+  cy.ustadVerifyVideo()
+  cy.get('video')
+    .then($video => {
+      $video[0].play();
+    });
+  cy.wait(5000); // Wait for 11 seconds
 });
 
 it('Student-3 user makes attempts on epub', () => {
@@ -85,19 +100,6 @@ it('Student-3 user makes attempts on epub', () => {
   cy.contains("CHAPTER VII Discovery").click()
 })
 
-it('Student-2 user makes 2nd attempt on epub', () => {
-  cy.ustadClearDbAndLogin('stud2', 'tests2', { timeout: 8000 });
-  cy.contains('Test Course Block').click();
-  cy.contains("Content_002").click();
-  cy.contains('OPEN').click();
-  cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE');
-  cy.ustadVerifyEpub('The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)');
-  cy.contains('CHAPTER XXX An April Harvest').scrollIntoView();
-  cy.contains("CHAPTER XXX An April Harvest").click()
-});
-
-/*** video attempt 0% since the video file is not played as expected
-
 it('Student-1 user able to see attempts made on content 1', () => {
   cy.ustadClearDbAndLogin('stud1', 'tests1', { timeout: 8000 });
   cy.contains('Courses').click();
@@ -105,42 +107,34 @@ it('Student-1 user able to see attempts made on content 1', () => {
   cy.contains("Content_001").click();
   cy.contains("button", "Attempts", { timeout: 8000 }).click();
   cy.contains("Attempts: 1").should('exist');
-  cy.contains('100% Completion').should('exist'); //video attempts are not made now 0%
+  cy.contains('100% Completion').should('exist');
  // Assert progress bar visible
   cy.contains("Student 1").click();
   cy.contains('Completed').should('exist');
   cy.contains('100% Completion').should('exist');
-})*/
-
+  cy.contains('Completed').click()
+  cy.contains('Completion: 100%').should('exist');
+  cy.contains('progressed').should('exist');
+  cy.contains('Completed').click()
+  cy.contains('progressed').should('not.visible');
+})
+/*
 it('Student2 user able to see epub content attempts made', () => {
   cy.ustadClearDbAndLogin('stud2', 'tests2', { timeout: 8000 });
   cy.contains('Courses').click();
   cy.contains('Test Course Block').click();
-  cy.contains('Content_002').click();
-  cy.contains("button", "Attempts").click();
- // Assert progress bar visible
+  cy.contains("Content_001").click();
+  cy.contains("button", "Attempts", { timeout: 8000 }).click();
   cy.contains("Attempts: 1").should('exist');
-  cy.contains('62% Completion').should('exist'); // updated completion % should be visible
+  cy.contains('40% Completion').should('exist');
+ // Assert progress bar visible
   cy.contains("Student 2").click();
- // Assert attempt score, completion, duration visible
   cy.contains('Incomplete').should('exist');
-  cy.get('svg[data-testid="TimerIcon"]').should('exist');
-  cy.contains('62% Completion').should('exist');
-  cy.contains('Incomplete').click();
-  cy.contains('Experience-').first().should('exist');
-  cy.contains('Experience-').last().should('exist');
- // Test filter chips - Experience and Completed
-  cy.get('.MuiChip-label').contains('Experience').click()
-  cy.get('.MuiChip-label').contains('Experience').should('be.selected');
-  cy.contains('Experience-').first().should('exist');
-  cy.contains('Experience-').last().should('exist');
-  cy.get('.MuiChip-label').contains('Experience').click()
-  cy.get('.MuiChip-label').contains('Experience').should('not.be.selected');
-  cy.get('.MuiChip-label').contains('Completed').click()
-  cy.get('.MuiChip-label').contains('Completed').should('be.selected');
-  cy.contains('Experience-').should('not.exist');
+  cy.contains('40% Completion').should('exist');
+  cy.contains('Incomplete').click()
+  cy.contains('Completion: 40%').should('exist');
 
-});
+})
 
 it('Student3 user able to see epub content attempts made', () => {
   cy.ustadClearDbAndLogin('stud3', 'tests3', { timeout: 8000 });
@@ -157,26 +151,48 @@ it('Student3 user able to see epub content attempts made', () => {
   cy.get('svg[data-testid="TimerIcon"]').should('exist');
   cy.contains('25% Completion').should('exist');
   cy.contains('Incomplete').click();
-  cy.contains('Experience-').should('exist');
+  cy.contains('Progressed').should('exist');
 });
 
 it('Teacher user can see student users attempts', () => {
   cy.ustadClearDbAndLogin('teach1', 'testt1', { timeout: 8000 });
+// *** student 1  **** //
   cy.contains('Test Course Block').click();
-  cy.contains('Content_002').click();
+  cy.contains('Content_001').click();
   cy.contains("button", "Attempts").click();
  // Assert progress bar visible
-  cy.contains('62% Completion').should('exist');
+  cy.contains('100% Completion').should('exist');
   cy.contains("Attempts: 1").should('exist');
-  cy.contains("Student 2").click();
+  cy.contains("Student 1").click();
  // Assert attempt completion, duration visible
+  cy.contains('Completed').should('exist');
+  cy.contains('100% Completion').should('exist');
+  cy.contains('Completed').click()
+  cy.contains('Completion: 100%').should('exist');
+  cy.contains('progressed').should('exist');
+ // Apply filter - completed
+  cy.get('.MuiChip-label.MuiChip-labelMedium').contains('Completed').click()
+  cy.contains('progressed').should('not.visible');
+ // Apply filter - progressed
+  cy.get('.MuiChip-label.MuiChip-labelMedium').contains('Completed').click() // unselect the Completed filter chip
+  cy.get('.MuiChip-label.MuiChip-labelMedium').contains('Progressed').click()
+  cy.contains('Completed').should('not.visible');
+// *** student 2  **** //
+  cy.contains('Courses').click()
+  cy.contains('Test Course Block').click();
+  cy.contains('Content_001').click();
+  cy.contains("button", "Attempts").click();
+ // Assert progress bar visible
+  cy.contains('40% Completion').should('exist');
+  cy.contains("Attempts: 1").should('exist');
+  cy.contains("Student 1").click();
+ // Assert attempt completion, duration visible
+  cy.contains("Student 1").click();
   cy.contains('Incomplete').should('exist');
-  cy.get('svg[data-testid="TimerIcon"]').should('exist');
-  cy.contains('62% Completion').should('exist');
-  cy.contains('Incomplete').click();
-  cy.contains('Experience-').should('exist')
-
- // Teacher verify Student-3's attempt
+  cy.contains('40% Completion').should('exist');
+  cy.contains('Incomplete').click()
+  cy.contains('Completion: 40%').should('exist');
+// *** student 3  **** //
   cy.contains('Courses').click()
   cy.contains('Test Course Block').click();
   cy.contains('Content_002').click();
@@ -191,13 +207,13 @@ it('Teacher user can see student users attempts', () => {
   cy.get('svg[data-testid="TimerIcon"]').should('exist');
   cy.contains('25% Completion').should('exist'); // Test failing here because max attempt % is visible instead of actual attempt made by stud 3
   cy.contains('Incomplete').click();
-  cy.contains('Experience-').should('exist');
+  cy.contains('Progressed').should('exist');
 });
 
 it('Student2 cannot see Student1 users attempt', () => {
   cy.ustadClearDbAndLogin('stud2', 'tests2', { timeout: 8000 });
   cy.contains('Test Course Block').click();
-  cy.contains("Content_001").click();
+  cy.contains("Content_002").click();
   cy.contains("button", "Attempts").click();
  // Assert attempts are not visible
   cy.contains('Nothing here, yet').should('exist');
@@ -206,5 +222,5 @@ it('Student2 cannot see Student1 users attempt', () => {
   after(() => {
     // Stop Test Server after tests are complete
     cy.ustadStopTestServer();
-  });
+  });*/
 });

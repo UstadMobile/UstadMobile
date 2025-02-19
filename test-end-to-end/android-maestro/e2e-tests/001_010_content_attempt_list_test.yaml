@@ -226,11 +226,11 @@ onFlowComplete:
 - tapOn: "Completed"
 - assertVisible: "Completed"
 - assertVisible:
-    text: "100% Completion"
+    text: "Completion: 100%"
     index: 0
 - assertVisible: "Progressed"
 - assertVisible:
-    text: "100% Completion"
+    text: "Completion: 100%"
     index: 1
   # Verify student 1 not able to see attempts made in course content by Student 2
 - runFlow: "common/clear_state_and_get_started.yaml"
