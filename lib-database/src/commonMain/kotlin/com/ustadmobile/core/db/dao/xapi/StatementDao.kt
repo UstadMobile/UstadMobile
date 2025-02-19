@@ -580,7 +580,7 @@ expect abstract class StatementDao {
         )
     )
     /* Permission check for viewing user */
-    AND (    :accountPersonUid = :selectedPersonUid  /* User can see their own data */
+    AND (    :accountPersonUid = :selectedPersonUid 
           OR EXISTS(SELECT CoursePermission.cpUid
                       FROM CoursePermission
                      WHERE CoursePermission.cpClazzUid = StatementEntity.statementClazzUid
