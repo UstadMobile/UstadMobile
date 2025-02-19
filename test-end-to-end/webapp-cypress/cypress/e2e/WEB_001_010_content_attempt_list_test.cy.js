@@ -114,11 +114,13 @@ it('Student-1 user able to see attempts made on content 1', () => {
   cy.contains('100% Completion').should('exist');
   cy.contains('Completed').click()
   cy.contains('Completion: 100%').should('exist');
-  cy.contains('progressed').should('exist');
-  cy.contains('Completed').click()
-  cy.contains('progressed').should('not.visible');
+  cy.contains('Progressed').should('exist');
+ // verify filter chip works
+  cy.get('#completed_button').click()
+  cy.contains('Completed').should('be.visible');
+  cy.contains('Progressed').should('not.be.visible');
 })
-/*
+
 it('Student2 user able to see epub content attempts made', () => {
   cy.ustadClearDbAndLogin('stud2', 'tests2', { timeout: 8000 });
   cy.contains('Courses').click();
@@ -169,14 +171,16 @@ it('Teacher user can see student users attempts', () => {
   cy.contains('100% Completion').should('exist');
   cy.contains('Completed').click()
   cy.contains('Completion: 100%').should('exist');
-  cy.contains('progressed').should('exist');
+  cy.contains('Progressed').should('exist');
  // Apply filter - completed
-  cy.get('.MuiChip-label.MuiChip-labelMedium').contains('Completed').click()
-  cy.contains('progressed').should('not.visible');
+  cy.get('#completed_button').click()
+  cy.contains('Completed').should('be.visible');
+  cy.contains('Progressed').should('not.be.visible');
  // Apply filter - progressed
-  cy.get('.MuiChip-label.MuiChip-labelMedium').contains('Completed').click() // unselect the Completed filter chip
-  cy.get('.MuiChip-label.MuiChip-labelMedium').contains('Progressed').click()
-  cy.contains('Completed').should('not.visible');
+  cy.get('#completed_button').contains('Completed').click() // unselect the Completed filter chip
+  cy.get('#progressed_button').click()
+  cy.contains('Progressed').should('be.visible');
+  cy.contains('Completed').should('not.be.visible');
 // *** student 2  **** //
   cy.contains('Courses').click()
   cy.contains('Test Course Block').click();
@@ -208,7 +212,7 @@ it('Teacher user can see student users attempts', () => {
   cy.contains('25% Completion').should('exist'); // Test failing here because max attempt % is visible instead of actual attempt made by stud 3
   cy.contains('Incomplete').click();
   cy.contains('Progressed').should('exist');
-});
+})
 
 it('Student2 cannot see Student1 users attempt', () => {
   cy.ustadClearDbAndLogin('stud2', 'tests2', { timeout: 8000 });
@@ -217,10 +221,10 @@ it('Student2 cannot see Student1 users attempt', () => {
   cy.contains("button", "Attempts").click();
  // Assert attempts are not visible
   cy.contains('Nothing here, yet').should('exist');
-});
+})
 
   after(() => {
     // Stop Test Server after tests are complete
     cy.ustadStopTestServer();
-  });*/
-});
+  })
+})
