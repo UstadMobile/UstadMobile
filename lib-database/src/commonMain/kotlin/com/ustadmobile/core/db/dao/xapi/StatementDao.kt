@@ -453,80 +453,87 @@ expect abstract class StatementDao {
 
 
     @Query("""
-          WITH DistinctRegistrationUids(contextRegistrationHi, contextRegistrationLo) AS (
-               SELECT DISTINCT StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo
-                          FROM StatementEntity
-                         WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
-                           AND StatementEntity.statementActorPersonUid = :personUid)
-                         
-        SELECT DistinctRegistrationUids.contextRegistrationHi AS contextRegistrationHi,
-               DistinctRegistrationUids.contextRegistrationLo AS contextRegistrationLo,
-               (SELECT MIN(StatementEntity.timestamp)
-                  FROM StatementEntity
-                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
-                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
-               ) AS timeStarted,
-                   (SELECT MAX(StatementEntity.extensionProgress)
-                  FROM StatementEntity
-                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
-                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
-                   AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
-                ) AS maxProgress,
-               (SELECT MAX(StatementEntity.resultScoreScaled)
-                  FROM StatementEntity
-                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
-                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
-                   AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
-                ) AS maxScore,
-               (SELECT EXISTS(
-                       SELECT 1 
+         WITH DistinctRegistrationUids(contextRegistrationHi, contextRegistrationLo) AS (
+              SELECT DISTINCT StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo
                          FROM StatementEntity
-                        WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
-                          AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
-                          AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
-                          AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
-               )) AS isCompleted,
-               (SELECT CASE 
-                       WHEN EXISTS(
-                            SELECT 1 
-                              FROM StatementEntity
-                             WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
-                               AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
-                               AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
-                               AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 1
-                       WHEN EXISTS(
-                            SELECT 1 
-                              FROM StatementEntity
-                             WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
-                               AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
-                               AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
-                               AND StatementEntity.resultSuccess IS NOT NULL
-                               AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0) THEN 0
-                       ELSE NULL
-                       END) AS isSuccessful
-          FROM DistinctRegistrationUids     
-           ORDER BY  
-    CASE :sortOrder
-        WHEN 1 THEN timeStarted
-        ELSE ''
-    END DESC,
-    CASE :sortOrder
-        WHEN 2 THEN timeStarted
-        ELSE ''
-    END ASC,
-    CASE :sortOrder
-        WHEN 4 THEN maxScore
-        ELSE ''
-    END ASC,
-    CASE :sortOrder
-        WHEN 3 THEN maxScore
-        ELSE ''
-    END DESC
-          
-    """)
+                        WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                          AND StatementEntity.statementActorPersonUid = :personUid)
+                        
+       SELECT DistinctRegistrationUids.contextRegistrationHi AS contextRegistrationHi,
+              DistinctRegistrationUids.contextRegistrationLo AS contextRegistrationLo,
+              (SELECT MIN(StatementEntity.timestamp)
+                 FROM StatementEntity
+                WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                  AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                  AND StatementEntity.statementActorPersonUid = :personUid
+              ) AS timeStarted,
+                  (SELECT MAX(StatementEntity.extensionProgress)
+                 FROM StatementEntity
+                WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                  AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                  AND StatementEntity.statementActorPersonUid = :personUid
+                  AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+               ) AS maxProgress,
+              (SELECT MAX(StatementEntity.resultScoreScaled)
+                 FROM StatementEntity
+                WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                  AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                  AND StatementEntity.statementActorPersonUid = :personUid
+                  AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+               ) AS maxScore,
+              (SELECT EXISTS(
+                      SELECT 1 
+                        FROM StatementEntity
+                       WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                         AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                         AND StatementEntity.statementActorPersonUid = :personUid
+                         AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                         AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
+              )) AS isCompleted,
+              (SELECT CASE 
+                      WHEN EXISTS(
+                           SELECT 1 
+                             FROM StatementEntity
+                            WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                              AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                              AND StatementEntity.statementActorPersonUid = :personUid
+                              AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                              AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 1
+                      WHEN EXISTS(
+                           SELECT 1 
+                             FROM StatementEntity
+                            WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                              AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                              AND StatementEntity.statementActorPersonUid = :personUid
+                              AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                              AND StatementEntity.resultSuccess IS NOT NULL
+                              AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0) THEN 0
+                      ELSE NULL
+                      END) AS isSuccessful
+         FROM DistinctRegistrationUids     
+          ORDER BY  
+   CASE :sortOrder
+       WHEN 1 THEN timeStarted
+       ELSE ''
+   END DESC,
+   CASE :sortOrder
+       WHEN 2 THEN timeStarted
+       ELSE ''
+   END ASC,
+   CASE :sortOrder
+       WHEN 4 THEN maxScore
+       ELSE ''
+   END ASC,
+   CASE :sortOrder
+       WHEN 3 THEN maxScore
+       ELSE ''
+   END DESC
+         
+   """)
     abstract fun findSessionsByPersonAndContent(
         contentEntryUid: Long,
         personUid: Long,
+        accountPersonUid: Long,
         sortOrder: Int
     ): PagingSource<Int, SessionTimeAndProgressInfo>
 
@@ -543,8 +550,20 @@ expect abstract class StatementDao {
             WHERE VerbLangMapEntry.vlmeVerbUid = VerbEntity.verbUid
             ORDER BY VerbLangMapEntry.vlmeLastModified DESC
             LIMIT 1)
+    LEFT JOIN ClazzEnrolment 
+        ON ClazzEnrolment.clazzEnrolmentUid =
+            COALESCE(
+                (SELECT ClazzEnrolment.clazzEnrolmentUid 
+                FROM ClazzEnrolment
+                WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                    AND ClazzEnrolment.clazzEnrolmentActive
+                    AND ClazzEnrolment.clazzEnrolmentClazzUid = StatementEntity.statementClazzUid 
+                ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
+                LIMIT 1), 0)
     WHERE StatementEntity.contextRegistrationHi = :registrationHi
     AND StatementEntity.contextRegistrationLo = :registrationLo  
+    /* Add filter for selected student */
+    AND StatementEntity.statementActorPersonUid = :selectedPersonUid 
     AND (:searchText = "%" OR VerbEntity.verbUrlId LIKE :searchText)
     AND (:selectedVerbsString = '' OR VerbEntity.verbUrlId IN 
         (SELECT word FROM 
@@ -560,6 +579,18 @@ expect abstract class StatementDao {
             SELECT word FROM split WHERE word <> '')
         )
     )
+    /* Permission check for viewing user */
+    AND (    :accountPersonUid = :selectedPersonUid  /* User can see their own data */
+          OR EXISTS(SELECT CoursePermission.cpUid
+                      FROM CoursePermission
+                     WHERE CoursePermission.cpClazzUid = StatementEntity.statementClazzUid
+                       AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
+                            OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
+                       AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
+                       AND NOT CoursePermission.cpIsDeleted)
+          OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
+              ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+              ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
     ORDER BY 
         CASE :sortOrder
             WHEN $SORT_BY_TIMESTAMP_DESC THEN StatementEntity.resultDuration
@@ -581,6 +612,8 @@ expect abstract class StatementDao {
     abstract fun findStatementsBySession(
         registrationHi: Long,
         registrationLo: Long,
+        accountPersonUid: Long,
+        selectedPersonUid: Long,
         searchText: String = "%",
         sortOrder: Int,
         selectedVerbsString: String = ""

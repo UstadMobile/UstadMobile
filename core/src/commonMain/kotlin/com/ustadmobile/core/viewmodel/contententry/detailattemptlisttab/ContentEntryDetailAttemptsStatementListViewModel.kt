@@ -51,6 +51,8 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         return activeRepo.statementDao().findStatementsBySession(
             registrationHi = contextRegistrationHi,
             registrationLo = contextRegistrationLo,
+            accountPersonUid = activeUserPersonUid,
+            selectedPersonUid = argPersonUid, // Add this
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             sortOrder = state.sortOption.flag,
             selectedVerbsString = state.selectedVerbIds.joinToString(",")

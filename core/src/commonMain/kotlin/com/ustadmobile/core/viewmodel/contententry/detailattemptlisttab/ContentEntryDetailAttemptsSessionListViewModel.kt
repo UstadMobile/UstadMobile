@@ -46,7 +46,8 @@ class ContentEntryDetailAttemptsSessionListViewModel(
     private fun getAttemptsSessionListAsPagingSource(contentEntryUid: Long, personUid: Long)
             : PagingSource<Int, SessionTimeAndProgressInfo> {
         return activeRepo.statementDao().findSessionsByPersonAndContent(contentEntryUid, personUid,
-                sortOrder = _uiState.value.sortOption.flag
+            accountPersonUid = activeUserPersonUid,
+            sortOrder = _uiState.value.sortOption.flag
         )
     }
 

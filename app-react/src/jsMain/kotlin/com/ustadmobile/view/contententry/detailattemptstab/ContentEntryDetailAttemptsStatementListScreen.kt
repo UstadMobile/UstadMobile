@@ -9,7 +9,6 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
-import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useFormattedDuration
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
@@ -26,9 +25,23 @@ import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import mui.icons.material.Check
+import mui.icons.material.Close
 import mui.icons.material.Star
 import mui.icons.material.Timer
-import mui.material.*
+import mui.material.Box
+import mui.material.Chip
+import mui.material.ChipColor
+import mui.material.ChipVariant
+import mui.material.Container
+import mui.material.LinearProgress
+import mui.material.LinearProgressVariant
+import mui.material.ListItem
+import mui.material.ListItemButton
+import mui.material.ListItemIcon
+import mui.material.ListItemText
+import mui.material.Stack
+import mui.material.StackDirection
+import mui.material.Typography
 import mui.system.responsive
 import mui.system.sx
 import react.FC
@@ -37,8 +50,11 @@ import react.ReactNode
 import react.create
 import react.useRequiredContext
 import tanstack.react.query.UseInfiniteQueryResult
-import web.cssom.*
-import mui.icons.material.Close
+import web.cssom.AlignItems
+import web.cssom.Contain
+import web.cssom.Height
+import web.cssom.Overflow
+import web.cssom.pct
 
 private const val LOAD_SIZE = 50
 private const val WIDTH = 100
