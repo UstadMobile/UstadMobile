@@ -850,7 +850,7 @@
     <string name="course_blocks">Блокҳои курс</string>
     <string name="edit_block">Блокро таҳрир кардан</string>
     <string name="module">Модул</string>
-    <string name="course_module">Модули курс</string>
+    <string name="course_module">Модули курс. Модул метавонад ягон блоки дигарро дар бар гирад. Он метавонад васеъ карда шавад шавад ва барои баҳогузорӣ истифода шавад.</string>
     <string name="formatted_text_to_show_to_course_participants">Блоке, ки матни форматшударо намоиш медиҳад</string>
     <string name="add_course_block_content_desc">Аз файлҳо ё истинодҳо аудио, видео, китобҳои электронӣ ё мундариҷаи интерактивиро (H5P, xAPI ва ғайра) илова кунед</string>
     <string name="add_assignment_block_content_desc">Супориш барои иштирокчиёни курс барои анҷом додан</string>
@@ -913,9 +913,9 @@
     <string name="new_group_set">Гурӯҳи нав</string>
     <string name="edit_text">Таҳрири матн</string>
     <string name="add_module">Модули иловагӣ</string>
-    <string name="add_a_new_course">Илова ба курси нав</string>
+    <string name="add_a_new_course">Илова кардани курси нав</string>
     <string name="join_existing_course">Ворид шудан ба курси амалкунанда</string>
-    <string name="edit_course">Танзими курс</string>
+    <string name="edit_course">Таҳрири курс</string>
     <string name="currently_enrolled">Айниҳол ба қайд гирифташуда</string>
     <string name="past_enrollments">Пештар бақайдгирифташуда</string>
     <string name="unread">Нахондашуда</string>
@@ -938,7 +938,7 @@
     <string name="update_grade">Эълони баҳо</string>
     <string name="update_grade_and_mark_next">Баъд аз эълони баҳо супориши дигарро таъин намоед</string>
     <string name="submission_already_made">Муҳлати қабули супоришҳо ба анҷом расид</string>
-    <string name="from_my_courses">Аз курсҳои ман Из моих курсов</string>
+    <string name="from_my_courses">Аз курсҳои ман</string>
     <string name="points">Холҳо</string>
     <string name="edit_discussion">Муҳокимаро таҳрир кунед</string>
     <string name="add_discussion">Илова кардани муҳокима. Добавить обсуждение</string>
@@ -1064,7 +1064,7 @@
     <string name="upload_failed">Боркунӣ ноком шуд</string>
     <string name="canceled_enrolment_request">Дархости бақайдгирӣ бекор карда шуд</string>
     <string name="manage_student_enrolments">Бақайдгирии хонандагонро идора кунед</string>
-    <string name="add_new_courses">Курсҳои нав илова кунед</string>
+    <string name="add_new_courses">Илова кардани курсҳои нав</string>
     <string name="request_submitted">Дархост пешниҳод карда шуд</string>
     <string name="view_course">Курсро тамошо кунед</string>
     <string name="moderate">Муътадил</string>
