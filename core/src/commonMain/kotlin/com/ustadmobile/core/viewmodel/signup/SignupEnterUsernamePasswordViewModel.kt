@@ -4,6 +4,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.password.SavePasswordUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -107,7 +108,10 @@ class SignupEnterUsernamePasswordViewModel(
 
     private val genderConfig: GenderConfig by instance()
 
-    //Run EnqueueSavePictureUseCase after the database transaction has finished.
+    private val enrollToCourseFromInviteCodeUseCase:EnrollToCourseFromInviteCodeUseCase =
+    di.on(LearningSpace(serverUrl)).direct.instance()
+
+        //Run EnqueueSavePictureUseCase after the database transaction has finished.
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
     on(LearningSpace(serverUrl)).instance()
 
@@ -275,8 +279,23 @@ class SignupEnterUsernamePasswordViewModel(
                 }
 
                 savePasswordUseCase?.invoke(
-                    username =savePerson.username.toString(),
-                    password = _uiState.value.password.toString())
+                    username = savePerson.username.toString(),
+                    password = _uiState.value.password.toString(),
+                    learningSpace = serverUrl
+                )
+
+                try {
+                    val viewUri= savedStateHandle[UstadView.ARG_NEXT]
+                    if (viewUri != null&&viewUri.contains("ClazzInviteRedeem")) {
+                        nextDestination = ClazzListViewModel.DEST_NAME_HOME
+                        enrollToCourseFromInviteCodeUseCase.invoke(
+                            viewUri =viewUri,
+                            personUid = savePerson.personUid
+                        )
+                    }
+                } catch (e: Exception) {
+                    Napier.d { "enrollToCourseFromInviteCodeUseCase :"+e.message}
+                }
 
                 navigateToAppropriateScreen(savePerson)
 
@@ -304,6 +323,7 @@ class SignupEnterUsernamePasswordViewModel(
                 args = buildMap {
                     put(ARG_NEXT, nextDestination)
                     putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                    putFromSavedStateIfPresent(ARG_NEXT)
                 }
             )
 

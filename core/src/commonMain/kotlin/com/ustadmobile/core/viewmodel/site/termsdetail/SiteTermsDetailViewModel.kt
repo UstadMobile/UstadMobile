@@ -100,6 +100,7 @@ class SiteTermsDetailViewModel(
             SignUpViewModel.DEST_NAME,
             args = buildMap {
                 putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+                putFromSavedStateIfPresent(ARG_NEXT)
             }
         )
     }

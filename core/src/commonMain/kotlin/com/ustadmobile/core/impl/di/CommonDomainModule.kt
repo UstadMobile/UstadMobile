@@ -14,6 +14,7 @@ import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntry
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.domain.invite.ContactToServerUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
+import com.ustadmobile.core.domain.invite.ResendInviteUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
@@ -92,6 +93,13 @@ fun commonDomainDiModule(endpointScope: LearningSpaceScope) = DI.Module("CommonD
     }
     bind<ContactToServerUseCase>() with scoped(endpointScope).provider {
         ContactToServerUseCase(
+            httpClient = instance(),
+            learningSpace = context,
+            json = instance()
+        )
+    }
+    bind<ResendInviteUseCase>() with scoped(endpointScope).provider {
+        ResendInviteUseCase(
             httpClient = instance(),
             learningSpace = context,
             json = instance()

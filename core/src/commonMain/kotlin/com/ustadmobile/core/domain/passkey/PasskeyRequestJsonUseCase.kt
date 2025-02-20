@@ -43,7 +43,7 @@ class PasskeyRequestJsonUseCase(
                   {
                     "challenge": "${challengeBase64Encoded}",
                     "rp": {
-                      "id": "credential-manager-${createPasskeyParams.domainName}",
+                      "id": "credential-manager-${createPasskeyParams.masterDomainName}",
                       "name": "${systemImpl.getString(MR.strings.app_name)}"
                     },
                     "pubKeyCredParams": [
@@ -62,8 +62,8 @@ class PasskeyRequestJsonUseCase(
                     },
                     "user": {
                       "id": "$useridBase64Encoded",
-                      "name": "${createPasskeyParams.username}",
-                      "displayName": "${createPasskeyParams.username}"
+                      "name": "${createPasskeyParams.username}@${createPasskeyParams.serverDomainName}",
+                      "displayName": "${createPasskeyParams.username}@${createPasskeyParams.serverDomainName}"
                     }
                   }
               """.trimIndent()

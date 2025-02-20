@@ -4,5 +4,5 @@ package com.ustadmobile.core.domain.password
 * available in your device later during login popup will be shown for easy login
 * */
 interface SavePasswordUseCase {
-    suspend operator fun invoke(username:String,password:String)
+    suspend operator fun invoke(username:String,password:String,learningSpace: String)
 }

@@ -4,6 +4,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
@@ -117,6 +118,8 @@ class SignUpViewModel(
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
     on(LearningSpace(serverUrl)).instance()
 
+    private val enrollToCourseFromInviteCodeUseCase: EnrollToCourseFromInviteCodeUseCase =
+        di.on(LearningSpace(serverUrl)).direct.instance()
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -290,6 +293,7 @@ class SignUpViewModel(
                             doorNodeId = di.doorIdentityHashCode.toString(),
                             usStartTime = systemTimeInMillis(),
                             serverUrl = serverUrl,
+                            masterUrl = apiUrlConfig.systemBaseUrl,
                             person = savePerson
                         )
                     )
@@ -319,12 +323,13 @@ class SignUpViewModel(
                         )
 
                     }
-
+                    enrollToCourseFromInviteUid(savePerson.personUid)
                     navigateToAppropriateScreen(savePerson)
                 } else {
                     navController.navigate(SignupEnterUsernamePasswordViewModel.DEST_NAME,
                         args = buildMap {
                             putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                            putFromSavedStateIfPresent(ARG_NEXT)
                             put(
                                 OtherSignUpOptionSelectionViewModel.ARG_PERSON,
                                 json.encodeToString( Person.serializer(),savePerson)
@@ -364,6 +369,7 @@ class SignUpViewModel(
                 args = buildMap {
                     put(ARG_NEXT, nextDestination)
                     putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                    putFromSavedStateIfPresent(ARG_NEXT)
                 }
             )
 
@@ -411,6 +417,7 @@ class SignUpViewModel(
         navController.navigate(OtherSignUpOptionSelectionViewModel.DEST_NAME,
             args = buildMap {
                 putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                putFromSavedStateIfPresent(ARG_NEXT)
                 put(
                     OtherSignUpOptionSelectionViewModel.ARG_PERSON,
                     json.encodeToString( Person.serializer(),savePerson)
@@ -425,6 +432,22 @@ class SignUpViewModel(
                 )
             }
         )
+
+    }
+
+    suspend fun enrollToCourseFromInviteUid(personUid: Long) {
+        try {
+            val viewUri= savedStateHandle[UstadView.ARG_NEXT]
+            if (viewUri != null&&viewUri.contains("ClazzInviteRedeem")) {
+                nextDestination = ClazzListViewModel.DEST_NAME_HOME
+                enrollToCourseFromInviteCodeUseCase.invoke(
+                    viewUri =viewUri,
+                    personUid = personUid
+                )
+            }
+        } catch (e: Exception) {
+            print(e.message)
+        }
 
     }
 
