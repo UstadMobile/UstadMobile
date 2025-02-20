@@ -1,10 +1,7 @@
 package com.ustadmobile.libuicompose.view.report.graphs
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Surface
@@ -38,8 +35,6 @@ import io.github.koalaplot.core.xygraph.DefaultPoint
 import io.github.koalaplot.core.xygraph.FloatLinearAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
 
-
-
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 fun CombinedGraph(
@@ -61,7 +56,7 @@ fun CombinedGraph(
     // Collect all unique subgroups, treating null as a separate group
     val allSubgroups = remember(series) {
         series.flatMap { s ->
-            s.data.map { it.subgroup ?: "Default" }
+            s.data.map { it.subgroup ?: "" }
         }.distinct()
     }
 
@@ -74,17 +69,12 @@ fun CombinedGraph(
     }
 
     // Determine Y-axis unit and conversion factor
-    val (conversionFactor, unit) = remember(yAxisLabel) {
-        if (yAxisLabel.equals(YAxisTypes.DURATION.name, ignoreCase = true)) {
-            val maxY = series.flatMap { it.data.map { row -> row.yAxis } }.maxOrNull() ?: 0.0
-            when {
-                maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, "hr")
-                maxY >= 60_000 -> Pair(1.0 / 60_000, "min")
-                else -> Pair(1.0 / 1_000, "sec")
-            }
-        } else {
-            Pair(1.0, yAxisLabel)
-        }
+    val maxY = remember(series) {
+        series.flatMap { it.data.map { row -> row.yAxis } }.maxOrNull() ?: 0.0
+    }
+
+    val (conversionFactor, unit) = remember(yAxisLabel, maxY) {
+        calculateConversionFactor(yAxisLabel, maxY)
     }
 
     // Process bar series data
@@ -92,14 +82,12 @@ fun CombinedGraph(
     val barEntries = remember(barSeries, allXValues, conversionFactor, allSubgroups) {
         allXValues.map { xValue ->
             val subgroupValues = allSubgroups.map { subgroup ->
-                barSeries.flatMap { bs ->
-                    bs.data.filter { it.xAxis == xValue && (it.subgroup ?: "Default") == subgroup }
-                }.firstOrNull()?.yAxis ?: 0.0
-            }.map { (it * conversionFactor).toFloat() }
+                calculateSubgroupValues(barSeries, xValue, subgroup, conversionFactor)
+            }.map { DefaultVerticalBarPosition(0f, it) }
 
             DefaultVerticalBarPlotGroupedPointEntry(
                 x = xValueToIndex[xValue]!!.toFloat(),
-                y = subgroupValues.map { DefaultVerticalBarPosition(0f, it) }
+                y = subgroupValues
             )
         }
     }
@@ -109,38 +97,17 @@ fun CombinedGraph(
 
     // Calculate Y-axis range
     val yRange = remember(series, conversionFactor) {
-        val maxY =
-            series.flatMap { it.data.map { (it.yAxis * conversionFactor).toFloat() } }.maxOrNull()
-                ?: 0f
-        0f..(maxY * 1.1f)
+        val maxYValue = series.flatMap { it.data.map { (it.yAxis * conversionFactor).toFloat() } }.maxOrNull() ?: 0f
+        0f..(maxYValue * 1.1f)
     }
 
     // Determine step size for count-based Y-axis
     val tickIncrement = remember(yRange, yAxisLabel) {
-        val range = yRange.endInclusive - yRange.start
-        val defaultIncrement = when {
-            yAxisLabel.equals(YAxisTypes.COUNT.name, ignoreCase = true) -> {
-                when {
-                    range < 10 -> 1f
-                    range < 100 -> 10f
-                    range < 1000 -> 50f
-                    else -> 100f
-                }
-            }
-
-            else -> { // For duration
-                when (unit) {
-                    "hr" -> 0.5f
-                    "min" -> 15f
-                    else -> 30f
-                }
-            }
-        }
-        defaultIncrement.coerceAtMost(range / 5) // Prevents `tickIncrement` from exceeding range
+        calculateTickIncrement(yRange, yAxisLabel, unit)
     }
 
     ChartLayout(
-        modifier = modifier.defaultScreenPadding(),
+        modifier = modifier.defaultChartPadding(),
         legend = { CombinedLegend(series, colorMap) },
         legendLocation = LegendLocation.BOTTOM
     ) {
@@ -164,8 +131,7 @@ fun CombinedGraph(
             yAxisLabels = {
                 AxisLabels(
                     "%.1f".format(it),
-                    Modifier
-                        .defaultItemPadding(end = 4.dp)
+                    Modifier.defaultItemPadding(end = 4.dp)
                 )
             },
             yAxisTitle = {
@@ -180,8 +146,7 @@ fun CombinedGraph(
                 GroupedVerticalBarPlot(
                     data = barEntries,
                     bar = { _, subgroupIndex, entry ->
-                        val subgroup =
-                            allSubgroups.getOrNull(subgroupIndex) ?: return@GroupedVerticalBarPlot
+                        val subgroup = allSubgroups.getOrNull(subgroupIndex) ?: return@GroupedVerticalBarPlot
                         val color = colorMap[subgroup] ?: Color.Gray
                         DefaultVerticalBar(
                             brush = SolidColor(color),
@@ -227,7 +192,6 @@ fun CombinedGraph(
     }
 }
 
-@OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 private fun CombinedLegend(
     series: List<GraphSeries>,
@@ -264,15 +228,11 @@ private fun CombinedLegend(
                         itemCount = subgroups.size,
                         symbol = { index ->
                             val subgroup = subgroups[index]
-                            Symbol(
-                                modifier = Modifier.size(16.dp),
-                                fillBrush = colorMap[subgroup]?.let { SolidColor(it) },
-                                shape = RoundedCornerShape(4.dp)
+                            LegendItem(
+                                label = subgroup,
+                                color = colorMap[subgroup] ?: Color.Gray
                             )
-                        },
-                        label = { index ->
-                            subgroups[index].let { Text(it) }
-                        },
+                        }
                     )
                 }
             }
@@ -284,14 +244,10 @@ private fun CombinedLegend(
                         itemCount = subgroups.size,
                         symbol = { index ->
                             val subgroup = subgroups[index]
-                            Symbol(
-                                modifier = Modifier.size(16.dp),
-                                fillBrush = colorMap[subgroup]?.let { SolidColor(it) },
-                                shape = RoundedCornerShape(4.dp)
+                            LegendItem(
+                                label = subgroup,
+                                color = colorMap[subgroup] ?: Color.Gray
                             )
-                        },
-                        label = { index ->
-                            subgroups[index]?.let { Text(it) }
                         }
                     )
                 }
@@ -300,6 +256,23 @@ private fun CombinedLegend(
     }
 }
 
+@OptIn(ExperimentalKoalaPlotApi::class)
+@Composable
+private fun LegendItem(
+    label: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier) {
+        Symbol(
+            modifier = Modifier.size(16.dp),
+            fillBrush = SolidColor(color),
+            shape = RoundedCornerShape(4.dp)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(label)
+    }
+}
 
 @Composable
 private fun AxisLabels(label: String, modifier: Modifier = Modifier) {
@@ -326,3 +299,54 @@ private fun HoverSurface(content: @Composable () -> Unit) {
         }
     }
 }
+
+private fun calculateSubgroupValues(
+    barSeries: List<GraphSeries>,
+    xValue: Any,
+    subgroup: String,
+    conversionFactor: Double
+): Float {
+    return barSeries.flatMap { barSeriesItem ->
+        barSeriesItem.data.filter { dataPoint ->
+            dataPoint.xAxis == xValue && (dataPoint.subgroup ?: "") == subgroup
+        }
+    }.firstOrNull()?.yAxis?.times(conversionFactor)?.toFloat() ?: 0f
+}
+
+private fun calculateConversionFactor(yAxisLabel: String, maxY: Double): Pair<Double, String> {
+    return when {
+        yAxisLabel.equals(YAxisTypes.DURATION.name, ignoreCase = true) -> {
+            when {
+                maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, "hr")
+                maxY >= 60_000 -> Pair(1.0 / 60_000, "min")
+                else -> Pair(1.0 / 1_000, "sec")
+            }
+        }
+        else -> Pair(1.0, yAxisLabel)
+    }
+}
+
+private fun calculateTickIncrement(yRange: ClosedFloatingPointRange<Float>, yAxisLabel: String, unit: String): Float {
+    val range = yRange.endInclusive - yRange.start
+    return when {
+        yAxisLabel.equals(YAxisTypes.COUNT.name, ignoreCase = true) -> {
+            when {
+                range < 10 -> 1f
+                range < 100 -> 10f
+                range < 1000 -> 50f
+                else -> 100f
+            }
+        }
+        else -> {
+            when (unit) {
+                "hr" -> 0.5f
+                "min" -> 15f
+                else -> 30f
+            }
+        }
+    }.coerceAtMost(range / 5)
+}
+
+fun Modifier.defaultChartPadding() = this
+    .defaultScreenPadding()
+    .defaultItemPadding(top = 4.dp, end = 4.dp)

@@ -1997,6 +1997,8 @@
     <string name="export_data">Export data</string>
     <string name="graph_data">Graph data</string>
     <string name="raw_data">Raw data</string>
+    <string name="count">Count</string>
+
 
 
 </resources>

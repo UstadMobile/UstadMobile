@@ -74,7 +74,9 @@ class ReportListViewModel(
         navigateToCreateNew(
             ReportEditViewModel.DEST_NAME,
             savedStateHandle[ARG_GO_TO_ON_REPORT_SELECTED]?.let {
-                mapOf(ARG_POPUP_TO_ON_REPORT_SELECTED to it)
+                mapOf(
+                    ARG_POPUP_TO_ON_REPORT_SELECTED to it
+                )
             } ?: emptyMap())
     }
 

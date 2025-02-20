@@ -118,15 +118,13 @@ fun BarGraphSampleScreen(
         ReportResultQueryRow(xAxis = "male", yAxis = 900.0, subgroup = "Category B"),
     )
     val yAxisLabel = if (reportOptions.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }) {
-        "Duration"
+        stringResource(MR.strings.duration)
     } else {
-        "Count"
+        stringResource(MR.strings.count)
     }
     Column(modifier = Modifier.fillMaxSize()) {
         CombinedGraph(
             series = listOf(
-//                GraphSeries(SeriesType.BAR, barSeries1, "Bar Series 1"),
-//                GraphSeries(SeriesType.LINE, lineSeries, "Line Series 1"),
             GraphSeries(SeriesType.BAR, lineSeries1, "Line Series 2"),
             ),
             modifier = Modifier
@@ -138,8 +136,6 @@ fun BarGraphSampleScreen(
         )
         MoreOptionsSection(
             data = listOf(
-//                GraphSeries(SeriesType.BAR, barSeries1, "Bar Series 1"),
-//                GraphSeries(SeriesType.LINE, lineSeries, "Line Series 1"),
                 GraphSeries(SeriesType.BAR, lineSeries1, "Line Series 2"),
             ),
             onShowDialog = onShowDialog,
