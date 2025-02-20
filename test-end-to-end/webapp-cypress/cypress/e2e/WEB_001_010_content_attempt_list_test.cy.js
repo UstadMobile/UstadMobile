@@ -141,12 +141,12 @@ it('Student3 user able to see epub content attempts made', () => {
   cy.contains("button", "Attempts").click();
  // Assert progress bar visible
   cy.contains("Attempts: 1").should('exist');
-  cy.contains('25% Completion').should('exist'); // updated completion % will be visible
+  cy.contains('12% Completion').should('exist'); // updated completion % will be visible
   cy.contains("Student 3").click();
  // Assert attempt score, completion, duration visible
   cy.contains('Incomplete').should('exist');
   cy.get('svg[data-testid="TimerIcon"]').should('exist');
-  cy.contains('25% Completion').should('exist');
+  cy.contains('12% Completion').should('exist');
   cy.contains('Incomplete').click();
   cy.contains('Progressed').should('exist');
 });
@@ -180,9 +180,9 @@ it('Teacher user can see student users attempts', () => {
  // Assert progress bar visible
   cy.contains('10% Completion').should('exist');
   cy.contains("Attempts: 1").should('exist');
-  cy.contains("Student 1").click();
+  cy.contains("Student 2").click();
  // Assert attempt completion, duration visible
-  cy.contains("Student 1").click();
+  cy.contains("Student 2").click();
   cy.contains('Incomplete').should('exist');
   cy.contains('10% Completion').should('exist');
   cy.contains('Incomplete').click()
@@ -195,13 +195,13 @@ it('Teacher user can see student users attempts', () => {
   cy.contains("button", "Attempts").click();
  // Assert progress bar visible
   cy.contains("Student 3").should('exist');
-  cy.contains('25% Completion').should('exist');
+  cy.contains('12% Completion').should('exist');
   cy.contains("Attempts: 1").should('exist');
   cy.contains("Student 3").click();
  // Assert attempt completion, duration visible
   cy.contains('Incomplete').should('exist');
   cy.get('svg[data-testid="TimerIcon"]').should('exist');
-  cy.contains('25% Completion').should('exist');
+  cy.contains('12% Completion').should('exist');
   cy.contains('Incomplete').click();
   cy.contains('Progressed').should('exist');
 })
