@@ -133,7 +133,7 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                                     .replaceFirstChar { it.uppercase() }
 
                                 Chip.create {
-                                    id = verbId
+                                    id = "${verbName.lowercase()}_button"
                                     key = verbId
                                     label = ReactNode(verbName)
                                     variant = ChipVariant.outlined

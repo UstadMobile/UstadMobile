@@ -52,7 +52,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
             registrationHi = contextRegistrationHi,
             registrationLo = contextRegistrationLo,
             accountPersonUid = activeUserPersonUid,
-            selectedPersonUid = argPersonUid, // Add this
+            selectedPersonUid = argPersonUid,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             sortOrder = state.sortOption.flag,
             selectedVerbsString = state.selectedVerbIds.joinToString(",")
@@ -76,7 +76,9 @@ class ContentEntryDetailAttemptsStatementListViewModel(
                 launch {
                     activeRepo.statementDao().getUniqueVerbsForSession(
                         registrationHi = argContextRegistrationIdHi,
-                        registrationLo = argContextRegistrationIdLo
+                        registrationLo = argContextRegistrationIdLo,
+                        selectedPersonUid = argPersonUid
+
                     ).collect { verbs ->
                         _uiState.update { it.copy(availableVerbs = verbs) }
                     }

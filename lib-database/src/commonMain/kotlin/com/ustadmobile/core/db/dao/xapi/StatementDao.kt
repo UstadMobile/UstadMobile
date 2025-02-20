@@ -586,8 +586,7 @@ expect abstract class StatementDao {
                 LIMIT 1), 0)
     WHERE StatementEntity.contextRegistrationHi = :registrationHi
     AND StatementEntity.contextRegistrationLo = :registrationLo  
-    /* Add filter for selected student */
-    AND StatementEntity.statementActorPersonUid = :selectedPersonUid 
+    AND StatementEntity.statementActorPersonUid = :selectedPersonUid
     AND (:searchText = "%" OR VerbEntity.verbUrlId LIKE :searchText)
     AND (:selectedVerbsString = '' OR VerbEntity.verbUrlId IN 
         (SELECT word FROM 
@@ -601,6 +600,22 @@ expect abstract class StatementDao {
                 WHERE rest <> ''
             )
             SELECT word FROM split WHERE word <> '')
+        )
+    )
+    /* Filter out entries with no duration and duplicates */
+    AND StatementEntity.resultDuration > 0  
+    AND (
+        StatementEntity.extensionProgress > 0  
+        OR (
+            CAST(StatementEntity.resultCompletion AS INTEGER) = 1  
+            AND NOT EXISTS (
+                SELECT 1 FROM StatementEntity s2 
+                WHERE s2.contextRegistrationHi = StatementEntity.contextRegistrationHi
+                AND s2.contextRegistrationLo = StatementEntity.contextRegistrationLo
+                AND s2.statementActorPersonUid = StatementEntity.statementActorPersonUid
+                AND CAST(s2.resultCompletion AS INTEGER) = 1
+                AND s2.timestamp < StatementEntity.timestamp
+            )
         )
     )
     /* Permission check for viewing user */
@@ -644,29 +659,36 @@ expect abstract class StatementDao {
     ): PagingSource<Int, StatementEntityAndVerb>
 
     @Query("""
-WITH DistinctVerbUrls(statementVerbUid) AS(
-SELECT StatementEntity.statementVerbUid
-  FROM StatementEntity
- WHERE StatementEntity.contextRegistrationHi = :registrationHi
-    AND StatementEntity.contextRegistrationLo = :registrationLo  
-)
-
-SELECT DistinctVerbUrls.statementVerbUid AS verbUid,
-       VerbEntity.*,
-	   VerbLangMapEntry.*
-  FROM DistinctVerbUrls
-       LEFT JOIN VerbEntity 
-                 ON VerbEntity.verbUid = DistinctVerbUrls.statementVerbUid
-       LEFT JOIN VerbLangMapEntry
-                 ON (VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash) IN (
-                    SELECT VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash
-                      FROM VerbLangMapEntry
+    WITH DistinctVerbUrls(statementVerbUid) AS(
+        SELECT DISTINCT StatementEntity.statementVerbUid
+        FROM StatementEntity
+        WHERE StatementEntity.contextRegistrationHi = :registrationHi
+            AND StatementEntity.contextRegistrationLo = :registrationLo
+            AND StatementEntity.statementActorPersonUid = :selectedPersonUid
+            /* Filter out entries with no progress/time */
+            AND (StatementEntity.resultDuration > 0 
+                 OR StatementEntity.extensionProgress > 0 
+                 OR StatementEntity.resultScoreRaw IS NOT NULL
+                 OR CAST(StatementEntity.resultCompletion AS INTEGER) = 1)
+    )
+    
+    SELECT DistinctVerbUrls.statementVerbUid AS verbUid,
+           VerbEntity.*,
+           VerbLangMapEntry.*
+    FROM DistinctVerbUrls
+         LEFT JOIN VerbEntity 
+                  ON VerbEntity.verbUid = DistinctVerbUrls.statementVerbUid
+         LEFT JOIN VerbLangMapEntry
+                  ON (VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash) IN (
+                     SELECT VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash
+                     FROM VerbLangMapEntry
                      WHERE VerbLangMapEntry.vlmeVerbUid = DistinctVerbUrls.statementVerbUid
                      LIMIT 1)
 """)
     abstract fun getUniqueVerbsForSession(
         registrationHi: Long,
-        registrationLo: Long
+        registrationLo: Long,
+        selectedPersonUid: Long
     ): Flow<List<VerbEntity>>
 
     @Query("""
