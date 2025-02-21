@@ -42,6 +42,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_HI]?.toLong() ?: 0
     private val argContextRegistrationIdLo =
         savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_LO]?.toLong() ?: 0
+    private val argContentEntryUid = savedStateHandle[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
 
     private fun getAttemptsStatementListAsPagingSource(
         contextRegistrationHi: Long,
@@ -53,6 +54,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
             registrationLo = contextRegistrationLo,
             accountPersonUid = activeUserPersonUid,
             selectedPersonUid = argPersonUid,
+            contentEntryUid = argContentEntryUid,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             sortOrder = state.sortOption.flag,
             selectedVerbsString = state.selectedVerbIds.joinToString(",")
@@ -77,7 +79,8 @@ class ContentEntryDetailAttemptsStatementListViewModel(
                     activeRepo.statementDao().getUniqueVerbsForSession(
                         registrationHi = argContextRegistrationIdHi,
                         registrationLo = argContextRegistrationIdLo,
-                        selectedPersonUid = argPersonUid
+                        selectedPersonUid = argPersonUid,
+                        contentEntryUid = argContentEntryUid
 
                     ).collect { verbs ->
                         _uiState.update { it.copy(availableVerbs = verbs) }

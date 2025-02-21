@@ -28,6 +28,7 @@ import mui.icons.material.Check
 import mui.icons.material.Close
 import mui.icons.material.Star
 import mui.icons.material.Timer
+import mui.icons.material.Work
 import mui.material.Box
 import mui.material.Chip
 import mui.material.ChipColor
@@ -55,6 +56,7 @@ import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
+import web.cssom.px
 
 private const val LOAD_SIZE = 50
 private const val WIDTH = 100
@@ -135,7 +137,12 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                                 Chip.create {
                                     id = "${verbName.lowercase()}_button"
                                     key = verbId
-                                    label = ReactNode(verbName)
+                                    icon = if (verbId in props.uiState.selectedVerbIds) {
+                                        Check.create()
+                                    } else null
+                                    label = Typography.create {
+                                        +verbName
+                                    }
                                     variant = ChipVariant.outlined
                                     color = if (verbId in props.uiState.selectedVerbIds) {
                                         ChipColor.primary
@@ -190,18 +197,17 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
 
                         ListItemButton {
                             ListItemIcon {
-                                when {
-                                    attemptsStatementListItems?.statementEntity?.resultScoreRaw != null -> Star()
-                                    attemptsStatementListItems?.statementEntity?.extensionProgress != null -> Close()
-                                    else -> Check()
+                                Work()
+                                sx {
+                                    minWidth = 40.px
+                                    marginRight = 4.px
                                 }
                             }
                             ListItemText {
                                 primary = ReactNode(
                                     attemptsStatementListItems?.verb?.verbUrlId?.substringAfterLast(
                                         "/"
-                                    )
-                                        ?.replaceFirstChar { it.uppercase() } ?: ""
+                                    )?.replaceFirstChar { it.uppercase() } ?: ""
                                 )
                             }
                         }
@@ -240,11 +246,13 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                                 }.also { +it }
 
                                 Typography.create {
-                                    +(if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
-                                        "$score: ${(progress * 100).toInt()}%"
-                                    } else {
-                                        "$percentageCompletion: ${(progress * 100).toInt()}%"
-                                    })
+                                    +"${(progress * 100).toInt()}% ${
+                                        if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
+                                            score.lowercase()
+                                        } else {
+                                            percentageCompletion.lowercase()
+                                        }
+                                    }"
                                 }.also { +it }
                             }.also { +it }
                         }.also { +it }

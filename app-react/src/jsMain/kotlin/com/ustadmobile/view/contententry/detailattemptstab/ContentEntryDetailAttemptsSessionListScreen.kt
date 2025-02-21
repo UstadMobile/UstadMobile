@@ -54,6 +54,8 @@ import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.number
 import web.cssom.pct
+import web.cssom.px
+
 private const val LOAD_SIZE = 50
 private const val WIDTH = 100
 
@@ -162,7 +164,10 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                             }
                                         }
 
-
+                                        sx {
+                                            minWidth = 40.px
+                                            marginRight = 4.px
+                                        }
                                     }
 
                                     ListItemText {

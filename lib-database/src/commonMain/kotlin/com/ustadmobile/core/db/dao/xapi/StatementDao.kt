@@ -468,12 +468,14 @@ expect abstract class StatementDao {
                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
                   AND StatementEntity.statementActorPersonUid = :personUid
+                  AND StatementEntity.statementContentEntryUid = :contentEntryUid
               ) AS timeStarted,
                   (SELECT MAX(StatementEntity.extensionProgress)
                  FROM StatementEntity
                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
                   AND StatementEntity.statementActorPersonUid = :personUid
+                  AND StatementEntity.statementContentEntryUid = :contentEntryUid
                   AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
                ) AS maxProgress,
               (SELECT MAX(StatementEntity.resultScoreScaled)
@@ -481,6 +483,7 @@ expect abstract class StatementDao {
                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
                   AND StatementEntity.statementActorPersonUid = :personUid
+                  AND StatementEntity.statementContentEntryUid = :contentEntryUid
                   AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
                ) AS maxScore,
               (SELECT EXISTS(
@@ -489,6 +492,7 @@ expect abstract class StatementDao {
                        WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
                          AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
                          AND StatementEntity.statementActorPersonUid = :personUid
+                         AND StatementEntity.statementContentEntryUid = :contentEntryUid
                          AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
                          AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
               )) AS isCompleted,
@@ -499,6 +503,7 @@ expect abstract class StatementDao {
                             WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
                               AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
                               AND StatementEntity.statementActorPersonUid = :personUid
+                              AND StatementEntity.statementContentEntryUid = :contentEntryUid
                               AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
                               AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 1
                       WHEN EXISTS(
@@ -507,6 +512,7 @@ expect abstract class StatementDao {
                             WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
                               AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
                               AND StatementEntity.statementActorPersonUid = :personUid
+                              AND StatementEntity.statementContentEntryUid = :contentEntryUid
                               AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
                               AND StatementEntity.resultSuccess IS NOT NULL
                               AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0) THEN 0
@@ -587,6 +593,7 @@ expect abstract class StatementDao {
     WHERE StatementEntity.contextRegistrationHi = :registrationHi
     AND StatementEntity.contextRegistrationLo = :registrationLo  
     AND StatementEntity.statementActorPersonUid = :selectedPersonUid
+    AND StatementEntity.statementContentEntryUid = :contentEntryUid
     AND (:searchText = "%" OR VerbEntity.verbUrlId LIKE :searchText)
     AND (:selectedVerbsString = '' OR VerbEntity.verbUrlId IN 
         (SELECT word FROM 
@@ -653,6 +660,7 @@ expect abstract class StatementDao {
         registrationLo: Long,
         accountPersonUid: Long,
         selectedPersonUid: Long,
+        contentEntryUid: Long,
         searchText: String = "%",
         sortOrder: Int,
         selectedVerbsString: String = ""
@@ -665,6 +673,7 @@ expect abstract class StatementDao {
         WHERE StatementEntity.contextRegistrationHi = :registrationHi
             AND StatementEntity.contextRegistrationLo = :registrationLo
             AND StatementEntity.statementActorPersonUid = :selectedPersonUid
+            AND StatementEntity.statementContentEntryUid = :contentEntryUid
             /* Filter out entries with no progress/time */
             AND (StatementEntity.resultDuration > 0 
                  OR StatementEntity.extensionProgress > 0 
@@ -688,9 +697,9 @@ expect abstract class StatementDao {
     abstract fun getUniqueVerbsForSession(
         registrationHi: Long,
         registrationLo: Long,
-        selectedPersonUid: Long
+        selectedPersonUid: Long,
+        contentEntryUid: Long
     ): Flow<List<VerbEntity>>
-
     @Query("""
     SELECT EXISTS(
         SELECT 1 FROM StatementEntity 
