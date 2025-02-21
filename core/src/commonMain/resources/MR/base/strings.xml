@@ -1984,6 +1984,8 @@
     <string name="none">None</string>
     <string name="attendance_query">Attendance Query</string>
     <string name="statement_query">Statement Query</string>
+    <string name="duration_hours">Duration (hours) </string>
+    <string name="count">Count </string>
 
     <string name="equals">Equals</string>
     <string name="not_equals">Not Equals</string>

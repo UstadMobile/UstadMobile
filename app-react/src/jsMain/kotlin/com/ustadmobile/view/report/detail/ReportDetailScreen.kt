@@ -14,16 +14,13 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadQuickActionButton
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadFab
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.dom.clear
 import kotlinx.html.TagConsumer
 import kotlinx.html.dom.append
 import kotlinx.html.h1
 import kotlinx.html.js.div
 import kotlinx.html.style
-import mui.icons.material.GroupAdd
 import mui.icons.material.ImportExport
-import mui.icons.material.PersonAdd
 import mui.icons.material.Share
 import mui.material.Box
 import mui.material.Card
@@ -31,7 +28,6 @@ import mui.material.Dialog
 import mui.material.Divider
 import mui.material.ListItem
 import mui.material.ListItemButton
-import mui.material.ListItemIcon
 import mui.material.ListItemText
 import mui.material.Orientation
 import mui.material.Typography
@@ -113,8 +109,8 @@ val ReportDetailScreen = FC<Props> {
  *
  * https://github.com/SciProgCentre/plotly.kt/blob/master/examples/js-demo/src/main/kotlin/space/kscience/plotly/jsdemo/main.kt
  */
-@OptIn(DelicateCoroutinesApi::class)
 fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
+    val strings = useStringProvider()
     div {
         style = "height:50%; width=100%;"
         h1 { +"Report Graph" }
@@ -125,7 +121,7 @@ fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
 
         // Determine Y-axis type
         val isDuration = uiState.reportOptions2.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }
-        val yAxisTitle = if (isDuration) "Duration (hours)" else "Count"
+        val yAxisTitle = if (isDuration) strings[MR.strings.duration_hours] else strings[MR.strings.count]
 
         // Function to transform Y-axis values based on type
         fun transformYAxisValues(data: List<ReportResultQueryRow>): List<Double> {
@@ -190,7 +186,7 @@ fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
             layout {
                 xaxis {
                     title {
-                        text = uiState.reportOptions2.xAxis?.name ?: "X Axis"
+                        text = uiState.reportOptions2.xAxis?.name ?: strings[MR.strings.x_axis]
                         font {
                             size = 16
                         }
@@ -221,8 +217,6 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
     useEffect(canvasRefVal, props.uiState) {
         if (canvasRefVal == null)
             return@useEffect
-
-        console.log("Plotting time")
         (canvasRefVal as HTMLElement).clear()
         (canvasRefVal as HTMLElement).append {
             plot(props.uiState)
@@ -356,5 +350,4 @@ val sharedLineSeries1 = listOf(
 val sharedGraphSeriesList = listOf(
     GraphSeries(type = SeriesType.BAR, data = sharedBarSeries1, name = "Bar Series 1"),
     GraphSeries(type = SeriesType.LINE, data = sharedLineSeries, name = "Line Series"),
-//     GraphSeries(type = SeriesType.LINE, data = sharedLineSeries1, name = "Line Series 1")
 )

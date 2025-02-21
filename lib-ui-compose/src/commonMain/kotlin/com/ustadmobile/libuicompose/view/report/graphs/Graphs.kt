@@ -278,7 +278,6 @@ private fun LegendItem(
 private fun AxisLabels(label: String, modifier: Modifier = Modifier) {
     androidx.compose.material3.Text(
         label,
-        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
         modifier = modifier.fillMaxWidth(),
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,

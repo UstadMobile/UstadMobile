@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
@@ -118,7 +119,7 @@ fun BarGraphSampleScreen(
         ReportResultQueryRow(xAxis = "male", yAxis = 900.0, subgroup = "Category B"),
     )
     val yAxisLabel = if (reportOptions.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }) {
-        stringResource(MR.strings.duration)
+        stringResource(MR.strings.duration_hours)
     } else {
         stringResource(MR.strings.count)
     }
@@ -229,7 +230,6 @@ fun DataTable(data: List<ReportResultQueryRow>) {
                     Text(
                         text = title,
                         modifier = Modifier.weight(0.5f),
-                        style = MaterialTheme.typography.bodySmall,
                     )
                     if (index < header.lastIndex) {
                         VerticalDivider(modifier = Modifier.height(20.dp), color = Color.Black)
@@ -248,21 +248,18 @@ fun DataTable(data: List<ReportResultQueryRow>) {
                     Text(
                         text = row.xAxis,
                         modifier = Modifier.weight(0.5f),
-                        style = MaterialTheme.typography.bodySmall,
                     )
                     VerticalDivider(modifier = Modifier.height(20.dp), color = Color.Black)
 
                     Text(
                         text = row.yAxis.toString(),
                         modifier = Modifier.weight(0.5f),
-                        style = MaterialTheme.typography.bodySmall,
                     )
                     VerticalDivider(modifier = Modifier.height(20.dp), color = Color.Black)
 
                     Text(
                         text = row.subgroup ?: "-",
                         modifier = Modifier.weight(0.5f),
-                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }
