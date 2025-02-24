@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.report.model
 import dev.icerock.moko.resources.StringResource
 import kotlinx.datetime.Clock
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -22,6 +23,23 @@ enum class ReportTimeRangeUnit(
     WEEK(MR.strings.weeks, DateTimeUnit.WEEK),
     MONTH(MR.strings.months, DateTimeUnit.MONTH),
     YEAR(MR.strings.year, DateTimeUnit.YEAR),
+}
+
+/**
+ *
+ */
+enum class ReportTimeRangeOption(
+    val timeRange: ReportTimeRange,
+    override val label: StringResource
+): OptionWithLabelStringResource {
+
+    LAST_WEEK(RelativeReportTimeRange(ReportTimeRangeUnit.WEEK, 1), MR.strings.last_week),
+
+    LAST_MONTH(RelativeReportTimeRange(ReportTimeRangeUnit.MONTH, 1), MR.strings.last_month),
+
+    CUSTOM_PERIOD(RelativeReportTimeRange(ReportTimeRangeUnit.DAY, 1), MR.strings.custom_period),
+
+    CUSTOM_DATE_RANGE(FixedReportTimeRange(0L, UNSET_DISTANT_FUTURE), MR.strings.custom_date_range),
 }
 
 /**
