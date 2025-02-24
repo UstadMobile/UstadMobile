@@ -121,11 +121,17 @@ fun ContentEntryDetailAttemptsStatementList(
 
             val rawScore = statementEntity?.resultScoreRaw
             val maxScore = statementEntity?.resultScoreMax
+            val progressPercentage = (progress * 100).toInt()
+
             val scoreText = if (rawScore != null && maxScore != null) {
-                "${rawScore.toInt()}/${maxScore.toInt()} $score"
+                // Calculate percentage score if rawScore and maxScore are available
+                val percentageScore = (rawScore / maxScore) * 100
+                "${percentageScore.toInt()}% $score"
             } else {
-                "${statementEntity?.extensionProgress ?: 0}% $percentageCompletion"
+                // Show progress as percentage
+                "${progressPercentage}% $percentageCompletion"
             }
+
 
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable { },
