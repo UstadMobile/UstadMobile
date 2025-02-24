@@ -29,7 +29,7 @@ data class ContentEntryDetailAttemptsStatementListUiState(
     val sortOption: SortOrderOption = sortOptions.first(),
     val showSortOptions: Boolean = true,
     val availableVerbs: List<VerbEntity> = emptyList(),
-    val selectedVerbIds: Set<String> = emptySet(),
+    val selectedVerbIds: Set<String> = mutableSetOf()
 )
 
 class ContentEntryDetailAttemptsStatementListViewModel(
@@ -83,15 +83,20 @@ class ContentEntryDetailAttemptsStatementListViewModel(
                         contentEntryUid = argContentEntryUid
 
                     ).collect { verbs ->
-                        _uiState.update { it.copy(availableVerbs = verbs) }
+                        _uiState.update { state ->
+                            state.copy(
+                                availableVerbs = verbs,
+                                selectedVerbIds = verbs.mapNotNull { it.verbUrlId }.toSet()
+                            )
+                        }
                     }
                 }
 
                 launch {
-                    activeRepo.personDao().getNamesByUid(argPersonUid).collect { personNames ->
+                    activeRepo.contentEntryDao().findLiveContentEntry(argContentEntryUid).collect { contentEntry ->
                         _appUiState.update { prev ->
                             prev.copy(
-                                title = "${personNames?.firstNames} ${personNames?.lastName}",
+                                title = contentEntry?.title ?: "",
                                 searchState = createSearchEnabledState(visible = true),
                             )
                         }
