@@ -51,4 +51,7 @@ object PermissionFlags {
 
     const val ALL = Long.MAX_VALUE
 
+    const val REPORT_EDIT = 262144L // 2^18
+
+
 }

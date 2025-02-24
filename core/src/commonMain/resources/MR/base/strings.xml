@@ -1949,5 +1949,54 @@
 
     <string name="subtitles">Subtitles</string>
 
+    <!--  Edit Report -->
+    <string name="edit_report">Edit Report</string>
+    <string name="add_a_new_report">Add a New Report</string>
+    <string name="field">Field</string>
+    <string name="condition">Condition</string>
+    <string name="value">Value</string>
+    <string name="person_age">Person age</string>
+    <string name="person_gender">Person gender</string>
+    <string name="x_axis">X Axis</string>
+    <string name="series_title">Series Title</string>
+    <string name="y_axis">Y Axis</string>
+    <string name="subgroup_by">Subgroup by</string>
+    <string name="chart_type">Chart type</string>
+    <string name="time_range">Time range</string>
+    <string name="filters">Filters</string>
+    <string name="add_filter">Add filter</string>
+    <string name="add_series">Add Series</string>
+    <string name="total_duration">Total Duration</string>
+    <string name="average_duration">Average Duration</string>
+    <string name="number_sessions">Number of Sessions</string>
+    <string name="interactions_recorded">Interactions Recorded</string>
+    <string name="number_active_users">Number of Active Users</string>
+    <string name="average_usage_time_per_user">Average Usage Time per User</string>
+    <string name="number_of_students_completed_content">Number of Students Completed Content</string>
+    <string name="percent_of_students_completed_content">Percent of Students Completed Content</string>
+    <string name="total_attendance">Total Attendance</string>
+    <string name="total_absences">Total Absences</string>
+    <string name="total_lates">Total Lates</string>
+    <string name="percentage_students_attended">Percentage of Students Attended</string>
+    <string name="percentage_students_attended_or_late">Percentage of Students Attended or Late</string>
+    <string name="total_classes">Total Classes</string>
+    <string name="number_unique_students_attending">Number of Unique Students Attending</string>
+    <string name="none">None</string>
+    <string name="attendance_query">Attendance Query</string>
+    <string name="statement_query">Statement Query</string>
+
+    <string name="equals">Equals</string>
+    <string name="not_equals">Not Equals</string>
+    <string name="greater">Greater</string>
+    <string name="lesser">Lesser</string>
+    <string name="between">Between</string>
+    <string name="in_list">In List</string>
+    <string name="not_in_list">Not In List</string>
+
+    <string name="other">Other</string>
+
+    <string name="months">Months</string>
+    <string name="weeks">Weeks</string>
+    <string name="years">Years</string>
 
 </resources>

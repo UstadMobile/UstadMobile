@@ -5,6 +5,7 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
+import com.ustadmobile.core.viewmodel.report.list.ReportListViewModel
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import dev.icerock.moko.resources.StringResource
@@ -20,6 +21,7 @@ import mui.material.List
 import mui.icons.material.School as SchoolIcon
 import mui.icons.material.LibraryBooks
 import mui.icons.material.Person
+import mui.icons.material.Report
 import mui.system.sx
 import react.FC
 import react.Props
@@ -44,7 +46,9 @@ val ROOT_SCREENS = listOf(
     RootScreen(ClazzListViewModel.DEST_NAME_HOME, MR.strings.courses, SchoolIcon),
     RootScreen(ContentEntryListViewModel.DEST_NAME_HOME, MR.strings.library, LibraryBooks),
     RootScreen(ConversationListViewModel.DEST_NAME_HOME, MR.strings.messages, Chat),
-    RootScreen(PersonListViewModel.DEST_NAME_HOME, MR.strings.people, Person)
+    RootScreen(PersonListViewModel.DEST_NAME_HOME, MR.strings.people, Person),
+    RootScreen(ReportListViewModel.DEST_NAME_HOME, MR.strings.report, Report)
+
 )
 
 val Sidebar = FC<SidebarProps> { props ->

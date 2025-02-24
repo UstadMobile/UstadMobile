@@ -1,67 +1,67 @@
 package com.ustadmobile.core.domain.report.model
 
+import com.ustadmobile.core.MR
+import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ReportSeries2(
 
-    var reportSeriesUid: Int = 0,
+    val reportSeriesUid: Int = 0,
 
-    var reportSeriesName: String? = null,
+    val reportSeriesTitle: String = "",
 
-    var reportSeriesYAxis: Int = TOTAL_DURATION,
+    val reportSeriesYAxis: ReportSeriesYAxis? = ReportSeriesYAxis.TOTAL_DURATION,
 
-    var reportSeriesVisualType: Int = BAR_CHART,
+    val reportSeriesVisualType: ReportSeriesVisualType? = ReportSeriesVisualType.BAR_CHART,
 
-    var reportSeriesSubGroup: Int = NONE,
+    val reportSeriesSubGroup: ReportXAxis? = ReportXAxis.NONE,
 
-    var reportSeriesFilters: List<ReportFilter2>? = null,
+    val reportSeriesFilters: List<ReportFilter3>? = null,
 
-) {
+)
 
 
-    companion object {
+/** Enum representing different Y-axis or report series options */
+enum class ReportSeriesYAxis(override val label: StringResource) : OptionWithLabelStringResource {
+    TOTAL_DURATION(MR.strings.total_duration),
+    AVERAGE_DURATION(MR.strings.average_duration),
+    NUMBER_SESSIONS(MR.strings.number_sessions),
+    INTERACTIONS_RECORDED(MR.strings.interactions_recorded),
+    NUMBER_ACTIVE_USERS(MR.strings.number_active_users),
+    AVERAGE_USAGE_TIME_PER_USER(MR.strings.average_usage_time_per_user),
+    NONE(MR.strings.none);
+}
 
-        const val BAR_CHART = 100
+/** Enum representing different visual types for report series */
+enum class ReportSeriesVisualType(override val label: StringResource) :
+    OptionWithLabelStringResource {
+    BAR_CHART(MR.strings.bar_chart),
+    LINE_GRAPH(MR.strings.line_chart);
+}
 
-        const val LINE_GRAPH = 101
+/** Enum representing different X-axis or sub-group options for report series */
+enum class ReportXAxis(
+    override val label: StringResource,
+    val personJoinRequired: Boolean = false,
+) : OptionWithLabelStringResource {
+    DAY(MR.strings.day),
+    WEEK(MR.strings.weekly),
+    MONTH(MR.strings.monthly),
+    CLASS(MR.strings.class_name),
+    GENDER(MR.strings.gender_literal, personJoinRequired = true),
+    NONE(MR.strings.none);
+}
 
-        const val STATEMENT_QUERY = 100
+/** Enum representing different filter types for report series */
+enum class FilterType(override val label: StringResource) : OptionWithLabelStringResource {
+    PERSON_AGE(MR.strings.person_age),
+    PERSON_GENDER(MR.strings.person_gender);
+}
 
-        const val ATTENDANCE_QUERY = 101
 
-        const val TOTAL_DURATION = 200
-
-        const val AVERAGE_DURATION = 201
-
-        const val NUMBER_SESSIONS = 202
-
-        const val INTERACTIONS_RECORDED = 203
-
-        const val NUMBER_ACTIVE_USERS = 204
-
-        const val AVERAGE_USAGE_TIME_PER_USER = 205
-
-        const val NUMBER_OF_STUDENTS_COMPLETED_CONTENT = 206
-
-        const val PERCENT_OF_STUDENTS_COMPLETED_CONTENT = 207
-
-        const val TOTAL_ATTENDANCE = 208
-
-        const val TOTAL_ABSENCES = 209
-
-        const val TOTAL_LATES = 210
-
-        const val PERCENTAGE_STUDENTS_ATTENDED = 211
-
-        const val PERCENTAGE_STUDENTS_ATTENDED_OR_LATE = 212
-
-        const val TOTAL_CLASSES = 213
-
-        const val NUMBER_UNIQUE_STUDENTS_ATTENDING = 214
-
-        const val NONE = 0
-
-    }
-
+enum class GenderType(override val label: StringResource) : OptionWithLabelStringResource {
+    MALE(MR.strings.male),
+    FEMALE(MR.strings.female),
+    OTHER(MR.strings.other);
 }

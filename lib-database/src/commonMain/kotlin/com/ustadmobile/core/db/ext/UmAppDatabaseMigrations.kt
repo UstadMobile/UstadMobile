@@ -1652,6 +1652,45 @@ val MIGRATION_201_202 = DoorMigrationStatementList(201, 202) { db ->
         add("CREATE INDEX index_ContentEntryImportJob_cjiContentEntryUid_cjiFinishTime ON ContentEntryImportJob (cjiContentEntryUid, cjiFinishTime)")
     }
 }
+val MIGRATION_202_203 = DoorMigrationStatementList(202, 203) { db ->
+    buildList {
+        // Rename the old table to preserve data
+        add("ALTER TABLE Report RENAME TO Report_OLD")
+
+        // Create the new table Report with the updated schema
+        if (db.dbType() == DoorDbType.SQLITE) {
+            add("""
+                CREATE TABLE IF NOT EXISTS Report (
+                    reportTitle TEXT,
+                   reportOptions TEXT,
+                    reportIsTemplate INTEGER NOT NULL,
+                    reportLastModTime INTEGER NOT NULL,
+                    reportUid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+                )
+            """)
+        } else {
+            add("""
+                CREATE TABLE IF NOT EXISTS Report (
+                    reportTitle TEXT,
+                    reportOptions TEXT,
+                    reportIsTemplate BIGINT NOT NULL,
+                    reportLastModTime BIGINT NOT NULL,
+                    reportUid BIGSERIAL PRIMARY KEY NOT NULL
+                )
+            """)
+        }
+
+        // Copy data from the old table into the new table
+        add("""
+            INSERT INTO Report (reportTitle, reportOptions, reportIsTemplate, reportLastModTime, reportUid)
+            SELECT reportTitle, reportOptions, reportIsTemplate, reportLastModTime, reportUid FROM Report_OLD
+        """)
+//
+//        // Drop the old table
+        add("DROP TABLE Report_OLD")
+    }
+}
+
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1669,7 +1708,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
     MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
-    MIGRATION_199_200, MIGRATION_200_201, MIGRATION_201_202,
+    MIGRATION_199_200, MIGRATION_200_201, MIGRATION_201_202, MIGRATION_202_203
 )
 
 
