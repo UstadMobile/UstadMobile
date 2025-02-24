@@ -12,6 +12,14 @@ import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,7 +30,11 @@ class GenerateReportQueriesUseCaseTest {
     private lateinit var db: UmAppDatabase
 
     // Sat Feb 01 2025 09:24:32 GMT+0000
-    private val fromTimeEpoch = 1738401872000L
+    private val fromTimeEpoch = Clock.System.now().toLocalDateTime(
+        TimeZone.currentSystemDefault()
+    ).let {
+        LocalDateTime(it.date.minus(DatePeriod(days = 3)), it.time)
+    }.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 
     @BeforeTest
     fun setup() {
@@ -85,10 +97,14 @@ class GenerateReportQueriesUseCaseTest {
             "all results have expected total duration per day"
         )
 
-        (1..defaultNumDays).forEach { day ->
+        (0 until defaultNumDays).forEach { day ->
+            val localDate = Instant.fromEpochMilliseconds(fromTimeEpoch + (day * (MS_PER_HOUR * 24)))
+                .toLocalDateTime(TimeZone.UTC).date
+            localDate.toString()
+
             assertEquals(
                 expected = (defaultDurationPerStatement * defaultNumStatementsPerDay).toDouble(),
-                actual = results.find { it.xAxis == "0$day/02/2025" }!!.yAxis,
+                actual = results.find { it.xAxis == localDate.toString() }!!.yAxis,
                 message = "day $day has expected total duration"
             )
         }

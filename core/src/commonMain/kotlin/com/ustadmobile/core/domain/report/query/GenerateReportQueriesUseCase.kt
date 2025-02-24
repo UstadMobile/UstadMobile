@@ -14,19 +14,24 @@ class GenerateReportQueriesUseCase {
         dbType: Int,
     ) : String {
         val timeFieldName = "ResultSource.timestamp"
+
+        /*
+         * strftime should be able to use %F to create an iso formatted date, unfortunately, this
+         * doesn't work across all SQLite versions, so '%Y-%m-%d' is used instead
+         */
         return buildString {
             when(field) {
                 ReportXAxis.DAY -> {
                     when(dbType) {
-                        DoorDbType.SQLITE -> append("strftime('%d/%m/%Y', $timeFieldName/1000, 'unixepoch')")
-                        DoorDbType.POSTGRES -> append("TO_CHAR(TO_TIMESTAMP($timeFieldName/1000), 'DD/MM/YYYY')")
+                        DoorDbType.SQLITE -> append("strftime('%Y-%m-%d', $timeFieldName/1000, 'unixepoch')")
+                        DoorDbType.POSTGRES -> append("TO_CHAR(TO_TIMESTAMP($timeFieldName/1000), 'YYYY-MM-DD')")
                     }
                 }
 
                 ReportXAxis.WEEK -> {
                     when(dbType) {
                         DoorDbType.SQLITE ->
-                            append("strftime('%d/%m/%Y', $field/1000, 'unixepoch', 'weekday 6', '-5 day') ")
+                            append("strftime('%Y-%m-%d', $field/1000, 'unixepoch', 'weekday 6', '-5 day') ")
                         DoorDbType.POSTGRES ->
                             append("TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP($field/1000))), 'DD/MM/YYYY') ")
                     }
@@ -35,9 +40,9 @@ class GenerateReportQueriesUseCase {
                 ReportXAxis.MONTH -> {
                     when(dbType) {
                         DoorDbType.SQLITE ->
-                            append("strftime('%m/%Y', $field/1000, 'unixepoch') ")
+                            append("strftime('%Y-%m', $field/1000, 'unixepoch') ")
                         DoorDbType.POSTGRES ->
-                            append("TO_CHAR(TO_TIMESTAMP($field/1000), 'MM/YYYY') ")
+                            append("TO_CHAR(TO_TIMESTAMP($field/1000), 'YYYY-MM') ")
                     }
                 }
 
@@ -103,19 +108,22 @@ class GenerateReportQueriesUseCase {
 
             sql += " AS yAxis,\n"
 
-            sql += xAxisOrSubgroupExpression(xAxis, dbType) + " AS xAxis\n"
+            sql += xAxisOrSubgroupExpression(xAxis, dbType) + " AS xAxis,\n"
 
             when(series.reportSeriesSubGroup) {
                 ReportXAxis.NONE, null -> {
-                    sql += ", '' AS subgroup\n"
+                    sql += "'' AS subgroup\n"
                 }
 
                 else -> {
-                    sql += ", ${xAxisOrSubgroupExpression(series.reportSeriesSubGroup, dbType)} AS subgroup\n"
+                    sql += "${xAxisOrSubgroupExpression(series.reportSeriesSubGroup, dbType)} AS subgroup\n"
                 }
             }
 
             sql += "FROM StatementEntity ResultSource\n"
+            sql += "WHERE ResultSource.timestamp BETWEEN ? AND ?\n"
+            paramsList.add(reportOptions.timeRange.from)
+            paramsList.add(reportOptions.timeRange.to)
 
             if(reportOptions.xAxis.personJoinRequired ||
                 series.reportSeriesSubGroup?.personJoinRequired == true
