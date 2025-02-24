@@ -1995,4 +1995,8 @@
 
     <string name="other">Other</string>
 
+    <string name="months">Months</string>
+    <string name="weeks">Weeks</string>
+    <string name="years">Years</string>
+
 </resources>

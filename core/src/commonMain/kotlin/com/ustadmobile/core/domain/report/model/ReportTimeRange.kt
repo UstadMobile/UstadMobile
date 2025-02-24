@@ -2,28 +2,76 @@ package com.ustadmobile.core.domain.report.model
 
 import dev.icerock.moko.resources.StringResource
 import kotlinx.datetime.Clock
-import kotlin.time.Duration.Companion.days
 import com.ustadmobile.core.MR
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.serialization.Serializable
 
+/**
+ * Enum of the relative units that can be selected for a report e.g. last x days, last x months, etc.
+ */
+enum class ReportTimeRangeUnit(
+    val label: StringResource,
+    val unit: DateTimeUnit.DateBased
+) {
+    DAY(MR.strings.days, DateTimeUnit.DAY),
+    WEEK(MR.strings.weeks, DateTimeUnit.WEEK),
+    MONTH(MR.strings.months, DateTimeUnit.MONTH),
+    YEAR(MR.strings.year, DateTimeUnit.YEAR),
+}
+
+/**
+ * Sealed class that represents a report time range as selected by the user.
+ */
+@Serializable
 sealed class ReportTimeRange {
 
+    /**
+     * The start time of the range (in ms since epoch)
+     */
     abstract val from: Long
 
+    /**
+     * The end time of the range (in ms since epoch)
+     */
     abstract val to: Long
-
-    abstract val label: StringResource?
 
 }
 
-class LastWeekReportTimeRange : ReportTimeRange() {
-
-    override val from: Long
-        get() = Clock.System.now().minus(7.days).toEpochMilliseconds()
-
+/**
+ * A relative report time range is relative to the current time - e.g. last x days, last y months, etc.
+ *
+ * @param reportUnit The unit of time to subtract from the current time
+ * @param reportUnitQuantity The quantity of the unit to subtract from the current time
+ */
+@Serializable
+class RelativeReportTimeRange(
+    val reportUnit: ReportTimeRangeUnit,
+    val reportUnitQuantity: Int,
+): ReportTimeRange() {
     override val to: Long
         get() = Clock.System.now().toEpochMilliseconds()
 
-    override val label: StringResource
-        get() = MR.strings.last_week
-
+    override val from: Long
+        get() {
+            val timeZone = TimeZone.currentSystemDefault()
+            val nowDateTime = Clock.System.now().toLocalDateTime(timeZone)
+            return LocalDateTime(
+                date = nowDateTime.date.minus(reportUnitQuantity, reportUnit.unit),
+                time = nowDateTime.time
+            ).toInstant(timeZone).toEpochMilliseconds()
+        }
 }
+
+/**
+ * A fixed report date range as specified by the user.
+ */
+@Serializable
+class FixedReportTimeRange(
+    override val from: Long,
+    override val to: Long,
+): ReportTimeRange()

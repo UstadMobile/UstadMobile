@@ -49,7 +49,9 @@ class GenerateReportQueriesUseCase {
                     append("COALESCE(Person.gender, 0)")
                 }
 
-                else -> TODO("Not done yet")
+                ReportXAxis.NONE -> {
+                    throw IllegalArgumentException("Cannot graph x axis 'none'")
+                }
             }
         }
     }
