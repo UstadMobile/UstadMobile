@@ -8,6 +8,7 @@ import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -109,8 +110,7 @@ val ReportDetailScreen = FC<Props> {
  *
  * https://github.com/SciProgCentre/plotly.kt/blob/master/examples/js-demo/src/main/kotlin/space/kscience/plotly/jsdemo/main.kt
  */
-fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
-    val strings = useStringProvider()
+fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState, strings: StringProvider) {
     div {
         style = "height:50%; width=100%;"
         h1 { +"Report Graph" }
@@ -120,8 +120,10 @@ fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
         val graphSeriesList = sharedGraphSeriesList
 
         // Determine Y-axis type
-        val isDuration = uiState.reportOptions2.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }
-        val yAxisTitle = if (isDuration) strings[MR.strings.duration_hours] else strings[MR.strings.count]
+        val isDuration =
+            uiState.reportOptions2.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }
+        val yAxisTitle =
+            if (isDuration) strings[MR.strings.duration_hours] else strings[MR.strings.count]
 
         // Function to transform Y-axis values based on type
         fun transformYAxisValues(data: List<ReportResultQueryRow>): List<Double> {
@@ -170,6 +172,7 @@ fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
 
                             }
                         }
+
                         SeriesType.LINE -> {
                             scatter {
                                 name = "${series.name} - $subgroup"
@@ -209,6 +212,7 @@ fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState) {
 
 val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
     val canvasRef = useRef<web.html.HTMLElement>()
+    val strings = useStringProvider() // Get strings here
 
     // Use a reference to get the HTMLElement (DOM object) when it is added by React.
     val canvasRefVal = canvasRef.current
@@ -219,7 +223,7 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
             return@useEffect
         (canvasRefVal as HTMLElement).clear()
         (canvasRefVal as HTMLElement).append {
-            plot(props.uiState)
+            plot(props.uiState, strings = strings)
         }
 
     }
@@ -232,7 +236,7 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
             ReactHTML.div {
                 ref = canvasRef
             }
-            moreOption{
+            moreOption {
                 uiState = props.uiState
                 onShowDialog = props.onShowDialog
                 onDismissDialog = props.onDismissDialog
@@ -240,9 +244,13 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
         }
     }
 }
-private  val moreOption = FC<ReportDetailProps> { props ->
+private val moreOption = FC<ReportDetailProps> { props ->
     val strings = useStringProvider()
-    val header = listOf(strings[MR.strings.x_axis], strings[MR.strings.y_axis], strings[MR.strings.subgroup_by])
+    val header = listOf(
+        strings[MR.strings.x_axis],
+        strings[MR.strings.y_axis],
+        strings[MR.strings.subgroup_by]
+    )
     // Example data
     // Use the shared data
     val data = sharedGraphSeriesList
@@ -323,6 +331,7 @@ private  val moreOption = FC<ReportDetailProps> { props ->
     }
 
 }
+
 // Shared data for both graph and table
 val sharedBarSeries1 = listOf(
     ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 5000000.0, subgroup = "Category A"),
