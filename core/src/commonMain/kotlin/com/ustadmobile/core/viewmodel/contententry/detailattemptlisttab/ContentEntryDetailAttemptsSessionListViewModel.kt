@@ -13,6 +13,8 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfoConst
 import com.ustadmobile.lib.db.composites.xapi.StatementConst
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -64,15 +66,29 @@ class ContentEntryDetailAttemptsSessionListViewModel(
         _uiState.update { it.copy(attemptsSessionList = attemptsSessionListPagingSource) }
 
         viewModelScope.launch {
-            activeRepo.personDao().getNamesByUid(argPersonUid).collect { personNames ->
-                _appUiState.update { prev ->
-                    prev.copy(
-                        title = "${personNames?.firstNames} ${personNames?.lastName}"
-                    )
-                }
+            // Launch both the person names and content title fetching in parallel
+            val personNamesDeferred = async {
+                activeRepo.personDao().getNamesByUid(argPersonUid).firstOrNull()
             }
 
+            val contentEntryDeferred = async {
+                activeRepo.contentEntryDao().findLiveContentEntry(entityUidArg).firstOrNull()
+            }
+
+            val personNames = personNamesDeferred.await()
+            val contentEntry = contentEntryDeferred.await()
+
+            // Combine the user name and content title into a single string
+            val combinedTitle = "${personNames?.firstNames} ${personNames?.lastName} - ${contentEntry?.title ?: ""}"
+
+            // Update the UI state with the combined title
+            _appUiState.update { prev ->
+                prev.copy(
+                    title = combinedTitle
+                )
+            }
         }
+
     }
 
     fun onClickEntry(

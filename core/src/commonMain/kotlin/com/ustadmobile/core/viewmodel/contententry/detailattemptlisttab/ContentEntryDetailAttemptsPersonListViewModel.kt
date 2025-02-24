@@ -52,9 +52,7 @@ class ContentEntryDetailAttemptsPersonListViewModel(
 ) {
 
     protected val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
-    private suspend fun getContentEntryTitle(entityUid: Long): String? {
-        return activeRepo.statementDao().getTitleByEntityUid(entityUid)
-    }
+
 
     private suspend fun buildSortOptions(): List<SortOrderOption> {
         val options = mutableListOf(
@@ -119,15 +117,16 @@ class ContentEntryDetailAttemptsPersonListViewModel(
                 attemptsPersonList = attemptsPersonListPagingSource,
             )
         }
+
         viewModelScope.launch {
-            // Fetch the title using the entityUidArg
-            val title = getContentEntryTitle(entityUidArg) ?: "Default Title"
-            _appUiState.update { prev ->
-                prev.copy(
-                    title = title
-                )
+            activeRepo.contentEntryDao().findLiveContentEntry(entityUidArg).collect { contentEntry ->
+                _appUiState.update { prev ->
+                    prev.copy(
+                        title = contentEntry?.title ?: "")
+                }
             }
         }
+
     }
 
 
