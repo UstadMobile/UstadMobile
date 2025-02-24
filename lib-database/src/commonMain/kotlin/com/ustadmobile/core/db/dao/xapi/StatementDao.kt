@@ -718,4 +718,9 @@ expect abstract class StatementDao {
 """)
     abstract suspend fun hasCompletionData(contentEntryUid: Long): Boolean
 
+
+    // Query to get the title based on the contentEntryUid (which is equivalent to entityUidArg)
+    @Query("SELECT title FROM ContentEntry WHERE contentEntryUid = :entityUid")
+    abstract suspend fun getTitleByEntityUid(entityUid: Long): String?
+
 }
