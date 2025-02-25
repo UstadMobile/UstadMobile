@@ -67,6 +67,7 @@ class LearningSpaceListViewModel(
         navController.navigate(
             LearningSpaceEnterLinkViewModel.DEST_NAME,
             args = buildMap {
+                putFromSavedStateIfPresent(ARG_NEXT)
                 putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             }
         )
@@ -80,6 +81,7 @@ class LearningSpaceListViewModel(
             LoginViewModel.DEST_NAME
         }
         val args = buildMap {
+            putFromSavedStateIfPresent(ARG_NEXT)
             putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             put(ARG_LEARNINGSPACE_URL, learningSpace)
         }

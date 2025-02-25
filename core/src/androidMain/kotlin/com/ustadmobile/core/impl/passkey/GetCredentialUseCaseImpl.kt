@@ -10,7 +10,7 @@ import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
-import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.util.ext.formattedHost
 import com.ustadmobile.core.domain.passkey.CredentialResult
 import com.ustadmobile.core.domain.passkey.GetCredentialUseCase
 import com.ustadmobile.core.domain.passkey.PassKeySignInData
@@ -20,14 +20,12 @@ import org.json.JSONObject
 
 class GetCredentialUseCaseImpl(
     val context: Context,
-    val learningSpace: LearningSpace,
     val passkeyRequestJsonUseCase: PasskeyRequestJsonUseCase
 ) : GetCredentialUseCase {
-    private val domain: String by lazy {
-        Url(learningSpace.url).host
-    }
-    override suspend fun invoke(): CredentialResult {
+
+    override suspend fun invoke(systemBaseUrl: String): CredentialResult {
         val credentialManager = CredentialManager.create(context)
+        val domain: String = Url(systemBaseUrl).formattedHost()
 
         val getPasswordOption = GetPasswordOption()
         val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(

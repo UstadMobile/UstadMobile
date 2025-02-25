@@ -101,11 +101,8 @@ class ClazzInviteRedeemViewModel(
                     personUid = accountManager.currentAccount.personUid
                 )
 
-                if (result.isCodeRedeem) {
-                    snackDispatcher.showSnackBar(Snack(result.message))
-                } else {
-                    snackDispatcher.showSnackBar(Snack(result.message))
-                }
+                snackDispatcher.showSnackBar(Snack(result.message))
+
 
                 navController.navigate(
                     viewName = ClazzListViewModel.DEST_NAME_HOME,

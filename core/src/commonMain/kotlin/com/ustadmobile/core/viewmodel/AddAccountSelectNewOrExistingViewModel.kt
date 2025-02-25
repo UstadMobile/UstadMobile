@@ -1,22 +1,43 @@
 package com.ustadmobile.core.viewmodel
 
+import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.AdultAccountRequiredException
+import com.ustadmobile.core.account.ConsentNotGrantedException
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
+import com.ustadmobile.core.domain.passkey.CredentialResult
+import com.ustadmobile.core.domain.passkey.GetCredentialUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.LoadingUiState
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.appendSelectedAccount
+import com.ustadmobile.core.util.ext.base64StringToByteArray
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
+import com.ustadmobile.lib.db.entities.Person
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 data class AddAccountSelectNewOrExistingUiState(
     val currentLanguage: UstadMobileSystemCommon.UiLanguage = UstadMobileSystemCommon.UiLanguage(
@@ -62,10 +83,23 @@ class AddAccountSelectNewOrExistingViewModel(
 
     private val apiUrlConfig: SystemUrlConfig by instance()
 
+    private var nextDestination: String
+
+    private val impl: UstadMobileSystemImpl by instance()
+
+    private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
+        ?.toBoolean() ?: false
+
+    val credentialUseCase: GetCredentialUseCase? =
+        di.on(LearningSpace(apiUrlConfig.systemBaseUrl)).direct.instanceOrNull()
+
+
     val uiState: Flow<AddAccountSelectNewOrExistingUiState>
         get() = _uiState.asStateFlow()
 
     init {
+        nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
+
         _appUiState.value = AppUiState(
             navigationVisible = false,
             hideAppBar = true,
@@ -81,6 +115,84 @@ class AddAccountSelectNewOrExistingViewModel(
         _uiState.update {
             AddAccountSelectNewOrExistingUiState(currentLanguage, allLanguages)
         }
+        getCredentials()
+    }
+    private fun getCredentials() {
+        viewModelScope.launch {
+            try {
+                credentialUseCase?.let { useCase ->
+                    when (val credentialResult = useCase.invoke(apiUrlConfig.systemBaseUrl)) {
+
+                        is CredentialResult.PasskeyCredentialResult -> {
+                            val userHandle = credentialResult.passKeySignInData.userHandle.base64StringToByteArray()
+                            val endpointUrl= userHandle.decodeToString().substringAfter("@")
+
+                            val account = accountManager.loginWithPasskey(
+                                credentialResult.passKeySignInData,
+                                apiUrlConfig.systemBaseUrl
+                            )
+                             goToNextDestAfterSignIn(account.toPerson(), endpointUrl)
+                        }
+                        is CredentialResult.PasswordCredentialResult -> {
+                            val username=credentialResult.username
+                            val password=credentialResult.password
+                            if (username!=null&&password!=null){
+                                onClickWithUsernameAndPassword(
+                                    username,
+                                    password
+                                )
+                            }
+
+
+                        }
+                        is CredentialResult.Error -> {
+                            Napier.e { "Error occurred: ${credentialResult.message}"}
+
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Napier.e { "Error occurred: ${e.message}"}
+            }
+        }
+    }
+
+    private fun onClickWithUsernameAndPassword(usernameWithDomain: String, password: String) {
+        viewModelScope.launch {
+            var errorMessage: String? = null
+            val parts = usernameWithDomain.split("@")
+            val domain = parts[1]
+            val username = parts[0]
+            val serverUrl = createServerUrl(domain)
+            try {
+                val account = accountManager.login(
+                    username = username.trim(),
+                    password = password.trim(),
+                    endpointUrl = serverUrl,
+                    maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong()
+                        ?: 0L,
+                    dontSetCurrentSession = dontSetCurrentSession,
+                )
+
+                goToNextDestAfterSignIn(account.toPerson(),serverUrl)
+            } catch (e: AdultAccountRequiredException) {
+                errorMessage = impl.getString(MR.strings.adult_account_required)
+            } catch (e: UnauthorizedException) {
+                errorMessage = impl.getString(MR.strings.wrong_user_pass_combo)
+            } catch (e: ConsentNotGrantedException) {
+                errorMessage = impl.getString(MR.strings.your_account_needs_approved)
+            } catch (e: Exception) {
+                errorMessage = impl.getString(MR.strings.login_network_error)
+            } finally {
+                loadingState = LoadingUiState.NOT_LOADING
+                if (errorMessage!=null){
+                    snackDispatcher.showSnackBar(
+                        Snack(errorMessage.toString())
+                    )
+                }
+
+            }
+        }
     }
 
     fun onClickNewUser() {
@@ -95,6 +207,7 @@ class AddAccountSelectNewOrExistingViewModel(
         val userType = if (isNewUser) "new" else "existing"
         val arg = buildMap {
             putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+            putFromSavedStateIfPresent(ARG_NEXT)
             put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, userType)
             apiUrlConfig.presetLearningSpaceUrl?.let {
                 put(ARG_LEARNINGSPACE_URL, it)
@@ -129,7 +242,27 @@ class AddAccountSelectNewOrExistingViewModel(
             }
         }
     }
+    private fun goToNextDestAfterSignIn(person: Person, serverUrl: String) {
+        val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+        Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
+        if (person.isPersonalAccount) {
+            nextDestination = ContentEntryListViewModel.DEST_NAME_HOME
+        }
+        navController.navigateToViewUri(
 
+            nextDestination.appendSelectedAccount(person.personUid, LearningSpace(serverUrl)),
+            goOptions
+        )
+    }
+    private fun createServerUrl(domain: String): String {
+
+        val containsPort = domain.contains(":")
+        return if (containsPort) {
+            "$domain/"
+        } else {
+            "https://$domain"
+        }
+    }
     companion object {
 
         const val DEST_NAME = "addAccountSelectNewOrExisting"

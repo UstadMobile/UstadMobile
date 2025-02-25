@@ -63,7 +63,7 @@ class CreatePasskeyUseCaseImpl(
                 attestationObj = attestationObject,
                 clientDataJson = clientDataJsonString,
                 originString = originString,
-                rpid = "credential-manager-${createPassKeyParams.domainName}",
+                rpid = "credential-manager-${createPassKeyParams.masterDomainName}",
                 challengeString = challengeString,
                 publicKey = publicKey,
                 id = id,

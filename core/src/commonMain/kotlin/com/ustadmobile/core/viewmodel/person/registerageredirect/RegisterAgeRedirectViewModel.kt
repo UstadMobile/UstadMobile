@@ -98,6 +98,7 @@ class RegisterAgeRedirectViewModel(
 
         val args = buildMap {
             putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+            putFromSavedStateIfPresent(ARG_NEXT)
             put(ARG_SHOW_ACCEPT_BUTTON,true.toString())
 
 

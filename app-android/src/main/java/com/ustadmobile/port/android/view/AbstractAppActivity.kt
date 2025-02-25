@@ -148,7 +148,6 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         bind<GetCredentialUseCase>() with scoped(LearningSpaceScope.Default).singleton{
             GetCredentialUseCaseImpl(
                 context=this@AbstractAppActivity,
-                learningSpace = context,
                 passkeyRequestJsonUseCase = instance()
             )
         }

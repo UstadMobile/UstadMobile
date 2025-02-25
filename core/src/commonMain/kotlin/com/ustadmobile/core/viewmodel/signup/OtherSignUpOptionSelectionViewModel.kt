@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.signup
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
@@ -9,6 +10,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.view.UstadView
@@ -29,8 +31,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 
 data class OtherSignUpOptionSelectionUiState(
@@ -53,6 +57,8 @@ class OtherSignUpOptionSelectionViewModel(
     private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]?: "http://localhost"
     private val isParent = savedStateHandle[IS_PARENT].toBoolean()
 
+    private val apiUrlConfig: SystemUrlConfig by instance()
+
     private val getLocalAccountsSupportedUseCase: GetLocalAccountsSupportedUseCase by instance()
 
     private val createPasskeyUseCase: CreatePasskeyUseCase? by instanceOrNull()
@@ -62,6 +68,8 @@ class OtherSignUpOptionSelectionViewModel(
 
     val uiState: Flow<OtherSignUpOptionSelectionUiState> = _uiState.asStateFlow()
 
+    private val enrollToCourseFromInviteCodeUseCase: EnrollToCourseFromInviteCodeUseCase =
+        di.on(LearningSpace(serverUrl)).direct.instance()
 
     init {
         viewModelScope.launch {
@@ -113,6 +121,7 @@ class OtherSignUpOptionSelectionViewModel(
                     doorNodeId = di.doorIdentityHashCode.toString(),
                     usStartTime = systemTimeInMillis(),
                     serverUrl = serverUrl,
+                    masterUrl = apiUrlConfig.systemBaseUrl,
                     person = savePerson
                 )
             )
@@ -135,11 +144,12 @@ class OtherSignUpOptionSelectionViewModel(
                     args = buildMap {
                         put(ARG_NEXT, nextDestination)
                         putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                        putFromSavedStateIfPresent(ARG_NEXT)
                     }
                 )
 
             } else {
-
+                enrollToCourseFromInviteUid(savePerson.personUid)
                 val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
                 Napier.d { "AddSignUpPresenter: go to next destination: $nextDestination" }
                 navController.navigateToViewUri(
@@ -176,6 +186,7 @@ class OtherSignUpOptionSelectionViewModel(
         val args = buildMap {
             put(SignUpViewModel.SIGN_WITH_USERNAME_AND_PASSWORD, "true")
             putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+            putFromSavedStateIfPresent(ARG_NEXT)
             put(
                 ARG_PERSON,
                 json.encodeToString( Person.serializer(),_uiState.value.person?:Person())
@@ -194,6 +205,21 @@ class OtherSignUpOptionSelectionViewModel(
 
     }
 
+    suspend fun enrollToCourseFromInviteUid(personUid: Long) {
+        try {
+            val viewUri= savedStateHandle[UstadView.ARG_NEXT]
+            if (viewUri != null&&viewUri.contains("ClazzInviteRedeem")) {
+                nextDestination = ClazzListViewModel.DEST_NAME_HOME
+                enrollToCourseFromInviteCodeUseCase.invoke(
+                    viewUri =viewUri,
+                    personUid = personUid
+                )
+            }
+        } catch (e: Exception) {
+            print(e.message)
+        }
+
+    }
 
     companion object {
 
