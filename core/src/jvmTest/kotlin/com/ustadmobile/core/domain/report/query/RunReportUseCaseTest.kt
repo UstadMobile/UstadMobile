@@ -8,8 +8,6 @@ import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.DoorDbType
-import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
@@ -25,9 +23,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class GenerateReportQueriesUseCaseTest {
+class RunReportUseCaseTest {
 
     private lateinit var db: UmAppDatabase
+
+    private lateinit var runReportUseCase: RunReportUseCase
 
     // Sat Feb 01 2025 09:24:32 GMT+0000
     private val fromTimeEpoch = Clock.System.now().toLocalDateTime(
@@ -40,6 +40,7 @@ class GenerateReportQueriesUseCaseTest {
     fun setup() {
         db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, "jdbc:sqlite::memory:", 1L)
             .build()
+        runReportUseCase = RunReportUseCaseDatabaseImpl(db, GenerateReportQueriesUseCase())
     }
 
     private val defaultNumStatementsPerDay = 2
@@ -73,23 +74,21 @@ class GenerateReportQueriesUseCaseTest {
     @Test
     fun givenStatementsInDatabase_whenDurationPerDayQueried_thenResultsAsExpected() {
         insertStatementsPerDay()
-        val out = GenerateReportQueriesUseCase().invoke(
-            reportOptions = ReportOptions2(
-                xAxis = ReportXAxis.DAY,
-                series = listOf(
-                    ReportSeries2(
-                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
-                    )
-                )
-            ),
-            dbType = DoorDbType.SQLITE
-        )
-
-        val query = SimpleDoorQuery(out[0].sql, out[0].params)
-
         val results = runBlocking {
-            db.statementDao().runReportQuery(query)
-        }
+            runReportUseCase(
+                request = RunReportUseCase.RunReportRequest(
+                    reportOptions = ReportOptions2(
+                        xAxis = ReportXAxis.DAY,
+                        series = listOf(
+                            ReportSeries2(
+                                reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
+                            )
+                        )
+                    ),
+                    accountPersonUid = 1L,
+                )
+            )
+        }.results.first()
 
         assertEquals(defaultNumDays, results.size, "results size equals number of days")
         assertTrue(

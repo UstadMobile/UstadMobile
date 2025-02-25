@@ -1,26 +1,13 @@
 package com.ustadmobile.core.util.ext
 
-import app.cash.paging.PagingSource
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.xapi.getResults
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.graph.LabelValueFormatter
-import com.ustadmobile.core.util.graph.MessageIdFormatter
-import com.ustadmobile.core.util.graph.TimeFormatter
-import com.ustadmobile.core.util.graph.UidAndLabelFormatter
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
-import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonGroup
 import com.ustadmobile.lib.db.entities.PersonGroupMember
-import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ScopedGrant
-import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
-import com.ustadmobile.lib.db.entities.StatementReportData
 
 
 /**
@@ -52,125 +39,6 @@ suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(
 
     return entity
 }
-
-
-//suspend fun UmAppDatabase.generateChartData(
-//    report: ReportWithSeriesWithFilters,
-//    context: Any,
-//    impl: UstadMobileSystemImpl,
-//    loggedInPersonUid: Long
-//): ChartData{
-//
-//    val queries = report.generateSql(loggedInPersonUid, dbType())
-//    val seriesDataList = mutableListOf<SeriesData>()
-//
-//    var yAxisValueFormatter: LabelValueFormatter? = null
-//
-//    val xAxisList = mutableSetOf<String>()
-//    queries.forEach {
-//
-//        val reportList = statementDao().getResults(it.value.sqlStr, it.value.queryParams)
-//        val series = it.key
-//
-//        xAxisList.addAll(reportList.mapNotNull { it.xAxis }.toSet())
-//        if(series.reportSeriesYAxis == ReportSeries.AVERAGE_DURATION
-//                || series.reportSeriesYAxis == ReportSeries.TOTAL_DURATION){
-//            yAxisValueFormatter = TimeFormatter()
-//        }
-//
-////        val subGroupFormatter = when(series.reportSeriesSubGroup){
-////            Report.CLASS -> {
-////                val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
-////                val clazzLabelList = clazzDao().getClassNamesFromListOfIds(listOfUids)
-////                        .map { it.uid to it.labelName }.toMap()
-////                UidAndLabelFormatter(clazzLabelList)
-////            }
-//////must be handled when reports are brought back
-//////            Report.GENDER -> {
-//////                MessageIdFormatter(
-//////                        genderMap.mapKeys { it.key.toString() },
-//////                        impl, context)
-//////            }
-////            Report.CONTENT_ENTRY ->{
-////                val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
-////                val entryLabelList = contentEntryDao().getContentEntryFromUids(listOfUids)
-////                        .map { it.uid to it.labelName }.toMap()
-////                UidAndLabelFormatter(entryLabelList)
-////            }
-////            Report.ENROLMENT_LEAVING_REASON -> {
-////                val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
-////                val reasonLabelList = leavingReasonDao().getReasonsFromUids(listOfUids)
-////                        .map { it.uid to it.labelName }.toMap()
-////                UidAndLabelFormatter(reasonLabelList)
-////            }
-////            Report.ENROLMENT_OUTCOME -> {
-////                MessageIdFormatter(
-////                        OUTCOME_TO_MESSAGE_ID_MAP.mapKeys { it.key.toString() }, impl, context)
-////            }
-////            else ->{
-////                null
-////            }
-////        }
-//
-////        seriesDataList.add(SeriesData(reportList, subGroupFormatter, series))
-//    }
-//
-////    val xAxisFormatter = when(report.xAxis){
-////        Report.CLASS -> {
-////            val clazzLabelList = clazzDao().getClassNamesFromListOfIds(xAxisList
-////                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
-////            UidAndLabelFormatter(clazzLabelList)
-////        }
-//////Must be handled when reporting is brought back
-//////        Report.GENDER -> {
-//////            MessageIdFormatter(
-//////                    genderMap.mapKeys { it.key.toString() },
-//////                    impl, context)
-//////        }
-////        Report.CONTENT_ENTRY ->{
-////            val entryLabelList = contentEntryDao().getContentEntryFromUids(xAxisList
-////                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
-////            UidAndLabelFormatter(entryLabelList)
-////        }
-////        Report.ENROLMENT_OUTCOME -> {
-////            MessageIdFormatter(
-////                    OUTCOME_TO_MESSAGE_ID_MAP.mapKeys { it.key.toString() }, impl, context)
-////        }
-////        Report.ENROLMENT_LEAVING_REASON -> {
-////            val reasonLabelList = leavingReasonDao().getReasonsFromUids(xAxisList
-////                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
-////                    .plus(0L to impl.getString(MR.strings.unset))
-////            UidAndLabelFormatter(reasonLabelList)
-////        }
-////        else ->{
-////            null
-////        }
-////    }
-//    val xAxisFormatter = null
-//    return ChartData(seriesDataList.toList(), report, yAxisValueFormatter, xAxisFormatter)
-//}
-
-//fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters, loggedInPersonUid: Long):
-//        List<PagingSource<Int, StatementEntityAndDisplayDetails>> {
-//
-//    val queries = report.generateSql(loggedInPersonUid, dbType())
-//    val statementDataSourceList = mutableListOf<PagingSource<Int, StatementEntityAndDisplayDetails>>()
-//    queries.forEach {
-//        statementDataSourceList.add(statementDao().getListResults(SimpleDoorQuery(it.value.sqlListStr, it.value.queryParams)))
-//    }
-//    return statementDataSourceList.toList()
-//}
-
-
-//data class ChartData(val seriesData: List<SeriesData>,
-//                     val reportWithFilters: ReportWithSeriesWithFilters,
-//                     val yAxisValueFormatter: LabelValueFormatter?,
-//                     val xAxisValueFormatter: LabelValueFormatter?)
-
-//data class SeriesData(val dataList: List<StatementReportData>,
-//                      val subGroupFormatter: LabelValueFormatter?,
-//                      val series: ReportSeries)
-
 
 /**
  * Gets the maximum number of items that can be in a query parameter of type list. This is 100 on
