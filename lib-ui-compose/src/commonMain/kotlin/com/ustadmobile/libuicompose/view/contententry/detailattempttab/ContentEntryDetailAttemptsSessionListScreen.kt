@@ -35,6 +35,7 @@ import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDuration
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.TimeZone
@@ -104,6 +105,9 @@ fun ContentEntryDetailAttemptsSessionListScreen(
             key = { it.contextRegistrationHi.toInt() }) { attemptsSessionListItem ->
 
             val timeZoneId = remember { TimeZone.currentSystemDefault().id }
+            val formattedDuration = attemptsSessionListItem?.resultDuration?.let {
+                rememberFormattedDuration(timeInMillis = it)
+            }
 
             val formattedDateAndTime = attemptsSessionListItem?.let {
                 rememberFormattedDateTime(
@@ -137,7 +141,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                     )
                 },
                 headlineContent = {
-                    Text(text = statusText)
+                    Text(text = "$statusText - $formattedDuration")
                 },
                 supportingContent = {
                     Column {

@@ -10,6 +10,7 @@ import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentE
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.useFormattedDateAndTime
+import com.ustadmobile.hooks.useFormattedDuration
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
@@ -128,6 +129,13 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                     if (isSettledEmpty) {
                         item("empty_state") {
                             UstadNothingHereYet.create()
+                        }
+                    }
+                    val FormattedDurationComponent = FC<Props> { props ->
+                        val duration = props.asDynamic().duration as Long
+                        val formattedDuration = useFormattedDuration(timeInMillis = duration)
+                        ListItemText {
+                            secondary = ReactNode(formattedDuration)
                         }
                     }
                     infiniteQueryPagingItems(
