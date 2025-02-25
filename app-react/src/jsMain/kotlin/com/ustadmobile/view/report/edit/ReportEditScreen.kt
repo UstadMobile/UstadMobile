@@ -5,7 +5,6 @@ import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
-import com.ustadmobile.core.domain.report.model.ReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
@@ -259,6 +258,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         +ReactNode(strings[MR.strings.time_range] + "*")
                     }
 
+                    /* TODO: Update as per updated prototype with custom period and custom date range options
                     Select {
                         value = series.reportTimeRange?.name ?: ""
                         id = "time_range"
@@ -277,7 +277,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                                 +ReactNode(strings[option.label])
                             }
                         }
-                    }
+                    }*/
                 }
 
                 if (series.reportSeriesFilters?.isNotEmpty() == true) {

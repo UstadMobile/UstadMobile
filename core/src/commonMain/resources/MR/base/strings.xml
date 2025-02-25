@@ -1995,4 +1995,11 @@
 
     <string name="other">Other</string>
 
+    <string name="months">Months</string>
+    <string name="weeks">Weeks</string>
+    <string name="years">Years</string>
+
+    <string name="custom_period">Custom period (e.g. last x days/weeks)</string>
+    <string name="custom_date_range">Custom date range</string>
+
 </resources>

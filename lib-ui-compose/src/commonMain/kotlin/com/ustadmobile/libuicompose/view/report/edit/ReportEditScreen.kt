@@ -33,7 +33,6 @@ import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
-import com.ustadmobile.core.domain.report.model.ReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
@@ -205,6 +204,8 @@ private fun ReportEditScreen(
                     )
 
                     // Time Range Dropdown
+                    /*
+                     * TODO: update as per updated prototype with custom period and custom date range options
                     ExposedDropdownMenu(
                         label = { Text(stringResource(MR.strings.time_range)) },
                         options = ReportTimeRange.entries,
@@ -214,6 +215,7 @@ private fun ReportEditScreen(
                             onSeriesChanged(updatedSeries)
                         }
                     )
+                    */
                 }
             }
 
