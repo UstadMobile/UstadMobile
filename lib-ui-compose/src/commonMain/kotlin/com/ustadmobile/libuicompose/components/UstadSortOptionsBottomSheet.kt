@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.util.SortOrderOption
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
+import com.ustadmobile.libuicompose.util.ext.description
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +35,7 @@ fun UstadSortOptionsBottomSheet(
             text = stringResource(MR.strings.sort_by)
         )
 
-        Divider(thickness = 1.dp)
+        HorizontalDivider(thickness = 1.dp)
 
         Column(
             Modifier.verticalScroll(
@@ -48,17 +49,8 @@ fun UstadSortOptionsBottomSheet(
                         onClickSortOption(sortOption)
                     },
                     headlineContent = {
-                        val fieldText = stringResource(sortOption.fieldMessageId)
-                        val orderText = if (sortOption.order) stringResource(MR.strings.ascending) else stringResource(MR.strings.descending)
-
-                        val finalText = if (sortOption.fieldMessageId == MR.strings.most_recent || sortOption.fieldMessageId == MR.strings.least_recent) {
-                            fieldText // No brackets for "Most Recent" and "Least Recent"
-                        } else {
-                            "$fieldText ($orderText)" // Add (Asc) or (Desc) for other options
-                        }
-
-                        Text(text = finalText)
-                    }
+                        Text(sortOption.description())
+                    },
                 )
             }
         }

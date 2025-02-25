@@ -624,20 +624,28 @@ END ASC
             SELECT word FROM split WHERE word <> '')
         )
     )
-    /* Filter out entries with no duration and duplicates */
-    AND StatementEntity.resultDuration > 0  
+    /* Ensure meaningful entries */
     AND (
-        StatementEntity.extensionProgress > 0  
-        OR (
-            CAST(StatementEntity.resultCompletion AS INTEGER) = 1  
-            AND NOT EXISTS (
-                SELECT 1 FROM StatementEntity s2 
-                WHERE s2.contextRegistrationHi = StatementEntity.contextRegistrationHi
-                AND s2.contextRegistrationLo = StatementEntity.contextRegistrationLo
-                AND s2.statementActorPersonUid = StatementEntity.statementActorPersonUid
-                AND CAST(s2.resultCompletion AS INTEGER) = 1
-                AND s2.timestamp < StatementEntity.timestamp
-            )
+        StatementEntity.resultDuration > 0
+        OR StatementEntity.extensionProgress > 0
+        OR StatementEntity.resultScoreRaw IS NOT NULL
+        OR StatementEntity.resultScoreScaled IS NOT NULL
+        OR CAST(StatementEntity.resultCompletion AS INTEGER) = 1
+    )
+    /* Keep the latest successful or most meaningful statement */
+    AND StatementEntity.timestamp = (
+        SELECT MAX(s2.timestamp)
+        FROM StatementEntity s2
+        WHERE s2.contextRegistrationHi = StatementEntity.contextRegistrationHi
+        AND s2.contextRegistrationLo = StatementEntity.contextRegistrationLo
+        AND s2.statementActorPersonUid = StatementEntity.statementActorPersonUid
+        AND s2.statementContentEntryUid = StatementEntity.statementContentEntryUid
+        AND (
+            s2.resultDuration > 0
+            OR s2.extensionProgress > 0
+            OR s2.resultScoreRaw IS NOT NULL
+            OR s2.resultScoreScaled IS NOT NULL
+            OR CAST(s2.resultCompletion AS INTEGER) = 1
         )
     )
     /* Permission check for viewing user */
@@ -654,11 +662,11 @@ END ASC
               ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
     ORDER BY 
         CASE :sortOrder
-            WHEN $SORT_BY_TIMESTAMP_DESC THEN StatementEntity.resultDuration
+            WHEN $SORT_BY_TIMESTAMP_DESC THEN StatementEntity.timestamp
             ELSE NULL
         END DESC,
         CASE :sortOrder
-            WHEN $SORT_BY_TIMESTAMP_ASC THEN StatementEntity.resultDuration
+            WHEN $SORT_BY_TIMESTAMP_ASC THEN StatementEntity.timestamp
             ELSE NULL
         END ASC,
         CASE :sortOrder
