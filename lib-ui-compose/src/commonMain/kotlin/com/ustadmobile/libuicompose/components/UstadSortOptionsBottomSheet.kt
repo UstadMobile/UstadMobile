@@ -48,14 +48,17 @@ fun UstadSortOptionsBottomSheet(
                         onClickSortOption(sortOption)
                     },
                     headlineContent = {
-                        Text(
-                            stringResource(sortOption.fieldMessageId) + " (" + if(sortOption.order) {
-                                stringResource(MR.strings.ascending)
-                            }else {
-                                stringResource(MR.strings.descending)
-                            } + ")"
-                        )
-                    },
+                        val fieldText = stringResource(sortOption.fieldMessageId)
+                        val orderText = if (sortOption.order) stringResource(MR.strings.ascending) else stringResource(MR.strings.descending)
+
+                        val finalText = if (sortOption.fieldMessageId == MR.strings.most_recent || sortOption.fieldMessageId == MR.strings.least_recent) {
+                            fieldText // No brackets for "Most Recent" and "Least Recent"
+                        } else {
+                            "$fieldText ($orderText)" // Add (Asc) or (Desc) for other options
+                        }
+
+                        Text(text = finalText)
+                    }
                 )
             }
         }

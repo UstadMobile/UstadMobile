@@ -77,13 +77,17 @@ val UstadListSortHeader = FC<UstadListSortHeaderProps> { props ->
                     props.onClickSort(option)
                 }
 
-                + strings[option.fieldMessageId]
-                val orderLabel = if(option.order) {
-                    strings[MR.strings.ascending]
-                }else {
-                    strings[MR.strings.descending]
+                +strings[option.fieldMessageId]
+
+                if (option.fieldMessageId != MR.strings.most_recent &&
+                    option.fieldMessageId != MR.strings.least_recent) {
+                    val orderLabel = if(option.order) {
+                        strings[MR.strings.ascending]
+                    } else {
+                        strings[MR.strings.descending]
+                    }
+                    +" ($orderLabel)"
                 }
-                +" ($orderLabel)"
             }
         }
 

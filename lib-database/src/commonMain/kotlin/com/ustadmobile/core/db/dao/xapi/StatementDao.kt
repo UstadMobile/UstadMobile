@@ -28,7 +28,7 @@ import com.ustadmobile.lib.db.composites.AttemptsPersonListConst
 import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
-import com.ustadmobile.lib.db.composites.xapi.StatementConst
+import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfoConst
 import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_SCORE_ASC
 import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_SCORE_DESC
 import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_TIMESTAMP_ASC
@@ -548,31 +548,29 @@ expect abstract class StatementDao {
                 OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
                     ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
                     ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))      
-         ORDER BY  
+ORDER BY  
 CASE :sortOrder
-    WHEN 1 THEN timeStarted
-    WHEN 8 THEN timeStarted
+    WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_TIMESTAMP_DESC} THEN timeStarted
     ELSE NULL
 END DESC,
 CASE :sortOrder
-    WHEN 2 THEN timeStarted
-    WHEN 7 THEN timeStarted
+    WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_TIMESTAMP_ASC} THEN timeStarted
     ELSE NULL
 END ASC,
 CASE :sortOrder
-    WHEN 4 THEN maxScore
+    WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_SCORE_DESC} THEN maxScore
     ELSE NULL
 END DESC,
 CASE :sortOrder
-    WHEN 3 THEN maxScore
+    WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_SCORE_ASC} THEN maxScore
     ELSE NULL
 END ASC,
 CASE :sortOrder
-    WHEN 6 THEN maxProgress
+    WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_COMPLETION_DESC} THEN maxProgress
     ELSE NULL
 END DESC,
 CASE :sortOrder
-    WHEN 5 THEN maxProgress
+    WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_COMPLETION_ASC} THEN maxProgress
     ELSE NULL
 END ASC
          

@@ -29,6 +29,8 @@ import kotlinx.datetime.TimeZone
 import mui.icons.material.CalendarToday
 import mui.icons.material.Check
 import mui.icons.material.Close
+import mui.icons.material.HighlightOffOutlined
+import mui.icons.material.Star
 import mui.material.Box
 import mui.material.Container
 import mui.material.LinearProgress
@@ -165,12 +167,14 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                     }
                                     ListItemIcon {
                                         when {
-                                            attemptsSessionListItems?.isSuccessful == true || attemptsSessionListItems?.isCompleted == true -> {
-                                                Check()
+                                            attemptsSessionListItems?.isSuccessful == true -> {
+                                                Star()
                                             }
-
+                                            attemptsSessionListItems?.isSuccessful == false -> {
+                                                HighlightOffOutlined()
+                                            }
                                             else -> {
-                                                Close()
+                                                Check()
                                             }
                                         }
 
@@ -179,6 +183,7 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                             marginRight = 4.px
                                         }
                                     }
+
 
                                     ListItemText {
                                         primary = ReactNode(

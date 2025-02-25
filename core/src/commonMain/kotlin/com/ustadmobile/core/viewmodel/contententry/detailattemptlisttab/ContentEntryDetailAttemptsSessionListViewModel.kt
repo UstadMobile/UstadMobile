@@ -5,14 +5,12 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfoConst
-import com.ustadmobile.lib.db.composites.xapi.StatementConst
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
@@ -24,9 +22,7 @@ data class ContentEntryDetailAttemptsSessionListUiState(
     val attemptsSessionList: () -> PagingSource<Int, SessionTimeAndProgressInfo> = { EmptyPagingSource() },
     val sortOptions: List<SortOrderOption> = listOf(
         SortOrderOption(MR.strings.most_recent, SessionTimeAndProgressInfoConst.SORT_BY_TIMESTAMP_DESC, true),
-        SortOrderOption(MR.strings.most_recent, SessionTimeAndProgressInfoConst.SORT_BY_TIMESTAMP_ASC, false),
-        SortOrderOption(MR.strings.least_recent, SessionTimeAndProgressInfoConst.SORT_BY_LEAST_RECENT_DESC, true),
-        SortOrderOption(MR.strings.least_recent, SessionTimeAndProgressInfoConst.SORT_BY_LEAST_RECENT_ASC, false),
+        SortOrderOption(MR.strings.least_recent, SessionTimeAndProgressInfoConst.SORT_BY_TIMESTAMP_ASC, false),
         SortOrderOption(MR.strings.by_score, SessionTimeAndProgressInfoConst.SORT_BY_SCORE_ASC, true),
         SortOrderOption(MR.strings.by_score, SessionTimeAndProgressInfoConst.SORT_BY_SCORE_DESC, false),
         SortOrderOption(MR.strings.by_completion, SessionTimeAndProgressInfoConst.SORT_BY_COMPLETION_ASC, true),

@@ -52,7 +52,7 @@
     <string name="by_score">Score</string>
     <string name="by_completion">Completion Percent</string>
     <string name="by_recent_attempt">Most Recent Attempt Time</string>
-    <string name="by_timestamp">Timestamp</string>
+    <string name="by_timestamp">Time Stamp</string>
     <string name="register_now">Register Now</string>
     <string name="new_password">New password</string>
     <string name="phone_memory">Phone memory</string>
@@ -299,8 +299,8 @@
     <string name="xapi_verb_header">Did what</string>
     <string name="xapi_result_header">Result</string>
     <string name="xapi_score">Score (%)</string>
-    <string name="content_score">Score</string>
-    <string name="content_percentage_completion">Completion</string>
+    <string name="content_score">score</string>
+    <string name="content_percentage_completion">completion</string>
     <string name="import_title_not_entered">Title not entered</string>
     <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>

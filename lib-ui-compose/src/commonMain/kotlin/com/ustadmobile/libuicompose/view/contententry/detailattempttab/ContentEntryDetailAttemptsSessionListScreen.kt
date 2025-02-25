@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -49,7 +49,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
         uiState = uiState.value,
         refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickEntry = viewModel::onClickEntry,
-
+        onSortOrderChanged = viewModel::onSortOrderChanged
         )
 }
 
@@ -73,7 +73,6 @@ fun ContentEntryDetailAttemptsSessionListScreen(
     val percentageScore = stringResource(MR.strings.content_score)
     val passed = stringResource(MR.strings.passed)
     val failed = stringResource(MR.strings.failed)
-
     val completed = stringResource(MR.strings.completed)
     val incomplete = stringResource(MR.strings.incomplete)
 
@@ -137,7 +136,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                     Icon(
                         imageVector = when {
                             attemptsSessionListItem?.isSuccessful == true -> Icons.Filled.Star // Star for passed
-                            attemptsSessionListItem?.isSuccessful == false -> Icons.Filled.Close // Cross for failed
+                            attemptsSessionListItem?.isSuccessful == false -> Icons.Filled.Cancel // Cross for failed
                             else -> Icons.Filled.Check // Check for completed
                         },
                         contentDescription = null,
