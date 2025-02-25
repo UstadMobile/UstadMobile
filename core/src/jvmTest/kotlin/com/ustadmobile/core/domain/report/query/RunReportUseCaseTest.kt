@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
+import com.ustadmobile.core.domain.report.model.ReportTimeRangeOption
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.door.DatabaseBuilder
@@ -21,7 +22,6 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class RunReportUseCaseTest {
 
@@ -83,23 +83,20 @@ class RunReportUseCaseTest {
                             ReportSeries2(
                                 reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
                             )
-                        )
+                        ),
+                        timeRange = ReportTimeRangeOption.LAST_WEEK.timeRange,
                     ),
                     accountPersonUid = 1L,
                 )
             )
         }.results.first()
 
-        assertEquals(defaultNumDays, results.size, "results size equals number of days")
-        assertTrue(
-            results.all { it.yAxis == (defaultDurationPerStatement * defaultNumStatementsPerDay).toDouble() },
-            "all results have expected total duration per day"
-        )
+        assertEquals(7, results.size,
+            "result size equals number of days of reporting period - LAST_WEEK - 7 days")
 
         (0 until defaultNumDays).forEach { day ->
             val localDate = Instant.fromEpochMilliseconds(fromTimeEpoch + (day * (MS_PER_HOUR * 24)))
                 .toLocalDateTime(TimeZone.UTC).date
-            localDate.toString()
 
             assertEquals(
                 expected = (defaultDurationPerStatement * defaultNumStatementsPerDay).toDouble(),

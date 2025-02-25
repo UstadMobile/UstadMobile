@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.report.model
 
 import com.ustadmobile.core.MR
 import dev.icerock.moko.resources.StringResource
+import kotlinx.datetime.DatePeriod
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -44,10 +45,11 @@ enum class ReportSeriesVisualType(override val label: StringResource) :
 enum class ReportXAxis(
     override val label: StringResource,
     val personJoinRequired: Boolean = false,
+    val datePeriod: DatePeriod? = null,
 ) : OptionWithLabelStringResource {
-    DAY(MR.strings.day),
-    WEEK(MR.strings.weekly),
-    MONTH(MR.strings.monthly),
+    DAY(MR.strings.day, datePeriod = DatePeriod(days = 1)),
+    WEEK(MR.strings.weekly, datePeriod = DatePeriod(days = 7)),
+    MONTH(MR.strings.monthly, datePeriod = DatePeriod(months = 1)),
     CLASS(MR.strings.class_name),
     GENDER(MR.strings.gender_literal, personJoinRequired = true),
     NONE(MR.strings.none);

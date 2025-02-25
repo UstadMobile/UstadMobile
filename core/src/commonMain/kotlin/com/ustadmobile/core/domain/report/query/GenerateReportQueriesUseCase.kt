@@ -18,6 +18,8 @@ class GenerateReportQueriesUseCase {
         /*
          * strftime should be able to use %F to create an iso formatted date, unfortunately, this
          * doesn't work across all SQLite versions, so '%Y-%m-%d' is used instead
+         *
+         * See https://www.sqlite.org/lang_datefunc.html
          */
         return buildString {
             when(field) {
