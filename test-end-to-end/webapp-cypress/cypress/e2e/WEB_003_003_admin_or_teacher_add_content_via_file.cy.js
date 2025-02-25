@@ -1,4 +1,4 @@
-describe('WEB_003_005_admin_or_teacher_and_content_via_file', () => {
+describe('WEB_003_003_admin_or_teacher_add_content_via_file', () => {
   before(() => {
     // Start Test Server
     cy.ustadStartTestServer(6000)
@@ -35,11 +35,9 @@ it('Teacher able to add content block from file', () => {
   cy.contains('Import from file').click()
   cy.get('input[type="file"]')
     .selectFile('../test-files/content/Epub_Content1.epub',{force: true})
-
-  //Continue import
+ //Continue import
   cy.contains('#actionBarButton', 'Next').click()
-
-  //Set CourseBlock title
+ //Set CourseBlock title
   cy.contains("#appbar_title", "Edit content block").should("be.visible")
   cy.get('input[id="title"]').click()
   cy.get('input[id="title"]').clear().type('Content_002',{timeout: 2000})
@@ -48,10 +46,9 @@ it('Teacher able to add content block from file', () => {
   cy.contains('button','Edit').should('exist')
   cy.contains("Content_001").should('exist')
   cy.contains('Content_002').should('exist')
-
 })
 
-it('Student-1, Attempt 1, Video content-10%', () => {
+it('Student-1, Attempt 1, Video content-for 2 sec', () => {
   cy.ustadClearDbAndLogin('stud1', 'tests1', { timeout: 8000 });
   cy.contains('Test Course Block').click();
   cy.contains("Content_001").click();
@@ -61,11 +58,10 @@ it('Student-1, Attempt 1, Video content-10%', () => {
     .then($video => {
       $video[0].play();
     });
-
-  cy.wait(2000); // Wait for 5 seconds
+  cy.wait(2000); // Wait for 2 seconds to get progress verb for test
 })
 
-it('Student-1, Attempt-2, video content', () => {
+it('Student-1, Attempt-2, video content - 100%', () => {
   cy.ustadClearDbAndLogin('stud1', 'tests1', { timeout: 8000 });
   cy.contains('Test Course Block').click();
   cy.contains("Content_001").click();
@@ -74,14 +70,13 @@ it('Student-1, Attempt-2, video content', () => {
   cy.get('video')
     .then($video => {
       $video[0].play();
-    });
-
-  cy.wait(11000); // Wait for 11 seconds
+    })
+  cy.wait(10500)  // {timeout:15000} didn't work so added wait to make sure the video makes 100% completion
   cy.get('video')
     .should('have.prop', 'ended', true);
 })
 
-it('Student-2 user makes attempts on video', () => {
+it('Student-2 user makes attempts on video-2 sec', () => {
   cy.ustadClearDbAndLogin('stud2', 'tests2', { timeout: 8000 });
   cy.contains('Test Course Block').click();
   cy.contains("Content_001").click();
@@ -91,7 +86,7 @@ it('Student-2 user makes attempts on video', () => {
     .then($video => {
       $video[0].play();
     });
-  cy.wait(2000); // Wait for 2 seconds
+  cy.wait(2000) // Wait for 2 seconds to get progress verb for test
 });
 
 it('Student-3 user makes attempts on epub', () => {
@@ -111,21 +106,31 @@ it('Student-1 user able to see attempts made on content 1', () => {
   cy.contains("Content_001").click();
   cy.contains("button", "Attempts", { timeout: 8000 }).click();
   cy.contains("Attempts: 1").should('exist');
-  cy.get('.MuiStack-root')
-    .parent() // Get the parent container
-    .find('span[role="progressbar"]')
-    .should('exist');
-  cy.contains('100% Completion').should('exist');
- // Assert progress bar visible
-  cy.contains("Student 1").click();
-  cy.contains('Completed').should('exist');
-  cy.contains('100% Completion').should('exist');
+  cy.get("#appbar_title").contains("Content_001").should("exist")
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').first().should('exist')
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').last().should('exist')
+  cy.contains("Student 1").click()
+  cy.get("#appbar_title").contains("Student 1 - Content_001").should("exist")
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').first().should('exist')
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').last().should('exist')
+  cy.contains('Completed').should('exist')
+  cy.contains('100% Completion').should('exist')
   cy.contains('Completed').click()
-  cy.contains('Completion: 100%').should('exist');
-  cy.get('.MuiStack-root')
-    .parent() // Get the parent container
-    .find('span[role="progressbar"]')
-    .should('exist');
+  cy.get("#appbar_title").contains("Content_001").should("exist")
+  cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
+  cy.contains("Completed").should("exist")
+    //cy.contains("Completed - title here").should('exist') // title of the question/page
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('exist')
+  cy.contains("100% Completion").should("exist")
+  cy.contains("Completed").click() // testing filter chip
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
+  cy.get("svg[data-testid='CheckIcon']").should('not.exist')
 })
 
 it('Student2 user able to see epub content attempts made', () => {
@@ -134,23 +139,20 @@ it('Student2 user able to see epub content attempts made', () => {
   cy.contains('Test Course Block').click();
   cy.contains("Content_001").click();
   cy.contains("button", "Attempts", { timeout: 8000 }).click();
+  cy.get("#appbar_title").contains("Content_001").should("exist")
   cy.contains("Attempts: 1").should('exist');
-  cy.get('.MuiStack-root')
-    .parent() // Get the parent container
-    .find('span[role="progressbar"]')
-    .should('exist');
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
  // Assert progress bar visible
-  cy.contains("Student 2").click();
-  cy.contains('Incomplete').should('exist');
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
+  cy.contains("Student 2").click()
+  cy.get("#appbar_title").contains("Student 2 - Content_001").should("exist")
+  cy.contains('Incomplete').should('exist')
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
   cy.contains('Incomplete').click()
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
+  cy.get("#appbar_title").contains("Content_001").should("exist")
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
 
 })
 
@@ -160,26 +162,22 @@ it('Student3 user able to see epub content attempts made', () => {
   cy.contains('Test Course Block').click();
   cy.contains('Content_002').click();
   cy.contains("button", "Attempts").click();
- // Assert progress bar visible
+  cy.get("#appbar_title").contains("Content_002").should("exist")
   cy.contains("Attempts: 1").should('exist');
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
   cy.contains("Student 3").click();
+  cy.get("#appbar_title").contains("Student 3 - Content_002").should("exist")
  // Assert attempt score, completion, duration visible
   cy.contains('Incomplete').should('exist');
-  cy.get('svg[data-testid="TimerIcon"]').should('exist');
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
+  cy.get("svg[data-testid='CalendarTodayIcon']").should('exist')
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
   cy.contains('Incomplete').click();
+  cy.get("#appbar_title").contains("Content_002").should("exist")
   cy.contains("[data-testid='CloseIcon']").should('not.exist'); // wrong icon
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
 });
 
 it('Teacher user can see student users attempts', () => {
@@ -188,77 +186,67 @@ it('Teacher user can see student users attempts', () => {
   cy.contains('Test Course Block').click();
   cy.contains('Content_001').click();
   cy.contains("button", "Attempts").click();
+  cy.get("#appbar_title").contains("Content_001").should("exist")
  // Assert progress bar visible
   cy.contains('100% Completion').should('exist');
   cy.contains("Attempts: 1").should('exist');
   cy.contains("Student 1").click();
+  cy.get("#appbar_title").contains("Student 1 - Content_001").should("exist")
  // Assert attempt completion, duration visible
   cy.contains('Completed').should('exist');
   cy.contains('100% Completion').should('exist');
   cy.contains('Completed').click()
-  cy.contains('Completion: 100%').should('exist');
-
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
+  cy.contains('100% completion').should('exist');
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('exist')
  // verify filter - completed filter chip is tested
   cy.get('#completed_button').click()
-  cy.contains('Completion: 100%').should('exist');
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
+  cy.contains('100% completion').should('exist');
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
 
 // *** student 2  **** //
   cy.contains('Courses').click()
   cy.contains('Test Course Block').click();
   cy.contains('Content_001').click();
   cy.contains("button", "Attempts").click();
+  cy.get("#appbar_title").contains("Content_001").should("exist")
  // Assert progress bar visible
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
   cy.contains("Attempts: 1").should('exist');
   cy.contains("Student 2").click();
+  cy.get("#appbar_title").contains("Student 2 - Content_001").should("exist")
  // Assert attempt completion, duration visible
   cy.contains("Student 2").click();
-  cy.contains('Incomplete').should('exist');
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
+  cy.contains('Incomplete').should('exist')
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
   cy.contains('Incomplete').click()
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
+  cy.get("#appbar_title").contains("Content_001").should("exist")
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
 // *** student 3  **** //
   cy.contains('Courses').click()
   cy.contains('Test Course Block').click();
   cy.contains('Content_002').click();
-  cy.contains("button", "Attempts").click();
+  cy.contains("button", "Attempts").click()
+  cy.get("#appbar_title").contains("Content_002").should("exist")
  // Assert progress bar visible
   cy.contains("Student 3").should('exist');
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
   cy.contains("Attempts: 1").should('exist');
   cy.contains("Student 3").click();
+  cy.get("#appbar_title").contains("Student 3 - Content_002").should("exist")
  // Assert attempt completion, duration visible
   cy.contains('Incomplete').should('exist');
-  cy.get('svg[data-testid="TimerIcon"]').should('exist');
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
-  cy.contains('Incomplete').click();
-  cy.get('.MuiStack-root')
-      .parent() // Get the parent container
-      .find('span[role="progressbar"]')
-      .should('exist');
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
+  cy.contains('Incomplete').click()
+  cy.get("#appbar_title").contains("Student 3 - Content_002").should("exist")
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
 })
 
 it('Student2 cannot see Student1 users attempt', () => {
@@ -266,6 +254,7 @@ it('Student2 cannot see Student1 users attempt', () => {
   cy.contains('Test Course Block').click();
   cy.contains("Content_002").click();
   cy.contains("button", "Attempts").click();
+  cy.get("#appbar_title").contains("Content_002").should("exist")
  // Assert attempts are not visible
   cy.contains('Nothing here, yet').should('exist');
 })

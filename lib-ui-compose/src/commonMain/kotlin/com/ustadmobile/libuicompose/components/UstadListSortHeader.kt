@@ -25,6 +25,7 @@ import com.ustadmobile.core.util.SortOrderOption
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.libuicompose.util.defaultSortListMode
+import com.ustadmobile.libuicompose.util.ext.description
 
 enum class SortListMode {
 
@@ -57,16 +58,17 @@ fun UstadListSortHeader(
 
             Spacer(Modifier.width(8.dp))
 
+
             Icon(
-                imageVector = if(activeSortOrderOption.order)
+                imageVector = if(activeSortOrderOption.order != false)
                     Icons.Default.ArrowDownward
                 else
                     Icons.Default.ArrowUpward,
-                contentDescription = stringResource(if(activeSortOrderOption.order) {
-                    MR.strings.ascending
-                }else {
-                    MR.strings.descending
-                }),
+                contentDescription = when(activeSortOrderOption.order) {
+                    null -> null
+                    true -> stringResource(MR.strings.ascending)
+                    false -> stringResource(MR.strings.descending)
+                },
                 modifier = Modifier.size(16.dp)
             )
 
@@ -83,13 +85,7 @@ fun UstadListSortHeader(
                                     onClickSortOption(sortOption)
                                 },
                                 text = {
-                                    Text(
-                                        stringResource(sortOption.fieldMessageId) + " (" + if(sortOption.order) {
-                                            stringResource(MR.strings.ascending)
-                                        }else {
-                                            stringResource(MR.strings.descending)
-                                        } + ")"
-                                    )
+                                    Text(sortOption.description())
                                 }
                             )
                         }
