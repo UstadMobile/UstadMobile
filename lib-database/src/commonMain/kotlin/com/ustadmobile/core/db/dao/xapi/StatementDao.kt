@@ -541,23 +541,33 @@ expect abstract class StatementDao {
                 OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
                     ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
                     ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))      
-          ORDER BY  
-   CASE :sortOrder
-       WHEN 1 THEN timeStarted
-       ELSE ''
-   END DESC,
-   CASE :sortOrder
-       WHEN 2 THEN timeStarted
-       ELSE ''
-   END ASC,
-   CASE :sortOrder
-       WHEN 4 THEN maxScore
-       ELSE ''
-   END ASC,
-   CASE :sortOrder
-       WHEN 3 THEN maxScore
-       ELSE ''
-   END DESC
+         ORDER BY  
+CASE :sortOrder
+    WHEN 1 THEN timeStarted
+    WHEN 8 THEN timeStarted
+    ELSE NULL
+END DESC,
+CASE :sortOrder
+    WHEN 2 THEN timeStarted
+    WHEN 7 THEN timeStarted
+    ELSE NULL
+END ASC,
+CASE :sortOrder
+    WHEN 4 THEN maxScore
+    ELSE NULL
+END DESC,
+CASE :sortOrder
+    WHEN 3 THEN maxScore
+    ELSE NULL
+END ASC,
+CASE :sortOrder
+    WHEN 6 THEN maxProgress
+    ELSE NULL
+END DESC,
+CASE :sortOrder
+    WHEN 5 THEN maxProgress
+    ELSE NULL
+END ASC
          
    """)
     abstract fun findSessionsByPersonAndContent(

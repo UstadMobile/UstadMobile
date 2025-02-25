@@ -25,4 +25,7 @@ object SessionTimeAndProgressInfoConst{
     const val SORT_BY_COMPLETION_ASC = 5
     const val SORT_BY_COMPLETION_DESC = 6
 
+    const val SORT_BY_LEAST_RECENT_DESC = 7
+    const val SORT_BY_LEAST_RECENT_ASC = 8
+
 }

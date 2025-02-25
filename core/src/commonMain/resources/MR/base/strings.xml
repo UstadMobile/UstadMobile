@@ -48,10 +48,11 @@
     <string name="confirm_password">Confirm password</string>
     <string name="last_name">Last name</string>
     <string name="first_name">First name</string>
-    <string name="by_score">By Score</string>
-    <string name="by_completion">By Completion</string>
-    <string name="by_recent_attempt">By Recent Attempt</string>
-    <string name="by_timestamp">By Timestamp</string>
+    <string name="least_recent">Least Recent</string>
+    <string name="by_score">Score</string>
+    <string name="by_completion">Completion Percent</string>
+    <string name="by_recent_attempt">Most Recent Attempt Time</string>
+    <string name="by_timestamp">Timestamp</string>
     <string name="register_now">Register Now</string>
     <string name="new_password">New password</string>
     <string name="phone_memory">Phone memory</string>
