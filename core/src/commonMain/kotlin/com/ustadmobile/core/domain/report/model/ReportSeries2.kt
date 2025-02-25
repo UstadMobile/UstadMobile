@@ -21,16 +21,21 @@ data class ReportSeries2(
 
 )
 
-
+enum class YAxisTypes {
+    COUNT, DURATION,
+}
 /** Enum representing different Y-axis or report series options */
-enum class ReportSeriesYAxis(override val label: StringResource) : OptionWithLabelStringResource {
-    TOTAL_DURATION(MR.strings.total_duration),
-    AVERAGE_DURATION(MR.strings.average_duration),
-    NUMBER_SESSIONS(MR.strings.number_sessions),
-    INTERACTIONS_RECORDED(MR.strings.interactions_recorded),
-    NUMBER_ACTIVE_USERS(MR.strings.number_active_users),
-    AVERAGE_USAGE_TIME_PER_USER(MR.strings.average_usage_time_per_user),
-    NONE(MR.strings.none);
+enum class ReportSeriesYAxis(
+    override val label: StringResource,
+    val type: YAxisTypes
+) : OptionWithLabelStringResource {
+    TOTAL_DURATION(MR.strings.total_duration, YAxisTypes.DURATION),
+    AVERAGE_DURATION(MR.strings.average_duration, YAxisTypes.DURATION),
+    NUMBER_SESSIONS(MR.strings.number_sessions, YAxisTypes.COUNT),
+    INTERACTIONS_RECORDED(MR.strings.interactions_recorded, YAxisTypes.COUNT),
+    NUMBER_ACTIVE_USERS(MR.strings.number_active_users, YAxisTypes.COUNT),
+    AVERAGE_USAGE_TIME_PER_USER(MR.strings.average_usage_time_per_user,YAxisTypes.DURATION),
+    NONE(MR.strings.none, YAxisTypes.COUNT),
 }
 
 /** Enum representing different visual types for report series */
@@ -65,3 +70,16 @@ enum class GenderType(override val label: StringResource) : OptionWithLabelStrin
     FEMALE(MR.strings.female),
     OTHER(MR.strings.other);
 }
+enum class SeriesType { BAR, LINE }
+
+data class ReportResultQueryRow(
+    val yAxis: Double,
+    val xAxis: String,
+    val subgroup: String? = null
+)
+
+data class GraphSeries(
+    val type: SeriesType,
+    val data: List<ReportResultQueryRow>,
+    val name: String,
+)
