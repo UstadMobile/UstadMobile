@@ -213,6 +213,11 @@ Screens must use default margins and colors provided by the platform theme (Jetp
 this is 16.dp between screen edge and components, and between components. ```ListItem``` already includes padding so it should not be added. Components other
 than ListItem should use ```Modifier.defaultItemPadding()``` for this.
 
+Dates, times, and timestamps (e.g. date and time combined) are formatted using ```rememberDateFormat``` and ```useFormattedDate``` functions etc. These
+functions use the user's locale to format date/time accordingly. Unless otherwise noted in writing, any date, time, or timestamp should
+use the existing formatters (the formatting shown on the prototype may vary from the result of using the function, and the functions result will be 
+deemed correct.
+
 Android Jetpack Compose:
 ```
 /*
