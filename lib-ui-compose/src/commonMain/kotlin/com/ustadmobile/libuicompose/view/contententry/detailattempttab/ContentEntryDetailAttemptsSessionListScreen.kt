@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -35,6 +34,7 @@ import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDuration
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.TimeZone
@@ -113,10 +113,21 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                 )
             }
 
-            // Construct status and duration text
+            val formattedDuration = attemptsSessionListItem?.let {
+                rememberFormattedDuration(
+                    timeInMillis = it.timeStarted,
+                )
+            }
+
+
+
             val statusText = when {
-                attemptsSessionListItem?.isSuccessful == true -> "$passed"
-                attemptsSessionListItem?.isSuccessful == false -> "$failed"
+                attemptsSessionListItem?.isSuccessful == true -> {
+                    if (formattedDuration != null) "$passed - $formattedDuration" else "$passed"
+                }
+                attemptsSessionListItem?.isSuccessful == false -> {
+                    if (formattedDuration != null) "$failed - $formattedDuration" else "$failed"
+                }
                 attemptsSessionListItem?.isCompleted == true -> completed
                 else -> incomplete
             }

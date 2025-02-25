@@ -43,9 +43,10 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
-import com.ustadmobile.libuicompose.util.rememberFormattedDuration
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.TimeZone
 
 @Composable
 fun ContentEntryDetailAttemptsStatementListScreen(
@@ -108,9 +109,16 @@ fun ContentEntryDetailAttemptsStatementList(
             key = { it.statementEntity?.statementIdHi ?: -1 }
         ) { attemptsStatementListItems ->
             val statementEntity = attemptsStatementListItems?.statementEntity
-            val formattedDuration = statementEntity?.resultDuration?.let {
-                rememberFormattedDuration(timeInMillis = it)
-            }
+
+            val formattedTimestamp = statementEntity?.timestamp?.let {
+                rememberFormattedDateTime(
+                    timeInMillis = it,
+                    timeZoneId = TimeZone.currentSystemDefault().id,
+                    joinDateAndTime = { date, time ->
+                        "$date, $time"
+                    }
+                )
+            } ?: "N/A"
 
             val progress = statementEntity?.extensionProgress?.takeIf { it > 0 }?.div(100f)
                 ?: statementEntity?.let { entity ->
@@ -163,7 +171,7 @@ fun ContentEntryDetailAttemptsStatementList(
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                             Text(
-                                text = formattedDuration ?: "N/A",
+                                text = formattedTimestamp ?: "N/A",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }

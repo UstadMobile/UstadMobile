@@ -9,7 +9,7 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
-import com.ustadmobile.hooks.useFormattedDuration
+import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
@@ -24,10 +24,9 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.datetime.TimeZone
+import mui.icons.material.CalendarToday
 import mui.icons.material.Check
-import mui.icons.material.Close
-import mui.icons.material.Star
-import mui.icons.material.Timer
 import mui.icons.material.Work
 import mui.material.Box
 import mui.material.Chip
@@ -164,11 +163,15 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                 }
             }
 
-            val FormattedDurationComponent = FC<Props> { props ->
-                val duration = props.asDynamic().duration as Long
-                val formattedDuration = useFormattedDuration(timeInMillis = duration)
+
+            val FormattedTimestampComponent = FC<Props> { props ->
+                val timestamp = props.asDynamic().timestamp as Long
+                val formattedTimestamp =  useFormattedDateAndTime(
+                    timeInMillis = timestamp,
+                    timezoneId = TimeZone.currentSystemDefault().id
+                )
                 ListItemText {
-                    secondary = ReactNode(formattedDuration)
+                    secondary = ReactNode(formattedTimestamp)
                 }
             }
 
@@ -214,13 +217,13 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
 
                         ListItemButton {
                             ListItemIcon {
-                                Timer()
+                                CalendarToday()
                                 sx {
                                     padding = theme.spacing(1, 1, 1, 5)
                                 }
                             }
-                            FormattedDurationComponent {
-                                this.asDynamic().duration = attemptsStatementListItems?.statementEntity?.resultDuration ?: 0L
+                            FormattedTimestampComponent {
+                                this.asDynamic().timestamp = attemptsStatementListItems?.statementEntity?.timestamp ?: 0L
                             }
                         }
 

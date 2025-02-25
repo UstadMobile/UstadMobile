@@ -49,6 +49,10 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         contextRegistrationLo: Long,
     ): PagingSource<Int, StatementEntityAndVerb> {
         val state = _uiState.value
+
+        if (state.availableVerbs.isNotEmpty() && state.selectedVerbIds.isEmpty()) {
+            return EmptyPagingSource()
+        }
         return activeRepo.statementDao().findStatementsBySession(
             registrationHi = contextRegistrationHi,
             registrationLo = contextRegistrationLo,
