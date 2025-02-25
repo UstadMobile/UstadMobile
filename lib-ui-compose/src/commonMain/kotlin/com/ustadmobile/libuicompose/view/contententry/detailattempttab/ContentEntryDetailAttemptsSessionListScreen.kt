@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
@@ -116,12 +116,6 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                 )
             }
 
-            val formattedDuration = attemptsSessionListItem?.let {
-                rememberFormattedDuration(
-                    timeInMillis = it.timeStarted,
-                )
-            }
-
 
 
             val statusText = when {
@@ -151,7 +145,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                     )
                 },
                 headlineContent = {
-                    Text(text = "$statusText - $formattedDuration")
+                    Text(text = "$statusText")
                 },
                 supportingContent = {
                     Column {
@@ -161,7 +155,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                                 verticalAlignment = Alignment.CenterVertically // Ensure both elements align at center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.Timer,
+                                    imageVector = Icons.Filled.CalendarToday,
                                     contentDescription = null,
                                 )
                                 Text(

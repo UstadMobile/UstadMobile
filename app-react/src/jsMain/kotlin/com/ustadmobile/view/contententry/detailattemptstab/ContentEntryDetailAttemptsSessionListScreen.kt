@@ -131,13 +131,7 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                             UstadNothingHereYet.create()
                         }
                     }
-                    val FormattedDurationComponent = FC<Props> { props ->
-                        val duration = props.asDynamic().duration as Long
-                        val formattedDuration = useFormattedDuration(timeInMillis = duration)
-                        ListItemText {
-                            secondary = ReactNode(formattedDuration)
-                        }
-                    }
+
                     infiniteQueryPagingItems(
                         items = infiniteQueryResult,
                         key = { it.contextRegistrationHi.toString() }
@@ -151,7 +145,7 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                             }
 
                         val formattedDuration =
-                            attemptsSessionListItems?.timeStarted?.let { it1 ->
+                            attemptsSessionListItems?.resultDuration?.let { it1 ->
                                 useFormattedDuration(
                                     timeInMillis = it1,
                                 )
