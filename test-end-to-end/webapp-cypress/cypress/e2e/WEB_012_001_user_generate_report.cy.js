@@ -1,4 +1,4 @@
-describe('WEB_001_001_add_content', () => {
+describe('WEB_012_001_user_generate_report', () => {
   before(() => {
     // Start Test Server
     cy.ustadStartTestServer(6000)
@@ -10,7 +10,7 @@ it('Teacher generate report', () => {
   cy.ustadClearDbAndLogin('teach1','testt1',{timeout:8000})
   cy.contains("Reports").click()
   cy.get("svg[data-testid='AddIcon']").click()
-  cy.get("#title").click().type("Test1")
+  cy.get("#title").click().type("Test1)")
   cy.get('div[id="x_axis"]').click()
   cy.contains("Day").click()
   cy.get('input[id="series_title"]').type("Usage time by day this week")
@@ -33,6 +33,14 @@ it('Teacher generate report', () => {
   cy.get('#Value').click().type('13')
   cy.get('#actionBarButton').click()
   cy.get('#actionBarButton').click()
+// screenshot will be saved as
+// cypress/screenshots/spec.cy.js/bar_chart_graph_report
+  cy.screenshot('bar_chart_graph_report')
+  cy.contains('button','Edit').click()
+  cy.get('div[id="chart_type"]').click()
+  cy.contains("Line Chart").click()
+  cy.get('#actionBarButton').click()
+  cy.screenshot('Line_chart_graph_report')
   cy.contains("Reports").click()
   cy.contains("Test1").should("exist")
   cy.get("svg[data-testid='DeleteIcon']").should("exist")
