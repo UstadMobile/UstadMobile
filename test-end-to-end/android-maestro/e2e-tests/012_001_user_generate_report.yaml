@@ -64,8 +64,15 @@ onFlowComplete:
 - inputText: "13"
 - tapOn: "Done"
 - tapOn: "Done"
-#- assertVisible: "Detail Screen" -- this need to be validated later
+- takeScreenshot: "${TESTRESULTSDIR}/bar_chart_graph_report"
 - tapOn: "Reports"
 - assertVisible: "Test Report"
 - tapOn: "Test Report"
-#- assertVisible: "Detail Screen"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Chart type"
+- tapOn: "Line Chart"
+- tapOn: "Done"
+- assertVisible: "Share"
+- assertVisible: "Export data"
+- takeScreenshot: "${TESTRESULTSDIR}/line_chart_graph_report"
