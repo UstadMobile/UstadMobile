@@ -517,7 +517,14 @@ expect abstract class StatementDao {
                               AND StatementEntity.resultSuccess IS NOT NULL
                               AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0) THEN 0
                       ELSE NULL
-                      END) AS isSuccessful
+                      END) AS isSuccessful,
+                      (SELECT MAX(StatementEntity.resultDuration)
+                 FROM StatementEntity
+                WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                  AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                  AND StatementEntity.statementActorPersonUid = :personUid
+                  AND StatementEntity.statementContentEntryUid = :contentEntryUid
+              ) AS resultDuration
          FROM DistinctRegistrationUids
          WHERE (    :personUid = :accountPersonUid 
                 OR EXISTS(

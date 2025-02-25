@@ -104,6 +104,9 @@ fun ContentEntryDetailAttemptsSessionListScreen(
             key = { it.contextRegistrationHi.toInt() }) { attemptsSessionListItem ->
 
             val timeZoneId = remember { TimeZone.currentSystemDefault().id }
+            val formattedDuration = attemptsSessionListItem?.resultDuration?.let {
+                rememberFormattedDuration(timeInMillis = it)
+            }
 
             val formattedDateAndTime = attemptsSessionListItem?.let {
                 rememberFormattedDateTime(
@@ -148,7 +151,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                     )
                 },
                 headlineContent = {
-                    Text(text = statusText)
+                    Text(text = "$statusText - $formattedDuration")
                 },
                 supportingContent = {
                     Column {

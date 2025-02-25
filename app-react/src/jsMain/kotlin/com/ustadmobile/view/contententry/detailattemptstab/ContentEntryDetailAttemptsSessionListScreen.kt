@@ -131,6 +131,13 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                             UstadNothingHereYet.create()
                         }
                     }
+                    val FormattedDurationComponent = FC<Props> { props ->
+                        val duration = props.asDynamic().duration as Long
+                        val formattedDuration = useFormattedDuration(timeInMillis = duration)
+                        ListItemText {
+                            secondary = ReactNode(formattedDuration)
+                        }
+                    }
                     infiniteQueryPagingItems(
                         items = infiniteQueryResult,
                         key = { it.contextRegistrationHi.toString() }
