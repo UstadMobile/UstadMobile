@@ -84,7 +84,6 @@ class ReportEditViewModel(
                                     reportSeriesUid = 1,
                                     reportSeriesVisualType = null,
                                     reportSeriesSubGroup = null,
-                                    reportTimeRange = null,
                                     reportSeriesYAxis = null,
                                     reportSeriesFilters = emptyList()
                                 )
@@ -270,7 +269,6 @@ class ReportEditViewModel(
                             ?: 0) + 1,
                         reportSeriesVisualType = null,
                         reportSeriesSubGroup = null,
-                        reportTimeRange = null,
                         reportSeriesYAxis = null
                     ),
                 )

@@ -21,6 +21,7 @@ import com.ustadmobile.core.domain.cachelock.CreateCacheLocksForActiveContentEnt
 import com.ustadmobile.core.domain.cachelock.Migrate131to132AddRetainActiveUriTriggers
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
+import com.ustadmobile.core.domain.db.UmAppDatabaseMigration203_204
 import com.ustadmobile.core.domain.message.AddOutgoingReplicationForMessageTriggerCallback
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -175,6 +176,7 @@ fun makeJvmBackendDiModule(
             .addMigrations(MIGRATION_161_162_SERVER)
             .addMigrations(MIGRATION_169_170_SERVER)
             .addMigrations(MIGRATE_USERNAME_SERVER)
+            .addMigrations(UmAppDatabaseMigration203_204(xxHasher64Factory = instance()))
             .build().also {
                 it.ktorInitDb(di)
             }

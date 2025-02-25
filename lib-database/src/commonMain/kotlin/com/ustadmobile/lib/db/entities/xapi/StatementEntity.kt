@@ -33,6 +33,12 @@ import kotlinx.serialization.Serializable
  * @param completionOrProgress Indicates whether or not the statement is completion or progress
  * (excludes xAPI statements that are progress or completion of child activities for statements
  * received over API) - e.g. the statement could be relevant to showing the progress of the learner.
+ * @param contextStatementRefIdHi most significant bits of the context registration uuid
+ * @param contextStatementRefIdLo least significant bits of the context registration uuid
+ * @param contextRegistrationHash the xxhash64 of contextStatementRefIdHi and contextStatementRefIdLo
+ *        for purposes of reporting queries where there is a need to count the number of distinct
+ *        contextRegistrations. COUNT(DISTINCT...) cannot work with multiple columns. xxhash64 has
+ *        an extremely low risk of collision, not enough to meaningfully alter statistics.
 
  * This is used as an index field so that the database can quickly filter out other types of
  * statements (e.g. statements that are not for the top level activity, dont have a score,
@@ -113,6 +119,8 @@ data class StatementEntity(
     var contextRegistrationHi: Long = 0,
 
     var contextRegistrationLo: Long = 0,
+
+    var contextRegistrationHash: Long = 0,
 
     var contextPlatform: String? = null,
 
