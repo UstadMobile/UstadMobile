@@ -40,8 +40,7 @@ it('Admin user add content to the library', () => {
     .then($video => {
       $video[0].play();
     });
-  cy.wait(11000); // Wait for 11 seconds
-  cy.get('video')
+  cy.get('video',{timeout:11000})
     .should('have.prop', 'ended', true);
   cy.go('back')
  // attempts made on video
@@ -50,14 +49,12 @@ it('Admin user add content to the library', () => {
   cy.contains("Admin User").should("exist")
   cy.contains("Attempts: 1").should("exist")
   cy.contains("100% completion").should("exist")
-  cy.get('.MuiStack-root')
-    .parent() // Get the parent container
-    .find('span[role="progressbar"]')
-    .should('exist');
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('exist')
   cy.contains("Admin User").click()
   cy.contains("Completed").should("exist")
   cy.get("#appbar_title").contains("Admin User - Content_003").should("exist")
-  cy.get("svg[data-testid='CalendarTodayIcon']").should('exist');
+  cy.get("svg[data-testid='CalendarTodayIcon']").should('exist')
   cy.contains("100% completion").should("exist")
   cy.get('.MuiStack-root').parent()
     .find('span[role="progressbar"]').should('exist')
