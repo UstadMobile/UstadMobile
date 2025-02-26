@@ -28,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
@@ -184,7 +185,7 @@ fun ContentEntryDetailAttemptsStatementList(
                         ) {
                             LinearProgressIndicator(
                                 progress = progress,
-                                modifier = Modifier.weight(0.7f),
+                                modifier = Modifier.weight(0.7f).testTag("progress_bar"),
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.width(8.dp))
