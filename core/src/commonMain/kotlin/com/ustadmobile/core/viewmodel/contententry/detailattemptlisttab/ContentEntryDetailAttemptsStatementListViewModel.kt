@@ -29,7 +29,7 @@ data class ContentEntryDetailAttemptsStatementListUiState(
     val sortOption: SortOrderOption = sortOptions.first(),
     val showSortOptions: Boolean = true,
     val availableVerbs: List<VerbEntity> = emptyList(),
-    val selectedVerbIds: Set<String> = mutableSetOf()
+    val selectedVerbIds: List<Long> = emptyList()
 )
 
 class ContentEntryDetailAttemptsStatementListViewModel(
@@ -49,11 +49,6 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         contextRegistrationLo: Long,
     ): PagingSource<Int, StatementEntityAndVerb> {
         val state = _uiState.value
-
-        if (state.availableVerbs.isEmpty() || state.selectedVerbIds.isEmpty()) {
-            _refreshCommandFlow.tryEmit(RefreshCommand())
-            return EmptyPagingSource()
-        }
         return activeRepo.statementDao().findStatementsBySession(
             registrationHi = contextRegistrationHi,
             registrationLo = contextRegistrationLo,
@@ -62,7 +57,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
             contentEntryUid = argContentEntryUid,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             sortOrder = state.sortOption.flag,
-            selectedVerbsString = state.selectedVerbIds.joinToString(",")
+            selectedVerbUids = state.selectedVerbIds // Changed to pass list of Long UIDs
         )
     }
 
@@ -86,12 +81,11 @@ class ContentEntryDetailAttemptsStatementListViewModel(
                         registrationLo = argContextRegistrationIdLo,
                         selectedPersonUid = argPersonUid,
                         contentEntryUid = argContentEntryUid
-
                     ).collect { verbs ->
                         _uiState.update { state ->
                             state.copy(
                                 availableVerbs = verbs,
-                                selectedVerbIds = verbs.mapNotNull { it.verbUrlId }.toSet()
+                                selectedVerbIds = verbs.mapNotNull { it.verbUid } // Changed to map to verb UIDs (Long)
                             )
                         }
                         _refreshCommandFlow.tryEmit(RefreshCommand())
@@ -128,9 +122,19 @@ class ContentEntryDetailAttemptsStatementListViewModel(
 
     fun onVerbFilterToggled(verbUrlId: String) {
         _uiState.update { state ->
-            val newSelectedVerbIds = state.selectedVerbIds.toMutableSet().apply {
-                if (contains(verbUrlId)) remove(verbUrlId) else add(verbUrlId)
+            val verbEntity = state.availableVerbs.find { it.verbUrlId == verbUrlId }
+            val verbUid = verbEntity?.verbUid
+
+            val newSelectedVerbIds = if (verbUid != null) {
+                if (state.selectedVerbIds.contains(verbUid)) {
+                    state.selectedVerbIds.filter { it != verbUid }
+                } else {
+                    state.selectedVerbIds + verbUid
+                }
+            } else {
+                state.selectedVerbIds
             }
+
             state.copy(
                 selectedVerbIds = newSelectedVerbIds,
                 attemptsStatementList = attemptsStatementListPagingSource

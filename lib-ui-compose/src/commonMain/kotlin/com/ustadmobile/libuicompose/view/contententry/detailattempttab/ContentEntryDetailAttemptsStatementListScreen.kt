@@ -208,7 +208,7 @@ fun ContentEntryDetailAttemptsStatementList(
 @Composable
 fun FilterRow(
     availableVerbs: List<VerbEntity>,
-    selectedVerbIds: Set<String>,
+    selectedVerbIds: List<Long>,
     onVerbFilterToggled: (String) -> Unit
 ) {
     Row(
@@ -228,7 +228,7 @@ fun FilterRow(
 
                     key(verbId) {
                         FilterChip(
-                            selected = verbId in selectedVerbIds,
+                            selected = verb.verbUid in selectedVerbIds,
                             onClick = { onVerbFilterToggled(verbId) },
                             label = {
                                 Text(
@@ -236,7 +236,7 @@ fun FilterRow(
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             },
-                            leadingIcon = if (verbId in selectedVerbIds) {
+                            leadingIcon = if (verb.verbUid in selectedVerbIds) {
                                 {
                                     Icon(
                                         imageVector = Icons.Filled.Check,
@@ -251,7 +251,7 @@ fun FilterRow(
                             ),
                             border = FilterChipDefaults.filterChipBorder(
                                 enabled = true,
-                                selected = verbId in selectedVerbIds
+                                selected = verb.verbUid in selectedVerbIds
                             )
                         )
                     }

@@ -136,14 +136,14 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                                 Chip.create {
                                     id = "${verbName.lowercase()}_button"
                                     key = verbId
-                                    icon = if (verbId in props.uiState.selectedVerbIds) {
+                                    icon = if (verb.verbUid in props.uiState.selectedVerbIds) { // Check if verbUid is in the list
                                         Check.create()
                                     } else null
                                     label = Typography.create {
                                         +verbName
                                     }
                                     variant = ChipVariant.outlined
-                                    color = if (verbId in props.uiState.selectedVerbIds) {
+                                    color = if (verb.verbUid in props.uiState.selectedVerbIds) { // Check if verbUid is in the list
                                         ChipColor.primary
                                     } else {
                                         ChipColor.default
@@ -153,8 +153,7 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                                     }
                                 }.also { +it }
                             }
-                        }
-                    }.also { +it }
+                        }                    }.also { +it }
                 }.also { +it }
             }
             if (isSettledEmpty) {
