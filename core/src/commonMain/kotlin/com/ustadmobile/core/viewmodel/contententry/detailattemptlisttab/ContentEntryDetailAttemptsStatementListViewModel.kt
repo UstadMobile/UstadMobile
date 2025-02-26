@@ -51,6 +51,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         val state = _uiState.value
 
         if (state.availableVerbs.isNotEmpty() && state.selectedVerbIds.isEmpty()) {
+            _refreshCommandFlow.tryEmit(RefreshCommand())
             return EmptyPagingSource()
         }
         return activeRepo.statementDao().findStatementsBySession(
@@ -93,6 +94,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
                                 selectedVerbIds = verbs.mapNotNull { it.verbUrlId }.toSet()
                             )
                         }
+                        _refreshCommandFlow.tryEmit(RefreshCommand())
                     }
                 }
 
