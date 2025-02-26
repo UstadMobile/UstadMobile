@@ -610,9 +610,12 @@ END ASC
     AND StatementEntity.statementActorPersonUid = :selectedPersonUid
     AND StatementEntity.statementContentEntryUid = :contentEntryUid
     AND (:searchText = "%" OR VerbEntity.verbUrlId LIKE :searchText)
-    AND (:selectedVerbsString = '' OR VerbEntity.verbUrlId IN 
-        (SELECT word FROM 
-            (WITH split(word, rest) AS (
+    
+    /* Verb filtering with empty list handling */
+    AND (
+        :selectedVerbsString = '' 
+        OR VerbEntity.verbUrlId IN (
+            WITH split(word, rest) AS (
                 SELECT '', :selectedVerbsString || ','
                 UNION ALL
                 SELECT
@@ -621,18 +624,24 @@ END ASC
                 FROM split
                 WHERE rest <> ''
             )
-            SELECT word FROM split WHERE word <> '')
+            SELECT trim(word) FROM split WHERE word <> ''
         )
     )
-    /* Ensure meaningful entries */
+
+    /* Ensure meaningful entries with less strict completion */
     AND (
-        StatementEntity.resultDuration > 0
+        /* Any completed or progressed statement */
+        StatementEntity.completionOrProgress = 1
+        
+        /* Or has any meaningful data */
+        OR StatementEntity.resultDuration > 0
         OR StatementEntity.extensionProgress > 0
         OR StatementEntity.resultScoreRaw IS NOT NULL
         OR StatementEntity.resultScoreScaled IS NOT NULL
         OR CAST(StatementEntity.resultCompletion AS INTEGER) = 1
     )
-    /* Keep the latest successful or most meaningful statement */
+
+    /* Keep the latest meaningful statement */
     AND StatementEntity.timestamp = (
         SELECT MAX(s2.timestamp)
         FROM StatementEntity s2
@@ -641,13 +650,15 @@ END ASC
         AND s2.statementActorPersonUid = StatementEntity.statementActorPersonUid
         AND s2.statementContentEntryUid = StatementEntity.statementContentEntryUid
         AND (
-            s2.resultDuration > 0
+            s2.completionOrProgress = 1
+            OR s2.resultDuration > 0
             OR s2.extensionProgress > 0
             OR s2.resultScoreRaw IS NOT NULL
             OR s2.resultScoreScaled IS NOT NULL
             OR CAST(s2.resultCompletion AS INTEGER) = 1
         )
     )
+
     /* Permission check for viewing user */
     AND (    :accountPersonUid = :selectedPersonUid 
           OR EXISTS(SELECT CoursePermission.cpUid

@@ -50,7 +50,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
     ): PagingSource<Int, StatementEntityAndVerb> {
         val state = _uiState.value
 
-        if (state.availableVerbs.isNotEmpty() && state.selectedVerbIds.isEmpty()) {
+        if (state.availableVerbs.isEmpty() || state.selectedVerbIds.isEmpty()) {
             _refreshCommandFlow.tryEmit(RefreshCommand())
             return EmptyPagingSource()
         }
