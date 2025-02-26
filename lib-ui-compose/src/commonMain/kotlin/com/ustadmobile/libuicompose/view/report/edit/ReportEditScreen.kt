@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
@@ -27,19 +28,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.model.FixedReportTimeRange
 import com.ustadmobile.core.domain.report.model.OptionWithLabelStringResource
+import com.ustadmobile.core.domain.report.model.RelativeReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
+import com.ustadmobile.core.domain.report.model.ReportTimeRangeOption
+import com.ustadmobile.core.domain.report.model.ReportTimeRangeUnit
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.YAxisTypes
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
+import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
@@ -104,9 +110,59 @@ private fun ReportEditScreen(
             )
 
         }
+        item {
+            // Determine selected option based on TIME RANGE TYPE
+            val selected = remember(uiState.reportOptions2.timeRange) {
+                ReportTimeRangeOption.entries.find {
+                    it.timeRange == uiState.reportOptions2.timeRange
+                } ?: run {
+                    when (uiState.reportOptions2.timeRange) {
+                        is RelativeReportTimeRange -> ReportTimeRangeOption.CUSTOM_PERIOD
+                        is FixedReportTimeRange -> ReportTimeRangeOption.CUSTOM_DATE_RANGE
+                        else -> null
+                    }
+                }
+            }
+
+            ExposedDropdownMenu(
+                label = { Text(stringResource(MR.strings.time_range) + "*") },
+                options = ReportTimeRangeOption.entries,
+                selectedValue = selected, // Use the found selected option
+                onOptionSelected = { selectedOption ->
+                    handleTimeRangeSelection(
+                        selectedOption,
+                        uiState.reportOptions2,
+                        onReportChanged
+                    )
+                }
+            )
+
+            // Show CustomPeriodInputs only if selected is CUSTOM_PERIOD
+            if (selected == ReportTimeRangeOption.CUSTOM_PERIOD) {
+                CustomPeriodInputs(
+                    currentRange = uiState.reportOptions2.timeRange as RelativeReportTimeRange,
+                    onCustomPeriodChanged = { qty, unit ->
+                        val newRange = RelativeReportTimeRange(unit, qty)
+                        val updatedOptions = uiState.reportOptions2.copy(timeRange = newRange)
+                        onReportChanged(updatedOptions)
+                    }
+                )
+            }
+
+            // Show CustomDateRangeInputs only if selected is CUSTOM_DATE_RANGE
+            if (selected == ReportTimeRangeOption.CUSTOM_DATE_RANGE) {
+                CustomDateRangeInputs(
+                    currentRange = uiState.reportOptions2.timeRange as FixedReportTimeRange,
+                    onDateRangeChanged = { from, to ->
+                        val newRange = FixedReportTimeRange(from, to)
+                        val updatedOptions = uiState.reportOptions2.copy(timeRange = newRange)
+                        onReportChanged(updatedOptions)
+                    }
+                )
+            }
+        }
 
         item {
-
             ExposedDropdownMenu(
                 selectedValue = uiState.reportOptions2.xAxis,
                 label = { Text(stringResource(MR.strings.x_axis) + "*") },
@@ -216,19 +272,6 @@ private fun ReportEditScreen(
                         }
                     )
 
-                    // Time Range Dropdown
-                    /*
-                     * TODO: update as per updated prototype with custom period and custom date range options
-                    ExposedDropdownMenu(
-                        label = { Text(stringResource(MR.strings.time_range)) },
-                        options = ReportTimeRange.entries,
-                        selectedValue = seriesItem.reportTimeRange,
-                        onOptionSelected = { selectedTimeRange ->
-                            val updatedSeries = seriesItem.copy(reportTimeRange = selectedTimeRange)
-                            onSeriesChanged(updatedSeries)
-                        }
-                    )
-                    */
                 }
             }
 
@@ -346,5 +389,110 @@ fun <T : OptionWithLabelStringResource> ExposedDropdownMenu(
                 )
             }
         }
+    }
+}
+
+fun handleTimeRangeSelection(
+    selectedOption: ReportTimeRangeOption,
+    currentOptions: ReportOptions2,
+    onReportChanged: (ReportOptions2) -> Unit
+) {
+    val newOptions = currentOptions.copy(
+        timeRange = selectedOption.timeRange
+    )
+
+    onReportChanged(newOptions)
+}
+
+@Composable
+fun CustomPeriodInputs(
+    currentRange: RelativeReportTimeRange,
+    onCustomPeriodChanged: (Int, ReportTimeRangeUnit) -> Unit
+) {
+    var quantity by remember { mutableStateOf(currentRange.reportUnitQuantity.toString()) }
+    var selectedUnit by remember { mutableStateOf(currentRange.reportUnit) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.weight(1f),
+            value = quantity,
+            onValueChange = {
+                quantity = it
+                it.toIntOrNull()?.let { qty ->
+                    onCustomPeriodChanged(qty, selectedUnit)
+                }
+            },
+            label = { Text("Quantity") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+
+        ExposedDropdownMenu(
+            modifier = Modifier.weight(2f),
+            label = { Text("Unit") },
+            options = ReportTimeRangeUnit.entries,
+            selectedValue = selectedUnit,
+            onOptionSelected = { unit ->
+                selectedUnit = unit
+                quantity.toIntOrNull()?.let { qty ->
+                    onCustomPeriodChanged(qty, unit)
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun CustomDateRangeInputs(
+    currentRange: FixedReportTimeRange,
+    onDateRangeChanged: (Long, Long) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        DatePickerButton(
+            label = "From",
+            timestamp = currentRange.from,
+            onDateSelected = { newFrom ->
+                onDateRangeChanged(newFrom, currentRange.to)
+            },
+            modifier = Modifier.weight(1f) // Equal width
+        )
+
+        DatePickerButton(
+            label = "To",
+            timestamp = currentRange.to,
+            onDateSelected = { newTo ->
+                onDateRangeChanged(currentRange.from, newTo)
+            },
+            modifier = Modifier.weight(1f) // Equal width
+        )
+    }
+}
+
+@Composable
+fun DatePickerButton(
+    label: String,
+    timestamp: Long,
+    onDateSelected: (Long) -> Unit,
+    modifier: Modifier
+) {
+    Column(modifier = modifier) {
+        UstadDateField(
+            modifier = Modifier.fillMaxWidth(),
+            value = timestamp,
+            label = { Text(label) },
+            timeZoneId = UstadMobileConstants.UTC,
+            onValueChange = {
+                onDateSelected(it)
+            },
+            supportingText = {}
+        )
     }
 }
