@@ -36,18 +36,19 @@ onFlowComplete:
     id: "floating_action_button"      #    +Report button
 - tapOn: "Title*"
 - inputText: "Test Report"
+- tapOn: "Time range*"
+- tapOn: "Custom period (e.g. last x days/weeks)"
 - tapOn: "X Axis*"
 - tapOn: "Day"
 - tapOn: "Series Title*"
 - inputText: "Usage time by day this week"
+- hideKeyboard
 - tapOn: "Y Axis*"
 - tapOn: "Total Duration"
 - tapOn: "Subgroup by"
 - tapOn: "Gender"
 - tapOn: "Chart type"
 - tapOn: "Bar Chart"
-- tapOn: "Time range"
-- tapOn: "Last week"
 - tapOn: "Done"
 - tapOn:
     id: "floating_action_button"
@@ -70,6 +71,18 @@ onFlowComplete:
 - tapOn: "Test Report"
 - tapOn:
     id: "floating_action_button"
+- tapOn: "Time range*"
+- tapOn: "Custom date range"
+- tapOn:
+    text: "dd/mm/yyyy"
+    index: 0
+- inputText: "12/12/2024"
+- tapOn: "dd/mm/yyyy"
+- inputText: "12/02/2025"
+- scrollUntilVisible:
+    element:
+      text: "Chart type"
+    direction: DOWN
 - tapOn: "Chart type"
 - tapOn: "Line Chart"
 - tapOn: "Done"
