@@ -1,22 +1,29 @@
 package com.ustadmobile.view.report.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.model.FixedReportTimeRange
+import com.ustadmobile.core.domain.report.model.RelativeReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
+import com.ustadmobile.core.domain.report.model.ReportTimeRangeOption
+import com.ustadmobile.core.domain.report.model.ReportTimeRangeUnit
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.ThemeContext
+import com.ustadmobile.mui.components.UstadDateField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.util.ext.onTextChange
 import kotlinx.coroutines.Dispatchers
 import mui.icons.material.Close
+import mui.material.Box
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.Divider
@@ -38,12 +45,14 @@ import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
+import react.dom.onChange
 import react.useRequiredContext
 import web.cssom.AlignItems
 import web.cssom.Color
 import web.cssom.JustifyContent
 import web.cssom.pct
 import web.cssom.px
+import web.html.HTMLInputElement
 
 external interface ReportEditScreenProps : Props {
     var uiState: ReportEditUiState
@@ -79,6 +88,136 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 error = props.uiState.reportTitleError != null
 
             }
+
+            // Time Range Dropdown
+            val selected =
+                ReportTimeRangeOption.entries.find {
+                    it.timeRange == props.uiState.reportOptions2.timeRange
+                } ?: run {
+                    when (props.uiState.reportOptions2.timeRange) {
+                        is RelativeReportTimeRange -> ReportTimeRangeOption.CUSTOM_PERIOD
+                        is FixedReportTimeRange -> ReportTimeRangeOption.CUSTOM_DATE_RANGE
+                        else -> null
+                    }
+                }
+            FormControl {
+                fullWidth = true
+                InputLabel {
+                    id = "time_range_label"
+                    shrink = true
+                    sx {
+                        backgroundColor = Color(theme.palette.background.default)
+                    }
+                    +ReactNode(strings[MR.strings.time_range] + "*")
+                }
+                Select {
+                    value = selected
+                    id = "time_range"
+                    labelId = "time_range_label"
+                    fullWidth = true
+                    onChange = { event, _ ->
+                        val selectedOption = ReportTimeRangeOption.entries.find { it.name == event.target.value }
+                        if (selectedOption != null) {
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(timeRange = selectedOption.timeRange))
+                        }
+                    }
+
+                    ReportTimeRangeOption.entries.forEach { option ->
+                        MenuItem {
+                            value = option.name
+                            +ReactNode(strings[option.label])
+                        }
+                    }
+                }
+            }
+
+            // Show CustomPeriodInputs only if CUSTOM_PERIOD is selected
+            if (selected == ReportTimeRangeOption.CUSTOM_PERIOD) {
+                Stack {
+                    direction = responsive(StackDirection.row)
+                    spacing = responsive(8.px)
+                    sx {
+                        justifyContent = JustifyContent.spaceBetween
+                        alignItems = AlignItems.center
+                    }
+                    TextField {
+                        label = ReactNode("quantity")
+                        fullWidth = true
+                        value = (props.uiState.reportOptions2.timeRange as RelativeReportTimeRange).reportUnitQuantity.toString()
+                        onChange = { event ->
+                            val target = event.target as? HTMLInputElement
+                            val quantity = target?.value?.toIntOrNull() ?: 0
+                            val newRange = RelativeReportTimeRange(
+                                (props.uiState.reportOptions2.timeRange as RelativeReportTimeRange).reportUnit,
+                                quantity
+                            )
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(timeRange = newRange))
+                        }
+                    }
+
+                    Select {
+                        fullWidth = true
+                        value = (props.uiState.reportOptions2.timeRange as RelativeReportTimeRange).reportUnit.name
+                        onChange = { event, _ ->
+                            val newUnit = ReportTimeRangeUnit.valueOf(event.target.value)
+                            val newRange = RelativeReportTimeRange(newUnit, (props.uiState.reportOptions2.timeRange as RelativeReportTimeRange).reportUnitQuantity)
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(timeRange = newRange))
+                        }
+
+                        ReportTimeRangeUnit.entries.forEach { unit ->
+                            MenuItem {
+                                value = unit.name
+                                +ReactNode(unit.name)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Show CustomDateRangeInputs only if CUSTOM_DATE_RANGE is selected
+            if (selected == ReportTimeRangeOption.CUSTOM_DATE_RANGE) {
+                // Custom Date Range Inputs
+                Stack {
+                    direction = responsive(StackDirection.row)
+                    spacing = responsive(8.px)
+                    sx {
+                        justifyContent = JustifyContent.spaceBetween
+                        alignItems = AlignItems.center
+                    }
+                    UstadDateField {
+                        fullWidth = true
+                        id = "from_date"
+                        timeInMillis =
+                            (props.uiState.reportOptions2.timeRange as FixedReportTimeRange).from
+                        label = ReactNode(strings[MR.strings.start_date])
+                        timeZoneId = UstadMobileConstants.UTC
+                        onChange = { newDate ->
+                            val newRange = FixedReportTimeRange(
+                                newDate,
+                                (props.uiState.reportOptions2.timeRange as FixedReportTimeRange).to
+                            )
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(timeRange = newRange))
+                        }
+                    }
+
+                    UstadDateField {
+                        fullWidth = true
+                        id = "to_date"
+                        timeInMillis =
+                            (props.uiState.reportOptions2.timeRange as FixedReportTimeRange).to
+                        label = ReactNode(strings[MR.strings.end_date])
+                        timeZoneId = UstadMobileConstants.UTC
+                        onChange = { newDate ->
+                            val newRange = FixedReportTimeRange(
+                                (props.uiState.reportOptions2.timeRange as FixedReportTimeRange).from,
+                                newDate
+                            )
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(timeRange = newRange))
+                        }
+                    }
+                }
+            }
+
 
             // X Axis Selection
             FormControl {
@@ -252,40 +391,6 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             }
                         }
                     }
-                }
-
-                // Time Range Dropdown
-                FormControl {
-                    fullWidth = true
-                    InputLabel {
-                        id = "time_range_label"
-                        shrink = true
-                        sx {
-                            backgroundColor = Color(theme.palette.background.default)
-                        }
-                        +ReactNode(strings[MR.strings.time_range] + "*")
-                    }
-
-                    /* TODO: Update as per updated prototype with custom period and custom date range options
-                    Select {
-                        value = series.reportTimeRange?.name ?: ""
-                        id = "time_range"
-                        labelId = "time_range_label"
-                        fullWidth = true
-                        onChange = { event, _ ->
-                            val selectedValue =
-                                ReportTimeRange.entries.firstOrNull { it.name == event.target.value }
-                                    ?: ReportTimeRange.LAST_WEEK
-                            props.onSeriesChanged(series.copy(reportTimeRange = selectedValue))
-                        }
-
-                        ReportTimeRange.entries.forEach { option ->
-                            MenuItem {
-                                value = option.name
-                                +ReactNode(strings[option.label])
-                            }
-                        }
-                    }*/
                 }
 
                 if (series.reportSeriesFilters?.isNotEmpty() == true) {
