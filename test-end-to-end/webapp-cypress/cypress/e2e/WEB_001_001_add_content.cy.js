@@ -38,10 +38,10 @@ it('Admin user add content to the library', () => {
   cy.ustadVerifyVideo()
   cy.get('video')
     .then($video => {
-      $video[0].play();
-    });
+      $video[0].play()
+    })
   cy.get('video',{timeout:11000})
-    .should('have.prop', 'ended', true);
+    .should('have.prop', 'ended', true)
   cy.go('back')
  // attempts made on video
   cy.contains("Attempts").click()
@@ -77,7 +77,7 @@ it('Admin user add content to the library', () => {
   cy.contains('Content_002').click()
   cy.ustadOpenH5pEpub('Content_002')
   cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
-  cy.ustadVerifyEpub('The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)');
+  cy.ustadVerifyEpub('The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)')
   cy.contains("THE ADOPTING OF ROSA MARIE").click()
 // Attempts made on epub
   cy.contains("Library").click()
@@ -106,6 +106,6 @@ it('Admin user add content to the library', () => {
 
   after(() => {
     // Stop Test Server after tests are complete
-    cy.ustadStopTestServer();
+    cy.ustadStopTestServer()
   })
 })
