@@ -384,11 +384,13 @@ expect abstract class StatementDao {
                     ORDER BY s2.timestamp DESC
                     LIMIT 1
                 )) AS maxProgress,
+            
             (SELECT COALESCE(MAX(StatementEntity.resultScoreScaled), 0)
                FROM StatementEntity
               WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
                 AND StatementEntity.statementActorPersonUid = Person.personUid
                 AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1) AS maxScore,
+            
             (SELECT MAX(StatementEntity.timestamp)
                FROM StatementEntity
               WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
@@ -441,8 +443,6 @@ expect abstract class StatementDao {
         WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_RECENT_ATTEMPT_DESC} THEN mostRecentAttemptTime
         ELSE NULL
     END DESC
-
-
 """)
     abstract fun findPersonsWithAttempts(
         contentEntryUid: Long,
@@ -619,7 +619,7 @@ END ASC
         OR StatementEntity.resultScoreScaled IS NOT NULL
         OR CAST(StatementEntity.resultCompletion AS INTEGER) = 1
     )
-    /* Keep the latest successful or most meaningful statement */
+    /* Keep the latest meaningful statement */
     AND StatementEntity.timestamp = (
         SELECT MAX(s2.timestamp)
         FROM StatementEntity s2
@@ -627,6 +627,7 @@ END ASC
         AND s2.contextRegistrationLo = StatementEntity.contextRegistrationLo
         AND s2.statementActorPersonUid = StatementEntity.statementActorPersonUid
         AND s2.statementContentEntryUid = StatementEntity.statementContentEntryUid
+        AND s2.statementVerbUid = StatementEntity.statementVerbUid
         AND (
             s2.resultDuration > 0
             OR s2.extensionProgress > 0
@@ -635,35 +636,43 @@ END ASC
             OR CAST(s2.resultCompletion AS INTEGER) = 1
         )
     )
-    /* Permission check for viewing user */
-    AND (    :accountPersonUid = :selectedPersonUid 
-          OR EXISTS(SELECT CoursePermission.cpUid
-                      FROM CoursePermission
-                     WHERE CoursePermission.cpClazzUid = StatementEntity.statementClazzUid
-                       AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
-                            OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
-                       AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
-                       AND NOT CoursePermission.cpIsDeleted)
-          OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
-              ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
-              ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
+    /* Permission check */
+    AND (
+        :accountPersonUid = :selectedPersonUid 
+        OR EXISTS(
+            SELECT CoursePermission.cpUid
+            FROM CoursePermission
+            WHERE CoursePermission.cpClazzUid = StatementEntity.statementClazzUid
+            AND (
+                CoursePermission.cpToPersonUid = :accountPersonUid 
+                OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole
+            )
+            AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
+            AND NOT CoursePermission.cpIsDeleted
+        )
+        OR (
+            ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
+            ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+            ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}
+        )
+    )
     ORDER BY 
-        CASE :sortOrder
-            WHEN $SORT_BY_TIMESTAMP_DESC THEN StatementEntity.timestamp
-            ELSE NULL
-        END DESC,
-        CASE :sortOrder
-            WHEN $SORT_BY_TIMESTAMP_ASC THEN StatementEntity.timestamp
-            ELSE NULL
-        END ASC,
-        CASE :sortOrder
-            WHEN $SORT_BY_SCORE_DESC THEN StatementEntity.resultScoreRaw
-            ELSE NULL
-        END DESC,
-        CASE :sortOrder
-            WHEN $SORT_BY_SCORE_ASC THEN StatementEntity.resultScoreRaw
-            ELSE NULL
-        END ASC
+    CASE :sortOrder
+        WHEN ${SORT_BY_TIMESTAMP_DESC} THEN StatementEntity.timestamp
+        ELSE NULL
+    END DESC,
+    CASE :sortOrder
+        WHEN ${SORT_BY_TIMESTAMP_ASC} THEN StatementEntity.timestamp
+        ELSE NULL
+    END ASC,
+    CASE :sortOrder
+        WHEN ${SORT_BY_SCORE_DESC} THEN StatementEntity.resultScoreRaw
+        ELSE NULL
+    END DESC,
+    CASE :sortOrder
+        WHEN ${SORT_BY_SCORE_ASC} THEN StatementEntity.resultScoreRaw
+        ELSE NULL
+    END ASC
 """)
     abstract fun findStatementsBySession(
         registrationHi: Long,
@@ -677,18 +686,21 @@ END ASC
     ): PagingSource<Int, StatementEntityAndVerb>
 
     @Query("""
-    WITH DistinctVerbUrls(statementVerbUid) AS(
+    WITH DistinctVerbUrls(statementVerbUid) AS (
         SELECT DISTINCT StatementEntity.statementVerbUid
         FROM StatementEntity
         WHERE StatementEntity.contextRegistrationHi = :registrationHi
             AND StatementEntity.contextRegistrationLo = :registrationLo
             AND StatementEntity.statementActorPersonUid = :selectedPersonUid
             AND StatementEntity.statementContentEntryUid = :contentEntryUid
-            /* Filter out entries with no progress/time */
-            AND (StatementEntity.resultDuration > 0 
-                 OR StatementEntity.extensionProgress > 0 
-                 OR StatementEntity.resultScoreRaw IS NOT NULL
-                 OR CAST(StatementEntity.resultCompletion AS INTEGER) = 1)
+            /* Ensure meaningful entries */
+            AND (
+                StatementEntity.resultDuration > 0
+                OR StatementEntity.extensionProgress > 0
+                OR StatementEntity.resultScoreRaw IS NOT NULL
+                OR StatementEntity.resultScoreScaled IS NOT NULL
+                OR CAST(StatementEntity.resultCompletion AS INTEGER) = 1
+            )
     )
     
     SELECT DistinctVerbUrls.statementVerbUid AS verbUid,
@@ -698,11 +710,12 @@ END ASC
          LEFT JOIN VerbEntity 
                   ON VerbEntity.verbUid = DistinctVerbUrls.statementVerbUid
          LEFT JOIN VerbLangMapEntry
-                  ON (VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash) IN (
-                     SELECT VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash
-                     FROM VerbLangMapEntry
-                     WHERE VerbLangMapEntry.vlmeVerbUid = DistinctVerbUrls.statementVerbUid
-                     LIMIT 1)
+                  ON (VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash) = 
+                     (SELECT VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash
+                      FROM VerbLangMapEntry
+                      WHERE VerbLangMapEntry.vlmeVerbUid = DistinctVerbUrls.statementVerbUid
+                      ORDER BY VerbLangMapEntry.vlmeLastModified DESC
+                      LIMIT 1)
 """)
     abstract fun getUniqueVerbsForSession(
         registrationHi: Long,
@@ -710,6 +723,7 @@ END ASC
         selectedPersonUid: Long,
         contentEntryUid: Long
     ): Flow<List<VerbEntity>>
+
     @Query("""
     SELECT EXISTS(
         SELECT 1 FROM StatementEntity 
