@@ -92,3 +92,170 @@ onFlowComplete:
     direction: DOWN
 - assertVisible:
     text: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
+  # Student 1 attempt video content
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Video"
+    direction: DOWN
+- tapOn: "Video"
+- tapOn: "Open"
+- tapOn: "Play"
+- extendedWaitUntil:
+    visible: "Play"
+    timeout: 20000
+- back
+# Verify student able to see attempts made in course content
+- tapOn: "Attempts"
+- assertVisible: "Student 1"
+- assertVisible: "100% Completion"
+- tapOn: "Student 1"
+- assertVisible: "Completed"
+- assertVisible: "100% Completion"
+- tapOn: "Completed"
+- assertVisible: "Completed"
+- assertVisible:
+    text: "Completion: 100%"
+    index: 0
+- assertVisible: "Progressed"
+- assertVisible:
+    text: "Completion: 100%"
+    index: 1
+- assertVisible: "Completed"
+- assertVisible: "Progressed"
+  # Student 2 attempt H5p content
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud2"
+      PASSWORD: "tests2"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+- tapOn: Open
+- runFlow:
+    file: "common/chrome-first-run-check.yaml"
+# Student answered wrong
+- tapOn: "No "
+- tapOn: "Check"
+- tapOn: "Close tab"
+- tapOn: "Attempts"
+- assertVisible: "Student 2"
+- assertVisible: "1 Attempts"
+- tapOn: "Student 2"
+- assertVisible: "Failed"
+- assertVisible: "0% Score"
+- tapOn: "Failed"
+# verify filters are working
+- tapOn:
+    text: "Answered"
+    index: 0
+- assertVisible: "Score: 0 / 1"
+# Student 3 makes attempt on H5p content
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud3"
+      PASSWORD: "tests3"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+- tapOn: Open
+- runFlow:
+    file: "common/chrome-first-run-check.yaml"
+- tapOn: "Yes "
+- tapOn: "Check"
+- tapOn: "Close tab"
+# Verify student 3 able to see attempts made in course content
+- tapOn: "Attempts"
+- assertVisible: "Student 3"
+- assertVisible: "1 Attempts"
+- assertVisible: "100% Score"
+- tapOn: "Student 3"
+- assertVisible: "Passed"
+- assertVisible: "100% Score"
+- tapOn: "Passed"
+# verify filters are working
+- tapOn:
+    text: "Answered"
+    index: 0
+- assertVisible: "Score: 1 / 1"
+# verify teacher able to see students attempts
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+# Verify teacher able to see attempts made in course content
+- tapOn: "Attempts"
+- assertVisible: "Student 2"
+- assertVisible: "1 Attempts"
+- assertVisible: "Student 3"
+- assertVisible: "1 Attempts"
+- assertVisible: "100% Score"
+- tapOn: "Student 2"
+- assertVisible: "Failed"
+- assertVisible: "0% Score"
+- tapOn: "Failed"
+# verify filters are working
+- assertVisible: "Score: 0 / 1"
+- back
+- back
+- tapOn: "Student 3"
+- assertVisible: "Passed"
+- assertVisible: "100% Score"
+- tapOn: "Passed"
+# verify filters are working
+- tapOn:
+    text: "Answered"
+    index: 0
+- assertVisible: "Score: 1 / 1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Video"
+    direction: DOWN
+- tapOn: "Video"
+- tapOn: "Attempts"
+- assertVisible: "Student 1"
+- assertVisible: "100% Completion"
+- tapOn: "Student 1"
+- assertVisible: "Completed"
+- assertVisible: "100% Completion"
+- tapOn: "Completed"
+- assertVisible: "Completed"
+- assertVisible:
+    text: "Completion: 100%"
+    index: 0
+- assertVisible: "Progressed"
+- assertVisible:
+    text: "Completion: 100%"
+    index: 1
+  # Verify student 1 not able to see attempts made in course content by Student 2
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+- tapOn: "Attempts"
+- assertVisible: "Nothing here, yet"

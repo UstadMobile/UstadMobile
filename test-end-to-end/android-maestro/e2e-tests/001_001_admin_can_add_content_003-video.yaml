@@ -47,3 +47,40 @@ onFlowComplete:
     visible: "Play"
     timeout: 20000
 - takeScreenshot: "${TESTRESULTSDIR}/video_content_download_and_open"
+- tapOn: "Back"
+- tapOn: "Attempts"
+- assertVisible:
+    text: "Video_Content.mp4"
+    id: "app_title"
+- assertVisible: "Admin User"
+- assertVisible: "1 Attempts"
+- assertVisible: "100% Completion"
+- tapOn: "Admin User"
+- assertVisible:
+    text: "Admin User - Video_Content.mp4"
+    id: "app_title"
+- assertVisible: "Completed"
+- assertVisible: "100% Completion"
+- tapOn: "Completed"
+- assertVisible:
+    text: "Video_Content.mp4"
+    id: "app_title"
+- assertVisible:
+    text: "Completed"  #completed selected by default
+    index: 0
+- assertVisible:
+    text: "Completed"
+    index: 1
+- assertVisible: "100% completion"
+- tapOn:
+    text: "Completed"
+    index: 0
+- assertVisible:
+    text: "Progressed"
+    index: 1
+- assertVisible:
+    id: "progress_bar"
+- tapOn:
+    text: "Progressed"
+    index: 0
+- assertVisible: "Nothing here, yet"

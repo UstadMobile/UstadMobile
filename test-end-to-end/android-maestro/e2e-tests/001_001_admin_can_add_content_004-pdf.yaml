@@ -45,4 +45,31 @@ onFlowComplete:
 - tapOn: Download
 - tapOn: Open
 - assertVisible: "PDF PAGE"
+- scroll
 - takeScreenshot: "${TESTRESULTSDIR}/pdf_content_download_and_open"
+- tapOn: "Back"
+- tapOn: "Attempts"
+- assertVisible:
+    text: "Pdf_Content"
+    id: "app_title"
+- assertVisible: "Admin User"
+- assertVisible: "1 Attempts"
+- tapOn: "100% completion"
+- tapOn: "Admin User"
+- assertVisible:
+    text: "Admin User - Pdf_Content"
+    id: "app_title"
+- assertVisible: "Completed"
+- assertVisible: "100% completion"
+- tapOn: "Completed"
+- assertVisible:
+    text: "Pdf_Content"
+    id: "app_title"
+- assertVisible:
+    text: "Completed"    # filter is unselected
+    index: 1
+- assertVisible: "100% completion"
+- tapOn:
+    text: "Completed"    # filter is unselected
+    index: 0
+- assertNotVisible: "100% completion"
