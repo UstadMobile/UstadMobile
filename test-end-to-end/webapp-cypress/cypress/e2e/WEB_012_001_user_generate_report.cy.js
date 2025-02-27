@@ -10,7 +10,15 @@ it('Teacher generate report', () => {
   cy.ustadClearDbAndLogin('teach1','testt1',{timeout:8000})
   cy.contains("Reports").click()
   cy.get("svg[data-testid='AddIcon']").click()
-  cy.get("#title").click().type("Test1)")
+  cy.get('input[id="title"]').clear().type('Test1',{delay: 30})
+  cy.get('div[id="time_range"]').click()
+ // Set a custom report date range
+  const toDate = new Date();
+  const fromDate = new Date();
+  fromDate.setMonth(fromDate.getMonth() - 1);
+  cy.contains("Custom date range").click()
+  cy.ustadSetDate(cy.get('input[id="from_date"]'),fromDate) // 1 month from today
+  cy.ustadSetDate(cy.get('input[id="to_date"]'),toDate) // Today
   cy.get('div[id="x_axis"]').click()
   cy.contains("Day").click()
   cy.get('input[id="series_title"]').type("Usage time by day this week")
@@ -20,8 +28,6 @@ it('Teacher generate report', () => {
   cy.contains("Gender").click()
   cy.get('div[id="chart_type"]').click()
   cy.contains("Bar Chart").click()
-  cy.get('div[id="time_range"]').click()
-  cy.contains("Last week").click()
   cy.contains('button','Done').click()
   cy.contains('button','Edit').click()
   cy.contains('Add filter').scrollIntoView();
@@ -37,6 +43,8 @@ it('Teacher generate report', () => {
 // cypress/screenshots/spec.cy.js/bar_chart_graph_report
   cy.screenshot('bar_chart_graph_report')
   cy.contains('button','Edit').click()
+  cy.get('div[id="time_range"]').click()
+  cy.contains("Custom period (e.g. last x days/weeks)").click()
   cy.get('div[id="chart_type"]').click()
   cy.contains("Line Chart").click()
   cy.get('#actionBarButton').click()
