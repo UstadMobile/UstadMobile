@@ -1986,6 +1986,12 @@
     <string name="statement_query">Statement Query</string>
     <string name="duration_hours">Duration (hours) </string>
     <string name="count">Count </string>
+    <string name="quantity">Quantity </string>
+    <string name="unit">Unit </string>
+    <string name="from">From </string>
+    <string name="to_">To </string>
+    <string name="quantity_must_be_at_least_1">Quantity must be at least 1 </string>
+
 
     <string name="equals">Equals</string>
     <string name="not_equals">Not Equals</string>

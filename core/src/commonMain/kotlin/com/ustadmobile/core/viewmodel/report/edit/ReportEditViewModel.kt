@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.report.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.model.RelativeReportTimeRange
 import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
@@ -33,7 +34,9 @@ data class ReportEditUiState(
     val seriesTitleError: String? = null,
     val subGroupError: String? = null,
     val chartTypeError: String? = null,
-)
+    val timeRangeError: String? = null,
+    val quantityError: String? = null,
+    )
 
 class ReportEditViewModel(
     di: DI,
@@ -123,6 +126,15 @@ class ReportEditViewModel(
 
     fun onClickSave() {
         val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
+        val currentReport = _uiState.value.reportOptions2
+
+        // Validate quantity if timeRange is RelativeReportTimeRange
+        val quantityError = if (currentReport.timeRange is RelativeReportTimeRange) {
+            val qty = (currentReport.timeRange as RelativeReportTimeRange).reportUnitQuantity
+            if (qty < 1) systemImpl.getString(MR.strings.quantity_must_be_at_least_1) else null
+        } else {
+            null
+        }
         _uiState.update { prev ->
             prev.copy(
                 reportTitleError = if (prev.reportOptions2.title.isEmpty()) {
@@ -144,8 +156,14 @@ class ReportEditViewModel(
                     requiredFieldMessage
                 } else {
                     null
-                }
-            )
+                },
+                timeRangeError = if (prev.reportOptions2.timeRange == null) {
+                    requiredFieldMessage
+                } else {
+                    null
+                },
+                quantityError = quantityError,
+                )
         }
         if (_uiState.value.hasErrors()) {
             loadingState = LoadingUiState.NOT_LOADING
@@ -177,6 +195,12 @@ class ReportEditViewModel(
     }
 
     fun onEntityChanged(newOptions: ReportOptions2) {
+        val quantityError = when (val timeRange = newOptions.timeRange) {
+            is RelativeReportTimeRange -> {
+                if (timeRange.reportUnitQuantity < 1) systemImpl.getString(MR.strings.quantity_must_be_at_least_1) else null
+            }
+            else -> null
+        }
         _uiState.update { currentState ->
             currentState.copy(
                 reportOptions2 = newOptions,
@@ -199,7 +223,13 @@ class ReportEditViewModel(
                     currentState.reportOptions2.series.map { it.reportSeriesYAxis },
                     newOptions.series.map { it.reportSeriesYAxis },
                     currentState.yAxisError
-                )
+                ),
+                timeRangeError = updateErrorMessageOnChange(
+                    currentState.reportOptions2.timeRange,
+                    newOptions.timeRange,
+                    currentState.timeRangeError
+                ),
+                quantityError = quantityError
             )
         }
         scheduleEntityCommitToSavedState(
@@ -316,7 +346,9 @@ class ReportEditViewModel(
                 seriesTitleError != null ||
                 subGroupError != null ||
                 chartTypeError != null ||
-                yAxisError != null
+                yAxisError != null ||
+                timeRangeError != null ||
+                quantityError != null
     }
 
     companion object {

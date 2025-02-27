@@ -124,28 +124,35 @@ private fun ReportEditScreen(
                 }
             }
 
+            // In ReportEditScreen's time range dropdown item
             ExposedDropdownMenu(
                 label = { Text(stringResource(MR.strings.time_range) + "*") },
                 options = ReportTimeRangeOption.entries,
-                selectedValue = selected, // Use the found selected option
+                selectedValue = selected,
                 onOptionSelected = { selectedOption ->
-                    handleTimeRangeSelection(
-                        selectedOption,
-                        uiState.reportOptions2,
-                        onReportChanged
-                    )
+                    handleTimeRangeSelection(selectedOption, uiState.reportOptions2, onReportChanged)
+                },
+                isError = uiState.timeRangeError != null && selected == null,
+                supportingText = {
+                    if (selected == null) {
+                        Text(uiState.timeRangeError ?: stringResource(MR.strings.required))
+                    } else {
+                        Text("")
+                    }
                 }
             )
 
             // Show CustomPeriodInputs only if selected is CUSTOM_PERIOD
             if (selected == ReportTimeRangeOption.CUSTOM_PERIOD) {
+                // When selected is CUSTOM_PERIOD
                 CustomPeriodInputs(
                     currentRange = uiState.reportOptions2.timeRange as RelativeReportTimeRange,
                     onCustomPeriodChanged = { qty, unit ->
                         val newRange = RelativeReportTimeRange(unit, qty)
                         val updatedOptions = uiState.reportOptions2.copy(timeRange = newRange)
                         onReportChanged(updatedOptions)
-                    }
+                    },
+                    quantityError = uiState.quantityError
                 )
             }
 
@@ -407,7 +414,8 @@ fun handleTimeRangeSelection(
 @Composable
 fun CustomPeriodInputs(
     currentRange: RelativeReportTimeRange,
-    onCustomPeriodChanged: (Int, ReportTimeRangeUnit) -> Unit
+    onCustomPeriodChanged: (Int, ReportTimeRangeUnit) -> Unit,
+    quantityError: String?
 ) {
     var quantity by remember { mutableStateOf(currentRange.reportUnitQuantity.toString()) }
     var selectedUnit by remember { mutableStateOf(currentRange.reportUnit) }
@@ -425,13 +433,16 @@ fun CustomPeriodInputs(
                     onCustomPeriodChanged(qty, selectedUnit)
                 }
             },
-            label = { Text("Quantity") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
+            label = { Text(stringResource(MR.strings.quantity)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = quantityError != null,
+            supportingText = { quantityError?.let { Text(it) } },
+            )
+
 
         ExposedDropdownMenu(
             modifier = Modifier.weight(2f),
-            label = { Text("Unit") },
+            label = { Text(stringResource(MR.strings.unit)) },
             options = ReportTimeRangeUnit.entries,
             selectedValue = selectedUnit,
             onOptionSelected = { unit ->
@@ -457,21 +468,21 @@ fun CustomDateRangeInputs(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         DatePickerButton(
-            label = "From",
+            label = stringResource(MR.strings.from) ,
             timestamp = currentRange.from,
             onDateSelected = { newFrom ->
                 onDateRangeChanged(newFrom, currentRange.to)
             },
-            modifier = Modifier.weight(1f) // Equal width
+            modifier = Modifier.weight(1f)
         )
 
         DatePickerButton(
-            label = "To",
+            label = stringResource(MR.strings.to_),
             timestamp = currentRange.to,
             onDateSelected = { newTo ->
                 onDateRangeChanged(currentRange.from, newTo)
             },
-            modifier = Modifier.weight(1f) // Equal width
+            modifier = Modifier.weight(1f)
         )
     }
 }

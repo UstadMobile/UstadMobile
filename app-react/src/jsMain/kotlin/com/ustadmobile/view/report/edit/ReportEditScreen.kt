@@ -102,6 +102,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 }
             FormControl {
                 fullWidth = true
+                error = props.uiState.timeRangeError != null
                 InputLabel {
                     id = "time_range_label"
                     shrink = true
@@ -141,7 +142,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         alignItems = AlignItems.center
                     }
                     TextField {
-                        label = ReactNode("quantity")
+                        label = ReactNode(strings[MR.strings.quantity])
                         fullWidth = true
                         value = (props.uiState.reportOptions2.timeRange as RelativeReportTimeRange).reportUnitQuantity.toString()
                         onChange = { event ->
@@ -153,6 +154,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             )
                             props.onEntityChanged(props.uiState.reportOptions2.copy(timeRange = newRange))
                         }
+                        error = props.uiState.quantityError != null
                     }
 
                     Select {
@@ -189,7 +191,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         id = "from_date"
                         timeInMillis =
                             (props.uiState.reportOptions2.timeRange as FixedReportTimeRange).from
-                        label = ReactNode(strings[MR.strings.start_date])
+                        label = ReactNode(strings[MR.strings.from])
                         timeZoneId = UstadMobileConstants.UTC
                         onChange = { newDate ->
                             val newRange = FixedReportTimeRange(
@@ -205,7 +207,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         id = "to_date"
                         timeInMillis =
                             (props.uiState.reportOptions2.timeRange as FixedReportTimeRange).to
-                        label = ReactNode(strings[MR.strings.end_date])
+                        label = ReactNode(strings[MR.strings.to_])
                         timeZoneId = UstadMobileConstants.UTC
                         onChange = { newDate ->
                             val newRange = FixedReportTimeRange(
