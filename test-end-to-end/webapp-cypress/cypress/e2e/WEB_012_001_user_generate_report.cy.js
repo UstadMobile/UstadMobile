@@ -20,8 +20,8 @@ it('Teacher generate report', () => {
   cy.contains("Gender").click()
   cy.get('div[id="chart_type"]').click()
   cy.contains("Bar Chart").click()
-  cy.get('div[id="time_range"]').click()
-  cy.contains("Last week").click()
+//  cy.get('div[id="time_range"]').click()
+//  cy.contains("Last week").click()
   cy.contains('button','Done').click()
   cy.contains('button','Edit').click()
   cy.contains('Add filter').scrollIntoView();

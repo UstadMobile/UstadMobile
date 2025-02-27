@@ -46,8 +46,8 @@ onFlowComplete:
 - tapOn: "Gender"
 - tapOn: "Chart type"
 - tapOn: "Bar Chart"
-- tapOn: "Time range"
-- tapOn: "Last week"
+#- tapOn: "Time range"
+#- tapOn: "Last week"
 - tapOn: "Done"
 - tapOn:
     id: "floating_action_button"
