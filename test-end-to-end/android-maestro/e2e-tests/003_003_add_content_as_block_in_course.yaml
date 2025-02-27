@@ -275,7 +275,7 @@ onFlowComplete:
 - assertVisible: "100% Score"
 - tapOn: "Student 3"
 - assertVisible:
-    text: "tudent 3 - True/False Question"
+    text: "Student 3 - True/False Question"
     id: "app_title"
 - assertVisible:
     id: "progress_bar"
