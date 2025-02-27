@@ -27,7 +27,7 @@ onFlowComplete:
     env:
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
-    # admin add an existing content in library to course
+    # admin add content in library
 - runFlow:
     file: "common/clear_login_and_add_content.yaml"
     env:
@@ -125,7 +125,7 @@ onFlowComplete:
 # Verify student able to see attempts made in course content
 - tapOn: "Attempts"
 - assertVisible:
-    text: "Video_Content"
+    text: "Video_Content.mp4"
     id: "app_title"
 - assertVisible: "Student 1"
 - assertVisible: "100% completion"
@@ -133,7 +133,7 @@ onFlowComplete:
     id: "progress_bar"
 - tapOn: "Student 1"
 - assertVisible:
-    text: "Student 1 - Video_Content"
+    text: "Student 1 - Video_Content.mp4"
     id: "app_title"
 - assertVisible: "Completed"
 - assertVisible: "100% completion"
@@ -141,7 +141,7 @@ onFlowComplete:
     id: "progress_bar"
 - tapOn: "Completed"
 - assertVisible:
-    text: "Video_Content"
+    text: "Video_Content.mp4"
     id: "app_title"
 - assertVisible: "Completed"
 - assertVisible:

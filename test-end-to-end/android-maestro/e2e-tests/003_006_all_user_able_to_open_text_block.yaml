@@ -2,11 +2,11 @@ appId: com.toughra.ustadmobile
 tags:
   - courseBlocks
 env:
-  TESTRESULTSDIR: "build/reports/maestro/003_007_all_user_able_to_open_text_block/Screenshots"
+  TESTRESULTSDIR: "build/reports/maestro/003_006_all_user_able_to_open_text_block/Screenshots"
   TEXTTITLE: "PRIMARY COLOURS"
   TESTCOURSENAME: "Test Course Block"
 onFlowStart:
-  - startRecording: 003_007_all_user_able_to_open_text_block
+  - startRecording: 003_006_all_user_able_to_open_text_block
   - runScript:
       file: "common/startserver.js"
       env:
