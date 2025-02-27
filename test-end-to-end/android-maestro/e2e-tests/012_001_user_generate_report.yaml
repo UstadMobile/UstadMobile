@@ -76,9 +76,13 @@ onFlowComplete:
 - tapOn:
     text: "dd/mm/yyyy"
     index: 0
-- inputText: "12/12/2024"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.yesterdayDate}
 - tapOn: "dd/mm/yyyy"
-- inputText: "12/02/2025"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.currentDate}
 - scrollUntilVisible:
     element:
       text: "Chart type"
