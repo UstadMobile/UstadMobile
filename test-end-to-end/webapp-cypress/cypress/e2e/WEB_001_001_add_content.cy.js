@@ -20,7 +20,7 @@ it('Admin user add content to the library', () => {
   cy.contains("Library").click()
  /* cy.contains("Content_001").click()
   cy.contains("Attempts").click()
- // cy.contains("Admin User").should("exist") -------- Attempts are not visible for this h5p content on cypress
+ // cy.contains("Admin User").should("exist") -------- Attempts are not visible for this h5p content on cypress, manually it works
 */
 
  //Add Epub content
