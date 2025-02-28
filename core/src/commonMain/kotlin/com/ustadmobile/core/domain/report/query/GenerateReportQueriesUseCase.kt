@@ -4,6 +4,10 @@ import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.door.DoorDbType
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 class GenerateReportQueriesUseCase {
 
@@ -12,6 +16,8 @@ class GenerateReportQueriesUseCase {
     private fun xAxisOrSubgroupExpression(
         field: ReportXAxis,
         dbType: Int,
+        reportOptions: ReportOptions2,
+        timeZone: TimeZone,
     ) : String {
         val timeFieldName = "ResultSource.timestamp"
 
@@ -55,8 +61,28 @@ class GenerateReportQueriesUseCase {
                                                   '-7 day')
                                  END)
                             """.trimIndent())
-                        DoorDbType.POSTGRES ->
-                            append("TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP($timeFieldName/1000))), 'DD/MM/YYYY') ")
+                        DoorDbType.POSTGRES -> {
+                            /*
+                             * Postgres DATE_TRUNC will always truncate to the last Monday. Suppose
+                             * the report period starts on a Wednesday. Procedure is thus:
+                             * 1) Subtract the difference number of days (2) from timestamp - a
+                             *    timestamp that was Wednesday is now Monday, a timestamp that was
+                             *    Thursday is now Tuesday, etc.
+                             * 2) Use DATE_TRUNC('week') on adjusted timestamp - which truncates to
+                             *    the last Monday.
+                             * 3) Add the difference number of days back. Now both rows will have
+                             *    the timestamp string for Wednesday, and can be grouped/aggregated
+                             *    as expected.
+                             */
+                            val periodStartDayOfWeek = Instant.fromEpochMilliseconds(reportOptions.timeRange.from)
+                                .toLocalDateTime(timeZone).dayOfWeek
+                            val deltaDays = periodStartDayOfWeek.ordinal - DayOfWeek.MONDAY.ordinal
+                            append("TO_CHAR(DATE_TRUNC('week', " +
+                                    "TO_TIMESTAMP(1740751543) - INTERVAL '$deltaDays days') " +
+                                    "+ INTERVAL '$deltaDays days', 'YYYY-MM-DD')"
+                            )
+                        }
+
                     }
                 }
 
@@ -96,18 +122,18 @@ class GenerateReportQueriesUseCase {
             val paramsList = mutableListOf<Any>()
 
             /*
-             * Where xAxis or subgrouping is by week, we need to know the first day of week; so this
-             * is added as a CTE.
+             * Where xAxis or subgrouping is by week and we are using SQLite we need to know the
+             * first day of week; so this is added as a CTE.
              */
-            if(xAxis == ReportXAxis.WEEK ||
-                reportOptions.series.any { it.reportSeriesSubGroup == ReportXAxis.WEEK }
+            if(
+                dbType == DoorDbType.SQLITE &&
+                (xAxis == ReportXAxis.WEEK ||
+                        reportOptions.series.any { it.reportSeriesSubGroup == ReportXAxis.WEEK })
             ) {
-                if(dbType == DoorDbType.SQLITE) {
-                    sql += "WITH StartOfWeekCte(TimeRangeStartDayOfWeek) AS (\n" +
-                            "SELECT strftime('%w', ?, 'unixepoch') AS TimeRangeStartDayOfWeek\n" +
-                            ")\n"
-                    paramsList.add(reportOptions.timeRange.from/1000)
-                }
+                sql += "WITH StartOfWeekCte(TimeRangeStartDayOfWeek) AS (\n" +
+                        "SELECT strftime('%w', ?, 'unixepoch') AS TimeRangeStartDayOfWeek\n" +
+                        ")\n"
+                paramsList.add(reportOptions.timeRange.from/1000)
             }
 
             sql += "SELECT "
@@ -148,7 +174,7 @@ class GenerateReportQueriesUseCase {
 
             sql += " AS yAxis,\n"
 
-            sql += xAxisOrSubgroupExpression(xAxis, dbType) + " AS xAxis,\n"
+            sql += xAxisOrSubgroupExpression(xAxis, dbType, reportOptions, TimeZone.UTC) + " AS xAxis,\n"
 
             when(series.reportSeriesSubGroup) {
                 ReportXAxis.NONE, null -> {
@@ -156,7 +182,7 @@ class GenerateReportQueriesUseCase {
                 }
 
                 else -> {
-                    sql += "${xAxisOrSubgroupExpression(series.reportSeriesSubGroup, dbType)} AS subgroup\n"
+                    sql += "${xAxisOrSubgroupExpression(series.reportSeriesSubGroup, dbType, reportOptions, TimeZone.UTC)} AS subgroup\n"
                 }
             }
 
