@@ -33,18 +33,39 @@ class GenerateReportQueriesUseCase {
                 ReportXAxis.WEEK -> {
                     when(dbType) {
                         DoorDbType.SQLITE ->
-                            append("strftime('%Y-%m-%d', $field/1000, 'unixepoch', 'weekday 6', '-5 day') ")
+                            /* Group data as documented on ReportXAxis.WEEK - on SQLite this works
+                             * by :
+                             *  a) When the day of week for the timestamp matches
+                             *     StartOfWeekCte.TimeRangeStartDayOfWeek, just format the timestamp date
+                             *  b) if not, use the weekday modifier which will advance the date
+                             *     forward to when the day of week will match, then adjust backwards
+                             *     7 days, thus grouping data by week commencing date.
+                             */
+                            append("""
+                              (CASE strftime('%w', $timeFieldName/1000, 'unixepoch')
+                                    WHEN (SELECT StartOfWeekCte.TimeRangeStartDayOfWeek
+                                           FROM StartOfWeekCte)
+                                	THEN strftime('%Y-%m-%d', $timeFieldName/1000, 'unixepoch')
+                                
+                                	ELSE strftime('%Y-%m-%d', $timeFieldName/1000, 
+                                                  'unixepoch', 
+                                                  'weekday ' || 
+                                                  (SELECT StartOfWeekCte.TimeRangeStartDayOfWeek
+                                                     FROM StartOfWeekCte), 
+                                                  '-7 day')
+                                 END)
+                            """.trimIndent())
                         DoorDbType.POSTGRES ->
-                            append("TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP($field/1000))), 'DD/MM/YYYY') ")
+                            append("TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP($timeFieldName/1000))), 'DD/MM/YYYY') ")
                     }
                 }
 
                 ReportXAxis.MONTH -> {
                     when(dbType) {
                         DoorDbType.SQLITE ->
-                            append("strftime('%Y-%m', $field/1000, 'unixepoch') ")
+                            append("strftime('%Y-%m', $timeFieldName/1000, 'unixepoch') ")
                         DoorDbType.POSTGRES ->
-                            append("TO_CHAR(TO_TIMESTAMP($field/1000), 'YYYY-MM') ")
+                            append("TO_CHAR(TO_TIMESTAMP($timeFieldName/1000), 'YYYY-MM') ")
                     }
                 }
 
@@ -71,8 +92,25 @@ class GenerateReportQueriesUseCase {
 
         return reportOptions.series.map { series ->
             val yAxis = series.reportSeriesYAxis
-            var sql = "SELECT "
+            var sql = ""
             val paramsList = mutableListOf<Any>()
+
+            /*
+             * Where xAxis or subgrouping is by week, we need to know the first day of week; so this
+             * is added as a CTE.
+             */
+            if(xAxis == ReportXAxis.WEEK ||
+                reportOptions.series.any { it.reportSeriesSubGroup == ReportXAxis.WEEK }
+            ) {
+                if(dbType == DoorDbType.SQLITE) {
+                    sql += "WITH StartOfWeekCte(TimeRangeStartDayOfWeek) AS (\n" +
+                            "SELECT strftime('%w', ?, 'unixepoch') AS TimeRangeStartDayOfWeek\n" +
+                            ")\n"
+                    paramsList.add(reportOptions.timeRange.from/1000)
+                }
+            }
+
+            sql += "SELECT "
 
             when(yAxis) {
                 null -> throw IllegalArgumentException("$series y axis is null")

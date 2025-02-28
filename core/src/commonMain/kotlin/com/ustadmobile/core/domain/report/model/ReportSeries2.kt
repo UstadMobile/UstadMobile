@@ -48,6 +48,12 @@ enum class ReportXAxis(
     val datePeriod: DatePeriod? = null,
 ) : OptionWithLabelStringResource {
     DAY(MR.strings.day, datePeriod = DatePeriod(days = 1)),
+    /**
+     * When report data xAxis is by week, or data is subgrouped by week, this is based on the day of
+     * the week of the first day of the reporting period. E.g. if the report period is Tuesday
+     * 4/Feb/25 to Monday 17/Feb/25, then there will be two entries on the xAxis: 2025-02-04, and
+     * 2025-02-11.
+     */
     WEEK(MR.strings.weekly, datePeriod = DatePeriod(days = 7)),
     MONTH(MR.strings.monthly, datePeriod = DatePeriod(months = 1)),
     CLASS(MR.strings.class_name),
