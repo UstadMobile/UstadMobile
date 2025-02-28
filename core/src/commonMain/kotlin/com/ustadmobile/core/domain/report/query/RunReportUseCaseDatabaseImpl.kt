@@ -1,16 +1,15 @@
 package com.ustadmobile.core.domain.report.query
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.StatementReportRow
-import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.periodUntil
 import kotlinx.datetime.plus
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 
 class RunReportUseCaseDatabaseImpl(
@@ -29,32 +28,37 @@ class RunReportUseCaseDatabaseImpl(
         request: RunReportUseCase.RunReportRequest,
     ): List<StatementReportRow> {
         val allSubGroups = this.map { it.subgroup }.distinct()
+        val datePeriod = request.reportOptions.xAxis?.datePeriod ?: return this
+        val resultList = mutableListOf<StatementReportRow>()
+        val timezone = TimeZone.UTC
+        val rowMap = this.associateBy { Pair(it.xAxis, it.subgroup) }
 
+        var fromDateTime = Instant.fromEpochMilliseconds(request.reportOptions.timeRange.from)
+            .toLocalDateTime(timezone)
+        val reportEndVal = request.reportOptions.timeRange.to
 
-
-        return when(request.reportOptions.xAxis) {
-            ReportXAxis.DAY -> {
-                val rowMap = this.associateBy { Pair(it.xAxis, it.subgroup) }
-                val fromInstant = Instant.fromEpochMilliseconds(request.reportOptions.timeRange.from)
-                val fromDateTime = fromInstant.toLocalDateTime(TimeZone.UTC)
-                val toInstant = Instant.fromEpochMilliseconds(request.reportOptions.timeRange.to)
-                val period = fromInstant.periodUntil(toInstant, TimeZone.UTC)
-
-                (0 until period.days).flatMap { dayIndex ->
-                    allSubGroups.map { subgroup ->
-                        val dayStr = fromDateTime.date.plus(DatePeriod(days = dayIndex)).toString()
-                        rowMap[Pair(dayStr, subgroup)] ?: StatementReportRow(xAxis = dayStr, subgroup = subgroup)
-                    }
+        while(fromDateTime.toInstant(timezone).toEpochMilliseconds() < reportEndVal) {
+            val xAxisStr = fromDateTime.date.toString()
+            resultList.addAll(
+                allSubGroups.map { subgroup ->
+                    rowMap[Pair(xAxisStr, subgroup)] ?: StatementReportRow(xAxis = xAxisStr, subgroup = subgroup)
                 }
-            }
-            else -> this
+            )
+
+            fromDateTime = LocalDateTime(fromDateTime.date.plus(datePeriod), fromDateTime.time)
         }
+
+        return resultList.toList()
     }
 
 
     override suspend fun invoke(
         request: RunReportUseCase.RunReportRequest,
     ): RunReportUseCase.RunReportResult {
+        if(request.reportOptions.timeRange.from >= request.reportOptions.timeRange.to) {
+            throw IllegalArgumentException("Invalid time range: to time must be after from time")
+        }
+
         val queries = generateReportQueriesUseCase(request.reportOptions, db.dbType())
         return RunReportUseCase.RunReportResult(
             timestamp = systemTimeInMillis(),
