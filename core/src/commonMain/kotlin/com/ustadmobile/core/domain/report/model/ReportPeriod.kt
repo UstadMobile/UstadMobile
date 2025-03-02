@@ -47,10 +47,10 @@ enum class ReportTimeRangeOption(
 }
 
 /**
- * Sealed class that represents a report time range as selected by the user.
+ * Sealed class that represents a report period as selected by the user.
  *
  * When a report is run, the time range will always be from 00:00.00 (midnight) on the first day (
- * as per the timezone) until 23:59.999 (end of day) on the last day of the range inclusive.
+ * as per the timezone) until 23:59.999 (end of day) on the last day of the report period (inclusive).
  */
 @Serializable
 sealed class ReportPeriod {
@@ -104,14 +104,30 @@ class RelativeRangeReportPeriod(
     override fun periodStart(timeZone: TimeZone): LocalDate {
         val nowDateTime = Clock.System.now().toLocalDateTime(timeZone)
 
-        /*
-         * Because reports are always run from 00:00.00 to 23:59.999 as per the request timezone,
-         * we always need to add one day - e.g. if a report is for the last 1 day, then from=to,
-         * however when the report runs from will be set to 00:00.000 and to will be set to
-         * 23:59.999 for the current day.
-         */
-        return nowDateTime.date.minus(rangeQuantity, rangeUnit.unit)
-            .plus(DatePeriod(days = 1))
+        return when(rangeUnit) {
+            ReportTimeRangeUnit.YEAR -> {
+                nowDateTime.date.minus(rangeQuantity - 1, DateTimeUnit.YEAR).let {
+                    LocalDate(it.year, 1, 1)
+                }
+            }
+
+            ReportTimeRangeUnit.MONTH -> {
+                nowDateTime.date.minus(rangeQuantity - 1, DateTimeUnit.MONTH).let {
+                    LocalDate(it.year, it.monthNumber, 1)
+                }
+            }
+
+            ReportTimeRangeUnit.DAY, ReportTimeRangeUnit.WEEK -> {
+                /*
+                 * Because reports are always run from 00:00.00 to 23:59.999 as per the request timezone,
+                 * we always need to add one day - e.g. if a report is for the last 1 day, then from=to,
+                 * however when the report runs from will be set to 00:00.000 and to will be set to
+                 * 23:59.999 for the current day.
+                 */
+                return nowDateTime.date.minus(rangeQuantity, rangeUnit.unit)
+                    .plus(DatePeriod(days = 1))
+            }
+        }
     }
 }
 

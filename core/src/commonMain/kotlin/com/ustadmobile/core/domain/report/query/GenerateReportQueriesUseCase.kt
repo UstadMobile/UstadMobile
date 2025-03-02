@@ -79,7 +79,7 @@ class GenerateReportQueriesUseCase {
                                 ).toLocalDateTime(timeZone).dayOfWeek
                             val deltaDays = periodStartDayOfWeek.ordinal - DayOfWeek.MONDAY.ordinal
                             append("TO_CHAR(DATE_TRUNC('week', " +
-                                    "TO_TIMESTAMP(1740751543) - INTERVAL '$deltaDays days') " +
+                                    "TO_TIMESTAMP($timeFieldName/1000) - INTERVAL '$deltaDays days') " +
                                     "+ INTERVAL '$deltaDays days', 'YYYY-MM-DD')"
                             )
                         }
@@ -90,9 +90,20 @@ class GenerateReportQueriesUseCase {
                 ReportXAxis.MONTH -> {
                     when(dbType) {
                         DoorDbType.SQLITE ->
-                            append("strftime('%Y-%m', $timeFieldName/1000, 'unixepoch') ")
+                            append("strftime('%Y-%m-%d', $timeFieldName/1000, 'unixepoch', 'start of month') ")
                         DoorDbType.POSTGRES ->
-                            append("TO_CHAR(TO_TIMESTAMP($timeFieldName/1000), 'YYYY-MM') ")
+                            append("TO_CHAR(DATE_TRUNC('month', TO_TIMESTAMP($timeFieldName/1000)), 'YYYY-MM-DD') ")
+                    }
+                }
+
+                ReportXAxis.YEAR -> {
+                    when(dbType) {
+                        DoorDbType.SQLITE -> {
+                            append("strftime('%Y-%m-%d', $timeFieldName/1000, 'unixepoch', 'start of year') ")
+                        }
+                        DoorDbType.POSTGRES -> {
+                            append("TO_CHAR(DATE_TRUNC('year', TO_TIMESTAMP($timeFieldName/1000)), 'YYYY-MM-DD') ")
+                        }
                     }
                 }
 

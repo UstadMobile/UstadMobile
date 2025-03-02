@@ -56,6 +56,7 @@ enum class ReportXAxis(
      */
     WEEK(MR.strings.weekly, datePeriod = DatePeriod(days = 7)),
     MONTH(MR.strings.monthly, datePeriod = DatePeriod(months = 1)),
+    YEAR(MR.strings.year, datePeriod = DatePeriod(years = 1)),
     CLASS(MR.strings.class_name),
     GENDER(MR.strings.gender_literal, personJoinRequired = true),
     NONE(MR.strings.none);

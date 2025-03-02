@@ -18,7 +18,7 @@ class RunReportUseCaseDatabaseImpl(
 ) : RunReportUseCase {
 
     /**
-     * Where the XAxis is time based (day/week/month) then the list of StatementReportRow MUST
+     * Where the XAxis is time based (day/week/month/year) then the list of StatementReportRow MUST
      * contain a row for each day/week/month for each subgroup. If there are no matching records in
      * the database, then the SQL query will not contain any such row.
      *
