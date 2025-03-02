@@ -4,10 +4,12 @@ import dev.icerock.moko.resources.StringResource
 import kotlinx.datetime.Clock
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.UNSET_DISTANT_FUTURE
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
@@ -44,12 +46,15 @@ enum class ReportTimeRangeOption(
 
 /**
  * Sealed class that represents a report time range as selected by the user.
+ *
+ * When a report is run, the time range will always be from 00:00.00 (midnight) on the first day (
+ * as per the timezone) until 23:59.999 (end of day) on the last day of the range inclusive.
  */
 @Serializable
 sealed class ReportTimeRange {
 
     /**
-     * The start time of the range (in ms since epoch)
+     * The start time of the range (in ms since epoch) as selected by the user.
      */
     abstract val from: Long
 
@@ -76,10 +81,18 @@ class RelativeReportTimeRange(
 
     override val from: Long
         get() {
-            val timeZone = TimeZone.currentSystemDefault()
+            val timeZone = TimeZone.UTC
             val nowDateTime = Clock.System.now().toLocalDateTime(timeZone)
+
+            /*
+             * Because reports are always run from 00:00.00 to 23:59.999 as per the request timezone,
+             * we always need to add one day - e.g. if a report is for the last 1 day, then from=to,
+             * however when the report runs from will be set to 00:00.000 and to will be set to
+             * 23:59.999 for the current day.
+             */
             return LocalDateTime(
-                date = nowDateTime.date.minus(reportUnitQuantity, reportUnit.unit),
+                date = nowDateTime.date.minus(reportUnitQuantity, reportUnit.unit)
+                    .plus(DatePeriod(days = 1)),
                 time = nowDateTime.time
             ).toInstant(timeZone).toEpochMilliseconds()
         }

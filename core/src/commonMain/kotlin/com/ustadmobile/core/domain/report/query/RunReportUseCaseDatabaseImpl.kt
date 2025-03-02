@@ -1,6 +1,8 @@
 package com.ustadmobile.core.domain.report.query
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.toLocalEndOfDay
+import com.ustadmobile.core.util.ext.toLocalMidnight
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -34,10 +36,11 @@ class RunReportUseCaseDatabaseImpl(
         val rowMap = this.associateBy { Pair(it.xAxis, it.subgroup) }
 
         var fromDateTime = Instant.fromEpochMilliseconds(request.reportOptions.timeRange.from)
-            .toLocalDateTime(timezone)
-        val reportEndVal = request.reportOptions.timeRange.to
+            .toLocalDateTime(timezone).toLocalMidnight()
+        val reportEndMs = Instant.fromEpochMilliseconds(request.reportOptions.timeRange.to)
+            .toLocalDateTime(timezone).toLocalEndOfDay().toInstant(timezone).toEpochMilliseconds()
 
-        while(fromDateTime.toInstant(timezone).toEpochMilliseconds() < reportEndVal) {
+        while(fromDateTime.toInstant(timezone).toEpochMilliseconds() < reportEndMs) {
             val xAxisStr = fromDateTime.date.toString()
             resultList.addAll(
                 allSubGroups.map { subgroup ->

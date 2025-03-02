@@ -3,10 +3,13 @@ package com.ustadmobile.core.domain.report.query
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportXAxis
+import com.ustadmobile.core.util.ext.toLocalEndOfDay
+import com.ustadmobile.core.util.ext.toLocalMidnight
 import com.ustadmobile.door.DoorDbType
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 
 class GenerateReportQueriesUseCase {
@@ -113,8 +116,21 @@ class GenerateReportQueriesUseCase {
     operator fun invoke(
         reportOptions: ReportOptions2,
         dbType: Int,
+        timezone: TimeZone = TimeZone.UTC,
     ): List<ReportQueryParts2> {
         val xAxis = reportOptions.xAxis ?: throw IllegalArgumentException("null x axis")
+
+        /*
+         * Report period will always begin at 00:00hrs on the first day of the report and end at
+         * 23:59.999000 on the last day of the period (as per request timezone)
+         */
+        val reportFromDateTime = Instant.fromEpochMilliseconds(reportOptions.timeRange.from)
+            .toLocalDateTime(timezone).toLocalMidnight()
+        val reportFromMs = reportFromDateTime.toInstant(timezone).toEpochMilliseconds()
+
+        val reportToDateTime = Instant.fromEpochMilliseconds(reportOptions.timeRange.to)
+            .toLocalDateTime(timezone).toLocalEndOfDay()
+        val reportToMs = reportToDateTime.toInstant(timezone).toEpochMilliseconds()
 
         return reportOptions.series.map { series ->
             val yAxis = series.reportSeriesYAxis
@@ -128,7 +144,7 @@ class GenerateReportQueriesUseCase {
             if(
                 dbType == DoorDbType.SQLITE &&
                 (xAxis == ReportXAxis.WEEK ||
-                        reportOptions.series.any { it.reportSeriesSubGroup == ReportXAxis.WEEK })
+                        reportOptions.series.any { it.reportSeriesSubGroup == ReportXAxis.WEEK } )
             ) {
                 sql += "WITH StartOfWeekCte(TimeRangeStartDayOfWeek) AS (\n" +
                         "SELECT strftime('%w', ?, 'unixepoch') AS TimeRangeStartDayOfWeek\n" +
@@ -188,8 +204,8 @@ class GenerateReportQueriesUseCase {
 
             sql += "FROM StatementEntity ResultSource\n"
             sql += "WHERE ResultSource.timestamp BETWEEN ? AND ?\n"
-            paramsList.add(reportOptions.timeRange.from)
-            paramsList.add(reportOptions.timeRange.to)
+            paramsList.add(reportFromMs)
+            paramsList.add(reportToMs)
 
             if(reportOptions.xAxis.personJoinRequired ||
                 series.reportSeriesSubGroup?.personJoinRequired == true

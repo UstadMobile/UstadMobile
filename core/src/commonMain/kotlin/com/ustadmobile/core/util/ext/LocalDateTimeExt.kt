@@ -7,7 +7,7 @@ fun LocalDateTime.toLocalMidnight() : LocalDateTime {
 }
 
 fun LocalDateTime.toLocalEndOfDay() : LocalDateTime {
-    return LocalDateTime(date, LocalTime(23, 59, 59))
+    return LocalDateTime(date, LocalTime(23, 59, 59, nanosecond = 999_999_000))
 }
 
 fun LocalDateTime.ageInYears(): Int {
