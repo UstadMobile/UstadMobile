@@ -1,8 +1,6 @@
 package com.ustadmobile.core.domain.report.query
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.toLocalEndOfDay
-import com.ustadmobile.core.util.ext.toLocalMidnight
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -35,10 +33,10 @@ class RunReportUseCaseDatabaseImpl(
         val timezone = TimeZone.UTC
         val rowMap = this.associateBy { Pair(it.xAxis, it.subgroup) }
 
-        var fromDateTime = Instant.fromEpochMilliseconds(request.reportOptions.timeRange.from)
-            .toLocalDateTime(timezone).toLocalMidnight()
-        val reportEndMs = Instant.fromEpochMilliseconds(request.reportOptions.timeRange.to)
-            .toLocalDateTime(timezone).toLocalEndOfDay().toInstant(timezone).toEpochMilliseconds()
+        var fromDateTime = Instant
+            .fromEpochMilliseconds(request.reportOptions.timeRange.periodStartMillis(timezone))
+            .toLocalDateTime(timezone)
+        val reportEndMs = request.reportOptions.timeRange.periodEndMillis(timezone)
 
         while(fromDateTime.toInstant(timezone).toEpochMilliseconds() < reportEndMs) {
             val xAxisStr = fromDateTime.date.toString()
@@ -58,7 +56,8 @@ class RunReportUseCaseDatabaseImpl(
     override suspend fun invoke(
         request: RunReportUseCase.RunReportRequest,
     ): RunReportUseCase.RunReportResult {
-        if(request.reportOptions.timeRange.from >= request.reportOptions.timeRange.to) {
+        if(request.reportOptions.timeRange.periodStartMillis(request.timeZone) >=
+            request.reportOptions.timeRange.periodEndMillis(request.timeZone)) {
             throw IllegalArgumentException("Invalid time range: to time must be after from time")
         }
 

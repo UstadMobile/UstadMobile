@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.report.query
 
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.lib.db.composites.StatementReportRow
+import kotlinx.datetime.TimeZone
 import kotlinx.serialization.Serializable
 
 /**
@@ -38,12 +39,14 @@ interface RunReportUseCase {
      * @param accountPersonUid personUid of the person running the query. This will affect the result
      *        as the data that can be accessed depends on the permissions available to the person.
      * @param cacheControl cache control - would be used to set must-revalidate, only-if-cached, etc.
+     * @param timeZone TimeZone to use for date calculations - see ReportPeriod for details.
      */
     @Serializable
     data class RunReportRequest(
         val reportOptions: ReportOptions2,
         val accountPersonUid: Long,
         val cacheControl: String? = null,
+        val timeZone: TimeZone = TimeZone.UTC,
     )
 
     /**

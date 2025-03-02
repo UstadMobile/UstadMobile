@@ -2,14 +2,13 @@ package com.ustadmobile.core.domain.report.query
 
 import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.report.model.RelativeReportTimeRange
+import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportTimeRangeOption
 import com.ustadmobile.core.domain.report.model.ReportTimeRangeUnit
 import com.ustadmobile.core.domain.report.model.ReportXAxis
-import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.coroutines.runBlocking
@@ -31,12 +30,6 @@ class RunReportUseCaseTest {
     private lateinit var db: UmAppDatabase
 
     private lateinit var runReportUseCase: RunReportUseCase
-
-    private val fromTimeEpoch = Clock.System.now().toLocalDateTime(
-        TimeZone.UTC
-    ).let {
-        LocalDateTime(it.date.minus(DatePeriod(days = 3)), it.time)
-    }.toInstant(TimeZone.UTC).toEpochMilliseconds()
 
     @BeforeTest
     fun setup() {
@@ -110,55 +103,58 @@ class RunReportUseCaseTest {
         assertEquals(7, results.size,
             "result size equals number of days of reporting period - LAST_WEEK - 7 days")
 
-        (0 until defaultNumDays).forEach { day ->
-            val localDate = Instant.fromEpochMilliseconds(fromTimeEpoch + (day * (MS_PER_HOUR * 24)))
-                .toLocalDateTime(TimeZone.UTC).date
+        (0 until defaultNumDays).forEach { dayIndex ->
+            val localDate = Clock.System.now().toLocalDateTime(TimeZone.UTC).date
+                .minus(DatePeriod(days = dayIndex))
 
             assertEquals(
                 expected = (defaultDurationPerStatement * defaultNumStatementsPerDay).toDouble(),
                 actual = results.find { it.xAxis == localDate.toString() }!!.yAxis,
-                message = "day $day has expected total duration"
+                message = "day $dayIndex has expected total duration"
             )
         }
     }
 
-    //@Test
+    @Test
     fun givenStatementsInDatabase_whenDurationPerWeekQueried_thenResultsAsExpected() {
-        val numDaysStatements = 21
+        val numWeeks = 3
+        val numDaysStatements = numWeeks * 7
         insertStatementsPerDay(
             numDays = numDaysStatements,
         )
 
+        val request = RunReportUseCase.RunReportRequest(
+            reportOptions = ReportOptions2(
+                xAxis = ReportXAxis.WEEK,
+                series = listOf(
+                    ReportSeries2(
+                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
+                    )
+                ),
+                timeRange = RelativeRangeReportPeriod(ReportTimeRangeUnit.WEEK, 3),
+            ),
+            accountPersonUid = 1L,
+        )
+
         val results = runBlocking {
-            runReportUseCase(
-                request = RunReportUseCase.RunReportRequest(
-                    reportOptions = ReportOptions2(
-                        xAxis = ReportXAxis.WEEK,
-                        series = listOf(
-                            ReportSeries2(
-                                reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
-                            )
-                        ),
-                        timeRange = RelativeReportTimeRange(ReportTimeRangeUnit.WEEK, 3),
-                    ),
-                    accountPersonUid = 1L,
-                )
-            )
+            runReportUseCase(request = request)
         }.results.first()
 
         assertEquals(3, results.size,
             "result size equals number of weeks of reporting period - 3 weeks")
 
-        (0 until 3).forEach { week ->
-            val firstDayOfWeek = Instant.fromEpochMilliseconds(fromTimeEpoch)
-                .toLocalDateTime(TimeZone.UTC).let { localDateTime ->
-                    LocalDateTime(localDateTime.date.plus(DatePeriod(days =  (week * 7))), localDateTime.time)
-                }
+        (0 until 3).forEach { weekNum ->
+            val firstDayOfWeek = Instant.fromEpochMilliseconds(
+                request.reportOptions.timeRange.periodStartMillis(request.timeZone)
+            ).toLocalDateTime(request.timeZone)
+                .date.plus(DatePeriod(days = weekNum * 7))
+            val row = results.firstOrNull { it.xAxis == firstDayOfWeek.toString() }
+
 
             assertEquals(
                 expected = (defaultDurationPerStatement * defaultNumStatementsPerDay * 7).toDouble(),
-                actual = results.find { it.xAxis == firstDayOfWeek.toString() }!!.yAxis,
-                message = "week $week has expected total duration"
+                actual = row?.yAxis ?: -1f,
+                message = "week $weekNum has expected total duration"
             )
         }
     }

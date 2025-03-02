@@ -3,13 +3,10 @@ package com.ustadmobile.core.domain.report.query
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportXAxis
-import com.ustadmobile.core.util.ext.toLocalEndOfDay
-import com.ustadmobile.core.util.ext.toLocalMidnight
 import com.ustadmobile.door.DoorDbType
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 
 class GenerateReportQueriesUseCase {
@@ -77,8 +74,9 @@ class GenerateReportQueriesUseCase {
                              *    the timestamp string for Wednesday, and can be grouped/aggregated
                              *    as expected.
                              */
-                            val periodStartDayOfWeek = Instant.fromEpochMilliseconds(reportOptions.timeRange.from)
-                                .toLocalDateTime(timeZone).dayOfWeek
+                            val periodStartDayOfWeek = Instant.fromEpochMilliseconds(
+                                    reportOptions.timeRange.periodStartMillis(timeZone)
+                                ).toLocalDateTime(timeZone).dayOfWeek
                             val deltaDays = periodStartDayOfWeek.ordinal - DayOfWeek.MONDAY.ordinal
                             append("TO_CHAR(DATE_TRUNC('week', " +
                                     "TO_TIMESTAMP(1740751543) - INTERVAL '$deltaDays days') " +
@@ -120,17 +118,9 @@ class GenerateReportQueriesUseCase {
     ): List<ReportQueryParts2> {
         val xAxis = reportOptions.xAxis ?: throw IllegalArgumentException("null x axis")
 
-        /*
-         * Report period will always begin at 00:00hrs on the first day of the report and end at
-         * 23:59.999000 on the last day of the period (as per request timezone)
-         */
-        val reportFromDateTime = Instant.fromEpochMilliseconds(reportOptions.timeRange.from)
-            .toLocalDateTime(timezone).toLocalMidnight()
-        val reportFromMs = reportFromDateTime.toInstant(timezone).toEpochMilliseconds()
 
-        val reportToDateTime = Instant.fromEpochMilliseconds(reportOptions.timeRange.to)
-            .toLocalDateTime(timezone).toLocalEndOfDay()
-        val reportToMs = reportToDateTime.toInstant(timezone).toEpochMilliseconds()
+        val reportFromMs = reportOptions.timeRange.periodStartMillis(timezone)
+        val reportToMs = reportOptions.timeRange.periodEndMillis(timezone)
 
         return reportOptions.series.map { series ->
             val yAxis = series.reportSeriesYAxis
@@ -149,7 +139,7 @@ class GenerateReportQueriesUseCase {
                 sql += "WITH StartOfWeekCte(TimeRangeStartDayOfWeek) AS (\n" +
                         "SELECT strftime('%w', ?, 'unixepoch') AS TimeRangeStartDayOfWeek\n" +
                         ")\n"
-                paramsList.add(reportOptions.timeRange.from/1000)
+                paramsList.add(reportFromMs/1000)
             }
 
             sql += "SELECT "

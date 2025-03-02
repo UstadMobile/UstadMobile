@@ -10,6 +10,6 @@ import kotlinx.serialization.Serializable
 data class ReportOptions2(
     val title: String = "",
     val xAxis:ReportXAxis? = null,
-    val timeRange: ReportTimeRange = ReportTimeRangeOption.LAST_WEEK.timeRange,
+    val timeRange: ReportPeriod = ReportTimeRangeOption.LAST_WEEK.timeRange,
     val series: List<ReportSeries2> = emptyList(),
 )

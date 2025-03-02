@@ -24,3 +24,9 @@ fun LocalDateTime.chopOffSeconds() : LocalDateTime {
     }
 }
 
+/**
+ * Like atStartOfDayIn(as per Kotlinx DateTime) but for end of day
+ */
+fun LocalDate.atEndOfDayIn(timeZone: TimeZone) : Instant {
+    return atTime(23, 59, 59, 999_999_000).toInstant(timeZone)
+}
