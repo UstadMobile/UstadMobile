@@ -24,6 +24,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class RunReportUseCaseTest {
 
@@ -158,4 +159,37 @@ class RunReportUseCaseTest {
             )
         }
     }
+
+    @Test
+    fun givenStatementsInDatabase_whenDurationPerMonthQueried_thenResultsAsExpected() {
+        val numDaysStatements = 90
+
+        insertStatementsPerDay(
+            numDays = numDaysStatements,
+        )
+
+        val reportNumMonths = 3
+        val request = RunReportUseCase.RunReportRequest(
+            reportOptions = ReportOptions2(
+                xAxis = ReportXAxis.MONTH,
+                series = listOf(
+                    ReportSeries2(
+                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
+                    )
+                ),
+                timeRange = RelativeRangeReportPeriod(ReportTimeRangeUnit.MONTH, reportNumMonths),
+            ),
+            accountPersonUid = 1L,
+        )
+
+        val results = runBlocking {
+            runReportUseCase(request = request)
+        }.results.first()
+
+        assertEquals(reportNumMonths, results.size,
+            "result size equals number of weeks of reporting period - 3 months")
+        assertTrue(results.all { it.xAxis.endsWith("01") },
+            "Report by month xAxis should always end with 01 (e.g. first of month)")
+    }
+
 }
