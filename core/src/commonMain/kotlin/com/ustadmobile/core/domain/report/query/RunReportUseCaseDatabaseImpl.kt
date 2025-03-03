@@ -26,7 +26,9 @@ class RunReportUseCaseDatabaseImpl(
     private fun List<StatementReportRow>.fillIfNeeded(
         request: RunReportUseCase.RunReportRequest,
     ): List<StatementReportRow> {
-        val allSubGroups = this.map { it.subgroup }.distinct()
+        //If there are no rows in the database query result; we must use the empty subgroup
+        // this might need adjusted when subgroups are by gender / known values
+        val allSubGroups = this.map { it.subgroup }.distinct().ifEmpty { listOf("") }
         val datePeriod = request.reportOptions.xAxis?.datePeriod ?: return this
         val resultList = mutableListOf<StatementReportRow>()
         val rowMap = this.associateBy { Pair(it.xAxis, it.subgroup) }

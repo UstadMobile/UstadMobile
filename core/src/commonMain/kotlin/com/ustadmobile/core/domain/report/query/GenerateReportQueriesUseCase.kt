@@ -254,16 +254,27 @@ class GenerateReportQueriesUseCase {
             }
 
             sql += "FROM StatementEntity ResultSource\n"
-            sql += "WHERE ResultSource.timestamp BETWEEN ? AND ?\n"
-            paramsList.add(reportFromMs)
-            paramsList.add(reportToMs)
-
             if(reportOptions.xAxis.personJoinRequired ||
                 series.reportSeriesSubGroup?.personJoinRequired == true
             ) {
                 sql += "LEFT JOIN Person\n" +
-                       "ON Person.personUid = ResultSource.statementActorPersonUid\n"
+                        "ON Person.personUid = ResultSource.statementActorPersonUid\n"
             }
+
+            sql += "WHERE ResultSource.timestamp BETWEEN ? AND ?\n"
+            paramsList.add(reportFromMs)
+            paramsList.add(reportToMs)
+
+            sql += """
+                AND (     (SELECT AllLearningRecordsPermission.hasPermission
+                             FROM AllLearningRecordsPermission)
+                       OR ResultSource.statementActorPersonUid = ? 
+                       OR ResultSource.statementClazzUid IN 
+                          (SELECT ClazzesWithPermission.clazzUid
+                             FROM ClazzesWithPermission)
+                    )         
+            """.trimIndent()
+            paramsList.add(request.accountPersonUid)
 
             sql += " GROUP BY xAxis"
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.report.query
 
 import com.benasher44.uuid.uuid4
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
 import com.ustadmobile.core.domain.report.model.ReportOptions2
@@ -10,6 +11,7 @@ import com.ustadmobile.core.domain.report.model.ReportPeriodOption
 import com.ustadmobile.core.domain.report.model.ReportTimeRangeUnit
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.lib.db.entities.SystemPermission
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
@@ -43,6 +45,8 @@ class RunReportUseCaseTest {
     private val defaultDurationPerStatement = 2_000L
     private val defaultNumDays = 3
 
+    private val defaultAccountPersonUid = 1L
+
     data class StatementsInsertedInfo(
         val statements: List<StatementEntity>,
     )
@@ -51,7 +55,6 @@ class RunReportUseCaseTest {
         numStatementsPerDay: Int = defaultNumStatementsPerDay,
         durationPerStatement: Long = defaultDurationPerStatement,
         numDays: Int = defaultNumDays,
-
     ) : StatementsInsertedInfo{
         val today = Clock.System.now().toLocalDateTime(TimeZone.UTC)
 
@@ -80,10 +83,25 @@ class RunReportUseCaseTest {
         return StatementsInsertedInfo(statementList)
     }
 
+    private fun grantLearningRecordViewSystemPermission(
+        personUid: Long = defaultAccountPersonUid
+    ) {
+        runBlocking {
+            db.systemPermissionDao().upsertAsync(
+                SystemPermission(
+                    spToPersonUid = personUid,
+                    spPermissionsFlag = PermissionFlags.COURSE_LEARNINGRECORD_VIEW
+                )
+            )
+        }
+    }
+
 
     @Test
     fun givenStatementsInDatabase_whenDurationPerDayQueried_thenResultsAsExpected() {
         insertStatementsPerDay()
+        grantLearningRecordViewSystemPermission()
+
         val results = runBlocking {
             runReportUseCase(
                 request = RunReportUseCase.RunReportRequest(
@@ -96,7 +114,7 @@ class RunReportUseCaseTest {
                         ),
                         period = ReportPeriodOption.LAST_WEEK.period,
                     ),
-                    accountPersonUid = 1L,
+                    accountPersonUid = defaultAccountPersonUid,
                     timeZone = TimeZone.UTC,
                 )
             )
@@ -124,6 +142,7 @@ class RunReportUseCaseTest {
         insertStatementsPerDay(
             numDays = numDaysStatements,
         )
+        grantLearningRecordViewSystemPermission()
 
         val request = RunReportUseCase.RunReportRequest(
             reportOptions = ReportOptions2(
@@ -135,7 +154,7 @@ class RunReportUseCaseTest {
                 ),
                 period = RelativeRangeReportPeriod(ReportTimeRangeUnit.WEEK, 3),
             ),
-            accountPersonUid = 1L,
+            accountPersonUid = defaultAccountPersonUid,
             timeZone = TimeZone.UTC,
         )
 
@@ -169,6 +188,7 @@ class RunReportUseCaseTest {
         insertStatementsPerDay(
             numDays = numDaysStatements,
         )
+        grantLearningRecordViewSystemPermission()
 
         val reportNumMonths = 3
         val request = RunReportUseCase.RunReportRequest(
@@ -181,7 +201,7 @@ class RunReportUseCaseTest {
                 ),
                 period = RelativeRangeReportPeriod(ReportTimeRangeUnit.MONTH, reportNumMonths),
             ),
-            accountPersonUid = 1L,
+            accountPersonUid = defaultAccountPersonUid,
             timeZone = TimeZone.UTC,
         )
 
@@ -203,6 +223,7 @@ class RunReportUseCaseTest {
         insertStatementsPerDay(
             numDays = numDaysStatements,
         )
+        grantLearningRecordViewSystemPermission()
 
         val request = RunReportUseCase.RunReportRequest(
             reportOptions = ReportOptions2(
@@ -214,7 +235,7 @@ class RunReportUseCaseTest {
                 ),
                 period = RelativeRangeReportPeriod(ReportTimeRangeUnit.YEAR, reportNumYears),
             ),
-            accountPersonUid = 1L,
+            accountPersonUid = defaultAccountPersonUid,
             timeZone = TimeZone.UTC,
         )
 
