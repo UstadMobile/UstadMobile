@@ -6,7 +6,7 @@ import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
-import com.ustadmobile.core.domain.report.model.ReportTimeRangeOption
+import com.ustadmobile.core.domain.report.model.ReportPeriodOption
 import com.ustadmobile.core.domain.report.model.ReportTimeRangeUnit
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.door.DatabaseBuilder
@@ -94,9 +94,10 @@ class RunReportUseCaseTest {
                                 reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
                             )
                         ),
-                        timeRange = ReportTimeRangeOption.LAST_WEEK.timeRange,
+                        period = ReportPeriodOption.LAST_WEEK.period,
                     ),
                     accountPersonUid = 1L,
+                    timeZone = TimeZone.UTC,
                 )
             )
         }.results.first()
@@ -132,9 +133,10 @@ class RunReportUseCaseTest {
                         reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
                     )
                 ),
-                timeRange = RelativeRangeReportPeriod(ReportTimeRangeUnit.WEEK, 3),
+                period = RelativeRangeReportPeriod(ReportTimeRangeUnit.WEEK, 3),
             ),
             accountPersonUid = 1L,
+            timeZone = TimeZone.UTC,
         )
 
         val results = runBlocking {
@@ -146,7 +148,7 @@ class RunReportUseCaseTest {
 
         (0 until 3).forEach { weekNum ->
             val firstDayOfWeek = Instant.fromEpochMilliseconds(
-                request.reportOptions.timeRange.periodStartMillis(request.timeZone)
+                request.reportOptions.period.periodStartMillis(request.timeZone)
             ).toLocalDateTime(request.timeZone)
                 .date.plus(DatePeriod(days = weekNum * 7))
             val row = results.firstOrNull { it.xAxis == firstDayOfWeek.toString() }
@@ -161,7 +163,7 @@ class RunReportUseCaseTest {
     }
 
     @Test
-    fun givenStatementsInDatabase_whenDurationPerMonthQueried_thenResultsAsExpected() {
+    fun givenStatementsInDatabase_whenDurationPerMonthQueried_thenReturnsExpectedNumOfResults() {
         val numDaysStatements = 90
 
         insertStatementsPerDay(
@@ -177,9 +179,10 @@ class RunReportUseCaseTest {
                         reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
                     )
                 ),
-                timeRange = RelativeRangeReportPeriod(ReportTimeRangeUnit.MONTH, reportNumMonths),
+                period = RelativeRangeReportPeriod(ReportTimeRangeUnit.MONTH, reportNumMonths),
             ),
             accountPersonUid = 1L,
+            timeZone = TimeZone.UTC,
         )
 
         val results = runBlocking {
@@ -190,6 +193,39 @@ class RunReportUseCaseTest {
             "result size equals number of weeks of reporting period - 3 months")
         assertTrue(results.all { it.xAxis.endsWith("01") },
             "Report by month xAxis should always end with 01 (e.g. first of month)")
+    }
+
+    @Test
+    fun givenStatementsInDatabase_whenDurationPerYearQueried_thenReturnsExpectedNumOfResults() {
+        val reportNumYears = 2
+        val numDaysStatements = 365 * reportNumYears
+
+        insertStatementsPerDay(
+            numDays = numDaysStatements,
+        )
+
+        val request = RunReportUseCase.RunReportRequest(
+            reportOptions = ReportOptions2(
+                xAxis = ReportXAxis.YEAR,
+                series = listOf(
+                    ReportSeries2(
+                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
+                    )
+                ),
+                period = RelativeRangeReportPeriod(ReportTimeRangeUnit.YEAR, reportNumYears),
+            ),
+            accountPersonUid = 1L,
+            timeZone = TimeZone.UTC,
+        )
+
+        val results = runBlocking {
+            runReportUseCase(request = request)
+        }.results.first()
+
+        assertEquals(reportNumYears, results.size,
+            "result size equals number of weeks of reporting period - 2 years")
+        assertTrue(results.all { it.xAxis.endsWith("01-01") },
+            "Report by year xAxis should always end with 01-01 (e.g. first day of the year)")
     }
 
 }

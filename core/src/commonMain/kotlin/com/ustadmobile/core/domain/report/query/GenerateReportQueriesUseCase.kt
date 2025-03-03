@@ -1,12 +1,11 @@
 package com.ustadmobile.core.domain.report.query
 
-import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.door.DoorDbType
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
+import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toLocalDateTime
 
 class GenerateReportQueriesUseCase {
@@ -16,10 +15,22 @@ class GenerateReportQueriesUseCase {
     private fun xAxisOrSubgroupExpression(
         field: ReportXAxis,
         dbType: Int,
-        reportOptions: ReportOptions2,
-        timeZone: TimeZone,
+        request: RunReportUseCase.RunReportRequest,
     ) : String {
-        val timeFieldName = "ResultSource.timestamp"
+        val reportOptions = request.reportOptions
+        val timeZone = request.timeZone
+
+        /**
+         * Database functions will convert ms since epoch into dates using the UTC timezone: we want
+         * to get the date as per the RunReportRequest timezone. Therefor we add the timezone offset
+         * such that the SQLite/Postgres functions will return the date as expected.
+         *
+         * This methodology doesn't handle daylight saving time changes within the report period.
+         */
+        val offsetMillis = timeZone.offsetAt(reportOptions.period.periodStartInstant(timeZone))
+            .totalSeconds * 1000
+
+        val timeFieldName = "(ResultSource.timestamp + $offsetMillis)"
 
         /*
          * strftime should be able to use %F to create an iso formatted date, unfortunately, this
@@ -75,7 +86,7 @@ class GenerateReportQueriesUseCase {
                              *    as expected.
                              */
                             val periodStartDayOfWeek = Instant.fromEpochMilliseconds(
-                                    reportOptions.timeRange.periodStartMillis(timeZone)
+                                    reportOptions.period.periodStartMillis(timeZone)
                                 ).toLocalDateTime(timeZone).dayOfWeek
                             val deltaDays = periodStartDayOfWeek.ordinal - DayOfWeek.MONDAY.ordinal
                             append("TO_CHAR(DATE_TRUNC('week', " +
@@ -123,15 +134,14 @@ class GenerateReportQueriesUseCase {
     }
 
     operator fun invoke(
-        reportOptions: ReportOptions2,
+        request: RunReportUseCase.RunReportRequest,
         dbType: Int,
-        timezone: TimeZone = TimeZone.UTC,
     ): List<ReportQueryParts2> {
+        val reportOptions = request.reportOptions
         val xAxis = reportOptions.xAxis ?: throw IllegalArgumentException("null x axis")
 
-
-        val reportFromMs = reportOptions.timeRange.periodStartMillis(timezone)
-        val reportToMs = reportOptions.timeRange.periodEndMillis(timezone)
+        val reportFromMs = reportOptions.period.periodStartMillis(request.timeZone)
+        val reportToMs = reportOptions.period.periodEndMillis(request.timeZone)
 
         return reportOptions.series.map { series ->
             val yAxis = series.reportSeriesYAxis
@@ -191,7 +201,7 @@ class GenerateReportQueriesUseCase {
 
             sql += " AS yAxis,\n"
 
-            sql += xAxisOrSubgroupExpression(xAxis, dbType, reportOptions, TimeZone.UTC) + " AS xAxis,\n"
+            sql += xAxisOrSubgroupExpression(xAxis, dbType, request) + " AS xAxis,\n"
 
             when(series.reportSeriesSubGroup) {
                 ReportXAxis.NONE, null -> {
@@ -199,7 +209,7 @@ class GenerateReportQueriesUseCase {
                 }
 
                 else -> {
-                    sql += "${xAxisOrSubgroupExpression(series.reportSeriesSubGroup, dbType, reportOptions, TimeZone.UTC)} AS subgroup\n"
+                    sql += "${xAxisOrSubgroupExpression(series.reportSeriesSubGroup, dbType, request)} AS subgroup\n"
                 }
             }
 

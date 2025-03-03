@@ -48,6 +48,7 @@ enum class ReportXAxis(
     val datePeriod: DatePeriod? = null,
 ) : OptionWithLabelStringResource {
     DAY(MR.strings.day, datePeriod = DatePeriod(days = 1)),
+
     /**
      * When report data xAxis is by week, or data is subgrouped by week, this is based on the day of
      * the week of the first day of the reporting period. E.g. if the report period is Tuesday
@@ -55,7 +56,19 @@ enum class ReportXAxis(
      * 2025-02-11.
      */
     WEEK(MR.strings.weekly, datePeriod = DatePeriod(days = 7)),
+
+    /**
+     * When report data xAxis is by month, or data is subgrouped by month, this will be done by
+     * calendar month. Queries will group data using YYYY-MM-01 e.g. using DATE_TRUNC('month'..)
+     * on PostgreSQL and the strftime 'start of month' modifier on SQLite.
+     */
     MONTH(MR.strings.monthly, datePeriod = DatePeriod(months = 1)),
+
+    /**
+     * When report data xAxis is by month, or data is subgrouped by month, this will be done by
+     * calendar year. Queries will group data using YYYY-01-01 e.g. using DATE_TRUNC('year'..)
+     * on PostgreSQL and the strftime 'start of year' modifier on SQLite.
+     */
     YEAR(MR.strings.year, datePeriod = DatePeriod(years = 1)),
     CLASS(MR.strings.class_name),
     GENDER(MR.strings.gender_literal, personJoinRequired = true),

@@ -32,14 +32,16 @@ enum class ReportTimeRangeUnit(
 /**
  *
  */
-enum class ReportTimeRangeOption(
-    val timeRange: ReportPeriod,
+enum class ReportPeriodOption(
+    val period: ReportPeriod,
     override val label: StringResource
 ): OptionWithLabelStringResource {
 
     LAST_WEEK(RelativeRangeReportPeriod(ReportTimeRangeUnit.WEEK, 1), MR.strings.last_week),
 
-    LAST_MONTH(RelativeRangeReportPeriod(ReportTimeRangeUnit.MONTH, 1), MR.strings.last_month),
+    LAST_30_DAYS(RelativeRangeReportPeriod(ReportTimeRangeUnit.DAY, 30), MR.strings.last_30_days),
+
+    LAST_3_MONTHS(RelativeRangeReportPeriod(ReportTimeRangeUnit.MONTH, 3), MR.strings.last_3_months),
 
     CUSTOM_PERIOD(RelativeRangeReportPeriod(ReportTimeRangeUnit.DAY, 1), MR.strings.custom_period),
 
@@ -50,7 +52,8 @@ enum class ReportTimeRangeOption(
  * Sealed class that represents a report period as selected by the user.
  *
  * When a report is run, the time range will always be from 00:00.00 (midnight) on the first day (
- * as per the timezone) until 23:59.999 (end of day) on the last day of the report period (inclusive).
+ * as per RunReportRequest.timeZone) until 23:59.999 (end of day) on the last day of the
+ * report period (inclusive).
  */
 @Serializable
 sealed class ReportPeriod {
@@ -66,12 +69,30 @@ sealed class ReportPeriod {
     abstract fun periodEnd(timeZone: TimeZone): LocalDate
 
     /**
+     * The start time of the period (Instant) as selected by the user.
+     *
+     * @param timeZone report timezone to use for time calculations as per ReportPeriod doc.
+     */
+    fun periodStartInstant(timeZone: TimeZone): Instant {
+        return periodStart(timeZone).atStartOfDayIn(timeZone)
+    }
+
+    /**
      * The start time of the period (in ms since epoch) as selected by the user.
      *
      * @param timeZone report timezone to use for time calculations as per ReportPeriod doc.
      */
     fun periodStartMillis(timeZone: TimeZone): Long {
-        return periodStart(timeZone).atStartOfDayIn(timeZone).toEpochMilliseconds()
+        return periodStartInstant(timeZone).toEpochMilliseconds()
+    }
+
+    /**
+     * The end time of the range (Instant) as selected by user
+     *
+     * @param timeZone report timezone to use for time calculations as per ReportPeriod doc.
+     */
+    fun periodEndInstant(timeZone: TimeZone): Instant {
+        return periodEnd(timeZone).atEndOfDayIn(timeZone)
     }
 
     /**
@@ -80,7 +101,7 @@ sealed class ReportPeriod {
      * @param timeZone report timezone to use for time calculations as per ReportPeriod doc.
      */
     fun periodEndMillis(timeZone: TimeZone): Long {
-        return periodEnd(timeZone).atEndOfDayIn(timeZone).toEpochMilliseconds()
+        return periodEndInstant(timeZone).toEpochMilliseconds()
     }
 
 }

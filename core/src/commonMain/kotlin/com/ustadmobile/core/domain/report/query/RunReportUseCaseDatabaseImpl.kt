@@ -7,7 +7,6 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.StatementReportRow
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
@@ -30,15 +29,14 @@ class RunReportUseCaseDatabaseImpl(
         val allSubGroups = this.map { it.subgroup }.distinct()
         val datePeriod = request.reportOptions.xAxis?.datePeriod ?: return this
         val resultList = mutableListOf<StatementReportRow>()
-        val timezone = TimeZone.UTC
         val rowMap = this.associateBy { Pair(it.xAxis, it.subgroup) }
 
         var fromDateTime = Instant
-            .fromEpochMilliseconds(request.reportOptions.timeRange.periodStartMillis(timezone))
-            .toLocalDateTime(timezone)
-        val reportEndMs = request.reportOptions.timeRange.periodEndMillis(timezone)
+            .fromEpochMilliseconds(request.reportOptions.period.periodStartMillis(request.timeZone))
+            .toLocalDateTime(request.timeZone)
+        val reportEndMs = request.reportOptions.period.periodEndMillis(request.timeZone)
 
-        while(fromDateTime.toInstant(timezone).toEpochMilliseconds() < reportEndMs) {
+        while(fromDateTime.toInstant(request.timeZone).toEpochMilliseconds() < reportEndMs) {
             val xAxisStr = fromDateTime.date.toString()
             resultList.addAll(
                 allSubGroups.map { subgroup ->
@@ -56,12 +54,12 @@ class RunReportUseCaseDatabaseImpl(
     override suspend fun invoke(
         request: RunReportUseCase.RunReportRequest,
     ): RunReportUseCase.RunReportResult {
-        if(request.reportOptions.timeRange.periodStartMillis(request.timeZone) >=
-            request.reportOptions.timeRange.periodEndMillis(request.timeZone)) {
+        if(request.reportOptions.period.periodStartMillis(request.timeZone) >=
+            request.reportOptions.period.periodEndMillis(request.timeZone)) {
             throw IllegalArgumentException("Invalid time range: to time must be after from time")
         }
 
-        val queries = generateReportQueriesUseCase(request.reportOptions, db.dbType())
+        val queries = generateReportQueriesUseCase(request = request, dbType = db.dbType())
         return RunReportUseCase.RunReportResult(
             timestamp = systemTimeInMillis(),
             request = request,
