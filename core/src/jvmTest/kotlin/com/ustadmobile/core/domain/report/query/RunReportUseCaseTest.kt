@@ -11,6 +11,8 @@ import com.ustadmobile.core.domain.report.model.ReportPeriodOption
 import com.ustadmobile.core.domain.report.model.ReportTimeRangeUnit
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.SystemPermission
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.coroutines.runBlocking
@@ -47,6 +49,8 @@ class RunReportUseCaseTest {
 
     private val defaultAccountPersonUid = 1L
 
+    private val defaultStatementClazzUid = 42L
+
     data class StatementsInsertedInfo(
         val statements: List<StatementEntity>,
     )
@@ -55,6 +59,7 @@ class RunReportUseCaseTest {
         numStatementsPerDay: Int = defaultNumStatementsPerDay,
         durationPerStatement: Long = defaultDurationPerStatement,
         numDays: Int = defaultNumDays,
+        statementClazzUid: (index: Int) -> Long = { defaultStatementClazzUid },
     ) : StatementsInsertedInfo{
         val today = Clock.System.now().toLocalDateTime(TimeZone.UTC)
 
@@ -65,13 +70,14 @@ class RunReportUseCaseTest {
                 today.date.minus(DatePeriod(days = dayIndex)), today.time
             ).toInstant(TimeZone.UTC)
 
-            (1..numStatementsPerDay).map {
+            (1..numStatementsPerDay).map { statementNum ->
                 val statementUid = uuid4()
                 StatementEntity(
                     statementIdHi = statementUid.mostSignificantBits,
                     statementIdLo = statementUid.leastSignificantBits,
                     timestamp = timestamp.toEpochMilliseconds(),
                     resultDuration = durationPerStatement,
+                    statementClazzUid = statementClazzUid(statementNum),
                 )
             }
         }
@@ -247,6 +253,72 @@ class RunReportUseCaseTest {
             "result size equals number of weeks of reporting period - 2 years")
         assertTrue(results.all { it.xAxis.endsWith("01-01") },
             "Report by year xAxis should always end with 01-01 (e.g. first day of the year)")
+    }
+
+    @Test
+    fun givenTeacherHasLearningRecordPermissionForClazz_whenQueryRuns_thenOnlyOwnClazzIsIncluded() {
+        val teachersClazzUid = 43L
+
+        //Half of statements will be in the clazzUid for the teacher, half not.
+        insertStatementsPerDay(
+            statementClazzUid = {
+                if(it.mod(2) == 0)
+                    teachersClazzUid
+                else
+                    defaultStatementClazzUid
+            }
+        )
+
+        runBlocking {
+            db.coursePermissionDao().upsertAsync(
+                CoursePermission(
+                    cpToEnrolmentRole = ClazzEnrolment.ROLE_TEACHER,
+                    cpClazzUid = teachersClazzUid,
+                    cpPermissionsFlag = CoursePermission.TEACHER_DEFAULT_PERMISSIONS,
+                )
+            )
+
+            db.clazzEnrolmentDao().insertListAsync(
+                listOf(
+                    ClazzEnrolment(
+                        clazzUid = teachersClazzUid,
+                        personUid = defaultAccountPersonUid,
+                        role = ClazzEnrolment.ROLE_TEACHER
+                    )
+                )
+            )
+        }
+
+        val results = runBlocking {
+            runReportUseCase(
+                request = RunReportUseCase.RunReportRequest(
+                    reportOptions = ReportOptions2(
+                        xAxis = ReportXAxis.DAY,
+                        series = listOf(
+                            ReportSeries2(
+                                reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
+                            )
+                        ),
+                        period = ReportPeriodOption.LAST_WEEK.period,
+                    ),
+                    accountPersonUid = defaultAccountPersonUid,
+                    timeZone = TimeZone.UTC,
+                )
+            )
+        }.results.first()
+
+
+        //Half of the statements will be for the teacher's clazzUid, so totals should be half.
+        (0 until defaultNumDays).forEach { dayIndex ->
+            val localDate = Clock.System.now().toLocalDateTime(TimeZone.UTC).date
+                .minus(DatePeriod(days = dayIndex))
+
+            assertEquals(
+                expected = (defaultDurationPerStatement * (defaultNumStatementsPerDay/2)).toDouble(),
+                actual = results.find { it.xAxis == localDate.toString() }!!.yAxis,
+                message = "day $dayIndex has expected total duration"
+            )
+        }
     }
 
 }
