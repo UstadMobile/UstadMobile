@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.report.query
 
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.door.DoorDbType
@@ -148,6 +149,45 @@ class GenerateReportQueriesUseCase {
             var sql = ""
             val paramsList = mutableListOf<Any>()
 
+
+            /* Permission check CTEs:
+             * a) AllLearningRecordsPermission: Check if the user as per accountPersonUid has view
+             *    learning records SystemPermission, in which case, no further checks will be
+             *    required.
+             * b) Where the user does not have the SystemPermission, get a list of the clazzUids for
+             *    which the active user has view learning records permission
+             */
+            sql += """
+                WITH AllLearningRecordsPermission(hasPermission) AS (
+                     SELECT EXISTS(
+                            SELECT 1
+                              FROM SystemPermission
+                             WHERE SystemPermission.spToPersonUid = ?
+                               AND (SystemPermission.spPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}))
+                            AS hasPermission   
+                ),
+                
+                ClazzesWithPermission(clazzUid) AS(
+                     SELECT Clazz.clazzUid AS clazzUid
+                       FROM Clazz
+                      WHERE NOT (SELECT hasPermission FROM AllLearningRecordsPermission)
+                        AND Clazz.clazzOwnerPersonUid = ?
+                      UNION
+                      SELECT CoursePermission.cpClazzUid AS clazzUid
+                        FROM CoursePermission
+                       WHERE NOT (SELECT hasPermission FROM AllLearningRecordsPermission)
+                         AND (    CoursePermission.cpToPersonUid = ?
+                              OR ((CoursePermission.cpToEnrolmentRole, CoursePermission.cpClazzUid) IN
+                                  (SELECT ClazzEnrolment.clazzEnrolmentRole,
+                                          ClazzEnrolment.clazzEnrolmentClazzUid
+                                     FROM ClazzEnrolment      
+                                    WHERE ClazzEnrolment.clazzEnrolmentPersonUid = ?)))
+                         AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0         
+                )
+            """.trimIndent()
+            //All parameters above are the accountPersonUid (4)
+            paramsList.addAll((0 until 4).map { request.accountPersonUid })
+
             /*
              * Where xAxis or subgrouping is by week and we are using SQLite we need to know the
              * first day of week; so this is added as a CTE.
@@ -157,7 +197,7 @@ class GenerateReportQueriesUseCase {
                 (xAxis == ReportXAxis.WEEK ||
                         reportOptions.series.any { it.reportSeriesSubGroup == ReportXAxis.WEEK } )
             ) {
-                sql += "WITH StartOfWeekCte(TimeRangeStartDayOfWeek) AS (\n" +
+                sql += ",StartOfWeekCte(TimeRangeStartDayOfWeek) AS (\n" +
                         "SELECT strftime('%w', ?, 'unixepoch') AS TimeRangeStartDayOfWeek\n" +
                         ")\n"
                 paramsList.add(reportFromMs/1000)
