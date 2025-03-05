@@ -321,4 +321,37 @@ class RunReportUseCaseTest {
         }
     }
 
+    @Test
+    fun givenAllReportOptionCombinations_whenRun_thenShouldNotThrowException() {
+        insertStatementsPerDay()
+        grantLearningRecordViewSystemPermission()
+
+        runBlocking {
+            ReportSeriesYAxis.entries.filter { it != ReportSeriesYAxis.NONE }.forEach { yAxis ->
+                ReportXAxis.entries.filter { it != ReportXAxis.NONE }.forEach { xAxis ->
+                    try {
+                        runReportUseCase(
+                            request = RunReportUseCase.RunReportRequest(
+                                reportOptions = ReportOptions2(
+                                    xAxis = xAxis,
+                                    series = listOf(
+                                        ReportSeries2(
+                                            reportSeriesYAxis = yAxis
+                                        )
+                                    ),
+                                    period = ReportPeriodOption.LAST_WEEK.period,
+                                ),
+                                accountPersonUid = defaultAccountPersonUid,
+                                timeZone = TimeZone.UTC,
+                            )
+                        )
+                    }catch(e: Throwable) {
+                        println("Exception running report yAxis=$yAxis xAxis=$xAxis")
+                        throw e
+                    }
+                }
+            }
+        }
+    }
+
 }

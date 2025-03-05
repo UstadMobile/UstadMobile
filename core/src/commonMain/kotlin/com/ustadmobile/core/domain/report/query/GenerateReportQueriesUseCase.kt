@@ -214,11 +214,11 @@ class GenerateReportQueriesUseCase {
 
                 ReportSeriesYAxis.AVERAGE_DURATION -> {
                     sql += "SUM(ResultSource.resultDuration) /" +
-                           "COUNT(DISTINCT ResultSource.contextRegistration)"
+                           "COUNT(DISTINCT ResultSource.contextRegistrationHash)"
                 }
 
                 ReportSeriesYAxis.NUMBER_SESSIONS -> {
-                    sql += "COUNT(DISTINCT ResultSource.contextRegistration)"
+                    sql += "COUNT(DISTINCT ResultSource.contextRegistrationHash)"
                 }
 
                 ReportSeriesYAxis.INTERACTIONS_RECORDED -> {
@@ -226,12 +226,12 @@ class GenerateReportQueriesUseCase {
                 }
 
                 ReportSeriesYAxis.NUMBER_ACTIVE_USERS -> {
-                    sql += "COUNT(DISTINCT ResultSource.statementPersonUid)"
+                    sql += "COUNT(DISTINCT ResultSource.statementActorPersonUid)"
                 }
 
                 ReportSeriesYAxis.AVERAGE_USAGE_TIME_PER_USER -> {
                     sql += "SUM(ResultSource.resultDuration) / " +
-                            "COUNT(DISTINCT ResultSource.statementPersonUid)"
+                            "COUNT(DISTINCT ResultSource.statementActorPersonUid)"
                 }
 
                 ReportSeriesYAxis.NONE -> {
