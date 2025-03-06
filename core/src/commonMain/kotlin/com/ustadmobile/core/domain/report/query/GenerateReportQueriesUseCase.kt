@@ -4,14 +4,54 @@ import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.door.DoorDbType
+import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Instant
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toLocalDateTime
 
+/**
+ * `GenerateReportQueriesUseCase`
+ *
+ * This class is responsible for generating the SQL queries required to populate a report
+ * based on the provided `RunReportUseCase.RunReportRequest`. It handles different database types
+ * (SQLite and Postgres) and various report options such as the x-axis (time-based or categorical),
+ * y-axis (metrics), and sub-grouping. This is normally something like 'total usage duration by week'
+ * (see ReportOptions2 for available xAxis/yAxis options).
+ *
+ * ReportOptions2 allows the user to select the YAxis, XAXis, subgrouping (if any), time period, etc.
+ *
+ * The SQL uses the GROUP BY clause to aggregate data according to XAxis and subgrouping (if any).
+ * Once data is grouped, we can use SQL aggregate functions (e.g. SUM, AVERAGE, etc) to get the
+ * yAxis corresponding with each xAxis/subgroup combination.
+ *
+ * The results of the query will be inserted into the ReportQueryResult table which essentially
+ * acts as a cache. Report queries can be long/complex; hence it is necessary to cache the results,
+ * even on the server side.
+ */
 class GenerateReportQueriesUseCase {
 
-    data class ReportQueryParts2(val sql: String, val params: Array<Any>)
+    /**
+     * @param sql The SQL to run (including ? placeholders for any parameters)
+     * @param params The parameters values to use
+     */
+    data class ReportQueryParts2(val sql: String, val params: Array<Any>) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is ReportQueryParts2) return false
+
+            if (sql != other.sql) return false
+            if (!params.contentEquals(other.params)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = sql.hashCode()
+            result = 31 * result + params.contentHashCode()
+            return result
+        }
+    }
 
     private fun xAxisOrSubgroupExpression(
         field: ReportXAxis,
@@ -143,6 +183,7 @@ class GenerateReportQueriesUseCase {
 
         val reportFromMs = reportOptions.period.periodStartMillis(request.timeZone)
         val reportToMs = reportOptions.period.periodEndMillis(request.timeZone)
+        val timenow = systemTimeInMillis()
 
         return reportOptions.series.map { series ->
             val yAxis = series.reportSeriesYAxis
@@ -158,6 +199,10 @@ class GenerateReportQueriesUseCase {
              *    which the active user has view learning records permission
              */
             sql += """
+                INSERT INTO ReportQueryResult(rqrReportUid, rqrLastModified,
+                rqrReportSeriesUid, rqrLastValidated, rqrXAxis, rqrYAxis,
+                rqrSubgroup)
+                
                 WITH AllLearningRecordsPermission(hasPermission) AS (
                      SELECT EXISTS(
                             SELECT 1
@@ -203,6 +248,7 @@ class GenerateReportQueriesUseCase {
                 paramsList.add(reportFromMs/1000)
             }
 
+            sql += ",ResultSourceCte AS (\n "
             sql += "SELECT "
 
             when(yAxis) {
@@ -276,7 +322,20 @@ class GenerateReportQueriesUseCase {
             """.trimIndent()
             paramsList.add(request.accountPersonUid)
 
-            sql += " GROUP BY xAxis"
+            sql += " GROUP BY xAxis\n"
+            sql += ")\n"
+
+            sql += """
+                SELECT ? AS rqrReportUid,
+                       ? AS rqrLastModified,
+                       ? AS rqrLastValidated,
+                       ? AS rqrReportSeriesUid,
+                       ResultSourceCte.xAxis AS rqrXAxis,
+                       ResultSourceCte.yAxis AS rqrYAxis,
+                       ResultSourceCte.subgroup AS rqrSubgroup
+                  FROM ResultSourceCte  
+            """.trimIndent()
+            paramsList.addAll(listOf(request.reportUid, timenow, timenow, series.reportSeriesUid))
 
             ReportQueryParts2(sql, paramsList.toTypedArray())
         }

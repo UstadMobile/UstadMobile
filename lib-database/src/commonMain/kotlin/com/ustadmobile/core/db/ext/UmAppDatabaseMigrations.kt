@@ -1691,6 +1691,19 @@ val MIGRATION_202_203 = DoorMigrationStatementList(202, 203) { db ->
     }
 }
 
+//203-204 is handled separately - see UmAppDatabaseMigration203_204 - responsible to add
+//StatementEntity.contextRegistrationHash
+val MIGRATION_204_205 = DoorMigrationStatementList(204, 205) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS ReportQueryResult (  rqrReportUid  INTEGER  NOT NULL , rqrLastModified  INTEGER  NOT NULL , rqrLastValidated  INTEGER  NOT NULL , rqrReportSeriesUid  INTEGER  NOT NULL , rqrXAxis  TEXT  NOT NULL , rqrYAxis  REAl  NOT NULL , rqrSubgroup  TEXT  NOT NULL , rqrUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        }else {
+            add("CREATE TABLE IF NOT EXISTS ReportQueryResult (  rqrReportUid  BIGINT  NOT NULL , rqrLastModified  BIGINT  NOT NULL , rqrLastValidated  BIGINT  NOT NULL , rqrReportSeriesUid  BIGINT  NOT NULL , rqrXAxis  TEXT  NOT NULL , rqrYAxis  DOUBLE PRECISION  NOT NULL , rqrSubgroup  TEXT  NOT NULL , rqrUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+
+        add("CREATE INDEX idx_reportqueryresult_rqrreportuid ON ReportQueryResult (rqrReportUid)")
+    }
+}
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1708,7 +1721,8 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
     MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
-    MIGRATION_199_200, MIGRATION_200_201, MIGRATION_201_202, MIGRATION_202_203
+    MIGRATION_199_200, MIGRATION_200_201, MIGRATION_201_202, MIGRATION_202_203,
+    MIGRATION_204_205,
 )
 
 

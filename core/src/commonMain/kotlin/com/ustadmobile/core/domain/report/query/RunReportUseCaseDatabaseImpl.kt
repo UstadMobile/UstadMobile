@@ -1,10 +1,13 @@
 package com.ustadmobile.core.domain.report.query
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.SimpleDoorQuery
+import com.ustadmobile.door.PreparedStatementConfig
 import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.ext.prepareAndUseStatementAsync
+import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.StatementReportRow
+import com.ustadmobile.lib.db.composites.adapters.asStatementReportRow
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.plus
@@ -65,9 +68,23 @@ class RunReportUseCaseDatabaseImpl(
         return RunReportUseCase.RunReportResult(
             timestamp = systemTimeInMillis(),
             request = request,
-            results = queries.map {
-                db.statementDao().runReportQuery(SimpleDoorQuery(it.sql, it.params))
-                    .fillIfNeeded(request)
+            results = db.withDoorTransactionAsync {
+                db.reportRunResultRowDao().deleteByReportUid(request.reportUid)
+                queries.forEach { query ->
+                    db.prepareAndUseStatementAsync(PreparedStatementConfig(query.sql)) { statement ->
+                        query.params.forEachIndexed { index, paramVal ->
+                            statement.setObject(index + 1, paramVal)
+                        }
+                        statement.executeUpdate()
+                    }
+                }
+
+                db.reportRunResultRowDao().getAllByReportUid(request.reportUid)
+                    .groupBy { it.rqrReportSeriesUid }
+                    .values
+                    .map { list ->
+                        list.map { it.asStatementReportRow() }.fillIfNeeded(request)
+                    }
             }
         )
     }
