@@ -354,4 +354,48 @@ class RunReportUseCaseTest {
         }
     }
 
+    @Test
+    fun givenReportOptionsWithSubgroup_whenRun_thenResultsAsExpected() {
+        insertStatementsPerDay(
+            statementClazzUid = {
+                defaultStatementClazzUid + it.mod(2)
+            }
+        )
+        grantLearningRecordViewSystemPermission()
+
+        val results = runBlocking {
+            runReportUseCase(
+                request = RunReportUseCase.RunReportRequest(
+                    reportOptions = ReportOptions2(
+                        xAxis = ReportXAxis.DAY,
+                        series = listOf(
+                            ReportSeries2(
+                                reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION,
+                                reportSeriesSubGroup = ReportXAxis.CLASS,
+                            )
+                        ),
+                        period = ReportPeriodOption.LAST_WEEK.period,
+                    ),
+                    accountPersonUid = defaultAccountPersonUid,
+                    timeZone = TimeZone.UTC,
+                )
+            )
+        }.results.first()
+
+        //When using subgrouping, for each xAxis day, there should be two results (one per clazzUid value).
+        (0 until defaultNumDays).forEach { dayIndex ->
+            listOf(defaultStatementClazzUid, defaultStatementClazzUid + 1).forEach { clazzUid ->
+                val localDate = Clock.System.now().toLocalDateTime(TimeZone.UTC).date
+                    .minus(DatePeriod(days = dayIndex))
+
+                assertEquals(
+                    expected = (defaultDurationPerStatement * (defaultNumStatementsPerDay/2)).toDouble(),
+                    actual = results.find {
+                        it.xAxis == localDate.toString() && it.subgroup == clazzUid.toString()
+                    }!!.yAxis,
+                    message = "day $dayIndex has expected total duration"
+                )
+            }
+        }
+    }
 }

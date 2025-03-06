@@ -322,8 +322,12 @@ class GenerateReportQueriesUseCase {
             """.trimIndent()
             paramsList.add(request.accountPersonUid)
 
-            sql += " GROUP BY xAxis\n"
-            sql += ")\n"
+            sql += " GROUP BY xAxis"
+            series.reportSeriesSubGroup?.also {
+                sql += ", subgroup"
+            }
+
+            sql += "\n)\n"
 
             //Order must match INSERT clause
             sql += """
