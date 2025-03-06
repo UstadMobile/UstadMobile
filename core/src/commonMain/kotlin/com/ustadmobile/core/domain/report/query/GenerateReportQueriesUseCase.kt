@@ -325,17 +325,18 @@ class GenerateReportQueriesUseCase {
             sql += " GROUP BY xAxis\n"
             sql += ")\n"
 
+            //Order must match INSERT clause
             sql += """
                 SELECT ? AS rqrReportUid,
                        ? AS rqrLastModified,
-                       ? AS rqrLastValidated,
                        ? AS rqrReportSeriesUid,
+                       ? AS rqrLastValidated,
                        ResultSourceCte.xAxis AS rqrXAxis,
                        ResultSourceCte.yAxis AS rqrYAxis,
                        ResultSourceCte.subgroup AS rqrSubgroup
                   FROM ResultSourceCte  
             """.trimIndent()
-            paramsList.addAll(listOf(request.reportUid, timenow, timenow, series.reportSeriesUid))
+            paramsList.addAll(listOf(request.reportUid, timenow, series.reportSeriesUid, timenow))
 
             ReportQueryParts2(sql, paramsList.toTypedArray())
         }

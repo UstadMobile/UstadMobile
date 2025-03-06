@@ -37,7 +37,7 @@ data class ReportQueryResult(
     var rqrReportUid: Long = 0,
     var rqrLastModified: Long = 0,
     var rqrLastValidated: Long = 0,
-    var rqrReportSeriesUid: Long = 0,
+    var rqrReportSeriesUid: Int = 0,
     var rqrXAxis: String = "",
     var rqrYAxis: Double = 0.0,
     var rqrSubgroup: String = "",

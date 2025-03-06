@@ -79,12 +79,18 @@ class RunReportUseCaseDatabaseImpl(
                     }
                 }
 
-                db.reportRunResultRowDao().getAllByReportUid(request.reportUid)
+                val reportQueryResults = db.reportRunResultRowDao().getAllByReportUid(request.reportUid)
                     .groupBy { it.rqrReportSeriesUid }
-                    .values
-                    .map { list ->
-                        list.map { it.asStatementReportRow() }.fillIfNeeded(request)
-                    }
+                    .map {  entry ->
+                        entry.key to entry.value.map {
+                            it.asStatementReportRow()
+                        }.fillIfNeeded(request)
+                    }.toMap()
+
+                //ensure that the order matches
+                request.reportOptions.series.mapNotNull {
+                    reportQueryResults[it.reportSeriesUid]
+                }
             }
         )
     }
