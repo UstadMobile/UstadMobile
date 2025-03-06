@@ -22,7 +22,7 @@ import kotlinx.datetime.toLocalDateTime
  * ReportOptions2 allows the user to select the YAxis, XAXis, subgrouping (if any), time period, etc.
  *
  * The SQL uses the GROUP BY clause to aggregate data according to XAxis and subgrouping (if any).
- * Once data is grouped, we can use SQL aggregate functions (e.g. SUM, AVERAGE, etc) to get the
+ * Once data is grouped, we can use SQL aggregate functions (e.g. SUM, AVERAGE, COUNT etc) to get the
  * yAxis corresponding with each xAxis/subgroup combination.
  *
  * The results of the query will be inserted into the ReportQueryResult table which essentially

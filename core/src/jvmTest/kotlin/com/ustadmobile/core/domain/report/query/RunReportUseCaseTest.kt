@@ -15,6 +15,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.SystemPermission
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
@@ -111,6 +112,7 @@ class RunReportUseCaseTest {
         val results = runBlocking {
             runReportUseCase(
                 request = RunReportUseCase.RunReportRequest(
+                    reportUid = 42L,
                     reportOptions = ReportOptions2(
                         xAxis = ReportXAxis.DAY,
                         series = listOf(
@@ -123,7 +125,7 @@ class RunReportUseCaseTest {
                     accountPersonUid = defaultAccountPersonUid,
                     timeZone = TimeZone.UTC,
                 )
-            )
+            ).first()
         }.results.first()
 
         assertEquals(7, results.size,
@@ -151,6 +153,7 @@ class RunReportUseCaseTest {
         grantLearningRecordViewSystemPermission()
 
         val request = RunReportUseCase.RunReportRequest(
+            reportUid = 42L,
             reportOptions = ReportOptions2(
                 xAxis = ReportXAxis.WEEK,
                 series = listOf(
@@ -165,7 +168,7 @@ class RunReportUseCaseTest {
         )
 
         val results = runBlocking {
-            runReportUseCase(request = request)
+            runReportUseCase(request = request).first()
         }.results.first()
 
         assertEquals(3, results.size,
@@ -198,6 +201,7 @@ class RunReportUseCaseTest {
 
         val reportNumMonths = 3
         val request = RunReportUseCase.RunReportRequest(
+            reportUid = 42L,
             reportOptions = ReportOptions2(
                 xAxis = ReportXAxis.MONTH,
                 series = listOf(
@@ -212,7 +216,7 @@ class RunReportUseCaseTest {
         )
 
         val results = runBlocking {
-            runReportUseCase(request = request)
+            runReportUseCase(request = request).first()
         }.results.first()
 
         assertEquals(reportNumMonths, results.size,
@@ -232,6 +236,7 @@ class RunReportUseCaseTest {
         grantLearningRecordViewSystemPermission()
 
         val request = RunReportUseCase.RunReportRequest(
+            reportUid = 42L,
             reportOptions = ReportOptions2(
                 xAxis = ReportXAxis.YEAR,
                 series = listOf(
@@ -246,7 +251,7 @@ class RunReportUseCaseTest {
         )
 
         val results = runBlocking {
-            runReportUseCase(request = request)
+            runReportUseCase(request = request).first()
         }.results.first()
 
         assertEquals(reportNumYears, results.size,
@@ -292,6 +297,7 @@ class RunReportUseCaseTest {
         val results = runBlocking {
             runReportUseCase(
                 request = RunReportUseCase.RunReportRequest(
+                    reportUid = 42L,
                     reportOptions = ReportOptions2(
                         xAxis = ReportXAxis.DAY,
                         series = listOf(
@@ -304,7 +310,7 @@ class RunReportUseCaseTest {
                     accountPersonUid = defaultAccountPersonUid,
                     timeZone = TimeZone.UTC,
                 )
-            )
+            ).first()
         }.results.first()
 
 
@@ -332,6 +338,7 @@ class RunReportUseCaseTest {
                     try {
                         runReportUseCase(
                             request = RunReportUseCase.RunReportRequest(
+                                reportUid = 42L,
                                 reportOptions = ReportOptions2(
                                     xAxis = xAxis,
                                     series = listOf(
@@ -366,6 +373,7 @@ class RunReportUseCaseTest {
         val results = runBlocking {
             runReportUseCase(
                 request = RunReportUseCase.RunReportRequest(
+                    reportUid = 42L,
                     reportOptions = ReportOptions2(
                         xAxis = ReportXAxis.DAY,
                         series = listOf(
@@ -379,7 +387,7 @@ class RunReportUseCaseTest {
                     accountPersonUid = defaultAccountPersonUid,
                     timeZone = TimeZone.UTC,
                 )
-            )
+            ).first()
         }.results.first()
 
         //When using subgrouping, for each xAxis day, there should be two results (one per clazzUid value).

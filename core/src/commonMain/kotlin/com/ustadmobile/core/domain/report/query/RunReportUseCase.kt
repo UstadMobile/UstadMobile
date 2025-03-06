@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.report.query
 
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.lib.db.composites.StatementReportRow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.TimeZone
 import kotlinx.serialization.Serializable
 
@@ -29,7 +30,7 @@ interface RunReportUseCase {
     data class RunReportResult(
         val timestamp: Long,
         val request: RunReportRequest,
-        val results: List<List<StatementReportRow>>
+        val results: List<List<StatementReportRow>>,
     )
 
     /**
@@ -44,7 +45,7 @@ interface RunReportUseCase {
      */
     @Serializable
     data class RunReportRequest(
-        val reportUid: Long = 0,
+        val reportUid: Long,
         val reportOptions: ReportOptions2,
         val accountPersonUid: Long,
         val cacheControl: String? = null,
@@ -59,6 +60,6 @@ interface RunReportUseCase {
      */
     suspend operator fun invoke(
         request: RunReportRequest
-    ): RunReportResult
+    ): Flow<RunReportResult>
 
 }
