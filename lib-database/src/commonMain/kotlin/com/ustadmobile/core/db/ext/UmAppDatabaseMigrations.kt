@@ -1705,6 +1705,12 @@ val MIGRATION_204_205 = DoorMigrationStatementList(204, 205) { db ->
     }
 }
 
+val MIGRATION_205_206 = DoorMigrationStatementList(205, 206) { db ->
+    val bigIntType = if(db.dbType() == DoorDbType.SQLITE) "INTEGER" else "BIGINT"
+    listOf("ALTER TABLE Report ADD COLUMN reportOwnerPersonUid $bigIntType NOT NULL DEFAULT 0")
+}
+
+
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
@@ -1722,7 +1728,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
     MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
     MIGRATION_199_200, MIGRATION_200_201, MIGRATION_201_202, MIGRATION_202_203,
-    MIGRATION_204_205,
+    MIGRATION_204_205, MIGRATION_205_206,
 )
 
 
