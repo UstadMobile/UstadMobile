@@ -25,12 +25,14 @@ interface RunReportUseCase {
      *        lists, where the first list is in the same order as request.options.series (e.g. for each series
      *        there is a list of the results). The order of statementreportrows depends on the the
      *        xAxis (e.g. whether it is based on dates or not).
+     * @param age Age as used in http headers (e.g. seconds since report was run)
      */
     @Serializable
     data class RunReportResult(
         val timestamp: Long,
         val request: RunReportRequest,
         val results: List<List<StatementReportRow>>,
+        val age: Int = 0,
     )
 
     /**

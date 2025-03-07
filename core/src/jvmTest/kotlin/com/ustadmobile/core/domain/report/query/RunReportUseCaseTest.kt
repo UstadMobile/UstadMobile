@@ -406,4 +406,44 @@ class RunReportUseCaseTest {
             }
         }
     }
+
+    @Test
+    fun givenReportIsFresh_whenRunAgain_thenCacheResultReturned() {
+        insertStatementsPerDay()
+        grantLearningRecordViewSystemPermission()
+        val runReportRequest = RunReportUseCase.RunReportRequest(
+            reportUid = 42L,
+            reportOptions = ReportOptions2(
+                xAxis = ReportXAxis.DAY,
+                series = listOf(
+                    ReportSeries2(
+                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
+                    )
+                ),
+                period = ReportPeriodOption.LAST_WEEK.period,
+            ),
+            accountPersonUid = defaultAccountPersonUid,
+            timeZone = TimeZone.UTC,
+        )
+
+        val results = runBlocking {
+            runReportUseCase(
+                request = runReportRequest
+            ).first()
+        }
+
+        Thread.sleep(1000)
+
+        val cachedResults = runBlocking {
+            runReportUseCase(
+                request = runReportRequest
+            ).first()
+        }
+
+        assertEquals(7, cachedResults.results.first().size,
+            "result size equals number of days of reporting period - LAST_WEEK - 7 days")
+        assertTrue(cachedResults.age > 0, "Cached results age > 0")
+        assertEquals(0, results.age)
+    }
+
 }

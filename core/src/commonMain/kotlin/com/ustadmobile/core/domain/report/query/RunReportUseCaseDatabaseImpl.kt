@@ -6,6 +6,7 @@ import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.ext.prepareAndUseStatementAsync
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.ihttp.headers.directives.directivesToMap
 import com.ustadmobile.lib.db.composites.StatementReportRow
 import com.ustadmobile.lib.db.composites.adapters.asStatementReportRow
 import kotlinx.coroutines.flow.Flow
@@ -76,39 +77,64 @@ class RunReportUseCaseDatabaseImpl(
         }
 
         return flow {
+            val directives = request.cacheControl?.let { directivesToMap(it) }
+            val maxAgeVal = directives?.get("max-age")
+
+            val maxAgeAccepted = when {
+                directives?.containsKey("must-revalidate") == true -> 0
+                maxAgeVal != null -> maxAgeVal.toInt()
+                else -> DEFAULT_MAX_AGE
+            }
+
             val queries = generateReportQueriesUseCase(request = request, dbType = db.dbType())
+
             val queryResults = db.withDoorTransactionAsync {
-                db.reportRunResultRowDao().deleteByReportUid(request.reportUid)
-                queries.forEach { query ->
-                    db.prepareAndUseStatementAsync(PreparedStatementConfig(query.sql)) { statement ->
-                        query.params.forEachIndexed { index, paramVal ->
-                            statement.setObject(index + 1, paramVal)
+                val lastResultIsFresh = db.reportRunResultRowDao().isReportFresh(
+                    reportUid = request.reportUid,
+                    freshThresholdTime = queries.first().timestamp - (maxAgeAccepted * 1000)
+                )
+
+                if(!lastResultIsFresh) {
+                    db.reportRunResultRowDao().deleteByReportUid(request.reportUid)
+                    queries.forEach { query ->
+                        db.prepareAndUseStatementAsync(PreparedStatementConfig(query.sql)) { statement ->
+                            query.params.forEachIndexed { index, paramVal ->
+                                statement.setObject(index + 1, paramVal)
+                            }
+                            statement.executeUpdate()
                         }
-                        statement.executeUpdate()
                     }
                 }
 
-                val reportQueryResults = db.reportRunResultRowDao().getAllByReportUid(request.reportUid)
-                    .groupBy { it.rqrReportSeriesUid }
-                    .map {  entry ->
-                        entry.key to entry.value.map {
-                            it.asStatementReportRow()
-                        }.fillIfNeeded(request)
-                    }.toMap()
-
-                //ensure that the order matches
-                request.reportOptions.series.mapNotNull {
-                    reportQueryResults[it.reportSeriesUid]
-                }
+                db.reportRunResultRowDao().getAllByReportUid(request.reportUid)
             }
+
+            val queryResultMap = queryResults.groupBy { it.rqrReportSeriesUid }
+                .map {  entry ->
+                    entry.key to entry.value.map {
+                        it.asStatementReportRow()
+                    }.fillIfNeeded(request)
+                }.toMap()
 
             emit(
                 RunReportUseCase.RunReportResult(
                     timestamp = systemTimeInMillis(),
                     request = request,
-                    results = queryResults
+                    results = request.reportOptions.series.mapNotNull {
+                        //ensure that the order matches the order as per request.reportOptions.series
+                        queryResultMap[it.reportSeriesUid]
+                    },
+                    age = (queryResults.firstOrNull()?.rqrLastModified?.let {
+                        queries.first().timestamp - it
+                    }?.toInt() ?: 0) / 1000
                 )
             )
         }
+    }
+
+    companion object {
+
+        const val DEFAULT_MAX_AGE = (60 * 60)//one hour
+
     }
 }

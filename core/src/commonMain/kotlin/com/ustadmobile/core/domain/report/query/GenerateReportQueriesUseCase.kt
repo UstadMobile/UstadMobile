@@ -34,12 +34,20 @@ class GenerateReportQueriesUseCase {
     /**
      * @param sql The SQL to run (including ? placeholders for any parameters)
      * @param params The parameters values to use
+     * @param timestamp timestamp - used for the current time (e.g. ReportQueryResult.rqrLastModified)
+     *        This may be needed as the basis for subsequent calculations; and is therefor included
+     *        in the return value.
      */
-    data class ReportQueryParts2(val sql: String, val params: Array<Any>) {
+    data class ReportQueryParts2(
+        val sql: String,
+        val params: Array<Any>,
+        val timestamp: Long,
+    ) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other !is ReportQueryParts2) return false
 
+            if (timestamp != other.timestamp) return false
             if (sql != other.sql) return false
             if (!params.contentEquals(other.params)) return false
 
@@ -47,7 +55,8 @@ class GenerateReportQueriesUseCase {
         }
 
         override fun hashCode(): Int {
-            var result = sql.hashCode()
+            var result = timestamp.hashCode()
+            result = 31 * result + sql.hashCode()
             result = 31 * result + params.contentHashCode()
             return result
         }
@@ -342,7 +351,7 @@ class GenerateReportQueriesUseCase {
             """.trimIndent()
             paramsList.addAll(listOf(request.reportUid, timenow, series.reportSeriesUid, timenow))
 
-            ReportQueryParts2(sql, paramsList.toTypedArray())
+            ReportQueryParts2(sql, paramsList.toTypedArray(), timenow)
         }
     }
 }
