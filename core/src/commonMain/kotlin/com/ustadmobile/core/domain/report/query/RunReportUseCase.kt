@@ -58,7 +58,7 @@ interface RunReportUseCase {
      * @param request the report request to run
      * @return result containing data that can be graphed
      */
-    suspend operator fun invoke(
+    operator fun invoke(
         request: RunReportRequest
     ): Flow<RunReportResult>
 

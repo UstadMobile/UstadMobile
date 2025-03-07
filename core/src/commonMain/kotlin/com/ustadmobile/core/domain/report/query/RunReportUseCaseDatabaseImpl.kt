@@ -9,7 +9,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.StatementReportRow
 import com.ustadmobile.lib.db.composites.adapters.asStatementReportRow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.plus
@@ -66,44 +66,49 @@ class RunReportUseCaseDatabaseImpl(
      *
      * @return a single value flow with the report result.
      */
-    override suspend fun invoke(
+    override fun invoke(
         request: RunReportUseCase.RunReportRequest,
     ): Flow<RunReportUseCase.RunReportResult> {
         if(request.reportOptions.period.periodStartMillis(request.timeZone) >=
-            request.reportOptions.period.periodEndMillis(request.timeZone)) {
+            request.reportOptions.period.periodEndMillis(request.timeZone)
+        ) {
             throw IllegalArgumentException("Invalid time range: to time must be after from time")
         }
 
-        val queries = generateReportQueriesUseCase(request = request, dbType = db.dbType())
-        return flowOf(
-            RunReportUseCase.RunReportResult(
-                timestamp = systemTimeInMillis(),
-                request = request,
-                results = db.withDoorTransactionAsync {
-                    db.reportRunResultRowDao().deleteByReportUid(request.reportUid)
-                    queries.forEach { query ->
-                        db.prepareAndUseStatementAsync(PreparedStatementConfig(query.sql)) { statement ->
-                            query.params.forEachIndexed { index, paramVal ->
-                                statement.setObject(index + 1, paramVal)
-                            }
-                            statement.executeUpdate()
+        return flow {
+            val queries = generateReportQueriesUseCase(request = request, dbType = db.dbType())
+            val queryResults = db.withDoorTransactionAsync {
+                db.reportRunResultRowDao().deleteByReportUid(request.reportUid)
+                queries.forEach { query ->
+                    db.prepareAndUseStatementAsync(PreparedStatementConfig(query.sql)) { statement ->
+                        query.params.forEachIndexed { index, paramVal ->
+                            statement.setObject(index + 1, paramVal)
                         }
-                    }
-
-                    val reportQueryResults = db.reportRunResultRowDao().getAllByReportUid(request.reportUid)
-                        .groupBy { it.rqrReportSeriesUid }
-                        .map {  entry ->
-                            entry.key to entry.value.map {
-                                it.asStatementReportRow()
-                            }.fillIfNeeded(request)
-                        }.toMap()
-
-                    //ensure that the order matches
-                    request.reportOptions.series.mapNotNull {
-                        reportQueryResults[it.reportSeriesUid]
+                        statement.executeUpdate()
                     }
                 }
+
+                val reportQueryResults = db.reportRunResultRowDao().getAllByReportUid(request.reportUid)
+                    .groupBy { it.rqrReportSeriesUid }
+                    .map {  entry ->
+                        entry.key to entry.value.map {
+                            it.asStatementReportRow()
+                        }.fillIfNeeded(request)
+                    }.toMap()
+
+                //ensure that the order matches
+                request.reportOptions.series.mapNotNull {
+                    reportQueryResults[it.reportSeriesUid]
+                }
+            }
+
+            emit(
+                RunReportUseCase.RunReportResult(
+                    timestamp = systemTimeInMillis(),
+                    request = request,
+                    results = queryResults
+                )
             )
-        )
+        }
     }
 }
