@@ -1,21 +1,15 @@
 package com.ustadmobile.core.domain.report.query
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.report.query.RunReportUseCase.Companion.reportQueryResultsToResultStatementReportRows
+import com.ustadmobile.core.util.ext.age
 import com.ustadmobile.door.PreparedStatementConfig
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.ext.prepareAndUseStatementAsync
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.ihttp.headers.directives.directivesToMap
-import com.ustadmobile.lib.db.composites.StatementReportRow
-import com.ustadmobile.lib.db.composites.adapters.asStatementReportRow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.plus
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 
 /**
  *
@@ -24,42 +18,6 @@ class RunReportUseCaseDatabaseImpl(
     val db: UmAppDatabase,
     val generateReportQueriesUseCase: GenerateReportQueriesUseCase,
 ) : RunReportUseCase {
-
-    /**
-     * Where the XAxis is time based (day/week/month/year) then the list of StatementReportRow MUST
-     * contain a row for each day/week/month for each subgroup. If there are no matching records in
-     * the database, then the SQL query will not contain any such row.
-     *
-     * This functions "fills" it in with zero so the data can be graphed as expected.
-     */
-    private fun List<StatementReportRow>.fillIfNeeded(
-        request: RunReportUseCase.RunReportRequest,
-    ): List<StatementReportRow> {
-        //If there are no rows in the database query result; we must use the empty subgroup
-        // this might need adjusted when subgroups are by gender / known values
-        val allSubGroups = this.map { it.subgroup }.distinct().ifEmpty { listOf("") }
-        val datePeriod = request.reportOptions.xAxis?.datePeriod ?: return this
-        val resultList = mutableListOf<StatementReportRow>()
-        val rowMap = this.associateBy { Pair(it.xAxis, it.subgroup) }
-
-        var fromDateTime = Instant
-            .fromEpochMilliseconds(request.reportOptions.period.periodStartMillis(request.timeZone))
-            .toLocalDateTime(request.timeZone)
-        val reportEndMs = request.reportOptions.period.periodEndMillis(request.timeZone)
-
-        while(fromDateTime.toInstant(request.timeZone).toEpochMilliseconds() < reportEndMs) {
-            val xAxisStr = fromDateTime.date.toString()
-            resultList.addAll(
-                allSubGroups.map { subgroup ->
-                    rowMap[Pair(xAxisStr, subgroup)] ?: StatementReportRow(xAxis = xAxisStr, subgroup = subgroup)
-                }
-            )
-
-            fromDateTime = LocalDateTime(fromDateTime.date.plus(datePeriod), fromDateTime.time)
-        }
-
-        return resultList.toList()
-    }
 
 
     /**
@@ -77,21 +35,12 @@ class RunReportUseCaseDatabaseImpl(
         }
 
         return flow {
-            val directives = request.cacheControl?.let { directivesToMap(it) }
-            val maxAgeVal = directives?.get("max-age")
-
-            val maxAgeAccepted = when {
-                directives?.containsKey("must-revalidate") == true -> 0
-                maxAgeVal != null -> maxAgeVal.toInt()
-                else -> DEFAULT_MAX_AGE
-            }
-
             val queries = generateReportQueriesUseCase(request = request, dbType = db.dbType())
 
             val queryResults = db.withDoorTransactionAsync {
                 val lastResultIsFresh = db.reportRunResultRowDao().isReportFresh(
                     reportUid = request.reportUid,
-                    freshThresholdTime = queries.first().timestamp - (maxAgeAccepted * 1000)
+                    freshThresholdTime = queries.first().timestamp - (request.maxFreshAge * 1000)
                 )
 
                 if(!lastResultIsFresh) {
@@ -109,32 +58,17 @@ class RunReportUseCaseDatabaseImpl(
                 db.reportRunResultRowDao().getAllByReportUid(request.reportUid)
             }
 
-            val queryResultMap = queryResults.groupBy { it.rqrReportSeriesUid }
-                .map {  entry ->
-                    entry.key to entry.value.map {
-                        it.asStatementReportRow()
-                    }.fillIfNeeded(request)
-                }.toMap()
-
             emit(
                 RunReportUseCase.RunReportResult(
                     timestamp = systemTimeInMillis(),
                     request = request,
-                    results = request.reportOptions.series.mapNotNull {
-                        //ensure that the order matches the order as per request.reportOptions.series
-                        queryResultMap[it.reportSeriesUid]
-                    },
-                    age = (queryResults.firstOrNull()?.rqrLastModified?.let {
-                        queries.first().timestamp - it
-                    }?.toInt() ?: 0) / 1000
+                    results = reportQueryResultsToResultStatementReportRows(
+                        queryResults = queryResults,
+                        request = request
+                    ),
+                    age = queryResults.age(sinceTimestamp = queries.first().timestamp)
                 )
             )
         }
-    }
-
-    companion object {
-
-        const val DEFAULT_MAX_AGE = (60 * 60)//one hour
-
     }
 }
