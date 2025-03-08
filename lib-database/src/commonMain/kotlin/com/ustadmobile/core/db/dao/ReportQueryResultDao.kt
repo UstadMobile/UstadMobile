@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.PostgresQuery
@@ -13,6 +14,10 @@ abstract class ReportQueryResultDao {
          WHERE rqrReportUid = :reportUid
     """)
     abstract suspend fun deleteByReportUid(reportUid: Long)
+
+    @Insert
+    abstract suspend fun insertAllAsync(results: List<ReportQueryResult>)
+
 
     @Query("""
         SELECT ReportQueryResult.*
