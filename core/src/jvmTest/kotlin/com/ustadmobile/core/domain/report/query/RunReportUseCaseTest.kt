@@ -1,30 +1,31 @@
 package com.ustadmobile.core.domain.report.query
 
-import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
 import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportPeriodOption
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
-import com.ustadmobile.core.domain.report.model.ReportPeriodOption
 import com.ustadmobile.core.domain.report.model.ReportTimeRangeUnit
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.SystemPermission
-import com.ustadmobile.lib.db.entities.xapi.StatementEntity
+import com.ustadmobile.util.test.ext.DEFAULT_DURATION_PER_STATEMENT
+import com.ustadmobile.util.test.ext.DEFAULT_NUM_DAYS
+import com.ustadmobile.util.test.ext.DEFAULT_NUM_STATEMENTS_PER_DAY
+import com.ustadmobile.util.test.ext.DEFAULT_STATEMENT_CLAZZ_UID
+import com.ustadmobile.util.test.ext.insertStatementsPerDay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -44,51 +45,9 @@ class RunReportUseCaseTest {
         runReportUseCase = RunReportUseCaseDatabaseImpl(db, GenerateReportQueriesUseCase())
     }
 
-    private val defaultNumStatementsPerDay = 2
-    private val defaultDurationPerStatement = 2_000L
-    private val defaultNumDays = 3
-
     private val defaultAccountPersonUid = 1L
 
     private val defaultStatementClazzUid = 42L
-
-    data class StatementsInsertedInfo(
-        val statements: List<StatementEntity>,
-    )
-
-    private fun insertStatementsPerDay(
-        numStatementsPerDay: Int = defaultNumStatementsPerDay,
-        durationPerStatement: Long = defaultDurationPerStatement,
-        numDays: Int = defaultNumDays,
-        statementClazzUid: (index: Int) -> Long = { defaultStatementClazzUid },
-    ) : StatementsInsertedInfo{
-        val today = Clock.System.now().toLocalDateTime(TimeZone.UTC)
-
-        val statementList = (0 until numDays).flatMap { dayIndex ->
-            //Adding 24 hours does not always get to the same time next day e.g. when daylight
-            // savings time changes. Use LocalDateTime to workaround this.
-            val timestamp = LocalDateTime(
-                today.date.minus(DatePeriod(days = dayIndex)), today.time
-            ).toInstant(TimeZone.UTC)
-
-            (1..numStatementsPerDay).map { statementNum ->
-                val statementUid = uuid4()
-                StatementEntity(
-                    statementIdHi = statementUid.mostSignificantBits,
-                    statementIdLo = statementUid.leastSignificantBits,
-                    timestamp = timestamp.toEpochMilliseconds(),
-                    resultDuration = durationPerStatement,
-                    statementClazzUid = statementClazzUid(statementNum),
-                )
-            }
-        }
-
-        runBlocking {
-            db.statementDao().insertOrIgnoreListAsync(statementList)
-        }
-
-        return StatementsInsertedInfo(statementList)
-    }
 
     private fun grantLearningRecordViewSystemPermission(
         personUid: Long = defaultAccountPersonUid
@@ -106,7 +65,7 @@ class RunReportUseCaseTest {
 
     @Test
     fun givenStatementsInDatabase_whenDurationPerDayQueried_thenResultsAsExpected() {
-        insertStatementsPerDay()
+        runBlocking { db.insertStatementsPerDay() }
         grantLearningRecordViewSystemPermission()
 
         val results = runBlocking {
@@ -131,12 +90,12 @@ class RunReportUseCaseTest {
         assertEquals(7, results.size,
             "result size equals number of days of reporting period - LAST_WEEK - 7 days")
 
-        (0 until defaultNumDays).forEach { dayIndex ->
+        (0 until DEFAULT_NUM_DAYS).forEach { dayIndex ->
             val localDate = Clock.System.now().toLocalDateTime(TimeZone.UTC).date
                 .minus(DatePeriod(days = dayIndex))
 
             assertEquals(
-                expected = (defaultDurationPerStatement * defaultNumStatementsPerDay).toDouble(),
+                expected = (DEFAULT_DURATION_PER_STATEMENT * DEFAULT_NUM_STATEMENTS_PER_DAY).toDouble(),
                 actual = results.find { it.xAxis == localDate.toString() }!!.yAxis,
                 message = "day $dayIndex has expected total duration"
             )
@@ -147,9 +106,7 @@ class RunReportUseCaseTest {
     fun givenStatementsInDatabase_whenDurationPerWeekQueried_thenResultsAsExpected() {
         val numWeeks = 3
         val numDaysStatements = numWeeks * 7
-        insertStatementsPerDay(
-            numDays = numDaysStatements,
-        )
+        runBlocking { db.insertStatementsPerDay(numDays = numDaysStatements) }
         grantLearningRecordViewSystemPermission()
 
         val request = RunReportUseCase.RunReportRequest(
@@ -183,7 +140,7 @@ class RunReportUseCaseTest {
 
 
             assertEquals(
-                expected = (defaultDurationPerStatement * defaultNumStatementsPerDay * 7).toDouble(),
+                expected = (DEFAULT_DURATION_PER_STATEMENT * DEFAULT_NUM_STATEMENTS_PER_DAY * 7).toDouble(),
                 actual = row?.yAxis ?: -1f,
                 message = "week $weekNum has expected total duration"
             )
@@ -194,9 +151,7 @@ class RunReportUseCaseTest {
     fun givenStatementsInDatabase_whenDurationPerMonthQueried_thenReturnsExpectedNumOfResults() {
         val numDaysStatements = 90
 
-        insertStatementsPerDay(
-            numDays = numDaysStatements,
-        )
+        runBlocking { db.insertStatementsPerDay(numDays = numDaysStatements) }
         grantLearningRecordViewSystemPermission()
 
         val reportNumMonths = 3
@@ -230,9 +185,7 @@ class RunReportUseCaseTest {
         val reportNumYears = 2
         val numDaysStatements = 365 * reportNumYears
 
-        insertStatementsPerDay(
-            numDays = numDaysStatements,
-        )
+        runBlocking { db.insertStatementsPerDay(numDays = numDaysStatements) }
         grantLearningRecordViewSystemPermission()
 
         val request = RunReportUseCase.RunReportRequest(
@@ -265,14 +218,16 @@ class RunReportUseCaseTest {
         val teachersClazzUid = 43L
 
         //Half of statements will be in the clazzUid for the teacher, half not.
-        insertStatementsPerDay(
-            statementClazzUid = {
-                if(it.mod(2) == 0)
-                    teachersClazzUid
-                else
-                    defaultStatementClazzUid
-            }
-        )
+        runBlocking {
+            db.insertStatementsPerDay(
+                statementClazzUid = {
+                    if(it.mod(2) == 0)
+                        teachersClazzUid
+                    else
+                        DEFAULT_STATEMENT_CLAZZ_UID
+                }
+            )
+        }
 
         runBlocking {
             db.coursePermissionDao().upsertAsync(
@@ -315,12 +270,12 @@ class RunReportUseCaseTest {
 
 
         //Half of the statements will be for the teacher's clazzUid, so totals should be half.
-        (0 until defaultNumDays).forEach { dayIndex ->
+        (0 until DEFAULT_NUM_DAYS).forEach { dayIndex ->
             val localDate = Clock.System.now().toLocalDateTime(TimeZone.UTC).date
                 .minus(DatePeriod(days = dayIndex))
 
             assertEquals(
-                expected = (defaultDurationPerStatement * (defaultNumStatementsPerDay/2)).toDouble(),
+                expected = (DEFAULT_DURATION_PER_STATEMENT * (DEFAULT_NUM_STATEMENTS_PER_DAY/2)).toDouble(),
                 actual = results.find { it.xAxis == localDate.toString() }!!.yAxis,
                 message = "day $dayIndex has expected total duration"
             )
@@ -329,7 +284,7 @@ class RunReportUseCaseTest {
 
     @Test
     fun givenAllReportOptionCombinations_whenRun_thenShouldNotThrowException() {
-        insertStatementsPerDay()
+        runBlocking { db.insertStatementsPerDay() }
         grantLearningRecordViewSystemPermission()
 
         runBlocking {
@@ -363,11 +318,13 @@ class RunReportUseCaseTest {
 
     @Test
     fun givenReportOptionsWithSubgroup_whenRun_thenResultsAsExpected() {
-        insertStatementsPerDay(
-            statementClazzUid = {
-                defaultStatementClazzUid + it.mod(2)
-            }
-        )
+        runBlocking {
+            db.insertStatementsPerDay(
+                statementClazzUid = {
+                    defaultStatementClazzUid + it.mod(2)
+                }
+            )
+        }
         grantLearningRecordViewSystemPermission()
 
         val results = runBlocking {
@@ -391,13 +348,13 @@ class RunReportUseCaseTest {
         }.results.first()
 
         //When using subgrouping, for each xAxis day, there should be two results (one per clazzUid value).
-        (0 until defaultNumDays).forEach { dayIndex ->
-            listOf(defaultStatementClazzUid, defaultStatementClazzUid + 1).forEach { clazzUid ->
+        (0 until DEFAULT_NUM_DAYS).forEach { dayIndex ->
+            listOf(DEFAULT_STATEMENT_CLAZZ_UID, DEFAULT_STATEMENT_CLAZZ_UID + 1).forEach { clazzUid ->
                 val localDate = Clock.System.now().toLocalDateTime(TimeZone.UTC).date
                     .minus(DatePeriod(days = dayIndex))
 
                 assertEquals(
-                    expected = (defaultDurationPerStatement * (defaultNumStatementsPerDay/2)).toDouble(),
+                    expected = (DEFAULT_DURATION_PER_STATEMENT * (DEFAULT_NUM_STATEMENTS_PER_DAY/2)).toDouble(),
                     actual = results.find {
                         it.xAxis == localDate.toString() && it.subgroup == clazzUid.toString()
                     }!!.yAxis,
@@ -409,7 +366,7 @@ class RunReportUseCaseTest {
 
     @Test
     fun givenReportIsFresh_whenRunAgain_thenCacheResultReturned() {
-        insertStatementsPerDay()
+        runBlocking { db.insertStatementsPerDay() }
         grantLearningRecordViewSystemPermission()
         val runReportRequest = RunReportUseCase.RunReportRequest(
             reportUid = 42L,
