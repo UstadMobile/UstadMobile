@@ -38,6 +38,10 @@ import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaIn
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
+import com.ustadmobile.core.domain.report.query.GenerateReportQueriesUseCase
+import com.ustadmobile.core.domain.report.query.RunReportUseCase
+import com.ustadmobile.core.domain.report.query.RunReportUseCaseClientImpl
+import com.ustadmobile.core.domain.report.query.RunReportUseCaseDatabaseImpl
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
@@ -62,6 +66,7 @@ import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
 import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.RepositoryConfig
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
@@ -99,6 +104,7 @@ import nl.adaptivity.xmlutil.serialization.XmlConfig
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.direct
+import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 import org.kodein.di.provider
 import org.quartz.Scheduler
@@ -609,6 +615,29 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
                 workDir = instance(tag = TAG_DATA_DIR),
             )
         }
+    }
+
+    bind<RunReportUseCase>() with scoped(EndpointScope.Default).singleton {
+        val repo : UmAppDatabase? = instanceOrNull(tag = DoorTag.TAG_REPO)
+
+        if(repo != null) {
+            RunReportUseCaseClientImpl(
+                db =  instance(tag = DoorTag.TAG_DB),
+                repo = (repo as DoorDatabaseRepository),
+                learningSpace = context,
+                httpClient = instance(),
+                json = instance()
+            )
+        }else {
+            RunReportUseCaseDatabaseImpl(
+                db = instance(tag = DoorTag.TAG_DB),
+                generateReportQueriesUseCase = instance(),
+            )
+        }
+    }
+
+    bind<GenerateReportQueriesUseCase>() with scoped(EndpointScope.Default).singleton {
+        GenerateReportQueriesUseCase()
     }
 
     onReady {

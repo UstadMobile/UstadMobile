@@ -27,11 +27,20 @@ import kotlinx.serialization.json.Json
  */
 class RunReportUseCaseClientImpl(
     private val db: UmAppDatabase,
-    private val repo: UmAppDatabase,
+    private val clientNodeId: Long,
+    private val clientNodeAuth: String,
     private val learningSpace: Endpoint,
     private val httpClient: HttpClient,
     private val json: Json,
 ): RunReportUseCase {
+
+    constructor(
+        db: UmAppDatabase,
+        repo: DoorDatabaseRepository,
+        learningSpace: Endpoint,
+        httpClient: HttpClient,
+        json: Json,
+    ): this(db, repo.config.nodeId, repo.config.auth, learningSpace, httpClient, json)
 
     override fun invoke(
         request: RunReportUseCase.RunReportRequest
@@ -59,15 +68,20 @@ class RunReportUseCaseClientImpl(
             )
 
             if(!isFresh) {
-                val rowsJsonText = httpClient.post {
-                    url {
-                        takeFrom(learningSpace.url)
-                        appendPathSegments("report/run")
-                    }
+                val rowsJsonText = try {
+                    httpClient.post {
+                        url {
+                            takeFrom(learningSpace.url)
+                            appendPathSegments("api/report/run")
+                        }
 
-                    doorNodeIdHeader(repo as DoorDatabaseRepository)
-                    setBodyJson(json, RunReportUseCase.RunReportRequest.serializer(), request)
-                }.bodyAsDecodedText()
+                        doorNodeIdHeader(clientNodeId, clientNodeAuth)
+                        setBodyJson(json, RunReportUseCase.RunReportRequest.serializer(), request)
+                    }.bodyAsDecodedText()
+                }catch(e: Throwable) {
+                    e.printStackTrace()
+                    throw e
+                }
 
                 val response = json.decodeFromString(
                     RunReportUseCase.RunReportResult.serializer(), rowsJsonText

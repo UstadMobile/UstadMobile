@@ -1,7 +1,9 @@
 package com.ustadmobile.lib.rest.domain.report.query
 
+import app.cash.turbine.test
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.account.VerifyClientUserSessionUseCase
 import com.ustadmobile.core.domain.report.model.ReportOptions2
@@ -11,20 +13,20 @@ import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.query.GenerateReportQueriesUseCase
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
+import com.ustadmobile.core.domain.report.query.RunReportUseCaseClientImpl
 import com.ustadmobile.core.domain.report.query.RunReportUseCaseDatabaseImpl
 import com.ustadmobile.core.impl.di.CommonJvmDiModule
-import com.ustadmobile.core.util.ext.bodyAsDecodedText
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.doorNodeIdHeader
-import com.ustadmobile.door.ext.setBodyJson
 import com.ustadmobile.door.util.NodeIdAuthCache
 import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.SystemPermission
 import com.ustadmobile.lib.db.entities.UserSession
 import com.ustadmobile.lib.db.entities.UserSession.Companion.STATUS_ACTIVE
 import com.ustadmobile.lib.rest.CONF_DBMODE_VIRTUALHOST
 import com.ustadmobile.lib.rest.commonTestKtorDiModule
+import com.ustadmobile.util.test.ext.insertStatementsPerDay
 import io.ktor.client.HttpClient
-import io.ktor.client.request.post
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
@@ -37,6 +39,7 @@ import io.ktor.server.testing.testApplication
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.TimeZone
 import kotlinx.serialization.json.Json
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.kodein.di.DI
@@ -49,6 +52,7 @@ import org.kodein.di.on
 import org.kodein.di.registerContextTranslator
 import org.kodein.di.scoped
 import org.kodein.di.singleton
+import kotlin.time.Duration.Companion.seconds
 
 class RunReportRouteIntegrationTest {
 
@@ -56,7 +60,21 @@ class RunReportRouteIntegrationTest {
 
     private lateinit var endpointScope: EndpointScope
 
-    private val serverEndpoint = Endpoint("localhost")
+    private val serverEndpoint = Endpoint("http://localhost/")
+
+    private val defaultClientNodeId = 43L
+
+    private val defaultClientNodeAuth = "secret"
+
+    private val json = Json {
+        encodeDefaults = true
+        ignoreUnknownKeys = true
+    }
+
+    data class RunReportRouteIntegrationContext(
+        val httpClient: HttpClient,
+        val clientDi: DI,
+    )
 
     @Before
     fun setup() {
@@ -67,10 +85,7 @@ class RunReportRouteIntegrationTest {
             import(commonTestKtorDiModule(endpointScope))
 
             bind<Json>() with singleton {
-                Json {
-                    encodeDefaults = true
-                    ignoreUnknownKeys = true
-                }
+                json
             }
 
             registerContextTranslator { _: ApplicationCall ->
@@ -80,7 +95,7 @@ class RunReportRouteIntegrationTest {
     }
 
     private fun testReportRouteApplication(
-        block: ApplicationTestBuilder.(httpClient: HttpClient) -> Unit
+        block: ApplicationTestBuilder.(context: RunReportRouteIntegrationContext) -> Unit
     ) {
         testApplication {
             environment {
@@ -144,18 +159,43 @@ class RunReportRouteIntegrationTest {
                 }
             }
 
-            block(client)
+            val clientScope = EndpointScope()
+            val clientDi by DI.lazy{
+                bind<RunReportUseCase>() with scoped(clientScope).singleton {
+                    RunReportUseCaseClientImpl(
+                        db = instance(tag = DoorTag.TAG_DB),
+                        clientNodeId = defaultClientNodeId,
+                        clientNodeAuth = defaultClientNodeAuth,
+                        learningSpace = context,
+                        httpClient = client,
+                        json = json,
+                    )
+                }
+
+                bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(clientScope).singleton {
+                    DatabaseBuilder.databaseBuilder(
+                        UmAppDatabase::class, "jdbc:sqlite::memory:", nodeId = defaultClientNodeId
+                    ).build()
+                }
+
+                bind<UmAppDatabase>(tag = DoorTag.TAG_REPO)
+            }
+
+            block(
+                RunReportRouteIntegrationContext(
+                    httpClient = client,
+                    clientDi = clientDi,
+                )
+            )
         }
     }
 
     @Test
     fun givenReportExists_whenGetReportClientRuns_thenRetrieves(
 
-    )  = testReportRouteApplication {
+    )  = testReportRouteApplication { testCtx ->
         val json: Json = serverDi.direct.instance()
         val personUid = 1L
-        val nodeId = 2L
-        val nodeAuth = "secret"
 
         val reportRequest = RunReportUseCase.RunReportRequest(
             reportUid = 42L,
@@ -184,21 +224,32 @@ class RunReportRouteIntegrationTest {
             serverDb.userSessionDao().insertSession(
                 UserSession().apply {
                     usPersonUid = personUid
-                    usClientNodeId = nodeId
+                    usClientNodeId = defaultClientNodeId
                     usStatus = STATUS_ACTIVE
                 }
             )
+            serverDb.systemPermissionDao().upsertAsync(
+                SystemPermission(
+                    spToPersonUid = personUid,
+                    spPermissionsFlag = PermissionFlags.COURSE_LEARNINGRECORD_VIEW
+                )
+            )
+            serverDb.insertStatementsPerDay()
             serverDb.reportDao().insert(report)
         }
 
-        val responseText: String = runBlocking {
-            client.post("/api/report/run") {
-                doorNodeIdHeader(nodeId, nodeAuth)
-                setBodyJson(json, RunReportUseCase.RunReportRequest.serializer(), reportRequest)
-            }.bodyAsDecodedText()
+        val runReportUseCaseImpl: RunReportUseCase = testCtx.clientDi.on(serverEndpoint).direct
+            .instance()
+
+        runBlocking {
+            runReportUseCaseImpl(reportRequest).test(timeout = 10.seconds) {
+                val cachedResult = awaitItem()
+                assertTrue("first result empty", cachedResult.results.isEmpty())
+                val httpResult = awaitItem()
+                assertTrue("second result not emtpy", httpResult.results.isNotEmpty())
+                cancelAndIgnoreRemainingEvents()
+            }
         }
-        val response = json.decodeFromString(RunReportUseCase.RunReportResult.serializer(), responseText)
-        println(response)
     }
 
 

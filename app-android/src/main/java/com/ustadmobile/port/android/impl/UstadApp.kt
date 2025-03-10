@@ -112,6 +112,10 @@ import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
+import com.ustadmobile.core.domain.report.query.GenerateReportQueriesUseCase
+import com.ustadmobile.core.domain.report.query.RunReportUseCase
+import com.ustadmobile.core.domain.report.query.RunReportUseCaseClientImpl
+import com.ustadmobile.core.domain.report.query.RunReportUseCaseDatabaseImpl
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -1163,6 +1167,29 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 dispatcher = Dispatchers.IO,
                 supportedLanguagesConfig = instance(),
             )
+        }
+
+        bind<RunReportUseCase>() with scoped(EndpointScope.Default).singleton {
+            val repo : UmAppDatabase? = instanceOrNull(tag = DoorTag.TAG_REPO)
+
+            if(repo != null) {
+                RunReportUseCaseClientImpl(
+                    db =  instance(tag = DoorTag.TAG_DB),
+                    repo = (repo as DoorDatabaseRepository),
+                    learningSpace = context,
+                    httpClient = instance(),
+                    json = instance()
+                )
+            }else {
+                RunReportUseCaseDatabaseImpl(
+                    db = instance(tag = DoorTag.TAG_DB),
+                    generateReportQueriesUseCase = instance(),
+                )
+            }
+        }
+
+        bind<GenerateReportQueriesUseCase>() with scoped(EndpointScope.Default).singleton {
+            GenerateReportQueriesUseCase()
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
