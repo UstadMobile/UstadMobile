@@ -7,9 +7,7 @@ import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
-import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +25,7 @@ class ReportFilterEditViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
-    val seriesId: Int = savedStateHandle["reportSeriesUid"]?.toInt() ?: 0
+    val seriesId: Int = savedStateHandle[ARG_REPORT_SERIES_UID]?.toInt() ?: 0
 
     private val _uiState = MutableStateFlow(
         ReportFilterEditUiState(
@@ -105,5 +103,7 @@ class ReportFilterEditViewModel(
     companion object {
         const val DEST_NAME = "ReportFilterEdit"
         const val DEST_NAME_HOME = "ReportFilterEditHome"
+
+        const val ARG_REPORT_SERIES_UID = "reportSeriesUid"
     }
 }
