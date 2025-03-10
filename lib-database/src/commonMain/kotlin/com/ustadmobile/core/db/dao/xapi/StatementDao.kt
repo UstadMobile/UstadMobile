@@ -37,6 +37,7 @@ import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
+import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.lib.db.entities.xapi.ActorEntity
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.lib.db.entities.xapi.VerbEntity
@@ -570,7 +571,8 @@ expect abstract class StatementDao {
 
     @HttpAccessible
     @Query("""
-    SELECT StatementEntity.*, VerbEntity.*, VerbLangMapEntry.*
+    SELECT StatementEntity.*, VerbEntity.*, VerbLangMapEntry.*, ActivityEntity.*,
+           ActivityLangMapEntry.*
     FROM StatementEntity
     LEFT JOIN VerbEntity
         ON StatementEntity.statementVerbUid = VerbEntity.verbUid
@@ -581,6 +583,15 @@ expect abstract class StatementDao {
             WHERE VerbLangMapEntry.vlmeVerbUid = VerbEntity.verbUid
             ORDER BY VerbLangMapEntry.vlmeLastModified DESC
             LIMIT 1)
+    LEFT JOIN ActivityEntity
+              ON ActivityEntity.actUid = StatementEntity.statementObjectUid1
+    LEFT JOIN ActivityLangMapEntry
+              ON (ActivityLangMapEntry.almeActivityUid, ActivityLangMapEntry.almeHash) = 
+                 (SELECT ActivityLangMapEntry.almeActivityUid, ActivityLangMapEntry.almeHash
+                    FROM ActivityLangMapEntry
+                   WHERE ActivityLangMapEntry.almeActivityUid = StatementEntity.statementObjectUid1
+                     AND ActivityLangMapEntry.almePropName = '${ActivityLangMapEntry.PROPNAME_NAME}'
+                   LIMIT 1)
     LEFT JOIN ClazzEnrolment 
         ON ClazzEnrolment.clazzEnrolmentUid =
             COALESCE(

@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.db.composites.xapi
 
 import androidx.room.Embedded
+import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
+import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import com.ustadmobile.lib.db.entities.xapi.VerbEntity
 import com.ustadmobile.lib.db.entities.xapi.VerbLangMapEntry
@@ -14,6 +16,10 @@ class StatementEntityAndVerb(
     var verb: VerbEntity? = null,
     @Embedded
     var verbDisplay: VerbLangMapEntry? = null,
+    @Embedded
+    var activity: ActivityEntity? = null,
+    @Embedded
+    var activityLangMapEntry: ActivityLangMapEntry? = null,
 )
 
 object StatementConst{
