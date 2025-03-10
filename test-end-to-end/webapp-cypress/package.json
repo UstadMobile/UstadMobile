@@ -12,7 +12,7 @@
     "@this-dot/cypress-indexeddb": "^2.0.0"
   },
   "scripts": {
-    "delete:reports": "rm results/* cypress/videos/*  cypress/screenshots/* logs/* || true",
+    "delete:reports": "rm results/* cypress/videos/*  cypress/screenshots/* logs/* log/* || true",
     "start-server-ci": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar -P:url=$TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=cypress",
     "cy:run-ci": "cypress run --config baseUrl=$TESTCONTROLLER_URL",
     "test-ci": "start-server-and-test start-server-ci $TESTCONTROLLER_URL cy:run-ci",

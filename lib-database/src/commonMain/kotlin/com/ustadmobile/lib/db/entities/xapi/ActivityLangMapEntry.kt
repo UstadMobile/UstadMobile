@@ -40,6 +40,9 @@ import kotlinx.serialization.Serializable
  * an interaction property name (choices,scale,source,target,steps) - id - lang code e.g.
  * "choices-choiceid-en-US"
  * @param almeLangCode the lang code as per the xAPI language map eg en-US
+ * @param almePropName the property name as per PROP_NAME_constants (description or name), OR, for
+ * an interaction property name (choices,scale,source,target,steps), id - lang code e.g.
+ * "choices-choiceid-en-US"
  * @param almeValue the string value for the given language
  * @param almeAieHash where this entity represents a langmap for an interaction property, the hash
  * as per ActivityInteractionEntity.aieHash
@@ -48,6 +51,7 @@ data class ActivityLangMapEntry(
     var almeActivityUid: Long = 0,
     var almeHash: Long = 0,
     var almeLangCode: String? = null,
+    var almePropName: String? = null,
     var almeValue: String? = null,
     var almeAieHash: Long = 0,
 
