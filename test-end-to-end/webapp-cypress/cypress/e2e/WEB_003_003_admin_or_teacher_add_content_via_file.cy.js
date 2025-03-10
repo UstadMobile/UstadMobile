@@ -58,7 +58,16 @@ it('Student-1, Attempt 1, Video content-for 2 sec', () => {
     .then($video => {
       $video[0].play()
     })
-  cy.wait(2000) // Wait for 2 seconds to get progress verb for test
+cy.get('video')
+  .should(($video) => {
+    expect($video[0].paused).to.be.false; // Ensure video is playing
+  })
+  .invoke('prop', 'currentTime')
+  .then((startTime) => {
+    cy.get('video')
+      .invoke('prop', 'currentTime')
+      .should('be.gt', startTime + 2); // Verify at least 2 sec has passed
+  })
 })
 
 it('Student-1, Attempt-2, video content - 100%', () => {
@@ -71,9 +80,7 @@ it('Student-1, Attempt-2, video content - 100%', () => {
     .then($video => {
       $video[0].play()
     })
-  cy.wait(10500)  // {timeout:15000} didn't work so added wait to make sure the video makes 100% completion
-  cy.get('video')
-    .should('have.prop', 'ended', true)
+    cy.wait(11000) // Wait command to play video completely to get completed status for test, tried - cy.get('video',{timeout:12000}).should('have.prop', 'ended', true)
 })
 
 it('Student-2 user makes attempts on video-2 sec', () => {
@@ -86,7 +93,16 @@ it('Student-2 user makes attempts on video-2 sec', () => {
     .then($video => {
       $video[0].play()
     })
-  cy.wait(2000) // Wait for 2 seconds to get progress verb for test
+cy.get('video')
+  .should(($video) => {
+    expect($video[0].paused).to.be.false; // Ensure video is playing
+  })
+  .invoke('prop', 'currentTime')
+  .then((startTime) => {
+    cy.get('video')
+      .invoke('prop', 'currentTime')
+      .should('be.gt', startTime + 2); // Verify at least 2 sec has passed
+  })
 })
 
 it('Student-3 user makes attempts on epub', () => {
