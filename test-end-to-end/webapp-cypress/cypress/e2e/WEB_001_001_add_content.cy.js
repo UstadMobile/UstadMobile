@@ -13,7 +13,15 @@ it('Admin user add content to the library', () => {
   cy.contains("Importing", { timeout: 20000 }).should("not.exist") //In case importing
   cy.ustadOpenH5P("Content_001")
   cy.ustadGetH5pBody().find(".h5p-question-check-answer.h5p-joubelui-button","Check").should("be.visible")
+  cy.ustadGetH5pBody().find(".h5p-true-false-answer").contains("Yes").click()
+  cy.ustadGetH5pBody().find(".h5p-question-check-answer.h5p-joubelui-button","Check").click()
+  cy.ustadGetH5pBody().find(".h5p-question-feedback-content-text","You got 1 out of 1 points").should("be.visible")
   cy.go('back')
+  cy.contains("Library").click()
+ /* cy.contains("Content_001").click()
+  cy.contains("Attempts").click()
+ // cy.contains("Admin User").should("exist") -------- Attempts are not visible for this h5p content on cypress, manually it works
+*/
 
  //Add Epub content
   cy.ustadAddContentToLibrary('../test-files/content/Epub_Content1.epub','Content_002')
@@ -28,16 +36,76 @@ it('Admin user add content to the library', () => {
   cy.contains("button","OPEN").click()
   cy.contains("#appbar_title", "Content_003").should("be.visible")
   cy.ustadVerifyVideo()
-
+  cy.get('video')
+    .then($video => {
+      $video[0].play()
+    })
+  cy.get('video',{timeout:11000})
+    .should('have.prop', 'ended', true)
   cy.go('back')
-  cy.go('back')
+ // attempts made on video
+  cy.contains("Attempts").click()
+  cy.get("#appbar_title").contains("Content_003").should("exist")
+  cy.contains("Admin User").should("exist")
+  cy.contains("Attempts: 1").should("exist")
+  cy.contains("100% completion").should("exist")
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('exist')
+  cy.contains("Admin User").click()
+  cy.contains("Completed").should("exist")
+  cy.get("#appbar_title").contains("Admin User - Content_003").should("exist")
+  cy.get("svg[data-testid='CalendarTodayIcon']").should('exist')
+  cy.contains("100% completion").should("exist")
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('exist')
+  cy.contains("Completed").click()
+  cy.get("#appbar_title").contains("Content_003").should("exist")
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('exist')
+  cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
+  cy.contains("Completed").should("exist")
+  //cy.contains("Completed - title here").should('exist') // title of the question/page
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('exist')
+  cy.contains("100% completion").should("exist")
+  cy.contains("Completed").click() // testing filter chip
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
+  cy.get("svg[data-testid='CheckIcon']").should('not.exist')
+ // User making attempt on Epub content
+  cy.contains("Library").click()
   cy.contains('Content_002').click()
   cy.ustadOpenH5pEpub('Content_002')
   cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
+  cy.ustadVerifyEpub('The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)')
+  cy.contains("THE ADOPTING OF ROSA MARIE").click()
+// Attempts made on epub
+  cy.contains("Library").click()
+  cy.contains("Content_002").click()
+  cy.contains("Attempts").click()
+  cy.get("#appbar_title").contains("Content_002").should("exist")
+  cy.contains("Admin User").should("exist")
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('exist')
+  cy.contains("Admin User").click()
+  cy.get("#appbar_title").contains("Admin User - Content_002").should("exist")
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('exist')
+  cy.contains("Incomplete").click()
+  cy.get("#appbar_title").contains("Content_002").should("exist")
+  cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('exist')
+  cy.get("svg[data-testid='CheckIcon']").should('exist')
+  //cy.contains("Progressed - title here").should('exist')  // title of the question/page
+  cy.contains("Progressed").click() // testing filter chip
+  cy.get('.MuiStack-root').parent()
+    .find('span[role="progressbar"]').should('not.exist')
+  cy.get("svg[data-testid='CheckIcon']").should('not.exist')
 })
 
   after(() => {
     // Stop Test Server after tests are complete
-    cy.ustadStopTestServer();
+    cy.ustadStopTestServer()
   })
 })

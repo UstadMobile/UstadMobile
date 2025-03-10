@@ -6,12 +6,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
@@ -20,6 +19,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.paging.RefreshCommand
@@ -35,6 +35,7 @@ import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDuration
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.TimeZone
@@ -49,7 +50,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
         uiState = uiState.value,
         refreshCommandFlow = viewModel.refreshCommandFlow,
         onClickEntry = viewModel::onClickEntry,
-
+        onSortOrderChanged = viewModel::onSortOrderChanged
         )
 }
 
@@ -73,7 +74,6 @@ fun ContentEntryDetailAttemptsSessionListScreen(
     val percentageScore = stringResource(MR.strings.content_score)
     val passed = stringResource(MR.strings.passed)
     val failed = stringResource(MR.strings.failed)
-
     val completed = stringResource(MR.strings.completed)
     val incomplete = stringResource(MR.strings.incomplete)
 
@@ -104,6 +104,9 @@ fun ContentEntryDetailAttemptsSessionListScreen(
             key = { it.contextRegistrationHi.toInt() }) { attemptsSessionListItem ->
 
             val timeZoneId = remember { TimeZone.currentSystemDefault().id }
+            val formattedDuration = attemptsSessionListItem?.resultDuration?.let {
+                rememberFormattedDuration(timeInMillis = it)
+            }
 
             val formattedDateAndTime = attemptsSessionListItem?.let {
                 rememberFormattedDateTime(
@@ -113,10 +116,15 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                 )
             }
 
-            // Construct status and duration text
+
+
             val statusText = when {
-                attemptsSessionListItem?.isSuccessful == true -> "$passed"
-                attemptsSessionListItem?.isSuccessful == false -> "$failed"
+                attemptsSessionListItem?.isSuccessful == true -> {
+                    if (formattedDuration != null) "$passed - $formattedDuration" else "$passed"
+                }
+                attemptsSessionListItem?.isSuccessful == false -> {
+                    if (formattedDuration != null) "$failed - $formattedDuration" else "$failed"
+                }
                 attemptsSessionListItem?.isCompleted == true -> completed
                 else -> incomplete
             }
@@ -129,7 +137,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                     Icon(
                         imageVector = when {
                             attemptsSessionListItem?.isSuccessful == true -> Icons.Filled.Star // Star for passed
-                            attemptsSessionListItem?.isSuccessful == false -> Icons.Filled.Close // Cross for failed
+                            attemptsSessionListItem?.isSuccessful == false -> Icons.Filled.Cancel // Cross for failed
                             else -> Icons.Filled.Check // Check for completed
                         },
                         contentDescription = null,
@@ -137,7 +145,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                     )
                 },
                 headlineContent = {
-                    Text(text = statusText)
+                    Text(text = "$statusText")
                 },
                 supportingContent = {
                     Column {
@@ -147,7 +155,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
                                 verticalAlignment = Alignment.CenterVertically // Ensure both elements align at center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.Timer,
+                                    imageVector = Icons.Filled.CalendarToday,
                                     contentDescription = null,
                                 )
                                 Text(
@@ -175,7 +183,9 @@ fun ContentEntryDetailAttemptsSessionListScreen(
 
                                 LinearProgressIndicator(
                                     progress = progressValue,
-                                    modifier = Modifier.weight(0.7f)
+                                    modifier = Modifier.weight(0.7f).testTag("progress_bar")
+
+
                                 )
                                 Text(
                                     text = when {

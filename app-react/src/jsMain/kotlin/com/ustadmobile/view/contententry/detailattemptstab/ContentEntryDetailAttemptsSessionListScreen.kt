@@ -10,6 +10,7 @@ import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentE
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.useFormattedDateAndTime
+import com.ustadmobile.hooks.useFormattedDuration
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
@@ -25,9 +26,11 @@ import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.datetime.TimeZone
+import mui.icons.material.CalendarToday
 import mui.icons.material.Check
 import mui.icons.material.Close
-import mui.icons.material.Timer
+import mui.icons.material.HighlightOffOutlined
+import mui.icons.material.Star
 import mui.material.Box
 import mui.material.Container
 import mui.material.LinearProgress
@@ -54,6 +57,8 @@ import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.number
 import web.cssom.pct
+import web.cssom.px
+
 private const val LOAD_SIZE = 50
 private const val WIDTH = 100
 
@@ -128,6 +133,7 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                             UstadNothingHereYet.create()
                         }
                     }
+
                     infiniteQueryPagingItems(
                         items = infiniteQueryResult,
                         key = { it.contextRegistrationHi.toString() }
@@ -139,6 +145,14 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                     timezoneId = TimeZone.currentSystemDefault().id
                                 )
                             }
+
+                        val formattedDuration =
+                            attemptsSessionListItems?.resultDuration?.let { it1 ->
+                                useFormattedDuration(
+                                    timeInMillis = it1,
+                                )
+                            }
+
                         ListItem.create {
                             Stack {
                                 direction = responsive(StackDirection.column)
@@ -153,28 +167,37 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                     }
                                     ListItemIcon {
                                         when {
-                                            attemptsSessionListItems?.isSuccessful == true || attemptsSessionListItems?.isCompleted == true -> {
-                                                Check()
+                                            attemptsSessionListItems?.isSuccessful == true -> {
+                                                Star()
                                             }
-
+                                            attemptsSessionListItems?.isSuccessful == false -> {
+                                                HighlightOffOutlined()
+                                            }
                                             else -> {
-                                                Close()
+                                                Check()
                                             }
                                         }
 
-
+                                        sx {
+                                            minWidth = 40.px
+                                            marginRight = 4.px
+                                        }
                                     }
 
+
                                     ListItemText {
-                                        primary =
-                                            ReactNode(
-                                                when {
-                                                    attemptsSessionListItems?.isSuccessful == true -> passed
-                                                    attemptsSessionListItems?.isSuccessful == false -> failed
-                                                    attemptsSessionListItems?.isCompleted == true -> completed
-                                                    else -> incomplete
+                                        primary = ReactNode(
+                                            when {
+                                                attemptsSessionListItems?.isSuccessful == true -> {
+                                                    if (formattedDuration != null) "$passed - $formattedDuration" else passed
                                                 }
-                                            )
+                                                attemptsSessionListItems?.isSuccessful == false -> {
+                                                    if (formattedDuration != null) "$failed - $formattedDuration" else failed
+                                                }
+                                                attemptsSessionListItems?.isCompleted == true -> completed
+                                                else -> incomplete
+                                            }
+                                        )
                                     }
 
 
@@ -182,7 +205,7 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                                 if (formattedDateAndTime != null) {
                                     ListItemButton {
                                         ListItemIcon {
-                                            Timer()
+                                            CalendarToday()
                                             sx {
                                                 padding = theme.spacing(1, 1, 1, 5)
                                             }

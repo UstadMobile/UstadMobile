@@ -11,7 +11,9 @@ data class SessionTimeAndProgressInfo(
     var maxScore: Float? = null,
     var isCompleted: Boolean = false,
     var isSuccessful: Boolean? = null,
-)
+    var resultDuration: Long = 0,
+
+    )
 
 object SessionTimeAndProgressInfoConst{
     const val SORT_BY_TIMESTAMP_DESC = 1
@@ -24,5 +26,8 @@ object SessionTimeAndProgressInfoConst{
 
     const val SORT_BY_COMPLETION_ASC = 5
     const val SORT_BY_COMPLETION_DESC = 6
+
+    const val SORT_BY_LEAST_RECENT_DESC = 7
+    const val SORT_BY_LEAST_RECENT_ASC = 8
 
 }

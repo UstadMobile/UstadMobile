@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Icon
 import androidx.compose.material3.FilterChip
@@ -26,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
@@ -41,9 +44,10 @@ import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
-import com.ustadmobile.libuicompose.util.rememberFormattedDuration
+import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.TimeZone
 
 @Composable
 fun ContentEntryDetailAttemptsStatementListScreen(
@@ -106,9 +110,16 @@ fun ContentEntryDetailAttemptsStatementList(
             key = { it.statementEntity?.statementIdHi ?: -1 }
         ) { attemptsStatementListItems ->
             val statementEntity = attemptsStatementListItems?.statementEntity
-            val formattedDuration = statementEntity?.resultDuration?.let {
-                rememberFormattedDuration(timeInMillis = it)
-            }
+
+            val formattedTimestamp = statementEntity?.timestamp?.let {
+                rememberFormattedDateTime(
+                    timeInMillis = it,
+                    timeZoneId = TimeZone.currentSystemDefault().id,
+                    joinDateAndTime = { date, time ->
+                        "$date, $time"
+                    }
+                )
+            } ?: "N/A"
 
             val progress = statementEntity?.extensionProgress?.takeIf { it > 0 }?.div(100f)
                 ?: statementEntity?.let { entity ->
@@ -119,11 +130,17 @@ fun ContentEntryDetailAttemptsStatementList(
 
             val rawScore = statementEntity?.resultScoreRaw
             val maxScore = statementEntity?.resultScoreMax
+            val progressPercentage = (progress * 100).toInt()
+
             val scoreText = if (rawScore != null && maxScore != null) {
-                "$score: ${rawScore.toInt()} / ${maxScore.toInt()}"
+                // Calculate percentage score if rawScore and maxScore are available
+                val percentageScore = (rawScore / maxScore) * 100
+                "${percentageScore.toInt()}% $score"
             } else {
-                "$percentageCompletion: ${statementEntity?.extensionProgress ?: 0}%"
+                // Show progress as percentage
+                "${progressPercentage}% $percentageCompletion"
             }
+
 
             androidx.compose.material3.ListItem(
                 modifier = Modifier.clickable { },
@@ -155,7 +172,7 @@ fun ContentEntryDetailAttemptsStatementList(
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                             Text(
-                                text = formattedDuration ?: "N/A",
+                                text = formattedTimestamp ?: "N/A",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -168,7 +185,7 @@ fun ContentEntryDetailAttemptsStatementList(
                         ) {
                             LinearProgressIndicator(
                                 progress = progress,
-                                modifier = Modifier.weight(0.7f),
+                                modifier = Modifier.weight(0.7f).testTag("progress_bar"),
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -191,7 +208,7 @@ fun ContentEntryDetailAttemptsStatementList(
 @Composable
 fun FilterRow(
     availableVerbs: List<VerbEntity>,
-    selectedVerbIds: Set<String>,
+    selectedVerbIds: List<Long>,
     onVerbFilterToggled: (String) -> Unit
 ) {
     Row(
@@ -211,7 +228,7 @@ fun FilterRow(
 
                     key(verbId) {
                         FilterChip(
-                            selected = verbId in selectedVerbIds,
+                            selected = verb.verbUid in selectedVerbIds,
                             onClick = { onVerbFilterToggled(verbId) },
                             label = {
                                 Text(
@@ -219,13 +236,22 @@ fun FilterRow(
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             },
+                            leadingIcon = if (verb.verbUid in selectedVerbIds) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Filled.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                    )
+                                }
+                            } else null,
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
                             ),
                             border = FilterChipDefaults.filterChipBorder(
                                 enabled = true,
-                                selected = verbId in selectedVerbIds
+                                selected = verb.verbUid in selectedVerbIds
                             )
                         )
                     }

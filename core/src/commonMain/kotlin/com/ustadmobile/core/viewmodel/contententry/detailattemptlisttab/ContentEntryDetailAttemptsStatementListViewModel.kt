@@ -29,7 +29,7 @@ data class ContentEntryDetailAttemptsStatementListUiState(
     val sortOption: SortOrderOption = sortOptions.first(),
     val showSortOptions: Boolean = true,
     val availableVerbs: List<VerbEntity> = emptyList(),
-    val selectedVerbIds: Set<String> = emptySet(),
+    val selectedVerbIds: List<Long> = emptyList()
 )
 
 class ContentEntryDetailAttemptsStatementListViewModel(
@@ -42,6 +42,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_HI]?.toLong() ?: 0
     private val argContextRegistrationIdLo =
         savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_LO]?.toLong() ?: 0
+    private val argContentEntryUid = savedStateHandle[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
 
     private fun getAttemptsStatementListAsPagingSource(
         contextRegistrationHi: Long,
@@ -53,9 +54,10 @@ class ContentEntryDetailAttemptsStatementListViewModel(
             registrationLo = contextRegistrationLo,
             accountPersonUid = activeUserPersonUid,
             selectedPersonUid = argPersonUid,
+            contentEntryUid = argContentEntryUid,
             searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             sortOrder = state.sortOption.flag,
-            selectedVerbsString = state.selectedVerbIds.joinToString(",")
+            selectedVerbUids = state.selectedVerbIds // Changed to pass list of Long UIDs
         )
     }
 
@@ -77,18 +79,24 @@ class ContentEntryDetailAttemptsStatementListViewModel(
                     activeRepo.statementDao().getUniqueVerbsForSession(
                         registrationHi = argContextRegistrationIdHi,
                         registrationLo = argContextRegistrationIdLo,
-                        selectedPersonUid = argPersonUid
-
+                        selectedPersonUid = argPersonUid,
+                        contentEntryUid = argContentEntryUid
                     ).collect { verbs ->
-                        _uiState.update { it.copy(availableVerbs = verbs) }
+                        _uiState.update { state ->
+                            state.copy(
+                                availableVerbs = verbs,
+                                selectedVerbIds = verbs.mapNotNull { it.verbUid } // Changed to map to verb UIDs (Long)
+                            )
+                        }
+                        _refreshCommandFlow.tryEmit(RefreshCommand())
                     }
                 }
 
                 launch {
-                    activeRepo.personDao().getNamesByUid(argPersonUid).collect { personNames ->
+                    activeRepo.contentEntryDao().findLiveContentEntry(argContentEntryUid).collect { contentEntry ->
                         _appUiState.update { prev ->
                             prev.copy(
-                                title = "${personNames?.firstNames} ${personNames?.lastName}",
+                                title = contentEntry?.title ?: "",
                                 searchState = createSearchEnabledState(visible = true),
                             )
                         }
@@ -114,9 +122,19 @@ class ContentEntryDetailAttemptsStatementListViewModel(
 
     fun onVerbFilterToggled(verbUrlId: String) {
         _uiState.update { state ->
-            val newSelectedVerbIds = state.selectedVerbIds.toMutableSet().apply {
-                if (contains(verbUrlId)) remove(verbUrlId) else add(verbUrlId)
+            val verbEntity = state.availableVerbs.find { it.verbUrlId == verbUrlId }
+            val verbUid = verbEntity?.verbUid
+
+            val newSelectedVerbIds = if (verbUid != null) {
+                if (state.selectedVerbIds.contains(verbUid)) {
+                    state.selectedVerbIds.filter { it != verbUid }
+                } else {
+                    state.selectedVerbIds + verbUid
+                }
+            } else {
+                state.selectedVerbIds
             }
+
             state.copy(
                 selectedVerbIds = newSelectedVerbIds,
                 attemptsStatementList = attemptsStatementListPagingSource

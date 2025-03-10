@@ -9,7 +9,7 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
-import com.ustadmobile.hooks.useFormattedDuration
+import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
@@ -24,10 +24,10 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.datetime.TimeZone
+import mui.icons.material.CalendarToday
 import mui.icons.material.Check
-import mui.icons.material.Close
-import mui.icons.material.Star
-import mui.icons.material.Timer
+import mui.icons.material.Work
 import mui.material.Box
 import mui.material.Chip
 import mui.material.ChipColor
@@ -55,6 +55,7 @@ import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
+import web.cssom.px
 
 private const val LOAD_SIZE = 50
 private const val WIDTH = 100
@@ -135,9 +136,14 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                                 Chip.create {
                                     id = "${verbName.lowercase()}_button"
                                     key = verbId
-                                    label = ReactNode(verbName)
+                                    icon = if (verb.verbUid in props.uiState.selectedVerbIds) { // Check if verbUid is in the list
+                                        Check.create()
+                                    } else null
+                                    label = Typography.create {
+                                        +verbName
+                                    }
                                     variant = ChipVariant.outlined
-                                    color = if (verbId in props.uiState.selectedVerbIds) {
+                                    color = if (verb.verbUid in props.uiState.selectedVerbIds) { // Check if verbUid is in the list
                                         ChipColor.primary
                                     } else {
                                         ChipColor.default
@@ -147,8 +153,7 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                                     }
                                 }.also { +it }
                             }
-                        }
-                    }.also { +it }
+                        }                    }.also { +it }
                 }.also { +it }
             }
             if (isSettledEmpty) {
@@ -157,11 +162,15 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                 }
             }
 
-            val FormattedDurationComponent = FC<Props> { props ->
-                val duration = props.asDynamic().duration as Long
-                val formattedDuration = useFormattedDuration(timeInMillis = duration)
+
+            val FormattedTimestampComponent = FC<Props> { props ->
+                val timestamp = props.asDynamic().timestamp as Long
+                val formattedTimestamp =  useFormattedDateAndTime(
+                    timeInMillis = timestamp,
+                    timezoneId = TimeZone.currentSystemDefault().id
+                )
                 ListItemText {
-                    secondary = ReactNode(formattedDuration)
+                    secondary = ReactNode(formattedTimestamp)
                 }
             }
 
@@ -190,31 +199,30 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
 
                         ListItemButton {
                             ListItemIcon {
-                                when {
-                                    attemptsStatementListItems?.statementEntity?.resultScoreRaw != null -> Star()
-                                    attemptsStatementListItems?.statementEntity?.extensionProgress != null -> Close()
-                                    else -> Check()
+                                Work()
+                                sx {
+                                    minWidth = 40.px
+                                    marginRight = 4.px
                                 }
                             }
                             ListItemText {
                                 primary = ReactNode(
                                     attemptsStatementListItems?.verb?.verbUrlId?.substringAfterLast(
                                         "/"
-                                    )
-                                        ?.replaceFirstChar { it.uppercase() } ?: ""
+                                    )?.replaceFirstChar { it.uppercase() } ?: ""
                                 )
                             }
                         }
 
                         ListItemButton {
                             ListItemIcon {
-                                Timer()
+                                CalendarToday()
                                 sx {
                                     padding = theme.spacing(1, 1, 1, 5)
                                 }
                             }
-                            FormattedDurationComponent {
-                                this.asDynamic().duration = attemptsStatementListItems?.statementEntity?.resultDuration ?: 0L
+                            FormattedTimestampComponent {
+                                this.asDynamic().timestamp = attemptsStatementListItems?.statementEntity?.timestamp ?: 0L
                             }
                         }
 
@@ -240,11 +248,13 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                                 }.also { +it }
 
                                 Typography.create {
-                                    +(if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
-                                        "$score: ${(progress * 100).toInt()}%"
-                                    } else {
-                                        "$percentageCompletion: ${(progress * 100).toInt()}%"
-                                    })
+                                    +"${(progress * 100).toInt()}% ${
+                                        if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
+                                            score.lowercase()
+                                        } else {
+                                            percentageCompletion.lowercase()
+                                        }
+                                    }"
                                 }.also { +it }
                             }.also { +it }
                         }.also { +it }

@@ -17,7 +17,6 @@ onFlowComplete:
       file: "common/stopserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-
 ---
 - runFlow:
     file: "common/clear_login_and_add_content.yaml"
@@ -33,8 +32,6 @@ onFlowComplete:
     notVisible: "Uploading"
     timeout: 10000
 - tapOn: Open
-- assertVisible: "Cover"
-- tapOn: "Back"
 - runFlow:
     file: "common/login_download_and_open_content.yaml"
 #Download and open content
@@ -47,3 +44,46 @@ onFlowComplete:
 - tapOn: Open
 - assertVisible: "Cover"
 - takeScreenshot: "${TESTRESULTSDIR}/epub_content_download_and_open"
+- tapOn: More options
+- tapOn: Table of contents
+- scrollUntilVisible:
+    element:
+      text: "THE FULL PROJECT GUTENBERG LICENSE"
+    direction: DOWN
+- tapOn: "THE FULL PROJECT GUTENBERG LICENSE"
+- scroll
+- tapOn: "Back"
+- tapOn: "Attempts"
+- assertVisible:
+    text: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
+    id: "app_title"
+- assertVisible: "Admin User"
+- assertVisible: "1 Attempts"
+- assertVisible:
+    id: "progress_bar"
+- tapOn: "100% completion"
+- tapOn: "Admin User"
+- assertVisible:
+    text: "Admin User - The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
+    id: "app_title"
+- assertVisible: "Completed"
+- assertVisible:
+    id: "progress_bar"
+- assertVisible: "100% completion"
+- tapOn: "Completed"
+- assertVisible:
+    text: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
+    id: "app_title"
+- assertVisible:
+    text: "Completed"    # filter is unselected
+    index: 1
+- assertVisible:
+    id: "progress_bar"
+- assertVisible: "100% completion"
+- tapOn:
+    text: "Completed"    # filter is unselected
+    index: 0
+- assertNotVisible: "100% completion"
+- assertNotVisible:
+    id: "progress_bar"
+- assertVisible: "Nothing here, yet"

@@ -49,5 +49,43 @@ onFlowComplete:
     visible: "Check"
     timeout: 5000
 - takeScreenshot: "${TESTRESULTSDIR}/h5p_content_download_and_open"
+- tapOn: "Yes "
+- tapOn: "Check"
 - tapOn: "Close tab"
-- tapOn: "Back"
+- tapOn: "Attempts"
+- assertVisible:
+    text: "True/False Question"
+    id: "app_title"
+- assertVisible: "Admin User"
+- assertVisible:
+    id: "progress_bar"
+- assertVisible: "1 Attempts"
+- assertVisible: "100% Score"
+- tapOn: "Admin User"
+- assertVisible:
+    id: "progress_bar"
+- assertVisible:
+     text: "Admin User - True/False Question"
+     id: "app_title"
+- assertVisible: "100% score"
+- tapOn:
+    id: "progress_bar"
+- tapOn: "100% score"
+- assertVisible:
+    text: "True/False Question"
+    id: "app_title"
+- assertVisible:
+    text: "Answered"
+    index: 0
+- assertVisible:
+    text: "Answered"
+    index: 1
+- assertVisible: "100% score"
+# verify filters are working
+- tapOn:
+    text: "Answered"
+    index: 0
+- assertNotVisible: "100% score"
+- assertNotVisible:
+    id: "progress_bar"
+- assertVisible: "Nothing here, yet"

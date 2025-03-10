@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.paging.RefreshCommand
@@ -116,7 +117,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                             LinearProgressIndicator(
                                 progress = (attemptsPersonListItems?.maxProgress?.toFloat()
                                     ?: 0f) / 100f,
-                                modifier = Modifier.weight(0.7f).padding(start = 12.dp),
+                                modifier = Modifier.weight(0.7f).padding(start = 12.dp).testTag("progress_bar"),
                             )
 
                             Text(
@@ -135,7 +136,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                                     ?: 0f),
                                 modifier = Modifier
                                     .weight(0.7f)
-                                    .padding(start = 12.dp),
+                                    .padding(start = 12.dp).testTag("progress_bar"),
                             )
 
                             Text(
