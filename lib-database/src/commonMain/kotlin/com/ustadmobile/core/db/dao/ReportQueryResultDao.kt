@@ -7,7 +7,7 @@ import com.ustadmobile.door.annotation.PostgresQuery
 import com.ustadmobile.lib.db.entities.ReportQueryResult
 
 @DoorDao
-abstract class ReportQueryResultDao {
+expect abstract class ReportQueryResultDao {
 
     @Query("""
         DELETE FROM ReportQueryResult
