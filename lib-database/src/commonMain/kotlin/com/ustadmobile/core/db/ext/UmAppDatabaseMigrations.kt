@@ -1710,6 +1710,13 @@ val MIGRATION_205_206 = DoorMigrationStatementList(205, 206) { db ->
     listOf("ALTER TABLE Report ADD COLUMN reportOwnerPersonUid $bigIntType NOT NULL DEFAULT 0")
 }
 
+val MIGRATION_206_207 = DoorMigrationStatementList(206, 207) { db ->
+    listOf(
+        "ALTER TABLE ReportQueryResult ADD rqrTimeZone TEXT NOT NULL DEFAULT ''",
+        "DROP INDEX IF EXISTS idx_reportqueryresult_rqrreportuid",
+        "CREATE INDEX idx_reportqueryresult_rqrreportuid_rqrtimezone ON ReportQueryResult (rqrReportUid, rqrTimeZone)"
+    )
+}
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1728,7 +1735,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
     MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
     MIGRATION_199_200, MIGRATION_200_201, MIGRATION_201_202, MIGRATION_202_203,
-    MIGRATION_204_205, MIGRATION_205_206,
+    MIGRATION_204_205, MIGRATION_205_206, MIGRATION_206_207,
 )
 
 

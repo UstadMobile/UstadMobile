@@ -40,11 +40,14 @@ class RunReportUseCaseDatabaseImpl(
             val queryResults = db.withDoorTransactionAsync {
                 val lastResultIsFresh = db.reportRunResultRowDao().isReportFresh(
                     reportUid = request.reportUid,
+                    timeZone = request.timeZone.id,
                     freshThresholdTime = queries.first().timestamp - (request.maxFreshAge * 1000)
                 )
 
                 if(!lastResultIsFresh) {
-                    db.reportRunResultRowDao().deleteByReportUid(request.reportUid)
+                    db.reportRunResultRowDao().deleteByReportUidAndTimeZone(
+                        request.reportUid, request.timeZone.id,
+                    )
                     queries.forEach { query ->
                         db.prepareAndUseStatementAsync(PreparedStatementConfig(query.sql)) { statement ->
                             query.params.forEachIndexed { index, paramVal ->
@@ -55,7 +58,9 @@ class RunReportUseCaseDatabaseImpl(
                     }
                 }
 
-                db.reportRunResultRowDao().getAllByReportUid(request.reportUid)
+                db.reportRunResultRowDao().getAllByReportUidAndTimeZone(
+                    request.reportUid, request.timeZone.id
+                )
             }
 
             emit(

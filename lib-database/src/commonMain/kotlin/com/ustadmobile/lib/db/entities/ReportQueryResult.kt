@@ -24,10 +24,17 @@ import kotlinx.serialization.Serializable
  * @param rqrXAxis XAxis value
  * @param rqrYAxis YAxis value
  * @param rqrSubgroup subgroup (if any, otherwise empty string)
+ * @param rqrTimeZone the timezone for which this result is valid. The start/end period of the
+ *        query, and potentially xAxis/subgrouping depends on the timezone. Running the same report
+ *        options with a different timezone can produce different results. This is the TimeZone.id .
  */
 @Entity(
     indices = arrayOf(
-        Index(value = arrayOf("rqrReportUid"), name = "idx_reportqueryresult_rqrreportuid", unique = false)
+        Index(
+            value = arrayOf("rqrReportUid", "rqrTimeZone"),
+            name = "idx_reportqueryresult_rqrreportuid_rqrtimezone",
+            unique = false
+        )
     )
 )
 @Serializable
@@ -41,4 +48,5 @@ data class ReportQueryResult(
     var rqrXAxis: String = "",
     var rqrYAxis: Double = 0.0,
     var rqrSubgroup: String = "",
+    var rqrTimeZone: String = "",
 )

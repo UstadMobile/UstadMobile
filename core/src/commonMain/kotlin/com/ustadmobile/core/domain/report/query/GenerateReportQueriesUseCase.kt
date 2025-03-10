@@ -210,7 +210,7 @@ class GenerateReportQueriesUseCase {
             sql += """
                 INSERT INTO ReportQueryResult(rqrReportUid, rqrLastModified,
                 rqrReportSeriesUid, rqrLastValidated, rqrXAxis, rqrYAxis,
-                rqrSubgroup)
+                rqrSubgroup, rqrTimeZone)
                 
                 WITH AllLearningRecordsPermission(hasPermission) AS (
                      SELECT EXISTS(
@@ -346,10 +346,13 @@ class GenerateReportQueriesUseCase {
                        ? AS rqrLastValidated,
                        ResultSourceCte.xAxis AS rqrXAxis,
                        ResultSourceCte.yAxis AS rqrYAxis,
-                       ResultSourceCte.subgroup AS rqrSubgroup
+                       ResultSourceCte.subgroup AS rqrSubgroup,
+                       ? AS rqrSubgroup
                   FROM ResultSourceCte  
             """.trimIndent()
-            paramsList.addAll(listOf(request.reportUid, timenow, series.reportSeriesUid, timenow))
+            paramsList.addAll(
+                listOf(request.reportUid, timenow, series.reportSeriesUid, timenow, request.timeZone.id)
+            )
 
             ReportQueryParts2(sql, paramsList.toTypedArray(), timenow)
         }

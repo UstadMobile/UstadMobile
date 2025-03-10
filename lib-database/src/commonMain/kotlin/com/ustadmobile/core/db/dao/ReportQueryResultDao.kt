@@ -12,8 +12,9 @@ expect abstract class ReportQueryResultDao {
     @Query("""
         DELETE FROM ReportQueryResult
          WHERE rqrReportUid = :reportUid
+           AND rqrTimeZone = :timeZone
     """)
-    abstract suspend fun deleteByReportUid(reportUid: Long)
+    abstract suspend fun deleteByReportUidAndTimeZone(reportUid: Long, timeZone: String)
 
     @Insert
     abstract suspend fun insertAllAsync(results: List<ReportQueryResult>)
@@ -23,8 +24,12 @@ expect abstract class ReportQueryResultDao {
         SELECT ReportQueryResult.*
           FROM ReportQueryResult
          WHERE ReportQueryResult.rqrReportUid = :reportUid 
+           AND ReportQueryResult.rqrTimeZone = :timeZone
     """)
-    abstract suspend fun getAllByReportUid(reportUid: Long): List<ReportQueryResult>
+    abstract suspend fun getAllByReportUidAndTimeZone(
+        reportUid: Long,
+        timeZone: String
+    ): List<ReportQueryResult>
 
     /**
      * Determine if a previous report run is fresh (as the term is used in caching). This checks
@@ -39,6 +44,7 @@ expect abstract class ReportQueryResultDao {
                (SELECT ReportQueryResult.rqrLastModified
                   FROM ReportQueryResult
                  WHERE ReportQueryResult.rqrReportUid = :reportUid
+                   AND ReportQueryResult.rqrTimeZone = :timeZone
                  LIMIT 1), 0) >= 
                (SELECT MAX(:freshThresholdTime, 
                             (SELECT COALESCE(
@@ -51,6 +57,7 @@ expect abstract class ReportQueryResultDao {
                (SELECT ReportQueryResult.rqrLastModified
                   FROM ReportQueryResult
                  WHERE ReportQueryResult.rqrReportUid = :reportUid
+                   AND ReportQueryResult.rqrTimeZone = :timeZone
                  LIMIT 1), 0) >= 
                (SELECT GREATEST(:freshThresholdTime, 
                             (SELECT COALESCE(
@@ -60,6 +67,7 @@ expect abstract class ReportQueryResultDao {
     """)
     abstract suspend fun isReportFresh(
         reportUid: Long,
+        timeZone: String,
         freshThresholdTime: Long,
     ): Boolean
 

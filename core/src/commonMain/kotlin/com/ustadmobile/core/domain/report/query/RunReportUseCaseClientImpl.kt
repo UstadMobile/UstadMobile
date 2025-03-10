@@ -46,8 +46,8 @@ class RunReportUseCaseClientImpl(
         request: RunReportUseCase.RunReportRequest
     ): Flow<RunReportUseCase.RunReportResult> {
         return flow {
-            val currentReportQueryResults = db.reportRunResultRowDao().getAllByReportUid(
-                request.reportUid
+            val currentReportQueryResults = db.reportRunResultRowDao().getAllByReportUidAndTimeZone(
+                request.reportUid, request.timeZone.id
             )
 
             emit(
@@ -64,7 +64,8 @@ class RunReportUseCaseClientImpl(
 
             val isFresh = db.reportRunResultRowDao().isReportFresh(
                 reportUid = request.reportUid,
-                freshThresholdTime = systemTimeInMillis() - (request.maxFreshAge * 1000)
+                freshThresholdTime = systemTimeInMillis() - (request.maxFreshAge * 1000),
+                timeZone = request.timeZone.id
             )
 
             if(!isFresh) {
@@ -105,7 +106,9 @@ class RunReportUseCaseClientImpl(
                 }
 
                 db.withDoorTransactionAsync {
-                    db.reportRunResultRowDao().deleteByReportUid(request.reportUid)
+                    db.reportRunResultRowDao().deleteByReportUidAndTimeZone(
+                        request.reportUid, request.timeZone.id
+                    )
                     db.reportRunResultRowDao().insertAllAsync(responseQueryResults)
                 }
 
