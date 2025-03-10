@@ -425,7 +425,7 @@ fun CustomPeriodInputs(
         horizontalArrangement = Arrangement.spacedBy(5.dp),
     ) {
         OutlinedTextField(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1.2f),
             value = quantity,
             onValueChange = {
                 quantity = it
@@ -441,7 +441,7 @@ fun CustomPeriodInputs(
 
 
         ExposedDropdownMenu(
-            modifier = Modifier.weight(2f),
+            modifier = Modifier.weight(0.8f),
             label = { Text(stringResource(MR.strings.unit)) },
             options = ReportTimeRangeUnit.entries,
             selectedValue = selectedUnit,

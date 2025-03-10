@@ -4,23 +4,16 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
 import com.ustadmobile.core.domain.report.model.SeriesType
-import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadQuickActionButton
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadFab
-import kotlinx.dom.clear
-import kotlinx.html.TagConsumer
-import kotlinx.html.dom.append
-import kotlinx.html.h1
-import kotlinx.html.js.div
-import kotlinx.html.style
+import com.ustadmobile.view.report.graph.ReportGraph
 import mui.icons.material.ImportExport
 import mui.icons.material.Share
 import mui.material.Box
@@ -36,20 +29,10 @@ import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
 import mui.system.sx
-import org.w3c.dom.HTMLElement
 import react.FC
 import react.Props
 import react.ReactNode
 import react.create
-import react.dom.html.ReactHTML
-import react.useEffect
-import react.useRef
-import space.kscience.plotly.bar
-import space.kscience.plotly.layout
-import space.kscience.plotly.models.ScatterMode
-import space.kscience.plotly.models.TraceType
-import space.kscience.plotly.plotDiv
-import space.kscience.plotly.scatter
 import web.cssom.px
 
 external interface ReportDetailProps : Props {
@@ -105,136 +88,19 @@ val ReportDetailScreen = FC<Props> {
     }
 }
 
-/**
- * This is based on the Plotly.kt JS demo found here:
- *
- * https://github.com/SciProgCentre/plotly.kt/blob/master/examples/js-demo/src/main/kotlin/space/kscience/plotly/jsdemo/main.kt
- */
-fun TagConsumer<HTMLElement>.plot(uiState: ReportDetailUiState, strings: StringProvider) {
-    div {
-        style = "height:50%; width=100%;"
-        h1 { +"Report Graph" }
-
-        // Example data
-        // Use the shared data
-        val graphSeriesList = sharedGraphSeriesList
-
-        // Determine Y-axis type
-        val isDuration =
-            uiState.reportOptions2.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }
-        val yAxisTitle =
-            if (isDuration) strings[MR.strings.duration_hours] else strings[MR.strings.count]
-
-        // Function to transform Y-axis values based on type
-        fun transformYAxisValues(data: List<ReportResultQueryRow>): List<Double> {
-            return data.map { row ->
-                if (isDuration) {
-                    // Convert milliseconds to hours
-                    row.yAxis / (1000 * 60 * 60)
-                } else {
-                    // Keep as is for count
-                    row.yAxis
-                }
-            }
-        }
-
-        // Function to generate distinct colors for subgroups
-        fun generateColors(numColors: Int): List<String> {
-            val colors = mutableListOf<String>()
-            val hueStep = 360.0 / numColors
-            for (i in 0 until numColors) {
-                val hue = (i * hueStep) % 360
-                colors.add("hsl($hue, 70%, 50%)") // HSL format for distinct colors
-            }
-            return colors
-        }
-
-        // Get all unique subgroups
-        val allSubgroups = graphSeriesList.flatMap { it.data.map { row -> row.subgroup } }.toSet()
-
-        // Generate colors for each subgroup
-        val subgroupColors = generateColors(allSubgroups.size).zip(allSubgroups.toList()).toMap()
-
-        plotDiv {
-            // Iterate through the graphSeriesList and render each series
-            graphSeriesList.forEach { series ->
-                // Group data by subgroup
-                val groupedData = series.data.groupBy { it.subgroup }
-
-                groupedData.forEach { (subgroup, data) ->
-                    val transformedYValues = transformYAxisValues(data)
-                    when (series.type) {
-                        SeriesType.BAR -> {
-                            bar {
-                                name = "${series.name} - $subgroup"
-                                x.strings = data.map { it.xAxis }
-                                y.numbers = transformedYValues
-
-                            }
-                        }
-
-                        SeriesType.LINE -> {
-                            scatter {
-                                name = "${series.name} - $subgroup"
-                                x.strings = data.map { it.xAxis }
-                                y.numbers = transformedYValues
-                                mode = ScatterMode.lines
-                                type = TraceType.scatter
-                            }
-                        }
-                    }
-                }
-            }
-
-            layout {
-                xaxis {
-                    title {
-                        text = uiState.reportOptions2.xAxis?.name ?: strings[MR.strings.x_axis]
-                        font {
-                            size = 16
-                        }
-                    }
-                }
-                yaxis {
-                    title {
-                        text = yAxisTitle
-                        font {
-                            size = 16
-                        }
-                    }
-                }
-                // Add a legend to distinguish subgroups
-                showlegend = true
-            }
-        }
-    }
-}
-
+// In ReportDetailScreen.kt
 val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
-    val canvasRef = useRef<web.html.HTMLElement>()
-    val strings = useStringProvider() // Get strings here
-
-    // Use a reference to get the HTMLElement (DOM object) when it is added by React.
-    val canvasRefVal = canvasRef.current
-
-    // useEffect function arguments should include the canvas reference itself and props.uiState
-    useEffect(canvasRefVal, props.uiState) {
-        if (canvasRefVal == null)
-            return@useEffect
-        (canvasRefVal as HTMLElement).clear()
-        (canvasRefVal as HTMLElement).append {
-            plot(props.uiState, strings = strings)
-        }
-
-    }
+    val string = useStringProvider()
 
     UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
             spacing = responsive(8.px)
 
-            ReactHTML.div {
-                ref = canvasRef
+            ReportGraph {
+                graphSeriesList = sharedGraphSeriesList
+                reportOptions = props.uiState.reportOptions2
+                strings = string
             }
             moreOption {
                 uiState = props.uiState
@@ -254,14 +120,12 @@ private val moreOption = FC<ReportDetailProps> { props ->
     // Example data
     // Use the shared data
     val data = sharedGraphSeriesList
-    UstadStandardContainer {
 
+    UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
             spacing = responsive(8.px)
-            //divider
             Divider { orientation = Orientation.horizontal }
-
             Stack {
                 direction = responsive(StackDirection.row)
                 UstadQuickActionButton {
