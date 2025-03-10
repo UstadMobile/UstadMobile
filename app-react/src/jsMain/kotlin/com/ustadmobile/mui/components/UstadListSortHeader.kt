@@ -4,11 +4,12 @@ import com.ustadmobile.core.db.dao.ClazzDaoCommon
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.util.ext.description
 import web.cssom.JustifyContent
 import web.cssom.pct
 import web.cssom.px
-import mui.icons.material.ArrowDownward
-import mui.icons.material.ArrowUpward
+import mui.icons.material.ArrowDownward as ArrowDownwardIcon
+import mui.icons.material.ArrowUpward as ArrowUpwardIcon
 import mui.material.*
 import mui.system.sx
 import react.*
@@ -32,10 +33,10 @@ val UstadListSortHeader = FC<UstadListSortHeaderProps> { props ->
 
     val strings = useStringProvider()
 
-    val sortIcon = if(props.activeSortOrderOption.order)
-        ArrowDownward.create()
+    val sortIcon = if(props.activeSortOrderOption.order != false)
+        ArrowDownwardIcon.create()
     else
-        ArrowUpward.create()
+        ArrowUpwardIcon.create()
 
     var anchorState by useState<HTMLElement?>(null)
 
@@ -77,13 +78,7 @@ val UstadListSortHeader = FC<UstadListSortHeaderProps> { props ->
                     props.onClickSort(option)
                 }
 
-                + strings[option.fieldMessageId]
-                val orderLabel = if(option.order) {
-                    strings[MR.strings.ascending]
-                }else {
-                    strings[MR.strings.descending]
-                }
-                +" ($orderLabel)"
+                + option.description(strings)
             }
         }
 
