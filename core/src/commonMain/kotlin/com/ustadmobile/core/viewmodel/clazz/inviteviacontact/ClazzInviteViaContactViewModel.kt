@@ -4,6 +4,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.hidekeyboard.HideKeyboardUseCase
 import com.ustadmobile.core.domain.invite.ContactToServerUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -20,7 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.instance
 import kotlinx.serialization.json.Json
-
+import org.kodein.di.instanceOrNull
 
 
 data class InviteViaContactChip(
@@ -30,9 +31,7 @@ data class InviteViaContactChip(
 )
 
 data class ClazzInviteViaContactUiState(
-    private val fromContact: String? = null,
     val contactError: String? = null,
-    val onSendClick: Boolean? = null,
     val chips: List<InviteViaContactChip> = emptyList(),
     val textFieldValue: String? = null,
 )
@@ -49,6 +48,8 @@ class ClazzInviteViaContactViewModel(
     private val _uiState = MutableStateFlow(ClazzInviteViaContactUiState())
 
     val uiState: Flow<ClazzInviteViaContactUiState> = _uiState.asStateFlow()
+
+    private val hideKeyboardUseCase: HideKeyboardUseCase? by instanceOrNull()
 
     init {
         _appUiState.update {
@@ -71,16 +72,14 @@ class ClazzInviteViaContactViewModel(
 
     fun onClickSend() {
         viewModelScope.launch {
-            _uiState.update { prev ->
-                prev.copy(onSendClick = true)
-            }
+            hideKeyboardUseCase?.invoke()
 
             val contacts = _uiState.value.chips
 
             if (contacts.isEmpty()) {
                 val textField = _uiState.value.textFieldValue
                  if (!textField.isNullOrBlank()){
-                    val parsedTextValue= parseInviteUseCase(textField)
+                     val parsedTextValue= parseInviteUseCase(textField)
                      sendContactsToServer(parsedTextValue)
                      return@launch
                  }
@@ -163,7 +162,6 @@ class ClazzInviteViaContactViewModel(
     fun onValueChanged() {
         _uiState.update { prev ->
             prev.copy(
-                onSendClick = false,
                 contactError = null
             )
         }

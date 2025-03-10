@@ -9,7 +9,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavCommand
@@ -207,7 +206,6 @@ fun AppNavHost(
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
     val di = localDI()
-     val accountManager: UstadAccountManager = di.direct.instance()
 
     val popCommandFlow = remember {
         MutableSharedFlow<PopNavCommand>(
@@ -230,8 +228,6 @@ fun AppNavHost(
             ustadNavController.onCollectNavCommand(it)
         }
     }
-
-
 
     val navResultReturner: NavResultReturner = remember {
         NavResultReturnerImpl()

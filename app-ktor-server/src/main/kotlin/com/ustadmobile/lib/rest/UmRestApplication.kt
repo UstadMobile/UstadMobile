@@ -290,6 +290,8 @@ fun Application.umRestApplication(
         setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
     }
 
+    environment.config.absoluteDataDir().takeIf { !it.exists() }?.mkdirs()
+
     ktorServerPropertiesFile(
         dataDir = environment.config.absoluteDataDir()
     ).writer().use { serverPropWriter ->

@@ -34,7 +34,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import com.dokar.chiptextfield.m3.ChipTextFieldDefaults
 import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.InviteViaContactChip
@@ -73,8 +72,6 @@ fun ClazzInviteViaContactScreen(
     onTextFieldValueChanged: (String) -> Unit,
     onValueChanged: () -> Unit,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-
     val state = rememberChipTextFieldState<AvatarChip>()
     UstadVerticalScrollColumn(
         modifier = Modifier
@@ -135,12 +132,6 @@ fun ClazzInviteViaContactScreen(
                 }
             }
         )
-    }
-
-    LaunchedEffect(uiState.onSendClick) {
-        uiState.onSendClick?.let {
-            if (it) keyboardController?.hide()
-        }
     }
 
     LaunchedEffect(uiState.chips) {
