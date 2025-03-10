@@ -75,12 +75,16 @@ it('Student-1, Attempt-2, video content - 100%', () => {
   cy.contains('Test Course Block').click()
   cy.contains("Content_001").click()
   cy.contains("OPEN").click()
-  cy.ustadVerifyVideo()
-  cy.get('video')
-    .then($video => {
-      $video[0].play()
-    })
-    cy.wait(11000) // Wait command to play video completely to get completed status for test, tried - cy.get('video',{timeout:12000}).should('have.prop', 'ended', true)
+cy.ustadVerifyVideo();
+
+cy.get('video').then(($video) => {
+    $video[0].playbackRate = 4
+    $video[0].play()
+  })
+cy.wait(5000)  // getting attempt as completed when we use wait here
+
+// Wait until the video has ended
+//cy.get('video', { timeout: 5000 }).should('have.prop', 'ended', true);  // the attempt is not recorded
 })
 
 it('Student-2 user makes attempts on video-2 sec', () => {
