@@ -63,7 +63,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
             spacing = responsive(2)
 
             TextField {
-                id = "Title"
+                id = "title"
                 value = props.uiState.reportOptions2.title ?: ""
                 label = ReactNode(strings[MR.strings.title] + "*")
                 onTextChange = { newValue ->
@@ -126,7 +126,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
 
                     // Series Title
                     TextField {
-                        id = "Series Title"
+                        id = "series_title"
                         value = series.reportSeriesTitle
                         label = ReactNode(strings[MR.strings.series_title] + "*")
                         onTextChange = { newValue ->
@@ -145,7 +145,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         error = props.uiState.yAxisError != null
 
                         InputLabel {
-                            id = "Y Axis"
+                            id = "y_axis_label"
                             shrink = true
                             sx {
                                 backgroundColor = Color(theme.palette.background.default)
@@ -155,7 +155,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
 
                         Select {
                             value = series.reportSeriesYAxis?.name ?: ""
-                            id = "Y Axis"
+                            id = "y_axis"
                             labelId = "y_axis_label"
                             fullWidth = true
                             onChange = { event, _ ->
@@ -183,7 +183,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         fullWidth = true
 
                         InputLabel {
-                            id = "Subgroup by"
+                            id = "sub_group_label"
                             shrink = true
                             sx {
                                 backgroundColor = Color(theme.palette.background.default)
@@ -193,7 +193,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
 
                         Select {
                             value = series.reportSeriesSubGroup?.name ?: ""
-                            id = "Subgroup by"
+                            id = "subgroup_by"
                             labelId = "sub_group_label"
                             fullWidth = true
                             onChange = { event, _ ->
@@ -217,7 +217,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 FormControl {
                     fullWidth = true
                     InputLabel {
-                        id = "Chart Type"
+                        id = "chart_type_label"
                         shrink = true
                         sx {
                             backgroundColor = Color(theme.palette.background.default)
@@ -227,8 +227,8 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
 
                     Select {
                         value = series.reportSeriesVisualType?.name ?: ""
-                        id = "Chart Type"
-                        labelId = "y_axis_label"
+                        id = "chart_type"
+                        labelId = "chart_type_label"
                         fullWidth = true
                         onChange = { event, _ ->
                             val selectedValue =
@@ -250,7 +250,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 FormControl {
                     fullWidth = true
                     InputLabel {
-                        id = "Time Range"
+                        id = "time_range_label"
                         shrink = true
                         sx {
                             backgroundColor = Color(theme.palette.background.default)
@@ -261,7 +261,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     /* TODO: Update as per updated prototype with custom period and custom date range options
                     Select {
                         value = series.reportTimeRange?.name ?: ""
-                        id = "Time Range"
+                        id = "time_range"
                         labelId = "time_range_label"
                         fullWidth = true
                         onChange = { event, _ ->
@@ -326,7 +326,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     }
                 }
                 Button {
-                    id = "Filter add Button"
+                    id = "filter_add_button"
                     fullWidth = true
                     onClick = { props.onAddFilter(series.reportSeriesUid) }
                     variant = ButtonVariant.outlined
@@ -334,7 +334,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 }
             }
             Button {
-                id = "Series add Button"
+                id = "series_add_button"
                 fullWidth = true
                 onClick = { props.onAddSeries() }
                 variant = ButtonVariant.outlined
