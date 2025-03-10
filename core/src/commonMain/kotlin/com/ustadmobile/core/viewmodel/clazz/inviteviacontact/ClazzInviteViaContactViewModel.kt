@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel.clazz.inviteviaContact
+package com.ustadmobile.core.viewmodel.clazz.inviteviacontact
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import kotlinx.coroutines.flow.update
@@ -29,7 +29,7 @@ data class InviteViaContactChip(
     val inviteType: Int
 )
 
-data class InviteViaContactUiState(
+data class ClazzInviteViaContactUiState(
     private val fromContact: String? = null,
     val contactError: String? = null,
     val onSendClick: Boolean? = null,
@@ -38,7 +38,7 @@ data class InviteViaContactUiState(
 )
 
 
-class InviteViaContactViewModel(
+class ClazzInviteViaContactViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
@@ -46,10 +46,9 @@ class InviteViaContactViewModel(
     private val contactToServerUseCase: ContactToServerUseCase by di.onActiveLearningSpace().instance()
     private val clazzUid = savedStateHandle[ARG_CLAZZ_UID]?.toLong() ?: 0L
     private val personRole = savedStateHandle[ARG_ROLE]?.toLong() ?: 0L
-    private var _uiState = MutableStateFlow(InviteViaContactUiState())
+    private val _uiState = MutableStateFlow(ClazzInviteViaContactUiState())
 
-    val uiState: Flow<InviteViaContactUiState> = _uiState.asStateFlow()
-
+    val uiState: Flow<ClazzInviteViaContactUiState> = _uiState.asStateFlow()
 
     init {
         _appUiState.update {
@@ -64,14 +63,13 @@ class InviteViaContactViewModel(
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
                     text = systemImpl.getString(MR.strings.send),
-                    onClick = this@InviteViaContactViewModel::OnClickSend
+                    onClick = this@ClazzInviteViaContactViewModel::onClickSend
                 )
             )
         }
     }
 
-    fun OnClickSend() {
-
+    fun onClickSend() {
         viewModelScope.launch {
             _uiState.update { prev ->
                 prev.copy(onSendClick = true)
@@ -82,14 +80,17 @@ class InviteViaContactViewModel(
             if (contacts.isEmpty()) {
                 val textField = _uiState.value.textFieldValue
                  if (!textField.isNullOrBlank()){
-                    val parsedTextValue= parseInviteUseCase.invoke(textField)
+                    val parsedTextValue= parseInviteUseCase(textField)
                      sendContactsToServer(parsedTextValue)
                      return@launch
                  }
+
                 val noContactFoundMessage = systemImpl.getString(MR.strings.no_contact_found)
+
                 _uiState.update { prev ->
                     prev.copy(contactError = noContactFoundMessage)
                 }
+
                 onContactError(noContactFoundMessage)
                 return@launch
             }

@@ -17,6 +17,7 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.EnrolmentRequestAndCoursePic
 import com.ustadmobile.lib.db.entities.Clazz
@@ -165,7 +166,7 @@ class ClazzListViewModel(
     }
 
     fun onClickJoinExistingClazz() {
-        navController.navigate(JoinWithCodeView.VIEW_NAME, mapOf(
+        navController.navigate(JoinWithCodeViewModel.DEST_NAME, mapOf(
             UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString()
         ))
     }

@@ -3,9 +3,9 @@ package com.ustadmobile.view.clazz.inviteviacontact
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactChip
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactUiState
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.InviteViaContactChip
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.ClazzInviteViaContactUiState
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.ClazzInviteViaContactViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadStandardContainer
 import js.array.ReadonlyArray
@@ -19,21 +19,21 @@ import react.Props
 import react.FC
 import react.*
 
-external interface InviteViaContactProps : Props {
-    var uiState: InviteViaContactUiState
+external interface ClazzInviteViaContactProps : Props {
+    var uiState: ClazzInviteViaContactUiState
     var onChipSubmitClick: (String) -> InviteViaContactChip
     var onChipRemoved: (String) -> Unit
     var onTextFieldValueChanged: (String) -> Unit
 }
 
-val InviteViaContactScreen = FC<Props> {
+val ClazzInviteViaContactScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
-        InviteViaContactViewModel(di, savedStateHandle)
+        ClazzInviteViaContactViewModel(di, savedStateHandle)
     }
 
-    val uiStateVal by viewModel.uiState.collectAsState(InviteViaContactUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzInviteViaContactUiState())
 
-    InviteViaContactComponent2 {
+    ClazzInviteViaContactComponent2 {
         uiState = uiStateVal
         onChipSubmitClick=viewModel::onClickChipSubmit
         onChipRemoved=viewModel::onChipRemoved
@@ -41,7 +41,7 @@ val InviteViaContactScreen = FC<Props> {
     }
 }
 
-private val InviteViaContactComponent2 = FC<InviteViaContactProps> { props ->
+private val ClazzInviteViaContactComponent2 = FC<ClazzInviteViaContactProps> { props ->
     val strings = useStringProvider()
     var chipList by useState { emptyArray<String>() }
     val uiState = props.uiState

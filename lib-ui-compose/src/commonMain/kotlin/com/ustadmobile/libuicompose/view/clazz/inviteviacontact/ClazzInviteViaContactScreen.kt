@@ -24,8 +24,8 @@ import com.dokar.chiptextfield.Chip
 import com.dokar.chiptextfield.m3.OutlinedChipTextField
 import com.dokar.chiptextfield.rememberChipTextFieldState
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactUiState
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.ClazzInviteViaContactUiState
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.ClazzInviteViaContactViewModel
 import com.ustadmobile.libuicompose.components.UstadContactPickButton
 import dev.icerock.moko.resources.compose.stringResource
 import androidx.compose.material3.Icon
@@ -37,17 +37,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import com.dokar.chiptextfield.m3.ChipTextFieldDefaults
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactChip
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.InviteViaContactChip
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 
 
 @Composable
-fun InviteViaContactScreen(
-    viewModel: InviteViaContactViewModel
+fun ClazzInviteViaContactScreen(
+    viewModel: ClazzInviteViaContactViewModel
 ) {
 
-    val uiState by viewModel.uiState.collectAsState(InviteViaContactUiState())
-    InviteViaContactScreen(
+    val uiState by viewModel.uiState.collectAsState(ClazzInviteViaContactUiState())
+    ClazzInviteViaContactScreen(
         uiState = uiState,
         onChipSubmitClick = {
             viewModel.onClickChipSubmit(
@@ -65,8 +65,8 @@ fun InviteViaContactScreen(
 class AvatarChip(text: String, val avatar: ImageVector) : Chip(text)
 
 @Composable
-fun InviteViaContactScreen(
-    uiState: InviteViaContactUiState = InviteViaContactUiState(),
+fun ClazzInviteViaContactScreen(
+    uiState: ClazzInviteViaContactUiState = ClazzInviteViaContactUiState(),
     onChipSubmitClick: (String) -> InviteViaContactChip,
     onContactError: (String) -> Unit,
     onChipRemoved: (String) -> Unit,

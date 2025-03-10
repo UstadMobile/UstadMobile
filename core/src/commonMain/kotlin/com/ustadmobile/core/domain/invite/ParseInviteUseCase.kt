@@ -2,7 +2,7 @@ package com.ustadmobile.core.domain.invite
 
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactChip
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.InviteViaContactChip
 import com.ustadmobile.lib.db.entities.ClazzInvite
 
 

@@ -2,7 +2,6 @@ package com.ustadmobile.core.domain.invite
 
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactChip
 import com.ustadmobile.lib.rest.domain.invite.ProcessInviteUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
