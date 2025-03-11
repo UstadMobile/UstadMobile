@@ -21,8 +21,8 @@ data class ContentEntryDetailAttemptsSessionListUiState(
 
     val attemptsSessionList: () -> PagingSource<Int, SessionTimeAndProgressInfo> = { EmptyPagingSource() },
     val sortOptions: List<SortOrderOption> = listOf(
-        SortOrderOption(MR.strings.most_recent, SessionTimeAndProgressInfoConst.SORT_BY_TIMESTAMP_DESC, true),
-        SortOrderOption(MR.strings.least_recent, SessionTimeAndProgressInfoConst.SORT_BY_TIMESTAMP_ASC, false),
+        SortOrderOption(MR.strings.most_recent, SessionTimeAndProgressInfoConst.SORT_BY_TIMESTAMP_DESC, null),
+        SortOrderOption(MR.strings.least_recent, SessionTimeAndProgressInfoConst.SORT_BY_TIMESTAMP_ASC, null),
         SortOrderOption(MR.strings.by_score, SessionTimeAndProgressInfoConst.SORT_BY_SCORE_ASC, true),
         SortOrderOption(MR.strings.by_score, SessionTimeAndProgressInfoConst.SORT_BY_SCORE_DESC, false),
         SortOrderOption(MR.strings.by_completion, SessionTimeAndProgressInfoConst.SORT_BY_COMPLETION_ASC, true),

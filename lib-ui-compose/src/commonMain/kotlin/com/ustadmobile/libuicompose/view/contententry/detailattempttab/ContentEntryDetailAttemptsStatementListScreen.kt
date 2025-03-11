@@ -152,11 +152,16 @@ fun ContentEntryDetailAttemptsStatementList(
                     )
                 },
                 headlineContent = {
-                    attemptsStatementListItems?.verb?.verbUrlId?.let { verbId ->
-                        Text(
-                            text = verbId.substringAfterLast("/").replaceFirstChar { it.uppercaseChar() }
-                        )
-                    } ?: Text(text = "N/A")
+                    val verbName = attemptsStatementListItems?.verb?.verbUrlId?.substringAfterLast("/")
+                        ?.replaceFirstChar { it.uppercaseChar() } ?: ""
+
+                    val activityName = attemptsStatementListItems?.activityLangMapEntry?.almeValue ?: ""
+
+                    Text(
+                        text =  "$verbName $activityName",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                    )
                 },
                 supportingContent = {
                     Column(modifier = Modifier.fillMaxWidth()) {
