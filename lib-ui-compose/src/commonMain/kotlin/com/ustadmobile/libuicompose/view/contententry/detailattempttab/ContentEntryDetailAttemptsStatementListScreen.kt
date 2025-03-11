@@ -177,27 +177,25 @@ fun ContentEntryDetailAttemptsStatementList(
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(4.dp))
-
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically // Align vertically in the center
                         ) {
                             LinearProgressIndicator(
                                 progress = progress,
-                                modifier = Modifier.weight(0.7f).testTag("progress_bar"),
+                                modifier = Modifier
+                                    .weight(0.7f) // Occupy 70% of the width
+                                    .testTag("progress_bar"),
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = scoreText,
-                                style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier
                                     .padding(start = 4.dp)
-                                    .width(48.dp),
-                                textAlign = TextAlign.Center
+                                    .weight(0.3f),
                             )
                         }
+
                     }
                 }
             )
