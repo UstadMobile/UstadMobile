@@ -1,18 +1,14 @@
 package com.ustadmobile.core.db.ext
 
-import androidx.room.PrimaryKey
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.DoorDbType
-import com.ustadmobile.door.annotation.ReplicateEtag
-import com.ustadmobile.door.annotation.ReplicateLastModified
 import com.ustadmobile.door.migration.DoorMigration
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.CacheLockJoin
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.Message
-import com.ustadmobile.lib.db.entities.PersonPasskey.Companion.NOT_REVOKED
 import com.ustadmobile.lib.db.entities.UserSession
 
 /**
@@ -1682,10 +1678,10 @@ val MIGRATION_204_205 = DoorMigrationStatementList(204, 205) { db ->
     buildList {
         if (db.dbType() == DoorDbType.SQLITE) {
             add("ALTER TABLE ClazzEnrolment ADD COLUMN clazzEnrolmentInviteUid INTEGER NOT NULL DEFAULT 0")
-            add("CREATE TABLE IF NOT EXISTS ClazzInvite (  ciPersonUid  INTEGER  NOT NULL , ciRoleId  INTEGER  NOT NULL , ciClazzUid  INTEGER  NOT NULL , inviteType  INTEGER  NOT NULL  DEFAULT 1 , inviteContact  TEXT , inviteToken  TEXT , inviteStatus  INTEGER  NOT NULL , inviteLct  INTEGER  NOT NULL , ciUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS ClazzInvite (  ciPersonUid  INTEGER  NOT NULL , ciRoleId  INTEGER  NOT NULL , ciClazzUid  INTEGER  NOT NULL , inviteType  INTEGER  NOT NULL  DEFAULT 1 , inviteContact  TEXT NOT NULL, inviteToken  TEXT NOT NULL, inviteStatus  INTEGER  NOT NULL , inviteLct  INTEGER  NOT NULL , ciUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
         } else {
             add("ALTER TABLE ClazzEnrolment ADD COLUMN clazzEnrolmentInviteUid INTEGER NOT NULL DEFAULT 0")
-            add("CREATE TABLE IF NOT EXISTS ClazzInvite (  ciPersonUid  BIGINT  NOT NULL , ciRoleId  BIGINT  NOT NULL , ciClazzUid  BIGINT  NOT NULL , inviteType  INTEGER  NOT NULL  DEFAULT 1 , inviteContact  TEXT , inviteToken  TEXT , inviteStatus  INTEGER  NOT NULL , inviteLct  BIGINT  NOT NULL , ciUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS ClazzInvite (  ciPersonUid  BIGINT  NOT NULL , ciRoleId  BIGINT  NOT NULL , ciClazzUid  BIGINT  NOT NULL , inviteType  INTEGER  NOT NULL  DEFAULT 1 , inviteContact  TEXT NOT NULL, inviteToken  TEXT NOT NULL, inviteStatus  INTEGER  NOT NULL , inviteLct  BIGINT  NOT NULL , ciUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
         }
     }
 }

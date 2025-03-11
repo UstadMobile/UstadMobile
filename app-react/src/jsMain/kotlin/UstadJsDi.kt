@@ -47,6 +47,7 @@ import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
 import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
+import com.ustadmobile.core.impl.di.commonClientDomainDiModule
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -55,8 +56,6 @@ import nl.adaptivity.xmlutil.serialization.XmlConfig
 import web.location.location
 import web.navigator.navigator
 import web.url.URLSearchParams
-
-
 
 /**
  * KodeIn DI builder for JS/Browser.
@@ -70,6 +69,7 @@ internal fun ustadJsDi(
     stringsProvider: JsStringProvider,
 ) = DI {
     import(commonDomainDiModule(LearningSpaceScope.Default))
+    import(commonClientDomainDiModule(LearningSpaceScope.Default))
     import(DomainDiModuleJs(LearningSpaceScope.Default))
     val learningSpaceUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Learning Space URL = $learningSpaceUrl (location.href = ${location.href}")

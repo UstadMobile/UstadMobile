@@ -10,6 +10,7 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadStandardContainer
 import js.array.ReadonlyArray
 import js.objects.jso
+import mui.base.AutocompleteChangeReason
 import mui.material.Autocomplete
 import mui.material.AutocompleteProps
 import mui.material.Chip
@@ -22,7 +23,7 @@ import react.*
 external interface ClazzInviteViaContactProps : Props {
     var uiState: ClazzInviteViaContactUiState
     var onChipSubmitClick: (String) -> InviteViaContactChip
-    var onChipRemoved: (String) -> Unit
+    var onChipsRemoved: (List<String>) -> Unit
     var onTextFieldValueChanged: (String) -> Unit
 }
 
@@ -36,21 +37,13 @@ val ClazzInviteViaContactScreen = FC<Props> {
     ClazzInviteViaContactComponent2 {
         uiState = uiStateVal
         onChipSubmitClick=viewModel::onClickChipSubmit
-        onChipRemoved=viewModel::onChipRemoved
+        onChipsRemoved=viewModel::onChipsRemoved
         onTextFieldValueChanged=viewModel::onTextFieldValueChanged
     }
 }
 
 private val ClazzInviteViaContactComponent2 = FC<ClazzInviteViaContactProps> { props ->
     val strings = useStringProvider()
-    var chipList by useState { emptyArray<String>() }
-    val uiState = props.uiState
-
-    useEffect(uiState.chips) {
-        chipList = uiState.chips.map { it.text }.toTypedArray()
-
-    }
-
 
     UstadStandardContainer {
         maxWidth = "lg"
@@ -69,13 +62,10 @@ private val ClazzInviteViaContactComponent2 = FC<ClazzInviteViaContactProps> { p
                         ReactNode(
                             value.mapIndexed { index, option ->
                                 Chip.create {
+                                    key = "contact_chip_$option"
                                     label = ReactNode(option)
-                                    //Here - can send onDelete to the viewmodel
                                     onDelete = {
-                                     props.onChipRemoved(option)
-                                        chipList = chipList.filterIndexed { i, _ ->
-                                            i != index
-                                        }.toTypedArray()
+                                        props.onChipsRemoved(listOf(option))
                                     }
                                 }
 
@@ -91,14 +81,21 @@ private val ClazzInviteViaContactComponent2 = FC<ClazzInviteViaContactProps> { p
                 onInputChange = { event, value, _ ->
                     props.onTextFieldValueChanged(value)
                 }
-                value = chipList
+                value = props.uiState.chips.map { it.text }.toTypedArray()
                 onChange = { event, value, reason, detail ->
-                    detail?.option?.let { props.onChipSubmitClick(it) }
+                    val submittedText = detail?.option
 
-                    chipList = value.unsafeCast<Array<String>>()
+                    when {
+                        submittedText != null && reason == AutocompleteChangeReason.createOption -> {
+                            props.onChipSubmitClick(submittedText)
+                        }
+
+                        submittedText != null && reason == AutocompleteChangeReason.removeOption -> {
+                            props.onChipsRemoved(listOf(submittedText))
+                        }
+                    }
                 }
             }
         }
-
     }
 }

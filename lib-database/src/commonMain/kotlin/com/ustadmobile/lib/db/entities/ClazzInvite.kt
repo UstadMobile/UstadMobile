@@ -40,9 +40,9 @@ data class ClazzInvite(
     @ColumnInfo(defaultValue = "1")
     var inviteType: Int = 1,
 
-    var inviteContact: String? = null,
+    var inviteContact: String = "",
 
-    var inviteToken: String? = null,
+    var inviteToken: String = "",
 
     var inviteStatus: Int = STATUS_PENDING,
 

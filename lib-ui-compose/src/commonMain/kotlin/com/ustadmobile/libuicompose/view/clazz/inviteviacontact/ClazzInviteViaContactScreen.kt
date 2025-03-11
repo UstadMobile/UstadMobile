@@ -54,7 +54,7 @@ fun ClazzInviteViaContactScreen(
             )
         },
         onContactError = { viewModel.onContactError(it) },
-        onChipRemoved = { viewModel.onChipRemoved(it) },
+        onChipsRemoved = { viewModel.onChipsRemoved(it) },
         onTextFieldValueChanged = {viewModel.onTextFieldValueChanged(it)},
         onValueChanged = { viewModel.onValueChanged() }
 
@@ -68,21 +68,17 @@ fun ClazzInviteViaContactScreen(
     uiState: ClazzInviteViaContactUiState = ClazzInviteViaContactUiState(),
     onChipSubmitClick: (String) -> InviteViaContactChip,
     onContactError: (String) -> Unit,
-    onChipRemoved: (String) -> Unit,
+    onChipsRemoved: (List<String>) -> Unit,
     onTextFieldValueChanged: (String) -> Unit,
     onValueChanged: () -> Unit,
 ) {
     val state = rememberChipTextFieldState<AvatarChip>()
     UstadVerticalScrollColumn(
-        modifier = Modifier
-            .fillMaxSize(),
-
-        ) {
-
-
+        modifier = Modifier.fillMaxSize(),
+    ) {
         OutlinedChipTextField(
             state = state,
-            value = uiState.textFieldValue?:"" ,
+            value = uiState.textFieldValue ?: "" ,
             onValueChange = { newValue ->
                 onTextFieldValueChanged(newValue)
             },
@@ -91,7 +87,7 @@ fun ClazzInviteViaContactScreen(
                 .padding(10.dp).fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             onSubmit = {
-               val inviteViaContactChip= onChipSubmitClick(it)
+                val inviteViaContactChip= onChipSubmitClick(it)
                 onValueChanged()
                 // need to return avatarChip but we are handling add and removing
                 //chips from uistate , so returning the last chip from uistate if its not
@@ -134,9 +130,11 @@ fun ClazzInviteViaContactScreen(
         )
     }
 
+    /**
+     * When a chip is added via the ViewModel uiState, then add it to the ChipTextField state
+     */
     LaunchedEffect(uiState.chips) {
         uiState.chips.let { uiChips ->
-
             val chipsToAdd = uiChips.filterNot { chip ->
                 state.chips.any { it.text == chip.text }
             }
@@ -151,17 +149,16 @@ fun ClazzInviteViaContactScreen(
         }
     }
 
+    /**
+     * When a chip is removed by clicking the close icon, then notify the ViewModel that it has
+     * been removed.
+     */
     LaunchedEffect(state.chips) {
-        state.chips.let { stateChips ->
-
-            val removedChips = uiState.chips.filterNot { chip ->
-                stateChips.any { it.text == chip.text }
-            }
-
-            removedChips.forEach {
-                onChipRemoved(it.text)
-            }
+        val removedChips = state.chips.filterNot { chip ->
+            uiState.chips.any { it.text == chip.text }
         }
+
+        onChipsRemoved(removedChips.map { it.text })
     }
 
 }

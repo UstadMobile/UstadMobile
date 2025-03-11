@@ -2057,5 +2057,7 @@
 
     <string name="invitation_is_revoked">Invitation is revoked</string>
 
+    <string name="invitations_sent">Invitations sent</string>
+
 
 </resources>

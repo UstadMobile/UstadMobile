@@ -12,7 +12,6 @@ import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.RequestEnrolm
 import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
-import com.ustadmobile.core.domain.invite.ContactToServerUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.invite.ResendInviteUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
@@ -32,17 +31,16 @@ import org.kodein.di.singleton
  * Includes items that require systemImpl, so cannot be used on Android for dependencies that are
  * at the Application level di.
  */
-fun commonDomainDiModule(endpointScope: LearningSpaceScope) = DI.Module("CommonDomain") {
+fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("CommonDomain") {
 
-
-    bind<EnrolIntoCourseUseCase>() with scoped(endpointScope).provider {
+    bind<EnrolIntoCourseUseCase>() with scoped(learningSpaceScope).provider {
         EnrolIntoCourseUseCase(
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance<UmAppDataLayer>().repository,
         )
     }
 
-    bind<IApproveOrDeclinePendingEnrolmentRequestUseCase>() with scoped(endpointScope).provider {
+    bind<IApproveOrDeclinePendingEnrolmentRequestUseCase>() with scoped(learningSpaceScope).provider {
         ApproveOrDeclinePendingEnrolmentUseCase(
             repo = instance<UmAppDataLayer>().repository,
             db = instance(tag = DoorTag.TAG_DB),
@@ -50,7 +48,7 @@ fun commonDomainDiModule(endpointScope: LearningSpaceScope) = DI.Module("CommonD
         )
     }
 
-    bind<SaveContentEntryUseCase>() with scoped(endpointScope).provider {
+    bind<SaveContentEntryUseCase>() with scoped(learningSpaceScope).provider {
         SaveContentEntryUseCase(
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance<UmAppDataLayer>().repository,
@@ -58,47 +56,40 @@ fun commonDomainDiModule(endpointScope: LearningSpaceScope) = DI.Module("CommonD
         )
     }
 
-    bind<GetAssignmentSubmitterNameUseCase>() with scoped(endpointScope).provider {
+    bind<GetAssignmentSubmitterNameUseCase>() with scoped(learningSpaceScope).provider {
         GetAssignmentSubmitterNameUseCase(
             repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
             systemImpl = instance()
         )
     }
 
-    bind<GetLocaleForSiteTermsUseCase>() with scoped(endpointScope).provider {
+    bind<GetLocaleForSiteTermsUseCase>() with scoped(learningSpaceScope).provider {
         GetLocaleForSiteTermsUseCase(
             supportedLangConfig = instance(),
             repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
 
-    bind<LaunchContentEntryVersionUseCase>() with scoped(endpointScope).provider {
+    bind<LaunchContentEntryVersionUseCase>() with scoped(learningSpaceScope).provider {
         DefaultLaunchContentEntryVersionUseCase()
     }
 
-    bind<RequestEnrolmentUseCase>() with scoped(endpointScope).provider {
+    bind<RequestEnrolmentUseCase>() with scoped(learningSpaceScope).provider {
         RequestEnrolmentUseCase(
             activeRepo = instance<UmAppDataLayer>().repositoryOrLocalDb
         )
     }
 
-    bind<MakeLinkUseCase>() with scoped(endpointScope).singleton {
+    bind<MakeLinkUseCase>() with scoped(learningSpaceScope).singleton {
         MakeLinkUseCase(context)
     }
 
-    bind<CreateNewClazzUseCase>() with scoped(endpointScope).singleton {
+    bind<CreateNewClazzUseCase>() with scoped(learningSpaceScope).singleton {
         CreateNewClazzUseCase(
             repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
-    bind<ContactToServerUseCase>() with scoped(endpointScope).provider {
-        ContactToServerUseCase(
-            httpClient = instance(),
-            learningSpace = context,
-            json = instance()
-        )
-    }
-    bind<ResendInviteUseCase>() with scoped(endpointScope).provider {
+    bind<ResendInviteUseCase>() with scoped(learningSpaceScope).provider {
         ResendInviteUseCase(
             httpClient = instance(),
             learningSpace = context,
@@ -112,7 +103,7 @@ fun commonDomainDiModule(endpointScope: LearningSpaceScope) = DI.Module("CommonD
         )
     }
 
-    bind<SubmitMarkUseCase>() with scoped(endpointScope).provider {
+    bind<SubmitMarkUseCase>() with scoped(learningSpaceScope).provider {
         SubmitMarkUseCase(
             repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
             learningSpace = context,
@@ -123,7 +114,7 @@ fun commonDomainDiModule(endpointScope: LearningSpaceScope) = DI.Module("CommonD
         )
     }
 
-    bind<CreateXapiGroupForCourseGroupUseCase>() with scoped(endpointScope).provider {
+    bind<CreateXapiGroupForCourseGroupUseCase>() with scoped(learningSpaceScope).provider {
         CreateXapiGroupForCourseGroupUseCase(
             repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
             learningSpace = context,

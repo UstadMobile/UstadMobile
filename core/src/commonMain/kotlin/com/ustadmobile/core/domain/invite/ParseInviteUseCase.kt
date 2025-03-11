@@ -5,40 +5,49 @@ import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.InviteViaContactChip
 import com.ustadmobile.lib.db.entities.ClazzInvite
 
-
+/**
+ * Separates out a string (e.g. text field input) into contacts - where the contacts can be
+ * separated by whitespace, a comma, or a semicolon. Typically invoked when the user submits
+ * contacts into a text field where they are turned chips.
+ */
 class ParseInviteUseCase(
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase,
     private val validateEmailUseCase: ValidateEmailUseCase
 ) {
 
+    /**
+     * @param text user entered text to parse into contacts
+     * @return list of InviteViaContactChip parsed from teh string
+     */
     operator fun invoke(
         text: String
     ): List<InviteViaContactChip> {
-        val parts = text.split(",").map { it.trim() }.distinct()
-        val validatedChips: MutableList<InviteViaContactChip> = mutableListOf()
-        for (i in parts.indices) {
-            val part = parts[i].trim() // Trim to remove any leading or trailing whitespace
+        //Regex: accepts whitespace, comma, or semicolon
+        val parts = text.split(Regex("\\s+|,|;"))
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
 
+        return parts.map { part ->
             // Check if the part is a valid email or phone number
-            if (validateEmailUseCase(part) != null) {
+            when {
+                validateEmailUseCase(part) != null -> {
+                    InviteViaContactChip(part, true, ClazzInvite.EMAIL)
+                }
 
-                validatedChips.add(InviteViaContactChip(part, true, ClazzInvite.EMAIL))
+                phoneNumValidatorUseCase.isValid(part) -> {
+                    InviteViaContactChip(part, true, ClazzInvite.PHONE)
+                }
 
-            } else if (phoneNumValidatorUseCase.isValid(part)) {
+                isValidUserName(part) -> {
+                    InviteViaContactChip(part, true, ClazzInvite.INTERNAL_MESSAGE)
+                }
 
-                validatedChips.add(InviteViaContactChip(part, true, ClazzInvite.PHONE))
-
-            } else if (isValidUserName(part)) {
-
-                validatedChips.add(InviteViaContactChip(part, true, ClazzInvite.INTERNAL_MESSAGE))
-
-            } else {
-                validatedChips.add(InviteViaContactChip(part, false, 0))
-
+                else -> {
+                    InviteViaContactChip(part, false, 0)
+                }
             }
         }
-        return validatedChips
-
     }
 
 

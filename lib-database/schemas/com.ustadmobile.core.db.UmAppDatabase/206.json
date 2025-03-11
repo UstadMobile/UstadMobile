@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 206,
-    "identityHash": "c2e2403d55280a397e6ef66611ddaf8e",
+    "identityHash": "b20a885b4bee5981daaa35bc0ea6c67c",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -941,7 +941,7 @@
       },
       {
         "tableName": "ClazzInvite",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ciUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ciPersonUid` INTEGER NOT NULL, `ciRoleId` INTEGER NOT NULL, `ciClazzUid` INTEGER NOT NULL, `inviteType` INTEGER NOT NULL DEFAULT 1, `inviteContact` TEXT, `inviteToken` TEXT, `inviteStatus` INTEGER NOT NULL, `inviteExpire` INTEGER NOT NULL, `inviteLct` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ciUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ciPersonUid` INTEGER NOT NULL, `ciRoleId` INTEGER NOT NULL, `ciClazzUid` INTEGER NOT NULL, `inviteType` INTEGER NOT NULL DEFAULT 1, `inviteContact` TEXT NOT NULL, `inviteToken` TEXT NOT NULL, `inviteStatus` INTEGER NOT NULL, `inviteExpire` INTEGER NOT NULL, `inviteLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "ciUid",
@@ -978,13 +978,13 @@
             "fieldPath": "inviteContact",
             "columnName": "inviteContact",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "inviteToken",
             "columnName": "inviteToken",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "inviteStatus",
@@ -6507,7 +6507,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c2e2403d55280a397e6ef66611ddaf8e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b20a885b4bee5981daaa35bc0ea6c67c')"
     ]
   }
 }

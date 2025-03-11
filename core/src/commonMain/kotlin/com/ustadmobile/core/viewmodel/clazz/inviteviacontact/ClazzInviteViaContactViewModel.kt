@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.hidekeyboard.HideKeyboardUseCase
-import com.ustadmobile.core.domain.invite.ContactToServerUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
+import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -20,10 +20,14 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.instance
-import kotlinx.serialization.json.Json
 import org.kodein.di.instanceOrNull
 
 
+/**
+ * @param text the actual text of the contact e.g. "person@email.com" "+12223312121" "@username"
+ * @param isValid whether or not the contact is valid
+ * @param inviteType the invite type as per ClazzInvite type constants
+ */
 data class InviteViaContactChip(
     val text: String,
     val isValid: Boolean,
@@ -42,7 +46,8 @@ class ClazzInviteViaContactViewModel(
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
     private val parseInviteUseCase: ParseInviteUseCase by instance()
-    private val contactToServerUseCase: ContactToServerUseCase by di.onActiveLearningSpace().instance()
+    private val sendClazzInvitesUseCase: SendClazzInvitesUseCase by
+        di.onActiveLearningSpace().instance()
     private val clazzUid = savedStateHandle[ARG_CLAZZ_UID]?.toLong() ?: 0L
     private val personRole = savedStateHandle[ARG_ROLE]?.toLong() ?: 0L
     private val _uiState = MutableStateFlow(ClazzInviteViaContactUiState())
@@ -111,20 +116,26 @@ class ClazzInviteViaContactViewModel(
             return
         }
 
-        val result = contactToServerUseCase.invoke(
-            validContacts.map { it.text },
-            clazzUid,
-            personRole,
-            accountManager.currentUserSession.person.personUid
-        )
+        try {
+            sendClazzInvitesUseCase(
+                SendClazzInvitesUseCase.SendClazzInvitesRequest(
+                    contacts = validContacts.map { it.text },
+                    clazzUid = clazzUid,
+                    role = personRole,
+                    personUid = accountManager.currentUserSession.person.personUid
+                )
+            )
+            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.invitations_sent)))
 
-        val invitation = Json.decodeFromString<InviteResult>(result)
-
-        snackDispatcher.showSnackBar(Snack(invitation.inviteSent))
-        navController.popBackStack(
-            viewName = PersonListViewModel.DEST_NAME,
-            inclusive = true
-        )
+            navController.popBackStack(
+                viewName = PersonListViewModel.DEST_NAME,
+                inclusive = true
+            )
+        }catch(e: Throwable) {
+            snackDispatcher.showSnackBar(
+                Snack("${systemImpl.getString(MR.strings.error)}: ${e.message ?: ""}")
+            )
+        }
     }
 
     fun onContactError(error: String) {
@@ -141,16 +152,25 @@ class ClazzInviteViaContactViewModel(
         }.chips.last()
     }
 
-    fun onChipRemoved(
-        text: String,
+    /**
+     * @param removedChipTexts list of the text of chips removed. In reality it is very likely a list of one,
+     *        it is a list because in the unlikely event this is more than one, we do not want to
+     *        trigger more than one state update.
+     */
+    fun onChipsRemoved(
+        removedChipTexts: List<String>,
     ) {
-        val newChips = _uiState.value.chips.filter { it.text != text }
+        val newChips = _uiState.value.chips.filter {
+            it.text !in removedChipTexts
+        }
+
         _uiState.update { prev ->
             prev.copy(
                 chips = newChips
             )
         }
     }
+
     fun onTextFieldValueChanged(newValue:String) {
         _uiState.update { prev ->
             prev.copy(
