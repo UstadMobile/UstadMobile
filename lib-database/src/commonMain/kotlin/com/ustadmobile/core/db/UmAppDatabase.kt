@@ -98,8 +98,8 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     ReplicationOperation::class,
     PendingRepositorySession::class,
     DoorNode::class,
-
-], version = 204)
+    ReportQueryResult::class,
+], version = 207)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract fun personDao(): PersonDao
@@ -247,5 +247,7 @@ expect abstract class UmAppDatabase : RoomDatabase {
     abstract fun stateEntityDao(): StateEntityDao
 
     abstract fun stateDeleteCommandDao(): StateDeleteCommandDao
+
+    abstract fun reportRunResultRowDao(): ReportQueryResultDao
 
 }

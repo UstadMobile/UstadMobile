@@ -29,6 +29,9 @@ import kotlinx.serialization.Serializable
         sqlStatements = [TRIGGER_UPSERT],
     )
 ))
+/**
+ * @param spPermissionsFlag Permission Flag as per PermissionFlags
+ */
 @Serializable
 data class SystemPermission(
     @PrimaryKey(autoGenerate = true)

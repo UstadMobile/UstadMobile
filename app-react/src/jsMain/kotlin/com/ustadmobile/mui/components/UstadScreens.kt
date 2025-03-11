@@ -55,7 +55,11 @@ import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
+import com.ustadmobile.core.domain.db.migrate203_204AddStatementEntityContextRegHash
+import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryJs
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.door.DoorDbType
+import com.ustadmobile.door.migration.DoorMigrationAsync
 import com.ustadmobile.util.ext.deleteDatabaseAsync
 import mui.system.useMediaQuery
 import org.kodein.di.direct
@@ -246,6 +250,14 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
         .addMigrations(MIGRATION_161_162_CLIENT)
         .addMigrations(MIGRATION_169_170_CLIENT)
         .addMigrations(MIGRATE_USERNAME_CLIENT)
+        .addMigrations(
+            DoorMigrationAsync(203, 204) { db ->
+                db.connection.migrate203_204AddStatementEntityContextRegHash(
+                    xxHasher64Factory = XXHasher64FactoryJs(),
+                    dbType = DoorDbType.SQLITE,
+                )
+            }
+        )
         .addMigrations()
 
     @OptIn(DelicateCoroutinesApi::class)

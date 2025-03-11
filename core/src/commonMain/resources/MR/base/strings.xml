@@ -2002,4 +2002,6 @@
     <string name="custom_period">Custom period (e.g. last x days/weeks)</string>
     <string name="custom_date_range">Custom date range</string>
 
+    <string name="last_30_days">Last 30 days</string>
+    <string name="last_3_months">Last 3 months</string>
 </resources>
