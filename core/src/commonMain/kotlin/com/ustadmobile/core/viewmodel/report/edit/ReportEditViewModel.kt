@@ -14,9 +14,9 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
+import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel.Companion.ARG_REPORT_SERIES_UID
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Report
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -67,49 +67,47 @@ class ReportEditViewModel(
             setLoadingState = true,
             permissionCheck = { true }
         ) {
-            async {
-                loadEntity(
-                    serializer = ReportOptions2.serializer(),
-                    onLoadFromDb = { db ->
-                        val report = db.reportDao().findByUid(entityUidArg)
-                        report?.let {
-                            it.reportOptions?.takeIf { options -> options.isNotBlank() }
-                                ?.let { options ->
-                                    Json.decodeFromString(ReportOptions2.serializer(), options)
-                                } ?: ReportOptions2(title = it.reportTitle ?: "")
-                        }
-                    },
-                    makeDefault = {
-                        ReportOptions2(
-                            title = "",
-                            series = listOf(
-                                ReportSeries2(
-                                    reportSeriesUid = 1,
-                                    reportSeriesVisualType = null,
-                                    reportSeriesSubGroup = null,
-                                    reportSeriesYAxis = null,
-                                    reportSeriesFilters = emptyList()
-                                )
+            loadEntity(
+                serializer = ReportOptions2.serializer(),
+                onLoadFromDb = { db ->
+                    val report = db.reportDao().findByUid(entityUidArg)
+                    report?.let {
+                        it.reportOptions?.takeIf { options -> options.isNotBlank() }
+                            ?.let { options ->
+                                Json.decodeFromString(ReportOptions2.serializer(), options)
+                            } ?: ReportOptions2(title = it.reportTitle ?: "")
+                    }
+                },
+                makeDefault = {
+                    ReportOptions2(
+                        title = "",
+                        series = listOf(
+                            ReportSeries2(
+                                reportSeriesUid = 1,
+                                reportSeriesVisualType = null,
+                                reportSeriesSubGroup = null,
+                                reportSeriesYAxis = null,
+                                reportSeriesFilters = emptyList()
                             )
                         )
-                    },
-                    uiUpdate = { loadedReport ->
-                        _uiState.update { prev ->
-                            prev.copy(
-                                reportOptions2 = loadedReport ?: ReportOptions2()
-                            )
-                        }
+                    )
+                },
+                uiUpdate = { loadedReport ->
+                    _uiState.update { prev ->
+                        prev.copy(
+                            reportOptions2 = loadedReport ?: ReportOptions2()
+                        )
                     }
-                )
-
-                launch {
-                    navResultReturner.filteredResultFlowForKey(RESULT_KEY_REPORT)
-                        .collect { result ->
-                            val reportFilter = result.result as? ReportFilter3 ?: return@collect
-                            val seriesId = reportFilter.reportFilterSeriesUid
-                            onFilterChanged(reportFilter, seriesId)
-                        }
                 }
+            )
+
+            launch {
+                navResultReturner.filteredResultFlowForKey(RESULT_KEY_REPORT_FILTER)
+                    .collect { result ->
+                        val reportFilter = result.result as? ReportFilter3 ?: return@collect
+                        val seriesId = reportFilter.reportFilterSeriesUid
+                        onFilterChanged(reportFilter, seriesId)
+                    }
             }
         }
 
@@ -147,7 +145,7 @@ class ReportEditViewModel(
                 } else {
                     null
                 },
-                seriesTitleError = if (prev.reportOptions2.series.any { it.reportSeriesTitle.isNullOrEmpty() }) {
+                seriesTitleError = if (prev.reportOptions2.series.any { it.reportSeriesTitle.isEmpty() }) {
                     requiredFieldMessage
                 } else {
                     null
@@ -188,7 +186,7 @@ class ReportEditViewModel(
                 } catch (e: Exception) {
                     println("Error updating report options: ${e.message}")
                 } finally {
-                    finishWithResult(ReportDetailViewModel.DEST_NAME, report.reportUid ?: 0, report)
+                    finishWithResult(ReportDetailViewModel.DEST_NAME, report.reportUid, report)
                 }
             }
         }
@@ -282,10 +280,10 @@ class ReportEditViewModel(
     fun onAddFilter(seriesId: Int) {
         navigateForResult(
             nextViewName = ReportFilterEditViewModel.DEST_NAME,
-            key = RESULT_KEY_REPORT,
+            key = RESULT_KEY_REPORT_FILTER,
             currentValue = null,
             serializer = Report.serializer(),
-            args = mapOf("reportSeriesUid" to seriesId.toString())
+            args = mapOf(ARG_REPORT_SERIES_UID to seriesId.toString())
         )
     }
 
@@ -353,6 +351,6 @@ class ReportEditViewModel(
 
     companion object {
         const val DEST_NAME = "ReportEdit"
-        const val RESULT_KEY_REPORT = "arg"
+        const val RESULT_KEY_REPORT_FILTER = "reportFilter"
     }
 }
