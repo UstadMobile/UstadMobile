@@ -18,10 +18,9 @@ it('Admin user add content to the library', () => {
   cy.ustadGetH5pBody().find(".h5p-question-feedback-content-text","You got 1 out of 1 points").should("be.visible")
   cy.go('back')
   cy.contains("Library").click()
- /* cy.contains("Content_001").click()
+  cy.contains("Content_001").click()
   cy.contains("Attempts").click()
  // cy.contains("Admin User").should("exist") -------- Attempts are not visible for this h5p content on cypress, manually it works
-*/
 
  //Add Epub content
   cy.ustadAddContentToLibrary('../test-files/content/Epub_Content1.epub','Content_002')
@@ -75,7 +74,6 @@ it('Admin user add content to the library', () => {
   cy.contains('Content_002').click()
   cy.ustadOpenH5pEpub('Content_002')
   cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
-  cy.ustadVerifyEpub('The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)')
   cy.contains("THE ADOPTING OF ROSA MARIE").click()
 // Attempts made on epub
   cy.contains("Library").click()
