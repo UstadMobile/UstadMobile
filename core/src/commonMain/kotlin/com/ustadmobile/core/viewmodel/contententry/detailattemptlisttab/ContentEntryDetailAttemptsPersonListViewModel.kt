@@ -29,6 +29,8 @@ data class ContentEntryDetailAttemptsPersonListUiState(
     val attemptsPersonList: () -> PagingSource<Int, PersonAndPictureAndNumAttempts> =
         { EmptyPagingSource() },
     val sortOptions: List<SortOrderOption> = listOf(
+        SortOrderOption(MR.strings.most_recent, SORT_BY_RECENT_ATTEMPT_DESC, null),
+        SortOrderOption(MR.strings.least_recent, SORT_BY_RECENT_ATTEMPT_ASC, null),
         SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_ASC, true),
         SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_DESC, false),
         SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_ASC, true),
@@ -37,8 +39,6 @@ data class ContentEntryDetailAttemptsPersonListUiState(
         SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_DESC, false),
         SortOrderOption(MR.strings.by_completion, SORT_BY_COMPLETION_ASC, true),
         SortOrderOption(MR.strings.by_completion, SORT_BY_COMPLETION_DESC, false),
-        SortOrderOption(MR.strings.by_recent_attempt, SORT_BY_RECENT_ATTEMPT_DESC, true),
-        SortOrderOption(MR.strings.by_recent_attempt, SORT_BY_RECENT_ATTEMPT_ASC, false),
     ),
     val sortOption: SortOrderOption = sortOptions.first(),
     val showSortOptions: Boolean = true,
@@ -77,8 +77,8 @@ class ContentEntryDetailAttemptsPersonListViewModel(
         }
 
         options.addAll(listOf(
-            SortOrderOption(MR.strings.by_recent_attempt, SORT_BY_RECENT_ATTEMPT_DESC, true),
-            SortOrderOption(MR.strings.by_recent_attempt, SORT_BY_RECENT_ATTEMPT_ASC, false)
+            SortOrderOption(MR.strings.most_recent, SORT_BY_RECENT_ATTEMPT_DESC, null),
+            SortOrderOption(MR.strings.least_recent, SORT_BY_RECENT_ATTEMPT_ASC, null),
         ))
 
         return options

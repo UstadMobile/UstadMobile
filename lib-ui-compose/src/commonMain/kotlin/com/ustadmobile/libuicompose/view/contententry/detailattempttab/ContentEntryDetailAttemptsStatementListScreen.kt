@@ -155,7 +155,7 @@ fun ContentEntryDetailAttemptsStatementList(
                     val verbName = attemptsStatementListItems?.verb?.verbUrlId?.substringAfterLast("/")
                         ?.replaceFirstChar { it.uppercaseChar() } ?: ""
 
-                    val activityName = attemptsStatementListItems?.activityLangMapEntry?.almeValue ?: "NULL"
+                    val activityName = attemptsStatementListItems?.activityLangMapEntry?.almeValue ?: ""
 
                     Text(
                         text =  "$verbName $activityName",

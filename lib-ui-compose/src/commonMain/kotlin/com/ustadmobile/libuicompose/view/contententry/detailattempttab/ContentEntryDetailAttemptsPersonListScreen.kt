@@ -109,7 +109,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                 ) {
-                    if (attemptsPersonListItems.maxProgress != 0) {
+                    if (attemptsPersonListItems.maxProgress != null) {
                             Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
