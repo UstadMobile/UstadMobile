@@ -168,7 +168,8 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                                     paddingLeft = theme.spacing(5)
                                                 }
 
-                                                if ((attemptsPersonListItems.maxProgress ?: 0) > 0) {
+                                                if (attemptsPersonListItems.maxProgress!=null)
+                                                {
                                                     Box {
                                                         sx {
                                                             display = Display.flex
@@ -198,7 +199,7 @@ val ContentEntryDetailAttemptsPersonListScreen = FC<Props> {
                                                     }
                                                 }
 
-                                                if ((attemptsPersonListItems.maxScore ?: 0f) > 0f) {
+                                                if (attemptsPersonListItems.maxScore!=null )  {
                                                     Box {
                                                         sx {
                                                             display = Display.flex

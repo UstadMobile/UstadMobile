@@ -206,11 +206,12 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
                                 }
                             }
                             ListItemText {
-                                primary = ReactNode(
-                                    attemptsStatementListItems?.verb?.verbUrlId?.substringAfterLast(
-                                        "/"
-                                    )?.replaceFirstChar { it.uppercase() } ?: ""
-                                )
+                                val verbName = attemptsStatementListItems?.verb?.verbUrlId?.substringAfterLast("/")
+                                    ?.replaceFirstChar { it.uppercase() } ?: ""
+
+                                val activityName = attemptsStatementListItems?.activityLangMapEntry?.almeValue ?: ""
+
+                                primary = ReactNode("$verbName $activityName")
                             }
                         }
 
