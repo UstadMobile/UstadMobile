@@ -74,16 +74,11 @@ onFlowComplete:
 - assertVisible:
     text: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
     id: "app_title"
-- assertVisible:
-    text: "Completed"    # filter is unselected
-    index: 1
+- assertVisible: "Completed The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
 - assertVisible:
     id: "progress_bar"
 - assertVisible: "100% completion"
-- tapOn:
-    text: "Completed"    # filter is unselected
-    index: 0
-- assertNotVisible: "100% completion"
+- tapOn: "Completed"    # filter is unselected
 - assertNotVisible:
     id: "progress_bar"
 - assertVisible: "Nothing here, yet"

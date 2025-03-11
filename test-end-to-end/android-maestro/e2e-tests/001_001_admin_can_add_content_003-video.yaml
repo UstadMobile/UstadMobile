@@ -65,22 +65,16 @@ onFlowComplete:
 - assertVisible:
     text: "Video_Content.mp4"
     id: "app_title"
-- assertVisible:
-    text: "Completed"  #completed selected by default
-    index: 0
-- assertVisible:
-    text: "Completed"
-    index: 1
+- assertVisible: "Completed"
+- assertVisible: "Progressed"
+- assertVisible: "Completed Video_Content.mp4"
+- assertVisible: "Progressed Video_Content.mp4"
 - assertVisible: "100% completion"
-- tapOn:
-    text: "Completed"
-    index: 0
-- assertVisible:
-    text: "Progressed"
-    index: 1
 - assertVisible:
     id: "progress_bar"
-- tapOn:
-    text: "Progressed"
-    index: 0
+- tapOn: "Completed"  # test filter chip , Completed is unselected
+- assertVisible: "Progressed"
+- assertVisible:
+    id: "progress_bar"
+- tapOn: "Progressed" # test filter chip , Progressed is unselected
 - assertVisible: "Nothing here, yet"

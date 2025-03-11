@@ -63,10 +63,8 @@ it('Admin user add content to the library', () => {
   cy.get('.MuiStack-root').parent()
     .find('span[role="progressbar"]').should('exist')
   cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
-  cy.contains("Completed").should("exist")
-  //cy.contains("Completed - title here").should('exist') // title of the question/page
-  cy.get('.MuiStack-root').parent()
-    .find('span[role="progressbar"]').should('exist')
+  cy.get(".MuiTypography-body1").contains("Completed").should("exist")
+  cy.get(".MuiListItemText-primary").contains("Completed Content_003").should("exist")
   cy.contains("100% completion").should("exist")
   cy.contains("Completed").click() // testing filter chip
   cy.get('.MuiStack-root').parent()
@@ -97,8 +95,9 @@ it('Admin user add content to the library', () => {
   cy.get('.MuiStack-root').parent()
     .find('span[role="progressbar"]').should('exist')
   cy.get("svg[data-testid='CheckIcon']").should('exist')
-  //cy.contains("Progressed - title here").should('exist')  // title of the question/page
-  cy.contains("Progressed").click() // testing filter chip
+  cy.get(".MuiTypography-body1").contains("Progressed").should('exist')
+  cy.get(".MuiListItemText-primary").contains("Progressed The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)").should("exist")
+  cy.get(".MuiTypography-body1").contains("Progressed").click() // testing filter chip
   cy.get('.MuiStack-root').parent()
     .find('span[role="progressbar"]').should('not.exist')
   cy.get("svg[data-testid='CheckIcon']").should('not.exist')

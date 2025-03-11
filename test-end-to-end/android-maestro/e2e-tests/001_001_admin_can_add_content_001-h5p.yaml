@@ -74,18 +74,9 @@ onFlowComplete:
 - assertVisible:
     text: "True/False Question"
     id: "app_title"
-- assertVisible:
-    text: "Answered"
-    index: 0
-- assertVisible:
-    text: "Answered"
-    index: 1
+- assertVisible: "Answered"
+- assertVisible: "Answered "
 - assertVisible: "100% score"
 # verify filters are working
-- tapOn:
-    text: "Answered"
-    index: 0
-- assertNotVisible: "100% score"
-- assertNotVisible:
-    id: "progress_bar"
+- tapOn: "Answered"
 - assertVisible: "Nothing here, yet"

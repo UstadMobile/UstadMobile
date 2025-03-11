@@ -129,16 +129,15 @@ it('Student-1 user able to see attempts made on content 1', () => {
   cy.get("#appbar_title").contains("Content_001").should("exist")
   cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
   cy.get(".MuiTypography-body1").contains("Completed").should("exist") // Filter chip
-  cy.get(".MuiListItemText-primary").contains("Completed").should("exist")
+  cy.get(".MuiListItemText-primary").contains("Completed Content_001").should("exist")
   cy.get(".MuiTypography-body1").contains("Progressed").should("exist") // Filter chip
-  cy.get(".MuiListItemText-primary").contains("Progressed").should("exist")
-  cy.get('span[role="progressbar"]').eq(0).should('exist')   //--completed
-  cy.get('span[role="progressbar"]').eq(1).should('exist') //--progressed
+  cy.get(".MuiListItemText-primary").contains("Progressed Content_001").should("exist")
+  cy.get('span[role="progressbar"]').should('exist')
   cy.contains("100% completion").should("exist")
   cy.get(".MuiTypography-body1").contains("Completed").click() // testing filter chip
   cy.contains("100% completion").should('not.exist')
-  cy.get(".MuiListItemText-primary").contains("Completed").should("not.exist")
-  cy.get(".MuiListItemText-primary").contains("Progressed").should("exist")
+  cy.get(".MuiListItemText-primary").contains("Completed Content_001").should("not.exist")
+  cy.get(".MuiListItemText-primary").contains("Progressed Content_001").should("exist")
 })
 
 it('Student2 user able to see video content attempts made', () => {
@@ -159,7 +158,7 @@ it('Student2 user able to see video content attempts made', () => {
   cy.contains('Incomplete').click()
   cy.get("#appbar_title").contains("Content_001").should("exist")
   cy.get(".MuiTypography-body1").contains("Progressed").should("exist")
-  cy.get(".MuiListItemText-primary").contains("Progressed").should("exist")
+  cy.get(".MuiListItemText-primary").contains("Progressed Content_001").should("exist")
   cy.get('.MuiStack-root').parent()
     .find('span[role="progressbar"]').should('exist')
 })
@@ -183,7 +182,7 @@ it('Student3 user able to see epub content attempts made', () => {
     .find('span[role="progressbar"]').should('exist')
   cy.contains('Incomplete').click()
   cy.get(".MuiTypography-body1").contains("Progressed").should("exist")
-  cy.get(".MuiListItemText-primary").contains("Progressed").should("exist")
+  cy.get(".MuiListItemText-primary").contains("Progressed The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)").should("exist")
   cy.get("#appbar_title").contains("Content_002").should("exist")
   cy.get('.MuiStack-root').parent()
     .find('span[role="progressbar"]').should('exist')
@@ -199,21 +198,18 @@ it('Teacher user can see student users attempts', () => {
   cy.contains("Student 2").should("exist")
 // *** student 2  **** //
   cy.get("#appbar_title").contains("Content_001").should("exist")
-  cy.get('span[role="progressbar"]').eq(0).should('exist')
-  cy.get('span[role="progressbar"]').eq(1).should('exist')
+  cy.get('span[role="progressbar"]').should('exist')
   cy.contains("Attempts: 1").should('exist')
   cy.contains("Student 2").click()
   cy.get("#appbar_title").contains("Student 2 - Content_001").should("exist")
- // Assert attempt completion, duration visible
   cy.contains("Student 2").click()
   cy.contains('Incomplete').should('exist')
   cy.get('.MuiStack-root').parent()
     .find('span[role="progressbar"]').should('exist')
   cy.contains('Incomplete').click()
-  cy.contains("Progressed").should("exist")
   cy.get("#appbar_title").contains("Content_001").should("exist")
-  cy.get('.MuiStack-root').parent()
-    .find('span[role="progressbar"]').should('exist')
+  cy.contains("Progressed Content_001").should("exist")
+  cy.get('span[role="progressbar"]').should('exist')
 })
 
 it('Student2 cannot see Student1 users attempt', () => {

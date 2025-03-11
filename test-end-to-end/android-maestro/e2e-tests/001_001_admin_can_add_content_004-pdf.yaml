@@ -65,11 +65,8 @@ onFlowComplete:
 - assertVisible:
     text: "Pdf_Content"
     id: "app_title"
-- assertVisible:
-    text: "Completed"    # filter is unselected
-    index: 1
+- assertVisible: "Completed "
+- assertVisible: "Progressed "
 - assertVisible: "100% completion"
-- tapOn:
-    text: "Completed"    # filter is unselected
-    index: 0
+- tapOn: "Completed"    # filter is unselected
 - assertNotVisible: "100% completion"
