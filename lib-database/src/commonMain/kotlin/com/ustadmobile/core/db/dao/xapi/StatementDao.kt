@@ -606,6 +606,7 @@ expect abstract class StatementDao {
     AND StatementEntity.contextRegistrationLo = :registrationLo  
     AND StatementEntity.statementActorPersonUid = :selectedPersonUid
     AND StatementEntity.statementContentEntryUid = :contentEntryUid
+    AND StatementEntity.resultDuration>0
     AND (:searchText = '%' OR VerbEntity.verbUrlId LIKE :searchText)
     AND StatementEntity.statementVerbUid IN (:selectedVerbUids)
     AND (
