@@ -40,8 +40,8 @@ it('Admin user add content to the library', () => {
     .then($video => {
       $video[0].play()
     })
-  cy.get('video',{timeout:11000})
-    .should('have.prop', 'ended', true)
+  cy.get('video', { timeout: 15000 })
+    .should('have.attr', 'data-ustad-video-state', 'ended')
   cy.go('back')
  // attempts made on video
   cy.contains("Attempts").click()

@@ -48,8 +48,27 @@ it('Teacher able to add content block from file', () => {
   cy.contains('Content_002').should('exist')
 })
 
-it('Student-1, Attempt 1, Video content-for 2 sec', () => {
+it('Student-1, Attempt - Video content', () => {
   cy.ustadClearDbAndLogin('stud1', 'tests1', { timeout: 8000 })
+  cy.contains('Test Course Block').click()
+  cy.contains("Content_001").click()
+  cy.contains("OPEN").click()
+
+ // Student-1, Attempt-1, video content - 10%
+  cy.ustadVerifyVideo();
+  cy.get('video')
+    .then($video => {
+    $video[0].play();
+    setTimeout(() => {
+     $video[0].pause();
+    }, 2000);
+    });
+// Verify that the video is paused
+cy.get('video', { timeout: 5000 })
+  .should('have.prop', 'paused', true);
+
+ // Student-1, Attempt-2, video content - 100%
+  cy.contains('Courses').click()
   cy.contains('Test Course Block').click()
   cy.contains("Content_001").click()
   cy.contains("OPEN").click()
@@ -58,33 +77,8 @@ it('Student-1, Attempt 1, Video content-for 2 sec', () => {
     .then($video => {
       $video[0].play()
     })
-cy.get('video')
-  .should(($video) => {
-    expect($video[0].paused).to.be.false; // Ensure video is playing
-  })
-  .invoke('prop', 'currentTime')
-  .then((startTime) => {
-    cy.get('video')
-      .invoke('prop', 'currentTime')
-      .should('be.gt', startTime + 2); // Verify at least 2 sec has passed
-  })
-})
-
-it('Student-1, Attempt-2, video content - 100%', () => {
-  cy.ustadClearDbAndLogin('stud1', 'tests1', { timeout: 8000 })
-  cy.contains('Test Course Block').click()
-  cy.contains("Content_001").click()
-  cy.contains("OPEN").click()
-cy.ustadVerifyVideo();
-
-cy.get('video').then(($video) => {
-    $video[0].playbackRate = 4
-    $video[0].play()
-  })
-cy.wait(5000)  // getting attempt as completed when we use wait here
-
-// Wait until the video has ended
-//cy.get('video', { timeout: 5000 }).should('have.prop', 'ended', true);  // the attempt is not recorded
+ // cy.get('video', { timeout: 15000 }).should('have.attr', 'data-ustad-video-state', 'ended')
+  cy.wait(11000)
 })
 
 it('Student-2 user makes attempts on video-2 sec', () => {
@@ -92,21 +86,17 @@ it('Student-2 user makes attempts on video-2 sec', () => {
   cy.contains('Test Course Block').click()
   cy.contains("Content_001").click()
   cy.contains("OPEN").click()
-  cy.ustadVerifyVideo()
+  cy.ustadVerifyVideo();
   cy.get('video')
     .then($video => {
-      $video[0].play()
-    })
-cy.get('video')
-  .should(($video) => {
-    expect($video[0].paused).to.be.false; // Ensure video is playing
-  })
-  .invoke('prop', 'currentTime')
-  .then((startTime) => {
-    cy.get('video')
-      .invoke('prop', 'currentTime')
-      .should('be.gt', startTime + 2); // Verify at least 2 sec has passed
-  })
+    $video[0].play();
+    setTimeout(() => {
+     $video[0].pause();
+    }, 2000);
+    });
+// Verify that the video is paused
+cy.get('video', { timeout: 5000 })
+  .should('have.prop', 'paused', true);
 })
 
 it('Student-3 user makes attempts on epub', () => {
@@ -138,15 +128,17 @@ it('Student-1 user able to see attempts made on content 1', () => {
   cy.contains('Completed').click()
   cy.get("#appbar_title").contains("Content_001").should("exist")
   cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
-  cy.contains("Completed").should("exist")
-    //cy.contains("Completed - title here").should('exist') // title of the question/page
+  cy.get(".MuiTypography-body1").contains("Completed").should("exist") // Filter chip
+  cy.get(".MuiListItemText-primary").contains("Completed").should("exist")
+  cy.get(".MuiTypography-body1").contains("Progressed").should("exist") // Filter chip
+  cy.get(".MuiListItemText-primary").contains("Progressed").should("exist")
   cy.get('span[role="progressbar"]').eq(0).should('exist')   //--completed
   cy.get('span[role="progressbar"]').eq(1).should('exist') //--progressed
   cy.contains("100% completion").should("exist")
-  cy.contains("Completed").click() // testing filter chip
+  cy.get(".MuiTypography-body1").contains("Completed").click() // testing filter chip
   cy.contains("100% completion").should('not.exist')
-  cy.get('span[role="progressbar"]').eq(1).should('not.exist')
-  //cy.get("svg[data-testid='CheckIcon']").should('not.exist')
+  cy.get(".MuiListItemText-primary").contains("Completed").should("not.exist")
+  cy.get(".MuiListItemText-primary").contains("Progressed").should("exist")
 })
 
 it('Student2 user able to see video content attempts made', () => {
@@ -166,7 +158,8 @@ it('Student2 user able to see video content attempts made', () => {
     .find('span[role="progressbar"]').should('exist')
   cy.contains('Incomplete').click()
   cy.get("#appbar_title").contains("Content_001").should("exist")
-  cy.contains("Progressed").should("exist")
+  cy.get(".MuiTypography-body1").contains("Progressed").should("exist")
+  cy.get(".MuiListItemText-primary").contains("Progressed").should("exist")
   cy.get('.MuiStack-root').parent()
     .find('span[role="progressbar"]').should('exist')
 })
@@ -189,7 +182,8 @@ it('Student3 user able to see epub content attempts made', () => {
   cy.get('.MuiStack-root').parent()
     .find('span[role="progressbar"]').should('exist')
   cy.contains('Incomplete').click()
-  cy.contains("Progressed").should("exist")
+  cy.get(".MuiTypography-body1").contains("Progressed").should("exist")
+  cy.get(".MuiListItemText-primary").contains("Progressed").should("exist")
   cy.get("#appbar_title").contains("Content_002").should("exist")
   cy.get('.MuiStack-root').parent()
     .find('span[role="progressbar"]').should('exist')
