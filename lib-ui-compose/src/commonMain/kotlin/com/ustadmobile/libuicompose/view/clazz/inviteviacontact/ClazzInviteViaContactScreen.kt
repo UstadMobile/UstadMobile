@@ -24,8 +24,8 @@ import com.dokar.chiptextfield.Chip
 import com.dokar.chiptextfield.m3.OutlinedChipTextField
 import com.dokar.chiptextfield.rememberChipTextFieldState
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactUiState
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.ClazzInviteViaContactUiState
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.ClazzInviteViaContactViewModel
 import com.ustadmobile.libuicompose.components.UstadContactPickButton
 import dev.icerock.moko.resources.compose.stringResource
 import androidx.compose.material3.Icon
@@ -34,20 +34,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import com.dokar.chiptextfield.m3.ChipTextFieldDefaults
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactChip
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.InviteViaContactChip
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 
 
 @Composable
-fun InviteViaContactScreen(
-    viewModel: InviteViaContactViewModel
+fun ClazzInviteViaContactScreen(
+    viewModel: ClazzInviteViaContactViewModel
 ) {
 
-    val uiState by viewModel.uiState.collectAsState(InviteViaContactUiState())
-    InviteViaContactScreen(
+    val uiState by viewModel.uiState.collectAsState(ClazzInviteViaContactUiState())
+    ClazzInviteViaContactScreen(
         uiState = uiState,
         onChipSubmitClick = {
             viewModel.onClickChipSubmit(
@@ -55,7 +54,7 @@ fun InviteViaContactScreen(
             )
         },
         onContactError = { viewModel.onContactError(it) },
-        onChipRemoved = { viewModel.onChipRemoved(it) },
+        onChipsRemoved = { viewModel.onChipsRemoved(it) },
         onTextFieldValueChanged = {viewModel.onTextFieldValueChanged(it)},
         onValueChanged = { viewModel.onValueChanged() }
 
@@ -65,27 +64,21 @@ fun InviteViaContactScreen(
 class AvatarChip(text: String, val avatar: ImageVector) : Chip(text)
 
 @Composable
-fun InviteViaContactScreen(
-    uiState: InviteViaContactUiState = InviteViaContactUiState(),
+fun ClazzInviteViaContactScreen(
+    uiState: ClazzInviteViaContactUiState = ClazzInviteViaContactUiState(),
     onChipSubmitClick: (String) -> InviteViaContactChip,
     onContactError: (String) -> Unit,
-    onChipRemoved: (String) -> Unit,
+    onChipsRemoved: (List<String>) -> Unit,
     onTextFieldValueChanged: (String) -> Unit,
     onValueChanged: () -> Unit,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-
     val state = rememberChipTextFieldState<AvatarChip>()
     UstadVerticalScrollColumn(
-        modifier = Modifier
-            .fillMaxSize(),
-
-        ) {
-
-
+        modifier = Modifier.fillMaxSize(),
+    ) {
         OutlinedChipTextField(
             state = state,
-            value = uiState.textFieldValue?:"" ,
+            value = uiState.textFieldValue ?: "" ,
             onValueChange = { newValue ->
                 onTextFieldValueChanged(newValue)
             },
@@ -94,7 +87,7 @@ fun InviteViaContactScreen(
                 .padding(10.dp).fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             onSubmit = {
-               val inviteViaContactChip= onChipSubmitClick(it)
+                val inviteViaContactChip= onChipSubmitClick(it)
                 onValueChanged()
                 // need to return avatarChip but we are handling add and removing
                 //chips from uistate , so returning the last chip from uistate if its not
@@ -137,15 +130,11 @@ fun InviteViaContactScreen(
         )
     }
 
-    LaunchedEffect(uiState.onSendClick) {
-        uiState.onSendClick?.let {
-            if (it) keyboardController?.hide()
-        }
-    }
-
+    /**
+     * When a chip is added via the ViewModel uiState, then add it to the ChipTextField state
+     */
     LaunchedEffect(uiState.chips) {
         uiState.chips.let { uiChips ->
-
             val chipsToAdd = uiChips.filterNot { chip ->
                 state.chips.any { it.text == chip.text }
             }
@@ -160,17 +149,16 @@ fun InviteViaContactScreen(
         }
     }
 
+    /**
+     * When a chip is removed by clicking the close icon, then notify the ViewModel that it has
+     * been removed.
+     */
     LaunchedEffect(state.chips) {
-        state.chips.let { stateChips ->
-
-            val removedChips = uiState.chips.filterNot { chip ->
-                stateChips.any { it.text == chip.text }
-            }
-
-            removedChips.forEach {
-                onChipRemoved(it.text)
-            }
+        val removedChips = state.chips.filterNot { chip ->
+            uiState.chips.any { it.text == chip.text }
         }
+
+        onChipsRemoved(removedChips.map { it.text })
     }
 
 }

@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 
-data class InviteViaLinkUiState(
+data class ClazzInviteViaLinkUiState(
 
     val inviteLink: String? = null,
 
@@ -25,14 +25,14 @@ data class InviteViaLinkUiState(
 
 )
 
-class InviteViaLinkViewModel (
+class ClazzInviteViaLinkViewModel (
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
 ): UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
-    private val _uiState = MutableStateFlow(InviteViaLinkUiState())
+    private val _uiState = MutableStateFlow(ClazzInviteViaLinkUiState())
 
-    val uiState: Flow<InviteViaLinkUiState> = _uiState.asStateFlow()
+    val uiState: Flow<ClazzInviteViaLinkUiState> = _uiState.asStateFlow()
 
     private val makeLinkUseCase: MakeLinkUseCase by di.onActiveLearningSpace().instance()
 

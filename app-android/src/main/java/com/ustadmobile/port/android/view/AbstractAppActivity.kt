@@ -42,6 +42,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.di.AndroidDomainDiModule
+import com.ustadmobile.core.impl.di.commonClientDomainDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderAndroid
@@ -92,6 +93,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         extend(appContextDi)
 
         import(commonDomainDiModule(LearningSpaceScope.Default))
+        import(commonClientDomainDiModule(LearningSpaceScope.Default))
         import(AndroidDomainDiModule(applicationContext))
 
 

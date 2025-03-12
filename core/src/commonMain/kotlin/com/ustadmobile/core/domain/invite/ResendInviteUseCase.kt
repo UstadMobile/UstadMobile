@@ -19,13 +19,14 @@ class ResendInviteUseCase(
     private val learningSpace: LearningSpace,
     private val json: Json
 ) {
+
     suspend operator fun invoke(
         contact: String,
         personUid: Long
     ):String {
         try {
 
-          val respose=  httpClient.post("${learningSpace.url}api/resendinvite/sendcontact") {
+          val respose = httpClient.post("${learningSpace.url}api/resendinvite/sendcontact") {
                 contentType(ContentType.Application.Json)
                 setBodyJson(
                     json = json,

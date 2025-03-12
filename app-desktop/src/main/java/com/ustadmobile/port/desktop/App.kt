@@ -46,6 +46,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
+import com.ustadmobile.core.impl.di.commonClientDomainDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
@@ -194,6 +195,7 @@ fun main() {
                 DesktopHttpModule,
                 DesktopDomainDiModule,
                 commonDomainDiModule(LearningSpaceScope.Default),
+                commonClientDomainDiModule(LearningSpaceScope.Default),
             )),
         ) {
             val di = localDI()

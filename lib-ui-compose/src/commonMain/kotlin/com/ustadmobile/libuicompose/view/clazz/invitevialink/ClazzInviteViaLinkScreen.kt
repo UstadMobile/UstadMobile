@@ -15,19 +15,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkUiState
-import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.ClazzInviteViaLinkUiState
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.ClazzInviteViaLinkViewModel
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
 
 
 @Composable
-fun InviteViaLinkScreen(
-    viewModel: InviteViaLinkViewModel
+fun ClazzInviteViaLinkScreen(
+    viewModel: ClazzInviteViaLinkViewModel
 ) {
-    val uiState by viewModel.uiState.collectAsState(InviteViaLinkUiState())
+    val uiState by viewModel.uiState.collectAsState(ClazzInviteViaLinkUiState())
 
-    InviteViaLinkScreen(
+    ClazzInviteViaLinkScreen(
         uiState = uiState,
         onClickCopyLink = viewModel::onClickCopy,
         onClickShareLink = viewModel::onClickShare,
@@ -35,8 +35,8 @@ fun InviteViaLinkScreen(
 }
 
 @Composable
-fun InviteViaLinkScreen(
-    uiState: InviteViaLinkUiState = InviteViaLinkUiState(),
+fun ClazzInviteViaLinkScreen(
+    uiState: ClazzInviteViaLinkUiState = ClazzInviteViaLinkUiState(),
     onClickCopyLink: () -> Unit = {},
     onClickShareLink: () -> Unit = {},
 ) {

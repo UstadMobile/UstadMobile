@@ -43,7 +43,6 @@ import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUs
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
-import com.ustadmobile.core.domain.invite.CheckContactTypeUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -136,8 +135,8 @@ import com.ustadmobile.lib.rest.domain.learningspace.SystemConfigScriptRoute
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
-import com.ustadmobile.lib.rest.domain.invite.ProcessInviteRoute
-import com.ustadmobile.lib.rest.domain.invite.ProcessInviteUseCase
+import com.ustadmobile.lib.rest.domain.invite.SendClazzInvitesRoute
+import com.ustadmobile.lib.rest.domain.invite.SendClazzInvitesUseCaseServerImpl
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
 import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
@@ -154,6 +153,8 @@ import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.centralappconfigdb.datasource.LearningSpaceDataSource
 import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.core.domain.invite.ParseInviteUseCase
+import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
 import com.ustadmobile.lib.rest.domain.invite.ResendInviteRoute
 import com.ustadmobile.lib.rest.domain.invite.ResendInviteUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockSendEmailUseCase
@@ -289,6 +290,8 @@ fun Application.umRestApplication(
     val serverProperties = Properties().apply {
         setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
     }
+
+    environment.config.absoluteDataDir().takeIf { !it.exists() }?.mkdirs()
 
     ktorServerPropertiesFile(
         dataDir = environment.config.absoluteDataDir()
@@ -636,11 +639,11 @@ fun Application.umRestApplication(
 
 
         bind<SendMessageUseCase>() with provider {
-            SendMessageUseCase(activeDb = instance(tag = DoorTag.TAG_DB),)
+            SendMessageUseCase(activeDb = instance(tag = DoorTag.TAG_DB))
         }
 
-        bind<CheckContactTypeUseCase>() with provider {
-            CheckContactTypeUseCase(
+        bind<ParseInviteUseCase>() with provider {
+            ParseInviteUseCase(
                 validateEmailUseCase = instance(),
                 phoneNumValidatorUseCase = instance()
             )
@@ -922,16 +925,15 @@ fun Application.umRestApplication(
         bind<SendSmsUseCase>() with singleton {
             SendSmsUseCase(di)
         }
-        bind<ProcessInviteUseCase>() with scoped(LearningSpaceScope.Default).provider {
-            ProcessInviteUseCase(
+        bind<SendClazzInvitesUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            SendClazzInvitesUseCaseServerImpl(
                 sendEmailUseCase = instance(),
                 sendSmsUseCase = instance(),
                 sendMessageUseCase = instance(),
-                checkContactTypeUseCase = instance(),
+                parseInviteUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 learningSpace = context,
-                repo = null
-                )
+            )
         }
         bind<ResendInviteUseCase>() with scoped(LearningSpaceScope.Default).provider {
             ResendInviteUseCase(
@@ -1082,13 +1084,15 @@ fun Application.umRestApplication(
                         }
                     )
                 }
-                route("inviteuser") {
-                    ProcessInviteRoute(
+
+                route("invite") {
+                    SendClazzInvitesRoute(
                         useCase = { call ->
                             di.on(call).direct.instance()
                         }
                     )
                 }
+
                 route("resendinvite") {
                     ResendInviteRoute(
                         useCase = { call ->

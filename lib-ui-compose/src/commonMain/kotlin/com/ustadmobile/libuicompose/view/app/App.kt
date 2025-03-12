@@ -101,8 +101,7 @@ fun App(
 ) {
     val di = localDI()
     val accountManager: UstadAccountManager = di.direct.instance()
-    val currentSession by accountManager.currentUserSessionFlow
-        .collectAsState(null)
+    val currentSession by accountManager.currentUserSessionFlow.collectAsState(null)
 
     val appUiState = remember {
         mutableStateOf(
