@@ -352,10 +352,11 @@ class EpubContentViewModel(
         if(spineSize <= 0)
             return //avoid any chance of div by zero
 
-        if(index == spineSize -1)
-            onComplete()
-        else
+        if(index == spineSize -1) {
+            onComplete(oneCompletionStatementOnly = true)
+        } else {
             onProgressed((index * 100) / spineSize)
+        }
     }
 
 
