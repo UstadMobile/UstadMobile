@@ -135,7 +135,7 @@ val VideoContentScreen = FC<Props> {
     VideoContentComponent {
         uiState = uiStateVal
         onPlayStateChanged = viewModel::onPlayStateChanged
-        onComplete = viewModel::onComplete
+        onComplete = { viewModel.onComplete() }
         onUnload = viewModel::onUnload
     }
 

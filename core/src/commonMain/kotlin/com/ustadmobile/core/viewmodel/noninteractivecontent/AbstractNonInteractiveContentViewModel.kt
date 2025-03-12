@@ -65,9 +65,13 @@ abstract class AbstractNonInteractiveContentViewModel(
     /**
      * To be invoked by the ViewModel when the content being displayed is complete e.g. reached
      * last page of book, video finished, etc.
+     * @param oneCompletionStatementOnly as per
+     *        NonInteractiveContentXapiStatementRecorderFactory.onCompleted
      */
-    fun onComplete() {
-        statementRecorder.onComplete()
+    fun onComplete(
+        oneCompletionStatementOnly: Boolean = false,
+    ) {
+        statementRecorder.onComplete(oneCompletionStatementOnly)
     }
 
 
