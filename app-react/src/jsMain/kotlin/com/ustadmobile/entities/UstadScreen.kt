@@ -185,9 +185,11 @@ import com.ustadmobile.view.signup.SignUpEnterUsernamePasswordScreen
 import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
 import com.ustadmobile.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
+import com.ustadmobile.core.viewmodel.person.manageaccount.ManageAccountViewModel
 import com.ustadmobile.view.contententry.subtitleedit.SubtitleEditScreen
 
 import com.ustadmobile.view.clazz.inviteredeem.ClazzInviteRedeemScreen
+import com.ustadmobile.view.person.manageaccount.ManageAccountScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -342,6 +344,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ContentEntryListViewModel.DEST_NAME_PICKER, "ContentEntryListPicker",
         ContentEntryListScreen),
     UstadScreen(AccountListViewModel.DEST_NAME, "AccountList", AccountListScreen),
+    UstadScreen(ManageAccountViewModel.DEST_NAME, "AccountList", ManageAccountScreen),
     UstadScreen(
         ClazzMemberListViewModel.DEST_NAME, "ClazzMemberList Preview", ClazzMemberListScreen
     ),

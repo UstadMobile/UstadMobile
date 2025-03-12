@@ -351,13 +351,14 @@ class UstadAccountManager(
    }
     suspend fun registerWithPasskey(
         learningSpaceUrl: String,
+        systemBaseUrl: String,
         passkeyResult: CreatePasskeyResult,
         person: Person,
         personPicture: PersonPicture?,
     ) = withContext(Dispatchers.Default) {
         val learningSpace = LearningSpace(learningSpaceUrl)
 
-        val savePassKeyUseCase: SavePersonPasskeyUseCase = di.on(learningSpace).direct.instance()
+        val savePassKeyUseCase: SavePersonPasskeyUseCase = di.on(LearningSpace(systemBaseUrl)).direct.instance()
         savePassKeyUseCase.invoke(passkeyResult)
 
         val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
