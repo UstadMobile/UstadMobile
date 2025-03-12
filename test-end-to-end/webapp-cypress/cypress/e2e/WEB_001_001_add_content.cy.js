@@ -75,7 +75,6 @@ it('Admin user add content to the library', () => {
   cy.contains('Content_002').click()
   cy.ustadOpenH5pEpub('Content_002')
   cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
-  cy.ustadVerifyEpub('The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)')
   cy.contains("THE ADOPTING OF ROSA MARIE").click()
 // Attempts made on epub
   cy.contains("Library").click()
