@@ -37,11 +37,11 @@ enum class ReportPeriodOption(
     override val label: StringResource
 ): OptionWithLabelStringResource {
 
-    LAST_WEEK(RelativeRangeReportPeriod(ReportTimeRangeUnit.WEEK, 0), MR.strings.last_week),
+    LAST_WEEK(RelativeRangeReportPeriod(ReportTimeRangeUnit.WEEK, 1), MR.strings.last_week),
 
-    LAST_30_DAYS(RelativeRangeReportPeriod(ReportTimeRangeUnit.DAY, 0), MR.strings.last_30_days),
+    LAST_30_DAYS(RelativeRangeReportPeriod(ReportTimeRangeUnit.DAY, 30), MR.strings.last_30_days),
 
-    LAST_3_MONTHS(RelativeRangeReportPeriod(ReportTimeRangeUnit.MONTH, 0), MR.strings.last_3_months),
+    LAST_3_MONTHS(RelativeRangeReportPeriod(ReportTimeRangeUnit.MONTH, 3), MR.strings.last_3_months),
 
     CUSTOM_PERIOD(RelativeRangeReportPeriod(ReportTimeRangeUnit.DAY, 1), MR.strings.custom_period),
 

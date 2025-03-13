@@ -36,7 +36,7 @@ data class ReportEditUiState(
     val chartTypeError: String? = null,
     val timeRangeError: String? = null,
     val quantityError: String? = null,
-    )
+)
 
 class ReportEditViewModel(
     di: DI,
@@ -155,6 +155,7 @@ class ReportEditViewModel(
                     reportUid = entityUidArg,
                     reportTitle = currentReports.title,
                     reportOptions = json.encodeToString(currentReports),
+                    reportOwnerPersonUid = activeUserPersonUid,
                 )
                 try {
                     if (entityUidArg == 0L) {
