@@ -2,12 +2,12 @@ package com.ustadmobile.view.report.edit
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.FixedReportTimeRange
-import com.ustadmobile.core.domain.report.model.RelativeReportTimeRange
+import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
 import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportPeriodOption
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
-import com.ustadmobile.core.domain.report.model.ReportTimeRangeOption
 import com.ustadmobile.core.domain.report.model.ReportTimeRangeUnit
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.YAxisTypes
@@ -23,7 +23,6 @@ import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.util.ext.onTextChange
 import kotlinx.coroutines.Dispatchers
 import mui.icons.material.Close
-import mui.material.Box
 import mui.material.Button
 import mui.material.ButtonVariant
 import mui.material.Divider
@@ -91,12 +90,12 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
 
             // Time Range Dropdown
             val selected =
-                ReportTimeRangeOption.entries.find {
-                    it.timeRange == props.uiState.reportOptions2.timeRange
+                ReportPeriodOption.entries.find {
+                    it.period == props.uiState.reportOptions2.period
                 } ?: run {
-                    when (props.uiState.reportOptions2.timeRange) {
-                        is RelativeReportTimeRange -> ReportTimeRangeOption.CUSTOM_PERIOD
-                        is FixedReportTimeRange -> ReportTimeRangeOption.CUSTOM_DATE_RANGE
+                    when (props.uiState.reportOptions2.period) {
+                        is RelativeRangeReportPeriod -> ReportPeriodOption.CUSTOM_PERIOD
+                        is FixedReportTimeRange -> ReportPeriodOption.CUSTOM_DATE_RANGE
                         else -> null
                     }
                 }
@@ -117,13 +116,13 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     labelId = "time_range_label"
                     fullWidth = true
                     onChange = { event, _ ->
-                        val selectedOption = ReportTimeRangeOption.entries.find { it.name == event.target.value }
+                        val selectedOption = ReportPeriodOption.entries.find { it.name == event.target.value }
                         if (selectedOption != null) {
-                            props.onEntityChanged(props.uiState.reportOptions2.copy(timeRange = selectedOption.timeRange))
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(period = selectedOption.period))
                         }
                     }
 
-                    ReportTimeRangeOption.entries.forEach { option ->
+                    ReportPeriodOption.entries.forEach { option ->
                         MenuItem {
                             value = option.name
                             +ReactNode(strings[option.label])
@@ -133,7 +132,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
             }
 
             // Show CustomPeriodInputs only if CUSTOM_PERIOD is selected
-            if (selected == ReportTimeRangeOption.CUSTOM_PERIOD) {
+            if (selected == ReportPeriodOption.CUSTOM_PERIOD) {
                 Stack {
                     direction = responsive(StackDirection.row)
                     spacing = responsive(8.px)
@@ -144,26 +143,26 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     TextField {
                         label = ReactNode(strings[MR.strings.quantity])
                         fullWidth = true
-                        value = (props.uiState.reportOptions2.timeRange as RelativeReportTimeRange).reportUnitQuantity.toString()
+                        value = (props.uiState.reportOptions2.period as RelativeRangeReportPeriod).rangeQuantity.toString()
                         onChange = { event ->
                             val target = event.target as? HTMLInputElement
                             val quantity = target?.value?.toIntOrNull() ?: 0
-                            val newRange = RelativeReportTimeRange(
-                                (props.uiState.reportOptions2.timeRange as RelativeReportTimeRange).reportUnit,
+                            val newRange = RelativeRangeReportPeriod(
+                                (props.uiState.reportOptions2.period as RelativeRangeReportPeriod).rangeUnit,
                                 quantity
                             )
-                            props.onEntityChanged(props.uiState.reportOptions2.copy(timeRange = newRange))
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(period = newRange))
                         }
                         error = props.uiState.quantityError != null
                     }
 
                     Select {
                         fullWidth = true
-                        value = (props.uiState.reportOptions2.timeRange as RelativeReportTimeRange).reportUnit.name
+                        value = (props.uiState.reportOptions2.period as RelativeRangeReportPeriod).rangeUnit.name
                         onChange = { event, _ ->
                             val newUnit = ReportTimeRangeUnit.valueOf(event.target.value)
-                            val newRange = RelativeReportTimeRange(newUnit, (props.uiState.reportOptions2.timeRange as RelativeReportTimeRange).reportUnitQuantity)
-                            props.onEntityChanged(props.uiState.reportOptions2.copy(timeRange = newRange))
+                            val newRange = RelativeRangeReportPeriod(newUnit, (props.uiState.reportOptions2.period as RelativeRangeReportPeriod).rangeQuantity)
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(period = newRange))
                         }
 
                         ReportTimeRangeUnit.entries.forEach { unit ->
@@ -177,7 +176,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
             }
 
             // Show CustomDateRangeInputs only if CUSTOM_DATE_RANGE is selected
-            if (selected == ReportTimeRangeOption.CUSTOM_DATE_RANGE) {
+            if (selected == ReportPeriodOption.CUSTOM_DATE_RANGE) {
                 // Custom Date Range Inputs
                 Stack {
                     direction = responsive(StackDirection.row)
@@ -190,15 +189,15 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         fullWidth = true
                         id = "from_date"
                         timeInMillis =
-                            (props.uiState.reportOptions2.timeRange as FixedReportTimeRange).from
+                            (props.uiState.reportOptions2.period as FixedReportTimeRange).fromDateMillis
                         label = ReactNode(strings[MR.strings.from])
                         timeZoneId = UstadMobileConstants.UTC
                         onChange = { newDate ->
                             val newRange = FixedReportTimeRange(
                                 newDate,
-                                (props.uiState.reportOptions2.timeRange as FixedReportTimeRange).to
+                                (props.uiState.reportOptions2.period as FixedReportTimeRange).toDateMillis
                             )
-                            props.onEntityChanged(props.uiState.reportOptions2.copy(timeRange = newRange))
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(period = newRange))
                         }
                     }
 
@@ -206,15 +205,15 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         fullWidth = true
                         id = "to_date"
                         timeInMillis =
-                            (props.uiState.reportOptions2.timeRange as FixedReportTimeRange).to
+                            (props.uiState.reportOptions2.period as FixedReportTimeRange).toDateMillis
                         label = ReactNode(strings[MR.strings.to_])
                         timeZoneId = UstadMobileConstants.UTC
                         onChange = { newDate ->
                             val newRange = FixedReportTimeRange(
-                                (props.uiState.reportOptions2.timeRange as FixedReportTimeRange).from,
+                                (props.uiState.reportOptions2.period as FixedReportTimeRange).fromDateMillis,
                                 newDate
                             )
-                            props.onEntityChanged(props.uiState.reportOptions2.copy(timeRange = newRange))
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(period = newRange))
                         }
                     }
                 }
