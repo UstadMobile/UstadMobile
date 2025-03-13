@@ -37,15 +37,16 @@ class ResendInviteUseCase(
 
 
             val clazzInvite = effectiveDb.clazzInviteDao().findClazzInviteFromContact(contact)
-            val clazzName = effectiveDb.clazzDao().findByUidAsync(clazzInvite.ciClazzUid)?.clazzName ?: ""
+            val clazzName = clazzInvite?.ciClazzUid?.let { effectiveDb.clazzDao().findByUidAsync(it)?.clazzName }
+                ?: ""
 
             val inviteLink =
                 UstadUrlComponents(
                     learningSpace.url, ClazzInviteRedeemViewModel.DEST_NAME,
-                    "inviteCode=${clazzInvite.inviteToken}"
+                    "inviteCode=${clazzInvite?.inviteToken}"
                 ).fullUrl()
 
-            when (clazzInvite.inviteType) {
+            when (clazzInvite?.inviteType) {
                 1 -> {
                     clazzInvite.inviteContact?.let { sendEmailUseCase.invoke(clazzName, it, inviteLink) }
                 }

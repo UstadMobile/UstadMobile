@@ -23,13 +23,12 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.db.PermissionFlags
-import com.ustadmobile.core.domain.invite.ResendInviteUseCase
+import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.ext.onActiveLearningSpace
-import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.ClazzInviteViaContactViewModel.InviteResult
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonDetails
@@ -45,7 +44,6 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -104,7 +102,9 @@ class ClazzMemberListViewModel(
 ): UstadListViewModel<ClazzMemberListUiState>(
     di, savedStateHandle, ClazzMemberListUiState(), ClazzDetailViewModel.DEST_NAME,
 ) {
-    private val resendInviteUseCase: ResendInviteUseCase by di.onActiveLearningSpace().instance()
+
+    private val sendClazzInvitesUseCase: SendClazzInvitesUseCase by
+    di.onActiveLearningSpace().instance()
 
     private val approveOrDeclinePendingEnrolmentUseCase: IApproveOrDeclinePendingEnrolmentRequestUseCase by
         on(accountManager.activeLearningSpace).instance()
@@ -329,16 +329,18 @@ class ClazzMemberListViewModel(
         }
     }
 
-    fun onClickResendInvite(contact: String) {
+    fun onClickResendInvite(clazzInvite: ClazzInvite) {
         viewModelScope.launch {
-            val result = resendInviteUseCase.invoke(
-                contact,
-                accountManager.currentUserSession.person.personUid
+            sendClazzInvitesUseCase.invoke(
+                SendClazzInvitesUseCase.SendClazzInvitesRequest(
+                    listOf(clazzInvite.inviteContact),
+                    clazzInvite.ciClazzUid,
+                    clazzInvite.ciRoleId,
+                    accountManager.currentUserSession.person.personUid
+                )
             )
+            snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.invitation_sent)))
 
-            val invitation = Json.decodeFromString<InviteResult>(result)
-
-            snackDispatcher.showSnackBar(Snack(invitation.inviteSent))
         }
     }
     companion object {
