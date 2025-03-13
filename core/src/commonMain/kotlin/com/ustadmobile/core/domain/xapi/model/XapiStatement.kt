@@ -10,6 +10,7 @@ import com.ustadmobile.core.domain.xapi.xapiRequireValidIRI
 import com.ustadmobile.core.domain.xapi.xapiRequireValidUuidOrNull
 import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.core.util.ext.toByteArray
 import com.ustadmobile.core.util.ext.toEmptyIfNull
 import com.ustadmobile.door.DoorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -145,6 +146,11 @@ fun XapiStatement.toEntities(
                 stored = systemTimeInMillis(),
                 contextRegistrationHi = contextRegistration?.mostSignificantBits ?: 0,
                 contextRegistrationLo = contextRegistration?.leastSignificantBits ?: 0,
+                contextRegistrationHash = hasherFactory.newHasher(0).run {
+                    update((contextRegistration?.mostSignificantBits ?: 0).toByteArray())
+                    update((contextRegistration?.leastSignificantBits ?: 0).toByteArray())
+                    digest()
+                },
                 contextPlatform = context?.platform,
                 contextInstructorActorUid = contextInstructorActorEntities?.actor?.actorUid ?: 0,
                 statementContentEntryUid = xapiSession.xseContentEntryUid,

@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.report.model
 
 import com.ustadmobile.core.MR
 import dev.icerock.moko.resources.StringResource
+import kotlinx.datetime.DatePeriod
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -49,10 +50,31 @@ enum class ReportSeriesVisualType(override val label: StringResource) :
 enum class ReportXAxis(
     override val label: StringResource,
     val personJoinRequired: Boolean = false,
+    val datePeriod: DatePeriod? = null,
 ) : OptionWithLabelStringResource {
-    DAY(MR.strings.day),
-    WEEK(MR.strings.weekly),
-    MONTH(MR.strings.monthly),
+    DAY(MR.strings.day, datePeriod = DatePeriod(days = 1)),
+
+    /**
+     * When report data xAxis is by week, or data is subgrouped by week, this is based on the day of
+     * the week of the first day of the reporting period. E.g. if the report period is Tuesday
+     * 4/Feb/25 to Monday 17/Feb/25, then there will be two entries on the xAxis: 2025-02-04, and
+     * 2025-02-11.
+     */
+    WEEK(MR.strings.weekly, datePeriod = DatePeriod(days = 7)),
+
+    /**
+     * When report data xAxis is by month, or data is subgrouped by month, this will be done by
+     * calendar month. Queries will group data using YYYY-MM-01 e.g. using DATE_TRUNC('month'..)
+     * on PostgreSQL and the strftime 'start of month' modifier on SQLite.
+     */
+    MONTH(MR.strings.monthly, datePeriod = DatePeriod(months = 1)),
+
+    /**
+     * When report data xAxis is by month, or data is subgrouped by month, this will be done by
+     * calendar year. Queries will group data using YYYY-01-01 e.g. using DATE_TRUNC('year'..)
+     * on PostgreSQL and the strftime 'start of year' modifier on SQLite.
+     */
+    YEAR(MR.strings.year, datePeriod = DatePeriod(years = 1)),
     CLASS(MR.strings.class_name),
     GENDER(MR.strings.gender_literal, personJoinRequired = true),
     NONE(MR.strings.none);

@@ -24,10 +24,6 @@ compileKotlin{
 
 compileTestKotlin {
     kotlinOptions.jvmTarget = "17"
-    kotlinOptions {
-        freeCompilerArgs += "-Xopt-in=com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview"
-        freeCompilerArgs += "-Xexpect-actual-classes"
-    }
 }
 
 application {
@@ -159,6 +155,7 @@ dependencies {
     testImplementation libs.sqlite.jdbc
     testImplementation libs.commons.dbcp2
     testImplementation libs.postgresql
+    testImplementation libs.turbine
 
 }
 

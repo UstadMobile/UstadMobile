@@ -33,12 +33,12 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.FixedReportTimeRange
 import com.ustadmobile.core.domain.report.model.OptionWithLabelStringResource
-import com.ustadmobile.core.domain.report.model.RelativeReportTimeRange
+import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
 import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportPeriodOption
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
-import com.ustadmobile.core.domain.report.model.ReportTimeRangeOption
 import com.ustadmobile.core.domain.report.model.ReportTimeRangeUnit
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.YAxisTypes
@@ -112,13 +112,23 @@ private fun ReportEditScreen(
         }
         item {
             // Determine selected option based on TIME RANGE TYPE
-            val selected = remember(uiState.reportOptions2.timeRange) {
-                ReportTimeRangeOption.entries.find {
-                    it.timeRange == uiState.reportOptions2.timeRange
+            val selected = remember(uiState.reportOptions2.period) {
+                ReportPeriodOption.entries.find { option ->
+                    when (val currentPeriod = uiState.reportOptions2.period) {
+                        is RelativeRangeReportPeriod -> {
+                            val optionPeriod = option.period as? RelativeRangeReportPeriod
+                            optionPeriod?.rangeUnit == currentPeriod.rangeUnit &&
+                                    optionPeriod?.rangeQuantity == currentPeriod.rangeQuantity
+                        }
+                        is FixedReportTimeRange -> {
+                            option == ReportPeriodOption.CUSTOM_DATE_RANGE
+                        }
+                        else -> false
+                    }
                 } ?: run {
-                    when (uiState.reportOptions2.timeRange) {
-                        is RelativeReportTimeRange -> ReportTimeRangeOption.CUSTOM_PERIOD
-                        is FixedReportTimeRange -> ReportTimeRangeOption.CUSTOM_DATE_RANGE
+                    when (uiState.reportOptions2.period) {
+                        is RelativeRangeReportPeriod -> ReportPeriodOption.CUSTOM_PERIOD
+                        is FixedReportTimeRange -> ReportPeriodOption.CUSTOM_DATE_RANGE
                         else -> null
                     }
                 }
@@ -127,7 +137,7 @@ private fun ReportEditScreen(
             // In ReportEditScreen's time range dropdown item
             ExposedDropdownMenu(
                 label = { Text(stringResource(MR.strings.time_range) + "*") },
-                options = ReportTimeRangeOption.entries,
+                options = ReportPeriodOption.entries,
                 selectedValue = selected,
                 onOptionSelected = { selectedOption ->
                     handleTimeRangeSelection(selectedOption, uiState.reportOptions2, onReportChanged)
@@ -143,13 +153,13 @@ private fun ReportEditScreen(
             )
 
             // Show CustomPeriodInputs only if selected is CUSTOM_PERIOD
-            if (selected == ReportTimeRangeOption.CUSTOM_PERIOD) {
+            if (selected == ReportPeriodOption.CUSTOM_PERIOD) {
                 // When selected is CUSTOM_PERIOD
                 CustomPeriodInputs(
-                    currentRange = uiState.reportOptions2.timeRange as RelativeReportTimeRange,
+                    currentRange = uiState.reportOptions2.period as RelativeRangeReportPeriod,
                     onCustomPeriodChanged = { qty, unit ->
-                        val newRange = RelativeReportTimeRange(unit, qty)
-                        val updatedOptions = uiState.reportOptions2.copy(timeRange = newRange)
+                        val newRange = RelativeRangeReportPeriod(unit, qty)
+                        val updatedOptions = uiState.reportOptions2.copy(period = newRange)
                         onReportChanged(updatedOptions)
                     },
                     quantityError = uiState.quantityError
@@ -157,12 +167,12 @@ private fun ReportEditScreen(
             }
 
             // Show CustomDateRangeInputs only if selected is CUSTOM_DATE_RANGE
-            if (selected == ReportTimeRangeOption.CUSTOM_DATE_RANGE) {
+            if (selected == ReportPeriodOption.CUSTOM_DATE_RANGE) {
                 CustomDateRangeInputs(
-                    currentRange = uiState.reportOptions2.timeRange as FixedReportTimeRange,
+                    currentRange = uiState.reportOptions2.period as FixedReportTimeRange,
                     onDateRangeChanged = { from, to ->
                         val newRange = FixedReportTimeRange(from, to)
-                        val updatedOptions = uiState.reportOptions2.copy(timeRange = newRange)
+                        val updatedOptions = uiState.reportOptions2.copy(period = newRange)
                         onReportChanged(updatedOptions)
                     }
                 )
@@ -400,12 +410,12 @@ fun <T : OptionWithLabelStringResource> ExposedDropdownMenu(
 }
 
 fun handleTimeRangeSelection(
-    selectedOption: ReportTimeRangeOption,
+    selectedOption: ReportPeriodOption,
     currentOptions: ReportOptions2,
     onReportChanged: (ReportOptions2) -> Unit
 ) {
     val newOptions = currentOptions.copy(
-        timeRange = selectedOption.timeRange
+        period = selectedOption.period
     )
 
     onReportChanged(newOptions)
@@ -413,12 +423,12 @@ fun handleTimeRangeSelection(
 
 @Composable
 fun CustomPeriodInputs(
-    currentRange: RelativeReportTimeRange,
+    currentRange: RelativeRangeReportPeriod,
     onCustomPeriodChanged: (Int, ReportTimeRangeUnit) -> Unit,
     quantityError: String?
 ) {
-    var quantity by remember { mutableStateOf(currentRange.reportUnitQuantity.toString()) }
-    var selectedUnit by remember { mutableStateOf(currentRange.reportUnit) }
+    var quantity by remember { mutableStateOf(currentRange.rangeQuantity.toString()) }
+    var selectedUnit by remember { mutableStateOf(currentRange.rangeUnit) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -469,18 +479,18 @@ fun CustomDateRangeInputs(
     ) {
         DatePickerButton(
             label = stringResource(MR.strings.from) ,
-            timestamp = currentRange.from,
+            timestamp = currentRange.fromDateMillis,
             onDateSelected = { newFrom ->
-                onDateRangeChanged(newFrom, currentRange.to)
+                onDateRangeChanged(newFrom, currentRange.toDateMillis)
             },
             modifier = Modifier.weight(1f)
         )
 
         DatePickerButton(
             label = stringResource(MR.strings.to_),
-            timestamp = currentRange.to,
+            timestamp = currentRange.toDateMillis,
             onDateSelected = { newTo ->
-                onDateRangeChanged(currentRange.from, newTo)
+                onDateRangeChanged(currentRange.fromDateMillis, newTo)
             },
             modifier = Modifier.weight(1f)
         )

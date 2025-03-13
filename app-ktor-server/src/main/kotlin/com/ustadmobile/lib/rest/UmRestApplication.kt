@@ -53,6 +53,9 @@ import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorJvm
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumberUtilJvm
+import com.ustadmobile.core.domain.report.query.GenerateReportQueriesUseCase
+import com.ustadmobile.core.domain.report.query.RunReportUseCase
+import com.ustadmobile.core.domain.report.query.RunReportUseCaseDatabaseImpl
 import com.ustadmobile.core.domain.tmpfiles.CreateTempUriUseCase
 import com.ustadmobile.core.domain.tmpfiles.CreateTempUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
@@ -127,6 +130,8 @@ import com.ustadmobile.lib.rest.api.contentupload.GetSubtitleTrackServerRoute
 import com.ustadmobile.lib.rest.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriServerUseCase
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
+import com.ustadmobile.lib.rest.domain.report.query.RunReportRoute
+import com.ustadmobile.lib.rest.domain.report.query.RunReportServerUseCase
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
 import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
 import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
@@ -793,6 +798,32 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<GenerateReportQueriesUseCase>() with singleton {
+            GenerateReportQueriesUseCase()
+        }
+
+        bind<RunReportUseCase>() with singleton {
+            RunReportUseCaseDatabaseImpl(
+                generateReportQueriesUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+            )
+        }
+
+        bind<RunReportServerUseCase>() with scoped(EndpointScope.Default).singleton {
+            RunReportServerUseCase(
+                runReportUseCase = instance(),
+                verifyClientSessionUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+            )
+        }
+
+        bind<RunReportUseCase>() with scoped(EndpointScope.Default).singleton {
+            RunReportUseCaseDatabaseImpl(
+                db = instance(tag = DoorTag.TAG_DB),
+                generateReportQueriesUseCase = instance(),
+            )
+        }
+
         try {
             appConfig.config("mail")
 
@@ -1000,6 +1031,13 @@ fun Application.umRestApplication(
                 route("xapi/{pathSegments...}") {
                     XapiRoute(
                         xapiHttpServerUseCase = { call -> di.on(call).direct.instance() }
+                    )
+                }
+
+                route("report") {
+                    RunReportRoute(
+                        runReportServerUseCase = { call -> di.on(call).direct.instance() },
+                        json = json,
                     )
                 }
 

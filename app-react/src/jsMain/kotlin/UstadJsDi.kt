@@ -9,6 +9,8 @@ import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseJs
+import com.ustadmobile.core.domain.report.query.RunReportUseCase
+import com.ustadmobile.core.domain.report.query.RunReportUseCaseClientImpl
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
@@ -42,6 +44,7 @@ import com.ustadmobile.core.impl.locale.StringProviderJs
 import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
 import nl.adaptivity.xmlutil.ExperimentalXmlUtilApi
@@ -242,6 +245,16 @@ internal fun ustadJsDi(
             endpoint = context,
             json = instance(),
             repo = instance(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<RunReportUseCase>() with scoped(EndpointScope.Default).singleton {
+        RunReportUseCaseClientImpl(
+            db =  instance(tag = DoorTag.TAG_DB),
+            repo = (instance<UmAppDatabase>(tag = DoorTag.TAG_REPO) as DoorDatabaseRepository),
+            learningSpace = context,
+            httpClient = instance(),
+            json = instance()
         )
     }
 

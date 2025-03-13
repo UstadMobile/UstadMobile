@@ -25,6 +25,7 @@ import kotlinx.serialization.Serializable
  *        the specified role.
  * @param cpToPersonUid permissions will be given to a specific personUid
  * @param cpToGroupUid permissions will be given to a specific group (placeholder, reserved for future use)
+ * @param cpPermissionsFlag permissions to be granted as per PermissionFlags constants
  *
  */
 @Entity(

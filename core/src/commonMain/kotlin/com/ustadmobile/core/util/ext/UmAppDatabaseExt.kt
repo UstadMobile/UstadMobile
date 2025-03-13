@@ -1,26 +1,13 @@
 package com.ustadmobile.core.util.ext
 
-import app.cash.paging.PagingSource
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.xapi.getResults
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.graph.LabelValueFormatter
-import com.ustadmobile.core.util.graph.MessageIdFormatter
-import com.ustadmobile.core.util.graph.TimeFormatter
-import com.ustadmobile.core.util.graph.UidAndLabelFormatter
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDbType
-import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonGroup
 import com.ustadmobile.lib.db.entities.PersonGroupMember
-import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ScopedGrant
-import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
-import com.ustadmobile.lib.db.entities.StatementReportData
 
 
 /**
@@ -52,7 +39,6 @@ suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(
 
     return entity
 }
-
 
 /**
  * Gets the maximum number of items that can be in a query parameter of type list. This is 100 on

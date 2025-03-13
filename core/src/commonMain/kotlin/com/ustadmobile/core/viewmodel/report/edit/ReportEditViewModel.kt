@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.report.edit
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.model.RelativeReportTimeRange
+import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
 import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
@@ -126,54 +126,35 @@ class ReportEditViewModel(
         val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
         val currentReport = _uiState.value.reportOptions2
 
-        // Validate quantity if timeRange is RelativeReportTimeRange
-        val quantityError = if (currentReport.timeRange is RelativeReportTimeRange) {
-            val qty = (currentReport.timeRange as RelativeReportTimeRange).reportUnitQuantity
+        // Validate quantity if timeRange is RelativeRangeReportPeriod
+        val quantityError = if (currentReport.period is RelativeRangeReportPeriod) {
+            val qty = (currentReport.period as RelativeRangeReportPeriod).rangeQuantity
             if (qty < 1) systemImpl.getString(MR.strings.quantity_must_be_at_least_1) else null
         } else {
             null
         }
         _uiState.update { prev ->
             prev.copy(
-                reportTitleError = if (prev.reportOptions2.title.isEmpty()) {
-                    requiredFieldMessage
-                } else {
-                    null
-                },
-                xAxisError =  if (prev.reportOptions2.xAxis == null) {
-                    requiredFieldMessage
-                } else {
-                    null
-                },
-                seriesTitleError = if (prev.reportOptions2.series.any { it.reportSeriesTitle.isEmpty() }) {
-                    requiredFieldMessage
-                } else {
-                    null
-                },
-                yAxisError = if (prev.reportOptions2.series.any { it.reportSeriesYAxis == null }) {
-                    requiredFieldMessage
-                } else {
-                    null
-                },
-                timeRangeError = if (prev.reportOptions2.timeRange == null) {
-                    requiredFieldMessage
-                } else {
-                    null
-                },
-                quantityError = quantityError,
-                )
+                reportTitleError = if (prev.reportOptions2.title.isEmpty()) requiredFieldMessage else null,
+                xAxisError = if (prev.reportOptions2.xAxis == null) requiredFieldMessage else null,
+                seriesTitleError = if (prev.reportOptions2.series.any { it.reportSeriesTitle.isEmpty() }) requiredFieldMessage else null,
+                yAxisError = if (prev.reportOptions2.series.any { it.reportSeriesYAxis == null }) requiredFieldMessage else null,
+                timeRangeError = null,
+                quantityError = null
+            )
         }
         if (_uiState.value.hasErrors()) {
             loadingState = LoadingUiState.NOT_LOADING
+            println("Report options error")
             return
         }
         viewModelScope.launch {
             activeRepo.withDoorTransactionAsync {
-                val currentReport = _uiState.value.reportOptions2
+                val currentReports = _uiState.value.reportOptions2
                 val report = Report(
                     reportUid = entityUidArg,
-                    reportTitle = currentReport.title,
-                    reportOptions = json.encodeToString(currentReport),
+                    reportTitle = currentReports.title,
+                    reportOptions = json.encodeToString(currentReports),
                 )
                 try {
                     if (entityUidArg == 0L) {
@@ -193,9 +174,9 @@ class ReportEditViewModel(
     }
 
     fun onEntityChanged(newOptions: ReportOptions2) {
-        val quantityError = when (val timeRange = newOptions.timeRange) {
-            is RelativeReportTimeRange -> {
-                if (timeRange.reportUnitQuantity < 1) systemImpl.getString(MR.strings.quantity_must_be_at_least_1) else null
+        val quantityError = when (val timeRange = newOptions.period) {
+            is RelativeRangeReportPeriod -> {
+                if (timeRange.rangeQuantity < 1) systemImpl.getString(MR.strings.quantity_must_be_at_least_1) else null
             }
             else -> null
         }
@@ -223,8 +204,8 @@ class ReportEditViewModel(
                     currentState.yAxisError
                 ),
                 timeRangeError = updateErrorMessageOnChange(
-                    currentState.reportOptions2.timeRange,
-                    newOptions.timeRange,
+                    currentState.reportOptions2.period,
+                    newOptions.period,
                     currentState.timeRangeError
                 ),
                 quantityError = quantityError

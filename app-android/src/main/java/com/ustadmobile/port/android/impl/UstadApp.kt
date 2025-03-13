@@ -112,6 +112,10 @@ import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
+import com.ustadmobile.core.domain.report.query.GenerateReportQueriesUseCase
+import com.ustadmobile.core.domain.report.query.RunReportUseCase
+import com.ustadmobile.core.domain.report.query.RunReportUseCaseClientImpl
+import com.ustadmobile.core.domain.report.query.RunReportUseCaseDatabaseImpl
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -174,7 +178,9 @@ import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperAndroid
 import com.ustadmobile.core.util.ext.appMetaData
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
+import com.ustadmobile.core.util.ext.toByteArray
 import com.ustadmobile.core.util.ext.toNullIfBlank
+import com.ustadmobile.door.migration.DoorMigrationSync
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
@@ -351,6 +357,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
 
             val nodeIdAndAuth: NodeIdAndAuth = instance()
+            val xxHasher64Factory: XXHasher64Factory = instance()
 
             Log.i("MigrateIssue", "Creating database name=$dbName")
             val db = DatabaseBuilder.databaseBuilder(
@@ -367,6 +374,41 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(MIGRATION_161_162_CLIENT)
                 .addMigrations(MIGRATION_169_170_CLIENT)
                 .addMigrations(MIGRATE_USERNAME_CLIENT)
+                .addMigrations(
+                    DoorMigrationSync(203, 204) { db ->
+                        db.beginTransaction()
+                        db.execSQL("ALTER TABLE StatementEntity ADD COLUMN contextRegistrationHash INTEGER NOT NULL DEFAULT 0")
+                        db.query("""
+                             SELECT DISTINCT StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo,
+                               FROM StatementEntity
+                              WHERE StatementEntity.contextRegistrationHash = 0
+                                AND NOT(StatementEntity.statementIdHi = 0 AND StatementEntity.statementIdLo = 0)
+                              LIMIT 1000  
+                        """).use { cursor ->
+                            while(cursor.moveToNext()) {
+                                val regHi = cursor.getLong(cursor.getColumnIndexOrThrow("contextRegistrationHi"))
+                                val regLo = cursor.getLong(cursor.getColumnIndexOrThrow("contextRegistrationLo"))
+                                val hasher = xxHasher64Factory.newHasher(0)
+                                hasher.update(regHi.toByteArray())
+                                hasher.update(regLo.toByteArray())
+                                val hash = hasher.digest()
+
+                                db.execSQL(
+                                    """
+                                        UPDATE StatementEntity
+                                           SET contextRegistrationHash = ?
+                                         WHERE contextRegistrationHi = ?
+                                           AND contextRegistrationLo = ?   
+                                    """,
+                                    arrayOf(hash, regHi, regLo)
+                                )
+                            }
+                        }
+
+                        db.setTransactionSuccessful()
+                        db.endTransaction()
+                    }
+                )
                 .build()
 
             Log.i("MigrateIssue", "Database built: name=$dbName")
@@ -1125,6 +1167,29 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 dispatcher = Dispatchers.IO,
                 supportedLanguagesConfig = instance(),
             )
+        }
+
+        bind<RunReportUseCase>() with scoped(EndpointScope.Default).singleton {
+            val repo : UmAppDatabase? = instanceOrNull(tag = DoorTag.TAG_REPO)
+
+            if(repo != null) {
+                RunReportUseCaseClientImpl(
+                    db =  instance(tag = DoorTag.TAG_DB),
+                    repo = (repo as DoorDatabaseRepository),
+                    learningSpace = context,
+                    httpClient = instance(),
+                    json = instance()
+                )
+            }else {
+                RunReportUseCaseDatabaseImpl(
+                    db = instance(tag = DoorTag.TAG_DB),
+                    generateReportQueriesUseCase = instance(),
+                )
+            }
+        }
+
+        bind<GenerateReportQueriesUseCase>() with scoped(EndpointScope.Default).singleton {
+            GenerateReportQueriesUseCase()
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

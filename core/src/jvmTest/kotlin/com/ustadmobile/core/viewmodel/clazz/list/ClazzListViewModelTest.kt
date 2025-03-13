@@ -3,7 +3,6 @@ package com.ustadmobile.core.viewmodel.clazz.list
 import app.cash.turbine.test
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
-import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
@@ -61,11 +60,6 @@ class ClazzListViewModelTest : AbstractMainDispatcherTest()  {
             val testEntity = Clazz().apply {
                 clazzUid = activeDb.clazzDao().insert(this)
             }
-
-            val activeUser = setActiveUser(activeEndpoint)
-            activeRepo.grantScopedPermission(activeUser, Long.MAX_VALUE,
-                Clazz.TABLE_ID, testEntity.clazzUid)
-
 
             viewModel.uiState.filter { it.clazzList() !is EmptyPagingSource }
                 .test {
