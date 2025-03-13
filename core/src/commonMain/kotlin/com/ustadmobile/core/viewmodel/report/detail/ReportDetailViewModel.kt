@@ -3,7 +3,6 @@ package com.ustadmobile.core.viewmodel.report.detail
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
-import com.ustadmobile.core.domain.sms.OnClickSendSmsUseCase
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.INDETERMINATE
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.NOT_LOADING
@@ -23,7 +22,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
 
 data class ReportDetailUiState(
     val report: Report? = null,
@@ -58,12 +56,12 @@ class ReportDetailViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 fabState =
-                FabUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.edit),
-                    icon = FabUiState.FabIcon.EDIT,
-                    onClick = this@ReportDetailViewModel::onClickEdit
-                ),
+                    FabUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.edit),
+                        icon = FabUiState.FabIcon.EDIT,
+                        onClick = this@ReportDetailViewModel::onClickEdit
+                    ),
                 title = "Graph title",
             )
         }
@@ -73,31 +71,46 @@ class ReportDetailViewModel(
                     setLoadingState = true,
                     permissionCheck = { true }
                 ) {
-                    val siteFlow =activeRepo.reportDao().findByUidLive(reportUid)
+                    val siteFlow = activeRepo.reportDao().findByUidLive(reportUid)
                     launch {
-                        siteFlow.collect{
-                            val reportOptions = it?.let { optn ->
-                                optn.reportOptions?.takeIf { options -> options.isNotBlank() }
-                                    ?.let { options ->
-                                        Json.decodeFromString(
-                                            ReportOptions2.serializer(),
-                                            options
-                                        )
-                                    } ?: ReportOptions2(title = optn.reportTitle ?: "")
-                            }
-                            _uiState.update { prev ->
-                                prev.copy(
-                                    reportOptions2 = reportOptions ?: ReportOptions2()
-                                )
-                            }
-                            if (reportOptions != null) {
+                        siteFlow.collect { report ->
+                            try {
+                                val reportNonNull = report
+                                    ?: throw IllegalStateException("Report not found for uid $reportUid")
+                                val optionsJson = reportNonNull.reportOptions
+                                val reportTitle = reportNonNull.reportTitle
+
+                                val parsedOptions = when {
+                                    !optionsJson.isNullOrBlank() -> {
+                                        try {
+                                            Json.decodeFromString(
+                                                ReportOptions2.serializer(),
+                                                optionsJson
+                                            )
+                                        } catch (e: Exception) {
+                                            throw IllegalArgumentException("Invalid report options format")
+                                        }
+                                    }
+
+                                    !reportTitle.isNullOrBlank() -> {
+                                        ReportOptions2(title = reportTitle)
+                                    }
+
+                                    else -> throw IllegalStateException("Report $reportUid has no options or title")
+                                }
+
+                                _uiState.update { it.copy(reportOptions2 = parsedOptions) }
+
                                 val request = RunReportUseCase.RunReportRequest(
                                     reportUid = reportUid,
-                                    reportOptions = reportOptions,
+                                    reportOptions = parsedOptions,
                                     accountPersonUid = activeUserPersonUid,
-                                    timeZone = TimeZone.UTC
+                                    timeZone = TimeZone.currentSystemDefault()
                                 )
                                 runReport(request)
+
+                            } catch (e: Exception) {
+                                _appUiState.update { it.copy(loadingState = NOT_LOADING) }
                             }
                         }
                     }
@@ -105,6 +118,7 @@ class ReportDetailViewModel(
             }
         }
     }
+
     private fun runReport(request: RunReportUseCase.RunReportRequest) {
         viewModelScope.launch {
             _appUiState.update { it.copy(loadingState = INDETERMINATE) }

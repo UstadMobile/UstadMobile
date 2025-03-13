@@ -140,7 +140,7 @@ class ReportEditViewModel(
                 seriesTitleError = if (prev.reportOptions2.series.any { it.reportSeriesTitle.isEmpty() }) requiredFieldMessage else null,
                 yAxisError = if (prev.reportOptions2.series.any { it.reportSeriesYAxis == null }) requiredFieldMessage else null,
                 timeRangeError = null,
-                quantityError = null
+                quantityError = quantityError
             )
         }
         if (_uiState.value.hasErrors()) {
