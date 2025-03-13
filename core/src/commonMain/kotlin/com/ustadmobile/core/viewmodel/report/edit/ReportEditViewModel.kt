@@ -128,7 +128,7 @@ class ReportEditViewModel(
 
         // Validate quantity if timeRange is RelativeRangeReportPeriod
         val quantityError = if (currentReport.period is RelativeRangeReportPeriod) {
-            val qty = (currentReport.period as RelativeRangeReportPeriod).rangeQuantity
+            val qty = (currentReport.period).rangeQuantity
             if (qty < 1) systemImpl.getString(MR.strings.quantity_must_be_at_least_1) else null
         } else {
             null

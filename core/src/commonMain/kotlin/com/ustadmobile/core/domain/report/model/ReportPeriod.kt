@@ -114,8 +114,8 @@ sealed class ReportPeriod {
  */
 @Serializable
 class RelativeRangeReportPeriod(
-    private val rangeUnit: ReportTimeRangeUnit,
-    private val rangeQuantity: Int,
+    val rangeUnit: ReportTimeRangeUnit,
+    val rangeQuantity: Int,
 ): ReportPeriod() {
 
     override fun periodEnd(timeZone: TimeZone): LocalDate {
