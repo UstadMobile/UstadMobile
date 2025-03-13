@@ -94,7 +94,9 @@ expect abstract class ClazzInviteDao : BaseDao<ClazzInvite> {
         currentTime: Long
     ): PagingSource<Int, ClazzInvite>
 
-
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         UPDATE ClazzInvite 
           SET inviteStatus = 3
