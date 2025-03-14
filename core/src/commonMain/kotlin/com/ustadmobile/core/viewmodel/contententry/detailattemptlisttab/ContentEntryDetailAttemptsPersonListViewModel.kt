@@ -2,10 +2,12 @@ package com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab
 
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.UstadListViewModel
@@ -31,19 +33,10 @@ data class ContentEntryDetailAttemptsPersonListUiState(
     val sortOptions: List<SortOrderOption> = listOf(
         SortOrderOption(MR.strings.most_recent, SORT_BY_RECENT_ATTEMPT_DESC, null),
         SortOrderOption(MR.strings.least_recent, SORT_BY_RECENT_ATTEMPT_ASC, null),
-        SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_ASC, true),
-        SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_DESC, false),
-        SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_ASC, true),
-        SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_DESC, false),
-        SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_ASC, true),
-        SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_DESC, false),
-        SortOrderOption(MR.strings.by_completion, SORT_BY_COMPLETION_ASC, true),
-        SortOrderOption(MR.strings.by_completion, SORT_BY_COMPLETION_DESC, false),
     ),
     val sortOption: SortOrderOption = sortOptions.first(),
     val showSortOptions: Boolean = true,
-
-    )
+)
 
 class ContentEntryDetailAttemptsPersonListViewModel(
     di: DI, savedStateHandle: UstadSavedStateHandle, destinationName: String = DEST_NAME,
@@ -51,82 +44,90 @@ class ContentEntryDetailAttemptsPersonListViewModel(
     di, savedStateHandle, ContentEntryDetailAttemptsPersonListUiState(), destinationName
 ) {
 
-    protected val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
-
-
-    private suspend fun buildSortOptions(): List<SortOrderOption> {
-        val options = mutableListOf(
-            SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_ASC, true),
-            SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_DESC, false),
-            SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_ASC, true),
-            SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_DESC, false)
-        )
-
-        if (activeRepo.statementDao().hasScoreData(entityUidArg)) {
-            options.addAll(listOf(
-                SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_ASC, true),
-                SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_DESC, false)
-            ))
-        }
-
-        if (activeRepo.statementDao().hasCompletionData(entityUidArg)) {
-            options.addAll(listOf(
-                SortOrderOption(MR.strings.by_completion, SORT_BY_COMPLETION_ASC, true),
-                SortOrderOption(MR.strings.by_completion, SORT_BY_COMPLETION_DESC, false)
-            ))
-        }
-
-        options.addAll(listOf(
-            SortOrderOption(MR.strings.most_recent, SORT_BY_RECENT_ATTEMPT_DESC, null),
-            SortOrderOption(MR.strings.least_recent, SORT_BY_RECENT_ATTEMPT_ASC, null),
-        ))
-
-        return options
-    }
-
-    private fun getAttemptsPersonListAsPagingSource(contentEntryUid: Long):
-            PagingSource<Int, PersonAndPictureAndNumAttempts> {
-        val pagingSource =
-            activeRepo.statementDao().findPersonsWithAttempts(
-                contentEntryUid = contentEntryUid,
-                accountPersonUid = activeUserPersonUid,
-                searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
-                sortOrder = _uiState.value.sortOption.flag,
-                )
-        return pagingSource
-    }
+    private val entityUidArg: Long = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
 
     private val attemptsPersonListPagingSource: ListPagingSourceFactory<PersonAndPictureAndNumAttempts> =
         {
-            getAttemptsPersonListAsPagingSource(contentEntryUid = entityUidArg)
-        }
-
-    init {
-        viewModelScope.launch {
-            val availableSortOptions = buildSortOptions()
-            _uiState.update { prev ->
-                prev.copy(
-                    sortOptions = availableSortOptions,
-                    sortOption = availableSortOptions.firstOrNull()!!
-                )
-            }
-        }
-
-        _uiState.update { prev ->
-            prev.copy(
-                attemptsPersonList = attemptsPersonListPagingSource,
+            activeRepo.statementDao().findPersonsWithAttempts(
+                contentEntryUid = entityUidArg,
+                accountPersonUid = activeUserPersonUid,
+                searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
+                sortOrder = _uiState.value.sortOption.flag,
             )
         }
 
+    init {
+        _appUiState.update {
+            it.copy(searchState = createSearchEnabledState())
+        }
+
+        _uiState.update { prev ->
+            prev.copy(attemptsPersonList = attemptsPersonListPagingSource)
+        }
+
         viewModelScope.launch {
-            activeRepo.contentEntryDao().findLiveContentEntry(entityUidArg).collect { contentEntry ->
-                _appUiState.update { prev ->
-                    prev.copy(
-                        title = contentEntry?.title ?: "")
-                }
+            listOf(activeDb, activeRepo).forEach { db ->
+                val sortOptions = buildSortOptions(db)
+                _uiState.update { prev -> prev.copy(sortOptions = sortOptions) }
             }
         }
 
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                activeRepo.contentEntryDao().findLiveContentEntry(entityUidArg).collect { contentEntry ->
+                    _appUiState.update { prev ->
+                        prev.copy(title = contentEntry?.title ?: "")
+                    }
+                }
+            }
+        }
+    }
+
+    /*
+     * Some content has progress data, some doesn't. Some content has score data, some doesn't. When
+     * setting the sort options we need to check what is available for this content. Because the
+     * list of people who completed content is loaded through the paging source, we need to make a
+     * separate query.
+     */
+    private suspend fun buildSortOptions(db: UmAppDatabase): List<SortOrderOption> {
+        val (hasProgressData, hasScoreData) = db.statementDao()
+            .scoreOrProgressDataExistsForContent(
+                contentEntryUid = entityUidArg,
+                accountPersonUid = activeUserPersonUid
+            ).let { list ->
+                Pair(
+                    first = list.any { it.extensionProgress != null },
+                    second = list.any { it.resultScoreScaled != null }
+                )
+            }
+
+        return buildList {
+            addAll(listOf(
+                SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_ASC, true),
+                SortOrderOption(MR.strings.first_name, SORT_FIRST_NAME_DESC, false),
+                SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_ASC, true),
+                SortOrderOption(MR.strings.last_name, SORT_LAST_NAME_DESC, false)
+            ))
+
+            if(hasScoreData) {
+                addAll(listOf(
+                    SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_ASC, true),
+                    SortOrderOption(MR.strings.by_score, SORT_BY_SCORE_DESC, false)
+                ))
+            }
+
+            if(hasProgressData) {
+                addAll(listOf(
+                    SortOrderOption(MR.strings.progress_key, SORT_BY_COMPLETION_ASC, true),
+                    SortOrderOption(MR.strings.progress_key, SORT_BY_COMPLETION_DESC, false)
+                ))
+            }
+
+            addAll(listOf(
+                SortOrderOption(MR.strings.most_recent, SORT_BY_RECENT_ATTEMPT_DESC, null),
+                SortOrderOption(MR.strings.least_recent, SORT_BY_RECENT_ATTEMPT_ASC, null),
+            ))
+        }
     }
 
 
@@ -136,7 +137,7 @@ class ContentEntryDetailAttemptsPersonListViewModel(
         navController.navigate(
             viewName = ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME,
             args = mapOf(
-                UstadView.ARG_PERSON_UID to (entry.person?.personUid ?: 0).toString(),
+                UstadView.ARG_PERSON_UID to entry.person.personUid.toString(),
                 UstadView.ARG_CONTENT_ENTRY_UID to entityUidArg.toString(),
             )
         )
@@ -148,7 +149,7 @@ class ContentEntryDetailAttemptsPersonListViewModel(
     }
 
     override fun onClickAdd() {
-        TODO("Not yet implemented")
+        //Not used
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {

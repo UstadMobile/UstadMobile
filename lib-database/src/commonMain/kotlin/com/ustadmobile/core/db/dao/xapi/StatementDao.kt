@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE
 import com.ustadmobile.core.db.dao.SystemPermissionDaoCommon
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.ACTOR_UIDS_FOR_PERSONUIDS_CTE
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENTS_WHERE_MATCHES_CONTENT_ENTRY_UID_AND_HAS_PERMISSION
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
@@ -380,32 +381,9 @@ expect abstract class StatementDao {
                  ON PersonPicture.personPictureUid = Person.personUid
       WHERE Person.personUid IN
             (SELECT DISTINCT StatementEntity.statementActorPersonUid
-               FROM StatementEntity
-                    LEFT JOIN ClazzEnrolment 
-                         ON ClazzEnrolment.clazzEnrolmentUid =
-                           COALESCE(
-                            (SELECT ClazzEnrolment.clazzEnrolmentUid 
-                               FROM ClazzEnrolment
-                              WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
-                                AND ClazzEnrolment.clazzEnrolmentActive
-                                AND ClazzEnrolment.clazzEnrolmentClazzUid = StatementEntity.statementClazzUid 
-                           ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
-                              LIMIT 1), 0)
-              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
-                /* permission check */
-                AND (    StatementEntity.statementActorPersonUid = :accountPersonUid
-                      OR EXISTS(SELECT CoursePermission.cpUid
-                                  FROM CoursePermission
-                                 WHERE CoursePermission.cpClazzUid = StatementEntity.statementClazzUid
-                                   AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
-                                        OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
-                                   AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
-                                   AND NOT CoursePermission.cpIsDeleted)
-                      OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
-                          ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
-                          ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
-            )      
-            AND (:searchText = '%' OR Person.firstNames LIKE :searchText OR Person.lastName LIKE :searchText OR Person.userName LIKE :searchText)
+                    $FROM_STATEMENTS_WHERE_MATCHES_CONTENT_ENTRY_UID_AND_HAS_PERMISSION)      
+            AND (   :searchText = '%' 
+                 OR Person.firstNames || ' ' || Person.lastName LIKE :searchText)
      ORDER BY 
     CASE 
         WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_SCORE_ASC} THEN (${PERSON_WITH_ATTEMPTS_MAXSCORE})
@@ -688,22 +666,25 @@ expect abstract class StatementDao {
         contentEntryUid: Long
     ): Flow<List<VerbEntity>>
 
+    @HttpAccessible
     @Query("""
-    SELECT EXISTS(
-        SELECT 1 FROM StatementEntity 
-        WHERE statementContentEntryUid = :contentEntryUid 
-        AND resultScoreScaled IS NOT NULL
-    )
-""")
-    abstract suspend fun hasScoreData(contentEntryUid: Long): Boolean
-
-    @Query("""
-    SELECT EXISTS(
-        SELECT 1 FROM StatementEntity 
-        WHERE statementContentEntryUid = :contentEntryUid 
-        AND extensionProgress IS NOT NULL
-    )
-""")
-    abstract suspend fun hasCompletionData(contentEntryUid: Long): Boolean
+        SELECT * 
+          FROM (SELECT StatementEntity.*
+                 $FROM_STATEMENTS_WHERE_MATCHES_CONTENT_ENTRY_UID_AND_HAS_PERMISSION
+                   AND (     StatementEntity.extensionProgress IS NOT NULL
+                         AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1)
+                 LIMIT 1) AS ProgressStatements
+        UNION
+        SELECT * 
+          FROM (SELECT StatementEntity.*
+                 $FROM_STATEMENTS_WHERE_MATCHES_CONTENT_ENTRY_UID_AND_HAS_PERMISSION
+                   AND (     StatementEntity.resultScoreScaled IS NOT NULL
+                         AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1)
+                 LIMIT 1) AS ScoreStatements
+    """)
+    abstract suspend fun scoreOrProgressDataExistsForContent(
+        contentEntryUid: Long,
+        accountPersonUid: Long,
+    ): List<StatementEntity>
 
 }

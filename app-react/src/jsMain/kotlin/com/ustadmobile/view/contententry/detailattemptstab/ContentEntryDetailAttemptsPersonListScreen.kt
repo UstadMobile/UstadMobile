@@ -133,7 +133,7 @@ val ContentEntryDetailAttemptsPersonListComponent = FC<ContentEntryDetailAttempt
                                 attemptsPersonListItem?.maxProgress?.also { maxProgressVal ->
                                     UstadProgressBarWithLabel {
                                         label = ReactNode(
-                                            stringsXml[MR.strings.completion_key].capitalizeFirstLetter()
+                                            stringsXml[MR.strings.progress_key].capitalizeFirstLetter()
                                         )
                                         progressValue = maxProgressVal
                                     }

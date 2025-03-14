@@ -60,7 +60,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
     val attemptsPersonListItems = attemptsPersonListPager.lazyPagingItems
     val attempts = stringResource(MR.strings.attempts)
     val percentageScoreLabel = stringResource(MR.strings.content_score).capitalizeFirstLetter()
-    val completionLabel = stringResource(MR.strings.completion_key).capitalizeFirstLetter()
+    val progressLabel = stringResource(MR.strings.progress_key).capitalizeFirstLetter()
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -103,7 +103,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                         attemptsPersonListItems?.maxProgress?.also { maxProgressVal ->
                             UstadProgressBarWithLabel(
                                 progress = { (maxProgressVal.toFloat()) / 100f },
-                                labelContent = { Text(completionLabel) },
+                                labelContent = { Text(progressLabel) },
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }
