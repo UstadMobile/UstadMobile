@@ -96,7 +96,7 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
 
     val muiAppState = useMuiAppState()
     val score = stringsXml[MR.strings.content_score]
-    val percentageCompletion = stringsXml[MR.strings.content_percentage_completion]
+    val percentageCompletion = stringsXml[MR.strings.completion_key]
     val isSettledEmpty = infiniteQueryResult.isSettledEmpty(remoteMediatorResult)
 
     VirtualList {

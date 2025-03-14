@@ -70,7 +70,7 @@ fun ContentEntryDetailAttemptsSessionListScreen(
 
     val attemptsSessionListItems = attemptsSessionListPager.lazyPagingItems
 
-    val percentageCompletion = stringResource(MR.strings.content_percentage_completion)
+    val percentageCompletion = stringResource(MR.strings.completion_key)
     val percentageScore = stringResource(MR.strings.content_score)
     val passed = stringResource(MR.strings.passed)
     val failed = stringResource(MR.strings.failed)

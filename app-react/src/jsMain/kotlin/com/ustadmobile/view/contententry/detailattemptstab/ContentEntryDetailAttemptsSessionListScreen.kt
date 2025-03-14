@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.datetime.TimeZone
 import mui.icons.material.CalendarToday
 import mui.icons.material.Check
-import mui.icons.material.Close
 import mui.icons.material.HighlightOffOutlined
 import mui.icons.material.Star
 import mui.material.Box
@@ -97,10 +96,11 @@ val ContentEntryDetailAttemptsSessionListScreen = FC<Props> {
                 usePagingSource(
                     remoteMediatorResult.pagingSourceFactory, true, LOAD_SIZE
                 )
+
             val muiAppState = useMuiAppState()
             val stringsXml = useStringProvider()
             val percentageScore=stringsXml[MR.strings.content_score]
-            val percentageCompletion=stringsXml[MR.strings.content_percentage_completion]
+            val percentageCompletion=stringsXml[MR.strings.completion_key]
 
             val passed=stringsXml[MR.strings.passed]
             val failed=stringsXml[MR.strings.failed]

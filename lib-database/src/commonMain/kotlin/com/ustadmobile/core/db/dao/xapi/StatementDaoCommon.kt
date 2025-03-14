@@ -269,7 +269,7 @@ object StatementDaoCommon {
     """
 
     const val PERSON_WITH_ATTEMPTS_MAXSCORE = """
-        SELECT COALESCE(MAX(StatementEntity.resultScoreScaled), 0)
+             SELECT MAX(StatementEntity.resultScoreScaled)
                FROM StatementEntity
               WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
                 AND StatementEntity.statementActorPersonUid = Person.personUid
@@ -277,19 +277,11 @@ object StatementDaoCommon {
     """
 
     const val PERSON_WITH_ATTEMPTS_MAX_PROGRESS = """
-        SELECT COALESCE(MAX(StatementEntity.extensionProgress), 0)
+             SELECT MAX(StatementEntity.extensionProgress)
                FROM StatementEntity
               WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
                 AND StatementEntity.statementActorPersonUid = Person.personUid
                 AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
-                AND (StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo) IN (
-                    SELECT s2.contextRegistrationHi, s2.contextRegistrationLo
-                    FROM StatementEntity s2
-                    WHERE s2.statementContentEntryUid = :contentEntryUid
-                      AND s2.statementActorPersonUid = Person.personUid
-                    ORDER BY s2.timestamp DESC
-                    LIMIT 1
-                )
     """
 
     const val PERSON_WITH_ATTEMPTS_MOST_RECENT_TIME = """

@@ -300,7 +300,7 @@
     <string name="xapi_result_header">Result</string>
     <string name="xapi_score">Score (%)</string>
     <string name="content_score">score</string>
-    <string name="content_percentage_completion">completion</string>
+    <string name="completion_key">completion</string>
     <string name="import_title_not_entered">Title not entered</string>
     <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>
@@ -1958,6 +1958,8 @@
     <string name="edit_subtitles">Edit subtitles</string>
 
     <string name="subtitles">Subtitles</string>
+
+    <string name="progress_key">progress</string>
 
 
 </resources>

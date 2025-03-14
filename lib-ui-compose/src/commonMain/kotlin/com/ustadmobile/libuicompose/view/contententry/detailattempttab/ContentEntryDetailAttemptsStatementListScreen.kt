@@ -5,21 +5,18 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Work
-import androidx.compose.material3.Icon
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,7 +26,6 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.paging.RefreshCommand
@@ -72,7 +68,7 @@ fun ContentEntryDetailAttemptsStatementList(
     val attemptsStatementListPager =
         rememberDoorRepositoryPager(uiState.attemptsStatementList, refreshCommandFlow)
     val attemptsStatementListItems = attemptsStatementListPager.lazyPagingItems
-    val percentageCompletion = stringResource(MR.strings.content_percentage_completion)
+    val percentageCompletion = stringResource(MR.strings.completion_key)
     val score = stringResource(MR.strings.content_score)
 
     UstadLazyColumn(
@@ -177,7 +173,7 @@ fun ContentEntryDetailAttemptsStatementList(
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                             Text(
-                                text = formattedTimestamp ?: "N/A",
+                                text = formattedTimestamp,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -187,7 +183,7 @@ fun ContentEntryDetailAttemptsStatementList(
                             verticalAlignment = Alignment.CenterVertically // Align vertically in the center
                         ) {
                             LinearProgressIndicator(
-                                progress = progress,
+                                progress = { progress },
                                 modifier = Modifier
                                     .weight(0.7f) // Occupy 70% of the width
                                     .testTag("progress_bar"),
