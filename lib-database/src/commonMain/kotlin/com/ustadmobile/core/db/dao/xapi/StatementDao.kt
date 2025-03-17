@@ -35,13 +35,13 @@ import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_TIMESTAMP_A
 import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_TIMESTAMP_DESC
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndRelated
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
+import com.ustadmobile.lib.db.composites.xapi.VerbEntityAndName
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.lib.db.entities.xapi.ActorEntity
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
-import com.ustadmobile.lib.db.entities.xapi.VerbEntity
 import kotlinx.coroutines.flow.Flow
 
 @DoorDao
@@ -585,7 +585,7 @@ expect abstract class StatementDao {
     AND StatementEntity.statementActorPersonUid = :selectedPersonUid
     AND StatementEntity.statementContentEntryUid = :contentEntryUid
     AND (:searchText = '%' OR VerbEntity.verbUrlId LIKE :searchText)
-    AND StatementEntity.statementVerbUid IN (:selectedVerbUids)
+    AND StatementEntity.statementVerbUid NOT IN (:deSelectedVerbUids)
     /* Permission check */
     AND (
         :accountPersonUid = :selectedPersonUid 
@@ -632,9 +632,10 @@ expect abstract class StatementDao {
         contentEntryUid: Long,
         searchText: String = "%",
         sortOrder: Int,
-        selectedVerbUids: List<Long>
+        deSelectedVerbUids: List<Long>
     ): PagingSource<Int, StatementEntityAndVerb>
 
+    @HttpAccessible
     @Query("""
     WITH DistinctVerbUrls(statementVerbUid) AS (
         SELECT DISTINCT StatementEntity.statementVerbUid
@@ -645,12 +646,11 @@ expect abstract class StatementDao {
             AND StatementEntity.statementContentEntryUid = :contentEntryUid
     )
     
-    SELECT DistinctVerbUrls.statementVerbUid AS verbUid,
-           VerbEntity.*,
+    SELECT VerbEntity.*,
            VerbLangMapEntry.*
     FROM DistinctVerbUrls
-         LEFT JOIN VerbEntity 
-                  ON VerbEntity.verbUid = DistinctVerbUrls.statementVerbUid
+         JOIN VerbEntity 
+              ON VerbEntity.verbUid = DistinctVerbUrls.statementVerbUid
          LEFT JOIN VerbLangMapEntry
                   ON (VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash) = 
                      (SELECT VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash
@@ -664,7 +664,7 @@ expect abstract class StatementDao {
         registrationLo: Long,
         selectedPersonUid: Long,
         contentEntryUid: Long
-    ): Flow<List<VerbEntity>>
+    ): Flow<List<VerbEntityAndName>>
 
     @HttpAccessible
     @Query("""

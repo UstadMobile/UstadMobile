@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class StatementEntityAndVerb(
     @Embedded
-    var statementEntity: StatementEntity? = StatementEntity(),
+    var statementEntity: StatementEntity = StatementEntity(),
     @Embedded
     var verb: VerbEntity? = null,
     @Embedded

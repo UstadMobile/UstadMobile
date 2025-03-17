@@ -1,19 +1,19 @@
 package com.ustadmobile.view.contententry.detailattemptstab
 
 import app.cash.paging.PagingSourceLoadResult
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.capitalizeFirstLetter
+import com.ustadmobile.core.util.ext.displayName
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
-import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
+import com.ustadmobile.lib.db.entities.xapi.VerbEntity
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadListSortHeader
 import com.ustadmobile.mui.components.UstadNothingHereYet
@@ -24,25 +24,11 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.datetime.TimeZone
-import mui.icons.material.CalendarToday
-import mui.icons.material.Check
-import mui.icons.material.Work
+import mui.icons.material.Check as CheckIcon
 import mui.material.Box
 import mui.material.Chip
-import mui.material.ChipColor
 import mui.material.ChipVariant
 import mui.material.Container
-import mui.material.LinearProgress
-import mui.material.LinearProgressVariant
-import mui.material.ListItem
-import mui.material.ListItemButton
-import mui.material.ListItemIcon
-import mui.material.ListItemText
-import mui.material.Stack
-import mui.material.StackDirection
-import mui.material.Typography
-import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
@@ -50,12 +36,10 @@ import react.ReactNode
 import react.create
 import react.useRequiredContext
 import tanstack.react.query.UseInfiniteQueryResult
-import web.cssom.AlignItems
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
-import web.cssom.px
 
 private const val LOAD_SIZE = 50
 private const val WIDTH = 100
@@ -64,7 +48,7 @@ external interface ContentEntryDetailAttemptsStatementListProps : Props {
     var uiState: ContentEntryDetailAttemptsStatementListUiState
     var refreshCommandFlow: Flow<RefreshCommand>?
     var onSortOrderChanged: (SortOrderOption) -> Unit
-    var onVerbFilterToggled: (String) -> Unit
+    var onVerbFilterToggled: (VerbEntity) -> Unit
 }
 
 val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
@@ -84,7 +68,6 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
 
 val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAttemptsStatementListProps> { props ->
     val theme by useRequiredContext(ThemeContext)
-    val stringsXml = useStringProvider()
 
     val remoteMediatorResult = useDoorRemoteMediator(
         pagingSourceFactory = props.uiState.attemptsStatementList,
@@ -95,8 +78,6 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
         usePagingSource(remoteMediatorResult.pagingSourceFactory, true, LOAD_SIZE)
 
     val muiAppState = useMuiAppState()
-    val score = stringsXml[MR.strings.content_score]
-    val percentageCompletion = stringsXml[MR.strings.completion_key]
     val isSettledEmpty = infiniteQueryResult.isSettledEmpty(remoteMediatorResult)
 
     VirtualList {
@@ -119,147 +100,52 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
 
             item("verb_filters") {
                 Box.create {
+                    id = "verb_filters"
+
                     sx {
                         padding = theme.spacing(1)
                         overflowX = Overflow.scroll
                     }
 
-                    Stack.create {
-                        direction = responsive(StackDirection.row)
-                        spacing = responsive(1)
-
-                        props.uiState.availableVerbs.distinctBy { it.verbUrlId }.forEach { verb ->
-                            verb.verbUrlId?.let { verbId ->
-                                val verbName = verbId.substringAfterLast("/")
-                                    .replaceFirstChar { it.uppercase() }
-
-                                Chip.create {
-                                    id = "${verbName.lowercase()}_button"
-                                    key = verbId
-                                    icon = if (verb.verbUid in props.uiState.selectedVerbIds) { // Check if verbUid is in the list
-                                        Check.create()
-                                    } else null
-                                    label = Typography.create {
-                                        +verbName
-                                    }
-                                    variant = ChipVariant.outlined
-                                    color = if (verb.verbUid in props.uiState.selectedVerbIds) { // Check if verbUid is in the list
-                                        ChipColor.primary
-                                    } else {
-                                        ChipColor.default
-                                    }
-                                    onClick = {
-                                        props.onVerbFilterToggled(verbId)
-                                    }
-                                }.also { +it }
+                    props.uiState.availableVerbs.forEach { verb ->
+                        val isSelected = verb.verbEntity.verbUid !in props.uiState.deselectedVerbUids
+                        Chip {
+                            sx {
+                                marginLeft = theme.spacing(1)
+                                marginRight = theme.spacing(1)
                             }
-                        }                    }.also { +it }
-                }.also { +it }
+                            onClick = {
+                                props.onVerbFilterToggled(verb.verbEntity)
+                            }
+
+                            icon = if (isSelected) {
+                                CheckIcon.create()
+                            }else {
+                                null
+                            }
+                            label = ReactNode(verb.displayName().capitalizeFirstLetter())
+                            variant = if(isSelected) {
+                                ChipVariant.filled
+                            }else {
+                                ChipVariant.outlined
+                            }
+                        }
+                    }
+                }
             }
+
             if (isSettledEmpty) {
                 item("empty_state") {
                     UstadNothingHereYet.create()
                 }
             }
 
-
-            val FormattedTimestampComponent = FC<Props> { props ->
-                val timestamp = props.asDynamic().timestamp as Long
-                val formattedTimestamp =  useFormattedDateAndTime(
-                    timeInMillis = timestamp,
-                    timezoneId = TimeZone.currentSystemDefault().id
-                )
-                ListItemText {
-                    secondary = ReactNode(formattedTimestamp)
-                }
-            }
-
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
-                key = { it?.statementEntity?.statementLct?.toString() ?: "empty" }
-            ) { attemptsStatementListItems ->
-
-                val progress =
-                    attemptsStatementListItems?.statementEntity?.extensionProgress?.takeIf { it > 0 }
-                        ?.div(100f)
-                        ?: attemptsStatementListItems?.statementEntity?.let { entity ->
-                            val raw = entity.resultScoreRaw ?: 0f
-                            val max = entity.resultScoreMax?.takeIf { it > 0 } ?: 100f
-                            (raw / max).coerceIn(0f, 1f)
-                        } ?: 0f
-
-                ListItem.create {
-                    Stack {
-                        direction = responsive(StackDirection.column)
-                        spacing = responsive(1)
-
-                        sx {
-                            width = WIDTH.pct
-                        }
-
-                        ListItemButton {
-                            ListItemIcon {
-                                Work()
-                                sx {
-                                    minWidth = 40.px
-                                    marginRight = 4.px
-                                }
-                            }
-                            ListItemText {
-                                val verbName = attemptsStatementListItems?.verb?.verbUrlId?.substringAfterLast("/")
-                                    ?.replaceFirstChar { it.uppercase() } ?: ""
-
-                                val activityName = attemptsStatementListItems?.activityLangMapEntry?.almeValue ?: ""
-
-                                primary = ReactNode("$verbName $activityName")
-                            }
-                        }
-
-                        ListItemButton {
-                            ListItemIcon {
-                                CalendarToday()
-                                sx {
-                                    padding = theme.spacing(1, 1, 1, 5)
-                                }
-                            }
-                            FormattedTimestampComponent {
-                                this.asDynamic().timestamp = attemptsStatementListItems?.statementEntity?.timestamp ?: 0L
-                            }
-                        }
-
-                        Box.create {
-                            sx {
-                                padding = theme.spacing(0, 2, 1, 6)
-                                width = 100.pct
-                            }
-
-                            Stack.create {
-                                direction = responsive(StackDirection.row)
-                                spacing = responsive(2)
-                                sx {
-                                    alignItems = AlignItems.center
-                                }
-
-                                LinearProgress.create {
-                                    variant = LinearProgressVariant.determinate
-                                    value = (progress * 100).toInt()
-                                    sx {
-                                        width = 70.pct
-                                    }
-                                }.also { +it }
-
-                                Typography.create {
-                                    +"${(progress * 100).toInt()}% ${
-                                        if (attemptsStatementListItems?.statementEntity?.resultScoreRaw != null) {
-                                            score.lowercase()
-                                        } else {
-                                            percentageCompletion.lowercase()
-                                        }
-                                    }"
-                                }.also { +it }
-                            }.also { +it }
-                        }.also { +it }
-                    }
+                key = { "${it.statementEntity.statementIdHi}-${it.statementEntity.statementIdLo}" }
+            ) { item ->
+                StatementEntityAndVerbListItem.create {
+                    statement = item
                 }
             }
         }
