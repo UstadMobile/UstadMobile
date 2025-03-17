@@ -10,9 +10,10 @@ import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.descriptionStringRes
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.statementSummary
 import com.ustadmobile.hooks.useDoorRemoteMediator
-import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
+import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.mui.components.UstadListSortHeader
@@ -64,12 +65,12 @@ val ContentEntryDetailAttemptsPersonListComponent = FC<ContentEntryDetailAttempt
             remoteMediatorResult.pagingSourceFactory, true
         )
 
-    val muiAppState = useMuiAppState()
+    val tabAndAppBarHeight = useTabAndAppBarHeight()
     val stringsXml = useStringProvider()
 
     VirtualList {
         style = jso {
-            height = "calc(100vh - ${muiAppState.appBarHeight}px)".unsafeCast<Height>()
+            height = "calc(100vh - ${tabAndAppBarHeight}px)".unsafeCast<Height>()
             width = 100.pct
             contain = Contain.strict
             overflowY = Overflow.scroll
@@ -117,7 +118,7 @@ val ContentEntryDetailAttemptsPersonListComponent = FC<ContentEntryDetailAttempt
                             append(attemptsPersonListItem?.person?.fullName() ?: "")
                             append(" : ")
                             attemptsPersonListItem?.also {
-                                append(stringsXml[it.descriptionStringRes])
+                                append(stringsXml[it.statementSummary.descriptionStringRes])
                             }
                         }
 

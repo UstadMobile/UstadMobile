@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab
 
-import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
+import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 
-val PersonAndPictureAndNumAttempts.statementSummary: StatementSummaryEntity
+val SessionTimeAndProgressInfo.statementSummary: StatementSummaryEntity
     get() = StatementSummaryEntity(successful = isSuccessful, completed = isCompleted)

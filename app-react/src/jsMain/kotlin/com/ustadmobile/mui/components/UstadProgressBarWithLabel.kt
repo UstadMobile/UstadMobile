@@ -15,6 +15,9 @@ external interface UstadProgressBarWithLabelProps: PropsWithSx {
 
     var label: ReactNode
 
+    /**
+     * Between 0 and 100 as per LinearProgressIndicator
+     */
     var progressValue: Int
 
 }

@@ -19,6 +19,7 @@ import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.descriptionStringRes
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.statementSummary
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
@@ -93,7 +94,8 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                 },
                 headlineContent = {
                     Text((attemptsPersonListItems?.person?.fullName() ?: "") +
-                            ": ${attemptsPersonListItems?.descriptionStringRes?.let { stringResource(it) } ?: ""}",
+                            ": ${attemptsPersonListItems?.statementSummary?.descriptionStringRes
+                                ?.let { stringResource(it) } ?: ""}",
                         maxLines = 1)
                 },
                 supportingContent = {
