@@ -29,7 +29,7 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.util.ext.localFirstThenRepoIfNull
 import com.ustadmobile.core.util.ext.onActiveLearningSpace
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel.InviteResult
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.ClazzInviteViaContactViewModel.InviteResult
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonDetails

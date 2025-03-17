@@ -9,7 +9,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavCommand
@@ -19,7 +18,7 @@ import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
 import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUserTypeViewModel
-import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.ClazzInviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -28,7 +27,7 @@ import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.ClazzInviteViaContactViewModel
 import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
@@ -149,13 +148,13 @@ import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEdit
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
-import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
+import com.ustadmobile.libuicompose.view.clazz.invitevialink.ClazzInviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
 import com.ustadmobile.libuicompose.view.clazz.permissiondetail.CoursePermissionDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.permissionedit.CoursePermissionEditScreen
 import com.ustadmobile.libuicompose.view.clazz.permissionlist.CoursePermissionListScreen
 import com.ustadmobile.libuicompose.view.clazz.inviteredeem.ClazzInviteRedeemScreen
-import com.ustadmobile.libuicompose.view.clazz.inviteviacontact.InviteViaContactScreen
+import com.ustadmobile.libuicompose.view.clazz.inviteviacontact.ClazzInviteViaContactScreen
 import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailScreen
 import com.ustadmobile.libuicompose.view.contententry.edit.ContentEntryEditScreen
 import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGetMetadataScreen
@@ -207,7 +206,6 @@ fun AppNavHost(
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
     val di = localDI()
-     val accountManager: UstadAccountManager = di.direct.instance()
 
     val popCommandFlow = remember {
         MutableSharedFlow<PopNavCommand>(
@@ -230,8 +228,6 @@ fun AppNavHost(
             ustadNavController.onCollectNavCommand(it)
         }
     }
-
-
 
     val navResultReturner: NavResultReturner = remember {
         NavResultReturnerImpl()
@@ -816,10 +812,10 @@ fun AppNavHost(
                 )
             }
 
-            contentScene("/${InviteViaLinkViewModel.DEST_NAME}") { backStackEntry ->
-                InviteViaLinkScreen(
-                    appViewModel(backStackEntry, InviteViaLinkViewModel::class,
-                        ::InviteViaLinkViewModel)
+            contentScene("/${ClazzInviteViaLinkViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzInviteViaLinkScreen(
+                    appViewModel(backStackEntry, ClazzInviteViaLinkViewModel::class,
+                        ::ClazzInviteViaLinkViewModel)
                 )
             }
 
@@ -872,10 +868,10 @@ fun AppNavHost(
                 )
             }
 
-            contentScene("/${InviteViaContactViewModel.DEST_NAME}") { backStackEntry ->
-                InviteViaContactScreen(
-                    appViewModel(backStackEntry, InviteViaContactViewModel::class,
-                        ::InviteViaContactViewModel)
+            contentScene("/${ClazzInviteViaContactViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzInviteViaContactScreen(
+                    appViewModel(backStackEntry, ClazzInviteViaContactViewModel::class,
+                        ::ClazzInviteViaContactViewModel)
                 )
             }
 

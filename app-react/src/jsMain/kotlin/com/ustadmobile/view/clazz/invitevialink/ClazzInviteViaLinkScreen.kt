@@ -3,8 +3,8 @@ package com.ustadmobile.view.clazz.invitevialink
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkUiState
-import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.ClazzInviteViaLinkUiState
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.ClazzInviteViaLinkViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadStandardContainer
 import web.cssom.px
@@ -19,33 +19,33 @@ import react.FC
 import react.Props
 import react.create
 
-external interface InviteViaLinkProps : Props {
-    var uiState: InviteViaLinkUiState
+external interface ClazzInviteViaLinkProps : Props {
+    var uiState: ClazzInviteViaLinkUiState
     var onClickCopyLink: () -> Unit
 }
 
-val InviteViaLinkPreview = FC<Props> {
-    InviteViaLinkComponent2 {
-        uiState = InviteViaLinkUiState(
+val ClazzInviteViaLinkPreview = FC<Props> {
+    ClazzInviteViaLinkComponent2 {
+        uiState = ClazzInviteViaLinkUiState(
             inviteLink = "http://wwww.ustadmobile.com/ClazzJoin?code=12ASDncd",
         )
     }
 }
 
-val InviteViaLinkScreen = FC<Props> {
+val ClazzInviteViaLinkScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
-        InviteViaLinkViewModel(di, savedStateHandle)
+        ClazzInviteViaLinkViewModel(di, savedStateHandle)
     }
 
-    val uiStateVal by viewModel.uiState.collectAsState(InviteViaLinkUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(ClazzInviteViaLinkUiState())
 
-    InviteViaLinkComponent2 {
+    ClazzInviteViaLinkComponent2 {
         uiState = uiStateVal
         onClickCopyLink = viewModel::onClickCopy
     }
 }
 
-private val InviteViaLinkComponent2 = FC<InviteViaLinkProps> { props ->
+private val ClazzInviteViaLinkComponent2 = FC<ClazzInviteViaLinkProps> { props ->
 
     val strings = useStringProvider()
 
