@@ -18,6 +18,7 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.descriptionStringRes
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
@@ -92,7 +93,7 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                 },
                 headlineContent = {
                     Text((attemptsPersonListItems?.person?.fullName() ?: "") +
-                            ": ${attemptsPersonListItems?.numAttempts.toString()} $attempts",
+                            ": ${attemptsPersonListItems?.descriptionStringRes?.let { stringResource(it) } ?: ""}",
                         maxLines = 1)
                 },
                 supportingContent = {
@@ -100,6 +101,8 @@ fun ContentEntryDetailAttemptsPersonListScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        Text("${attemptsPersonListItems?.numAttempts.toString()} $attempts")
+
                         attemptsPersonListItems?.maxProgress?.also { maxProgressVal ->
                             UstadProgressBarWithLabel(
                                 progress = { (maxProgressVal.toFloat()) / 100f },

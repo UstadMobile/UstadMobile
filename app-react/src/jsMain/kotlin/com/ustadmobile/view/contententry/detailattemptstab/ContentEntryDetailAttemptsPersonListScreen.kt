@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.descriptionStringRes
 import com.ustadmobile.hooks.useDoorRemoteMediator
 import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
@@ -112,14 +113,24 @@ val ContentEntryDetailAttemptsPersonListComponent = FC<ContentEntryDetailAttempt
                             }
                         }
 
-                        val personHeaderText = (attemptsPersonListItem?.person?.fullName() ?: "") +
-                                ": ${attemptsPersonListItem?.numAttempts} ${stringsXml[MR.strings.attempts]}"
+                        val personHeaderText = buildString{
+                            append(attemptsPersonListItem?.person?.fullName() ?: "")
+                            append(" : ")
+                            attemptsPersonListItem?.also {
+                                append(stringsXml[it.descriptionStringRes])
+                            }
+                        }
+
 
                         ListItemText {
                             primary = ReactNode(personHeaderText)
 
                             secondary = Stack.create {
                                 direction = responsive(StackDirection.column)
+
+                                div {
+                                    + "${attemptsPersonListItem?.numAttempts} ${stringsXml[MR.strings.attempts]}"
+                                }
 
                                 attemptsPersonListItem?.maxScore?.also { maxScoreVal ->
                                     UstadProgressBarWithLabel {
