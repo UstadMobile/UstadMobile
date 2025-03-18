@@ -57,6 +57,18 @@ val StatementEntityAndVerbListItem = FC<StatementEntityAndVerbListItemProps> { p
             secondary = Stack.create {
                 direction = responsive(StackDirection.column)
 
+                props.statement?.statementActivityDescription?.also {
+                    div {
+                        + it.trim()
+                    }
+                }
+
+                props.statement?.statementEntity?.resultResponse?.also {
+                    div {
+                        + "${stringsXml[MR.strings.response]}: ${it.trim()}"
+                    }
+                }
+
                 Stack {
                     sx {
                         paddingBottom = theme.spacing(1)

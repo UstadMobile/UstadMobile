@@ -547,10 +547,32 @@ expect abstract class StatementDao {
         sortOrder: Int
     ): PagingSource<Int, SessionTimeAndProgressInfo>
 
-    @HttpAccessible
+
+    @Query("""
+        SELECT ActivityLangMapEntry.*
+          FROM ActivityLangMapEntry
+         WHERE ActivityLangMapEntry.almeActivityUid IN (
+               SELECT DISTINCT StatementEntity.statementObjectUid1
+                 FROM StatementEntity
+                WHERE StatementEntity.contextRegistrationHi = :registrationHi
+                  AND StatementEntity.contextRegistrationLo = :registrationLo)
+    """)
+    abstract suspend fun findActivityEntryLangMapsForStatementsBySession(
+        registrationHi: Long,
+        registrationLo: Long
+    ): List<ActivityLangMapEntry>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findStatementsBySession"),
+            HttpServerFunctionCall("findActivityEntryLangMapsForStatementsBySession")
+        )
+    )
     @Query("""
     SELECT StatementEntity.*, VerbEntity.*, VerbLangMapEntry.*, ActivityEntity.*,
-           ActivityLangMapEntry.*
+           ActivityLangMapEntry.*,
+           ActivityLangMapDescription.almeValue AS statementActivityDescription
     FROM StatementEntity
     LEFT JOIN VerbEntity
         ON StatementEntity.statementVerbUid = VerbEntity.verbUid
@@ -569,6 +591,13 @@ expect abstract class StatementDao {
                     FROM ActivityLangMapEntry
                    WHERE ActivityLangMapEntry.almeActivityUid = StatementEntity.statementObjectUid1
                      AND ActivityLangMapEntry.almePropName = '${ActivityLangMapEntry.PROPNAME_NAME}'
+                   LIMIT 1)
+    LEFT JOIN ActivityLangMapEntry ActivityLangMapDescription
+              ON (ActivityLangMapDescription.almeActivityUid, ActivityLangMapDescription.almeHash) = 
+                 (SELECT ActivityLangMapDescription.almeActivityUid, ActivityLangMapDescription.almeHash
+                    FROM ActivityLangMapEntry ActivityLangMapDescription
+                   WHERE ActivityLangMapDescription.almeActivityUid = StatementEntity.statementObjectUid1
+                     AND ActivityLangMapDescription.almePropName = '${ActivityLangMapEntry.PROPNAME_DESCRIPTION}'
                    LIMIT 1)
     LEFT JOIN ClazzEnrolment 
         ON ClazzEnrolment.clazzEnrolmentUid =
