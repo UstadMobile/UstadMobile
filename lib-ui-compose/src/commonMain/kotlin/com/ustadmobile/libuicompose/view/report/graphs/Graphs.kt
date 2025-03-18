@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
@@ -133,8 +134,8 @@ fun CombinedGraph(
             xAxisLabels = {
                 val index = it.toInt()
                 AxisLabels(
-                    allXValues.getOrNull(index) ?: "",
-                    Modifier.defaultItemPadding(top = 4.dp)
+                    label = allXValues.getOrNull(index) ?: "",
+                    Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
                 )
             },
             xAxisTitle = { AxisLabels(xAxisLabel) },
@@ -292,7 +293,8 @@ private fun AxisLabels(label: String, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth(),
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
-        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        fontSize = 8.sp
     )
 }
 

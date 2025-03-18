@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
@@ -158,37 +158,41 @@ fun MoreOptionsSection(
     onShowDialog: () -> Unit = { },
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        HorizontalDivider(thickness = 1.dp)
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultScreenPadding(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            IconTextButton(
-                icon = Icons.Default.Share,
-                text = stringResource(MR.strings.share),
-                onClick = { /* Handle share */ }
-            )
-
-            IconTextButton(
-                icon = Icons.Default.ImportExport,
-                text = stringResource(MR.strings.export_data),
-                onClick = { onShowDialog() }
-            )
+    LazyColumn(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        item {
+            HorizontalDivider(thickness = 1.dp)
         }
 
-        HorizontalDivider(thickness = 1.dp)
-        LazyRow(
-            modifier = Modifier
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(data) { series ->
-                DataTable(data = series.data)
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultScreenPadding(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                IconTextButton(
+                    icon = Icons.Default.Share,
+                    text = stringResource(MR.strings.share),
+                    onClick = { /* Handle share */ }
+                )
+
+                IconTextButton(
+                    icon = Icons.Default.ImportExport,
+                    text = stringResource(MR.strings.export_data),
+                    onClick = { onShowDialog() }
+                )
             }
+        }
+
+        item {
+            HorizontalDivider(thickness = 1.dp)
+        }
+
+        items(data) { series ->
+            DataTable(data = series.data)
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
