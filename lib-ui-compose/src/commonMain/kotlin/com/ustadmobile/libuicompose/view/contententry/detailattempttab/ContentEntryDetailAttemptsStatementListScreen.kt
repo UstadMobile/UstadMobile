@@ -158,6 +158,14 @@ fun ContentEntryDetailAttemptsStatementList(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
+                        item?.statementActivityDescription?.also {
+                            Text(it.trim())
+                        }
+
+                        item?.statementEntity?.resultResponse?.also {
+                            Text("${stringResource(MR.strings.response)}: ${it.trim()}")
+                        }
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically

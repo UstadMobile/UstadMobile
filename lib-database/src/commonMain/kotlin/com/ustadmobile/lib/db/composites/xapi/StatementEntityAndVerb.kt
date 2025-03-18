@@ -20,6 +20,8 @@ class StatementEntityAndVerb(
     var activity: ActivityEntity? = null,
     @Embedded
     var activityLangMapEntry: ActivityLangMapEntry? = null,
+
+    var statementActivityDescription: String? = null,
 )
 
 object StatementConst{
