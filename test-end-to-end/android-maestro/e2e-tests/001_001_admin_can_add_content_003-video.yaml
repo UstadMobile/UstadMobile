@@ -52,15 +52,19 @@ onFlowComplete:
 - assertVisible:
     text: "Video_Content.mp4"
     id: "app_title"
-- assertVisible: "Admin User"
+- assertVisible: "Admin User: Completed"
 - assertVisible: "1 Attempts"
-- assertVisible: "100% Completion"
-- tapOn: "Admin User"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+- tapOn: "Admin User: Completed"
 - assertVisible:
     text: "Admin User - Video_Content.mp4"
     id: "app_title"
 - assertVisible: "Completed"
-- assertVisible: "100% Completion"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+- assertVisible:
+    id: "progress_bar"
 - tapOn: "Completed"
 - assertVisible:
     text: "Video_Content.mp4"
@@ -69,7 +73,8 @@ onFlowComplete:
 - assertVisible: "Progressed"
 - assertVisible: "Completed Video_Content.mp4"
 - assertVisible: "Progressed Video_Content.mp4"
-- assertVisible: "100% completion"
+- assertVisible: "100%"
+- assertVisible: "Progress"
 - assertVisible:
     id: "progress_bar"
 - tapOn: "Completed"  # test filter chip , Completed is unselected

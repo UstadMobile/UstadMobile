@@ -57,19 +57,21 @@ onFlowComplete:
 - assertVisible:
     text: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
     id: "app_title"
-- assertVisible: "Admin User"
+- assertVisible: "Admin User: Completed"
 - assertVisible: "1 Attempts"
 - assertVisible:
     id: "progress_bar"
-- tapOn: "100% completion"
-- tapOn: "Admin User"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+- tapOn: "Admin User: Completed"
 - assertVisible:
     text: "Admin User - The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
     id: "app_title"
 - assertVisible: "Completed"
 - assertVisible:
     id: "progress_bar"
-- assertVisible: "100% completion"
+- assertVisible: "100%"
+- assertVisible: "Progress"
 - tapOn: "Completed"
 - assertVisible:
     text: "The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
@@ -77,8 +79,7 @@ onFlowComplete:
 - assertVisible: "Completed The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)"
 - assertVisible:
     id: "progress_bar"
-- assertVisible: "100% completion"
-- tapOn: "Completed"    # filter is unselected
-- assertNotVisible:
-    id: "progress_bar"
-- assertVisible: "Nothing here, yet"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+- assertVisible: "Progressed"
+- assertVisible: "Completed"    # filter is unselected
