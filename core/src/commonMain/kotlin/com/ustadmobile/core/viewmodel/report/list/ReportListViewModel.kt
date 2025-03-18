@@ -86,9 +86,8 @@ class ReportListViewModel(
 
     fun onRemoveReport(uid: Long) {
         viewModelScope.launch {
-            activeRepo.withDoorTransactionAsync {
-                activeRepo.reportDao().deleteReportByUid(uid)
-            }
+            activeRepo.reportDao().deleteReportByUid(uid)
+
         }
     }
 

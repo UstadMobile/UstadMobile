@@ -3,6 +3,7 @@ package com.ustadmobile.view.report.detail
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
+import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
@@ -33,6 +34,7 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.useMemo
 import web.cssom.px
 
 external interface ReportDetailProps : Props {
@@ -88,20 +90,38 @@ val ReportDetailScreen = FC<Props> {
     }
 }
 
-// In ReportDetailScreen.kt
 val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
     val string = useStringProvider()
 
+    val graphSeriesList = useMemo(listOf(props.uiState.reportResults, props.uiState.reportOptions2.series)) {
+        props.uiState.reportOptions2.series.mapIndexed { index, reportSeries ->
+            GraphSeries(
+                type = when (reportSeries.reportSeriesVisualType) {
+                    ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
+                    else -> SeriesType.BAR
+                },
+                data = props.uiState.reportResults.getOrNull(index)?.map { statementRow ->
+                    ReportResultQueryRow(
+                        xAxis = statementRow.xAxis,
+                        yAxis = statementRow.yAxis,
+                        subgroup = statementRow.subgroup
+                    )
+                } ?: emptyList(),
+                name = reportSeries.reportSeriesTitle
+            )
+        }
+    }
     UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
             spacing = responsive(8.px)
 
             ReportGraph {
-                graphSeriesList = sharedGraphSeriesList
-                reportOptions = props.uiState.reportOptions2
-                strings = string
+                this.graphSeriesList = graphSeriesList
+                this.reportOptions = props.uiState.reportOptions2
+                this.strings = string
             }
+
             moreOption {
                 uiState = props.uiState
                 onShowDialog = props.onShowDialog
@@ -110,6 +130,7 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
         }
     }
 }
+
 private val moreOption = FC<ReportDetailProps> { props ->
     val strings = useStringProvider()
     val header = listOf(
@@ -117,10 +138,22 @@ private val moreOption = FC<ReportDetailProps> { props ->
         strings[MR.strings.y_axis],
         strings[MR.strings.subgroup_by]
     )
-    // Example data
-    // Use the shared data
-    val data = sharedGraphSeriesList
 
+    val data = useMemo(props.uiState) {
+        props.uiState.reportOptions2.series.mapIndexed { index, reportSeries ->
+            GraphSeries(
+                type = SeriesType.BAR,
+                data = props.uiState.reportResults.getOrNull(index)?.map {
+                    ReportResultQueryRow(
+                        xAxis = it.xAxis,
+                        yAxis = it.yAxis,
+                        subgroup = it.subgroup
+                    )
+                } ?: emptyList(),
+                name = reportSeries.reportSeriesTitle
+            )
+        }
+    }
     UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
@@ -190,37 +223,6 @@ private val moreOption = FC<ReportDetailProps> { props ->
                     }
                 }
             }
-
         }
     }
-
 }
-
-// Shared data for both graph and table
-val sharedBarSeries1 = listOf(
-    ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 5000000.0, subgroup = "Category A"),
-    ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 4000000.0, subgroup = "Category B"),
-    ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 1000000.0, subgroup = "Category A"),
-    ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 5000000.0, subgroup = "Category B"),
-    ReportResultQueryRow(xAxis = "03/01/2024", yAxis = 4000000.0, subgroup = "Category B")
-)
-
-val sharedLineSeries = listOf(
-    ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 2000000.0, subgroup = "Category M"),
-    ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 9000000.0, subgroup = "Category N"),
-    ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 7000000.0, subgroup = "Category M"),
-    ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 1000000.0, subgroup = "Category N"),
-)
-
-val sharedLineSeries1 = listOf(
-    ReportResultQueryRow(xAxis = "female", yAxis = 20.0, subgroup = "Category A"),
-    ReportResultQueryRow(xAxis = "male", yAxis = 90.0, subgroup = "Category A"),
-    ReportResultQueryRow(xAxis = "female", yAxis = 80.0, subgroup = "Category B"),
-    ReportResultQueryRow(xAxis = "male", yAxis = 10.0, subgroup = "Category B"),
-)
-
-// Convert the shared data into GraphSeries
-val sharedGraphSeriesList = listOf(
-    GraphSeries(type = SeriesType.BAR, data = sharedBarSeries1, name = "Bar Series 1"),
-    GraphSeries(type = SeriesType.LINE, data = sharedLineSeries, name = "Line Series"),
-)

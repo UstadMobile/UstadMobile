@@ -43,12 +43,17 @@ fun CombinedGraph(
     xAxisLabel: String,
     yAxisLabel: String
 ) {
-    // Collect all unique xAxis values from all series
     val allXValues = remember(series) {
         series.flatMap { it.data.map { row -> row.xAxis } }.distinct().sorted()
     }
+    val hasValidData = remember(series) {
+        series.any { it.data.any { row -> row.yAxis > 0 } }
+    }
 
-    // Create a map from xAxis value to its index
+    if (!hasValidData) {
+        Text("No data available")
+        return
+    }
     val xValueToIndex = remember(allXValues) {
         allXValues.withIndex().associate { (index, xValue) -> xValue to index }
     }
@@ -97,8 +102,13 @@ fun CombinedGraph(
 
     // Calculate Y-axis range
     val yRange = remember(series, conversionFactor) {
-        val maxYValue = series.flatMap { it.data.map { (it.yAxis * conversionFactor).toFloat() } }.maxOrNull() ?: 0f
-        0f..(maxYValue * 1.1f)
+        val maxYValue = series.flatMap {
+            it.data.map { (it.yAxis * conversionFactor).toFloat() }
+        }.maxOrNull() ?: 0f
+
+        // Handle case where all values are zero
+        val adjustedMax = if (maxYValue == 0f) 1f else maxYValue * 1.1f
+        0f..adjustedMax
     }
 
     // Determine step size for count-based Y-axis
@@ -146,7 +156,8 @@ fun CombinedGraph(
                 GroupedVerticalBarPlot(
                     data = barEntries,
                     bar = { _, subgroupIndex, entry ->
-                        val subgroup = allSubgroups.getOrNull(subgroupIndex) ?: return@GroupedVerticalBarPlot
+                        val subgroup =
+                            allSubgroups.getOrNull(subgroupIndex) ?: return@GroupedVerticalBarPlot
                         val color = colorMap[subgroup] ?: Color.Gray
                         DefaultVerticalBar(
                             brush = SolidColor(color),
@@ -321,13 +332,20 @@ private fun calculateConversionFactor(yAxisLabel: String, maxY: Double): Pair<Do
                 else -> Pair(1.0 / 1_000, "sec")
             }
         }
+
+        maxY == 0.0 -> Pair(1.0, "") // Handle zero case
         else -> Pair(1.0, yAxisLabel)
     }
 }
 
-private fun calculateTickIncrement(yRange: ClosedFloatingPointRange<Float>, yAxisLabel: String, unit: String): Float {
+private fun calculateTickIncrement(
+    yRange: ClosedFloatingPointRange<Float>,
+    yAxisLabel: String,
+    unit: String
+): Float {
     val range = yRange.endInclusive - yRange.start
     return when {
+        range == 0f -> 1f // Handle zero range case
         yAxisLabel.equals(YAxisTypes.COUNT.name, ignoreCase = true) -> {
             when {
                 range < 10 -> 1f
@@ -336,6 +354,7 @@ private fun calculateTickIncrement(yRange: ClosedFloatingPointRange<Float>, yAxi
                 else -> 100f
             }
         }
+
         else -> {
             when (unit) {
                 "hr" -> 0.5f

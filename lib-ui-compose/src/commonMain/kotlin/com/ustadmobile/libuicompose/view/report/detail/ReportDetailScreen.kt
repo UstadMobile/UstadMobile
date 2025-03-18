@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
@@ -28,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,10 +37,12 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
+import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
+import com.ustadmobile.lib.db.composites.StatementReportRow
 import com.ustadmobile.libuicompose.components.UstadBottomSheetOption
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
 import com.ustadmobile.libuicompose.view.report.graphs.CombinedGraph
@@ -67,7 +69,11 @@ fun ReportDetailScreen(
     onDismissDialog: () -> Unit = { },
     onShowDialog: () -> Unit = { },
 ) {
-    BarGraphSampleScreen(onShowDialog = onShowDialog,reportOptions = uiState.reportOptions2)
+    BarGraphSampleScreen(
+        onShowDialog = onShowDialog,
+        reportOptions = uiState.reportOptions2,
+        statementReportRow = uiState.reportResults
+    )
     if (uiState.dialogVisible) {
         ModalBottomSheet(
             onDismissRequest = onDismissDialog
@@ -92,56 +98,57 @@ fun ReportDetailScreen(
     }
 }
 
-// Example Graph
 @Composable
 fun BarGraphSampleScreen(
     onShowDialog: () -> Unit = { },
-    reportOptions :ReportOptions2
+    reportOptions: ReportOptions2,
+    statementReportRow: List<List<StatementReportRow>>
 ) {
-    val barSeries1 = listOf(
-        ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 5000000.0, subgroup = "Category A"),
-        ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 4000000.0, subgroup = "Category B"),
-        ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 1000000.0, subgroup = "Category A"),
-        ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 5000000.0, subgroup = "Category B"),
-        ReportResultQueryRow(xAxis = "03/01/2024", yAxis = 4000000.0, subgroup = "Category B")
-    )
-
-    val lineSeries = listOf(
-        ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 2000000.0, subgroup = "Category M"),
-        ReportResultQueryRow(xAxis = "01/01/2024", yAxis = 9000000.0, subgroup = "Category N"),
-        ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 7000000.0, subgroup = "Category M"),
-        ReportResultQueryRow(xAxis = "02/01/2024", yAxis = 1000000.0, subgroup = "Category N"),
-    )
-    val lineSeries1 = listOf(
-        ReportResultQueryRow(xAxis = "female", yAxis = 20.0, subgroup = "Category A"),
-        ReportResultQueryRow(xAxis = "male", yAxis = 90.0, subgroup = "Category A"),
-        ReportResultQueryRow(xAxis = "female", yAxis = 20.0, subgroup = "Category B"),
-        ReportResultQueryRow(xAxis = "male", yAxis = 900.0, subgroup = "Category B"),
-    )
-    val yAxisLabel = if (reportOptions.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }) {
-        stringResource(MR.strings.duration_hours)
-    } else {
-        stringResource(MR.strings.count)
+    val graphSeries = remember(reportOptions, statementReportRow) {
+        reportOptions.series.mapIndexed { index, reportSeries ->
+            GraphSeries(
+                type = when (reportSeries.reportSeriesVisualType) {
+                    ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
+                    else -> SeriesType.BAR
+                },
+                data = statementReportRow.getOrNull(index)?.map { statementRow ->
+                    ReportResultQueryRow(
+                        xAxis = statementRow.xAxis,
+                        yAxis = statementRow.yAxis,
+                        subgroup = statementRow.subgroup
+                    )
+                } ?: emptyList(),
+                name = reportSeries.reportSeriesTitle
+            )
+        }
     }
-    Column(modifier = Modifier.fillMaxSize()) {
-        CombinedGraph(
-            series = listOf(
-            GraphSeries(SeriesType.BAR, lineSeries1, "Line Series 2"),
-            ),
-            modifier = Modifier
-                .weight(0.6f)
-                .fillMaxWidth(),
-            xAxisLabel = reportOptions.xAxis?.name?:"",
-            yAxisLabel = yAxisLabel
 
-        )
-        MoreOptionsSection(
-            data = listOf(
-                GraphSeries(SeriesType.BAR, lineSeries1, "Line Series 2"),
-            ),
-            onShowDialog = onShowDialog,
-            modifier = Modifier.weight(0.4f)
-        )
+    val yAxisLabel =
+        if (reportOptions.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }) {
+            stringResource(MR.strings.duration_hours)
+        } else {
+            stringResource(MR.strings.count)
+        }
+
+    if (graphSeries.isNotEmpty() && statementReportRow.isNotEmpty()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            CombinedGraph(
+                series = graphSeries,
+                modifier = Modifier
+                    .weight(0.6f)
+                    .fillMaxWidth(),
+                xAxisLabel = reportOptions.xAxis?.name ?: "",
+                yAxisLabel = yAxisLabel
+            )
+
+            MoreOptionsSection(
+                data = graphSeries,
+                onShowDialog = onShowDialog,
+                modifier = Modifier.weight(0.4f)
+            )
+        }
+    } else {
+        androidx.compose.material.Text("empty data") // need to change
     }
 }
 

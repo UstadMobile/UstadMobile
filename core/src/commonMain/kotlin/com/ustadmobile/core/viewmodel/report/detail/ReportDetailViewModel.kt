@@ -16,6 +16,9 @@ import com.ustadmobile.lib.db.entities.Report
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
@@ -27,7 +30,8 @@ data class ReportDetailUiState(
     val report: Report? = null,
     val dialogVisible: Boolean = false,
     val reportOptions2: ReportOptions2 = ReportOptions2(),
-    val reportResults: List<List<StatementReportRow>> = emptyList()
+    val reportResults: List<List<StatementReportRow>> = emptyList(),
+    val errorMessage: String? = null // Add error handling
 )
 
 class ReportDetailViewModel(
@@ -120,22 +124,22 @@ class ReportDetailViewModel(
     }
 
     private fun runReport(request: RunReportUseCase.RunReportRequest) {
-        viewModelScope.launch {
-            _appUiState.update { it.copy(loadingState = INDETERMINATE) }
-            try {
-                println("RunReportUseCase Initializing")
-                runReportUseCase(request).collect { result ->
-                    _uiState.update { prev ->
-                        prev.copy(reportResults = result.results)
-                    }
-                    println("RunReportUseCase ${result.results}")
+        _appUiState.update { it.copy(loadingState = INDETERMINATE) }
+        runReportUseCase(request)
+            .onEach { result ->
+                _uiState.update { prev ->
+                    prev.copy(reportResults = result.results)
                 }
-            } catch (e: Exception) {
-                println("RunReportUseCase ${e}")
-            } finally {
-                _appUiState.update { it.copy(loadingState = NOT_LOADING) }
+                println("Flow: ${result.results}")
             }
-        }
+            .catch { e ->
+                println("Flow error: $e")
+            }
+            .launchIn(viewModelScope)
+            .invokeOnCompletion { cause ->
+                _appUiState.update { it.copy(loadingState = NOT_LOADING) }
+                cause?.let { println("Flow Completion cause: $it") }
+            }
     }
 
 
