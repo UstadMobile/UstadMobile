@@ -36,8 +36,7 @@ it('Teacher able to add content block from file', () => {
   cy.get('input[type="file"]')
     .selectFile('../test-files/content/Epub_Content1.epub',{force: true})
  //Set CourseBlock title
-  //cy.contains("#appbar_title", "Edit content block").should("be.visible")
-  cy.get('input[id="content_title"]').click()
+   cy.get('input[id="content_title"]').click()
   cy.get('input[id="content_title"]').clear().type('Content_002',{timeout: 2000})
  //Continue import
   cy.contains('#actionBarButton', 'Next').click()
@@ -64,8 +63,8 @@ it('Student-1, Attempt - Video content', () => {
     }, 2000);
     });
 // Verify that the video is paused
-cy.get('video', { timeout: 5000 })
-  .should('have.prop', 'paused', true);
+  cy.get('video', { timeout: 5000 })
+    .should('have.prop', 'paused', true);
 
  // Student-1, Attempt-2, video content - 100%
   cy.contains('Courses').click()
@@ -77,8 +76,8 @@ cy.get('video', { timeout: 5000 })
     .then($video => {
       $video[0].play()
     })
- // cy.get('video', { timeout: 15000 }).should('have.attr', 'data-ustad-video-state', 'ended')
-  cy.wait(11000)
+ //cy.get('video', { timeout: 15000 }).should('have.attr', 'data-ustad-video-state', 'ended')  // tried but not getting 100% progress
+  cy.wait(12000)
 })
 
 it('Student-2 user makes attempts on video-2 sec', () => {
@@ -115,25 +114,30 @@ it('Student-1 user able to see attempts made on content 1', () => {
   cy.contains('Test Course Block').click()
   cy.contains("Content_001").click()
   cy.contains("button", "Attempts", { timeout: 8000 }).click()
-  cy.contains("Attempts: 1").should('exist')
   cy.get("#appbar_title").contains("Content_001").should("exist")
+  cy.contains("Student 1 : Completed").should('exist')
   cy.get('span[role="progressbar"]').should('exist')
-  cy.contains("Student 1").click()
+  cy.contains('100%').should('exist')
+  cy.contains('Progress').should('exist')
+  cy.contains("Student 1 : Completed").click()
   cy.get("#appbar_title").contains("Student 1 - Content_001").should("exist")
+  cy.contains("Completed").should("exist")
   cy.get('span[role="progressbar"]').should('exist')
-  cy.contains('Completed').should('exist')
-  cy.contains('100% completion').should('exist')
-  cy.contains('Completed').click()
+  cy.contains('100%').should('exist')
+  cy.contains('Progress').should('exist')
+  cy.contains("Completed").click()
   cy.get("#appbar_title").contains("Content_001").should("exist")
+  cy.contains('Completed').should('exist')
+  cy.contains('100%').should('exist')
+  cy.contains('Progress').should('exist')
   cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
   cy.get(".MuiTypography-body1").contains("Completed").should("exist") // Filter chip
   cy.get(".MuiListItemText-primary").contains("Completed Content_001").should("exist")
   cy.get(".MuiTypography-body1").contains("Progressed").should("exist") // Filter chip
   cy.get(".MuiListItemText-primary").contains("Progressed Content_001").should("exist")
   cy.get('span[role="progressbar"]').should('exist')
-  cy.contains("100% completion").should("exist")
-  cy.get(".MuiTypography-body1").contains("Completed").click() // testing filter chip
-  cy.contains("100% completion").should('not.exist')
+  cy.get(".MuiChip-labelMedium").contains("Completed").click() // testing filter chip
+  cy.contains("100%").should('not.exist')
   cy.get(".MuiListItemText-primary").contains("Completed Content_001").should("not.exist")
   cy.get(".MuiListItemText-primary").contains("Progressed Content_001").should("exist")
 })
@@ -145,9 +149,9 @@ it('Student2 user able to see video content attempts made', () => {
   cy.contains("Content_001").click()
   cy.contains("button", "Attempts", { timeout: 8000 }).click()
   cy.get("#appbar_title").contains("Content_001").should("exist")
-  cy.contains("Attempts: 1").should('exist')
+  cy.contains("Student 2 : Incomplete").should('exist')
   cy.get('span[role="progressbar"]').should('exist')
-  cy.contains("Student 2").click()
+  cy.contains("Student 2 : Incomplete").click()
   cy.get("#appbar_title").contains("Student 2 - Content_001").should("exist")
   cy.contains('Incomplete').should('exist')
   cy.get('span[role="progressbar"]').should('exist')
@@ -165,9 +169,9 @@ it('Student3 user able to see epub content attempts made', () => {
   cy.contains('Content_002').click()
   cy.contains("button", "Attempts").click()
   cy.get("#appbar_title").contains("Content_002").should("exist")
-  cy.contains("Attempts: 1").should('exist')
+  cy.contains("Student 3 : Incomplete").should('exist')
   cy.get('span[role="progressbar"]').should('exist')
-  cy.contains("Student 3").click()
+  cy.contains("Student 3 : Incomplete").click()
   cy.get("#appbar_title").contains("Student 3 - Content_002").should("exist")
  // Assert attempt score, completion, duration visible
   cy.contains('Incomplete').should('exist')
@@ -186,15 +190,14 @@ it('Teacher user can see student users attempts', () => {
   cy.contains('Content_001').click()
   cy.contains("button", "Attempts").click()
  // verify teacher able to see students list in attempts screen
-  cy.contains("Student 1").should("exist")
-  cy.contains("Student 2").should("exist")
+  cy.contains("Student 1 : Completed").should("exist")
+  cy.contains("Student 2 : Incomplete").should("exist")
 // *** student 2  **** //
   cy.get("#appbar_title").contains("Content_001").should("exist")
   cy.get('span[role="progressbar"]').should('exist')
-  cy.contains("Attempts: 1").should('exist')
-  cy.contains("Student 2").click()
+  cy.contains("1 Attempts").should('exist')
+  cy.contains("Student 2 : Incomplete").click()
   cy.get("#appbar_title").contains("Student 2 - Content_001").should("exist")
-  cy.contains("Student 2").click()
   cy.contains('Incomplete').should('exist')
   cy.get('span[role="progressbar"]').should('exist')
   cy.contains('Incomplete').click()
