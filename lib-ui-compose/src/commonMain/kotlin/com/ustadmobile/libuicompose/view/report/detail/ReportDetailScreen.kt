@@ -129,7 +129,9 @@ fun BarGraphSampleScreen(
         } else {
             stringResource(MR.strings.count)
         }
-
+    val hasAnyDuration = reportOptions.series.any {
+        it.reportSeriesYAxis?.type == YAxisTypes.DURATION
+    }
     if (graphSeries.isNotEmpty() && statementReportRow.isNotEmpty()) {
         Column(modifier = Modifier.fillMaxSize()) {
             CombinedGraph(
@@ -138,7 +140,8 @@ fun BarGraphSampleScreen(
                     .weight(0.6f)
                     .fillMaxWidth(),
                 xAxisLabel = reportOptions.xAxis?.name ?: "",
-                yAxisLabel = yAxisLabel
+                yAxisLabel = yAxisLabel,
+                isDurationType = hasAnyDuration
             )
 
             MoreOptionsSection(

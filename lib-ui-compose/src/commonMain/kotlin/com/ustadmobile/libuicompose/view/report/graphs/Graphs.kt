@@ -42,7 +42,8 @@ fun CombinedGraph(
     series: List<GraphSeries>,
     modifier: Modifier = Modifier,
     xAxisLabel: String,
-    yAxisLabel: String
+    yAxisLabel: String,
+    isDurationType: Boolean
 ) {
     val allXValues = remember(series) {
         series.flatMap { it.data.map { row -> row.xAxis } }.distinct().sorted()
@@ -79,8 +80,8 @@ fun CombinedGraph(
         series.flatMap { it.data.map { row -> row.yAxis } }.maxOrNull() ?: 0.0
     }
 
-    val (conversionFactor, unit) = remember(yAxisLabel, maxY) {
-        calculateConversionFactor(yAxisLabel, maxY)
+    val (conversionFactor, unit) = remember(isDurationType, maxY) {
+        calculateConversionFactor(isDurationType, maxY)
     }
 
     // Process bar series data
@@ -140,10 +141,12 @@ fun CombinedGraph(
             },
             xAxisTitle = { AxisLabels(xAxisLabel) },
             yAxisLabels = {
-                AxisLabels(
-                    "%.1f".format(it),
-                    Modifier.defaultItemPadding(end = 4.dp)
-                )
+                val formattedValue = if (isDurationType) {
+                    "%.1f %s".format(it, unit)  // Shows "1.5 hr" format
+                } else {
+                    "%.0f".format(it)  // Shows whole numbers for counts
+                }
+                AxisLabels(formattedValue, Modifier.defaultItemPadding(end = 4.dp))
             },
             yAxisTitle = {
                 AxisLabels(
@@ -165,7 +168,10 @@ fun CombinedGraph(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             HoverSurface {
-                                Text("%.1f %s".format(entry.y[subgroupIndex].yMax, unit))
+                                Text(
+                                    if (isDurationType) "%.1f %s".format(entry.y[subgroupIndex].yMax, unit)
+                                    else "%.0f".format(entry.y[subgroupIndex].yMax)
+                                )
                             }
                         }
                     },
@@ -325,18 +331,16 @@ private fun calculateSubgroupValues(
     }.firstOrNull()?.yAxis?.times(conversionFactor)?.toFloat() ?: 0f
 }
 
-private fun calculateConversionFactor(yAxisLabel: String, maxY: Double): Pair<Double, String> {
+private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<Double, String> {
     return when {
-        yAxisLabel.equals(YAxisTypes.DURATION.name, ignoreCase = true) -> {
+        isDuration -> {
             when {
                 maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, "hr")
                 maxY >= 60_000 -> Pair(1.0 / 60_000, "min")
                 else -> Pair(1.0 / 1_000, "sec")
             }
         }
-
-        maxY == 0.0 -> Pair(1.0, "") // Handle zero case
-        else -> Pair(1.0, yAxisLabel)
+        else -> Pair(1.0, "")
     }
 }
 
