@@ -139,7 +139,7 @@ fun BarGraphSampleScreen(
                 modifier = Modifier
                     .weight(0.6f)
                     .fillMaxWidth(),
-                xAxisLabel = reportOptions.xAxis?.name ?: "",
+                xAxisLabel = reportOptions.xAxis,
                 yAxisLabel = yAxisLabel,
                 isDurationType = hasAnyDuration
             )

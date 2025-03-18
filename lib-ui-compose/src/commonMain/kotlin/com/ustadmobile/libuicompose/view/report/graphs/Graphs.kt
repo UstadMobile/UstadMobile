@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ustadmobile.core.domain.report.model.GraphSeries
+import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -41,7 +42,7 @@ import io.github.koalaplot.core.xygraph.XYGraph
 fun CombinedGraph(
     series: List<GraphSeries>,
     modifier: Modifier = Modifier,
-    xAxisLabel: String,
+    xAxisLabel: ReportXAxis?,
     yAxisLabel: String,
     isDurationType: Boolean
 ) {
@@ -115,7 +116,7 @@ fun CombinedGraph(
 
     // Determine step size for count-based Y-axis
     val tickIncrement = remember(yRange, yAxisLabel) {
-        calculateTickIncrement(yRange, yAxisLabel, unit)
+        calculateTickIncrement(yRange, yAxisLabel, unit, isDurationType)
     }
 
     ChartLayout(
@@ -134,19 +135,19 @@ fun CombinedGraph(
             ),
             xAxisLabels = {
                 val index = it.toInt()
-                AxisLabels(
+                AxisValue(
                     label = allXValues.getOrNull(index) ?: "",
                     Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
                 )
             },
-            xAxisTitle = { AxisLabels(xAxisLabel) },
+            xAxisTitle = { AxisLabels(xAxisLabel?.name ?: "") },
             yAxisLabels = {
                 val formattedValue = if (isDurationType) {
                     "%.1f %s".format(it, unit)  // Shows "1.5 hr" format
                 } else {
                     "%.0f".format(it)  // Shows whole numbers for counts
                 }
-                AxisLabels(formattedValue, Modifier.defaultItemPadding(end = 4.dp))
+                AxisValue(formattedValue, Modifier.defaultItemPadding(end = 4.dp))
             },
             yAxisTitle = {
                 AxisLabels(
@@ -169,7 +170,10 @@ fun CombinedGraph(
                         ) {
                             HoverSurface {
                                 Text(
-                                    if (isDurationType) "%.1f %s".format(entry.y[subgroupIndex].yMax, unit)
+                                    if (isDurationType) "%.1f %s".format(
+                                        entry.y[subgroupIndex].yMax,
+                                        unit
+                                    )
                                     else "%.0f".format(entry.y[subgroupIndex].yMax)
                                 )
                             }
@@ -300,6 +304,16 @@ private fun AxisLabels(label: String, modifier: Modifier = Modifier) {
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+    )
+}
+@Composable
+private fun AxisValue(label: String, modifier: Modifier = Modifier) {
+    androidx.compose.material3.Text(
+        label,
+        modifier = modifier.fillMaxWidth(),
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1,
+        textAlign = androidx.compose.ui.text.style.TextAlign.End,
         fontSize = 8.sp
     )
 }
@@ -340,6 +354,7 @@ private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<D
                 else -> Pair(1.0 / 1_000, "sec")
             }
         }
+
         else -> Pair(1.0, "")
     }
 }
@@ -347,11 +362,12 @@ private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<D
 private fun calculateTickIncrement(
     yRange: ClosedFloatingPointRange<Float>,
     yAxisLabel: String,
-    unit: String
+    unit: String,
+    isDurationType: Boolean
 ): Float {
     val range = yRange.endInclusive - yRange.start
     return when {
-        range == 0f -> 1f // Handle zero range case
+        range == 0f -> 1f
         yAxisLabel.equals(YAxisTypes.COUNT.name, ignoreCase = true) -> {
             when {
                 range < 10 -> 1f
@@ -368,7 +384,13 @@ private fun calculateTickIncrement(
                 else -> 30f
             }
         }
-    }.coerceAtMost(range / 5)
+    }.coerceAtMost(
+        if (isDurationType) {
+            range / 5
+        } else {
+            1f
+        }
+    )
 }
 
 fun Modifier.defaultChartPadding() = this
