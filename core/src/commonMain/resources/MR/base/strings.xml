@@ -806,6 +806,8 @@
     <string name="ask_your_teacher_for_code">Ask your teacher for the code, then enter it below:</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="invite_link_desc">Anyone with this link can join and apply to join. You can then approve or reject their request to join.</string>
+    <string name="male">Male</string>
+    <string name="copy">Copy</string>
     <string name="copy_link">Copy link</string>
     <string name="copy_code">Copy code</string>
     <string name="share_link">Share link</string>
@@ -1438,6 +1440,8 @@
     <string name="add_a_new_course">Add a new course</string>
     <string name="join_existing_course">Join existing course</string>
     <string name="edit_course">Edit course</string>
+    <string name="copy_course">Copy course</string>
+
     <string name="currently_enrolled">Currently enrolled</string>
     <string name="past_enrollments">Past enrollments</string>
     <string name="unread">Unread</string>

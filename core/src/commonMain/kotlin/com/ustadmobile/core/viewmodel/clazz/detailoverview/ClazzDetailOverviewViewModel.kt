@@ -60,7 +60,7 @@ data class ClazzDetailOverviewUiState(
 
     val managePermissionVisible: Boolean = false,
 
-) {
+    ) {
     val clazz: Clazz?
         get() = clazzAndDetail?.clazz
 
@@ -97,7 +97,7 @@ class ClazzDetailOverviewViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     destinationName: String = DEST_NAME,
-): DetailViewModel<ClazzWithDisplayDetails>(di, savedStateHandle, destinationName) {
+) : DetailViewModel<ClazzWithDisplayDetails>(di, savedStateHandle, destinationName) {
 
     private val _uiState = MutableStateFlow(ClazzDetailOverviewUiState())
 
@@ -118,7 +118,7 @@ class ClazzDetailOverviewViewModel(
                     visible = false,
                     text = systemImpl.getString(MR.strings.edit),
                     icon = FabUiState.FabIcon.EDIT,
-                    onClick = this::onClickEdit
+                    onClick = { this.onClickEdit("edit") }
                 )
             )
         }
@@ -139,7 +139,7 @@ class ClazzDetailOverviewViewModel(
                     permissionFlow.map {
                         it.firstPermission
                     }.distinctUntilChanged().collectLatest { hasViewPermission ->
-                        if(hasViewPermission) {
+                        if (hasViewPermission) {
                             launch {
                                 activeRepo.courseBlockDao().findAllCourseBlockByClazzUidAsFlow(
                                     clazzUid = entityUidArg,
@@ -165,7 +165,7 @@ class ClazzDetailOverviewViewModel(
                                     }
                                 }
                             }
-                        }else{
+                        } else {
                             _uiState.update { prev ->
                                 prev.copy(courseBlockList = emptyList())
                             }
@@ -244,7 +244,7 @@ class ClazzDetailOverviewViewModel(
             ARG_CLAZZUID to entityUidArg.toString(),
         )
 
-        when(courseBlock.cbType) {
+        when (courseBlock.cbType) {
             CourseBlock.BLOCK_MODULE_TYPE -> {
                 _uiState.update { prev ->
                     prev.copy(
@@ -253,15 +253,19 @@ class ClazzDetailOverviewViewModel(
                 }
                 _listRefreshCommandFlow.tryEmit(RefreshCommand())
             }
+
             CourseBlock.BLOCK_TEXT_TYPE -> {
                 navController.navigate(TextBlockDetailViewModel.DEST_NAME, navArgs)
             }
+
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
                 navController.navigate(ClazzAssignmentDetailViewModel.DEST_NAME, navArgs)
             }
+
             CourseBlock.BLOCK_DISCUSSION_TYPE -> {
                 navController.navigate(CourseDiscussionDetailViewModel.DEST_NAME, navArgs)
             }
+
             CourseBlock.BLOCK_CONTENT_TYPE -> {
                 navController.navigate(
                     viewName = ContentEntryDetailViewModel.DEST_NAME,
@@ -275,9 +279,11 @@ class ClazzDetailOverviewViewModel(
         }
     }
 
-    private fun onClickEdit() {
-        navController.navigate(ClazzEditViewModel.DEST_NAME,
-            mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()))
+    fun onClickEdit(actionType: String) {
+        navController.navigate(
+            ClazzEditViewModel.DEST_NAME,
+            mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString(), UstadView.ARG_ACTION_TYPE to actionType)
+        )
     }
 
     fun onClickPermissions() {

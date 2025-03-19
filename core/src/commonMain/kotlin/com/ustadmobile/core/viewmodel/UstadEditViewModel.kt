@@ -21,7 +21,7 @@ abstract class UstadEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     destinationName: String,
-) : UstadViewModel(di, savedStateHandle, destinationName){
+) : UstadViewModel(di, savedStateHandle, destinationName) {
 
     protected var saveStateJob: Job? = null
 
@@ -40,7 +40,7 @@ abstract class UstadEditViewModel(
         saveStateJob?.cancel()
         saveStateJob = viewModelScope.launch {
             delay(commitDelay)
-            if(entity != null) {
+            if (entity != null) {
                 savedStateHandle.setJson(key, serializer, entity)
             }
         }
@@ -73,7 +73,7 @@ abstract class UstadEditViewModel(
         val createdNewEntity = savedStateHandle[ARG_ENTITY_UID] == null
         val returnResultExpected = (popUpToViewName != null && saveToKey != null)
 
-        if(createdNewEntity && !returnResultExpected) {
+        if (createdNewEntity && !returnResultExpected) {
             navController.navigate(
                 viewName = detailViewName,
                 args = buildMap {
@@ -85,7 +85,7 @@ abstract class UstadEditViewModel(
                     popUpToInclusive = true
                 )
             )
-        }else {
+        } else {
             finishWithResult(result)
         }
     }
@@ -95,14 +95,18 @@ abstract class UstadEditViewModel(
      * an existing entity and another message id for the title if creating a new entity.
      */
     protected fun createEditTitle(
+        actionType: String,
         newEntityStringResource: StringResource,
         editEntityStringResource: StringResource,
+        copyEntityStringResource: StringResource
     ): String {
         val isEditing = entityUidArg != 0L || savedStateHandle[ARG_ENTITY_JSON] != null
         return systemImpl.getString(
-            if(isEditing) {
+            if (actionType == "copy") {
+                copyEntityStringResource
+            } else if (isEditing) {
                 editEntityStringResource
-            }else {
+            } else {
                 newEntityStringResource
             }
         )
@@ -118,9 +122,9 @@ abstract class UstadEditViewModel(
         currentFieldValue: Any?,
         currentErrorMessage: String?,
     ): String? {
-        return if(currentErrorMessage == null)
+        return if (currentErrorMessage == null)
             null
-        else if(prevFieldValue != currentFieldValue)
+        else if (prevFieldValue != currentFieldValue)
             null
         else
             currentErrorMessage

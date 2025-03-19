@@ -88,6 +88,6 @@ fun ClazzDetailOverviewScreenPreview() {
 //                )
 //            },
             clazzCodeVisible = true
-        )
+        ),
     )
 }

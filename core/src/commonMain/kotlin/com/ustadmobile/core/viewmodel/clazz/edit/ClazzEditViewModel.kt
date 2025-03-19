@@ -133,11 +133,11 @@ class ClazzEditViewModel(
      */
     private val effectiveClazzUid = savedStateHandle[ARG_ENTITY_UID]?.toLong()
         ?: activeDb.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)
-
+    val actionType=savedStateHandle[UstadView.ARG_ACTION_TYPE]
     private val createNewClazzUseCase: CreateNewClazzUseCase by di.onActiveEndpoint().instance()
 
     init {
-        val title = createEditTitle(MR.strings.add_a_new_course, MR.strings.edit_course)
+        val title = createEditTitle(actionType.toString(),MR.strings.add_a_new_course, MR.strings.edit_course,MR.strings.copy_course)
         _appUiState.update {
             AppUiState(
                 title = title,

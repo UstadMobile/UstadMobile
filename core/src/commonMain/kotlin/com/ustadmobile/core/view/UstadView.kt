@@ -99,6 +99,7 @@ interface UstadView {
 
         const val ARG_PERSON_UID = "personUid"
 
+        const val ARG_ACTION_TYPE = "actionType"
         /**
          * Somewhere to go after the given Screen is completed e.g. after a login, regisrtation, etc.
          */

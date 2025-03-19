@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.FileCopy
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -70,9 +71,10 @@ fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
 
     ClazzDetailOverviewScreen(
         uiState = uiState,
-        onClickCourseBlock = viewModel::onClickCourseBlock,
         onClickClassCode = viewModel::onClickClazzCode,
+        onClickCourseBlock = viewModel::onClickCourseBlock,
         onClickPermissions = viewModel::onClickPermissions,
+        onClickEdit = viewModel::onClickEdit
     )
 }
 
@@ -82,6 +84,7 @@ fun ClazzDetailOverviewScreen(
     onClickClassCode: (String) -> Unit = {},
     onClickCourseBlock: (CourseBlock) -> Unit = {},
     onClickPermissions: () -> Unit = { },
+    onClickEdit: (String) -> Unit= { },
 ) {
 
     val clazzDateRange = rememberFormattedDateRange(
@@ -124,11 +127,20 @@ fun ClazzDetailOverviewScreen(
                 ) {
                     Row {
                         if(uiState.managePermissionVisible) {
-                            UstadQuickActionButton(
-                                imageVector = Icons.Default.Shield,
-                                labelText = stringResource(MR.strings.permissions),
-                                onClick = onClickPermissions,
-                            )
+                            Row {
+                                UstadQuickActionButton(
+                                    imageVector = Icons.Default.Shield,
+                                    labelText = stringResource(MR.strings.permissions),
+                                    onClick = onClickPermissions,
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                UstadQuickActionButton(
+                                    imageVector = Icons.Default.FileCopy,
+                                    labelText = stringResource(MR.strings.copy),
+                                    onClick = {onClickEdit("copy")},
+                                )
+                            }
+
                         }
                     }
 
