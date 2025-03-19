@@ -100,17 +100,12 @@ class RegisterAgeRedirectViewModel(
             putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             putFromSavedStateIfPresent(ARG_NEXT)
             put(ARG_SHOW_ACCEPT_BUTTON,true.toString())
-
-
+            put(SignUpViewModel.ARG_IS_MINOR,isMinor.toString())
             put(PersonEditViewModel.ARG_DATE_OF_BIRTH, date.toString())
         }
 
-        if (isMinor) {
-            //not decided where to go
-            //navController.navigate(PersonEditViewModel.DEST_NAME_REGISTER, args)
-        } else {
-            navController.navigate(SiteTermsDetailViewModel.DEST_NAME, args)
-        }
+        navController.navigate(SiteTermsDetailViewModel.DEST_NAME, args)
+
 
 
     }

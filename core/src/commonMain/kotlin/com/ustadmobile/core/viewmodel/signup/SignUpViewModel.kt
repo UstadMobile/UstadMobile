@@ -10,6 +10,7 @@ import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.appstate.Snack
@@ -107,6 +108,8 @@ class SignUpViewModel(
 
     private val getLocalAccountsSupportedUseCase: GetLocalAccountsSupportedUseCase by instance()
 
+    private val isMinor = savedStateHandle[SignUpViewModel.ARG_IS_MINOR].toBoolean()
+
     private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]
         ?: apiUrlConfig.newPersonalAccountsLearningSpaceUrl ?: "http://localhost"
 
@@ -152,6 +155,11 @@ class SignUpViewModel(
                 hideAppBar =false,
                 navigationVisible = false,
                 userAccountIconVisible = false,
+                actionBarButtonState = ActionBarButtonUiState(
+                    visible = isMinor,
+                    text = systemImpl.getString(MR.strings.done),
+                    onClick = this::onClickDone
+                )
             )
         }
         if (savedStateHandle[ARG_IS_PERSONAL_ACCOUNT] == "true") {
@@ -171,8 +179,8 @@ class SignUpViewModel(
                     isPersonalAccount = _uiState.value.isPersonalAccount
                 ),
                 serverUrl_ = serverUrl,
-                passkeySupported = createPasskeyUseCase != null,
-                showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke(),
+                passkeySupported = createPasskeyUseCase != null&&!isMinor,
+                showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke()&&!isMinor,
 
                 )
         }
@@ -210,6 +218,10 @@ class SignUpViewModel(
         _uiState.update { prev ->
             prev.copy(isTeacher = checked)
         }
+    }
+
+    fun onClickDone(){
+
     }
 
     fun onPersonPictureChanged(pictureUri: String?) {
@@ -462,6 +474,8 @@ class SignUpViewModel(
 
         const val ARG_IS_PERSONAL_ACCOUNT = "personalAccount"
 
+        const val ARG_IS_MINOR = "isMinor"
+
         const val ARG_NEW_OR_EXISTING_USER = "NewOrExistingUser"
 
         val REGISTRATION_ARGS_TO_PASS = listOf(
@@ -471,7 +485,8 @@ class SignUpViewModel(
             ARG_DATE_OF_BIRTH,
             ARG_REGISTRATION_MODE,
             ARG_NEW_OR_EXISTING_USER,
-            ARG_IS_PERSONAL_ACCOUNT
+            ARG_IS_PERSONAL_ACCOUNT,
+            ARG_IS_MINOR
         )
 
         const val SIGN_WITH_USERNAME_AND_PASSWORD = "SignupWithUsernameAndPassword"
