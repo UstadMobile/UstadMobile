@@ -51,8 +51,10 @@ class CourseGroupSetEditViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 title = createEditTitle(
+                    "",
                     newEntityStringResource = MR.strings.add_new_groups,
-                    editEntityStringResource = MR.strings.edit_groups
+                    editEntityStringResource = MR.strings.edit_groups,
+                    MR.strings.copy_course
                 ),
                 hideBottomNavigation = true,
                 loadingState = LoadingUiState.INDETERMINATE,

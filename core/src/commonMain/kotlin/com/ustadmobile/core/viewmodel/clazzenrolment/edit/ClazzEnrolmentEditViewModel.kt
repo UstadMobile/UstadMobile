@@ -62,8 +62,10 @@ class ClazzEnrolmentEditViewModel(
             prev.copy(
                 loadingState = LoadingUiState.INDETERMINATE,
                 title = createEditTitle(
+                    "",
                     newEntityStringResource = MR.strings.new_enrolment,
                     editEntityStringResource = MR.strings.edit_enrolment,
+                    MR.strings.copy_course
                 ),
             )
         }

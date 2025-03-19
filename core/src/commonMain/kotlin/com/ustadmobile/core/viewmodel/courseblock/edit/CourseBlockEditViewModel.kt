@@ -173,11 +173,11 @@ class CourseBlockEditViewModel(
                 prev.copy(
                     title = when(blockVal?.cbType) {
                         CourseBlock.BLOCK_MODULE_TYPE ->
-                            createEditTitle(MR.strings.add_module, MR.strings.edit_module)
+                            createEditTitle("",MR.strings.add_module, MR.strings.edit_module,MR.strings.copy_course)
                         CourseBlock.BLOCK_TEXT_TYPE ->
-                            createEditTitle(MR.strings.add_text, MR.strings.edit_text)
+                            createEditTitle("",MR.strings.add_text, MR.strings.edit_text,MR.strings.copy_course)
                         CourseBlock.BLOCK_DISCUSSION_TYPE ->
-                            createEditTitle(MR.strings.add_discussion, MR.strings.edit_discussion)
+                            createEditTitle("",MR.strings.add_discussion, MR.strings.edit_discussion,MR.strings.copy_course)
                         CourseBlock.BLOCK_CONTENT_TYPE -> systemImpl.getString(MR.strings.edit_content_block)
                         else -> ""
                     },

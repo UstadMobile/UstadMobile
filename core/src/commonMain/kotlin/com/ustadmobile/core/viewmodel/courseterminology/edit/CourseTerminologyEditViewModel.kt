@@ -43,7 +43,7 @@ class CourseTerminologyEditViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = createEditTitle(MR.strings.add_new_terminology, MR.strings.edit_terminology),
+                title = createEditTitle("",MR.strings.add_new_terminology, MR.strings.edit_terminology,MR.strings.copy_course),
                 loadingState = LoadingUiState.INDETERMINATE
             )
         }

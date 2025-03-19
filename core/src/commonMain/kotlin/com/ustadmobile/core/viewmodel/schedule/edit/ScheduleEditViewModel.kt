@@ -39,7 +39,7 @@ class ScheduleEditViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = createEditTitle(MR.strings.add_a_schedule, MR.strings.edit_schedule),
+                title = createEditTitle("",MR.strings.add_a_schedule, MR.strings.edit_schedule,MR.strings.copy_course),
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
                     text = systemImpl.getString(MR.strings.done),

@@ -123,7 +123,7 @@ class ClazzAssignmentEditViewModel(
                 hideBottomNavigation = true,
                 userAccountIconVisible = false,
                 loadingState = LoadingUiState.INDETERMINATE,
-                title = createEditTitle(MR.strings.new_assignment, MR.strings.edit_assignment),
+                title = createEditTitle("",MR.strings.new_assignment, MR.strings.edit_assignment,MR.strings.copy_course),
             )
         }
 
