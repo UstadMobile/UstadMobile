@@ -472,10 +472,9 @@ fun CustomDateRangeInputs(
 ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         DatePickerButton(
             label = stringResource(MR.strings.from) ,
