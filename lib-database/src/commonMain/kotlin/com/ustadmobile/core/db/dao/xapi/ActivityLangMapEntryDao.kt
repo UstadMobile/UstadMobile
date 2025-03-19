@@ -31,6 +31,7 @@ expect abstract class ActivityLangMapEntryDao {
     abstract suspend fun upsertIfInteractionEntityExists(
         almeActivityUid: Long,
         almeHash: Long,
+        almePropName: String?,
         almeLangCode: String?,
         almeValue: String?,
         almeAieHash: Long,

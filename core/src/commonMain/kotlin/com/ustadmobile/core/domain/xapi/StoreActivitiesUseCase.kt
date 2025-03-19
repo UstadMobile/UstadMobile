@@ -108,6 +108,7 @@ class StoreActivitiesUseCase(
                 dbOrRepo.activityLangMapEntryDao().upsertIfInteractionEntityExists(
                     almeActivityUid = it.almeActivityUid,
                     almeAieHash = it.almeAieHash,
+                    almePropName = it.almePropName,
                     almeValue = it.almeValue,
                     almeLastMod = timeNow,
                     almeLangCode = it.almeLangCode,
