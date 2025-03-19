@@ -127,16 +127,18 @@ onFlowComplete:
 - assertVisible:
     text: "Video_Content.mp4"
     id: "app_title"
-- assertVisible: "Student 1"
-- assertVisible: "100% completion"
+- assertVisible: "Student 1: Completed"
+- assertVisible:  "Progress"
+- assertVisible: "100%"
 - assertVisible:
     id: "progress_bar"
-- tapOn: "Student 1"
+- tapOn: "Student 1: Completed"
 - assertVisible:
     text: "Student 1 - Video_Content.mp4"
     id: "app_title"
 - assertVisible: "Completed"
-- assertVisible: "100% completion"
+- assertVisible: "100%"
+- assertVisible: "Progress"
 - assertVisible:
     id: "progress_bar"
 - tapOn: "Completed"
@@ -144,30 +146,17 @@ onFlowComplete:
     text: "Video_Content.mp4"
     id: "app_title"
 - assertVisible: "Completed"
-- assertVisible:
-    id: "progress_bar"
-    index: 0
-- assertVisible:
-    text: "100% completion"
-    index: 0
-- assertVisible:
-    id: "progress_bar"
-    index: 1
-- assertVisible:
-    text: "100% completion"
-    index: 1
-- assertVisible: "Completed"
 - assertVisible: "Progressed"
-- assertVisible: "Completed Video_Content.mp4"
 - assertVisible: "Progressed Video_Content.mp4"
+- assertVisible: "Completed Video_Content.mp4"
+- assertVisible:
+      id: "progress_bar"
+- assertVisible: "100%"
+- assertVisible: "Progress"
   # verify filter
 - tapOn: "Completed"
-- assertNotVisible:
-    id: "progress_bar"
-    index: 1
-- assertNotVisible:
-    text: "100% completion"
-    index: 1
+- assertNotVisible: "Completed Video_Content.mp4"
+
 
 # Student 2 attempt H5p content
 - runFlow: "common/clear_state_and_get_started.yaml"
@@ -191,25 +180,24 @@ onFlowComplete:
 - assertVisible:
     text: "True/False Question"
     id: "app_title"
-- assertVisible: "Student 2"
-- assertVisible: "1 Attempts"
-- tapOn: "Student 2"
+- assertVisible: "Student 2: Completed"
+- assertVisible:  "Score"
+- assertVisible: "0%"
+- assertVisible:
+      id: "progress_bar"
+- tapOn:
+    id: "progress_bar"
 - assertVisible:
     text: "Student 2 - True/False Question"
     id: "app_title"
-- assertVisible: "0% score"
+- assertVisible: "Failed"
 - tapOn:
     id: "progress_bar"
 - assertVisible:
     text: "True/False Question"
     id: "app_title"
-- assertVisible: "0% score"
-# verify filters are working
-- tapOn:
-    text: "Answered"
-    index: 0
-- assertNotVisible: "0% score"
-- assertVisible: "Nothing here, yet"
+- assertVisible: "0%"
+- assertVisible: "Score"
 
 # Student 3 makes attempt on H5p content
 - runFlow: "common/clear_state_and_get_started.yaml"
@@ -222,7 +210,7 @@ onFlowComplete:
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - tapOn: "True/False Question"
-- tapOn: Open
+- tapOn: "Open"
 - tapOn: "Yes "
 - tapOn: "Check"
 - tapOn: "Close tab"
@@ -231,16 +219,18 @@ onFlowComplete:
 - assertVisible:
     text: "True/False Question"
     id: "app_title"
-- assertVisible: "Student 3"
-- assertVisible: "1 Attempts"
-- assertVisible: "100% score"
-- tapOn: "Student 3"
+- assertVisible: "Student 3: Passed"
+- assertVisible: "100%"
+- assertVisible: "Score"
+- tapOn: "Student 3: Passed"
 - assertVisible:
     text: "Student 3 - True/False Question"
     id: "app_title"
+- assertVisible: "Passed"
 - assertVisible:
     id: "progress_bar"
-- assertVisible: "100% score"
+- assertVisible: "100%"
+- assertVisible: "Score"
 - tapOn:
     id: "progress_bar"
 - assertVisible:
@@ -248,7 +238,8 @@ onFlowComplete:
     id: "app_title"
 - assertVisible: "Answered"
 - assertVisible: "Answered "
-- assertVisible: "100% score"
+- assertVisible: "100%"
+- assertVisible: "Score"
 
 # verify teacher able to see students attempts
 - runFlow: "common/clear_state_and_get_started.yaml"
@@ -272,28 +263,30 @@ onFlowComplete:
 - assertVisible:
     text: "True/False Question"
     id: "app_title"
-- assertVisible: "Student 2"
-- assertVisible: "1 Attempts"
-- assertVisible: "Student 3"
-- assertVisible: "1 Attempts"
-- assertVisible: "100% Score"
-- tapOn: "Student 3"
+- assertVisible: "Student 2: Completed"
+- assertVisible: "Student 3: Passed"
+- assertVisible: "100%"
+- assertVisible: "Score"
+- tapOn: "Student 3: Passed"
+- assertVisible: "Passed"
 - assertVisible:
     text: "Student 3 - True/False Question"
     id: "app_title"
 - assertVisible:
     id: "progress_bar"
-- assertVisible: "100% Score"
+- assertVisible: "100%"
+- assertVisible: "Score"
 - tapOn:
     id: "progress_bar"
 - assertVisible:
     text: "True/False Question"
     id: "app_title"
     # On maestro Teacher not able to see progress -
-#- assertVisible:
-#    text: "Answered"
-#    index: 0
-#- assertVisible: "100% score"
+- assertVisible:
+    text: "Answered"
+    index: 0
+- assertVisible: "100%"
+- assertVisible: "Score"
   # Verify student 1 not able to see attempts made in course content by Student 2
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"

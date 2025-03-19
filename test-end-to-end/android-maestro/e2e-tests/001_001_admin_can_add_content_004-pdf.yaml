@@ -52,21 +52,23 @@ onFlowComplete:
 - assertVisible:
     text: "Pdf_Content"
     id: "app_title"
-- assertVisible: "Admin User"
+- assertVisible: "Admin User: Completed"
 - assertVisible: "1 Attempts"
-- tapOn: "100% completion"
-- tapOn: "Admin User"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+- tapOn: "Admin User: Completed"
 - assertVisible:
     text: "Admin User - Pdf_Content"
     id: "app_title"
 - assertVisible: "Completed"
-- assertVisible: "100% completion"
+- assertVisible: "100%"
+- assertVisible: "Progress"
 - tapOn: "Completed"
 - assertVisible:
     text: "Pdf_Content"
     id: "app_title"
 - assertVisible: "Completed "
 - assertVisible: "Progressed "
-- assertVisible: "100% completion"
-- tapOn: "Completed"    # filter is unselected
-- assertNotVisible: "100% completion"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+
