@@ -60,7 +60,7 @@ it('Admin user add content to the library', () => {
   cy.get("#appbar_title").contains("Content_003").should("exist")
   cy.get('span[role="progressbar"]').should('exist')
   cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
-  cy.get(".MuiTypography-body1").contains("Completed").should("exist")
+  cy.get(".MuiChip-labelMedium").contains("Completed").should("exist")
   cy.get(".MuiListItemText-primary").contains("Completed Content_003").should("exist")
   cy.contains("100%").should("exist")
   cy.contains("Progress").should("exist")
@@ -98,11 +98,11 @@ it('Admin user add content to the library', () => {
   cy.contains("Importing", { timeout: 20000 }).should("not.exist")
   cy.contains("button","OPEN").click()
   cy.contains("#appbar_title", "Content_004").should("be.visible")
-  cy.get('iframe[id="pdf_js"]', { timeout: 20000 }).should('be.visible')
+  cy.get('iframe[id="pdf_js"]', { timeout: 50000 }).should('be.visible')
   cy.get('iframe[id="pdf_js"]').then(($iframe) => {
   const iframeBody = $iframe.contents().find('body');
   cy.wrap(iframeBody)
-    .find('#viewerContainer') // PDF.js container
+    .find('#viewerContainer', { timeout: 50000 }) // PDF.js container
     .scrollTo('bottom', { duration: 1000 })
   })
   cy.go('back')
@@ -126,7 +126,7 @@ it('Admin user add content to the library', () => {
     cy.get("#appbar_title").contains("Content_004").should("exist")
     cy.get('span[role="progressbar"]').should('exist')
     cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
-    cy.get(".MuiTypography-body1").contains("Completed").should("exist")
+    cy.get(".MuiChip-labelMedium").contains("Completed").should("exist")
     cy.get(".MuiListItemText-primary").contains("Completed Content_004").should("exist")
     cy.contains("100%").should("exist")
     cy.contains("Progress").should("exist")

@@ -131,9 +131,9 @@ it('Student-1 user able to see attempts made on content 1', () => {
   cy.contains('100%').should('exist')
   cy.contains('Progress').should('exist')
   cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
-  cy.get(".MuiTypography-body1").contains("Completed").should("exist") // Filter chip
+  cy.get(".MuiChip-labelMedium").contains("Completed").should("exist") // Filter chip
   cy.get(".MuiListItemText-primary").contains("Completed Content_001").should("exist")
-  cy.get(".MuiTypography-body1").contains("Progressed").should("exist") // Filter chip
+  cy.get(".MuiChip-labelMedium").contains("Progressed").should("exist") // Filter chip
   cy.get(".MuiListItemText-primary").contains("Progressed Content_001").should("exist")
   cy.get('span[role="progressbar"]').should('exist')
   cy.get(".MuiChip-labelMedium").contains("Completed").click() // testing filter chip
@@ -157,7 +157,7 @@ it('Student2 user able to see video content attempts made', () => {
   cy.get('span[role="progressbar"]').should('exist')
   cy.contains('Incomplete').click()
   cy.get("#appbar_title").contains("Content_001").should("exist")
-  cy.get(".MuiTypography-body1").contains("Progressed").should("exist")
+  cy.get(".MuiChip-labelMedium").contains("Progressed").should("exist")
   cy.get(".MuiListItemText-primary").contains("Progressed Content_001").should("exist")
   cy.get('span[role="progressbar"]').should('exist')
 })
@@ -178,7 +178,7 @@ it('Student3 user able to see epub content attempts made', () => {
   cy.get("svg[data-testid='CalendarTodayIcon']").should('exist')
   cy.get('span[role="progressbar"]').should('exist')
   cy.contains('Incomplete').click()
-  cy.get(".MuiTypography-body1").contains("Progressed").should("exist")
+  cy.get(".MuiChip-labelMedium").contains("Progressed").should("exist")
   cy.get(".MuiListItemText-primary").contains("Progressed The Adopting of Rosa Marie / (A Sequel to Dandelion Cottage)").should("exist")
   cy.get("#appbar_title").contains("Content_002").should("exist")
   cy.get('span[role="progressbar"]').should('exist')
