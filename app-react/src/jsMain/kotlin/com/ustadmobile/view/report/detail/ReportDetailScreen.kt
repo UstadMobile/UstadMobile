@@ -142,12 +142,15 @@ private val moreOption = FC<ReportDetailProps> { props ->
     val data = useMemo(props.uiState) {
         props.uiState.reportOptions2.series.mapIndexed { index, reportSeries ->
             GraphSeries(
-                type = SeriesType.BAR,
-                data = props.uiState.reportResults.getOrNull(index)?.map {
+                type = when (reportSeries.reportSeriesVisualType) {
+                    ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
+                    else -> SeriesType.BAR
+                },
+                data = props.uiState.reportResults.getOrNull(index)?.map { statementRow ->
                     ReportResultQueryRow(
-                        xAxis = it.xAxis,
-                        yAxis = it.yAxis,
-                        subgroup = it.subgroup
+                        xAxis = statementRow.xAxis,
+                        yAxis = statementRow.yAxis,
+                        subgroup = statementRow.subgroup
                     )
                 } ?: emptyList(),
                 name = reportSeries.reportSeriesTitle

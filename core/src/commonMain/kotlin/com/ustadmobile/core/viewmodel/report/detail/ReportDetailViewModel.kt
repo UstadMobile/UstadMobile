@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.report.detail
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportPeriod
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.INDETERMINATE
@@ -31,7 +32,7 @@ data class ReportDetailUiState(
     val dialogVisible: Boolean = false,
     val reportOptions2: ReportOptions2 = ReportOptions2(),
     val reportResults: List<List<StatementReportRow>> = emptyList(),
-    val errorMessage: String? = null // Add error handling
+    val errorMessage: String? = null
 )
 
 class ReportDetailViewModel(
@@ -66,7 +67,7 @@ class ReportDetailViewModel(
                         icon = FabUiState.FabIcon.EDIT,
                         onClick = this@ReportDetailViewModel::onClickEdit
                     ),
-                title = "Graph title",
+                title = "Graph",
             )
         }
         viewModelScope.launch {

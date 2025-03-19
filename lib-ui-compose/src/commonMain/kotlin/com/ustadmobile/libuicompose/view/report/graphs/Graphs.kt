@@ -13,12 +13,14 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
+import dev.icerock.moko.resources.compose.stringResource
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.bar.DefaultVerticalBar
@@ -49,14 +51,7 @@ fun CombinedGraph(
     val allXValues = remember(series) {
         series.flatMap { it.data.map { row -> row.xAxis } }.distinct().sorted()
     }
-    val hasValidData = remember(series) {
-        series.any { it.data.any { row -> row.yAxis > 0 } }
-    }
 
-    if (!hasValidData) {
-        Text("No data available")
-        return
-    }
     val xValueToIndex = remember(allXValues) {
         allXValues.withIndex().associate { (index, xValue) -> xValue to index }
     }
@@ -135,8 +130,13 @@ fun CombinedGraph(
             ),
             xAxisLabels = {
                 val index = it.toInt()
+                val rawValue = allXValues.getOrNull(index)
+                val label = when (xAxisLabel) {
+                    ReportXAxis.GENDER -> getGenderLabel(rawValue)
+                    else -> rawValue?.toString() ?: ""
+                }
                 AxisValue(
-                    label = allXValues.getOrNull(index) ?: "",
+                    label = label,
                     Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
                 )
             },
@@ -215,17 +215,41 @@ fun CombinedGraph(
 }
 
 @Composable
+private fun getGenderLabel(rawValue: Any?): String {
+    return when (rawValue as? String) {
+        "0" -> stringResource(MR.strings.male)
+        "1" -> stringResource(MR.strings.female)
+        else -> rawValue?.toString() ?: ""
+    }
+}
+
+@Composable
 private fun CombinedLegend(
     series: List<GraphSeries>,
     colorMap: Map<String, Color>
 ) {
+    // Filter series with non-empty subgroups
     val barSeriesMap = series.filter { it.type == SeriesType.BAR }
         .groupBy { it.name }
-        .mapValues { entry -> entry.value.flatMap { it.data }.map { it.subgroup ?: "" }.distinct() }
+        .mapValues { entry ->
+            entry.value.flatMap { it.data }
+                .mapNotNull { it.subgroup }
+                .filter { it.isNotEmpty() }
+                .distinct()
+        }
+        .filterValues { it.isNotEmpty() }
 
     val lineSeriesMap = series.filter { it.type == SeriesType.LINE }
         .groupBy { it.name }
-        .mapValues { entry -> entry.value.flatMap { it.data }.map { it.subgroup ?: "" }.distinct() }
+        .mapValues { entry ->
+            entry.value.flatMap { it.data }
+                .mapNotNull { it.subgroup }
+                .filter { it.isNotEmpty() }
+                .distinct()
+        }
+        .filterValues { it.isNotEmpty() }
+
+    if (barSeriesMap.isEmpty() && lineSeriesMap.isEmpty()) return
 
     Surface(
         shadowElevation = 2.dp,
@@ -243,6 +267,7 @@ private fun CombinedLegend(
                 bottom = 5.dp
             )
         ) {
+            // Show bar series legends only if they have subgroups
             barSeriesMap.forEach { (seriesName, subgroups) ->
                 if (subgroups.isNotEmpty()) {
                     Text(seriesName)
@@ -259,6 +284,7 @@ private fun CombinedLegend(
                 }
             }
 
+            // Show line series legends only if they have subgroups
             lineSeriesMap.forEach { (seriesName, subgroups) ->
                 if (subgroups.isNotEmpty()) {
                     Text(seriesName)
