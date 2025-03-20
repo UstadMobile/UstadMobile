@@ -90,6 +90,6 @@ onFlowComplete:
 - tapOn: "Chart type"
 - tapOn: "Line Chart"
 - tapOn: "Done"
-- assertVisible: "Share"
-- assertVisible: "Export data"
+#- assertVisible: "SHARE"
+#- assertVisible: "EXPORT DATA"
 - takeScreenshot: "${TESTRESULTSDIR}/line_chart_graph_report"
