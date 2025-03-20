@@ -38,6 +38,8 @@ import mui.icons.material.Login
 import react.dom.html.ReactHTML.img
 import react.router.useLocation
 import mui.icons.material.Shield as ShieldIcon
+import mui.icons.material.FileCopy as FileCopyIcon
+
 
 
 external interface ClazzDetailOverviewProps : Props {
@@ -51,6 +53,9 @@ external interface ClazzDetailOverviewProps : Props {
     var onClickCourseBlock: (CourseBlock) -> Unit
 
     var onClickPermissions: () -> Unit
+
+    var onClickEdit: (String) -> Unit
+
 }
 
 val ClazzDetailOverviewComponent = FC<ClazzDetailOverviewProps> { props ->
@@ -100,18 +105,26 @@ val ClazzDetailOverviewComponent = FC<ClazzDetailOverviewProps> { props ->
 
                         Stack {
                             direction = responsive(StackDirection.row)
-
-                            if(props.uiState.managePermissionVisible) {
-                                UstadQuickActionButton {
-                                    text = strings[MR.strings.permissions]
-                                    icon = ShieldIcon.create()
-                                    onClick = {
-                                        props.onClickPermissions()
+                            if (props.uiState.managePermissionVisible) {
+                                Stack {
+                                    direction = responsive(StackDirection.row)
+                                    UstadQuickActionButton {
+                                        text = strings[MR.strings.permissions]
+                                        icon = ShieldIcon.create()
+                                        onClick = {
+                                            props.onClickPermissions()
+                                        }
+                                    }
+                                    UstadQuickActionButton {
+                                        text = strings[MR.strings.copy]
+                                        icon = FileCopyIcon.create()
+                                        onClick = {
+                                            props.onClickEdit("copy")
+                                        }
                                     }
                                 }
                             }
                         }
-
                         Divider()
                     }
                 }
@@ -210,6 +223,8 @@ val ClazzDetailOverviewScreen = FC<Props> {
         onClickCourseBlock = viewModel::onClickCourseBlock
         onClickClazzCode = viewModel::onClickClazzCode
         onClickPermissions = viewModel::onClickPermissions
+        onClickEdit = viewModel::onClickEdit
+
     }
 }
 
