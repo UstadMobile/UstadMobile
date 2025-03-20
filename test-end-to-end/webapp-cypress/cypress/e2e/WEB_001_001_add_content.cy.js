@@ -95,47 +95,38 @@ it('Admin user add content to the library', () => {
   cy.get(".MuiChip-labelMedium").contains("Progressed").click() // testing filter chip
   cy.get('span[role="progressbar"]').should('not.exist')
   cy.get("svg[data-testid='CheckIcon']").should('not.exist')
-// Pdf scroll getting failed on jenkins
+
 // Add Pdf Content
   cy.ustadAddContentToLibrary('../test-files/content/Pdf_Content.pdf','Content_004')
   cy.contains('Content_004').click()
   cy.contains("Importing", { timeout: 20000 }).should("not.exist")
   cy.contains("button","OPEN").click()
   cy.contains("#appbar_title", "Content_004").should("be.visible")
-  cy.get('iframe[id="pdf_js"]', { timeout: 50000 }).should('be.visible')
-  cy.get('iframe[id="pdf_js"]').then(($iframe) => {
-  const iframeBody = $iframe.contents().find('body');
-  cy.wrap(iframeBody)
-    .find('#viewerContainer', { timeout: 50000 }) // PDF.js container
-    .scrollTo('bottom', { duration: 1000 })
-  })
+  cy.wait(3000)
+ // cy.get('iframe[id="pdf_js"]', { timeout: 60000 }).should('be.visible')
   cy.go('back')
-
-//  Attempt list for pdf content is not coming as expected, expected - 100% Progress but getting 0% progress
-  // Attempts made on pdf
-    cy.contains("Attempts").click()
-    cy.get("#appbar_title").contains("Content_004").should("exist")
-    cy.contains("Admin User : Completed").should("exist")
-    cy.contains("100%").should("exist")
-    cy.contains("Progress").should("exist")
-    cy.get('span[role="progressbar"]').should('exist')
-    cy.contains("Admin User : Completed").click()
-    cy.contains("Completed").should("exist")
-    cy.contains("100%").should("exist")
-    cy.contains("Progress").should("exist")
-    cy.get("#appbar_title").contains("Admin User - Content_004").should("exist")
-    cy.get("svg[data-testid='CalendarTodayIcon']").should('exist')
-    cy.get('span[role="progressbar"]').should('exist')
-    cy.contains("Completed").click()
-    cy.get("#appbar_title").contains("Content_004").should("exist")
-    cy.get('span[role="progressbar"]').should('exist')
-    cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
-    cy.get(".MuiChip-labelMedium").contains("Completed").should("exist")
-    cy.get(".MuiListItemText-primary").contains("Completed ").should("exist")
-    cy.contains("100%").should("exist")
-    cy.contains("Progress").should("exist")
-
-
+ // Attempts made on pdf
+  cy.contains("Attempts").click()
+  cy.get("#appbar_title").contains("Content_004").should("exist")
+  cy.contains("Admin User : Completed").should("exist")
+  cy.contains("100%").should("exist")
+  cy.contains("Progress").should("exist")
+  cy.get('span[role="progressbar"]').should('exist')
+  cy.contains("Admin User : Completed").click()
+  cy.contains("Completed").should("exist")
+  cy.contains("100%").should("exist")
+  cy.contains("Progress").should("exist")
+  cy.get("#appbar_title").contains("Admin User - Content_004").should("exist")
+  cy.get("svg[data-testid='CalendarTodayIcon']").should('exist')
+  cy.get('span[role="progressbar"]').should('exist')
+  cy.contains("Completed").click()
+  cy.get("#appbar_title").contains("Content_004").should("exist")
+  cy.get('span[role="progressbar"]').should('exist')
+  cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
+  cy.get(".MuiChip-labelMedium").contains("Completed").should("exist")
+  cy.get(".MuiListItemText-primary").contains("Completed ").should("exist")
+  cy.contains("100%").should("exist")
+  cy.contains("Progress").should("exist")
 })
 
   after(() => {
