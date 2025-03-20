@@ -21,6 +21,7 @@ import react.useRef
 import space.kscience.plotly.bar
 import space.kscience.plotly.layout
 import space.kscience.plotly.models.ScatterMode
+import space.kscience.plotly.models.TickMode
 import space.kscience.plotly.models.TraceType
 import space.kscience.plotly.plotDiv
 import space.kscience.plotly.scatter
@@ -67,7 +68,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                                     name = "${series.name} - $subgroup"
                                     x.strings = data.map { it.xAxis }
                                     y.numbers = transformedYValues
-                                    mode = ScatterMode.lines
+                                    mode = ScatterMode.`lines+markers`
                                     type = TraceType.scatter
                                 }
                             }
@@ -81,6 +82,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                                     ?: props.strings[MR.strings.x_axis]
                                 font { size = 16 }
                             }
+                            tickmode = TickMode.linear
                         }
                         yaxis {
                             title {
@@ -99,7 +101,16 @@ val ReportGraph = FC<ReportGraphProps> { props ->
         ref = containerRef
     }
 }
-
+private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<Double, String> {
+    return when {
+        isDuration -> when {
+            maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, "hr")
+            maxY >= 60_000 -> Pair(1.0 / 60_000, "min")
+            else -> Pair(1.0 / 1_000, "sec")
+        }
+        else -> Pair(1.0, "")
+    }
+}
 private fun transformYAxisValues(
     data: List<ReportResultQueryRow>,
     reportOptions: ReportOptions2,
@@ -107,10 +118,13 @@ private fun transformYAxisValues(
     val isDuration = reportOptions.series.any {
         it.reportSeriesYAxis?.type == YAxisTypes.DURATION
     }
+    val maxY = data.maxOfOrNull { it.yAxis } ?: 0.0
+    val (conversionFactor) = calculateConversionFactor(isDuration, maxY)
 
     return data.map { row ->
-        if (isDuration) row.yAxis / (1000 * 60 * 60)
-        else row.yAxis
+        (row.yAxis * conversionFactor).let {
+            if (isDuration) it else it.toInt().toDouble()
+        }
     }
 }
 
