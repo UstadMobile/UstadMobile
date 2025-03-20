@@ -103,9 +103,8 @@ it('Admin user add content to the library', () => {
   cy.contains("button","OPEN").click()
   cy.contains("#appbar_title", "Content_004").should("be.visible")
   cy.wait(3000)
- // cy.get('iframe[id="pdf_js"]', { timeout: 60000 }).should('be.visible')
   cy.go('back')
- // Attempts made on pdf
+// Attempts made on pdf
   cy.contains("Attempts").click()
   cy.get("#appbar_title").contains("Content_004").should("exist")
   cy.contains("Admin User : Completed").should("exist")
