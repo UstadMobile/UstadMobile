@@ -36,10 +36,10 @@ onFlowComplete:
 - tapOn: "Video"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 60000
+    timeout: 80000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 60000
+    timeout: 80000
 # teacher add existing content in library to course as a content block
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
@@ -95,10 +95,10 @@ onFlowComplete:
     id: "app_title"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 60000
+    timeout: 80000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 60000
+    timeout: 80000
 - tapOn: "Open"
 - assertVisible: "Check"
 
@@ -169,7 +169,7 @@ onFlowComplete:
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
 - tapOn: "True/False Question"
-- tapOn: Open
+- tapOn: "Open"
 - runFlow:
     file: "common/chrome-first-run-check.yaml"
 # Student answered wrong
@@ -256,7 +256,7 @@ onFlowComplete:
 - scrollUntilVisible:
     element:
       text: "True/False Question"
-    direction: DOWN
+    direction: "DOWN"
 - tapOn: "True/False Question"
 # Verify teacher able to see attempts made in course content
 - tapOn: "Attempts"

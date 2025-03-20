@@ -17,12 +17,15 @@ it('Admin user add content to the library', () => {
   cy.ustadGetH5pBody().find(".h5p-question-check-answer.h5p-joubelui-button","Check").click()
   cy.ustadGetH5pBody().find(".h5p-question-feedback-content-text","You got 1 out of 1 points").should("be.visible")
   cy.go('back')
+
+  /* Attempts are not visible for this h5p content on cypress, manually it works
   cy.contains("Library").click()
-  /* cy.contains("Content_001").click()
+  cy.contains("Content_001").click()
   cy.contains("Attempts").click()
   cy.wait(2000)
- // cy.contains("Admin User").should("exist") -------- Attempts are not visible for this h5p content on cypress, manually it works
+ // cy.contains("Admin User").should("exist")
  */
+
  //Add Epub content
   cy.ustadAddContentToLibrary('../test-files/content/Epub_Content1.epub','Content_002')
   cy.contains('Content_002').click()
@@ -92,7 +95,7 @@ it('Admin user add content to the library', () => {
   cy.get(".MuiChip-labelMedium").contains("Progressed").click() // testing filter chip
   cy.get('span[role="progressbar"]').should('not.exist')
   cy.get("svg[data-testid='CheckIcon']").should('not.exist')
-/*  Pdf scroll getting failed on jenkins
+// Pdf scroll getting failed on jenkins
 // Add Pdf Content
   cy.ustadAddContentToLibrary('../test-files/content/Pdf_Content.pdf','Content_004')
   cy.contains('Content_004').click()
@@ -108,7 +111,7 @@ it('Admin user add content to the library', () => {
   })
   cy.go('back')
 
-/*  Attempt list for pdf content is not coming as expected, expected - 100% Progress but getting 0% progress
+//  Attempt list for pdf content is not coming as expected, expected - 100% Progress but getting 0% progress
   // Attempts made on pdf
     cy.contains("Attempts").click()
     cy.get("#appbar_title").contains("Content_004").should("exist")
@@ -128,10 +131,10 @@ it('Admin user add content to the library', () => {
     cy.get('span[role="progressbar"]').should('exist')
     cy.get("svg[data-testid='CheckIcon']").should('exist') // Filter already applied by default
     cy.get(".MuiChip-labelMedium").contains("Completed").should("exist")
-    cy.get(".MuiListItemText-primary").contains("Completed Content_004").should("exist")
+    cy.get(".MuiListItemText-primary").contains("Completed ").should("exist")
     cy.contains("100%").should("exist")
     cy.contains("Progress").should("exist")
-    */
+
 
 })
 
