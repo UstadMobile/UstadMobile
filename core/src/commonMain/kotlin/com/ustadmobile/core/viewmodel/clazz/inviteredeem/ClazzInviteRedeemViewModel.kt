@@ -54,7 +54,7 @@ class ClazzInviteRedeemViewModel(
 
     init {
         ifLoggedInElseNavigateToLoginWithNextDestSet(
-            requireAdultAccount = true,
+            requireAdultAccount = false,
             args = mapOf(ARG_INVITE_CODE to argInviteCode)
         ) {
             _appUiState.update { prev ->

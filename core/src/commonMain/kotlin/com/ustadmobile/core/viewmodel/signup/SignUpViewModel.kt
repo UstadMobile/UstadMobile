@@ -63,11 +63,15 @@ data class SignUpUiState(
 
     val firstName: String? = null,
 
+    val parentEmail: String? = null,
+
     val dateOfBirthError: String? = null,
 
     val genderError: String? = null,
 
     val fullNameError: String? = null,
+
+    val parentEmailError: String? = null,
 
     val isParent: Boolean = false,
 
@@ -81,7 +85,11 @@ data class SignUpUiState(
 
     val showOtherOption: Boolean = true,
 
+    val showPasskeyButton: Boolean = true,
+
     val isPersonalAccount: Boolean = false,
+
+    val isMinor: Boolean = false
 ) {
 
 
@@ -107,8 +115,6 @@ class SignUpViewModel(
     private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val getLocalAccountsSupportedUseCase: GetLocalAccountsSupportedUseCase by instance()
-
-    private val isMinor = savedStateHandle[SignUpViewModel.ARG_IS_MINOR].toBoolean()
 
     private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]
         ?: apiUrlConfig.newPersonalAccountsLearningSpaceUrl ?: "http://localhost"
@@ -156,7 +162,7 @@ class SignUpViewModel(
                 navigationVisible = false,
                 userAccountIconVisible = false,
                 actionBarButtonState = ActionBarButtonUiState(
-                    visible = isMinor,
+                    visible = _uiState.value.isMinor,
                     text = systemImpl.getString(MR.strings.done),
                     onClick = this::onClickDone
                 )
@@ -179,11 +185,17 @@ class SignUpViewModel(
                     isPersonalAccount = _uiState.value.isPersonalAccount
                 ),
                 serverUrl_ = serverUrl,
-                passkeySupported = createPasskeyUseCase != null&&!isMinor,
-                showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke()&&!isMinor,
+                passkeySupported = createPasskeyUseCase != null,
+                showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke(),
 
                 )
         }
+        _uiState.update { prev->
+            prev.copy(
+                isMinor = savedStateHandle[SignUpViewModel.ARG_IS_MINOR].toBoolean()
+            )
+        }
+
     }
 
     fun onEntityChanged(entity: Person?) {
@@ -241,6 +253,14 @@ class SignUpViewModel(
         }
     }
 
+
+    fun onParentEmailValueChange(parentEmail: String) {
+        _uiState.update { prev ->
+            prev.copy(
+               parentEmail = parentEmail
+            )
+        }
+    }
 
     fun onFullNameValueChange(fullName: String) {
         _uiState.update { prev ->

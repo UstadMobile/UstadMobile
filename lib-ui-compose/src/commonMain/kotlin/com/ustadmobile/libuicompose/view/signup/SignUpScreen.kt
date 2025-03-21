@@ -46,6 +46,7 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
         onclickSignUpWithPasskey = viewModel::onClickedSignup,
         onclickOtherOptions = viewModel::onClickOtherOption,
         onFullNameValueChange = viewModel::onFullNameValueChange,
+        onParentEmailValueChange = viewModel::onParentEmailValueChange,
 
         )
 
@@ -61,6 +62,7 @@ fun SignUpScreen(
     onTeacherCheckChanged: (Boolean) -> Unit = { },
     onParentCheckChanged: (Boolean) -> Unit = { },
     onFullNameValueChange: (String) -> Unit = { },
+    onParentEmailValueChange: (String) -> Unit = { },
 
     ) {
     UstadVerticalScrollColumn(
@@ -109,8 +111,26 @@ fun SignUpScreen(
                     Text(uiState.genderError ?: stringResource(MR.strings.required))
                 }
             )
+        if (uiState.isMinor){
+            OutlinedTextField(
+                modifier = Modifier
+                    .testTag("paren_email")
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
+                value = uiState.parentEmail ?: "",
+                label = { Text(stringResource(MR.strings.parent_email) + "*") },
+                isError = uiState.parentEmailError != null,
+                singleLine = true,
+                onValueChange = { parentEmail ->
+                    onParentEmailValueChange(parentEmail)
+                },
+                supportingText = {
+                    Text(uiState.parentEmailError ?: stringResource(MR.strings.required))
+                }
+            )
+        }
 
-        if (uiState.isPersonalAccount) {
+        if (uiState.isPersonalAccount&&!uiState.isMinor) {
             Row(
                 modifier = Modifier.padding(vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -139,28 +159,32 @@ fun SignUpScreen(
                 )
             }
         }
-        Button(
-            onClick = onclickSignUpWithPasskey,
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding()
-                .testTag("signup_passkey_button"),
-        ) {
-            Text(
-                text = if (uiState.passkeySupported) {
-                    stringResource(MR.strings.signup_with_passkey)
-                } else {
-                    stringResource(MR.strings.next)
-                }
-            )
+        if (!uiState.isMinor){
+            Button(
+                onClick = onclickSignUpWithPasskey,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultItemPadding()
+                    .testTag("signup_passkey_button"),
+            ) {
+                Text(
+                    text = if (uiState.passkeySupported) {
+                        stringResource(MR.strings.signup_with_passkey)
+                    } else {
+                        stringResource(MR.strings.next)
+                    }
+                )
+            }
         }
-        OutlinedButton(
-            onClick = onclickOtherOptions,
-            modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("other_option_button"),
-        ) {
-            Text(stringResource(MR.strings.other_options))
+        if (!uiState.isMinor) {
+            OutlinedButton(
+                onClick = onclickOtherOptions,
+                modifier = Modifier.fillMaxWidth().defaultItemPadding()
+                    .testTag("other_option_button"),
+            ) {
+                Text(stringResource(MR.strings.other_options))
+            }
         }
-
 
     }
 }
