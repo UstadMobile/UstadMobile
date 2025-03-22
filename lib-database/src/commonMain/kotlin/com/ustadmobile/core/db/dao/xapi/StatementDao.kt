@@ -29,6 +29,7 @@ import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
 import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfoConst
+import com.ustadmobile.lib.db.composites.xapi.StatementAndActivity
 import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_SCORE_ASC
 import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_SCORE_DESC
 import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_TIMESTAMP_ASC
@@ -715,5 +716,19 @@ expect abstract class StatementDao {
         contentEntryUid: Long,
         accountPersonUid: Long,
     ): List<StatementEntity>
+
+
+    @Query("""
+        SELECT StatementEntity.*, ActivityEntity.*
+          FROM StatementEntity
+               LEFT JOIN ActivityEntity
+                         ON ActivityEntity.actUid = StatementEntity.statementObjectUid1
+         WHERE StatementEntity.statementIdHi = :statementIdHi
+           AND StatementEntity.statementIdLo = :statementIdLo
+    """)
+    abstract suspend fun findByUidWithActivityAsync(
+        statementIdHi: Long,
+        statementIdLo: Long,
+    ): StatementAndActivity?
 
 }

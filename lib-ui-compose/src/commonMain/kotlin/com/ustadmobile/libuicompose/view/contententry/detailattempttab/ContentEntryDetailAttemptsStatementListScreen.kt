@@ -22,11 +22,14 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
@@ -34,6 +37,7 @@ import com.ustadmobile.core.util.ext.displayName
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListUiState
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.verbDisplayName
+import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import com.ustadmobile.lib.db.entities.xapi.VerbEntity
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadListSortHeader
@@ -46,6 +50,7 @@ import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.datetime.TimeZone
 
 @Composable
@@ -55,6 +60,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
     val uiState = viewModel.uiState.collectAsState(ContentEntryDetailAttemptsStatementListUiState())
     ContentEntryDetailAttemptsStatementList(
         uiState = uiState.value,
+        formattedResponseFlow = viewModel::formattedStatementResponse,
         refreshCommandFlow = viewModel.refreshCommandFlow,
         onSortOrderChanged = viewModel::onSortOrderChanged,
         onVerbFilterToggled = viewModel::onVerbFilterToggled,
@@ -64,6 +70,7 @@ fun ContentEntryDetailAttemptsStatementListScreen(
 @Composable
 fun ContentEntryDetailAttemptsStatementList(
     uiState: ContentEntryDetailAttemptsStatementListUiState,
+    formattedResponseFlow: (StatementEntityAndVerb) -> Flow<FormatStatementResponseUseCase.FormattedStatementResponse>,
     refreshCommandFlow: Flow<RefreshCommand> = rememberEmptyFlow(),
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onVerbFilterToggled: (VerbEntity) -> Unit = { },
@@ -139,6 +146,15 @@ fun ContentEntryDetailAttemptsStatementList(
                 )
             } ?: ""
 
+            val formattedResponseFlowVal = remember(
+                item?.statementEntity?.statementIdHi, item?.statementEntity?.statementIdLo
+            ) {
+                item?.let { formattedResponseFlow(it) } ?: emptyFlow()
+            }
+
+            val formattedResponse by formattedResponseFlowVal.collectAsState(
+                initial = FormatStatementResponseUseCase.FormattedStatementResponse("")
+            )
 
             ListItem(
                 leadingContent = {
@@ -162,7 +178,7 @@ fun ContentEntryDetailAttemptsStatementList(
                             Text(it.trim())
                         }
 
-                        item?.statementEntity?.resultResponse?.also {
+                        formattedResponse.string?.takeIf { it.isNotEmpty() }?.also {
                             Text("${stringResource(MR.strings.response)}: ${it.trim()}")
                         }
 

@@ -2,9 +2,11 @@ package com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab
 
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -16,9 +18,11 @@ import com.ustadmobile.lib.db.composites.xapi.StatementConst
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
 import com.ustadmobile.lib.db.composites.xapi.VerbEntityAndName
 import com.ustadmobile.lib.db.entities.xapi.VerbEntity
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 /**
  * @param deselectedVerbUids - storing deselected verbs makes life easier: no need to update when
@@ -52,6 +56,9 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         savedStateHandle[UstadView.ARG_CONTEXT_REGISTRATION_ID_LO]?.toLong() ?: 0
 
     private val argContentEntryUid = savedStateHandle[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
+
+    private val formatStatementResponseUseCase: FormatStatementResponseUseCase by
+        di.onActiveEndpoint().instance()
 
     private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementEntityAndVerb> = {
         activeRepo.statementDao().findStatementsBySession(
@@ -132,6 +139,12 @@ class ContentEntryDetailAttemptsStatementListViewModel(
 
     override fun onClickAdd() {
         //Not used
+    }
+
+    fun formattedStatementResponse(
+        statementEntity: StatementEntityAndVerb
+    ): Flow<FormatStatementResponseUseCase.FormattedStatementResponse> {
+        return formatStatementResponseUseCase(statementEntity.statementEntity, statementEntity.activity)
     }
 
     companion object {
