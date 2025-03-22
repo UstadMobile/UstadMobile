@@ -1,2 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <plurals name="duration_hours">
+        <item quantity="one">%d மணி</item>
+        <item quantity="other">%d மணிநேரம்</item>
+    </plurals>
+    <plurals name="number_of_attempts">
+        <item quantity="one">%d முயற்சி</item>
+        <item quantity="other">%d முயற்சிகள்</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%d மணித்துளி</item>
+        <item quantity="other">%d நிமிடங்கள்</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">%d நொடி</item>
+        <item quantity="other">%d வினாடிகள்</item>
+    </plurals>
+    <plurals name="items_selected">
+        <item quantity="one">%d உருப்படி தேர்ந்தெடுக்கப்பட்டது</item>
+        <item quantity="other">தேர்ந்தெடுக்கப்பட்ட %d உருப்படிகள்</item>
+    </plurals>
+    <plurals name="items_deleted">
+        <item quantity="one">%d உருப்படி நீக்கப்பட்டது</item>
+        <item quantity="other">%d உருப்படிகள் நீக்கப்பட்டன</item>
+    </plurals>
+    <plurals name="items_restored">
+        <item quantity="one">%d உருப்படி மீட்டெடுக்கப்பட்டது</item>
+        <item quantity="other">%d உருப்படிகள் மீட்டெடுக்கப்படுகின்றன</item>
+    </plurals>
+    <plurals name="are_you_sure_you_want_to_permanently_delete">
+        <item quantity="one">%d உருப்படியை நிரந்தரமாக நீக்க விரும்புகிறீர்களா?</item>
+        <item quantity="other">%d உருப்படிகளை நிரந்தரமாக நீக்க விரும்புகிறீர்களா?</item>
+    </plurals>
+</resources>
