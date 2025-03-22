@@ -178,8 +178,12 @@ fun ContentEntryDetailAttemptsStatementList(
                             Text(it.trim())
                         }
 
-                        formattedResponse.string?.takeIf { it.isNotEmpty() }?.also {
-                            Text("${stringResource(MR.strings.response)}: ${it.trim()}")
+                        formattedResponse.takeIf { it.hasResponse }?.also { response ->
+                            Text(buildString {
+                                append(stringResource(MR.strings.response) + ": ")
+                                response.string?.also { append(it) }
+                                response.stringResource?.also { append(stringResource(it)) }
+                            })
                         }
 
                         Row(

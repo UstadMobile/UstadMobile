@@ -1962,4 +1962,9 @@
     <string name="progress_key">Progress</string>
 
     <string name="response">Response</string>
+
+    <string name="true_key">true</string>
+
+    <string name="false_key">false</string>
+
 </resources>

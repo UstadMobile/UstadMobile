@@ -15,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import com.ustadmobile.core.MR
 
 class FormatStatementResponseUseCaseTest {
 
@@ -65,7 +66,7 @@ class FormatStatementResponseUseCaseTest {
 
     private fun assertFormattedResponseForStatement(
         statementResourcePath: String,
-        expectedResponse: String,
+        expectedResponseValidator: (FormatStatementResponseUseCase.FormattedStatementResponse) -> Unit,
     ) = runBlocking {
         val stmtUuid = uuid4()
         statementResource.put(
@@ -81,15 +82,26 @@ class FormatStatementResponseUseCaseTest {
         )!!
 
         formatStatementResponseUseCase(statementEntity, activityEntity).test {
-            val formatted = awaitItem()
-            assertEquals(expectedResponse, formatted.string)
+            expectedResponseValidator(awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }
 
+    private fun assertFormattedResponseForStatementEquals(
+        statementResourcePath: String,
+        expectedResponse: String,
+    ) {
+        assertFormattedResponseForStatement(
+            statementResourcePath = statementResourcePath,
+            expectedResponseValidator = {
+                assertEquals(expectedResponse, it.string)
+            }
+        )
+    }
+
     @Test
     fun givenChoiceResponse_whenFormatted_thenResponseWillBeAsExpected() {
-        assertFormattedResponseForStatement(
+        assertFormattedResponseForStatementEquals(
             statementResourcePath = "/com/ustadmobile/core/domain/xapi/multi-choice-statement.json",
             expectedResponse = "Golf Example",
         )
@@ -97,7 +109,7 @@ class FormatStatementResponseUseCaseTest {
 
     @Test
     fun givenChoiceWithMultipleResponses_whenFormatted_thenResponseWillBeAsExpected() {
-        assertFormattedResponseForStatement(
+        assertFormattedResponseForStatementEquals(
             statementResourcePath = "/com/ustadmobile/core/domain/xapi/multi-choice-statement-multiple-responses.json",
             expectedResponse = "Golf Example, Tetris Example",
         )
@@ -105,7 +117,7 @@ class FormatStatementResponseUseCaseTest {
 
     @Test
     fun givenLikertResponse_whenFormatted_thenWillBeAsExpected() {
-        assertFormattedResponseForStatement(
+        assertFormattedResponseForStatementEquals(
             statementResourcePath = "/com/ustadmobile/core/domain/xapi/likert-response-statement.json",
             expectedResponse = "It's Gonna Change the World",
         )
@@ -113,7 +125,7 @@ class FormatStatementResponseUseCaseTest {
 
     @Test
     fun givenSequencingResponse_whenFormatted_thenWillBeAsExpected() {
-        assertFormattedResponseForStatement(
+        assertFormattedResponseForStatementEquals(
             statementResourcePath = "/com/ustadmobile/core/domain/xapi/sequencing-response-statement.json",
             expectedResponse = "Tim, Mike, Ells, Ben",
         )
@@ -121,7 +133,7 @@ class FormatStatementResponseUseCaseTest {
 
     @Test
     fun givenMatchingResponse_whenFormatted_thenWillBeAsExpected() {
-        assertFormattedResponseForStatement(
+        assertFormattedResponseForStatementEquals(
             statementResourcePath = "/com/ustadmobile/core/domain/xapi/matching-response-statement.json",
             expectedResponse = "Ben - Duck, Chris - We got Runs, Troy - Van Delay Industries, Freddie - Swift Kick in the Grass",
         )
@@ -129,9 +141,19 @@ class FormatStatementResponseUseCaseTest {
 
     @Test
     fun givenPerformanceResponse_whenFormatted_thenWillBeAsExpected() {
-        assertFormattedResponseForStatement(
+        assertFormattedResponseForStatementEquals(
             statementResourcePath = "/com/ustadmobile/core/domain/xapi/performance-response-statement.json",
             expectedResponse = "Net pong matches won: 5, Strokes over par in disc golf at Liberty: 4, Lunch having been eaten: soup",
+        )
+    }
+
+    @Test
+    fun givenTrueFalseResponse_whenFormatted_thenWillBeAsExpected() {
+        assertFormattedResponseForStatement(
+            statementResourcePath = "/com/ustadmobile/core/domain/xapi/true-false-response-statement.json",
+            expectedResponseValidator = {
+                assertEquals(MR.strings.true_key, it.stringResource)
+            }
         )
     }
 
