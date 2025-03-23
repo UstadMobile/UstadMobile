@@ -153,7 +153,7 @@ fun ContentEntryDetailAttemptsStatementList(
             }
 
             val formattedResponse by formattedResponseFlowVal.collectAsState(
-                initial = FormatStatementResponseUseCase.FormattedStatementResponse("")
+                initial = FormatStatementResponseUseCase.FormattedStatementResponse(null)
             )
 
             ListItem(

@@ -299,38 +299,50 @@ expect abstract class StatementDao {
 
     /**
      * Get StatementEntities required for findPersonsWithAttempts when running over http
+     *
+     * For each person in the list, select the statement that has the maximum progress, the maximum
+     * score, and the most recent statement (this is required to ensure that the attempt is
+     * displayed even when there is no statement that counts as completion or progress for the
+     * content itself e.g. completionOrProgress = true). See StataementEntity.completionOrProgress.
      */
     @Query("""
         SELECT StatementEntity.*
-          FROM StatementEntity
-               LEFT JOIN ClazzEnrolment 
-                         ON ClazzEnrolment.clazzEnrolmentUid =
-                           COALESCE(
-                            (SELECT ClazzEnrolment.clazzEnrolmentUid 
-                               FROM ClazzEnrolment
-                              WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
-                                AND ClazzEnrolment.clazzEnrolmentActive
-                                AND ClazzEnrolment.clazzEnrolmentClazzUid = StatementEntity.statementClazzUid 
-                           ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
-                              LIMIT 1), 0)
-         WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
-           AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
-           AND (    StatementEntity.statementActorPersonUid = :accountPersonUid
-                      OR EXISTS(SELECT CoursePermission.cpUid
-                                  FROM CoursePermission
-                                 WHERE CoursePermission.cpClazzUid = StatementEntity.statementClazzUid
-                                   AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
-                                        OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
-                                   AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
-                                   AND NOT CoursePermission.cpIsDeleted)
-                      OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
-                          ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
-                          ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
+          FROM Person
+               JOIN StatementEntity
+                    ON (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN
+                            (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+                               FROM StatementEntity
+                              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                                AND StatementEntity.statementActorPersonUid = Person.personUid
+                                AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                           ORDER BY StatementEntity.extensionProgress DESC
+                              LIMIT 1)
+                    OR (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN    
+                          (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+                           FROM StatementEntity
+                          WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                            AND StatementEntity.statementActorPersonUid = Person.personUid
+                            AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                       ORDER BY StatementEntity.resultScoreScaled DESC
+                       LIMIT 1)
+                    OR (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN    
+                          (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+                           FROM StatementEntity
+                          WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                            AND StatementEntity.statementActorPersonUid = Person.personUid
+                       ORDER BY StatementEntity.timestamp DESC
+                       LIMIT 1)    
+         WHERE Person.personUid IN
+            (SELECT DISTINCT StatementEntity.statementActorPersonUid
+                    $FROM_STATEMENTS_WHERE_MATCHES_CONTENT_ENTRY_UID_AND_HAS_PERMISSION)      
+            AND (   :searchText = '%' 
+                 OR Person.firstNames || ' ' || Person.lastName LIKE :searchText) 
                           
     """)
     abstract suspend fun findPersonsWithAttemptsStatements(
         contentEntryUid: Long,
         accountPersonUid: Long,
+        searchText: String? = "%",
     ): List<StatementEntity>
 
     @HttpAccessible(
@@ -413,7 +425,7 @@ expect abstract class StatementDao {
         accountPersonUid: Long,
         searchText: String? = "%",
         sortOrder: Int,
-        ): PagingSource<Int, PersonAndPictureAndNumAttempts>
+    ): PagingSource<Int, PersonAndPictureAndNumAttempts>
 
 
     @Query("""

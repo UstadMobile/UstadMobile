@@ -1,6 +1,7 @@
 package com.ustadmobile.view.contententry.detailattemptstab
 
 import app.cash.paging.PagingSourceLoadResult
+import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
@@ -46,6 +47,7 @@ private const val WIDTH = 100
 
 external interface ContentEntryDetailAttemptsStatementListProps : Props {
     var uiState: ContentEntryDetailAttemptsStatementListUiState
+    var formattedResponseFlow: (StatementEntityAndVerb) -> Flow<FormatStatementResponseUseCase.FormattedStatementResponse>
     var refreshCommandFlow: Flow<RefreshCommand>?
     var onSortOrderChanged: (SortOrderOption) -> Unit
     var onVerbFilterToggled: (VerbEntity) -> Unit
@@ -56,10 +58,11 @@ val ContentEntryDetailAttemptsStatementListScreen = FC<Props> {
         ContentEntryDetailAttemptsStatementListViewModel(di, savedStateHandle)
     }
 
-    val uiState by viewModel.uiState.collectAsState(ContentEntryDetailAttemptsStatementListUiState())
+    val uiStateVal by viewModel.uiState.collectAsState(ContentEntryDetailAttemptsStatementListUiState())
 
     ContentEntryDetailAttemptsStatementListComponent {
-        this.uiState = uiState
+        uiState = uiStateVal
+        formattedResponseFlow = viewModel::formattedStatementResponse
         refreshCommandFlow = viewModel.refreshCommandFlow
         onSortOrderChanged = viewModel::onSortOrderChanged
         onVerbFilterToggled = viewModel::onVerbFilterToggled
@@ -146,6 +149,7 @@ val ContentEntryDetailAttemptsStatementListComponent = FC<ContentEntryDetailAtte
             ) { item ->
                 StatementEntityAndVerbListItem.create {
                     statement = item
+                    formattedResponseFlow = props.formattedResponseFlow
                 }
             }
         }

@@ -157,6 +157,16 @@ class FormatStatementResponseUseCaseTest {
         )
     }
 
+    @Test
+    fun givenInvalidResponse_whenFormatted_thenWontThrowException() {
+        assertFormattedResponseForStatement(
+            statementResourcePath = "/com/ustadmobile/core/domain/xapi/true-false-response-statement.json",
+            expectedResponseValidator = {
+                //Do nothing - just make sure it doesn't throw an exception
+            }
+        )
+    }
+
 
 
 

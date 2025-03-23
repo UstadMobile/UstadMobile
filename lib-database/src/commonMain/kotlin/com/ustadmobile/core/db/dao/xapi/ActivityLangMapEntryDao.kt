@@ -4,6 +4,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.PostgresQuery
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
@@ -53,6 +54,7 @@ expect abstract class ActivityLangMapEntryDao {
         almeLastMod: Long,
     )
 
+    @HttpAccessible
     @Query("""
         SELECT ActivityLangMapEntry.*
           FROM ActivityLangMapEntry

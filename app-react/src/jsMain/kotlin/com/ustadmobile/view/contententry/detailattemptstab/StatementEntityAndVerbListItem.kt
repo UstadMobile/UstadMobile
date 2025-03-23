@@ -26,10 +26,18 @@ import react.create
 import react.dom.html.ReactHTML.div
 import react.useRequiredContext
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
+import com.ustadmobile.core.hooks.collectAsState
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import react.useMemo
 
 external interface StatementEntityAndVerbListItemProps: Props {
 
     var statement: StatementEntityAndVerb?
+
+    var formattedResponseFlow: (StatementEntityAndVerb) ->
+        Flow<FormatStatementResponseUseCase.FormattedStatementResponse>
 
 }
 
@@ -43,6 +51,18 @@ val StatementEntityAndVerbListItem = FC<StatementEntityAndVerbListItemProps> { p
         )
     }
     val stringsXml = useStringProvider()
+
+    val formattedResponseFlowVal = useMemo(
+        props.statement?.statementEntity?.statementIdHi, props.statement?.statementEntity?.statementIdLo
+    ) {
+        props.statement?.let {
+            props.formattedResponseFlow(it)
+        } ?: emptyFlow()
+    }
+
+    val formattedResponse by formattedResponseFlowVal.collectAsState(
+        FormatStatementResponseUseCase.FormattedStatementResponse(string = null)
+    )
 
     ListItem {
         ListItemIcon {
@@ -63,9 +83,13 @@ val StatementEntityAndVerbListItem = FC<StatementEntityAndVerbListItemProps> { p
                     }
                 }
 
-                props.statement?.statementEntity?.resultResponse?.also {
+                formattedResponse.takeIf { it.hasResponse }?.also { response ->
                     div {
-                        + "${stringsXml[MR.strings.response]}: ${it.trim()}"
+                        + buildString {
+                            append(stringsXml[MR.strings.response] + ": ")
+                            response.string?.also { append(it) }
+                            response.stringResource?.also { append(stringsXml[it]) }
+                        }
                     }
                 }
 

@@ -50,7 +50,7 @@ class FormatStatementResponseUseCase(
         }
 
         when(interactionType) {
-             in INTERACTION_TYPES_WITH_IDS -> {
+            in INTERACTION_TYPES_WITH_IDS -> {
                 listOfNotNull(db, repo).forEach { dataSource ->
                     val langMapEntries = dataSource.activityLangMapEntryDao().findAllByActivityUid(
                         statement.statementObjectUid1
@@ -87,7 +87,9 @@ class FormatStatementResponseUseCase(
                          */
                         ActivityEntity.TYPE_MATCHING -> {
                             response.split("[,]").map { matchPairStr ->
-                                val (sourceId, targetId) = matchPairStr.split("[.]", limit = 2)
+                                val pairStrList = matchPairStr.split("[.]", limit = 2)
+                                val sourceId = pairStrList.first()
+                                val targetId = pairStrList.getOrNull(1)
                                 val sourceText = langMapEntries.firstOrNull {
                                     it.almePropName == "source-$sourceId"
                                 }?.almeValue ?: sourceId
@@ -140,6 +142,19 @@ class FormatStatementResponseUseCase(
                 )
             }
 
+            //As per the spec, fill-in and long fill-in use [,] to separate responses, so
+            //replace this with a normal comma and space.
+            ActivityEntity.TYPE_FILL_IN, ActivityEntity.TYPE_LONG_FILL_IN -> {
+                emit(
+                    FormattedStatementResponse(
+                        string = response.replace("[,]", ", ").trim()
+                    )
+                )
+            }
+
+            else -> {
+                emit(FormattedStatementResponse(string = response.trim()))
+            }
         }
     }
 
