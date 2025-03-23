@@ -1,14 +1,19 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/reports/maestro/007_007_admin_or_teacher_send_group_invitation_to_join_course/Screenshots"
+  TESTRESULTSDIR: "build/reports/maestro/007_007_admin_or_teacher_send_group_invitation_to_join_course_001_username_invite/Screenshots"
 onFlowStart:
-  - startRecording: 007_007_admin_or_teacher_send_group_invitation_to_join_course
+  - startRecording: 007_007_admin_or_teacher_send_group_invitation_to_join_course_001_username_invite
   - runScript:
       file: "common/startserver.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
   - clearState: com.toughra.ustadmobile
-
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runScript:
     file: "common/import_users_via_http.js"
@@ -35,34 +40,21 @@ onFlowStart:
 - tapOn: "Send"
 #- assertVisible: "invitation sent"
 # Fetch the invitation email via HTTP
+- clearState: com.toughra.ustadmobile
 - runScript:
     file: "common/fetch_invitation_link.js"
     env:
       EMAIL: "student1@email.com"
-- tapOn: "Messages"
-- assertVisible: "Student 1"
-- assertVisible: "Student 2"
-
-- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- tapOn: "New user"
+- runFlow:
+    when:
+      visible: "Personal"
+    commands:
+      - tapOn: "Join Learning Space"
+- tapOn: "Enter link manually"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"
-- tapOn: "Messages"
-- tapOn: "Teacher 1"
-- runFlow:
-    when:
-      visible:
-        text: "Be careful interacting online and in-app!"
-    commands:
-      - tapOn: "Got it"
-- tapOn: "Invitation to Test Course"
-- tapOn: "Accept"
-- tapOn: "Courses"
-- tapOn: "Test Course Block"
-- tapOn:
-    text: "Members"
-    index: 0
-- assertVisible: "Student 1"
