@@ -524,6 +524,7 @@ class ClazzEditViewModel(
             Napier.d("onClickSave: hasErrors")
             return
         }
+        val isCopyAction=actionType=="copy"
 
         //Entity to save
         val entity = initEntity.shallowCopy {
@@ -534,6 +535,10 @@ class ClazzEditViewModel(
             if(clazzEndTime != Long.MAX_VALUE){
                 clazzEndTime = Instant.fromEpochMilliseconds(initEntity.clazzEndTime)
                     .toLocalEndOfDay(initEntity.effectiveTimeZone).toEpochMilliseconds()
+            }
+            if (isCopyAction) {
+                clazzUid = 0L
+                clazzName = "${initEntity.clazzName}"
             }
         }
 
@@ -560,8 +565,8 @@ class ClazzEditViewModel(
             }
 
             activeDb.withDoorTransactionAsync {
-                if(entityUidArg == 0L) {
-                    createNewClazzUseCase(initEntity)
+                if(entityUidArg == 0L||isCopyAction) {
+                    createNewClazzUseCase(entity)
                 }else {
                     activeRepo.clazzDao().updateAsync(initEntity)
                 }
@@ -571,7 +576,7 @@ class ClazzEditViewModel(
                     activeDb.coursePictureDao().upsertAsync(coursePictureVal)
                 }
 
-                val clazzUid = entity.clazzUid
+                var clazzUid = entity.clazzUid
 
                 val schedulesToCommit = _uiState.value.clazzSchedules.map {
                     it.shallowCopy { scheduleClazzUid = clazzUid }
@@ -584,6 +589,7 @@ class ClazzEditViewModel(
                     }, systemTimeInMillis()
                 )
 
+
                 val courseBlockModulesToCommit = updateCourseBlocksOnReorderOrCommitUseCase(
                     courseBlockListVal)
                 activeRepo.courseBlockDao().upsertListAsync(
@@ -595,7 +601,15 @@ class ClazzEditViewModel(
                     }, systemTimeInMillis()
                 )
 
-                val assignmentsToUpsert = courseBlockListVal.mapNotNull { it.assignment }
+                val assignmentsToUpsert = courseBlockListVal.mapNotNull { block ->
+                    block.assignment?.let { assignment ->
+                        assignment.shallowCopy {
+                            clazzUid = entity.clazzUid  // Assign to the new course UID
+                            caUid = 0L  // Reset UID so it gets a new database entry
+                        }
+                    }
+                }
+
                 activeRepo.clazzAssignmentDao().upsertListAsync(assignmentsToUpsert)
                 val assignmentsToDeactivate = initState.courseBlockList.mapNotNull { it.assignment}
                     .findKeysNotInOtherList(assignmentsToUpsert) { it.caUid }
