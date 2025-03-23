@@ -321,5 +321,40 @@ object StatementDaoCommon {
                           ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
     """
 
+    const val DISTINCT_REGISTRATION_UIDS_FOR_PERSON_AND_CONTENT = """
+             DistinctRegistrationUids(contextRegistrationHi, contextRegistrationLo, statementClazzUid) AS (
+      SELECT DISTINCT StatementEntity.contextRegistrationHi, 
+                     StatementEntity.contextRegistrationLo,
+                     StatementEntity.statementClazzUid
+                 FROM StatementEntity
+                WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                  AND StatementEntity.statementActorPersonUid = :personUid)
+    """
+
+    const val DISTINCT_REGISTRATION_UIDS_PERMISSION_CHECK = """
+            :personUid = :accountPersonUid 
+                OR EXISTS(
+                    SELECT CoursePermission.cpUid
+                      FROM CoursePermission
+                           LEFT JOIN ClazzEnrolment 
+                                ON ClazzEnrolment.clazzEnrolmentUid =
+                                  COALESCE(
+                                   (SELECT ClazzEnrolment.clazzEnrolmentUid 
+                                      FROM ClazzEnrolment
+                                     WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                                       AND ClazzEnrolment.clazzEnrolmentActive
+                                       AND ClazzEnrolment.clazzEnrolmentClazzUid = DistinctRegistrationUids.statementClazzUid 
+                                  ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
+                                     LIMIT 1), 0)
+                     WHERE CoursePermission.cpClazzUid = DistinctRegistrationUids.statementClazzUid
+                       AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
+                            OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
+                       AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
+                       AND NOT CoursePermission.cpIsDeleted)
+                OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
+                    ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                    ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2})
+    """
+
 
 }

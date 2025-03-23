@@ -9,6 +9,8 @@ import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE
 import com.ustadmobile.core.db.dao.SystemPermissionDaoCommon
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.ACTOR_UIDS_FOR_PERSONUIDS_CTE
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.DISTINCT_REGISTRATION_UIDS_FOR_PERSON_AND_CONTENT
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.DISTINCT_REGISTRATION_UIDS_PERMISSION_CHECK
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENTS_WHERE_MATCHES_CONTENT_ENTRY_UID_AND_HAS_PERMISSION
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
@@ -428,14 +430,75 @@ expect abstract class StatementDao {
     ): PagingSource<Int, PersonAndPictureAndNumAttempts>
 
 
+    /**
+     * Find the statement entities required for findSessionsByPersonAndContent - for each distinct
+     * session for the given user/contententry we need to find the statement with the maximum
+     * progress, maximum score, time started, and completion.
+     */
     @Query("""
- WITH DistinctRegistrationUids(contextRegistrationHi, contextRegistrationLo, statementClazzUid) AS (
-      SELECT DISTINCT StatementEntity.contextRegistrationHi, 
-                     StatementEntity.contextRegistrationLo,
-                     StatementEntity.statementClazzUid
-                 FROM StatementEntity
-                WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
-                  AND StatementEntity.statementActorPersonUid = :personUid),
+        WITH $DISTINCT_REGISTRATION_UIDS_FOR_PERSON_AND_CONTENT
+        SELECT StatementEntity.*
+          FROM DistinctRegistrationUids
+               JOIN StatementEntity 
+                    ON (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN 
+                        -- Statement for time started
+                        (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo 
+                           FROM StatementEntity
+                          WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                            AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                       ORDER BY StatementEntity.timestamp ASC
+                          LIMIT 1)
+                          
+                       --statement for max progress   
+                    OR (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN 
+                       (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo 
+                          FROM StatementEntity
+                         WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                           AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                           AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                      ORDER BY StatementEntity.extensionProgress DESC
+                         LIMIT 1) 
+                         
+                       --statement for max score  
+                    OR (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN 
+                       (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo 
+                          FROM StatementEntity
+                         WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                           AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                           AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                      ORDER BY StatementEntity.resultScoreScaled DESC
+                         LIMIT 1)
+                         
+                        --statement with completion  
+                    OR (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN 
+                       (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo 
+                          FROM StatementEntity
+                         WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                           AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                           AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                           AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
+                         LIMIT 1)
+         WHERE ($DISTINCT_REGISTRATION_UIDS_PERMISSION_CHECK)
+    """)
+    abstract suspend fun findSessionsByPersonAndContentStatements(
+        contentEntryUid: Long,
+        personUid: Long,
+        accountPersonUid: Long,
+        sortOrder: Int
+    ): List<StatementEntity>
+
+    /**
+     * Get a list of the distinct sessions for a given user/contententry.
+     */
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findSessionsByPersonAndContentStatements"),
+            HttpServerFunctionCall("findSessionsByPersonAndContent")
+        )
+    )
+    @Query("""
+ WITH $DISTINCT_REGISTRATION_UIDS_FOR_PERSON_AND_CONTENT,
       SessionsByPerson(contextRegistrationHi, contextRegistrationLo, timeStarted, maxProgress, maxScore, isCompleted, isSuccessful, resultDuration) AS (
        SELECT DistinctRegistrationUids.contextRegistrationHi AS contextRegistrationHi,
               DistinctRegistrationUids.contextRegistrationLo AS contextRegistrationLo,
@@ -446,7 +509,8 @@ expect abstract class StatementDao {
                   AND StatementEntity.statementActorPersonUid = :personUid
                   AND StatementEntity.statementContentEntryUid = :contentEntryUid
               ) AS timeStarted,
-                  (SELECT MAX(StatementEntity.extensionProgress)
+              
+              (SELECT MAX(StatementEntity.extensionProgress)
                  FROM StatementEntity
                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
                   AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
@@ -454,6 +518,7 @@ expect abstract class StatementDao {
                   AND StatementEntity.statementContentEntryUid = :contentEntryUid
                   AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
                ) AS maxProgress,
+               
               (SELECT MAX(StatementEntity.resultScoreScaled)
                  FROM StatementEntity
                 WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
@@ -462,6 +527,7 @@ expect abstract class StatementDao {
                   AND StatementEntity.statementContentEntryUid = :contentEntryUid
                   AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
                ) AS maxScore,
+               
               (SELECT EXISTS(
                       SELECT 1 
                         FROM StatementEntity
@@ -501,29 +567,7 @@ expect abstract class StatementDao {
                           AND StatementEntity.statementActorPersonUid = :personUid
                           AND StatementEntity.statementContentEntryUid = :contentEntryUid) AS resultDuration
          FROM DistinctRegistrationUids
-         WHERE (    :personUid = :accountPersonUid 
-                OR EXISTS(
-                    SELECT CoursePermission.cpUid
-                      FROM CoursePermission
-                           LEFT JOIN ClazzEnrolment 
-                                ON ClazzEnrolment.clazzEnrolmentUid =
-                                  COALESCE(
-                                   (SELECT ClazzEnrolment.clazzEnrolmentUid 
-                                      FROM ClazzEnrolment
-                                     WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
-                                       AND ClazzEnrolment.clazzEnrolmentActive
-                                       AND ClazzEnrolment.clazzEnrolmentClazzUid = DistinctRegistrationUids.statementClazzUid 
-                                  ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
-                                     LIMIT 1), 0)
-                     WHERE CoursePermission.cpClazzUid = DistinctRegistrationUids.statementClazzUid
-                       AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
-                            OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
-                       AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
-                       AND NOT CoursePermission.cpIsDeleted)
-                OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
-                    ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
-                    ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))      
-) 
+         WHERE ($DISTINCT_REGISTRATION_UIDS_PERMISSION_CHECK)) 
       SELECT SessionsByPerson.*
         FROM SessionsByPerson
     ORDER BY  
@@ -551,7 +595,6 @@ expect abstract class StatementDao {
             WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_COMPLETION_ASC} THEN maxProgress
             ELSE NULL
         END ASC
-   
    """)
     abstract fun findSessionsByPersonAndContent(
         contentEntryUid: Long,
