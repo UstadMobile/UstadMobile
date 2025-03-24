@@ -42,6 +42,9 @@ import com.ustadmobile.core.viewmodel.clazzlog.attendancelist.ClazzLogListAttend
 import com.ustadmobile.core.viewmodel.clazzlog.edit.ClazzLogEditViewModel
 import com.ustadmobile.core.viewmodel.clazzlog.editattendance.ClazzLogEditAttendanceViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.getmetadata.ContentEntryGetMetadataViewModel
 import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
@@ -153,6 +156,9 @@ import com.ustadmobile.libuicompose.view.courseterminology.list.CourseTerminolog
 import com.ustadmobile.libuicompose.view.deleteditem.list.DeletedItemListScreen
 import com.ustadmobile.libuicompose.view.epubcontent.EpubContentScreen
 import com.ustadmobile.libuicompose.view.clazzlog.edit.ClazzLogEditScreen
+import com.ustadmobile.libuicompose.view.contententry.detailattempttab.ContentEntryDetailAttemptsPersonListScreen
+import com.ustadmobile.libuicompose.view.contententry.detailattempttab.ContentEntryDetailAttemptsSessionListScreen
+import com.ustadmobile.libuicompose.view.contententry.detailattempttab.ContentEntryDetailAttemptsStatementListScreen
 import com.ustadmobile.libuicompose.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.libuicompose.view.contententry.subtitleedit.SubtitleEditScreen
 import com.ustadmobile.libuicompose.view.interop.externalapppermissionrequest.ExternalAppPermissionRequestScreen
@@ -225,7 +231,7 @@ fun AppNavHost(
      * Simple shorthand to pass navController, onSetAppUiState
      */
     @Composable
-    fun <T: UstadViewModel> appViewModel(
+    fun <T : UstadViewModel> appViewModel(
         backStackEntry: BackStackEntry,
         modelClass: KClass<T>,
         block: (di: DI, UstadSavedStateHandle) -> T
@@ -249,7 +255,7 @@ fun AppNavHost(
         content: @Composable (BackStackEntry) -> Unit,
     ) {
         scene(route) { backStackEntry ->
-            if(contentVisible) {
+            if (contentVisible) {
                 content(backStackEntry)
             }
         }
@@ -326,12 +332,17 @@ fun AppNavHost(
             ClazzListViewModel.ALL_DEST_NAMES.forEach { destName ->
                 contentScene("/$destName") { backStackEntry ->
                     ClazzListScreen(
-                        backStackEntry, ustadNavController, onSetAppUiState, navResultReturner, onShowSnackBar, destName
+                        backStackEntry,
+                        ustadNavController,
+                        onSetAppUiState,
+                        navResultReturner,
+                        onShowSnackBar,
+                        destName
                     )
                 }
             }
 
-            contentScene("/${ClazzEditViewModel.DEST_NAME}") {backStackEntry ->
+            contentScene("/${ClazzEditViewModel.DEST_NAME}") { backStackEntry ->
                 ClazzEditScreen(
                     appViewModel(
                         backStackEntry, ClazzEditViewModel::class
@@ -353,7 +364,11 @@ fun AppNavHost(
 
             contentScene("/${ClazzDetailViewModel.DEST_NAME}") { backStackEntry ->
                 ClazzDetailScreen(
-                    backStackEntry, ustadNavController, onSetAppUiState, onShowSnackBar, navResultReturner,
+                    backStackEntry,
+                    ustadNavController,
+                    onSetAppUiState,
+                    onShowSnackBar,
+                    navResultReturner,
                 )
             }
 
@@ -367,7 +382,7 @@ fun AppNavHost(
                 )
             }
 
-            contentScene("/${TimeZoneListViewModel.DEST_NAME}") {backStackEntry ->
+            contentScene("/${TimeZoneListViewModel.DEST_NAME}") { backStackEntry ->
                 TimeZoneListScreen(
                     appViewModel(
                         backStackEntry, TimeZoneListViewModel::class
@@ -402,7 +417,9 @@ fun AppNavHost(
             contentScene("/${ClazzEnrolmentListViewModel.DEST_NAME}") { backStackEntry ->
                 ClazzEnrolmentListScreen(
                     appViewModel(
-                        backStackEntry, ClazzEnrolmentListViewModel::class, ::ClazzEnrolmentListViewModel
+                        backStackEntry,
+                        ClazzEnrolmentListViewModel::class,
+                        ::ClazzEnrolmentListViewModel
                     )
                 )
             }
@@ -430,35 +447,47 @@ fun AppNavHost(
             contentScene("/${PersonAccountEditViewModel.DEST_NAME}") { backStackEntry ->
                 PersonAccountEditScreen(
                     appViewModel(
-                        backStackEntry, PersonAccountEditViewModel::class, ::PersonAccountEditViewModel
+                        backStackEntry,
+                        PersonAccountEditViewModel::class,
+                        ::PersonAccountEditViewModel
                     )
                 )
             }
 
             contentScene("/${AccountListViewModel.DEST_NAME}") { backStackEntry ->
                 AccountListScreen(
-                    appViewModel(backStackEntry, AccountListViewModel::class, ::AccountListViewModel)
+                    appViewModel(
+                        backStackEntry,
+                        AccountListViewModel::class,
+                        ::AccountListViewModel
+                    )
                 )
             }
 
             contentScene("/${CourseDiscussionDetailViewModel.DEST_NAME}") { backStackEntry ->
                 CourseDiscussionDetailScreen(
-                    appViewModel(backStackEntry, CourseDiscussionDetailViewModel::class,
-                        ::CourseDiscussionDetailViewModel)
+                    appViewModel(
+                        backStackEntry, CourseDiscussionDetailViewModel::class,
+                        ::CourseDiscussionDetailViewModel
+                    )
                 )
             }
 
             contentScene("/${DiscussionPostDetailViewModel.DEST_NAME}") { backStackEntry ->
                 DiscussionPostDetailScreen(
-                    appViewModel(backStackEntry, DiscussionPostDetailViewModel::class,
-                        ::DiscussionPostDetailViewModel)
+                    appViewModel(
+                        backStackEntry, DiscussionPostDetailViewModel::class,
+                        ::DiscussionPostDetailViewModel
+                    )
                 )
             }
 
             contentScene("/${DiscussionPostEditViewModel.DEST_NAME}") { backStackEntry ->
                 DiscussionPostEditScreen(
-                    appViewModel(backStackEntry, DiscussionPostEditViewModel::class,
-                        ::DiscussionPostEditViewModel)
+                    appViewModel(
+                        backStackEntry, DiscussionPostEditViewModel::class,
+                        ::DiscussionPostEditViewModel
+                    )
                 )
             }
 
@@ -470,35 +499,47 @@ fun AppNavHost(
 
             contentScene("/${ClazzAssignmentEditViewModel.DEST_NAME}") { backStackEntry ->
                 ClazzAssignmentEditScreen(
-                    appViewModel(backStackEntry, ClazzAssignmentEditViewModel::class,
-                        ::ClazzAssignmentEditViewModel)
+                    appViewModel(
+                        backStackEntry, ClazzAssignmentEditViewModel::class,
+                        ::ClazzAssignmentEditViewModel
+                    )
                 )
             }
 
             contentScene("/${PeerReviewerAllocationEditViewModel.DEST_NAME}") { backStackEntry ->
                 PeerReviewerAllocationEditScreen(
-                    appViewModel(backStackEntry, PeerReviewerAllocationEditViewModel::class,
-                        ::PeerReviewerAllocationEditViewModel)
+                    appViewModel(
+                        backStackEntry, PeerReviewerAllocationEditViewModel::class,
+                        ::PeerReviewerAllocationEditViewModel
+                    )
                 )
             }
 
             contentScene("/${ClazzAssignmentDetailViewModel.DEST_NAME}") { backStackEntry ->
                 ClazzAssignmentDetailScreen(
-                    backStackEntry, ustadNavController, onSetAppUiState, onShowSnackBar, navResultReturner,
+                    backStackEntry,
+                    ustadNavController,
+                    onSetAppUiState,
+                    onShowSnackBar,
+                    navResultReturner,
                 )
             }
 
             contentScene("/${CourseGroupSetDetailViewModel.DEST_NAME}") { backStackEntry ->
                 CourseGroupSetDetailScreen(
-                    appViewModel(backStackEntry, CourseGroupSetDetailViewModel::class,
-                        ::CourseGroupSetDetailViewModel)
+                    appViewModel(
+                        backStackEntry, CourseGroupSetDetailViewModel::class,
+                        ::CourseGroupSetDetailViewModel
+                    )
                 )
             }
 
             contentScene("/${CourseGroupSetEditViewModel.DEST_NAME}") { backStackEntry ->
                 CourseGroupSetEditScreen(
-                    appViewModel(backStackEntry, CourseGroupSetEditViewModel::class,
-                        ::CourseGroupSetEditViewModel)
+                    appViewModel(
+                        backStackEntry, CourseGroupSetEditViewModel::class,
+                        ::CourseGroupSetEditViewModel
+                    )
                 )
             }
             contentScene("/${TextBlockDetailViewModel.DEST_NAME}") { backStackEntry ->
@@ -510,8 +551,10 @@ fun AppNavHost(
             }
             contentScene("/${ClazzAssignmentSubmitterDetailViewModel.DEST_NAME}") { backStackEntry ->
                 ClazzAssignmentSubmitterDetailScreen(
-                    appViewModel(backStackEntry, ClazzAssignmentSubmitterDetailViewModel::class,
-                        ::ClazzAssignmentSubmitterDetailViewModel)
+                    appViewModel(
+                        backStackEntry, ClazzAssignmentSubmitterDetailViewModel::class,
+                        ::ClazzAssignmentSubmitterDetailViewModel
+                    )
                 )
             }
 
@@ -519,30 +562,36 @@ fun AppNavHost(
                 CourseAssignmentSubmissionDetailScreen(
                     appViewModel(
                         backStackEntry, CourseAssignmentSubmissionDetailViewModel::class,
-                            ::CourseAssignmentSubmissionDetailViewModel
+                        ::CourseAssignmentSubmissionDetailViewModel
                     )
                 )
             }
 
             contentScene("/${ClazzLogEditAttendanceViewModel.DEST_NAME}") { backStackEntry ->
                 ClazzLogEditAttendanceScreen(
-                    appViewModel(backStackEntry, ClazzLogEditAttendanceViewModel::class,
-                        ::ClazzLogEditAttendanceViewModel)
+                    appViewModel(
+                        backStackEntry, ClazzLogEditAttendanceViewModel::class,
+                        ::ClazzLogEditAttendanceViewModel
+                    )
                 )
             }
 
 
             contentScene("/${ClazzLogListAttendanceViewModel.DEST_NAME}") { backStackEntry ->
                 ClazzLogListAttendanceScreen(
-                    appViewModel(backStackEntry, ClazzLogListAttendanceViewModel::class,
-                        ::ClazzLogListAttendanceViewModel)
+                    appViewModel(
+                        backStackEntry, ClazzLogListAttendanceViewModel::class,
+                        ::ClazzLogListAttendanceViewModel
+                    )
                 )
             }
 
             contentScene("/${CourseGroupSetListViewModel.DEST_NAME}") { backStackEntry ->
                 CourseGroupSetListScreen(
-                    appViewModel(backStackEntry, CourseGroupSetListViewModel::class,
-                        ::CourseGroupSetListViewModel)
+                    appViewModel(
+                        backStackEntry, CourseGroupSetListViewModel::class,
+                        ::CourseGroupSetListViewModel
+                    )
                 )
             }
 
@@ -566,36 +615,48 @@ fun AppNavHost(
 
             contentScene("/${RegisterAgeRedirectViewModel.DEST_NAME}") { backStackEntry ->
                 RegisterAgeRedirectScreen(
-                    appViewModel(backStackEntry, RegisterAgeRedirectViewModel::class,
-                        ::RegisterAgeRedirectViewModel)
+                    appViewModel(
+                        backStackEntry, RegisterAgeRedirectViewModel::class,
+                        ::RegisterAgeRedirectViewModel
+                    )
                 )
             }
 
             contentScene("/${SiteTermsDetailViewModel.DEST_NAME}") { backStackEntry ->
                 SiteTermsDetailScreen(
-                    appViewModel(backStackEntry, SiteTermsDetailViewModel::class, ::SiteTermsDetailViewModel)
+                    appViewModel(
+                        backStackEntry,
+                        SiteTermsDetailViewModel::class,
+                        ::SiteTermsDetailViewModel
+                    )
                 )
             }
 
             contentScene("/${RegisterMinorWaitForParentViewModel.DEST_NAME}") { backStackEntry ->
                 RegisterMinorWaitForParentScreen(
-                    appViewModel(backStackEntry, RegisterMinorWaitForParentViewModel::class,
-                        ::RegisterMinorWaitForParentViewModel)
+                    appViewModel(
+                        backStackEntry, RegisterMinorWaitForParentViewModel::class,
+                        ::RegisterMinorWaitForParentViewModel
+                    )
                 )
             }
 
             contentScene("/${ParentalConsentManagementViewModel.DEST_NAME}") { backStackEntry ->
                 ParentalConsentManagementScreen(
-                    appViewModel(backStackEntry, ParentalConsentManagementViewModel::class,
-                        ::ParentalConsentManagementViewModel)
+                    appViewModel(
+                        backStackEntry, ParentalConsentManagementViewModel::class,
+                        ::ParentalConsentManagementViewModel
+                    )
                 )
             }
 
 
             contentScene("/${ClazzLogEditViewModel.DEST_NAME}") { backStackEntry ->
                 ClazzLogEditScreen(
-                    appViewModel(backStackEntry, ClazzLogEditViewModel::class,
-                        ::ClazzLogEditViewModel)
+                    appViewModel(
+                        backStackEntry, ClazzLogEditViewModel::class,
+                        ::ClazzLogEditViewModel
+                    )
                 )
             }
             ConversationListViewModel.ALL_DEST_NAMES.forEach { destName ->
@@ -612,76 +673,101 @@ fun AppNavHost(
 
             contentScene("/${MessageListViewModel.DEST_NAME}") { backStackEntry ->
                 MessageListScreen(
-                    appViewModel(backStackEntry, MessageListViewModel::class,
-                        ::MessageListViewModel)
+                    appViewModel(
+                        backStackEntry, MessageListViewModel::class,
+                        ::MessageListViewModel
+                    )
                 )
             }
 
             contentScene("/${CourseTerminologyListViewModel.DEST_NAME}") { backStackEntry ->
                 CourseTerminologyListScreen(
-                    appViewModel(backStackEntry, CourseTerminologyListViewModel::class,
-                        ::CourseTerminologyListViewModel)
+                    appViewModel(
+                        backStackEntry, CourseTerminologyListViewModel::class,
+                        ::CourseTerminologyListViewModel
+                    )
                 )
             }
 
             contentScene("/${CourseTerminologyEditViewModel.DEST_NAME}") { backStackEntry ->
                 CourseTerminologyEditScreen(
-                    appViewModel(backStackEntry, CourseTerminologyEditViewModel::class,
-                        ::CourseTerminologyEditViewModel)
+                    appViewModel(
+                        backStackEntry, CourseTerminologyEditViewModel::class,
+                        ::CourseTerminologyEditViewModel
+                    )
                 )
             }
 
             contentScene("/${ContentEntryGetMetadataViewModel.DEST_NAME}") { backStackEntry ->
                 ContentEntryGetMetadataScreen(
-                    appViewModel(backStackEntry, ContentEntryGetMetadataViewModel::class,
-                        ::ContentEntryGetMetadataViewModel)
+                    appViewModel(
+                        backStackEntry, ContentEntryGetMetadataViewModel::class,
+                        ::ContentEntryGetMetadataViewModel
+                    )
                 )
             }
 
             contentScene("/${ContentEntryEditViewModel.DEST_NAME}") { backStackEntry ->
                 ContentEntryEditScreen(
-                    appViewModel(backStackEntry, ContentEntryEditViewModel::class,
-                        ::ContentEntryEditViewModel)
+                    appViewModel(
+                        backStackEntry, ContentEntryEditViewModel::class,
+                        ::ContentEntryEditViewModel
+                    )
                 )
             }
 
-            contentScene("/${ContentEntryDetailViewModel.DEST_NAME}") {backStackEntry ->
+            contentScene("/${ContentEntryDetailViewModel.DEST_NAME}") { backStackEntry ->
                 ContentEntryDetailScreen(
-                    backStackEntry, ustadNavController, onSetAppUiState, onShowSnackBar, navResultReturner,
+                    backStackEntry,
+                    ustadNavController,
+                    onSetAppUiState,
+                    onShowSnackBar,
+                    navResultReturner,
                 )
             }
 
             contentScene("/${XapiContentViewModel.DEST_NAME}") { backStackEntry ->
                 XapiContentScreen(
-                    appViewModel(backStackEntry, XapiContentViewModel::class,
-                        ::XapiContentViewModel)
+                    appViewModel(
+                        backStackEntry, XapiContentViewModel::class,
+                        ::XapiContentViewModel
+                    )
                 )
             }
 
             contentScene("/${VideoContentViewModel.DEST_NAME}") { backStackEntry ->
                 VideoContentScreen(
-                    appViewModel(backStackEntry, VideoContentViewModel::class,
-                        ::VideoContentViewModel)
+                    appViewModel(
+                        backStackEntry, VideoContentViewModel::class,
+                        ::VideoContentViewModel
+                    )
                 )
             }
 
             contentScene("/${ContentEntryImportLinkViewModel.DEST_NAME}") { backStackEntry ->
                 ContentEntryImportLinkScreen(
-                    appViewModel(backStackEntry, ContentEntryImportLinkViewModel::class,
-                        ::ContentEntryImportLinkViewModel)
+                    appViewModel(
+                        backStackEntry, ContentEntryImportLinkViewModel::class,
+                        ::ContentEntryImportLinkViewModel
+                    )
                 )
             }
 
             contentScene("/${PdfContentViewModel.DEST_NAME}") { backStackEntry ->
                 PdfContentScreen(
-                    appViewModel(backStackEntry, PdfContentViewModel::class,
-                        ::PdfContentViewModel)
+                    appViewModel(
+                        backStackEntry, PdfContentViewModel::class,
+                        ::PdfContentViewModel
+                    )
                 )
             }
 
             contentScene("/${EpubContentViewModel.DEST_NAME}") { backStackEntry ->
                 EpubContentScreen(
-                    appViewModel(backStackEntry, EpubContentViewModel::class) { di, savedStateHandle ->
+                    appViewModel(
+                        backStackEntry,
+                        EpubContentViewModel::class
+                    ) { di, savedStateHandle ->
                         EpubContentViewModel(di, savedStateHandle, useBodyDataUrls = true)
                     }
                 )
@@ -689,99 +775,154 @@ fun AppNavHost(
 
             contentScene("/${JoinWithCodeViewModel.DEST_NAME}") { backStackEntry ->
                 JoinWithCodeScreen(
-                    appViewModel(backStackEntry, JoinWithCodeViewModel::class, ::JoinWithCodeViewModel)
+                    appViewModel(
+                        backStackEntry,
+                        JoinWithCodeViewModel::class,
+                        ::JoinWithCodeViewModel
+                    )
                 )
             }
 
             contentScene("/${OpenLicensesViewModel.DEST_NAME}") { backStackEntry ->
-                OpenLicensesScreen(appViewModel(backStackEntry, OpenLicensesViewModel::class,
-                    ::OpenLicensesViewModel)
+                OpenLicensesScreen(
+                    appViewModel(
+                        backStackEntry, OpenLicensesViewModel::class,
+                        ::OpenLicensesViewModel
+                    )
                 )
             }
 
             contentScene("/${DeveloperSettingsViewModel.DEST_NAME}") { backStackEntry ->
                 DeveloperSettingsScreen(
-                    appViewModel(backStackEntry, DeveloperSettingsViewModel::class,
-                        ::DeveloperSettingsViewModel)
+                    appViewModel(
+                        backStackEntry, DeveloperSettingsViewModel::class,
+                        ::DeveloperSettingsViewModel
+                    )
                 )
             }
 
             contentScene("/${DeletedItemListViewModel.DEST_NAME}") { backStackEntry ->
                 DeletedItemListScreen(
-                    appViewModel(backStackEntry, DeletedItemListViewModel::class,
-                        ::DeletedItemListViewModel)
+                    appViewModel(
+                        backStackEntry, DeletedItemListViewModel::class,
+                        ::DeletedItemListViewModel
+                    )
                 )
             }
 
             contentScene("/${InviteViaLinkViewModel.DEST_NAME}") { backStackEntry ->
                 InviteViaLinkScreen(
-                    appViewModel(backStackEntry, InviteViaLinkViewModel::class,
-                        ::InviteViaLinkViewModel)
+                    appViewModel(
+                        backStackEntry, InviteViaLinkViewModel::class,
+                        ::InviteViaLinkViewModel
+                    )
                 )
             }
 
             contentScene("/${CoursePermissionListViewModel.DEST_NAME}") { backStackEntry ->
                 CoursePermissionListScreen(
-                    appViewModel(backStackEntry, CoursePermissionListViewModel::class,
-                        ::CoursePermissionListViewModel)
+                    appViewModel(
+                        backStackEntry, CoursePermissionListViewModel::class,
+                        ::CoursePermissionListViewModel
+                    )
                 )
             }
 
             contentScene("/${CoursePermissionEditViewModel.DEST_NAME}") { backStackEntry ->
                 CoursePermissionEditScreen(
-                    appViewModel(backStackEntry, CoursePermissionEditViewModel::class,
-                        ::CoursePermissionEditViewModel)
+                    appViewModel(
+                        backStackEntry, CoursePermissionEditViewModel::class,
+                        ::CoursePermissionEditViewModel
+                    )
                 )
             }
 
             contentScene("/${CoursePermissionDetailViewModel.DEST_NAME}") { backStackEntry ->
                 CoursePermissionDetailScreen(
-                    appViewModel(backStackEntry, CoursePermissionDetailViewModel::class,
-                        ::CoursePermissionDetailViewModel)
+                    appViewModel(
+                        backStackEntry, CoursePermissionDetailViewModel::class,
+                        ::CoursePermissionDetailViewModel
+                    )
                 )
             }
 
             contentScene("/${SystemPermissionDetailViewModel.DEST_NAME}") { backStackEntry ->
                 SystemPermissionDetailScreen(
-                    appViewModel(backStackEntry, SystemPermissionDetailViewModel::class,
-                        ::SystemPermissionDetailViewModel)
+                    appViewModel(
+                        backStackEntry, SystemPermissionDetailViewModel::class,
+                        ::SystemPermissionDetailViewModel
+                    )
                 )
             }
 
             contentScene("/${SystemPermissionEditViewModel.DEST_NAME}") { backStackEntry ->
                 SystemPermissionEditScreen(
-                    appViewModel(backStackEntry, SystemPermissionEditViewModel::class,
-                        ::SystemPermissionEditViewModel)
+                    appViewModel(
+                        backStackEntry, SystemPermissionEditViewModel::class,
+                        ::SystemPermissionEditViewModel
+                    )
                 )
             }
 
             contentScene("/${BulkAddPersonSelectFileViewModel.DEST_NAME}") { backStackEntry ->
                 BulkAddPersonSelectFileScreen(
-                    appViewModel(backStackEntry, BulkAddPersonSelectFileViewModel::class,
-                        ::BulkAddPersonSelectFileViewModel)
+                    appViewModel(
+                        backStackEntry, BulkAddPersonSelectFileViewModel::class,
+                        ::BulkAddPersonSelectFileViewModel
+                    )
                 )
             }
 
             contentScene("/${BulkAddPersonRunImportViewModel.DEST_NAME}") { backStackEntry ->
                 BulkAddPersonRunImportScreen(
-                    appViewModel(backStackEntry, BulkAddPersonRunImportViewModel::class,
-                        ::BulkAddPersonRunImportViewModel)
+                    appViewModel(
+                        backStackEntry, BulkAddPersonRunImportViewModel::class,
+                        ::BulkAddPersonRunImportViewModel
+                    )
                 )
             }
 
             contentScene("/${ExternalAppPermissionRequestViewModel.DEST_NAME}") { backStackEntry ->
                 ExternalAppPermissionRequestScreen(
-                    appViewModel(backStackEntry, ExternalAppPermissionRequestViewModel::class,
-                        ::ExternalAppPermissionRequestViewModel)
+                    appViewModel(
+                        backStackEntry, ExternalAppPermissionRequestViewModel::class,
+                        ::ExternalAppPermissionRequestViewModel
+                    )
                 )
             }
 
             contentScene("/${GrantExternalAppPermissionRedirectViewModel.DEST_NAME}") { backStackEntry ->
-                appViewModel(backStackEntry, GrantExternalAppPermissionRedirectViewModel::class) { di, savedStateHandle ->
+                appViewModel(
+                    backStackEntry,
+                    GrantExternalAppPermissionRedirectViewModel::class
+                ) { di, savedStateHandle ->
                     GrantExternalAppPermissionRedirectViewModel(di, savedStateHandle)
                 }
             }
-
+            contentScene("/${ContentEntryDetailAttemptsPersonListViewModel.DEST_NAME}") { backStackEntry ->
+                ContentEntryDetailAttemptsPersonListScreen(
+                    appViewModel(
+                        backStackEntry, ContentEntryDetailAttemptsPersonListViewModel::class,
+                        ::ContentEntryDetailAttemptsPersonListViewModel
+                    )
+                )
+            }
+            contentScene("/${ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME}") { backStackEntry ->
+                ContentEntryDetailAttemptsSessionListScreen(
+                    appViewModel(
+                        backStackEntry, ContentEntryDetailAttemptsSessionListViewModel::class,
+                        ::ContentEntryDetailAttemptsSessionListViewModel
+                    )
+                )
+            }
+            contentScene("/${ContentEntryDetailAttemptsStatementListViewModel.DEST_NAME}") { backStackEntry ->
+                ContentEntryDetailAttemptsStatementListScreen(
+                    appViewModel(
+                        backStackEntry, ContentEntryDetailAttemptsStatementListViewModel::class,
+                        ::ContentEntryDetailAttemptsStatementListViewModel
+                    )
+                )
+            }
             contentScene("/${SubtitleEditViewModel.DEST_NAME}") { backStackEntry ->
                 SubtitleEditScreen(
                     appViewModel(backStackEntry, SubtitleEditViewModel::class, ::SubtitleEditViewModel)

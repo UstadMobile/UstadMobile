@@ -163,8 +163,14 @@ import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSele
 import com.ustadmobile.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.view.clazz.gradebook.ClazzGradebookScreen
 import com.ustadmobile.mui.components.UstadChipsDemo
+import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsPersonListScreen
+import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsSessionListScreen
+import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsStatementListScreen
 import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
 import com.ustadmobile.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
@@ -244,6 +250,21 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ContentEntryDetailOverviewViewModel.DEST_NAME,
         "ContentEntryDetailOverview",
         ContentEntryDetailOverviewScreen
+    ),
+    UstadScreen(
+        ContentEntryDetailAttemptsPersonListViewModel.DEST_NAME,
+        "ContentEntryDetailAttemptsPersonList",
+        ContentEntryDetailAttemptsPersonListScreen
+    ),
+    UstadScreen(
+        ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME,
+        "ContentEntryDetailAttemptsSessionList",
+        ContentEntryDetailAttemptsSessionListScreen
+    ),
+    UstadScreen(
+        ContentEntryDetailAttemptsStatementListViewModel.DEST_NAME,
+        "ContentEntryDetailAttemptsStatementList",
+        ContentEntryDetailAttemptsStatementListScreen
     ),
     UstadScreen(HolidayCalendarEditViewModel.DEST_NAME, "HolidayCalendarEdit Preview",
         HolidayCalendarEditPreview),
