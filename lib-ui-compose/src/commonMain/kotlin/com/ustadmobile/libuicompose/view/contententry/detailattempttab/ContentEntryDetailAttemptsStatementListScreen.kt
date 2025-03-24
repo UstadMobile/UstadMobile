@@ -14,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -27,6 +28,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
@@ -48,6 +50,8 @@ import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.rememberEmptyFlow
 import com.ustadmobile.libuicompose.util.rememberFormattedDateTime
+import com.ustadmobile.libuicompose.util.rememberFormattedDuration
+import com.ustadmobile.libuicompose.util.rememberHtmlToPlainText
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -156,6 +160,10 @@ fun ContentEntryDetailAttemptsStatementList(
                 initial = FormatStatementResponseUseCase.FormattedStatementResponse(null)
             )
 
+            val descriptionTextVal = rememberHtmlToPlainText(
+                item?.statementActivityDescription ?: ""
+            ).trim()
+
             ListItem(
                 leadingContent = {
                     Icon(
@@ -175,7 +183,7 @@ fun ContentEntryDetailAttemptsStatementList(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         item?.statementActivityDescription?.also {
-                            Text(it.trim())
+                            Text(descriptionTextVal, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         }
 
                         formattedResponse.takeIf { it.hasResponse }?.also { response ->
@@ -196,6 +204,13 @@ fun ContentEntryDetailAttemptsStatementList(
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(text = formattedTimestamp)
+
+                            item?.statementEntity?.resultDuration?.also { durationVal ->
+                                Spacer(Modifier.width(8.dp))
+                                Icon(Icons.Filled.Timelapse, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text(rememberFormattedDuration(durationVal))
+                            }
                         }
 
                         item?.statementEntity?.extensionProgress?.also { progressVal ->

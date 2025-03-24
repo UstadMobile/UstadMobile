@@ -7,6 +7,7 @@ import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.ext.htmlToPlainText
 
 /**
  * We want to be able to show the user (eg. a teacher) the response a student gave to a particular
@@ -122,7 +123,11 @@ class FormatStatementResponseUseCase(
                         else -> null
                     }
 
-                    emit(FormattedStatementResponse(string = (responseStr ?: response).trim()))
+                    emit(
+                        FormattedStatementResponse(
+                            string = (responseStr ?: response).htmlToPlainText().trim()
+                        )
+                    )
                 }
             }
 
@@ -147,13 +152,13 @@ class FormatStatementResponseUseCase(
             ActivityEntity.TYPE_FILL_IN, ActivityEntity.TYPE_LONG_FILL_IN -> {
                 emit(
                     FormattedStatementResponse(
-                        string = response.replace("[,]", ", ").trim()
+                        string = response.replace("[,]", ", ").htmlToPlainText().trim()
                     )
                 )
             }
 
             else -> {
-                emit(FormattedStatementResponse(string = response.trim()))
+                emit(FormattedStatementResponse(string = response.htmlToPlainText().trim()))
             }
         }
     }

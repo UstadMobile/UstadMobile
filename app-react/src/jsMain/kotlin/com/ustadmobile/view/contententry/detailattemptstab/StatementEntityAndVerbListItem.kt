@@ -10,6 +10,7 @@ import com.ustadmobile.mui.components.UstadProgressBarWithLabel
 import js.objects.jso
 import kotlinx.datetime.TimeZone
 import mui.icons.material.CalendarToday as CalendarTodayIcon
+import mui.icons.material.Timelapse as TimeLapseIcon
 import mui.icons.material.Work as WorkIcon
 import react.Props
 import react.FC
@@ -28,6 +29,8 @@ import react.useRequiredContext
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
 import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.hooks.useFormattedDuration
+import com.ustadmobile.hooks.useHtmlToPlainText
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import react.useMemo
@@ -64,6 +67,14 @@ val StatementEntityAndVerbListItem = FC<StatementEntityAndVerbListItemProps> { p
         FormatStatementResponseUseCase.FormattedStatementResponse(string = null)
     )
 
+    val formattedDuration = useFormattedDuration(
+        props.statement?.statementEntity?.resultDuration ?: 0L
+    )
+
+    val descriptionPlainText = useHtmlToPlainText(
+        props.statement?.statementActivityDescription ?: ""
+    )
+
     ListItem {
         ListItemIcon {
             WorkIcon()
@@ -79,7 +90,7 @@ val StatementEntityAndVerbListItem = FC<StatementEntityAndVerbListItemProps> { p
 
                 props.statement?.statementActivityDescription?.also {
                     div {
-                        + it.trim()
+                        + descriptionPlainText.trim()
                     }
                 }
 
@@ -109,6 +120,20 @@ val StatementEntityAndVerbListItem = FC<StatementEntityAndVerbListItemProps> { p
                     }
 
                     + formattedDateAndTime
+
+                    if(props.statement?.statementEntity?.resultDuration != null) {
+                        TimeLapseIcon {
+                            sx {
+                                marginInlineStart = theme.spacing(1)
+                                marginInlineEnd = theme.spacing(1)
+                            }
+                            fontSize = SvgIconSize.small
+                        }
+
+                        +formattedDuration
+                    }
+
+
                 }
 
                 props.statement?.statementEntity?.extensionProgress?.also { progressVal ->
