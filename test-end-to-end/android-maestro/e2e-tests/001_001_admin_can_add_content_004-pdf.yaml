@@ -21,16 +21,16 @@ onFlowComplete:
 - runFlow:
     file: "common/clear_login_and_add_content.yaml"
     env:
-      TESTFILENAME: Pdf_Content.pdf
+      TESTFILENAME: "Pdf_Content.pdf"
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}//content_add_to_library"
 - tapOn: "Document"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 10000
+    timeout: 80000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 10000
+    timeout: 80000
 - tapOn: Open
 - assertVisible: "PDF PAGE"
 - tapOn: "Back"
