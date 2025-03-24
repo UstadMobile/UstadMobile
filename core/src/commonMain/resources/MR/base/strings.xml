@@ -2059,5 +2059,7 @@
 
     <string name="invitations_sent">Invitations sent</string>
 
+    <string name="invitation_sent">Invitation sent</string>
+
 
 </resources>

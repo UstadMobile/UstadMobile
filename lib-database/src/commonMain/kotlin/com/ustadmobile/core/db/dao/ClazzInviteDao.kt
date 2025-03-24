@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.DoorDao
 import com.ustadmobile.door.annotation.HttpAccessible
@@ -24,6 +25,8 @@ expect abstract class ClazzInviteDao : BaseDao<ClazzInvite> {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun insertAll(entity: List<ClazzInvite>)
 
+    @Update(onConflict = OnConflictStrategy.IGNORE)
+    abstract suspend fun updateAll(entity: List<ClazzInvite>)
 
     @HttpAccessible(
         clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
@@ -91,7 +94,9 @@ expect abstract class ClazzInviteDao : BaseDao<ClazzInvite> {
         currentTime: Long
     ): PagingSource<Int, ClazzInvite>
 
-
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
     @Query("""
         UPDATE ClazzInvite 
           SET inviteStatus = 3
@@ -100,6 +105,6 @@ expect abstract class ClazzInviteDao : BaseDao<ClazzInvite> {
 
 
     @Query("""SELECT * FROM ClazzInvite WHERE inviteContact = :inviteContact""")
-    abstract suspend fun findClazzInviteFromContact(inviteContact: String): ClazzInvite
+    abstract suspend fun findClazzInviteFromContact(inviteContact: String): ClazzInvite?
 
 }

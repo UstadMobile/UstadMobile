@@ -13,7 +13,6 @@ import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchConte
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
-import com.ustadmobile.core.domain.invite.ResendInviteUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
@@ -89,13 +88,7 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
             repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
-    bind<ResendInviteUseCase>() with scoped(learningSpaceScope).provider {
-        ResendInviteUseCase(
-            httpClient = instance(),
-            learningSpace = context,
-            json = instance()
-        )
-    }
+
     bind<ParseInviteUseCase>() with singleton {
         ParseInviteUseCase(
             phoneNumValidatorUseCase = instance(),

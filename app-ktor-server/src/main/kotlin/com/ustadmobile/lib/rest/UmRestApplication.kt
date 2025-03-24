@@ -155,8 +155,6 @@ import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourc
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
-import com.ustadmobile.lib.rest.domain.invite.ResendInviteRoute
-import com.ustadmobile.lib.rest.domain.invite.ResendInviteUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockSendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCaseImpl
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockEmailSender
@@ -935,16 +933,6 @@ fun Application.umRestApplication(
                 learningSpace = context,
             )
         }
-        bind<ResendInviteUseCase>() with scoped(LearningSpaceScope.Default).provider {
-            ResendInviteUseCase(
-                sendEmailUseCase = instance(),
-                sendSmsUseCase = instance(),
-                sendMessageUseCase = instance(),
-                db = instance(tag = DoorTag.TAG_DB),
-                learningSpace = context,
-                repo = null
-            )
-        }
         registerContextTranslator { call: ApplicationCall ->
             call.callLearningSpace
         }
@@ -1093,13 +1081,6 @@ fun Application.umRestApplication(
                     )
                 }
 
-                route("resendinvite") {
-                    ResendInviteRoute(
-                        useCase = { call ->
-                            di.on(call).direct.instance()
-                        }
-                    )
-                }
                 route("passkey"){
 
                     VerifySignInWithPasskeyRoute(
