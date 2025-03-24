@@ -1,10 +1,17 @@
 package com.ustadmobile.view.report.list
 
 import app.cash.paging.PagingSourceLoadResult
+import com.ustadmobile.core.domain.report.model.GraphSeries
+import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
+import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
+import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.viewmodel.report.list.ReportDataResult
 import com.ustadmobile.core.viewmodel.report.list.ReportListUiState
 import com.ustadmobile.core.viewmodel.report.list.ReportListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
@@ -16,24 +23,32 @@ import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
+import com.ustadmobile.view.report.graph.ReportGraph
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import mui.material.Box
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemButton
 import mui.material.ListItemIcon
 import mui.material.ListItemText
+import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
 import react.create
 import react.router.useLocation
+import react.useMemo
 import tanstack.react.query.UseInfiniteQueryResult
 import web.cssom.Contain
+import web.cssom.FlexShrink
 import web.cssom.Height
 import web.cssom.Overflow
+import web.cssom.atrule.height
+import web.cssom.atrule.width
 import web.cssom.pct
+import web.cssom.px
 
 external interface ReportListProps : Props {
     var uiState: ReportListUiState
@@ -41,6 +56,68 @@ external interface ReportListProps : Props {
     var onListItemClick: (Report) -> Unit
     var onClickAddItem: () -> Unit
     var onRemoveReport: (Long) -> Unit
+    var runReport: (Report) -> Flow<ReportDataResult>
+}
+
+external interface ReportListItemProps : Props {
+    var report: Report
+    var onListItemClick: (Report) -> Unit
+    var onRemoveReport: (Long) -> Unit
+    var runReport: (Report) -> Flow<ReportDataResult>
+}
+
+val ReportListItem = FC<ReportListItemProps> { props ->
+    val string = useStringProvider()
+    val reportDataFlow = useMemo(props.report.reportUid) {
+        props.runReport(props.report)
+    }
+    val reportDataResult by reportDataFlow.collectAsState(
+        ReportDataResult(null, emptyList())
+    )
+
+    val graphSeriesList = useMemo(reportDataResult) {
+        reportDataResult.options?.series?.mapIndexed { index, reportSeries ->
+            GraphSeries(
+                type = when (reportSeries.reportSeriesVisualType) {
+                    ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
+                    else -> SeriesType.BAR
+                },
+                data = reportDataResult.data.getOrNull(index)?.map {
+                    ReportResultQueryRow(
+                        xAxis = it.xAxis,
+                        yAxis = it.yAxis,
+                        subgroup = it.subgroup
+                    )
+                } ?: emptyList(),
+                name = reportSeries.reportSeriesTitle
+            )
+        } ?: emptyList()
+    }
+
+    ListItem {
+        divider = true
+        ListItemButton {
+            onClick = { props.onListItemClick(props.report) }
+            ReportGraph {
+                this.graphSeriesList = graphSeriesList
+                this.reportOptions = reportDataResult.options ?: ReportOptions2()
+                this.strings = string
+                this.compact = true
+            }
+            ListItemText {
+                primary = ReactNode(props.report.reportTitle)
+            }
+        }
+        secondaryAction = ListItemIcon.create {
+            mui.material.IconButton {
+                mui.icons.material.Delete {
+                    onClick = {
+                        props.onRemoveReport(props.report.reportUid)
+                    }
+                }
+            }
+        }
+    }
 }
 
 val ReportListComponent2 = FC<ReportListProps> { props ->
@@ -65,26 +142,12 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
             infiniteQueryPagingItems(
                 items = infiniteQueryResult,
                 key = { it.reportUid.toString() }
-            ) { reportAndDetails ->
-                ListItem.create {
-                    ListItemButton {
-                        onClick = {
-                            reportAndDetails?.also { props.onListItemClick(it) }
-                        }
-
-                        ListItemText {
-                            primary = ReactNode(reportAndDetails?.reportTitle ?: "")
-                        }
-                    }
-                    ListItemIcon {
-                        mui.material.IconButton {
-                            mui.icons.material.Delete {
-                                onClick = {
-                                    reportAndDetails?.reportUid?.let { props.onRemoveReport(it) }
-                                }
-                            }
-                        }
-                    }
+            ) { report ->
+                ReportListItem.create {
+                    this.report = report ?: Report()
+                    this.onListItemClick = props.onListItemClick
+                    this.onRemoveReport = props.onRemoveReport
+                    this.runReport = props.runReport
                 }
             }
         }
@@ -110,5 +173,6 @@ val ReportListScreen = FC<Props> {
         onListItemClick = viewModel::onClickEntry
         onClickAddItem = viewModel::onClickAdd
         onRemoveReport = viewModel::onRemoveReport
+        runReport = viewModel::runReport
     }
 }

@@ -46,7 +46,9 @@ fun CombinedGraph(
     modifier: Modifier = Modifier,
     xAxisLabel: ReportXAxis?,
     yAxisLabel: String,
-    isDurationType: Boolean
+    isDurationType: Boolean,
+    compactMode: Boolean = false,
+
 ) {
     val allXValues = remember(series) {
         series.flatMap { it.data.map { row -> row.xAxis } }.distinct().sorted()
@@ -116,8 +118,8 @@ fun CombinedGraph(
 
     ChartLayout(
         modifier = modifier.defaultChartPadding(),
-        legend = { CombinedLegend(series, colorMap) },
-        legendLocation = LegendLocation.BOTTOM
+        legend = { if (!compactMode) CombinedLegend(series, colorMap) else null },
+        legendLocation = if (compactMode) LegendLocation.NONE else LegendLocation.BOTTOM
     ) {
         XYGraph(
             xAxisModel = FloatLinearAxisModel(
@@ -135,21 +137,24 @@ fun CombinedGraph(
                     ReportXAxis.GENDER -> getGenderLabel(rawValue)
                     else -> rawValue?.toString() ?: ""
                 }
+                if (!compactMode)
                 AxisValue(
                     label = label,
                     Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
                 )
             },
-            xAxisTitle = { AxisLabels(xAxisLabel?.name ?: "") },
+            xAxisTitle = { if (!compactMode) AxisLabels(xAxisLabel?.name ?: "") },
             yAxisLabels = {
                 val formattedValue = if (isDurationType) {
                     "%.1f %s".format(it, unit)  // Shows "1.5 hr" format
                 } else {
                     "%.0f".format(it)  // Shows whole numbers for counts
                 }
+                if (!compactMode)
                 AxisValue(formattedValue, Modifier.defaultItemPadding(end = 4.dp))
             },
             yAxisTitle = {
+                if (!compactMode)
                 AxisLabels(
                     yAxisLabel,
                     Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)

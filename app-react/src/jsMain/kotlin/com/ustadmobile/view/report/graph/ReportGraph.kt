@@ -11,7 +11,6 @@ import com.ustadmobile.core.impl.locale.StringProvider
 import kotlinx.dom.clear
 import kotlinx.html.dom.append
 import kotlinx.html.js.div
-import kotlinx.html.style
 import org.w3c.dom.HTMLElement
 import react.FC
 import react.Props
@@ -30,6 +29,7 @@ external interface ReportGraphProps : Props {
     var graphSeriesList: List<GraphSeries>
     var reportOptions: ReportOptions2
     var strings: StringProvider
+    var compact: Boolean?
 }
 
 /**
@@ -40,6 +40,7 @@ external interface ReportGraphProps : Props {
 
 val ReportGraph = FC<ReportGraphProps> { props ->
     val containerRef = useRef<web.html.HTMLElement>()
+    val isCompact = props.compact ?: false
 
     useEffect(props.graphSeriesList, props.reportOptions) {
         val container = containerRef.current ?: return@useEffect
@@ -47,7 +48,6 @@ val ReportGraph = FC<ReportGraphProps> { props ->
         (container as HTMLElement).clear()
         (container as HTMLElement).append {
             div {
-                style = "height:50%; width=100%;"
                 plotDiv {
                     props.graphSeriesList.forEach { series ->
                         val groupedData = series.data.groupBy { it.subgroup }
@@ -74,23 +74,25 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                             }
                         }
                     }
-
-                    layout {
-                        xaxis {
-                            title {
-                                text = props.reportOptions.xAxis?.name
-                                    ?: props.strings[MR.strings.x_axis]
-                                font { size = 16 }
+                    if (!isCompact) {
+                        layout {
+                            autosize = false
+                            xaxis {
+                                title {
+                                    text = props.reportOptions.xAxis?.name
+                                        ?: props.strings[MR.strings.x_axis]
+                                    font { size = 16 }
+                                }
+                                tickmode = TickMode.linear
                             }
-                            tickmode = TickMode.linear
-                        }
-                        yaxis {
-                            title {
-                                text = getYAxisTitle(props.reportOptions, props.strings)
-                                font { size = 16 }
+                            yaxis {
+                                title {
+                                    text = getYAxisTitle(props.reportOptions, props.strings)
+                                    font { size = 16 }
+                                }
                             }
+                            showlegend = !isCompact
                         }
-                        showlegend = true
                     }
                 }
             }
