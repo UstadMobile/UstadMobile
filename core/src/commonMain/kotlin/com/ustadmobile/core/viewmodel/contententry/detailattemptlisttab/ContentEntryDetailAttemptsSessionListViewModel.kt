@@ -42,22 +42,14 @@ class ContentEntryDetailAttemptsSessionListViewModel(
     private val entityUidArg = savedStateHandle[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
     private val argPersonUid = savedStateHandle[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
 
-
-    private fun getAttemptsSessionListAsPagingSource(contentEntryUid: Long, personUid: Long)
-            : PagingSource<Int, SessionTimeAndProgressInfo> {
-        return activeRepo.statementDao().findSessionsByPersonAndContent(contentEntryUid, personUid,
-            accountPersonUid = activeUserPersonUid,
-            sortOrder = _uiState.value.sortOption.flag
-        )
-    }
-
     private val attemptsSessionListPagingSource: ListPagingSourceFactory<SessionTimeAndProgressInfo> =
         {
-            getAttemptsSessionListAsPagingSource(
+            activeRepoWithFallback.statementDao().findSessionsByPersonAndContent(
                 contentEntryUid = entityUidArg,
                 personUid = argPersonUid,
-
-                )
+                accountPersonUid = activeUserPersonUid,
+                sortOrder = _uiState.value.sortOption.flag
+            )
         }
 
     init {
@@ -66,11 +58,11 @@ class ContentEntryDetailAttemptsSessionListViewModel(
         viewModelScope.launch {
             // Launch both the person names and content title fetching in parallel
             val personNamesDeferred = async {
-                activeRepo.personDao().getNamesByUid(argPersonUid).firstOrNull()
+                activeRepoWithFallback.personDao().getNamesByUid(argPersonUid).firstOrNull()
             }
 
             val contentEntryDeferred = async {
-                activeRepo.contentEntryDao().findLiveContentEntry(entityUidArg).firstOrNull()
+                activeRepoWithFallback.contentEntryDao().findLiveContentEntry(entityUidArg).firstOrNull()
             }
 
             val personNames = personNamesDeferred.await()
@@ -107,20 +99,18 @@ class ContentEntryDetailAttemptsSessionListViewModel(
         _uiState.update { prev ->
             prev.copy(
                 sortOption = sortOption,
-                attemptsSessionList = {
-                    getAttemptsSessionListAsPagingSource(entityUidArg, argPersonUid)
-                }
+                attemptsSessionList = attemptsSessionListPagingSource
             )
         }
         _refreshCommandFlow.tryEmit(RefreshCommand())
     }
 
     override fun onUpdateSearchResult(searchText: String) {
-        TODO("Not yet implemented")
+        //Not used
     }
 
     override fun onClickAdd() {
-        TODO("Not yet implemented")
+        //Not used
     }
 
     companion object {

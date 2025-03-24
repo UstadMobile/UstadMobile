@@ -2,13 +2,10 @@ package com.ustadmobile.core.domain.xapi.formatresponse
 
 import app.cash.turbine.test
 import com.benasher44.uuid.uuid4
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.runBlocking
@@ -16,6 +13,9 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 
 class FormatStatementResponseUseCaseTest {
 
@@ -29,7 +29,7 @@ class FormatStatementResponseUseCaseTest {
 
     private val xxHasher = XXStringHasherCommonJvm()
 
-    private val learningSpace = Endpoint("http://localhost/")
+    private val learningSpace = LearningSpace("http://localhost/")
 
     private lateinit var formatStatementResponseUseCase: FormatStatementResponseUseCase
 
@@ -55,7 +55,7 @@ class FormatStatementResponseUseCaseTest {
         statementResource = XapiStatementResource(
             db, null,
             xxHasher = xxHasher,
-            endpoint = learningSpace,
+            learningSpace = learningSpace,
             xapiJson = xapiJson,
             hasherFactory = XXHasher64FactoryCommonJvm(),
             storeActivitiesUseCase = storeActivitiesUseCase,
