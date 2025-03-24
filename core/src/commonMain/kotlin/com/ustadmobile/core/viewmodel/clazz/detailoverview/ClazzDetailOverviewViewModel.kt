@@ -118,7 +118,7 @@ class ClazzDetailOverviewViewModel(
                     visible = false,
                     text = systemImpl.getString(MR.strings.edit),
                     icon = FabUiState.FabIcon.EDIT,
-                    onClick = { this.onClickEdit("edit") }
+                    onClick = { this.onClickEdit("") }
                 )
             )
         }
