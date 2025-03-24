@@ -484,7 +484,6 @@ expect abstract class StatementDao {
         contentEntryUid: Long,
         personUid: Long,
         accountPersonUid: Long,
-        sortOrder: Int
     ): List<StatementEntity>
 
     /**
