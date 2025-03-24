@@ -65,6 +65,7 @@ class StoreActivitiesUseCase(
                     actMoreInfo = it.actMoreInfo,
                     actInteractionType = it.actInteractionType,
                     actCorrectResponsePatterns = it.actCorrectResponsePatterns,
+                    actLct = timeNow,
                 )
             }
 
