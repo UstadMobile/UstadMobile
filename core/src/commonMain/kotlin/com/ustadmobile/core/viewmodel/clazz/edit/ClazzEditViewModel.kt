@@ -490,6 +490,7 @@ class ClazzEditViewModel(
     }
 
 
+/*
     fun onClickSave() {
         val initEntity = _uiState.value.entity ?: return
         if (loadingState == LoadingUiState.INDETERMINATE) {
@@ -595,7 +596,143 @@ class ClazzEditViewModel(
             finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
         }
     }
+*/
 
+    fun onClickSave() {
+        val initEntity = _uiState.value.entity ?: return
+        if (loadingState == LoadingUiState.INDETERMINATE) {
+            Napier.d("onClickSave: indeterminate")
+            return
+        }
+
+        // ✅ Validation checks
+        if (initEntity.clazzStartTime == 0L) {
+            _uiState.update { prev -> prev.copy(clazzStartDateError = systemImpl.getString(MR.strings.field_required_prompt)) }
+            return
+        }
+        if (initEntity.clazzEndTime <= initEntity.clazzStartTime) {
+            _uiState.update { prev -> prev.copy(clazzEndDateError = systemImpl.getString(MR.strings.end_is_before_start)) }
+            return
+        }
+        if (initEntity.clazzName.isNullOrBlank()) {
+            _uiState.update { prev -> prev.copy(clazzNameError = systemImpl.getString(MR.strings.required)) }
+            return
+        }
+        if (_uiState.value.hasErrors()) {
+            Napier.d("onClickSave: hasErrors")
+            return
+        }
+
+        val isCopyAction = actionType == "copy"
+
+        // ✅ Prepare new entity (copy if needed)
+        val entity = initEntity.shallowCopy {
+            clazzName = clazzName?.trim()
+            clazzStartTime = Instant.fromEpochMilliseconds(initEntity.clazzStartTime)
+                .toLocalMidnight(initEntity.effectiveTimeZone).toEpochMilliseconds()
+            if (clazzEndTime != Long.MAX_VALUE) {
+                clazzEndTime = Instant.fromEpochMilliseconds(initEntity.clazzEndTime)
+                    .toLocalEndOfDay(initEntity.effectiveTimeZone).toEpochMilliseconds()
+            }
+            if (isCopyAction) {
+                clazzUid = 0L // New UID for copied entity
+            }
+        }
+
+        _uiState.update { prev -> prev.copy(entity = entity) }
+
+        launchWithLoadingIndicator(
+            onSetFieldsEnabled = { _uiState.update { prev -> prev.copy(fieldsEnabled = it) } }
+        ) {
+            val initState = savedStateHandle.getJson(KEY_INIT_STATE, ClazzEditUiState.serializer()) ?: return@launchWithLoadingIndicator
+            Napier.d("onClickSave: start transaction")
+
+            val courseBlockListVal = _uiState.value.courseBlockList
+
+            activeDb.withDoorTransactionAsync {
+                if (isCopyAction) {
+                    createNewClazzUseCase(entity) // ✅ Create a new course
+                } else {
+                    activeRepo.clazzDao().updateAsync(entity) // ✅ Update existing course
+                }
+
+                val clazzUid = entity.clazzUid // Get new or existing UID
+
+                // ✅ Copy Course Blocks
+                val copiedCourseBlocks = courseBlockListVal.map { block ->
+                    block.copy(
+                        courseBlock = block.courseBlock.copy(
+                            cbUid = if (isCopyAction) 0L else block.courseBlock.cbUid,
+                            cbClazzUid = clazzUid
+                        )
+                    )
+                }
+                activeRepo.courseBlockDao().upsertListAsync(copiedCourseBlocks.map { it.courseBlock })
+
+                // ✅ Deactivate Old Course Blocks
+                if (!isCopyAction) {
+                    val blocksToDeactivate = initState.courseBlockList.findKeysNotInOtherList(copiedCourseBlocks) { it.courseBlock.cbUid }
+                    activeRepo.courseBlockDao().deactivateByUids(blocksToDeactivate, systemTimeInMillis())
+                }
+
+                // ✅ Copy Assignments
+                val copiedAssignments = courseBlockListVal.mapNotNull { block ->
+                    block.assignment?.let { assignment ->
+                        assignment.copy(
+                            caUid = if (isCopyAction) 0L else assignment.caUid, // Explicitly reference `assignment`
+                            caClazzUid = clazzUid
+                        )
+                    }
+                }
+                activeRepo.clazzAssignmentDao().upsertListAsync(copiedAssignments)
+
+                // ✅ Deactivate Old Assignments
+                if (!isCopyAction) {
+                    val assignmentsToDeactivate = initState.courseBlockList
+                        .mapNotNull { it.assignment }
+                        .findKeysNotInOtherList(copiedAssignments) { it.caUid }
+
+                    activeRepo.clazzAssignmentDao().updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
+                }
+
+                // ✅ Copy Peer Review Allocations
+                val copiedPeerReviewAllocations = courseBlockListVal.flatMap {
+                    it.assignmentPeerAllocations.map { allocation ->
+                        allocation.copy(praUid = if (isCopyAction) 0L else allocation.praUid)
+                    }
+                }
+                activeRepo.peerReviewerAllocationDao().upsertList(copiedPeerReviewAllocations)
+
+                // ✅ Deactivate Old Peer Reviews
+                if (!isCopyAction) {
+                    val peerReviewsToDeactivate = initState.courseBlockList.flatMap { it.assignmentPeerAllocations }
+                        .findKeysNotInOtherList(copiedPeerReviewAllocations) { it.praUid }
+
+                    activeRepo.peerReviewerAllocationDao().deactivateByUids(peerReviewsToDeactivate, systemTimeInMillis())
+                }
+
+                // ✅ Handle course schedules
+                val schedulesToCommit = _uiState.value.clazzSchedules.map {
+                    it.shallowCopy { scheduleClazzUid = clazzUid }
+                }
+                activeRepo.scheduleDao().upsertListAsync(schedulesToCommit)
+
+                // ✅ Deactivate Old Schedules
+                if (!isCopyAction) {
+                    activeRepo.scheduleDao().deactivateByUids(
+                        initState.clazzSchedules.findKeysNotInOtherList(schedulesToCommit) { it.scheduleUid },
+                        systemTimeInMillis()
+                    )
+                }
+
+                Napier.d("onClickSave: transaction block done")
+            }
+
+            Napier.d("onClickSave: transaction done")
+
+            finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
+        }
+    }
 
 
     fun onCourseBlockMoved(from: Int, to: Int) {
