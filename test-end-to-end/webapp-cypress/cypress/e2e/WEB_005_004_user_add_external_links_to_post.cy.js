@@ -27,6 +27,7 @@ it('Admin add discussion board and post', () => {
   cy.get('#discussion_post_title').type('Topic 1')
   cy.get('.ql-editor').ustadTypeAndVerify('Discusssion post')
   cy.get('#actionBarButton').click()
+  cy.contains("Topic 1", { timeout: 10000 }).should('be.visible')
 })
 
 it('Teacher able to add external link as reply to the post', () => {
@@ -40,12 +41,11 @@ it('Teacher able to add external link as reply to the post', () => {
   cy.get('[data-placeholder="Add a reply"]').type('External link');
   cy.get('[data-placeholder="Add a reply"]').type('{selectall}')
   cy.get('.ql-link').click()
-  cy.get('[data-video="Embed URL"]').type('https://github.com/UstadMobile/UstadMobile/blob/primary/test-end-to-end/README.md')
+  cy.get('[data-video="Embed URL"]').type(`${Cypress.config('baseUrl')}testcontroller/test-files/content/example.html`)
   cy.get('[class=ql-action]').click()
   cy.contains('button','Post').click()
-  cy.contains('External link').should('be.visible')
-  cy.go('back')
-  cy.go('back')
+  cy.contains('External link', { timeout: 10000 }).should('be.visible')
+  cy.contains("Topic 1", { timeout: 10000 }).should('be.visible')
 })
 
 it('Student able to open the external link in the reply', () => {
@@ -57,7 +57,8 @@ it('Student able to open the external link in the reply', () => {
   cy.contains('Discussion 1').click()
   cy.contains('Topic 1').click()
   cy.contains('External link').invoke('attr','target', '_self').click()
-  cy.url().should('include','https://github.com/UstadMobile/UstadMobile/blob/primary/test-end-to-end/README.md')
+  cy.url().should('include',`${Cypress.config('baseUrl')}testcontroller/test-files/content/example.html`)
+  cy.contains('Welcome to Ustad Test Page').should('be.visible')
 })
 
   after(() => {

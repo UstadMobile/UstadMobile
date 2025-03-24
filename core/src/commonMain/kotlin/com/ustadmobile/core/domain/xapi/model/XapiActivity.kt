@@ -76,6 +76,7 @@ fun XapiActivity?.toEntities(
             almeActivityUid = activityUid,
             almeHash = stringHasher.hash("$propName-$lang"),
             almeLangCode = lang,
+            almePropName = propName,
             almeValue = text,
             almeAieHash = almeAieHash,
         )
