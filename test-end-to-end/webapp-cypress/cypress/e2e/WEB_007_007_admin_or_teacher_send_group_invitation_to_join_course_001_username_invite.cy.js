@@ -25,8 +25,9 @@ it('Student able to accept course invite', () => {
   cy.contains("Messages").click()
   cy.contains("Teacher 1").click()
   cy.get('.MuiBox-root.css-dwtjoi a').click()
-  cy.contains("Accept").should("exist")
-  cy.contains("Accept").click()
+  cy.contains("Do you want to join this course?").should("exist")
+  cy.contains("ACCEPT").click()
+  cy.contains("Test Course Block",{timeout: 10000}).should("exist")
 })
 it('Tearcher verify student added to the course', () => {
  // Teacher Login

@@ -39,8 +39,9 @@ it('New student user login via email link', () => {
   cy.contains("label", "Username").parent().find("input").clear().type('newuser')
   cy.contains("label", "Password").parent().find("input").clear().type('test1234')
   cy.contains('SIGN-UP').click()
-  cy.wait(3000)
-  cy.contains('Accept',{timeout:2000}).should('be.visible')
+  cy.contains("Do you want to join this course?").should("exist")
+  cy.contains("ACCEPT").click()
+  cy.contains("Test Course Block",{timeout: 10000}).should("exist")
 })
 
 it('Tearcher verify student added to the course', () => {
