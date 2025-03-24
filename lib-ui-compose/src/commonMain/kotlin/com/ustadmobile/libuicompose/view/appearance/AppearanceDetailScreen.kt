@@ -1,4 +1,7 @@
 package com.ustadmobile.libuicompose.view.appearance
 
-class AppearanceDetailScreen {
+import androidx.compose.runtime.Composable
+
+@Composable
+fun AppearanceDetailScreen() {
 }

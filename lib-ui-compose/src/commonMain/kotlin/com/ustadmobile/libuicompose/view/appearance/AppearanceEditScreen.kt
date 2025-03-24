@@ -1,4 +1,7 @@
 package com.ustadmobile.libuicompose.view.appearance
 
-class AppearanceEditScreen {
+import androidx.compose.runtime.Composable
+
+@Composable
+fun AppearanceEditScreen() {
 }
