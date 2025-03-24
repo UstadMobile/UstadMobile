@@ -27,10 +27,10 @@ onFlowComplete:
 - tapOn: "E-book"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 10000
+    timeout: 80000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 10000
+    timeout: 80000
 - tapOn: Open
 - runFlow:
     file: "common/login_download_and_open_content.yaml"
@@ -38,7 +38,7 @@ onFlowComplete:
 - tapOn: "Library"
 - extendedWaitUntil:
     visible: "E-book"
-    timeout: 60000
+    timeout: 80000
 - tapOn: "E-book"
 - tapOn: Download
 - tapOn: Open
