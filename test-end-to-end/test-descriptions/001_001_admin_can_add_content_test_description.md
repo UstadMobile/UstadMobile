@@ -6,31 +6,43 @@ Admin can add an H5P, Epub, Video, and Pdf content file from the device. Once ad
 
 ## Step-by-step procedure:
 
-1. Go to File-Downloads and make sure content file is there in downloads for test
-2. Launch Ustad app
-3. Click on "Existing User" button
-4. Click on "Enter link manually" button
-5. Enter the site link and click Next
-6. Login as admin.
-7. Click on "Library."
-8. Click on the "+ Content" button.
-9. Click on the "From file" or "From folder" button.
-10. Select the content file.
-11. Click the "Save" button.
-12. Verify that the content is visible in the library.
-13. Click on the content.
-14. Wait for the importing and uploading to complete.
-15. Click the "Open" button.
-16. Verify the content appears as expected.
-17. Close the content.
-18. Clear the app storage.
-19. Launch Ustad app
-20. Click on "Existing User" button
-21. Click on "Enter link manually" button
-22. Enter the site link and click Next
-23. Log in as admin.
-24. Click on "Library."
-25. Click on the content.
-26. Click the "Download" button.
-27. Click the "Open" button.
-28. Verify the content appears as expected.
+1. Login as admin.
+2. Click on "Library."
+3. Click on the "+ Content" button.
+4. Click on the "From file" or "From folder" button.
+5. Select the content file.
+6. Click the "Save" button.
+7. Verify that the content is visible in the library.
+8. Click on the content.
+9. Wait for the importing and uploading to complete.
+10. Click the "Open" button.
+11. Verify the content appears as expected.
+12. Close the content.
+13. Clear the app storage.
+14. Log in as admin.
+15. Click on "Library."
+16. Click on the content.
+17. Click the "Download" button.
+18. Click the "Open" button.
+19. Verify the content appears as expected.
+20. Back to content screen
+21. Click on "Attempts."
+22. Verify:
+    * The content title is visible
+    * User's name is listed.
+    * Progress bar is visible.
+    * "1 Attempt" is recorded.
+23. Click on "Admin User."
+24. Verify:
+    * The username - content title is visible
+    * Progress bar is visible.
+    * "% score/completion" is displayed.
+25. Click on the progress bar.
+26. Verify:
+    * The content title is visible
+    * Answered/Progressed verb is shown as per the content.
+27. Test filtering:
+    * Verify the progress bars are visible
+    * By default the filter chips are selected
+28. When filter chips are unselected corresponding progress bars are disappeared
+29. Verify "Nothing here, yet" is displayed.
