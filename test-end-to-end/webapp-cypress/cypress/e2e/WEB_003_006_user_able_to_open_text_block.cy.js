@@ -1,4 +1,4 @@
-describe('WEB_003_007_user_able_to_open_text_block', () => {
+describe('WEB_003_006_user_able_to_open_text_block', () => {
   before(() => {
     // Start Test Server
     cy.ustadStartTestServer(6000)

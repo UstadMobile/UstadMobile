@@ -19,7 +19,7 @@ fun SortOrderOption.description() : String  {
             }else {
                 append(stringResource(MR.strings.descending))
             }
+            append(")")
         }
-        append(")")
     }
 }
