@@ -1,4 +1,4 @@
-describe('WEB_007_007_admin_or_teacher_send_group_invitation_to_join_course_002_email_invite', () => {
+describe('007_007b_admin_send_group_invitation_to_join_course_via_email', () => {
  before(() => {
     // Start Test Server
     cy.ustadStartTestServer(6000)
@@ -39,8 +39,6 @@ it('New student user login via email link', () => {
   cy.contains("label", "Username").parent().find("input").clear().type('newuser')
   cy.contains("label", "Password").parent().find("input").clear().type('test1234')
   cy.contains('SIGN-UP').click()
-  cy.contains("Do you want to join this course?").should("exist")
-  cy.contains("ACCEPT").click()
   cy.contains("Test Course Block",{timeout: 10000}).should("exist")
 })
 

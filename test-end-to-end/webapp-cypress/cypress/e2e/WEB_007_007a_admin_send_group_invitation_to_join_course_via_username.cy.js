@@ -1,4 +1,4 @@
-describe('WEB_007_007_admin_or_teacher_send_group_invitation_to_join_course_001_username_invite', () => {
+describe('WEB_007_007a_admin_send_group_invitation_to_join_course_via_username', () => {
   before(() => {
     // Start Test Server
     cy.ustadStartTestServer(6000)

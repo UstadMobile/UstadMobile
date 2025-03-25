@@ -137,9 +137,9 @@ trickle -s -d 128 -u 128 bash
 
 7.6 [Admin can enable/disable guest login](test-descriptions/007_006_admin_enable_or_disable_guest_login_test_description.md)
 
-7.7a [Admin or teacher send invitation via message](test-descriptions/007_007_admin_or_teacher_send_group_invitation_to_join_course_001_username_invite_test_description.md)
+7.7a [Admin or teacher send invitation via message](test-descriptions/007_007a_admin_send_group_invitation_to_join_course_via_username.md)
 
-7.7b [Admin or teacher send invitation via phone numbers or email addresses](test-descriptions/007_007_admin_or_teacher_send_group_invitation_to_join_course_002_email_invite_test_description.md)
+7.7b [Admin or teacher send invitation via phone numbers or email addresses](test-descriptions/007_007b_admin_send_group_invitation_to_join_course_via_email_test_description.md)
 
 ### 8 Accessibility
 
