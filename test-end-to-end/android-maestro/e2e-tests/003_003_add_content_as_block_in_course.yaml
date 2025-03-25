@@ -41,7 +41,7 @@ onFlowComplete:
     notVisible: "Uploading"
     timeout: 80000
 # teacher add existing content in library to course as a content block
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -103,7 +103,7 @@ onFlowComplete:
 - assertVisible: "Check"
 
 # Student 1 attempt video content
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -159,7 +159,7 @@ onFlowComplete:
 
 
 # Student 2 attempt H5p content
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -200,7 +200,7 @@ onFlowComplete:
 - assertVisible: "Score"
 
 # Student 3 makes attempt on H5p content
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -242,7 +242,7 @@ onFlowComplete:
 - assertVisible: "Score"
 
 # verify teacher able to see students attempts
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -288,7 +288,7 @@ onFlowComplete:
 - assertVisible: "100%"
 - assertVisible: "Score"
   # Verify student 1 not able to see attempts made in course content by Student 2
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
