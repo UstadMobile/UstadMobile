@@ -21,5 +21,8 @@ appId: com.toughra.ustadmobile
     env:
       TESTFILENAME: ${TESTFILENAME}
 - tapOn: "Next"
+- tapOn: "Maximum points"
+- inputText: "10"
+- hideKeyboard
 - tapOn: "Done"
 - tapOn: "SAVE"

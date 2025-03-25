@@ -13,6 +13,7 @@ enum class UstadImage {
     COURSE_BANNER_DEFAULT2,
     COURSE_BANNER_DEFAULT3,
     COURSE_BANNER_DEFAULT4,
+
 }
 
 /**

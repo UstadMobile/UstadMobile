@@ -32,7 +32,8 @@ expect abstract class ActivityEntityDao  {
            SET actType = :actType,
                actMoreInfo = :actMoreInfo,
                actInteractionType = :actInteractionType,
-               actCorrectResponsePatterns = :actCorrectResponsePatterns
+               actCorrectResponsePatterns = :actCorrectResponsePatterns,
+               actLct = :actLct
          WHERE actUid = :actUid
            AND (SELECT ActivityEntityInternal.actType 
                   FROM ActivityEntity ActivityEntityInternal 
@@ -49,7 +50,8 @@ expect abstract class ActivityEntityDao  {
         actType: String?,
         actMoreInfo: String?,
         actInteractionType: Int,
-        actCorrectResponsePatterns: String?
+        actCorrectResponsePatterns: String?,
+        actLct: Long,
     )
 
     @Query("""

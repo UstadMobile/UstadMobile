@@ -1,0 +1,38 @@
+{
+  "actor": {
+    "account" : {
+      "name": "user",
+      "homePage": "http://localhost/"
+    }
+  },
+  "verb":{
+    "id":"http://adlnet.gov/expapi/verbs/attempted",
+    "display":{
+      "en-US":"attempted"
+    }
+  },
+  "object":{
+    "id":"http://example.adlnet.gov/xapi/example/simpleCBT",
+    "definition": {
+      "name": {"en-US": "Question 5"},
+      "description": {"en-US": "This interaction measures performance over a day of RS sports:"},
+      "type": "http://adlnet.gov/expapi/activities/cmi.interaction",
+      "interactionType": "performance",
+      "correctResponsesPattern": ["pong[.]1:[,]dg[.]:10[,]lunch[.]"],
+      "steps": [
+        {"id": "pong", "description": {"en-US": "Net pong matches won"}},
+        {"id": "dg", "description": {"en-US": "Strokes over par in disc golf at Liberty"}},
+        {"id": "lunch", "description": {"en-US": "Lunch having been eaten"}}
+      ]
+    }
+  },
+  "result":{
+    "score":{
+      "scaled":0.95
+    },
+    "success":true,
+    "completion":true,
+    "duration": "PT1234S",
+    "response" : "pong[.]5[,]dg[.]4[,]lunch[.]soup"
+  }
+}
