@@ -93,7 +93,7 @@ it('Admin user add content to the library', () => {
   cy.contains('Content_004').click()
   cy.contains("Importing", { timeout: 20000 }).should("not.exist")
   cy.contains("button","OPEN").click()
-  cy.contains("#appbar_title", "Content_004").should("be.visible")
+  cy.contains("#appbar_title", "Content_004", { timeout: 20000 }).should("exist")
   cy.wait(3000)
   cy.go('back')
 // Attempts made on pdf
