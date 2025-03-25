@@ -1,0 +1,36 @@
+{
+  "actor": {
+    "account" : {
+      "name": "user",
+      "homePage": "http://localhost/"
+    }
+  },
+  "verb":{
+    "id":"http://adlnet.gov/expapi/verbs/attempted",
+    "display":{
+      "en-US":"attempted"
+    }
+  },
+  "object":{
+    "id":"http://example.adlnet.gov/xapi/example/simpleCBT",
+    "definition": {
+      "description": {
+        "en-US": "Does the xAPI include the concept of statements?"
+      },
+      "type": "http://adlnet.gov/expapi/activities/cmi.interaction",
+      "interactionType": "true-false",
+      "correctResponsesPattern": [
+        "true"
+      ]
+    }
+  },
+  "result":{
+    "score":{
+      "scaled":0.95
+    },
+    "success":true,
+    "completion":true,
+    "duration": "PT1234S",
+    "response" : "true"
+  }
+}

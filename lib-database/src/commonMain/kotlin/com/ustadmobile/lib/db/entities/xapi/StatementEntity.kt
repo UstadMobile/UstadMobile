@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
  * @param resultDuration the duration of the result in ms (if provided), otherwise 0
  * @param extensionProgress Captures the progress extension ( as per
  *        https://aicc.github.io/CMI-5_Spec_Current/samples/scenarios/13-progress_usage/ ) for use
- *        to show progress in the UI.
+ *        to show progress in the UI. Integer between 0 and 100 as per progress extension.
  * @param statementActorUid the ActorEntity.actorUid for the actor referenced by the actor property
  * @param statementObjectType the object type of the statement as a flag : Activity, Agent, Group,
  * StatementRef, or SubStatement

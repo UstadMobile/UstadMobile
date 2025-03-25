@@ -5595,7 +5595,7 @@
       },
       {
         "tableName": "ActivityLangMapEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeActivityUid` INTEGER NOT NULL, `almeHash` INTEGER NOT NULL, `almeLangCode` TEXT, `almeValue` TEXT, `almeAieHash` INTEGER NOT NULL, `almeLastMod` INTEGER NOT NULL, PRIMARY KEY(`almeActivityUid`, `almeHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeActivityUid` INTEGER NOT NULL, `almeHash` INTEGER NOT NULL, `almeLangCode` TEXT, `almePropName` TEXT, `almeValue` TEXT, `almeAieHash` INTEGER NOT NULL, `almeLastMod` INTEGER NOT NULL, PRIMARY KEY(`almeActivityUid`, `almeHash`))",
         "fields": [
           {
             "fieldPath": "almeActivityUid",
@@ -5612,6 +5612,12 @@
           {
             "fieldPath": "almeLangCode",
             "columnName": "almeLangCode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "almePropName",
+            "columnName": "almePropName",
             "affinity": "TEXT",
             "notNull": false
           },

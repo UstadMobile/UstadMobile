@@ -111,7 +111,7 @@ val PdfContentScreen = FC<Props> {
     PdfContentComponent {
         uiState  = uiStateVal
         onProgressed = viewModel::onProgressed
-        onComplete = viewModel::onComplete
+        onComplete = { viewModel.onComplete(oneCompletionStatementOnly = true) }
         onActiveChanged = viewModel::onActiveChanged
     }
 }

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 204,
-    "identityHash": "025b7fcb3902318b4789d8ff96c8de3a",
+    "identityHash": "f5345f7feb337073e52bd57222e41da2",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -1927,7 +1927,7 @@
       },
       {
         "tableName": "StatementEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementIdHi` INTEGER NOT NULL, `statementIdLo` INTEGER NOT NULL, `statementActorPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `statementObjectType` INTEGER NOT NULL, `statementObjectUid1` INTEGER NOT NULL, `statementObjectUid2` INTEGER NOT NULL, `statementActorUid` INTEGER NOT NULL, `authorityActorUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER, `resultSuccess` INTEGER, `resultScoreScaled` REAL, `resultScoreRaw` REAL, `resultScoreMin` REAL, `resultScoreMax` REAL, `resultDuration` INTEGER, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistrationHi` INTEGER NOT NULL, `contextRegistrationLo` INTEGER NOT NULL, `contextRegistrationHash` INTEGER NOT NULL, `contextPlatform` TEXT, `contextStatementRefIdHi` INTEGER NOT NULL, `contextStatementRefIdLo` INTEGER NOT NULL, `contextInstructorActorUid` INTEGER NOT NULL, `statementLct` INTEGER NOT NULL, `extensionProgress` INTEGER, `completionOrProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `statementLearnerGroupUid` INTEGER NOT NULL, `statementClazzUid` INTEGER NOT NULL, `statementCbUid` INTEGER NOT NULL, `statementDoorNode` INTEGER NOT NULL, `isSubStatement` INTEGER NOT NULL, PRIMARY KEY(`statementIdHi`, `statementIdLo`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementIdHi` INTEGER NOT NULL, `statementIdLo` INTEGER NOT NULL, `statementActorPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `statementObjectType` INTEGER NOT NULL, `statementObjectUid1` INTEGER NOT NULL, `statementObjectUid2` INTEGER NOT NULL, `statementActorUid` INTEGER NOT NULL, `authorityActorUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER, `resultSuccess` INTEGER, `resultScoreScaled` REAL, `resultScoreRaw` REAL, `resultScoreMin` REAL, `resultScoreMax` REAL, `resultDuration` INTEGER, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistrationHi` INTEGER NOT NULL, `contextRegistrationLo` INTEGER NOT NULL, `contextPlatform` TEXT, `contextStatementRefIdHi` INTEGER NOT NULL, `contextStatementRefIdLo` INTEGER NOT NULL, `contextInstructorActorUid` INTEGER NOT NULL, `statementLct` INTEGER NOT NULL, `extensionProgress` INTEGER, `completionOrProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `statementLearnerGroupUid` INTEGER NOT NULL, `statementClazzUid` INTEGER NOT NULL, `statementCbUid` INTEGER NOT NULL, `statementDoorNode` INTEGER NOT NULL, `isSubStatement` INTEGER NOT NULL, PRIMARY KEY(`statementIdHi`, `statementIdLo`))",
         "fields": [
           {
             "fieldPath": "statementIdHi",
@@ -2058,12 +2058,6 @@
           {
             "fieldPath": "contextRegistrationLo",
             "columnName": "contextRegistrationLo",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "contextRegistrationHash",
-            "columnName": "contextRegistrationHash",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2398,11 +2392,77 @@
       },
       {
         "tableName": "Report",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportTitle` TEXT, `reportOptions` TEXT, `reportIsTemplate` INTEGER NOT NULL, `reportLastModTime` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `reportDateRangeSelection` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `fromRelTo` INTEGER NOT NULL, `fromRelOffSet` INTEGER NOT NULL, `fromRelUnit` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `toRelTo` INTEGER NOT NULL, `toRelOffSet` INTEGER NOT NULL, `toRelUnit` INTEGER NOT NULL, `reportTitle` TEXT, `reportDescription` TEXT, `reportSeries` TEXT, `reportInactive` INTEGER NOT NULL, `isTemplate` INTEGER NOT NULL, `priority` INTEGER NOT NULL, `reportTitleId` INTEGER NOT NULL, `reportDescId` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL, `reportLct` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "reportUid",
             "columnName": "reportUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportOwnerUid",
+            "columnName": "reportOwnerUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xAxis",
+            "columnName": "xAxis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportDateRangeSelection",
+            "columnName": "reportDateRangeSelection",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fromDate",
+            "columnName": "fromDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fromRelTo",
+            "columnName": "fromRelTo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fromRelOffSet",
+            "columnName": "fromRelOffSet",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fromRelUnit",
+            "columnName": "fromRelUnit",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "toDate",
+            "columnName": "toDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "toRelTo",
+            "columnName": "toRelTo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "toRelOffSet",
+            "columnName": "toRelOffSet",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "toRelUnit",
+            "columnName": "toRelUnit",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2413,20 +2473,68 @@
             "notNull": false
           },
           {
-            "fieldPath": "reportOptions",
-            "columnName": "reportOptions",
+            "fieldPath": "reportDescription",
+            "columnName": "reportDescription",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "reportIsTemplate",
-            "columnName": "reportIsTemplate",
+            "fieldPath": "reportSeries",
+            "columnName": "reportSeries",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reportInactive",
+            "columnName": "reportInactive",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "reportLastModTime",
-            "columnName": "reportLastModTime",
+            "fieldPath": "isTemplate",
+            "columnName": "isTemplate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priority",
+            "columnName": "priority",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportTitleId",
+            "columnName": "reportTitleId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportDescId",
+            "columnName": "reportDescId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportMasterChangeSeqNum",
+            "columnName": "reportMasterChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportLocalChangeSeqNum",
+            "columnName": "reportLocalChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportLastChangedBy",
+            "columnName": "reportLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportLct",
+            "columnName": "reportLct",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -5588,7 +5696,7 @@
       },
       {
         "tableName": "ActivityLangMapEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeActivityUid` INTEGER NOT NULL, `almeHash` INTEGER NOT NULL, `almeLangCode` TEXT, `almeValue` TEXT, `almeAieHash` INTEGER NOT NULL, `almeLastMod` INTEGER NOT NULL, PRIMARY KEY(`almeActivityUid`, `almeHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeActivityUid` INTEGER NOT NULL, `almeHash` INTEGER NOT NULL, `almeLangCode` TEXT, `almePropName` TEXT, `almeValue` TEXT, `almeAieHash` INTEGER NOT NULL, `almeLastMod` INTEGER NOT NULL, PRIMARY KEY(`almeActivityUid`, `almeHash`))",
         "fields": [
           {
             "fieldPath": "almeActivityUid",
@@ -5605,6 +5713,12 @@
           {
             "fieldPath": "almeLangCode",
             "columnName": "almeLangCode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "almePropName",
+            "columnName": "almePropName",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -6232,7 +6346,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '025b7fcb3902318b4789d8ff96c8de3a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f5345f7feb337073e52bd57222e41da2')"
     ]
   }
 }
