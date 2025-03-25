@@ -59,15 +59,13 @@ trickle -s -d 128 -u 128 bash
 
 3.2 [Admin or teacher can add module and text blocks](test-descriptions/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions_test_description.md)
 
-3.3 [Admin or teacher can add a content block and link existing content](test-descriptions/003_003_add_existing_content_in_library_as_block_test_description.md)
+3.3 [Admin or teacher can add a content block by linking existing content or uplaod from file](test-descriptions/003_003_add_existing_content_in_library_or_from_file_as_content_block_test_description.md)
 
 3.4 [Admin or teacher can add a content block and upload new content via link](test-descriptions/003_004_admin_or_teacher_can_add_a_content_block_and_upload_new_content_via_link_test_description.md)
 
-3.5 [Admin or teacher can add a content block and upload new content via file upload](test-descriptions/003_005_add_new_content_block_inside_course_test_description.md)
+3.5 [Course Modules can be expand/collapse](test-descriptions/003_005_course_view_and_modules_can_expand_collapse_test_description.md)
 
-3.6 [Course Modules can be expand/collapse](test-descriptions/003_006_course_view_and_modules_can_expand_collapse_test_description.md)
-
-3.7 [Text blocks can open and all text is visible](test-descriptions/003_007_all_user_able_to_open_text_block_test_description.md)
+3.6 [Text blocks can open and all text is visible](test-descriptions/003_006_all_user_able_to_open_text_block_test_description.md)
 
 ### 4: Assignments
 

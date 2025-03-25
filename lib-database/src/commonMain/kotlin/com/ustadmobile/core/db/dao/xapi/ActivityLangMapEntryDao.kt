@@ -4,7 +4,9 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.PostgresQuery
+import com.ustadmobile.door.annotation.QueryTableModified
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 
@@ -28,9 +30,11 @@ expect abstract class ActivityLangMapEntryDao {
         SET almeValue = EXCLUDED.almeValue,
             almeLastMod = EXCLUDED.almeLastMod
     """)
+    @QueryTableModified("ActivityLangMapEntry")
     abstract suspend fun upsertIfInteractionEntityExists(
         almeActivityUid: Long,
         almeHash: Long,
+        almePropName: String?,
         almeLangCode: String?,
         almeValue: String?,
         almeAieHash: Long,
@@ -52,6 +56,7 @@ expect abstract class ActivityLangMapEntryDao {
         almeLastMod: Long,
     )
 
+    @HttpAccessible
     @Query("""
         SELECT ActivityLangMapEntry.*
           FROM ActivityLangMapEntry
