@@ -8,6 +8,7 @@ import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.impl.locale.StringProvider
+import js.objects.jso
 import kotlinx.dom.clear
 import kotlinx.html.dom.append
 import kotlinx.html.js.div
@@ -24,6 +25,7 @@ import space.kscience.plotly.models.TickMode
 import space.kscience.plotly.models.TraceType
 import space.kscience.plotly.plotDiv
 import space.kscience.plotly.scatter
+import web.cssom.Overflow
 
 external interface ReportGraphProps : Props {
     var graphSeriesList: List<GraphSeries>
@@ -64,6 +66,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                                     x.strings = data.map { it.xAxis }
                                     y.numbers = transformedYValues
                                 }
+
                                 SeriesType.LINE -> scatter {
                                     name = "${series.name} - $subgroup"
                                     x.strings = data.map { it.xAxis }
@@ -74,26 +77,29 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                             }
                         }
                     }
-                    if (!isCompact) {
-                        layout {
-                            autosize = false
-                            xaxis {
-                                title {
-                                    text = props.reportOptions.xAxis?.name
-                                        ?: props.strings[MR.strings.x_axis]
-                                    font { size = 16 }
-                                }
-                                tickmode = TickMode.linear
-                            }
-                            yaxis {
-                                title {
-                                    text = getYAxisTitle(props.reportOptions, props.strings)
-                                    font { size = 16 }
-                                }
-                            }
-                            showlegend = !isCompact
+                    layout {
+                        if (isCompact) {
+                            width = 250
+                            height = 250
                         }
+                        autosize = false
+                        xaxis {
+                            title {
+                                text = props.reportOptions.xAxis?.name
+                                    ?: props.strings[MR.strings.x_axis]
+                                font { size = if (isCompact) 6 else 16 }
+                            }
+                            tickmode = TickMode.linear
+                        }
+                        yaxis {
+                            title {
+                                text = getYAxisTitle(props.reportOptions, props.strings)
+                                font { size = if (isCompact) 6 else 16 }
+                            }
+                        }
+                        showlegend = !isCompact
                     }
+
                 }
             }
         }
@@ -101,8 +107,12 @@ val ReportGraph = FC<ReportGraphProps> { props ->
 
     ReactHTML.div {
         ref = containerRef
+        style = jso {
+            overflow = Overflow.clip
+        }
     }
 }
+
 private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<Double, String> {
     return when {
         isDuration -> when {
@@ -110,9 +120,11 @@ private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<D
             maxY >= 60_000 -> Pair(1.0 / 60_000, "min")
             else -> Pair(1.0 / 1_000, "sec")
         }
+
         else -> Pair(1.0, "")
     }
 }
+
 private fun transformYAxisValues(
     data: List<ReportResultQueryRow>,
     reportOptions: ReportOptions2,
