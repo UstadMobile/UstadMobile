@@ -202,10 +202,23 @@ class ClazzEditViewModel(
                                 clazzOwnerPersonUid = activeUserPersonUid
                             }
                         },
-                        uiUpdate = {
+                  /*      uiUpdate = {
                             _uiState.update { prev ->
                                 prev.copy(
                                     entity = it
+                                )
+                            }
+                        }*/
+                        uiUpdate = {
+                            _uiState.update { prev ->
+                                prev.copy(
+                                    entity = it?.shallowCopy {
+                                        clazzName = if (actionType == "copy") {
+                                            "Copy of ${it.clazzName}"
+                                        } else {
+                                            it.clazzName
+                                        }
+                                    }
                                 )
                             }
                         }
