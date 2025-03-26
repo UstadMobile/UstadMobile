@@ -53,6 +53,8 @@ trickle -s -d 128 -u 128 bash
 
 2.5 [Teacher and admin user can grant permission for the course to other users](test-descriptions/002_005_admin_grant_permissions_test_description.md)
 
+2.6 [Teacher and admin user can copy a course](test-descriptions/002_006_admin_or_teacher_can_copy_a_course_test_description.md)
+
 ### 3: Course block editing
 
 3.1 [Admin or teacher can edit the course](test-descriptions/003_001_add_or_edit_course_permission_test_description.md)
