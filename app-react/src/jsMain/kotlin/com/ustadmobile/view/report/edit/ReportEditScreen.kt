@@ -4,6 +4,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.FixedReportTimeRange
 import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
 import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportPeriod
 import com.ustadmobile.core.domain.report.model.ReportPeriodOption
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
@@ -89,15 +90,11 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
             }
 
             // Time Range Dropdown
-            val selected =
-                ReportPeriodOption.entries.find {
-                    it.period == props.uiState.reportOptions2.period
-                } ?: run {
-                    when (props.uiState.reportOptions2.period) {
-                        is RelativeRangeReportPeriod -> ReportPeriodOption.CUSTOM_PERIOD
-                        is FixedReportTimeRange -> ReportPeriodOption.CUSTOM_DATE_RANGE
-                        else -> null
-                    }
+            val selected = findMatchingReportPeriodOption(props.uiState.reportOptions2.period, ReportPeriodOption.entries)
+                ?: when (props.uiState.reportOptions2.period) {
+                    is RelativeRangeReportPeriod -> ReportPeriodOption.CUSTOM_PERIOD
+                    is FixedReportTimeRange -> ReportPeriodOption.CUSTOM_DATE_RANGE
+                    else -> null
                 }
             FormControl {
                 fullWidth = true
@@ -457,7 +454,26 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
         }
     }
 }
-
+private fun findMatchingReportPeriodOption(
+    period: ReportPeriod,
+    options: List<ReportPeriodOption>
+): ReportPeriodOption? {
+    return options.firstOrNull { option ->
+        when (val optionPeriod = option.period) {
+            is RelativeRangeReportPeriod -> {
+                period is RelativeRangeReportPeriod &&
+                        optionPeriod.rangeUnit == period.rangeUnit &&
+                        optionPeriod.rangeQuantity == period.rangeQuantity
+            }
+            is FixedReportTimeRange -> {
+                period is FixedReportTimeRange &&
+                        optionPeriod.fromDateMillis == period.fromDateMillis &&
+                        optionPeriod.toDateMillis == period.toDateMillis
+            }
+            else -> false
+        }
+    }
+}
 val ReportEditScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
         ReportEditViewModel(di, savedStateHandle)

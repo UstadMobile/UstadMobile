@@ -82,14 +82,14 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                             width = 250
                             height = 250
                         }
-                        autosize = false
+                        autosize = true
                         xaxis {
                             title {
                                 text = props.reportOptions.xAxis?.name
                                     ?: props.strings[MR.strings.x_axis]
                                 font { size = if (isCompact) 6 else 16 }
                             }
-                            tickmode = TickMode.linear
+                            tickmode = TickMode.auto
                         }
                         yaxis {
                             title {
