@@ -56,7 +56,7 @@ onFlowComplete:
         text: "Be careful interacting online and in-app!"
     commands:
       - tapOn: "Got it"
-- tapOn: "Test link"  #need to add id for the test link
+- tapOn: "message_container"  #need to add id for the test link
 - tapOn: "Invitation to Test Course"
 - tapOn: "Accept"
 - tapOn: "Courses"
