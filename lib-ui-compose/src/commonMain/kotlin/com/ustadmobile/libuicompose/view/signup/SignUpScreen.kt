@@ -69,13 +69,13 @@ fun SignUpScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(16.dp))
-
-        UstadImageSelectButton(
-            imageUri = uiState.personPicture?.personPictureUri,
-            onImageUriChanged = onPersonPictureUriChanged,
-            modifier = Modifier.size(60.dp),
-        )
-
+        if (!uiState.isMinor) {
+            UstadImageSelectButton(
+                imageUri = uiState.personPicture?.personPictureUri,
+                onImageUriChanged = onPersonPictureUriChanged,
+                modifier = Modifier.size(60.dp),
+            )
+        }
             OutlinedTextField(
                 modifier = Modifier
                     .testTag("full_name")
@@ -135,23 +135,27 @@ fun SignUpScreen(
                 modifier = Modifier.padding(vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Checkbox(
-                    checked = uiState.isTeacher,
-                    onCheckedChange = {
-                        onTeacherCheckChanged(it)
+                if (!uiState.isParentalConsentForMinor){
+                    Checkbox(
+                        checked = uiState.isTeacher,
+                        onCheckedChange = {
+                            onTeacherCheckChanged(it)
 
-                    }
-                )
-                Text(
-                    text = stringResource(MR.strings.i_am_teacher),
-                    modifier = Modifier.padding(start = 4.dp, end = 16.dp)
-                )
+                        }
+                    )
+                    Text(
+                        text = stringResource(MR.strings.i_am_teacher),
+                        modifier = Modifier.padding(start = 4.dp, end = 16.dp)
+                    )
+                }
+
 
                 Checkbox(
                     checked = uiState.isParent,
                     onCheckedChange = {
                         onParentCheckChanged(it)
-                    }
+                    },
+                    enabled = !uiState.isParentalConsentForMinor
                 )
                 Text(
                     text = stringResource(MR.strings.i_am_parent),

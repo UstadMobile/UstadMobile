@@ -185,6 +185,7 @@ import com.ustadmobile.view.signup.SignUpEnterUsernamePasswordScreen
 import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
 import com.ustadmobile.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentConsentWaitingScreenViewModel
 import com.ustadmobile.view.contententry.subtitleedit.SubtitleEditScreen
 
 import com.ustadmobile.view.clazz.inviteredeem.ClazzInviteRedeemScreen
@@ -448,6 +449,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("UstadChipsDemo", "UstadChipsDemo", UstadChipsDemo),
     UstadScreen(GetSubtitleViewModel.DEST_NAME, "GetSubtitle", GetSubtitleScreen),
     UstadScreen(SubtitleEditViewModel.DEST_NAME, "SubtitleEdit", SubtitleEditScreen),
+    UstadScreen(ParentConsentWaitingScreenViewModel.DEST_NAME, "ParentalConsentWaitingScreen", ParentalConsentWaitingScreenScreen),
 )
 
 //Here as per the MUI showcase template

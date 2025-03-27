@@ -27,7 +27,10 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_NAME
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
@@ -98,6 +101,11 @@ class LoginViewModel(
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
     private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
+    /**
+     * checking that if child name is present in the savedStateHandle that means user is parent
+     * going to approve the child profile in AddChildProfilesViewModel
+     */
+    private val parentApprovingChildProfile: Boolean =  savedStateHandle[ARG_CHILD_NAME]!=null
 
     private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
         ?.toBoolean() ?: false
@@ -206,6 +214,22 @@ class LoginViewModel(
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
         Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
         if (person.isPersonalAccount) {
+            /**
+             * we checked if parentApprovingChildProfile is true then will navigate to AddChildProfilesViewModel
+             * with REGISTRATION_ARGS_TO_PASS in with child details are present and will display
+             * in list and parent can add child profile in database
+             */
+            if (parentApprovingChildProfile){
+                navController.navigate(
+                    AddChildProfilesViewModel.DEST_NAME,
+                    args = buildMap {
+                        put(ARG_NEXT, nextDestination)
+                        putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                        putFromSavedStateIfPresent(ARG_NEXT)
+                    }
+                )
+                return
+            }
             nextDestination = ContentEntryListViewModel.DEST_NAME_HOME
         }
         navController.navigateToViewUri(

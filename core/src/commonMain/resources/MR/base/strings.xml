@@ -2061,5 +2061,7 @@
 
     <string name="parent_email">Parent email</string>
 
+    <string name="wait_for_parent_to_consent">Wait for Parent to consent</string>
+
 
 </resources>

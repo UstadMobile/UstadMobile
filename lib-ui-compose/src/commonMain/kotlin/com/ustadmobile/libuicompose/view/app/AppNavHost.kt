@@ -69,6 +69,7 @@ import com.ustadmobile.core.viewmodel.interop.externalapppermissionrequest.Exter
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentConsentWaitingScreenViewModel
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
@@ -172,6 +173,7 @@ import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationLi
 import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
 import com.ustadmobile.libuicompose.view.newuser.AddAccountSelectNewOrExistingUserTypeScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
+import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentWaitingScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
@@ -687,6 +689,12 @@ fun AppNavHost(
                 ParentalConsentManagementScreen(
                     appViewModel(backStackEntry, ParentalConsentManagementViewModel::class,
                         ::ParentalConsentManagementViewModel)
+                )
+            }
+            contentScene("/${ParentConsentWaitingScreenViewModel.DEST_NAME}") { backStackEntry ->
+                ParentalConsentWaitingScreen(
+                    appViewModel(backStackEntry, ParentConsentWaitingScreenViewModel::class,
+                        ::ParentConsentWaitingScreenViewModel)
                 )
             }
 

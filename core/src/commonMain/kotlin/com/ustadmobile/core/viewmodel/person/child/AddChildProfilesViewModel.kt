@@ -13,6 +13,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
@@ -56,6 +57,9 @@ class AddChildProfilesViewModel(
     val uiState: Flow<AddChildProfilesUiState> = _uiState.asStateFlow()
 
     init {
+        if (savedStateHandle[ARG_CHILD_NAME]!=null){
+           addChildIntoUiState()
+        }
         _uiState.update { prev ->
             prev.copy(
                 parent = accountManager.currentUserSession.person,
@@ -86,11 +90,11 @@ class AddChildProfilesViewModel(
                     serializer = ListSerializer(Person.serializer()),
                     loadFromStateKeys = listOf(STATE_KEY_PERSONS),
                     onLoadFromDb = {
-                        emptyList()
+                        _uiState.value.childProfiles
 
                     },
                     makeDefault = {
-                        emptyList()
+                        _uiState.value.childProfiles
                     },
                     uiUpdate = {
                         _uiState.update { prev ->
@@ -146,6 +150,30 @@ class AddChildProfilesViewModel(
             }
         } else {
             onProfileSelected(accountManager.currentAccount.toPerson())
+        }
+
+    }
+
+    private fun addChildIntoUiState(){
+
+        viewModelScope.launch {
+            val childName = savedStateHandle[ARG_CHILD_NAME]
+            val childGender = savedStateHandle[ARG_CHILD_GENDER]?.toInt()?:0
+            val childDateOfBirth = savedStateHandle[ARG_CHILD_DATE_OF_BIRTH]?.toLong()?:0L
+            // full name splitting into first name and last name
+            val fullName = childName?.trim()
+            val parts = fullName?.trim()?.split(" ", limit = 2)
+            val firstName = parts?.get(0)
+            val lastName = parts?.getOrElse(1) { "" }
+            val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
+            val childProfile = Person(
+                personUid =uid,
+                firstNames = firstName,
+                lastName = lastName,
+                gender = childGender,
+                dateOfBirth = childDateOfBirth
+            )
+            updateChildProfileList(listOf(childProfile))
         }
 
     }
@@ -246,6 +274,12 @@ class AddChildProfilesViewModel(
         const val RESULT_KEY_PERSON = "person"
 
         const val STATE_KEY_PERSONS = "persons"
+
+        const val ARG_CHILD_NAME = "childName"
+
+        const val ARG_CHILD_DATE_OF_BIRTH = "childDateOfBirth"
+
+        const val ARG_CHILD_GENDER = "childGender"
 
 
     }

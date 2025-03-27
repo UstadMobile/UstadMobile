@@ -2,13 +2,14 @@ package com.ustadmobile.core.viewmodel.signup
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
-import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
+import com.ustadmobile.core.account.SendConsentRequestToParentUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
 import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -25,10 +26,13 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentConsentWaitingScreenViewModel
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_GENDER
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_NAME
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -89,7 +93,9 @@ data class SignUpUiState(
 
     val isPersonalAccount: Boolean = false,
 
-    val isMinor: Boolean = false
+    val isMinor: Boolean = false,
+
+    val isParentalConsentForMinor: Boolean = false
 ) {
 
 
@@ -105,8 +111,6 @@ class SignUpViewModel(
 
     private val createPasskeyUseCase: CreatePasskeyUseCase? by instanceOrNull()
 
-    private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
-
     private var nextDestination: String =
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
@@ -121,7 +125,14 @@ class SignUpViewModel(
 
     val addNewPersonUseCase: AddNewPersonUseCase = di.on(LearningSpace(serverUrl)).direct.instance()
 
+    private val validateEmailUseCase = ValidateEmailUseCase()
+
+    val sendConsentRequestToParentUseCase : SendConsentRequestToParentUseCase =
+        di.on(LearningSpace(serverUrl)).direct.instance()
+
     private val genderConfig: GenderConfig by instance()
+
+    private val dateOfBirth: Long = savedStateHandle[ARG_DATE_OF_BIRTH]?.toLong()?:0L
 
     //Run EnqueueSavePictureUseCase after the database transaction has finished.
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
@@ -131,6 +142,20 @@ class SignUpViewModel(
         di.on(LearningSpace(serverUrl)).direct.instance()
 
     init {
+        if (savedStateHandle[ARG_CHILD_NAME]!=null){
+           _uiState.update { prev->
+               prev.copy(
+                   isParentalConsentForMinor = true,
+                   isParent = true
+               )
+           }
+        }
+
+        _uiState.update { prev->
+            prev.copy(
+                isMinor = savedStateHandle[ARG_IS_MINOR].toBoolean()
+            )
+        }
         loadingState = LoadingUiState.INDETERMINATE
         val title =
             systemImpl.getString(MR.strings.create_account)
@@ -180,8 +205,7 @@ class SignUpViewModel(
             prev.copy(
                 genderOptions = genderConfig.genderMessageIdsAndUnset,
                 person = Person(
-                    dateOfBirth = savedStateHandle[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong()
-                        ?: 0L,
+                    dateOfBirth = dateOfBirth,
                     isPersonalAccount = _uiState.value.isPersonalAccount
                 ),
                 serverUrl_ = serverUrl,
@@ -189,11 +213,6 @@ class SignUpViewModel(
                 showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke(),
 
                 )
-        }
-        _uiState.update { prev->
-            prev.copy(
-                isMinor = savedStateHandle[SignUpViewModel.ARG_IS_MINOR].toBoolean()
-            )
         }
 
     }
@@ -233,6 +252,47 @@ class SignUpViewModel(
     }
 
     fun onClickDone(){
+
+        val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
+        val parentEmail = _uiState.value.parentEmail
+        _uiState.update { prev ->
+            prev.copy(
+                fullNameError = if (_uiState.value.firstName.isNullOrEmpty()) requiredFieldMessage else null,
+                parentEmailError = when{
+                    parentEmail.isNullOrEmpty() -> requiredFieldMessage
+                    parentEmail.let { validateEmailUseCase.invoke(it) } == null -> {
+                        systemImpl.getString(MR.strings.invalid_email)
+                    }
+                    else -> null
+                },
+                genderError = if (_uiState.value.person?.gender == GENDER_UNSET) requiredFieldMessage else null,
+            )
+        }
+        if (_uiState.value.hasErrorsIfBelow13()) {
+            return
+        }
+        viewModelScope.launch {
+            try {
+                sendConsentRequestToParentUseCase(
+                    SendConsentRequestToParentUseCase.SendConsentRequestToParentRequest(
+                        childFullName = _uiState.value.firstName?:"",
+                        childDateOfBirth = dateOfBirth,
+                        childGender = _uiState.value.person?.gender?:0,
+                        parentContact = _uiState.value.parentEmail?:""
+                    )
+                )
+
+                navController.navigate(
+                    viewName = ParentConsentWaitingScreenViewModel.DEST_NAME,
+                    args = emptyMap(),
+                    goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+                )
+
+            }catch(e: Throwable) {
+                snackDispatcher.showSnackBar(Snack(e.message.toString()))
+            }
+
+        }
 
     }
 
@@ -275,7 +335,11 @@ class SignUpViewModel(
         return fullNameError != null ||
                 genderError != null
     }
-
+    private fun SignUpUiState.hasErrorsIfBelow13(): Boolean {
+        return fullNameError != null ||
+                genderError != null ||
+                parentEmailError != null
+    }
 
     fun onClickedSignup() {
 
@@ -491,7 +555,6 @@ class SignUpViewModel(
 
         const val ARG_DATE_OF_BIRTH = "DateOfBirth"
 
-
         const val ARG_IS_PERSONAL_ACCOUNT = "personalAccount"
 
         const val ARG_IS_MINOR = "isMinor"
@@ -506,7 +569,11 @@ class SignUpViewModel(
             ARG_REGISTRATION_MODE,
             ARG_NEW_OR_EXISTING_USER,
             ARG_IS_PERSONAL_ACCOUNT,
-            ARG_IS_MINOR
+            ARG_IS_MINOR,
+            ARG_CHILD_NAME,
+            ARG_CHILD_GENDER,
+            ARG_CHILD_DATE_OF_BIRTH
+
         )
 
         const val SIGN_WITH_USERNAME_AND_PASSWORD = "SignupWithUsernameAndPassword"

@@ -32,6 +32,7 @@ external interface SignUpScreenProps : Props {
     var onParentCheckChanged: (Boolean) -> Unit
     var onClickSignUpWithPasskey: () -> Unit
     var onFullNameValueChange: (String) -> Unit
+    var onParentEmailValueChange: (String) -> Unit
 }
 
 val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
@@ -42,10 +43,12 @@ val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
         Stack {
             spacing = responsive(2)
 
-            UstadImageSelectButton {
-                imageUri = props.uiState.personPicture?.personPictureUri
-                onImageUriChanged = {
-                    props.onPersonPictureUriChanged(it)
+            if (!props.uiState.isMinor) {
+                UstadImageSelectButton {
+                    imageUri = props.uiState.personPicture?.personPictureUri
+                    onImageUriChanged = {
+                        props.onPersonPictureUriChanged(it)
+                    }
                 }
             }
             TextField {
@@ -100,19 +103,35 @@ val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
                 FormHelperText {
                     +ReactNode(props.uiState.genderError?: strings[MR.strings.required])
                 }
+                if (props.uiState.isMinor) {
+
+                    TextField {
+                        sx { width = 100.pct; marginTop = 16.px }
+                        label = ReactNode("${strings[MR.strings.parent_email]}*")
+                        value = props.uiState.parentEmail ?: ""
+                        onTextChange = {
+                            props.onParentEmailValueChange(it)
+                        }
+                        error = props.uiState.parentEmailError != null
+                        helperText = props.uiState.parentEmailError?.let { ReactNode(it) }
+                    }
+                }
             }
             Stack{
                 direction = responsive(StackDirection.row)
 
-                if (props.uiState.isPersonalAccount) {
-                    FormControlLabel {
-                        control = Checkbox.create {
-                            checked = props.uiState.isTeacher
-                            onChange = { _, checked ->
-                                props.onTeacherCheckChanged(checked)
+                if (props.uiState.isPersonalAccount&&!props.uiState.isMinor) {
+                    if (!props.uiState.isParentalConsentForMinor){
+
+                        FormControlLabel {
+                            control = Checkbox.create {
+                                checked = props.uiState.isTeacher
+                                onChange = { _, checked ->
+                                    props.onTeacherCheckChanged(checked)
+                                }
                             }
+                            label = ReactNode(strings[MR.strings.i_am_teacher])
                         }
-                        label = ReactNode(strings[MR.strings.i_am_teacher])
                     }
 
                     FormControlLabel {
@@ -121,6 +140,7 @@ val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
                             onChange = { _, checked ->
                                 props.onParentCheckChanged(checked)
                             }
+                            disabled = props.uiState.isParentalConsentForMinor
                         }
                         label = ReactNode(strings[MR.strings.i_am_parent])
                     }
@@ -132,11 +152,13 @@ val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
                     height = 10.px
                 }
             }
-            Button {
-                variant = ButtonVariant.contained
-                id = "next_button"
-                onClick = { props.onClickSignUpWithPasskey() }
-                +"${strings[MR.strings.next]}"
+            if (!props.uiState.isMinor) {
+                Button {
+                    variant = ButtonVariant.contained
+                    id = "next_button"
+                    onClick = { props.onClickSignUpWithPasskey() }
+                    +"${strings[MR.strings.next]}"
+                }
             }
         }
     }
@@ -158,5 +180,6 @@ val SignUpScreen = FC<Props> {
         onParentCheckChanged = viewModel::onParentCheckChanged
         onClickSignUpWithPasskey = viewModel::onClickedSignup
         onFullNameValueChange = viewModel::onFullNameValueChange
+        onParentEmailValueChange = viewModel::onParentEmailValueChange
     }
 }

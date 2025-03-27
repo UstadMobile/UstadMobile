@@ -1,6 +1,8 @@
 package com.ustadmobile.core.impl.di
 
+import com.ustadmobile.core.account.ConsentRequestToParentUseCaseSendToServerImpl
 import com.ustadmobile.core.account.LearningSpaceScope
+import com.ustadmobile.core.account.SendConsentRequestToParentUseCase
 import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
 import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCaseSendToServerImpl
 import org.kodein.di.DI
@@ -17,6 +19,13 @@ fun commonClientDomainDiModule(
 ) = DI.Module("CommonDomainClient") {
     bind<SendClazzInvitesUseCase>() with scoped(learningSpaceScope).provider {
         SendClazzInvitesUseCaseSendToServerImpl(
+            httpClient = instance(),
+            learningSpace = context,
+            json = instance()
+        )
+    }
+    bind<SendConsentRequestToParentUseCase>() with scoped(learningSpaceScope).provider {
+        ConsentRequestToParentUseCaseSendToServerImpl(
             httpClient = instance(),
             learningSpace = context,
             json = instance()
