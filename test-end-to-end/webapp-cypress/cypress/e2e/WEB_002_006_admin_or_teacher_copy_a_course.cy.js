@@ -5,12 +5,10 @@ describe('WEB_002_006_admin_or_teacher_copy_a_course.cy.js', () => {
   })
 
 it('Admin create a course', () => {
-
-  cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv");
-  // Admin user login
+ cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv");
+  // Admin user create a course
   cy.ustadClearDbAndLogin('admin','testpass')
   cy.contains('Test Course Block').click()
-
   // Add module block
     cy.contains('button', 'Edit').click();
     cy.contains('Add block').click();
@@ -44,20 +42,27 @@ it('Teacher has permission to copy a course ', () => {
   cy.contains('Copy').click()
   cy.contains("#appbar_title", "Copy course").should("be.visible")
   cy.get("input[value='Copy of Test Course Block']").should("be.visible")
+  cy.get('input[id="clazz_name"]').clear().type('New Test Course')
   cy.contains('Term 1').should('exist')
   cy.contains('Assignment 1').should('exist')
   cy.contains('Assignment 1').click()
-  cy.ustadSetDateTime(cy.get("#hide_until_date"), new Date("2025-01-01T08:30"))
   cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date("2025-10-01T08:30"))
   cy.get('#caSubmissionPolicy').click()
   cy.contains('Can make multiple submissions').click()
   cy.get("#caClassCommentEnabled").click()
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
-  cy.get('input[id="clazz_name"]').clear().type('New Test Course')
   cy.ustadBirthDate(cy.get("#clazz_start_time"), new Date("2025-01-01"))
   cy.ustadBirthDate(cy.get("#clazz_end_time"), new Date("2026-01-01"))
+  cy.contains('Add block').click();
+  cy.contains('Text').click();
+  cy.get('input[id="title"]').type('Text 1');
+  cy.contains('button', 'Done').click()
+  cy.contains('Text 1').should('exist')
   cy.contains('button', 'Save').click()
+  cy.contains('Term 1').should('exist')
+  cy.contains('Text 1').should('exist')
+  cy.contains('Assignment 1').should('exist')
   cy.contains('Courses').click()
   cy.contains('New Test Course').should('exist')
 })

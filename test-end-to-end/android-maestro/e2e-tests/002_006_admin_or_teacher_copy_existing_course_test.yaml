@@ -118,7 +118,7 @@ onFlowComplete:
       TEXTFIELD: "deadline_date"
 - runScript:
     file: "common/setDate.js"
-- inputText: ${output.yesterdayDate}
+- inputText: ${output.tomorrowDate}
 - hideKeyboard
 - tapOn: "Done"
 - assertNotVisible: "Done"
@@ -137,9 +137,10 @@ onFlowComplete:
 - tapOn: "Done"
 - tapOn: "Done"
 - assertNotVisible: "Done"
-- tapOn:
-    id: "name"
-- eraseText
+- runFlow:
+    file: "common/erase_text.yaml"
+    env:
+      TEXTFIELD: "name"
 - inputText: "New Test Course"
 - runFlow:
     file: "common/erase_text.yaml"
