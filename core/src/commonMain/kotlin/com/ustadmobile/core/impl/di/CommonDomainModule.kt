@@ -16,10 +16,12 @@ import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
+import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.provider
 import org.kodein.di.scoped
 import org.kodein.di.singleton
@@ -114,4 +116,12 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
             stringHasher = instance(),
         )
     }
+
+    bind<FormatStatementResponseUseCase>() with scoped(learningSpaceScope).singleton {
+        FormatStatementResponseUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instanceOrNull(tag = DoorTag.TAG_REPO),
+        )
+    }
+
 }

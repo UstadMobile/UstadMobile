@@ -100,3 +100,18 @@ fun <T> List<T>.duplicates() : List<T> {
 }
 
 fun <T> List<T>?.toEmptyIfNull(): List<T> = this ?: emptyList()
+
+/**
+ * Toggle the presence of an item in the given list
+ */
+fun <T> List<T>.toggle(item: T): List<T> {
+    val indexOfItem = this.indexOf(item)
+    return if(indexOfItem < 0) {
+        this + item
+    }else {
+        toMutableList().also {
+            it.removeAt(indexOfItem)
+        }.toList()
+    }
+}
+

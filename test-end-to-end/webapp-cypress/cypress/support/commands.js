@@ -272,7 +272,7 @@ Cypress.Commands.add('ustadCreateUserAccount',(userName,password) => {
     cy.get('#username:not([disabled])').type(userName)
     cy.get('#newpassword').type(password)
     cy.contains("button","Save").click()
-    cy.contains('Change Password',{timeout:2000}).should('be.visible')
+    cy.contains('Change Password',{timeout:6000}).should('be.visible')
     cy.go('back')
     cy.go('back')
 })

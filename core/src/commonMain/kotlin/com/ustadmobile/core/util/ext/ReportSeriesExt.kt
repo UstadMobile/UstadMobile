@@ -90,16 +90,28 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
             AS REAL) / MAX(COUNT(DISTINCT ResultSource.clazzLogAttendanceRecordUid),1)) * 100) as yAxis, """.trimMargin()
         TOTAL_CLASSES -> """COUNT(DISTINCT ResultSource.clazzLogAttendanceRecordClazzLogUid) As yAxis, """
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> """COUNT(DISTINCT CASE WHEN 
-            ResultSource.attendanceStatus = $STATUS_ATTENDED THEN
-            ResultSource.clazzLogAttendanceRecordPersonUid ELSE NULL END) As yAxis, """.trimMargin()
+    ResultSource.attendanceStatus = $STATUS_ATTENDED THEN
+    ResultSource.clazzLogAttendanceRecordPersonUid ELSE NULL END) As yAxis, """.trimMargin()
+
         NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """COUNT(DISTINCT CASE WHEN (ResultSource.resultCompletion 
-            AND ResultSource.contentEntryRoot AND ResultSource.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
-            THEN ResultSource.statementPersonUid ELSE NULL END) as yAxis, """.trimMargin()
+    AND ResultSource.contentEntryRoot 
+    AND EXISTS (
+        SELECT 1 FROM VerbEntity 
+        WHERE VerbEntity.verbUid = ResultSource.statementVerbUid 
+        AND VerbEntity.verbUrlId = '${VerbEntity.VERB_COMPLETED_URL}'
+    ))
+    THEN ResultSource.statementPersonUid ELSE NULL END) as yAxis, """.trimMargin()
+
         PERCENT_OF_STUDENTS_COMPLETED_CONTENT -> """((CAST(COUNT(DISTINCT CASE WHEN 
-            (ResultSource.resultCompletion AND ResultSource.contentEntryRoot 
-            AND ResultSource.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
-            THEN ResultSource.statementPersonUid ELSE NULL END) 
-            AS REAL) / MAX(COUNT(DISTINCT ResultSource.statementPersonUid),1)) * 100) as yAxis, """
+    (ResultSource.resultCompletion AND ResultSource.contentEntryRoot 
+    AND EXISTS (
+        SELECT 1 FROM VerbEntity 
+        WHERE VerbEntity.verbUid = ResultSource.statementVerbUid 
+        AND VerbEntity.verbUrlId = '${VerbEntity.VERB_COMPLETED_URL}'
+    ))
+    THEN ResultSource.statementPersonUid ELSE NULL END) 
+    AS REAL) / MAX(COUNT(DISTINCT ResultSource.statementPersonUid),1)) * 100) as yAxis, """
+
         else -> ""
     }
 

@@ -22,7 +22,7 @@ fun useFormattedDateAndTime(timeInMillis: Long, timezoneId: String): String {
         try {
             dateOffsetForTimezone?.let {
                 Intl.Companion.DateTimeFormat(langConfig?.displayedLocale ?: "en", jso {
-                    timeStyle = IntlDateTimeStyleProp.medium
+                    timeStyle = IntlDateTimeStyleProp.short
                     dateStyle = IntlDateTimeStyleProp.medium
                 }).format(it)
             } ?: ""
