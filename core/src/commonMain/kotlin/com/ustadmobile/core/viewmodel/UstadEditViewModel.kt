@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
+import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -69,7 +70,6 @@ abstract class UstadEditViewModel(
     ) {
         val popUpToViewName = savedStateHandle[UstadView.ARG_RESULT_DEST_VIEWNAME]
         val saveToKey = savedStateHandle[UstadView.ARG_RESULT_DEST_KEY]
-
         val createdNewEntity = savedStateHandle[ARG_ENTITY_UID] == null
         val returnResultExpected = (popUpToViewName != null && saveToKey != null)
 
@@ -86,9 +86,20 @@ abstract class UstadEditViewModel(
                 )
             )
         } else {
-            finishWithResult(result)
+            navController.navigate(
+                viewName = detailViewName,
+                args = buildMap {
+                    putAll(detailViewExtraArgs)
+                    put(ARG_ENTITY_UID, entityUid.toString())
+                },
+                goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                    popUpToViewName = ClazzDetailViewModel.DEST_NAME,
+                    popUpToInclusive = true
+                ))
         }
     }
+
+
 
     /**
      * Simple function to get the title for an edit view where there is one message id for editing

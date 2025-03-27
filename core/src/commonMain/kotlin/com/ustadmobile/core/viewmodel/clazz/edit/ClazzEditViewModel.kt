@@ -567,6 +567,7 @@ class ClazzEditViewModel(
             }
             if (isCopyAction) {
                 clazzUid = 0L // New UID for copied entity
+
             }
         }
 
@@ -767,7 +768,6 @@ class ClazzEditViewModel(
                 fromLocalDate.toLocalEndOfDay().toInstant(entityTimeZone).toEpochMilliseconds()
             )
             Napier.d("onClickSave: done")
-
             finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
         }
     }
