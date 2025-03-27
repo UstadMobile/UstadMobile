@@ -36,7 +36,7 @@ fun ConversationListItem(
     ListItem(
         modifier = Modifier.clickable {
             message?.also { onListItemClick(it) }
-        },
+        }.testTag("message_container"),
         headlineContent = { Text(text = "${message?.otherPerson?.fullName()}") },
         leadingContent = {
             UstadPersonAvatar(
