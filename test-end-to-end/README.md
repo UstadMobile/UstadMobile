@@ -59,15 +59,13 @@ trickle -s -d 128 -u 128 bash
 
 3.2 [Admin or teacher can add module and text blocks](test-descriptions/003_002_add_module_text_blocks_and_perform_indent_hide_delete_actions_test_description.md)
 
-3.3 [Admin or teacher can add a content block and link existing content](test-descriptions/003_003_add_existing_content_in_library_as_block_test_description.md)
+3.3 [Admin or teacher can add a content block by linking existing content or uplaod from file](test-descriptions/003_003_add_existing_content_in_library_or_from_file_as_content_block_test_description.md)
 
 3.4 [Admin or teacher can add a content block and upload new content via link](test-descriptions/003_004_admin_or_teacher_can_add_a_content_block_and_upload_new_content_via_link_test_description.md)
 
-3.5 [Admin or teacher can add a content block and upload new content via file upload](test-descriptions/003_005_add_new_content_block_inside_course_test_description.md)
+3.5 [Course Modules can be expand/collapse](test-descriptions/003_005_course_view_and_modules_can_expand_collapse_test_description.md)
 
-3.6 [Course Modules can be expand/collapse](test-descriptions/003_006_course_view_and_modules_can_expand_collapse_test_description.md)
-
-3.7 [Text blocks can open and all text is visible](test-descriptions/003_007_all_user_able_to_open_text_block_test_description.md)
+3.6 [Text blocks can open and all text is visible](test-descriptions/003_006_all_user_able_to_open_text_block_test_description.md)
 
 ### 4: Assignments
 
@@ -137,7 +135,9 @@ trickle -s -d 128 -u 128 bash
 
 7.6 [Admin can enable/disable guest login](test-descriptions/007_006_admin_enable_or_disable_guest_login_test_description.md)
 
-7.7 [Admin or teacher send invitation via message or phone numbers or email addresses](test-descriptions/007_007_admin_or_teacher_send_group_invitation_to_join_course_test_description.md)
+7.7a [Admin or teacher send invitation via message](test-descriptions/007_007a_admin_send_group_invitation_to_join_course_via_username.md)
+
+7.7b [Admin or teacher send invitation via phone numbers or email addresses](test-descriptions/007_007b_admin_send_group_invitation_to_join_course_via_email_test_description.md)
 
 ### 8 Accessibility
 

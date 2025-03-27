@@ -41,6 +41,14 @@ See https://github.com/adobe-type-tools/cmap-resources
 
       document.addEventListener('webviewerloaded', function(e) {
         PDFViewerApplication.initializedPromise.then(() => {
+            /*
+             * A one page pdf will never have a page changing event, so we must send an event on
+             * on loading. Opening it essentially marks it as completed.
+             */
+            PDFViewerApplication.eventBus.on('pagesinit', function(pgEvt) {
+              window.parent.postMessage("pdf-pages:1/" + PDFViewerApplication.pdfDocument.numPages);
+            });
+
             PDFViewerApplication.eventBus.on('pagechanging', function(pgEvt) {
               let pageNum = pgEvt.pageNumber;
               let numPages = PDFViewerApplication.pdfDocument.numPages;

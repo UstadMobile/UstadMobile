@@ -1,5 +1,5 @@
 const maxAttempts = 4;
-const email = EMAIL;
+const email = EMAIL ;
 const serverUrl = output.SERVER_URL;
 
 console.log("Using EMAIL: " + email);
@@ -26,7 +26,15 @@ for (var i = 0; i < maxAttempts; i++) {
         var match = emailData.text.match(urlRegex);
         if (match && match[0]) {
             console.log("SUCCESS (attempt " + i + "): " + match[0]);
-            window.open(match[0], "_blank"); // Open the URL in a new tab
+
+   // Open the link to trigger the app
+              if (typeof window !== "undefined") {
+                  window.location.href = match[0];  // Open in the current tab
+              } else {
+                  console.log("Cannot open automatically", match[0]);
+              }
+
+
             break;
         } else {
             console.log("WARNING: No valid invitation link found. Attempt:", i);
@@ -35,7 +43,7 @@ for (var i = 0; i < maxAttempts; i++) {
         console.log("FAIL: attempt " + i + " failed: " + err);
     }
 
-    if (i === maxAttempts - 1) {
+    /*if (i === maxAttempts - 1) {
         throw new Error("Failed after max attempts.");
-    }
+    }*/
 }

@@ -1,4 +1,4 @@
-describe('WEB_003_006_user_able_to_expand _and_collapse_modules', () => {
+describe('WEB_003_005_user_able_to_expand _and_collapse_modules', () => {
   before(() => {
     // Start Test Server
     cy.ustadStartTestServer(6000)

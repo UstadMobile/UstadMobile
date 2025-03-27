@@ -1,0 +1,61 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "build/reports/maestro/007_007b_admin_send_group_invitation_to_join_course_via_email/Screenshots"
+onFlowStart:
+  - startRecording: 007_007b_admin_send_group_invitation_to_join_course_via_email
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+---
+- runScript:
+    file: "common/import_users_via_http.js"
+    env:
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Unenrolled_Teacher_And__Student_list.csv"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn:
+    text: "Members"
+    index: 0
+- tapOn: "Add a student"
+- tapOn: "Invite Via Contact"
+- tapOn: "Add Username, Email or Phone"
+- hideKeyboard
+- inputText: "student1@email.com"
+- tapOn: "Send"
+#- assertVisible: "invitation sent"
+# Fetch the invitation email via HTTP
+- clearState: com.toughra.ustadmobile
+- runScript:
+    file: "common/fetch_invitation_link.js"
+    env:
+      EMAIL: "student1@email.com"
+- tapOn: "New user"
+- runFlow:
+    when:
+      visible: "Personal"
+    commands:
+      - tapOn: "Join Learning Space"
+- tapOn: "Enter link manually"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- assertVisible: "Test Course Block"
