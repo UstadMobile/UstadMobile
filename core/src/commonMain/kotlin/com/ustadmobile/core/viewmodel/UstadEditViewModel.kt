@@ -86,16 +86,7 @@ abstract class UstadEditViewModel(
                 )
             )
         } else {
-            navController.navigate(
-                viewName = detailViewName,
-                args = buildMap {
-                    putAll(detailViewExtraArgs)
-                    put(ARG_ENTITY_UID, entityUid.toString())
-                },
-                goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                    popUpToViewName = ClazzDetailViewModel.DEST_NAME,
-                    popUpToInclusive = true
-                ))
+            finishWithResult(result)
         }
     }
 
