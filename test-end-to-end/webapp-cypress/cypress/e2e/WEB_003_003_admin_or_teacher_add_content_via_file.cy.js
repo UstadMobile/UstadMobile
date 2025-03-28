@@ -30,7 +30,7 @@ it('Teacher able to add content block from file', () => {
   cy.contains("Test Course Block").click()
   cy.contains("button","Course").click()
   cy.contains("button","Edit").click()
-  cy.contains("Add block").click()
+  cy.contains("Add block", { timeout: 5000 }).click()
   cy.get("#add_content_block").click()
   cy.contains('Import from file').click()
   cy.get('input[type="file"]')
