@@ -6,6 +6,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -87,9 +88,9 @@ abstract class UstadEditViewModel(
             )
         } else {
             finishWithResult(result)
+
         }
     }
-
 
 
     /**
@@ -104,7 +105,7 @@ abstract class UstadEditViewModel(
     ): String {
         val isEditing = entityUidArg != 0L || savedStateHandle[ARG_ENTITY_JSON] != null
         return systemImpl.getString(
-            if (actionType == "copy") {
+            if (actionType == ClazzEditViewModel.COPY) {
                 copyEntityStringResource
             } else if (isEditing) {
                 editEntityStringResource

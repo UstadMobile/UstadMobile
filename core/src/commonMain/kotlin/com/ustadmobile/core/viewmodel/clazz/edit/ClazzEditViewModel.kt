@@ -50,6 +50,7 @@ import io.github.aakira.napier.Napier
 import org.kodein.di.direct
 import org.kodein.di.instanceOrNull
 
+
 @Serializable
 data class ClazzEditUiState(
 
@@ -66,6 +67,9 @@ data class ClazzEditUiState(
     val clazzSchedules: List<Schedule> = emptyList(),
 
     val courseBlockList: List<CourseBlockAndEditEntities> = emptyList(),
+
+    val canAddNewCourse: Boolean = false,
+
 
     val timeZone: String = "UTC"
 
@@ -126,6 +130,9 @@ class ClazzEditViewModel(
 
     val uiState: Flow<ClazzEditUiState> = _uiState.asStateFlow()
 
+    private val canAddNewCourse: Boolean =
+        savedStateHandle[UstadView.ARG_CAN_ADD_COURSE]?.toBoolean() ?: false
+
     /**
      * The clazz uid (whether it is an existing UID or new UID needs to be passed to other screens
      * e.g. ClazzAssignmentEdit etc. This needs to be available immediately to avoid issues with
@@ -135,8 +142,10 @@ class ClazzEditViewModel(
         ?: activeDb.doorPrimaryKeyManager.nextId(Clazz.TABLE_ID)
     val actionType = savedStateHandle[UstadView.ARG_ACTION_TYPE]
     private val createNewClazzUseCase: CreateNewClazzUseCase by di.onActiveEndpoint().instance()
-
     init {
+        _uiState.update { prev ->
+            prev.copy(canAddNewCourse = canAddNewCourse)
+        }
         val title = createEditTitle(
             actionType.toString(),
             MR.strings.add_a_new_course,
@@ -202,19 +211,12 @@ class ClazzEditViewModel(
                                 clazzOwnerPersonUid = activeUserPersonUid
                             }
                         },
-                  /*      uiUpdate = {
-                            _uiState.update { prev ->
-                                prev.copy(
-                                    entity = it
-                                )
-                            }
-                        }*/
                         uiUpdate = {
                             _uiState.update { prev ->
                                 prev.copy(
                                     entity = it?.shallowCopy {
-                                        clazzName = if (actionType == "copy") {
-                                            "Copy of ${it.clazzName}"
+                                        clazzName = if (actionType == COPY) {
+                                            "${systemImpl.getString(MR.strings.copy_of)} ${it.clazzName}"
                                         } else {
                                             it.clazzName
                                         }
@@ -554,7 +556,7 @@ class ClazzEditViewModel(
             return
         }
 
-        val isCopyAction = actionType == "copy"
+        val isCopyAction = actionType == COPY
 
         // ✅ Prepare new entity (copy if needed)
         val entity = initEntity.shallowCopy {
@@ -567,6 +569,7 @@ class ClazzEditViewModel(
             }
             if (isCopyAction) {
                 clazzUid = 0L // New UID for copied entity
+                clazzOwnerPersonUid = accountManager.currentAccount.personUid // Set new owner
 
             }
         }
@@ -742,7 +745,6 @@ class ClazzEditViewModel(
                 )
             }
 
-
             enqueueSavePictureUseCase.takeIf { updateImage }?.invoke(
                 entityUid = entity.clazzUid,
                 tableId = CoursePicture.TABLE_ID,
@@ -768,7 +770,9 @@ class ClazzEditViewModel(
                 fromLocalDate.toLocalEndOfDay().toInstant(entityTimeZone).toEpochMilliseconds()
             )
             Napier.d("onClickSave: done")
-            finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
+            finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid,
+                entity,mapOf(UstadView.ARG_CAN_ADD_COURSE to _uiState.value.canAddNewCourse.toString())
+            )
         }
     }
 
@@ -920,6 +924,9 @@ class ClazzEditViewModel(
          * Should not be the same as CourseBlockEdit - see note on CourseBlockEdit
          */
         const val RESULT_KEY_DESCRIPTION = "clazzDescriptionHtml"
+
+        const val COPY ="copy"
+
 
     }
 

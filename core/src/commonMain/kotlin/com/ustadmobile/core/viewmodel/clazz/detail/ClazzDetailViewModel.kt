@@ -30,7 +30,7 @@ class ClazzDetailViewModel(
     private val _uiState = MutableStateFlow(ClazzDetailUiState())
 
     val uiState: Flow<ClazzDetailUiState> = _uiState.asStateFlow()
-
+    private val canAddCourse: Boolean = savedStateHandle[UstadView.ARG_CAN_ADD_COURSE]?.toBoolean() ?: false
     private fun createTabList(
         showAttendance: Boolean,
         showMembers: Boolean,
@@ -39,7 +39,8 @@ class ClazzDetailViewModel(
         val tabs = mutableListOf(
             TabItem(
                 viewName = ClazzDetailOverviewViewModel.DEST_NAME,
-                args = mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()),
+                args = mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString(),
+                    UstadView.ARG_CAN_ADD_COURSE to canAddCourse.toString()),
                 label = systemImpl.getString(MR.strings.course),
             ),
         )

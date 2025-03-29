@@ -53,6 +53,7 @@ data class ClazzDetailOverviewUiState(
     val blockStatusesForActiveUser: List<BlockStatus> = emptyList(),
 
     val clazzCodeVisible: Boolean = false,
+    val canAddNewCourse: Boolean = false,
 
     val collapsedBlockUids: Set<Long> = emptySet(),
 
@@ -110,6 +111,7 @@ class ClazzDetailOverviewViewModel(
     )
 
     val listRefreshCommandFlow: Flow<RefreshCommand> = _listRefreshCommandFlow.asSharedFlow()
+    private val canAddNewCourse: Boolean = savedStateHandle[UstadView.ARG_CAN_ADD_COURSE]?.toBoolean() ?: false
 
     init {
         _appUiState.update { prev ->
@@ -122,7 +124,11 @@ class ClazzDetailOverviewViewModel(
                 )
             )
         }
-
+        viewModelScope.launch {
+            _uiState.update { prev ->
+                prev.copy(canAddNewCourse = canAddNewCourse)
+            }
+        }
 
         val permissionFlow = activeRepo.coursePermissionDao()
             .personHasPermissionWithClazzTripleAsFlow(
@@ -282,7 +288,7 @@ class ClazzDetailOverviewViewModel(
     fun onClickEdit(actionType: String) {
         navController.navigate(
             ClazzEditViewModel.DEST_NAME,
-            mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString(), UstadView.ARG_ACTION_TYPE to actionType)
+            mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString(), UstadView.ARG_ACTION_TYPE to actionType, UstadView.ARG_CAN_ADD_COURSE to canAddNewCourse.toString())
         )
     }
 
@@ -296,6 +302,7 @@ class ClazzDetailOverviewViewModel(
     companion object {
 
         const val DEST_NAME = "CourseDetailOverviewView"
+        const val COPY ="copy"
 
     }
 }

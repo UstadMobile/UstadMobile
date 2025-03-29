@@ -818,6 +818,7 @@
     <string name="invite_link_desc">Anyone with this link can join and apply to join. You can then approve or reject their request to join.</string>
     <string name="male">Male</string>
     <string name="copy">Copy</string>
+    <string name="copy_of">Copy of</string>
     <string name="copy_link">Copy link</string>
     <string name="copy_code">Copy code</string>
     <string name="share_link">Share link</string>

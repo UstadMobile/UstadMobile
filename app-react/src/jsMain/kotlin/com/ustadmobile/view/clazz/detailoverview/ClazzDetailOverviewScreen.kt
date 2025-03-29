@@ -115,11 +115,17 @@ val ClazzDetailOverviewComponent = FC<ClazzDetailOverviewProps> { props ->
                                             props.onClickPermissions()
                                         }
                                     }
+
+                                }
+                            }
+                            if(props.uiState.canAddNewCourse){
+                                Stack{
+                                    direction=responsive(StackDirection.row)
                                     UstadQuickActionButton {
                                         text = strings[MR.strings.copy]
                                         icon = FileCopyIcon.create()
                                         onClick = {
-                                            props.onClickEdit("copy")
+                                            props.onClickEdit(ClazzDetailOverviewViewModel.COPY)
                                         }
                                     }
                                 }

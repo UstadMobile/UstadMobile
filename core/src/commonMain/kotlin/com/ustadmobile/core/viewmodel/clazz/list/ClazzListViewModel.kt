@@ -80,7 +80,7 @@ class ClazzListViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     destinationName: String = DEST_NAME,
-): UstadListViewModel<ClazzListUiState>(
+) : UstadListViewModel<ClazzListUiState>(
     di, savedStateHandle, ClazzListUiState(), destinationName
 ) {
 
@@ -93,9 +93,9 @@ class ClazzListViewModel(
         ?: PermissionFlags.COURSE_VIEW
 
 
-    private val pagingSourceFactory: () -> PagingSource<Int, ClazzWithListDisplayDetails> =  {
+    private val pagingSourceFactory: () -> PagingSource<Int, ClazzWithListDisplayDetails> = {
         activeRepo.clazzDao().findClazzesWithPermission(
-            searchQuery =  _appUiState.value.searchState.searchText.toQueryLikeParam(),
+            searchQuery = _appUiState.value.searchState.searchText.toQueryLikeParam(),
             accountPersonUid = accountManager.currentAccount.personUid,
             excludeSelectedClazzList = filterAlreadySelectedList,
             sortOrder = _uiState.value.activeSortOrderOption.flag,
@@ -104,8 +104,12 @@ class ClazzListViewModel(
             permission = filterByPermission,
         )
     }
+    private val canAddNewCourse: Boolean =
+        savedStateHandle[UstadView.ARG_CAN_ADD_COURSE]?.toBoolean() ?: false
+
 
     init {
+        _uiState.update { it.copy(canAddNewCourse = canAddNewCourse) }
         _appUiState.update { prev ->
             prev.copy(
                 navigationVisible = true,
@@ -138,6 +142,7 @@ class ClazzListViewModel(
                             newClazzListOptionVisible = hasPermission && listMode == ListViewMode.PICKER
                         )
                     }
+                 //   savedStateHandle[UstadView.ARG_CAN_ADD_COURSE] = hasPermission.toString()
                 }
             }
         }
@@ -161,17 +166,23 @@ class ClazzListViewModel(
     }
 
     override fun onClickAdd() {
-        navigateToCreateNew(ClazzEditViewModel.DEST_NAME)
+        navigateToCreateNew(
+            ClazzEditViewModel.DEST_NAME,
+            extraArgs = mapOf(UstadView.ARG_CAN_ADD_COURSE to _uiState.value.canAddNewCourse.toString())
+        )
     }
-
     fun onClickJoinExistingClazz() {
-        navController.navigate(JoinWithCodeView.VIEW_NAME, mapOf(
-            UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString()
-        ))
+        navController.navigate(
+            JoinWithCodeView.VIEW_NAME, mapOf(
+                UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString()))
     }
-
     fun onClickEntry(entry: Clazz) {
-        navigateOnItemClicked(ClazzDetailViewModel.DEST_NAME, entry.clazzUid, entry)
+        navigateOnItemClicked(
+            ClazzDetailViewModel.DEST_NAME,
+            entry.clazzUid,
+            entry,
+            mapOf(UstadView.ARG_CAN_ADD_COURSE to _uiState.value.canAddNewCourse.toString())
+        )
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {

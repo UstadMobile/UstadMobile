@@ -38,6 +38,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.util.ext.UNSET_DISTANT_FUTURE
 import com.ustadmobile.core.util.ext.capitalizeFirstLetter
 import com.ustadmobile.core.util.ext.htmlToPlainText
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazz.ClazzScheduleConstants
 import com.ustadmobile.core.viewmodel.clazz.blockTypeStringResource
 import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewUiState
@@ -99,6 +100,7 @@ fun ClazzDetailOverviewScreen(
 
     val hasModules = uiState.hasModules
 
+
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
     ){
@@ -134,14 +136,15 @@ fun ClazzDetailOverviewScreen(
                                     onClick = onClickPermissions,
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                UstadQuickActionButton(
-                                    imageVector = Icons.Default.FileCopy,
-                                    labelText = stringResource(MR.strings.copy),
-                                    onClick = {onClickEdit("copy")},
-                                )
                             }
 
                         }
+                        if(uiState.canAddNewCourse){
+                            UstadQuickActionButton(
+                                imageVector = Icons.Default.FileCopy,
+                                labelText = stringResource(MR.strings.copy),
+                                onClick = {onClickEdit(ClazzDetailOverviewViewModel.COPY)},
+                                )}
                     }
 
                     HorizontalDivider(thickness = 1.dp)
