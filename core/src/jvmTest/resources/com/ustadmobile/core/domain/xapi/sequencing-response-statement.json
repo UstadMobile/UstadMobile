@@ -1,0 +1,61 @@
+{
+  "actor": {
+    "account" : {
+      "name": "user",
+      "homePage": "http://localhost/"
+    }
+  },
+  "verb":{
+    "id":"http://adlnet.gov/expapi/verbs/attempted",
+    "display":{
+      "en-US":"attempted"
+    }
+  },
+  "object":{
+    "id":"http://example.adlnet.gov/xapi/example/simpleCBT",
+    "definition": {
+      "description": {
+        "en-US": "Order players by their pong ladder position:"
+      },
+      "type": "http://adlnet.gov/expapi/activities/cmi.interaction",
+      "interactionType": "sequencing",
+      "correctResponsesPattern": [
+        "tim[,]mike[,]ells[,]ben"
+      ],
+      "choices": [
+        {
+          "id": "tim",
+          "description": {
+            "en-US": "Tim"
+          }
+        },
+        {
+          "id": "ben", "description": {
+          "en-US": "Ben"
+        }
+        },
+        {
+          "id": "ells",
+          "description": {
+            "en-US": "Ells"
+          }
+        },
+        {
+          "id": "mike",
+          "description": {
+            "en-US": "Mike"
+          }
+        }
+      ]
+    }
+  },
+  "result":{
+    "score":{
+      "scaled":0.95
+    },
+    "success":true,
+    "completion":true,
+    "duration": "PT1234S",
+    "response" : "tim[,]mike[,]ells[,]ben"
+  }
+}

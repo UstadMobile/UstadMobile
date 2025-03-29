@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 204,
-    "identityHash": "b0e85f4bcf7185908d72ce40a439793d",
+    "identityHash": "f5345f7feb337073e52bd57222e41da2",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -406,7 +406,7 @@
       },
       {
         "tableName": "Person",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `isPersonalAccount` INTEGER NOT NULL, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personLct` INTEGER NOT NULL, `personCountry` TEXT, `personType` INTEGER NOT NULL DEFAULT 0, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personLct` INTEGER NOT NULL, `personCountry` TEXT, `personType` INTEGER NOT NULL DEFAULT 0, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT)",
         "fields": [
           {
             "fieldPath": "personUid",
@@ -453,12 +453,6 @@
           {
             "fieldPath": "active",
             "columnName": "active",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isPersonalAccount",
-            "columnName": "isPersonalAccount",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -5702,7 +5696,7 @@
       },
       {
         "tableName": "ActivityLangMapEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeActivityUid` INTEGER NOT NULL, `almeHash` INTEGER NOT NULL, `almeLangCode` TEXT, `almeValue` TEXT, `almeAieHash` INTEGER NOT NULL, `almeLastMod` INTEGER NOT NULL, PRIMARY KEY(`almeActivityUid`, `almeHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeActivityUid` INTEGER NOT NULL, `almeHash` INTEGER NOT NULL, `almeLangCode` TEXT, `almePropName` TEXT, `almeValue` TEXT, `almeAieHash` INTEGER NOT NULL, `almeLastMod` INTEGER NOT NULL, PRIMARY KEY(`almeActivityUid`, `almeHash`))",
         "fields": [
           {
             "fieldPath": "almeActivityUid",
@@ -5719,6 +5713,12 @@
           {
             "fieldPath": "almeLangCode",
             "columnName": "almeLangCode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "almePropName",
+            "columnName": "almePropName",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -6024,86 +6024,6 @@
           "columnNames": [
             "stmtJsonIdHi",
             "stmtJsonIdLo"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "PersonPasskey",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPasskeyUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ppPersonUid` INTEGER NOT NULL, `ppAttestationObj` TEXT, `ppClientDataJson` TEXT, `ppOriginString` TEXT, `ppRpid` TEXT, `ppId` TEXT, `ppChallengeString` TEXT, `ppPublicKey` TEXT, `isRevoked` INTEGER NOT NULL, `ppPasskeyLct` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "personPasskeyUid",
-            "columnName": "personPasskeyUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ppPersonUid",
-            "columnName": "ppPersonUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ppAttestationObj",
-            "columnName": "ppAttestationObj",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppClientDataJson",
-            "columnName": "ppClientDataJson",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppOriginString",
-            "columnName": "ppOriginString",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppRpid",
-            "columnName": "ppRpid",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppId",
-            "columnName": "ppId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppChallengeString",
-            "columnName": "ppChallengeString",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ppPublicKey",
-            "columnName": "ppPublicKey",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "isRevoked",
-            "columnName": "isRevoked",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ppPasskeyLct",
-            "columnName": "ppPasskeyLct",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": true,
-          "columnNames": [
-            "personPasskeyUid"
           ]
         },
         "indices": [],
@@ -6426,7 +6346,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b0e85f4bcf7185908d72ce40a439793d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f5345f7feb337073e52bd57222e41da2')"
     ]
   }
 }
