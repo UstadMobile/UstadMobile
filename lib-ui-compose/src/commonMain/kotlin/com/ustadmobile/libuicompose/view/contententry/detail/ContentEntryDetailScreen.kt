@@ -8,9 +8,11 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
 import com.ustadmobile.core.viewmodel.contententry.detailoverviewtab.ContentEntryDetailOverviewViewModel
 import com.ustadmobile.libuicompose.components.UstadScreenTabs
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
+import com.ustadmobile.libuicompose.view.contententry.detailattempttab.ContentEntryDetailAttemptsPersonListScreen
 import com.ustadmobile.libuicompose.view.contententry.detailoverviewtab.ContentEntryDetailOverviewScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import moe.tlaster.precompose.navigation.BackStackEntry
@@ -49,6 +51,14 @@ fun ContentEntryDetailScreen(
                     }
                 )
             }
+            ContentEntryDetailAttemptsPersonListViewModel.DEST_NAME -> {
+                ContentEntryDetailAttemptsPersonListScreen(
+                    tabViewModel(ContentEntryDetailAttemptsPersonListViewModel::class, currentTab) { di, savedStateHandle ->
+                        ContentEntryDetailAttemptsPersonListViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+
             else -> {
                 Text(currentTab.viewName)
             }

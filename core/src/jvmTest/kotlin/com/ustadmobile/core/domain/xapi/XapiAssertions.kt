@@ -209,6 +209,7 @@ fun assertActivityLangMapEntriesMatch(
         assertNotNull(langMapEntity)
         assertEquals(nameEntry.key, langMapEntity.almeLangCode)
         assertEquals(nameEntry.value, langMapEntity.almeValue)
+        assertEquals(propName, langMapEntity.almePropName)
     }
 }
 

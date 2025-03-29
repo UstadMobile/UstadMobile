@@ -1,0 +1,88 @@
+{
+  "actor": {
+    "account" : {
+      "name": "user",
+      "homePage": "http://localhost/"
+    }
+  },
+  "verb":{
+    "id":"http://adlnet.gov/expapi/verbs/attempted",
+    "display":{
+      "en-US":"attempted"
+    }
+  },
+  "object":{
+    "id":"http://example.adlnet.gov/xapi/example/simpleCBT",
+    "definition": {
+      "description": {
+        "en-US": "Match these people to their kickball team:"
+      },
+      "type": "http://adlnet.gov/expapi/activities/cmi.interaction",
+      "interactionType": "matching",
+      "correctResponsesPattern": [
+        "ben[.]3[,]chris[.]2[,]troy[.]4[,]freddie[.]1"
+      ],
+      "source": [
+        {
+          "id": "ben",
+          "description": {
+            "en-US": "Ben"
+          }
+        },
+        {
+          "id": "chris",
+          "description": {
+            "en-US": "Chris"
+          }
+        },
+        {
+          "id": "troy",
+          "description": {
+            "en-US": "Troy"
+          }
+        },
+        {
+          "id": "freddie",
+          "description": {
+            "en-US": "Freddie"
+          }
+        }
+      ],
+      "target": [
+        {
+          "id": "1",
+          "description": {
+            "en-US": "Swift Kick in the Grass"
+          }
+        },
+        {
+          "id": "2",
+          "description": {
+            "en-US": "We got Runs"
+          }
+        },
+        {
+          "id": "3",
+          "description": {
+            "en-US": "Duck"
+          }
+        },
+        {
+          "id": "4",
+          "description": {
+            "en-US": "Van Delay Industries"
+          }
+        }
+      ]
+    }
+  },
+  "result":{
+    "score":{
+      "scaled":0.95
+    },
+    "success":true,
+    "completion":true,
+    "duration": "PT1234S",
+    "response" : "ben[.]3[,]chris[.]2[,]troy[.]4[,]freddie[.]1"
+  }
+}
