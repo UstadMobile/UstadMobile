@@ -115,13 +115,7 @@ val ClazzDetailOverviewComponent = FC<ClazzDetailOverviewProps> { props ->
                                             props.onClickPermissions()
                                         }
                                     }
-                                    UstadQuickActionButton {
-                                        text = strings[MR.strings.copy]
-                                        icon = FileCopyIcon.create()
-                                        onClick = {
-                                            props.onClickEdit(ClazzDetailOverviewViewModel.COPY)
-                                        }
-                                    }
+
 
                                 }
                             }

@@ -136,11 +136,7 @@ fun ClazzDetailOverviewScreen(
                                     onClick = onClickPermissions,
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                UstadQuickActionButton(
-                                    imageVector = Icons.Default.FileCopy,
-                                    labelText = stringResource(MR.strings.copy),
-                                    onClick = {onClickEdit(ClazzDetailOverviewViewModel.COPY)},
-                                )
+
                             }
 
                         }
