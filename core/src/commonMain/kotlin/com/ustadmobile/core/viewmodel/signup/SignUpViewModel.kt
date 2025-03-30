@@ -6,8 +6,8 @@ import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
-import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyParams
+import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -462,7 +462,11 @@ class SignUpViewModel(
 
         const val ARG_IS_PERSONAL_ACCOUNT = "personalAccount"
 
-        const val ARG_NEW_OR_EXISTING_USER = "NewOrExistingUser"
+        const val ARG_NEW_OR_EXISTING_USER = "newOrExisting"
+
+        const val ARG_VAL_NEW_USER = "new"
+
+        const val ARG_VAL_EXISTING_USER = "existing"
 
         val REGISTRATION_ARGS_TO_PASS = listOf(
             UstadView.ARG_LEARNINGSPACE_URL,

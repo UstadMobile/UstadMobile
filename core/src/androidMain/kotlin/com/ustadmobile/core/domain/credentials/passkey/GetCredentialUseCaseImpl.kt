@@ -1,4 +1,4 @@
-package com.ustadmobile.core.impl.passkey
+package com.ustadmobile.core.domain.credentials.passkey
 
 import android.content.Context
 import android.util.Base64
@@ -11,27 +11,31 @@ import androidx.credentials.PublicKeyCredential
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import com.ustadmobile.core.util.ext.formattedHost
-import com.ustadmobile.core.domain.passkey.CredentialResult
-import com.ustadmobile.core.domain.passkey.GetCredentialUseCase
-import com.ustadmobile.core.domain.passkey.PassKeySignInData
-import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
+import com.ustadmobile.core.domain.credentials.PassKeySignInData
+import com.ustadmobile.core.domain.credentials.PasskeyRequestJsonUseCase
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import io.ktor.http.Url
 import org.json.JSONObject
 
 class GetCredentialUseCaseImpl(
-    val context: Context,
-    val passkeyRequestJsonUseCase: PasskeyRequestJsonUseCase
+    private val context: Context,
+    private val passkeyRequestJsonUseCase: PasskeyRequestJsonUseCase,
+    private val apiUrlConfig: SystemUrlConfig,
 ) : GetCredentialUseCase {
 
-    override suspend fun invoke(systemBaseUrl: String): CredentialResult {
+    override suspend fun invoke(): GetCredentialUseCase.CredentialResult {
         val credentialManager = CredentialManager.create(context)
-        val domain: String = Url(systemBaseUrl).formattedHost()
+        val domain: String = Url(apiUrlConfig.systemBaseUrl).formattedHost()
 
         val getPasswordOption = GetPasswordOption()
         val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
             requestJson = passkeyRequestJsonUseCase.requestJsonForSignIn(domain)
         )
 
+        //As per https://developer.android.com/identity/sign-in/credential-manager#sign-in when
+        // preferImmediatelyAvailableCredentials = true then the dialog will only be shown if the
+        // user has accounts that they can select.
         val getCredentialRequest = GetCredentialRequest(
             credentialOptions = listOf(getPasswordOption, getPublicKeyCredentialOption),
             preferImmediatelyAvailableCredentials = true
@@ -43,10 +47,11 @@ class GetCredentialUseCaseImpl(
                 request = getCredentialRequest
             )
 
+            //As per https://developer.android.com/identity/sign-in/credential-manager#sign-in
             when (val credential = result.credential) {
                 is PasswordCredential -> {
-                    CredentialResult.PasswordCredentialResult(
-                        username = credential.id,
+                    GetCredentialUseCase.PasswordCredentialResult(
+                        credentialUsername = credential.id,
                         password = credential.password
                     )
                 }
@@ -65,31 +70,31 @@ class GetCredentialUseCaseImpl(
                         val decodedJson = String(decodedBytes)
                         val clientDataJson = JSONObject(decodedJson)
 
-                        CredentialResult.PasskeyCredentialResult(
+                        GetCredentialUseCase.PasskeyCredentialResult(
                             PassKeySignInData(
-                            credentialId = jsonObject.getString("id"),
-                            userHandle = responseObject.getString("userHandle"),
-                            authenticatorData = responseObject.getString("authenticatorData"),
-                            clientDataJSON = clientDataJsonString,
-                            signature = responseObject.getString("signature"),
-                            origin = clientDataJson.getString("origin"),
-                            rpId = "credential-manager-${domain}",
-                            challenge = clientDataJson.getString("challenge")
+                                credentialId = jsonObject.getString("id"),
+                                userHandle = responseObject.getString("userHandle"),
+                                authenticatorData = responseObject.getString("authenticatorData"),
+                                clientDataJSON = clientDataJsonString,
+                                signature = responseObject.getString("signature"),
+                                origin = clientDataJson.getString("origin"),
+                                rpId = "credential-manager-${domain}",
+                                challenge = clientDataJson.getString("challenge")
                             )
                         )
                     } else {
-                        CredentialResult.Error("Auth response JSON is null.")
+                        GetCredentialUseCase.Error("Auth response JSON is null.")
                     }
                 }
 
                 else -> {
-                    CredentialResult.Error("Unknown credential type.")
+                    GetCredentialUseCase.Error("Unknown credential type.")
                 }
             }
         } catch (e: NoCredentialException) {
-            CredentialResult.Error("No credentials found: ${e.message}")
+            GetCredentialUseCase.Error("No credentials found: ${e.message}")
         } catch (e: GetCredentialException) {
-            CredentialResult.Error("Failed to get credential: ${e.message}")
+            GetCredentialUseCase.Error("Failed to get credential: ${e.message}")
         }
     }
 }

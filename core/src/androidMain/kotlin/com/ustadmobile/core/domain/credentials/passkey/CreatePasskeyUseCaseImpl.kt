@@ -1,4 +1,4 @@
-package com.ustadmobile.core.impl.passkey
+package com.ustadmobile.core.domain.credentials.passkey
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -7,12 +7,12 @@ import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CredentialManager
 import androidx.credentials.exceptions.CreateCredentialException
-import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
-import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyParams
+import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import io.github.aakira.napier.Napier
 import org.json.JSONObject
-import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase.CreatePasskeyResult
-import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase.CreatePasskeyResult
+import com.ustadmobile.core.domain.credentials.PasskeyRequestJsonUseCase
 
 
 /**

@@ -73,7 +73,9 @@ class RedirectViewModel(
          *if account is personal then the default clazz type will be library screen else
          * course screen
          */
-        val clazzType = if (accountManager.currentUserSession.person.isPersonalAccount) {
+        val defaultScreenForAccountType = if (
+            accountManager.currentUserSession.person.isPersonalAccount
+        ) {
             ContentEntryListViewModel.DEST_NAME_HOME
         } else {
             ClazzListViewModel.DEST_NAME_HOME
@@ -81,20 +83,18 @@ class RedirectViewModel(
         val presetLearningSpaceUrl = apiUrlConfig.presetLearningSpaceUrl
         val destination = if (!presetLearningSpaceUrl.isNullOrEmpty()) {
             makeLinkUseCase.invoke(
-                destinationArg ?: clazzType,
+                destinationArg ?: defaultScreenForAccountType,
                 args = buildMap {
                     putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
                     put(
                         ARG_LEARNINGSPACE_URL,
-                        presetLearningSpaceUrl.requireHttpPrefix()
-                            .requirePostfix("/")
+                        presetLearningSpaceUrl.requireHttpPrefix().requirePostfix("/")
                     )
                 }
             )
         } else {
-            destinationArg ?: clazzType
+            destinationArg ?: defaultScreenForAccountType
         }
-
 
         viewModelScope.launch {
             navController.navigateToLink(

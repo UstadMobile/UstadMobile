@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.passkey
+package com.ustadmobile.core.domain.credentials
 
 import com.ustadmobile.lib.db.entities.Person
 
