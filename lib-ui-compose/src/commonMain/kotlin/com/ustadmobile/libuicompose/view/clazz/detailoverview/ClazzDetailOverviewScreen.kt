@@ -85,7 +85,7 @@ fun ClazzDetailOverviewScreen(
     onClickClassCode: (String) -> Unit = {},
     onClickCourseBlock: (CourseBlock) -> Unit = {},
     onClickPermissions: () -> Unit = { },
-    onClickEdit: (String) -> Unit= { },
+    onClickEdit: (String) -> Unit = { },
 ) {
 
     val clazzDateRange = rememberFormattedDateRange(
@@ -103,16 +103,16 @@ fun ClazzDetailOverviewScreen(
 
     UstadLazyColumn(
         modifier = Modifier.fillMaxSize()
-    ){
+    ) {
         item(key = "banner") {
-            if(courseBannerUri != null){
+            if (courseBannerUri != null) {
                 UstadAsyncImage(
                     uri = courseBannerUri,
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.height(156.dp).fillMaxWidth().testTag("course_banner")
                 )
-            }else {
+            } else {
                 Image(
                     painter = painterForDefaultCourseImage(uiState.clazz?.clazzName),
                     contentDescription = "",
@@ -122,13 +122,13 @@ fun ClazzDetailOverviewScreen(
             }
         }
 
-        if(uiState.quickActionBarVisible) {
+        if (uiState.quickActionBarVisible) {
             item(key = "quick_action_row") {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Row {
-                        if(uiState.managePermissionVisible) {
+                        if (uiState.managePermissionVisible) {
                             Row {
                                 UstadQuickActionButton(
                                     imageVector = Icons.Default.Shield,
@@ -140,12 +140,13 @@ fun ClazzDetailOverviewScreen(
                             }
 
                         }
-                        if(uiState.canAddNewCourse){
+                        if (uiState.canAddNewCourse) {
                             UstadQuickActionButton(
                                 imageVector = Icons.Default.FileCopy,
                                 labelText = stringResource(MR.strings.copy),
-                                onClick = {onClickEdit(ClazzDetailOverviewViewModel.COPY)},
-                                )}
+                                onClick = { onClickEdit(ClazzDetailOverviewViewModel.COPY) },
+                            )
+                        }
                     }
 
                     HorizontalDivider(thickness = 1.dp)
@@ -163,7 +164,7 @@ fun ClazzDetailOverviewScreen(
 
         item(key = "members") {
             UstadDetailField2(
-                valueText = uiState.membersString ,
+                valueText = uiState.membersString,
                 labelText = stringResource(MR.strings.members_key).capitalizeFirstLetter(),
                 icon = Icons.Filled.Group,
             )
@@ -172,7 +173,11 @@ fun ClazzDetailOverviewScreen(
         if (uiState.clazzCodeVisible) {
             item(key = "clazzcode") {
                 UstadDetailField2(
-                    modifier = Modifier.clickable { onClickClassCode(uiState.clazz?.clazzCode ?: "") },
+                    modifier = Modifier.clickable {
+                        onClickClassCode(
+                            uiState.clazz?.clazzCode ?: ""
+                        )
+                    },
                     valueContent = { Text(uiState.clazz?.clazzCode ?: "") },
                     labelContent = { Text(stringResource(MR.strings.invite_code)) },
                     leadingContent = {
@@ -182,7 +187,7 @@ fun ClazzDetailOverviewScreen(
             }
         }
 
-        if (uiState.clazzDateVisible){
+        if (uiState.clazzDateVisible) {
             item(key = "daterange") {
                 UstadDetailField2(
                     valueText = clazzDateRange,
@@ -198,7 +203,7 @@ fun ClazzDetailOverviewScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        if(uiState.scheduleList.isNotEmpty()) {
+        if (uiState.scheduleList.isNotEmpty()) {
             item(key = "scheduleheader") {
                 Text(
                     modifier = Modifier
@@ -212,7 +217,7 @@ fun ClazzDetailOverviewScreen(
         items(
             items = uiState.scheduleList,
             key = { Pair(1, it.scheduleUid) }
-        ){ schedule ->
+        ) { schedule ->
             val fromTimeFormatted = rememberFormattedTime(
                 timeInMs = schedule.sceduleStartTime.toInt()
             )
@@ -220,15 +225,19 @@ fun ClazzDetailOverviewScreen(
                 timeInMs = schedule.scheduleEndTime.toInt()
             )
             val text = buildString {
-                append(stringIdMapResource(
-                    map = ClazzScheduleConstants.SCHEDULE_FREQUENCY_STRING_RESOURCES,
-                    key = schedule.scheduleFrequency)
+                append(
+                    stringIdMapResource(
+                        map = ClazzScheduleConstants.SCHEDULE_FREQUENCY_STRING_RESOURCES,
+                        key = schedule.scheduleFrequency
+                    )
                 )
                 append(" ")
-                append(stringIdMapResource(
-                    map = ClazzScheduleConstants.DAY_STRING_RESOURCES,
-                    key = schedule.scheduleDay
-                ))
+                append(
+                    stringIdMapResource(
+                        map = ClazzScheduleConstants.DAY_STRING_RESOURCES,
+                        key = schedule.scheduleDay
+                    )
+                )
                 append(" $fromTimeFormatted - $toTimeFormatted ")
 
             }
@@ -270,7 +279,7 @@ fun CourseBlockListItem(
     expanded: Boolean = true,
     showGrade: Boolean = false,
     onClick: () -> Unit,
-){
+) {
 
     val descriptionPlainText = remember(courseBlock?.courseBlock?.cbDescription) {
         courseBlock?.courseBlock?.cbDescription?.htmlToPlainText() ?: ""
@@ -280,7 +289,7 @@ fun CourseBlockListItem(
         modifier = Modifier.clickable {
             onClick()
         }
-        .paddingCourseBlockIndent(courseBlock?.courseBlock?.cbIndentLevel ?: 0),
+            .paddingCourseBlockIndent(courseBlock?.courseBlock?.cbIndentLevel ?: 0),
         headlineContent = {
             Text(
                 text = courseBlock?.courseBlock?.cbTitle ?: "",
@@ -295,10 +304,15 @@ fun CourseBlockListItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     when {
                         contentEntryVal != null -> {
-                            Icon(contentEntryVal.contentTypeImageVector, "",
-                                modifier = Modifier.size(16.dp))
+                            Icon(
+                                contentEntryVal.contentTypeImageVector, "",
+                                modifier = Modifier.size(16.dp)
+                            )
                             Spacer(Modifier.width(8.dp))
-                            Text(stringResource(contentEntryVal.contentTypeStringResource), maxLines = 1)
+                            Text(
+                                stringResource(contentEntryVal.contentTypeStringResource),
+                                maxLines = 1
+                            )
                         }
 
                         courseBlockVal != null -> {
@@ -306,7 +320,10 @@ fun CourseBlockListItem(
                                 Icon(it, "", modifier = Modifier.size(16.dp))
                             }
                             Spacer(Modifier.width(8.dp))
-                            Text(stringResource(courseBlockVal.blockTypeStringResource), maxLines = 1)
+                            Text(
+                                stringResource(courseBlockVal.blockTypeStringResource),
+                                maxLines = 1
+                            )
                         }
                     }
                 }
@@ -324,7 +341,7 @@ fun CourseBlockListItem(
         },
         trailingContent = {
             Row {
-                if(showGrade) {
+                if (showGrade) {
                     ClazzGradebookCell(
                         blockUid = courseBlock?.courseBlock?.cbUid ?: 0,
                         blockStatuses = blockStatuses,
@@ -335,9 +352,9 @@ fun CourseBlockListItem(
                     )
                 }
 
-                if(showExpandCollapse) {
-                    if(courseBlock?.courseBlock?.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
-                        val trailingIcon = if(expanded)
+                if (showExpandCollapse) {
+                    if (courseBlock?.courseBlock?.cbType == CourseBlock.BLOCK_MODULE_TYPE) {
+                        val trailingIcon = if (expanded)
                             Icons.Default.KeyboardArrowUp
                         else
                             Icons.Default.KeyboardArrowDown
@@ -348,14 +365,14 @@ fun CourseBlockListItem(
                             Icon(
                                 imageVector = trailingIcon,
                                 contentDescription = stringResource(
-                                    if(expanded)
+                                    if (expanded)
                                         MR.strings.collapse
                                     else
                                         MR.strings.expand
                                 )
                             )
                         }
-                    }else {
+                    } else {
                         Spacer(Modifier.width(48.dp))
                     }
                 }
