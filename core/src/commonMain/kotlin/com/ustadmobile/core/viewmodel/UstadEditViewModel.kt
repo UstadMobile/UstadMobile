@@ -6,7 +6,9 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -87,7 +89,20 @@ abstract class UstadEditViewModel(
                 )
             )
         } else {
-            finishWithResult(result)
+            viewModelScope.launch {
+                navController.navigate(
+                    viewName = ClazzDetailViewModel.DEST_NAME, // Go back to B
+                    args = buildMap {
+                        putAll(detailViewExtraArgs)
+                        put(ARG_ENTITY_UID, entityUid.toString()) // Pass updated ID
+                    },
+                    goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                        popUpToViewName = ClazzEditViewModel.DEST_NAME, // Remove C from stack
+                        popUpToInclusive = true
+                    )
+                )
+            }
+
 
         }
     }
