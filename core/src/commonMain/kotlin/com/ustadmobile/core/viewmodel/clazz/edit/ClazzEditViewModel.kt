@@ -771,7 +771,7 @@ class ClazzEditViewModel(
             )
             Napier.d("onClickSave: done")
             finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid,
-                entity,mapOf(UstadView.ARG_CAN_ADD_COURSE to _uiState.value.canAddNewCourse.toString())
+                entity,mapOf(UstadView.ARG_CAN_ADD_COURSE to _uiState.value.canAddNewCourse.toString(),UstadView.ARG_ACTION_TYPE to COPY)
             )
         }
     }

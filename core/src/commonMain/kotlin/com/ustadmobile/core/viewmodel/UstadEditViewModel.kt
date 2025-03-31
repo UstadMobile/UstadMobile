@@ -75,7 +75,8 @@ abstract class UstadEditViewModel(
         val saveToKey = savedStateHandle[UstadView.ARG_RESULT_DEST_KEY]
         val createdNewEntity = savedStateHandle[ARG_ENTITY_UID] == null
         val returnResultExpected = (popUpToViewName != null && saveToKey != null)
-
+        val isCopyAction = detailViewExtraArgs[UstadView.ARG_ACTION_TYPE] == ClazzEditViewModel.COPY
+        
         if (createdNewEntity && !returnResultExpected) {
             navController.navigate(
                 viewName = detailViewName,
@@ -88,9 +89,25 @@ abstract class UstadEditViewModel(
                     popUpToInclusive = true
                 )
             )
-        } else {
-            finishWithResult(result)
+        } else if(isCopyAction){
+            viewModelScope.launch {
+                navController.navigate(
+                    viewName = ClazzDetailViewModel.DEST_NAME, // Go back to B
+                    args = buildMap {
+                        putAll(detailViewExtraArgs)
+                        put(ARG_ENTITY_UID, entityUid.toString()) // Pass updated ID
+                    },
+                    goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                        popUpToViewName = ClazzEditViewModel.DEST_NAME, // Remove C from stack
+                        popUpToInclusive = true
+                    )
+                )
+            }
 
+
+        }
+        else{
+            finishWithResult(result)
         }
     }
 
