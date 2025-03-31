@@ -76,7 +76,6 @@ abstract class UstadEditViewModel(
         val createdNewEntity = savedStateHandle[ARG_ENTITY_UID] == null
         val returnResultExpected = (popUpToViewName != null && saveToKey != null)
         val isCopyAction = detailViewExtraArgs[UstadView.ARG_ACTION_TYPE] == ClazzEditViewModel.COPY
-        
         if (createdNewEntity && !returnResultExpected) {
             navController.navigate(
                 viewName = detailViewName,
