@@ -1,8 +1,8 @@
-package com.ustadmobile.core.domain.passkey
+package com.ustadmobile.core.domain.credentials
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.PersonPasskey
-import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase.CreatePasskeyResult
+import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase.CreatePasskeyResult
 
 
 class SavePersonPasskeyUseCase(

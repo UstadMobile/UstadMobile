@@ -6,8 +6,7 @@ import com.ustadmobile.core.account.ConsentNotGrantedException
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
-import com.ustadmobile.core.domain.passkey.CredentialResult
-import com.ustadmobile.core.domain.passkey.GetCredentialUseCase
+import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -38,10 +37,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
-import org.kodein.di.on
 
 data class AddAccountSelectNewOrExistingUiState(
     val currentLanguage: UstadMobileSystemCommon.UiLanguage = UstadMobileSystemCommon.UiLanguage(
@@ -94,9 +91,7 @@ class AddAccountSelectNewOrExistingViewModel(
     private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
         ?.toBoolean() ?: false
 
-    val credentialUseCase: GetCredentialUseCase? =
-        di.on(LearningSpace(apiUrlConfig.systemBaseUrl)).direct.instanceOrNull()
-
+    private val getCredentialUseCase: GetCredentialUseCase? by instanceOrNull()
 
     val uiState: Flow<AddAccountSelectNewOrExistingUiState>
         get() = _uiState.asStateFlow()
@@ -120,51 +115,47 @@ class AddAccountSelectNewOrExistingViewModel(
             navigationVisible = false,
             hideAppBar = true,
             userAccountIconVisible = false,
+        )
 
-            )
-
-        val allLanguages = supportLangConfig
-            .supportedUiLanguagesAndSysDefault(systemImpl)
-        val currentLanguage = supportLangConfig
-            .getCurrentLanguage(systemImpl)
+        val allLanguages = supportLangConfig.supportedUiLanguagesAndSysDefault(systemImpl)
+        val currentLanguage = supportLangConfig.getCurrentLanguage(systemImpl)
 
         _uiState.update {
             AddAccountSelectNewOrExistingUiState(currentLanguage, allLanguages)
         }
+
         getCredentials()
     }
+
     private fun getCredentials() {
         viewModelScope.launch {
             try {
-                credentialUseCase?.let { useCase ->
-                    when (val credentialResult = useCase.invoke(apiUrlConfig.systemBaseUrl)) {
+                when (val credentialResult = getCredentialUseCase?.invoke()) {
+                    is GetCredentialUseCase.PasskeyCredentialResult -> {
+                        val userHandle = credentialResult.passKeySignInData.userHandle.base64StringToByteArray()
+                        val endpointUrl= userHandle.decodeToString().substringAfter("@")
 
-                        is CredentialResult.PasskeyCredentialResult -> {
-                            val userHandle = credentialResult.passKeySignInData.userHandle.base64StringToByteArray()
-                            val endpointUrl= userHandle.decodeToString().substringAfter("@")
+                        val account = accountManager.loginWithPasskey(
+                            credentialResult.passKeySignInData,
+                            apiUrlConfig.systemBaseUrl,
+                        )
 
-                            val account = accountManager.loginWithPasskey(
-                                credentialResult.passKeySignInData,
-                                apiUrlConfig.systemBaseUrl
-                            )
-                             goToNextDestAfterSignIn(account.toPerson(), endpointUrl)
-                        }
-                        is CredentialResult.PasswordCredentialResult -> {
-                            val username=credentialResult.username
-                            val password=credentialResult.password
-                            if (username!=null&&password!=null){
-                                onClickWithUsernameAndPassword(
-                                    username,
-                                    password
-                                )
-                            }
+                        goToNextDestAfterSignIn(account.toPerson(), endpointUrl)
+                    }
 
+                    is GetCredentialUseCase.PasswordCredentialResult -> {
+                        onLoginWithUsernameAndPasswordFromCredentialManager(
+                            credentialUsername = credentialResult.credentialUsername,
+                            password = credentialResult.password
+                        )
+                    }
 
-                        }
-                        is CredentialResult.Error -> {
-                            Napier.e { "Error occurred: ${credentialResult.message}"}
+                    is GetCredentialUseCase.Error -> {
+                        Napier.e { "Error occurred: ${credentialResult.message}"}
+                    }
 
-                        }
+                    null -> {
+                        //Do nothing
                     }
                 }
             } catch (e: Exception) {
@@ -173,24 +164,27 @@ class AddAccountSelectNewOrExistingViewModel(
         }
     }
 
-    private fun onClickWithUsernameAndPassword(usernameWithDomain: String, password: String) {
+    private fun onLoginWithUsernameAndPasswordFromCredentialManager(
+        credentialUsername: String,
+        password: String
+    ) {
         viewModelScope.launch {
             var errorMessage: String? = null
-            val parts = usernameWithDomain.split("@")
-            val domain = parts[1]
-            val username = parts[0]
-            val serverUrl = createServerUrl(domain)
+            val (learningSpace, username) = GetCredentialUseCase.learningSpaceAndUsernameForCredentialUsername(
+                credentialUsername
+            )
+
             try {
                 val account = accountManager.login(
                     username = username.trim(),
                     password = password.trim(),
-                    endpointUrl = serverUrl,
+                    endpointUrl = learningSpace.url,
                     maxDateOfBirth = savedStateHandle[UstadView.ARG_MAX_DATE_OF_BIRTH]?.toLong()
                         ?: 0L,
                     dontSetCurrentSession = dontSetCurrentSession,
                 )
 
-                goToNextDestAfterSignIn(account.toPerson(),serverUrl)
+                goToNextDestAfterSignIn(account.toPerson(), learningSpace.url)
             } catch (e: AdultAccountRequiredException) {
                 errorMessage = impl.getString(MR.strings.adult_account_required)
             } catch (e: UnauthorizedException) {
@@ -258,27 +252,21 @@ class AddAccountSelectNewOrExistingViewModel(
             }
         }
     }
+
     private fun goToNextDestAfterSignIn(person: Person, serverUrl: String) {
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
         Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
+
         if (person.isPersonalAccount) {
             nextDestination = ContentEntryListViewModel.DEST_NAME_HOME
         }
-        navController.navigateToViewUri(
 
+        navController.navigateToViewUri(
             nextDestination.appendSelectedAccount(person.personUid, LearningSpace(serverUrl)),
             goOptions
         )
     }
-    private fun createServerUrl(domain: String): String {
 
-        val containsPort = domain.contains(":")
-        return if (containsPort) {
-            "$domain/"
-        } else {
-            "https://$domain"
-        }
-    }
     companion object {
 
         const val DEST_NAME = "addAccountSelectNewOrExisting"

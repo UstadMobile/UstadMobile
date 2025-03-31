@@ -8,8 +8,8 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
-import com.ustadmobile.core.domain.passkey.CredentialResult
-import com.ustadmobile.core.domain.passkey.GetCredentialUseCase
+import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
+import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.validateusername.ValidationResult
@@ -37,7 +37,6 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
-import io.ktor.http.Url
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,7 +47,6 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
-import org.kodein.di.on
 
 data class LoginUiState(
     val username: String = "",
@@ -110,12 +108,20 @@ class LoginViewModel(
     private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
         ?.toBoolean() ?: false
 
+    private val savePasswordUseCase: SavePasswordUseCase? by instanceOrNull()
+
+    //Short-term internal variable used so that we can avoid showing a save password prompt if/when
+    //the user just used their saved password
+    private var usingSavedPassword = false
+
+    private val getCredentialUseCase: GetCredentialUseCase? by instanceOrNull()
+
     init {
         nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
-        serverUrl =
-            savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] ?: apiUrlConfig.presetLearningSpaceUrl
-                    ?: "http://localhost"
+        serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]
+            ?: apiUrlConfig.presetLearningSpaceUrl ?: "http://localhost"
+        savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = serverUrl
 
         _uiState.update { prev ->
             prev.copy(
@@ -191,6 +197,7 @@ class LoginViewModel(
     }
 
     fun onUsernameChanged(newValue: String) {
+        usingSavedPassword = false
         val filteredValue = filterUsernameUseCase(
             username = newValue,
             invalidCharReplacement = ""
@@ -200,6 +207,7 @@ class LoginViewModel(
     }
 
     fun onPasswordChanged(password: String) {
+        usingSavedPassword = false
         _uiState.update { prev ->
             prev.copy(password = password)
         }
@@ -276,6 +284,13 @@ class LoginViewModel(
                             ?: 0L,
                         dontSetCurrentSession = dontSetCurrentSession,
                     )
+
+                    if(!usingSavedPassword) {
+                        savePasswordUseCase?.invoke(
+                            username.trim(), password.trim(), learningSpace = serverUrl
+                        )
+                    }
+
                     //this emit the passkeydata to show prompt to user to create passkey
                     accountManager.createPassKeyPrompt(
                         username.trim(), account.personUid, di.doorIdentityHashCode.toString(),
@@ -352,28 +367,41 @@ class LoginViewModel(
     }
 
     private fun getCredentials() {
-        val credentialUseCase: GetCredentialUseCase? = di.on(LearningSpace(serverUrl)).direct.instanceOrNull()
+        val getCredentialUseCaseVal = getCredentialUseCase ?: return
+
         viewModelScope.launch {
             try {
-                credentialUseCase?.let { useCase ->
-                    when (val credentialResult = useCase.invoke(apiUrlConfig.systemBaseUrl)) {
-                        is CredentialResult.PasskeyCredentialResult -> {
-                            val account = accountManager.loginWithPasskey(
-                                credentialResult.passKeySignInData,
-                                serverUrl
+                when (val credentialResult = getCredentialUseCaseVal()) {
+                    is GetCredentialUseCase.PasskeyCredentialResult -> {
+                        val account = accountManager.loginWithPasskey(
+                            credentialResult.passKeySignInData,
+                            serverUrl
+                        )
+                        goToNextDestAfterLoginOrGuestSelected(account.toPerson())
+                    }
+
+                    is GetCredentialUseCase.PasswordCredentialResult -> {
+                        val (learningSpace, username) = GetCredentialUseCase
+                            .learningSpaceAndUsernameForCredentialUsername(
+                                credentialResult.credentialUsername
                             )
-                            goToNextDestAfterLoginOrGuestSelected(account.toPerson())
-                        }
-                        is CredentialResult.PasswordCredentialResult -> {
-                            credentialResult.username?.let { onUsernameChanged(it) }
-                            credentialResult.password?.let { onPasswordChanged(it) }
-                            onClickLogin()
 
-                        }
-                        is CredentialResult.Error -> {
-                            Napier.e { "Error occurred: ${credentialResult.message}"}
+                        onUsernameChanged(username)
+                        onPasswordChanged(credentialResult.password)
+                        usingSavedPassword = true
 
+                        /* Edge case: the user might have selected an account where the account's
+                         * learning space url does not match the url provided to the ViewModel as
+                         * an argument.
+                         */
+                        serverUrl = learningSpace.url.also {
+                            savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = it
                         }
+                        onClickLogin()
+                    }
+
+                    is GetCredentialUseCase.Error -> {
+                        Napier.e { "Error occurred: ${credentialResult.message}"}
                     }
                 }
             } catch (e: Exception) {

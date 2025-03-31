@@ -15,6 +15,7 @@ import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkViewMo
 import com.ustadmobile.centralappconfigdb.model.LearningSpaceInfo
 import com.ustadmobile.centralappconfigdb.datasource.LearningSpaceDataSource
 import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_VAL_NEW_USER
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -71,22 +72,24 @@ class LearningSpaceListViewModel(
                 putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             }
         )
-
-
     }
+
     fun onSelectLearningSpace(learningSpace:String) {
-        val viewName =if(savedStateHandle[SignUpViewModel.ARG_NEW_OR_EXISTING_USER]=="new"){
+        val viewName =if(
+            savedStateHandle[SignUpViewModel.ARG_NEW_OR_EXISTING_USER] == ARG_VAL_NEW_USER
+        ){
             RegisterAgeRedirectViewModel.DEST_NAME
         }else{
             LoginViewModel.DEST_NAME
         }
+
         val args = buildMap {
             putFromSavedStateIfPresent(ARG_NEXT)
             putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             put(ARG_LEARNINGSPACE_URL, learningSpace)
         }
 
-      goToLearningSpaceUseCase.invoke(
+      goToLearningSpaceUseCase(
           learningSpace,
           navController,
           args,

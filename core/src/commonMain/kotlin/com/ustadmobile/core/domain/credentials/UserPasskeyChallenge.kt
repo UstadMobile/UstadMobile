@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.passkey
+package com.ustadmobile.core.domain.credentials
 
 import kotlinx.serialization.Serializable
 
