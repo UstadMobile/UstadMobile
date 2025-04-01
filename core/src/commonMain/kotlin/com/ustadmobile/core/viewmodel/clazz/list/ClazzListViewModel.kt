@@ -121,7 +121,6 @@ class ClazzListViewModel(
                 )
             )
         }
-
         _uiState.update { prev ->
             prev.copy(
                 dayOfWeekStrings = DayOfWeek.values().associateWith {

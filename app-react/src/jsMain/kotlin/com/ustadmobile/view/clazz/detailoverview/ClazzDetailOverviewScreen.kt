@@ -115,8 +115,6 @@ val ClazzDetailOverviewComponent = FC<ClazzDetailOverviewProps> { props ->
                                             props.onClickPermissions()
                                         }
                                     }
-
-
                                 }
                             }
                             if(props.uiState.canAddNewCourse){

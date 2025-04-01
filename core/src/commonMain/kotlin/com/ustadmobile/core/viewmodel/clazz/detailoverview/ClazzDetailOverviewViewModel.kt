@@ -53,6 +53,7 @@ data class ClazzDetailOverviewUiState(
     val blockStatusesForActiveUser: List<BlockStatus> = emptyList(),
 
     val clazzCodeVisible: Boolean = false,
+
     val canAddNewCourse: Boolean = false,
 
     val collapsedBlockUids: Set<Long> = emptySet(),
@@ -300,7 +301,6 @@ class ClazzDetailOverviewViewModel(
     }
 
     companion object {
-
         const val DEST_NAME = "CourseDetailOverviewView"
         const val COPY ="copy"
 

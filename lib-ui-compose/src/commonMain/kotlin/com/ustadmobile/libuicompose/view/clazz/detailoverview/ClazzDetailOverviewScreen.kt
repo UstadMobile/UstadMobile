@@ -136,9 +136,7 @@ fun ClazzDetailOverviewScreen(
                                     onClick = onClickPermissions,
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-
                             }
-
                         }
                         if (uiState.canAddNewCourse) {
                             UstadQuickActionButton(
@@ -148,7 +146,6 @@ fun ClazzDetailOverviewScreen(
                             )
                         }
                     }
-
                     HorizontalDivider(thickness = 1.dp)
                 }
             }

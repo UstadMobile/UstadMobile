@@ -102,8 +102,6 @@ abstract class UstadEditViewModel(
                     )
                 )
             }
-
-
         }
         else{
             finishWithResult(result)
