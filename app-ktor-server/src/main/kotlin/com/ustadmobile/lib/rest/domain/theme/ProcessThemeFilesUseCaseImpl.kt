@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 class ProcessThemeFilesUseCaseImpl : ProcessThemeFilesUseCase {
     companion object {
-        private const val GITHUB_TOKEN = "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"
+        private const val GITHUB_TOKEN = ""
         private const val REPO_OWNER = "UstadMobile"
         private const val REPO_NAME = "UstadMobile"
         private const val BRANCH = "dev-admin-branding-customization-testing"
