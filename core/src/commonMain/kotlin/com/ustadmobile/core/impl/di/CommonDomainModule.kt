@@ -14,6 +14,7 @@ import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
+import com.ustadmobile.core.domain.theme.UnzipFileUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI

@@ -127,6 +127,7 @@ import com.ustadmobile.lib.rest.api.contentupload.GetSubtitleTrackServerRoute
 import com.ustadmobile.lib.rest.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriServerUseCase
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
+import com.ustadmobile.lib.rest.domain.theme.themeRoute
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
 import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
 import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
@@ -917,6 +918,12 @@ fun Application.umRestApplication(
 
             route("api") {
                 val di: DI by closestDI()
+
+                themeRoute(
+                    themeUploadUseCase = { call ->
+                        di.on(call).direct.instance()
+                    }
+                )
 
                 route("account"){
                     SetPasswordRoute(

@@ -22,6 +22,9 @@ import com.ustadmobile.core.domain.cachelock.Migrate131to132AddRetainActiveUriTr
 import com.ustadmobile.core.domain.cachelock.UpdateCacheLockJoinUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCaseCommonJvm
 import com.ustadmobile.core.domain.message.AddOutgoingReplicationForMessageTriggerCallback
+import com.ustadmobile.core.domain.theme.ProcessThemeFilesUseCase
+import com.ustadmobile.core.domain.theme.ThemeUploadUseCase
+import com.ustadmobile.core.domain.theme.UnzipFileUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -32,6 +35,9 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.rest.InsertDefaultSiteCallback
+import com.ustadmobile.lib.rest.domain.theme.ProcessThemeFilesUseCaseImpl
+import com.ustadmobile.lib.rest.domain.theme.ThemeUploadUseCaseImpl
+import com.ustadmobile.lib.rest.domain.theme.UnzipFileUseCaseImpl
 import com.ustadmobile.lib.rest.ext.dbModeProperty
 import com.ustadmobile.lib.rest.ext.initAdminUser
 import com.ustadmobile.lib.rest.identifier
@@ -87,6 +93,17 @@ fun makeJvmBackendDiModule(
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
     val dbMode = config.dbModeProperty()
+
+    bind<UnzipFileUseCase>() with singleton { UnzipFileUseCaseImpl() }
+
+    bind<ProcessThemeFilesUseCase>() with singleton { ProcessThemeFilesUseCaseImpl() }
+
+    bind<ThemeUploadUseCase>() with provider {
+        ThemeUploadUseCaseImpl(
+            unzipFileUseCase = instance(),
+            processThemeFilesUseCase = instance()
+        )
+    }
 
     bind<Json>() with singleton {
         json
