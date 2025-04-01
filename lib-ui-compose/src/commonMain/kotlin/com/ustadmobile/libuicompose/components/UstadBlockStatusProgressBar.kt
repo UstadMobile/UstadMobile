@@ -19,8 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.lib.db.composites.BlockStatus
-import com.ustadmobile.libuicompose.theme.onSuccessContainerDark
-import com.ustadmobile.libuicompose.theme.successContainerDark
+import com.ustadmobile.libuicompose.theme.onPrimaryContainerDark
+import com.ustadmobile.libuicompose.theme.primaryContainerDark
 
 /**
  * Given the BlockStatus, show a progress bar if determinative progress is available.
@@ -58,8 +58,8 @@ fun UstadBlockStatusProgressBar(
             PaddedCircleIcon(
                 imageVector = Icons.Default.Check,
                 modifier = Modifier.align(Alignment.CenterStart),
-                containerColor = successContainerDark,
-                onContainerColor = onSuccessContainerDark,
+                containerColor = onPrimaryContainerDark,
+                onContainerColor = primaryContainerDark,
                 size = iconSize,
                 outlineSize = iconOutlineSize,
             )

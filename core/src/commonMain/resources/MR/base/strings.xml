@@ -4,6 +4,8 @@
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
+    <string name="jetpack_compose_theme_name">Default Jetpack Compose</string>
+    <string name="mui_theme_name">Default MUI Theme</string>
     <string name="got_it">Got it</string>
     <string name="learn_more">Learn more</string>
     <string name="be_careful_interacting_online">Be careful interacting online and in-app!</string>
@@ -82,6 +84,12 @@
     <string name="exams">Exams</string>
     <string name="reports">Reports</string>
     <string name="choose_template">Choose template</string>
+    <string name="organisation_name">Organisation Name</string>
+    <string name="organisation_logo">Organisation Logo</string>
+    <string name="jetpack_compose_theme">Jetpack Compose Theme</string>
+    <string name="mui_theme">MUI Theme</string>
+    <string name="choose_file">Choose File</string>
+    <string name="no_file_chosen">No file chosen</string>
     <string name="save_as_template">Save as template</string>
     <string name="contents">Contents</string>
     <string name="students">Students</string>
@@ -861,6 +869,8 @@
     <!--Ustad Mobile supports multiple sites. Each site has it's own user accounts, content, classes, schools, etc. -->
     <string name="site">Site</string>
     <string name="site_link">Site link</string>
+    <string name="appearance">Appearance</string>
+    <string name="manage_brand">Manage brand and color palette </string>
     <string name="please_enter_the_linK">Please enter the link for your learning environment provided by your teacher or administrator:</string>
     <string name="or">OR</string>
     <string name="connect">Connect</string>

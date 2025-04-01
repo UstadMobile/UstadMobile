@@ -10,8 +10,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.SdStorage
-import androidx.compose.material.icons.filled.Workspaces
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -41,6 +41,7 @@ fun SettingsScreen(
         uiState = uiState,
         onClickAppLanguage = viewModel::onClickLanguage,
         onClickWorkspace = viewModel::onClickSiteSettings,
+        onClickAppearance = viewModel::onClickAppearance,
         onClickHtmlContentDisplayEngine = viewModel::onClickHtmlContentDisplayEngine,
         onClickVersion = viewModel::onClickVersion,
         onClickDeveloperOptions = viewModel::onClickDeveloperOptions,
@@ -116,6 +117,7 @@ fun SettingsScreen(
     onClickHtmlContentDisplayEngine: () -> Unit = {},
     onClickGoToHolidayCalendarList: () -> Unit = {},
     onClickWorkspace: () -> Unit = {},
+    onClickAppearance: () -> Unit = {},
     onClickLeavingReason: () -> Unit = {},
     onClickVersion: () -> Unit = { },
     onClickDeveloperOptions: () -> Unit = { },
@@ -165,10 +167,19 @@ fun SettingsScreen(
 
         if (uiState.workspaceSettingsVisible){
             UstadDetailField2(
-                icon = Icons.Default.Workspaces,
+                icon = Icons.Default.DisplaySettings,
                 valueText = stringResource(MR.strings.site),
                 labelText = stringResource(MR.strings.manage_site_settings),
                 modifier = Modifier.clickable { onClickWorkspace() },
+            )
+        }
+
+        if (uiState.appearanceSettingsVisible){
+            UstadDetailField2(
+                icon = Icons.Default.Palette,
+                valueText = stringResource(MR.strings.appearance),
+                labelText = stringResource(MR.strings.manage_brand),
+                modifier = Modifier.clickable { onClickAppearance() },
             )
         }
 

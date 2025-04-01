@@ -24,6 +24,8 @@ import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.core.viewmodel.appearance.AppearanceDetailViewModel
+import com.ustadmobile.core.viewmodel.appearance.AppearanceEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
@@ -139,6 +141,8 @@ import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEdit
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
+import com.ustadmobile.libuicompose.view.appearance.AppearanceDetailScreen
+import com.ustadmobile.libuicompose.view.appearance.AppearanceEditScreen
 import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
 import com.ustadmobile.libuicompose.view.clazz.permissiondetail.CoursePermissionDetailScreen
@@ -549,6 +553,18 @@ fun AppNavHost(
             contentScene("/${SettingsViewModel.DEST_NAME}") { backStackEntry ->
                 SettingsScreen(
                     appViewModel(backStackEntry, SettingsViewModel::class, ::SettingsViewModel)
+                )
+            }
+
+            contentScene("/${AppearanceDetailViewModel.DEST_NAME}") { backStackEntry ->
+                AppearanceDetailScreen(
+                    appViewModel(backStackEntry, AppearanceDetailViewModel::class, ::AppearanceDetailViewModel)
+                )
+            }
+
+            contentScene("/${AppearanceEditViewModel.DEST_NAME}") { backStackEntry ->
+                AppearanceEditScreen(
+                    appViewModel(backStackEntry, AppearanceEditViewModel::class, ::AppearanceEditViewModel)
                 )
             }
 

@@ -9,6 +9,7 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.UstadDetailField
 import com.ustadmobile.mui.components.UstadDetailField2
 import com.ustadmobile.mui.components.UstadStandardContainer
+import mui.icons.material.Palette
 import web.cssom.px
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.icons.material.Language as LanguageIcon
@@ -34,6 +35,8 @@ external interface SettingsProps : Props {
     var onClickGoToHolidayCalendarList: () -> Unit
 
     var onClickWorkspace: () -> Unit
+
+    var onClickAppearance: () -> Unit
 
     var onClickLeavingReason: () -> Unit
 
@@ -75,6 +78,7 @@ val SettingsScreen = FC<Props> {
     SettingsComponent2 {
         uiState = uiStateVal
         onClickWorkspace = viewModel::onClickSiteSettings
+        onClickAppearance = viewModel::onClickAppearance
         onClickAppLanguage = viewModel::onClickLanguage
         onClickDeletedItems = viewModel::onClickDeletedItems
     }
@@ -100,6 +104,7 @@ val SettingsPreview = FC<Props> {
         onClickWorkspace = { }
         onClickLeavingReason = { }
         onClickLangList = { }
+        onClickAppearance = { }
     }
 }
 
@@ -132,6 +137,15 @@ val SettingsComponent2 = FC<SettingsProps> { props ->
                     labelContent = ReactNode(strings[MR.strings.manage_site_settings])
                     valueContent = ReactNode(strings[MR.strings.site])
                     onClick = props.onClickWorkspace
+                }
+            }
+
+            if (props.uiState.appearanceSettingsVisible){
+                UstadDetailField2 {
+                    leadingContent = Palette.create()
+                    labelContent = ReactNode(strings[MR.strings.manage_brand])
+                    valueContent = ReactNode(strings[MR.strings.appearance])
+                    onClick = props.onClickAppearance
                 }
             }
 

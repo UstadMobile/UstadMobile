@@ -140,6 +140,8 @@ import com.ustadmobile.view.message.messagelist.MessageListScreen
 import com.ustadmobile.view.message.messagelist.MessageListScreenPreview
 import com.ustadmobile.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
+import com.ustadmobile.core.viewmodel.appearance.AppearanceDetailViewModel
+import com.ustadmobile.core.viewmodel.appearance.AppearanceEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.view.about.OpenLicensesScreen
 import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
@@ -168,6 +170,8 @@ import com.ustadmobile.mui.components.UstadChipsDemo
 import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
 import com.ustadmobile.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
+import com.ustadmobile.view.appearance.AppearanceDetailScreen
+import com.ustadmobile.view.appearance.AppearanceEditScreen
 import com.ustadmobile.view.contententry.subtitleedit.SubtitleEditScreen
 
 
@@ -202,6 +206,11 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         ParentalConsentManagementViewModel.DEST_NAME, "Parental Consent Management Preview",
         ParentalConsentManagementScreen),
     UstadScreen(SettingsViewModel.DEST_NAME, "Settings", SettingsScreen),
+
+    UstadScreen(AppearanceDetailViewModel.DEST_NAME, "AppearanceDetail", AppearanceDetailScreen),
+
+    UstadScreen(AppearanceEditViewModel.DEST_NAME, "AppearanceEdit", AppearanceEditScreen),
+
     UstadScreen(InviteViaLinkView.VIEW_NAME, "Invite Via Link Preview",
         InviteViaLinkPreview
     ),

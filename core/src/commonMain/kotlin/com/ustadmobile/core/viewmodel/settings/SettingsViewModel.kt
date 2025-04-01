@@ -26,6 +26,7 @@ import com.ustadmobile.core.domain.storage.SetOfflineStorageSettingUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.viewmodel.appearance.AppearanceDetailViewModel
 import com.ustadmobile.core.viewmodel.deleteditem.DeletedItemListViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel.Companion.PREFKEY_DEVSETTINGS_ENABLED
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
@@ -47,6 +48,8 @@ data class SettingsUiState(
     val holidayCalendarVisible: Boolean = false,
 
     val workspaceSettingsVisible: Boolean = false,
+
+    val appearanceSettingsVisible: Boolean = false,
 
     val reasonLeavingVisible: Boolean = false,
 
@@ -167,7 +170,10 @@ class SettingsViewModel(
                 activeUserPersonUid, PermissionFlags.MANAGE_SITE_SETTINGS
             ).collect { siteAdminSettingsVisible ->
                 _uiState.update { prev ->
-                    prev.copy(workspaceSettingsVisible = siteAdminSettingsVisible)
+                    prev.copy(
+                        workspaceSettingsVisible = siteAdminSettingsVisible,
+                        appearanceSettingsVisible = siteAdminSettingsVisible
+                    )
                 }
             }
         }
@@ -251,6 +257,10 @@ class SettingsViewModel(
 
     fun onClickDeletedItems() {
         navController.navigate(DeletedItemListViewModel.DEST_NAME, emptyMap())
+    }
+
+    fun onClickAppearance() {
+        navController.navigate(AppearanceDetailViewModel.DEST_NAME, emptyMap())
     }
 
     fun onClickVersion() {
