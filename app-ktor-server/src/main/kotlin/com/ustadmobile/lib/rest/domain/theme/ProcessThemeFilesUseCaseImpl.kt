@@ -14,12 +14,13 @@ import java.util.concurrent.TimeUnit
  * Server-side implementation of ProcessThemeFilesUseCase that processes theme files and pushes to GitHub
  */
 
+
 class ProcessThemeFilesUseCaseImpl : ProcessThemeFilesUseCase {
     companion object {
         private const val GITHUB_TOKEN = ""
-        private const val REPO_OWNER = "UstadMobile"
-        private const val REPO_NAME = "UstadMobile"
-        private const val BRANCH = "dev-admin-branding-customization-testing"
+        private const val REPO_OWNER = ""
+        private const val REPO_NAME = ""
+        private const val BRANCH = ""
         private const val STRINGS_XML_PATH = "core/src/commonMain/resources/MR/base/strings.xml"
         private const val LOGO_TARGET_PATH = "core/src/commonMain/resources/MR/images/ustad_logo.svg"
 
