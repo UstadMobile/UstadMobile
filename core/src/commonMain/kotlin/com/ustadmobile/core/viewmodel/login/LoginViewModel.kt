@@ -128,9 +128,7 @@ class LoginViewModel(
 
         if (savedStateHandle[ARG_IS_PERSONAL_ACCOUNT] == "true") {
             _uiState.update { prev ->
-                prev.copy(
-                    isPersonalAccount = true
-                )
+                prev.copy(isPersonalAccount = true)
             }
         }
 
@@ -385,8 +383,6 @@ class LoginViewModel(
             }
         }
     }
-
-
 
     companion object {
 

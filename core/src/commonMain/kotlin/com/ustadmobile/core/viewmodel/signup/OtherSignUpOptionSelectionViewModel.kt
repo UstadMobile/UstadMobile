@@ -42,8 +42,7 @@ data class OtherSignUpOptionSelectionUiState(
     val person: Person? = null,
     val personPicture: PersonPicture? = null,
     val passkeySupported: Boolean = true,
-
-    )
+)
 
 class OtherSignUpOptionSelectionViewModel(
     di: DI,
@@ -143,7 +142,7 @@ class OtherSignUpOptionSelectionViewModel(
                     AddChildProfilesViewModel.DEST_NAME,
                     args = buildMap {
                         put(ARG_NEXT, nextDestination)
-                        putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                        putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
                         putFromSavedStateIfPresent(ARG_NEXT)
                     }
                 )
@@ -185,7 +184,7 @@ class OtherSignUpOptionSelectionViewModel(
 
         val args = buildMap {
             put(SignUpViewModel.SIGN_WITH_USERNAME_AND_PASSWORD, "true")
-            putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+            putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
             putFromSavedStateIfPresent(ARG_NEXT)
             put(
                 ARG_PERSON,

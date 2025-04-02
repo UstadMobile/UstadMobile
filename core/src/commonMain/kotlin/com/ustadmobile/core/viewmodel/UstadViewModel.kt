@@ -401,7 +401,7 @@ abstract class UstadViewModel(
         putFromSavedStateIfPresent(savedStateHandle, key)
     }
 
-    fun MutableMap<String, String>.putFromSavedStateIfPresent(keys: List<String>) {
+    fun MutableMap<String, String>.putAllFromSavedStateIfPresent(keys: List<String>) {
         keys.forEach {
             putFromSavedStateIfPresent(it)
         }

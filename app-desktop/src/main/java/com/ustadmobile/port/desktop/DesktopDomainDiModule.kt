@@ -89,7 +89,7 @@ import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJvm
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.core.domain.credentials.PasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
@@ -529,8 +529,8 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
-    bind<PasskeyRequestJsonUseCase>()  with provider {
-        PasskeyRequestJsonUseCase(
+    bind<CreatePasskeyRequestJsonUseCase>()  with provider {
+        CreatePasskeyRequestJsonUseCase(
             systemImpl = instance(),
             json = instance()
         )

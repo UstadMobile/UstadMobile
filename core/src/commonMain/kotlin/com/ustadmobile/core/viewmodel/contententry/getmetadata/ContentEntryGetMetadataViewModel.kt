@@ -65,7 +65,7 @@ class ContentEntryGetMetadataViewModel(
                                 value = metadataResult
                             )
                         )
-                        putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                        putAllFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
                         putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
                         putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
                         putFromSavedStateIfPresent(ARG_PARENT_UID)

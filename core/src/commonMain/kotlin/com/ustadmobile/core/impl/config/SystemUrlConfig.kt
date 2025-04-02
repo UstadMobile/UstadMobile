@@ -40,7 +40,6 @@ data class SystemUrlConfig(
 
     val canSelectServer: Boolean = presetLearningSpaceUrl == null
 
-
     companion object {
         fun fromUstadBuildConfig(buildConfig: UstadBuildConfig): SystemUrlConfig {
             return SystemUrlConfig(

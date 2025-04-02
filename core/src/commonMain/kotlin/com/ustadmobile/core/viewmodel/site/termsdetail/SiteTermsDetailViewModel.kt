@@ -2,7 +2,6 @@ package com.ustadmobile.core.viewmodel.site.termsdetail
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_SHOW_ACCEPT_BUTTON
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.SiteTerms
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -99,7 +98,7 @@ class SiteTermsDetailViewModel(
         navController.navigate(
             SignUpViewModel.DEST_NAME,
             args = buildMap {
-                putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+                putAllFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
                 putFromSavedStateIfPresent(ARG_NEXT)
             }
         )

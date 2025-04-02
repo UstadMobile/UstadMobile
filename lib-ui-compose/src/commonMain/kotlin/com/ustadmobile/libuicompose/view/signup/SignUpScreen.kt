@@ -24,7 +24,6 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadImageSelectButton
 import com.ustadmobile.libuicompose.components.UstadMessageIdOptionExposedDropDownMenuField
-import com.ustadmobile.libuicompose.components.UstadPasswordField
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
@@ -46,9 +45,7 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
         onclickSignUpWithPasskey = viewModel::onClickedSignup,
         onclickOtherOptions = viewModel::onClickOtherOption,
         onFullNameValueChange = viewModel::onFullNameValueChange,
-
-        )
-
+    )
 }
 
 @Composable
@@ -61,8 +58,7 @@ fun SignUpScreen(
     onTeacherCheckChanged: (Boolean) -> Unit = { },
     onParentCheckChanged: (Boolean) -> Unit = { },
     onFullNameValueChange: (String) -> Unit = { },
-
-    ) {
+) {
     UstadVerticalScrollColumn(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -79,7 +75,7 @@ fun SignUpScreen(
                     .testTag("full_name")
                     .fillMaxWidth()
                     .defaultItemPadding(),
-                value = uiState.firstName ?: "",
+                value = uiState.fullName ?: "",
                 label = { Text(stringResource(MR.strings.full_name) + "*") },
                 isError = uiState.fullNameError != null,
                 singleLine = true,
@@ -119,9 +115,9 @@ fun SignUpScreen(
                     checked = uiState.isTeacher,
                     onCheckedChange = {
                         onTeacherCheckChanged(it)
-
                     }
                 )
+
                 Text(
                     text = stringResource(MR.strings.i_am_teacher),
                     modifier = Modifier.padding(start = 4.dp, end = 16.dp)
