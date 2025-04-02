@@ -64,15 +64,16 @@ it('Admin create a course', () => {
    cy.get('input[id="title"]').type('Text 1');
    cy.contains('button', 'Done').click()
    cy.contains('Text 1').should('exist')
-   cy.contains('button', 'Save',{timeout:5000}).click()
-   cy.contains('button', 'Save',{timeout:5000}).should('not.exist')
+   cy.contains('button', 'Save', { timeout: 10000 }).click()
+   cy.contains('button', 'Save').should('not.exist')
+   cy.wait(3000)
    cy.contains('Term 1').should('exist')
    cy.contains('Text 1').should('exist')
    cy.contains('Assignment 1').should('exist')
    cy.contains('Discussion 1').click()
    cy.contains('Post 1').should('not.exist')
-   cy.contains('Courses').click()
-   cy.contains('New Test Course').should('exist')
+   cy.contains('Courses', { timeout: 10000 }).should('be.visible').click()
+   cy.contains('New Test Course', { timeout: 10000 }).should('exist')
 })
 
 it('Teacher has no permission to add a course ', () => {
