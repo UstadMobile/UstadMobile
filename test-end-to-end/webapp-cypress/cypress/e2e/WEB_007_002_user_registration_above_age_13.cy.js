@@ -15,7 +15,7 @@ it('Admin enable registration', () => {
 // Verify Date of birth field is mandatory
   cy.contains('button','Next').click()
   cy.get('.Mui-error').contains('Birthday*').should('exist')
-  cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date("2010-06-01"));
+  cy.ustadSetDate(cy.get("#age_date_of_birth"), new Date("2010-06-01"));
   cy.contains('button','Next').click()
   cy.contains('New Terms').should('be.visible')
   cy.get('#accept_button').click()

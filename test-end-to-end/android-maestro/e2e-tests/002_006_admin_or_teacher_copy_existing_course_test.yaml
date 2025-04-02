@@ -1,8 +1,8 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/reports/maestro/002_005_admin_grant_permissions_test/Screenshots"
+  TESTRESULTSDIR: "build/reports/maestro/002_006_admin_or_teacher_copy_existing_course_test/Screenshots"
 onFlowStart:
-  - startRecording: 002_005_admin_grant_permissions_test
+  - startRecording: 002_006_admin_or_teacher_copy_existing_course_test
   - runScript:
       file: "common/startserver.js"
       env:
@@ -10,6 +10,10 @@ onFlowStart:
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runScript:
     file: "common/import_users_via_http.js"
@@ -37,17 +41,6 @@ onFlowComplete:
 - runScript:
     file: "common/setDate.js"
 - inputText: ${output.pastYearDate}
-- scrollUntilVisible:
-    element:
-      text: "Add block"
-    direction: DOWN
-- tapOn: "Add block"
-- tapOn: "Module"
-- tapOn: "Title*"
-- inputText: "TERM 1"
-- hideKeyboard
-- tapOn:
-    text: "Done"
 - scrollUntilVisible:
     element:
       text: "Add block"
@@ -85,21 +78,62 @@ onFlowComplete:
 - runScript:
     file: "common/setDate.js"
 - inputText: ${output.lastYearDate}
-- tapOn: "Save"
-# edit the course to add blocks
-- tapOn:
-    id: "floating_action_button"
-# teacher copy an existing course
-- runFlow: "common/clear_state_and_get_started.yaml"
-- runFlow: "common/select_site.yaml"
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
+- tapOn: "Add block"
 - runFlow:
-    file: "common/user_login.yaml"
-    env:
-      USERNAME: "teach1"
-      PASSWORD: "testt1"
-- tapOn: "Courses"
-- tapOn: "All"
-- tapOn: "Test Course Block"
+    when:
+      notVisible:
+        text: "Discussion board"
+    commands:
+      - swipe:
+          from:
+            text: "Drag handle"
+          direction: UP
+- tapOn: "Discussion board"
+- tapOn: "Title*"
+- inputText: "Discussion 1"
+- hideKeyboard
+- tapOn: "Description"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "test block"
+- tapOn: "Done"
+- assertVisible:
+    id: "app_title"
+    text: "Add discussion"
+- tapOn: "Done"
+- tapOn: "Save"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- assertVisible:            #  +POST button
+    id: "floating_action_button"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- tapOn:            #  +POST button
+    id: "floating_action_button"
+- tapOn: "Title*"
+- inputText: "Post 1"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "This is post 1"
+- tapOn: "Post"
+- assertVisible:
+    id: "app_title"
+    text: "Post 1"
+- assertVisible:
+    text: "This is post 1"
+- tapOn: "Back"
+- tapOn: "Back"
+- assertVisible: "Copy"
 - tapOn: "Copy"
 - assertVisible:
     id: "app_title"
@@ -154,17 +188,26 @@ onFlowComplete:
     env:
       TEXTFIELD: "end_date"
 - tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "New Test Course"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- assertNotVisible: "Post 1"
 - tapOn: "Courses"
 - tapOn: "Currently Enrolled"
 - assertVisible: "New Test Course"
-# student do not have permission to copy a course
+# teacher  does not have permission to add a course, so copy button won't be visible to the teacher
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
     env:
-      USERNAME: "stud1"
-      PASSWORD: "tests1"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
 - tapOn: "Courses"
 - tapOn: "All"
 - tapOn: "Test Course Block"
