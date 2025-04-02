@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="app_name">material-theme(1)</string>
+    <string name="app_name">User2</string>
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
@@ -1950,6 +1950,6 @@
     <string name="subtitles">Subtitles</string>
 
 
-    <string name="jetpack_compose_theme_name">theme_extract_86a86b13-1cc0-488e-acfd-2840add73414</string>
-    <string name="mui_theme_name">Default MUI Theme</string>
+    <string name="jetpack_compose_theme_name">material-theme</string>
+    <string name="mui_theme_name">material-theme(1)</string>
 </resources>
