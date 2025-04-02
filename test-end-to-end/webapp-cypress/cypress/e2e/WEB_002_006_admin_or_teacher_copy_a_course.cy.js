@@ -72,8 +72,9 @@ it('Admin create a course', () => {
    cy.contains('Assignment 1').should('exist')
    cy.contains('Discussion 1').click()
    cy.contains('Post 1').should('not.exist')
-   cy.contains('Courses', { timeout: 10000 }).should('be.visible').click()
-   cy.contains('New Test Course', { timeout: 10000 }).should('exist')
+   cy.contains('Courses', { timeout: 10000 }).scrollIntoView().should('be.visible').click();
+   cy.wait(3000); // Allow time for UI to update
+   cy.contains('New Test Course', { timeout: 10000 }).scrollIntoView().should('exist');
 })
 
 it('Teacher has no permission to add a course ', () => {
