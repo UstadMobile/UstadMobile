@@ -50,6 +50,7 @@ it('Admin create a course', () => {
    cy.contains('Assignment 1').should('exist')
    cy.get('input[id="clazz_name"]').clear()
    cy.get('input[id="clazz_name"]').type('New Test Course')
+   cy.contains('Assignment 1').ustadScrollUntilVisible()
    cy.contains('Assignment 1').click()
    cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now() + (24 * 60 * 60 * 1000))) // tomorrow
    cy.get('#caSubmissionPolicy').click()
@@ -65,6 +66,7 @@ it('Admin create a course', () => {
    cy.contains('Text 1').should('exist')
    cy.contains('button', 'Save',{timeout:5000}).click()
    cy.contains('button', 'Save',{timeout:5000}).should('not.exist')
+   cy.contains('Discussion 1').ustadScrollUntilVisible()
    cy.contains('Term 1').should('exist')
    cy.contains('Text 1').should('exist')
    cy.contains('Assignment 1').should('exist')
