@@ -13,8 +13,8 @@ import com.jakewharton.processphoenix.ProcessPhoenix
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.xapi.LaunchXapiUseCaseAndroid
-import com.ustadmobile.libuicompose.theme.md_theme_dark_primaryContainer
-import com.ustadmobile.libuicompose.theme.md_theme_light_primaryContainer
+import com.ustadmobile.libuicompose.theme.onPrimaryContainerDark
+import com.ustadmobile.libuicompose.theme.onPrimaryContainerLight
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -39,8 +39,8 @@ class AppActivity: AbstractAppActivity() {
             LaunchXapiUseCaseAndroid(
                 androidContext = this@AppActivity,
                 resolveXapiLaunchHrefUseCase = instance(),
-                lightToolbarColor = md_theme_light_primaryContainer.toArgb(),
-                darkToolbarColor = md_theme_dark_primaryContainer.toArgb(),
+                lightToolbarColor = onPrimaryContainerLight.toArgb(),
+                darkToolbarColor = onPrimaryContainerDark.toArgb(),
                 session = { mCustomTabsSession },
                 getHtmlContentDisplayEngineUseCase = instance(),
                 getApiUrlUseCase = instance(),

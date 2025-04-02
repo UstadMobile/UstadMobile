@@ -105,6 +105,7 @@ import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseC
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCaseAndroid
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseAndroid
+import com.ustadmobile.core.domain.file.UriFileUseCase
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
@@ -994,6 +995,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             ValidateUsernameUseCase()
         }
 
+        bind<UriFileUseCase>() with singleton { UriFileUseCase(di) }
 
         bind<CancelRemoteContentEntryImportUseCase>() with scoped(EndpointScope.Default).singleton {
             CancelRemoteContentEntryImportUseCase(

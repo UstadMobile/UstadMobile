@@ -2,6 +2,10 @@ package com.ustadmobile.lib.rest.domain.theme
 
 import com.ustadmobile.core.domain.theme.ProcessThemeFilesUseCase
 import io.github.aakira.napier.Napier
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -20,9 +24,12 @@ class ProcessThemeFilesUseCaseImpl : ProcessThemeFilesUseCase {
         private const val GITHUB_TOKEN = ""
         private const val REPO_OWNER = ""
         private const val REPO_NAME = ""
-        private const val BRANCH = ""
+        private const val BRANCH = "" 
         private const val STRINGS_XML_PATH = "core/src/commonMain/resources/MR/base/strings.xml"
+        private const val THEME_KT_PATH = "lib-ui-compose/src/commonMain/kotlin/com/ustadmobile/libuicompose/theme/Theme.kt"
+        private const val COLOR_KT_PATH = "lib-ui-compose/src/commonMain/kotlin/com/ustadmobile/libuicompose/theme/Color.kt"
         private const val LOGO_TARGET_PATH = "core/src/commonMain/resources/MR/images/ustad_logo.svg"
+        private const val MUI_THEME_KT_PATH = "app-react/src/jsMain/kotlin/com/ustadmobile/mui/theme/Themes.kt"
 
         private val httpClient = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -35,147 +42,363 @@ class ProcessThemeFilesUseCaseImpl : ProcessThemeFilesUseCase {
         extractedDir: String,
         orgName: String?,
         orgLogo: String?,
-        muiThemePath: String?
+        muiThemePath: String?,
+        jetpackComposeThemeName: String?,
+        muiThemeName: String?
     ): Result<Unit> {
         return try {
-            Napier.d("🟢 Processing extractedDir: $extractedDir")
-            Napier.d("🟢 Organization name: $orgName, logo: $orgLogo")
+            Napier.d("Processing with: extractedDir=$extractedDir, orgName=$orgName, logo=$orgLogo")
+            Napier.d("Theme names: jetpackComposeThemeName=$jetpackComposeThemeName, muiThemeName=$muiThemeName")
 
-            // Track which files need changes
+            if (extractedDir.isNotBlank()) {
+                val dir = File(extractedDir)
+                Napier.d("Extracted dir exists: ${dir.exists()}")
+            }
+
+            if (!orgLogo.isNullOrBlank()) {
+                val logoFile = File(orgLogo)
+                Napier.d("Logo file exists: ${logoFile.exists()}")
+            }
+
             val changedFiles = mutableMapOf<String, String>()
-            val commitMessage = buildCommitMessage(extractedDir, orgName, orgLogo, muiThemePath)
 
-            // Get theme names
-            val jetpackThemeName = getJetpackThemeName(extractedDir)
-            val muiThemeName = getMuiThemeName(muiThemePath)
-
-            // Process Jetpack theme files if directory exists
-            if (extractedDir.isNotEmpty()) {
-                val jetpackFiles = processJetpackThemeFiles(extractedDir)
-                changedFiles.putAll(jetpackFiles)
-            }
-
-            // Update strings.xml only if we have new values
-            if (orgName != null || extractedDir.isNotEmpty() || muiThemePath != null) {
-                val stringsXmlContent = updateStringsXml(orgName, jetpackThemeName, muiThemeName)
-                if (stringsXmlContent != null) {
-                    changedFiles[STRINGS_XML_PATH] = stringsXmlContent
+            //Jetpack theme files if directory exists
+            if (extractedDir.isNotBlank() && File(extractedDir).exists()) {
+                try {
+                    val jetpackFiles = processJetpackThemeFiles(extractedDir)
+                    jetpackFiles.forEach { (path, content) ->
+                        changedFiles[path] = content
+                    }
+                    Napier.d("Added ${jetpackFiles.size} theme files to be pushed")
+                } catch (e: Exception) {
+                    Napier.e("Failed to process theme files: ${e.message}", e)
                 }
             }
 
-            // Handle organization settings if provided
-            if (orgName != null || orgLogo != null) {
-                val configContent = createOrganizationConfig(orgName, orgLogo)
-                changedFiles["config/organization.json"] = configContent
-            }
-
-            // Process and handle logo file if provided
-            if (!orgLogo.isNullOrEmpty()) {
-                val logoContent = processLogoFile(orgLogo)
-                if (logoContent != null) {
-                    changedFiles[LOGO_TARGET_PATH] = logoContent
+            // Update strings.xml if orgName or theme names are provided
+            if (!orgName.isNullOrBlank() || !jetpackComposeThemeName.isNullOrBlank() || !muiThemeName.isNullOrBlank()) {
+                Napier.d("Updating strings.xml with: orgName=$orgName, jetpackTheme=$jetpackComposeThemeName, muiTheme=$muiThemeName")
+                try {
+                    val (currentContent, _) = fetchStringXmlContent() ?: return Result.failure(Exception("Failed to fetch strings.xml"))
+                    val updatedContent = updateStringsXml(
+                        orgName,
+                        jetpackComposeThemeName,
+                        muiThemeName,
+                        currentContent
+                    )
+                    changedFiles[STRINGS_XML_PATH] = updatedContent
+                    Napier.d("Added strings.xml to be pushed with updated content")
+                } catch (e: Exception) {
+                    Napier.e("Failed to update strings.xml: ${e.message}", e)
                 }
             }
 
-            // Handle MUI theme if provided
-            if (!muiThemePath.isNullOrEmpty()) {
-                val muiContent = processMuiThemeIfExists(muiThemePath)
-                if (muiContent != null) {
-                    changedFiles["web-ui/src/theme/customTheme.js"] = muiContent
+            // organization logo if provided
+            if (!orgLogo.isNullOrBlank() && File(orgLogo).exists()) {
+                try {
+                    val logoContent = processLogoFile(orgLogo)
+                    if (logoContent != null) {
+                        changedFiles[LOGO_TARGET_PATH] = logoContent
+                        Napier.d("Added logo to be pushed")
+                    }
+                } catch (e: Exception) {
+                    Napier.e("Failed to process logo: ${e.message}", e)
                 }
             }
 
-            // Push all changed files in a single batch if possible, or individually if needed
+            // MUI theme if provided
+            if (!muiThemePath.isNullOrBlank() && File(muiThemePath).exists()) {
+                try {
+                    val muiThemeContent = processMuiThemeJson(muiThemePath)
+                    if (muiThemeContent != null) {
+                        changedFiles[MUI_THEME_KT_PATH] = muiThemeContent
+                        Napier.d("Added MUI theme to be pushed")
+                    }
+                } catch (e: Exception) {
+                    Napier.e("Failed to process MUI theme: ${e.message}", e)
+                }
+            }
+
+            // Push all changed files to GitHub
             if (changedFiles.isNotEmpty()) {
-                pushChangedFiles(changedFiles, commitMessage)
+                Napier.d("Pushing ${changedFiles.size} files to GitHub")
+
+                // Log what files are being pushed
+                changedFiles.keys.forEach { path ->
+                    Napier.d("   - Will push: $path (${changedFiles[path]?.length} chars)")
+                }
+
+                for ((filePath, content) in changedFiles) {
+                    try {
+                        val fileSha = getFileSha(filePath)
+                        val result = pushFileToGitHub(content, filePath, "Update $filePath", fileSha)
+                        Napier.d("Push result for $filePath: $result")
+                    } catch (e: Exception) {
+                        Napier.e("Failed to push $filePath: ${e.message}", e)
+                    }
+                }
+            } else {
+                Napier.w("No files to push")
             }
 
             Result.success(Unit)
         } catch (e: Exception) {
-            Napier.e("❌ Exception during processing: ${e.message}", e)
+            Napier.e("Exception during processing: ${e.message}", e)
             Result.failure(e)
         }
     }
 
     /**
-     * Process the logo file and return its content
+     * Process the Jetpack Compose theme files from the extracted directory
+     */
+    private fun processJetpackThemeFiles(extractedDir: String): Map<String, String> {
+        val result = mutableMapOf<String, String>()
+        Napier.d("Processing Jetpack theme files from: $extractedDir")
+
+        val rootDir = File(extractedDir)
+
+        Napier.d("Directory contents:")
+        rootDir.walkTopDown().forEach { file ->
+            Napier.d("  - ${file.absolutePath}")
+        }
+
+        // Search for Theme.kt and Color.kt anywhere in the extracted directory
+        val themeFiles = mutableListOf<File>()
+        val colorFiles = mutableListOf<File>()
+
+        rootDir.walkTopDown().forEach { file ->
+            when (file.name) {
+                "Theme.kt" -> themeFiles.add(file)
+                "Color.kt" -> colorFiles.add(file)
+            }
+        }
+
+        Napier.d("Found ${themeFiles.size} Theme.kt files and ${colorFiles.size} Color.kt files")
+
+        if (themeFiles.isEmpty() || colorFiles.isEmpty()) {
+            val errorMsg = "Theme.kt or Color.kt not found in ${rootDir.absolutePath}"
+            throw IllegalArgumentException(errorMsg)
+        }
+
+        // Use the first found files
+        val themeFile = themeFiles.first()
+        val colorFile = colorFiles.first()
+
+        Napier.d("Using Theme.kt from: ${themeFile.absolutePath}")
+        Napier.d("Using Color.kt from: ${colorFile.absolutePath}")
+
+        try {
+            val themeContent = themeFile.readText()
+            Napier.d("Theme.kt content length: ${themeContent.length}")
+
+            val modifiedThemeContent = processThemeContent(themeContent)
+            Napier.d("Modified Theme.kt content length: ${modifiedThemeContent.length}")
+
+            val colorContent = colorFile.readText()
+            Napier.d("Color.kt content length: ${colorContent.length}")
+
+            val modifiedColorContent = colorContent.replace(
+                "package com.example.compose",
+                "package com.ustadmobile.libuicompose.theme"
+            )
+            Napier.d("Modified Color.kt content length: ${modifiedColorContent.length}")
+
+            result[THEME_KT_PATH] = modifiedThemeContent
+            result[COLOR_KT_PATH] = modifiedColorContent
+
+            Napier.d("Successfully processed theme files")
+            return result
+        } catch (e: Exception) {
+            Napier.e("Error processing theme files: ${e.message}", e)
+            throw e
+        }
+    }
+
+    /**
+     * Process the MUI theme JSON file and extract color values
+     */
+    private fun processMuiThemeJson(muiThemePath: String): String? {
+        try {
+            Napier.d("Processing MUI theme from: $muiThemePath")
+
+            val muiThemeFile = File(muiThemePath)
+
+            if (!muiThemeFile.exists()) {
+                Napier.e("MUI theme file not found: $muiThemePath")
+                return null
+            }
+
+            // First fetch the current content to preserve existing values
+            val (currentContent, _) = fetchCurrentThemesKtContent() ?: return null
+
+            // Parse the new theme JSON
+            val jsonContent = muiThemeFile.readText()
+            val jsonObject = Json.parseToJsonElement(jsonContent).jsonObject
+
+            // Extract colors from JSON if available
+            val lightScheme = jsonObject["schemes"]?.jsonObject?.get("light")?.jsonObject
+            val primaryColor = lightScheme?.get("primary")?.jsonPrimitive?.contentOrNull
+            val secondaryColor = lightScheme?.get("onSecondary")?.jsonPrimitive?.contentOrNull
+
+            Napier.d("Extracted colors - primary: $primaryColor, secondary: $secondaryColor")
+
+            // Parse current content to find existing colors
+            val primaryPattern = """primary\s*=\s*json\(\s*"main"\s*to\s*Color\("([^"]+)"\)""".toRegex()
+            val secondaryPattern = """secondary\s*=\s*json\(\s*"main"\s*to\s*Color\("([^"]+)"\)""".toRegex()
+
+            val currentPrimary = primaryPattern.find(currentContent)?.groupValues?.get(1)
+            val currentSecondary = secondaryPattern.find(currentContent)?.groupValues?.get(1)
+
+            // Use new colors if available, otherwise keep current ones
+            val finalPrimary = primaryColor ?: currentPrimary ?: "#00796b" // Fallback to default if nothing found
+            val finalSecondary = secondaryColor ?: currentSecondary ?: "#ff9800" // Fallback to default if nothing found
+
+            // Create the updated content
+            val themesKtContent = currentContent
+                .replace(primaryPattern, """primary = json("main" to Color("$finalPrimary")""")
+                .replace(secondaryPattern, """secondary = json("main" to Color("$finalSecondary")""")
+
+            Napier.d("Successfully processed MUI theme JSON")
+            return themesKtContent
+        } catch (e: Exception) {
+            Napier.e("Error processing MUI theme: ${e.message}", e)
+            return null
+        }
+    }
+
+    /**
+     * Update theme names in strings.xml
+     */
+    private fun updateThemeNamesInStringsXml(
+        jetpackThemeName: String?,
+        muiThemeName: String?,
+        currentContent: String
+    ): String {
+        var updatedContent = currentContent
+
+        // Update or add Jetpack Compose theme name
+        if (!jetpackThemeName.isNullOrBlank()) {
+            val jetpackThemeNamePattern = "<string name=\"jetpack_compose_theme_name\">.*</string>".toRegex()
+            if (jetpackThemeNamePattern.containsMatchIn(updatedContent)) {
+                updatedContent = updatedContent.replace(jetpackThemeNamePattern,
+                    "<string name=\"jetpack_compose_theme_name\">$jetpackThemeName</string>")
+                Napier.d("Updated Jetpack Compose theme name to: $jetpackThemeName")
+            } else {
+                updatedContent = updatedContent.replace(
+                    "</resources>",
+                    "    <string name=\"jetpack_compose_theme_name\">$jetpackThemeName</string>\n</resources>"
+                )
+                Napier.d("Added Jetpack Compose theme name: $jetpackThemeName")
+            }
+        }
+
+        // Update or add MUI theme name
+        if (!muiThemeName.isNullOrBlank()) {
+            val muiThemeNamePattern = "<string name=\"mui_theme_name\">.*</string>".toRegex()
+            if (muiThemeNamePattern.containsMatchIn(updatedContent)) {
+                updatedContent = updatedContent.replace(muiThemeNamePattern,
+                    "<string name=\"mui_theme_name\">$muiThemeName</string>")
+                Napier.d("Updated MUI theme name to: $muiThemeName")
+            } else {
+                updatedContent = updatedContent.replace(
+                    "</resources>",
+                    "    <string name=\"mui_theme_name\">$muiThemeName</string>\n</resources>"
+                )
+                Napier.d("Added MUI theme name: $muiThemeName")
+            }
+        }
+
+        return updatedContent
+    }
+
+    /**
+     * Fetch current Themes.kt content from GitHub
+     */
+    private fun fetchCurrentThemesKtContent(): Pair<String, String?>? {
+        val fileUrl = "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/contents/$MUI_THEME_KT_PATH?ref=$BRANCH"
+
+        val request = Request.Builder()
+            .url(fileUrl)
+            .header("Authorization", "token $GITHUB_TOKEN")
+            .header("Accept", "application/vnd.github.v3+json")
+            .build()
+
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                Napier.e("Failed to fetch current Themes.kt: ${response.code}")
+                return null
+            }
+
+            val responseBody = response.body?.string() ?: ""
+
+            // Extract content
+            val contentPattern = "\"content\":\\s*\"([^\"]+)\"".toRegex()
+            val contentMatch = contentPattern.find(responseBody)
+            val encodedContent = contentMatch?.groupValues?.get(1)?.replace("\\n", "") ?: return null
+
+            val content = String(Base64.getDecoder().decode(encodedContent))
+
+            // Extract SHA
+            val shaPattern = "\"sha\":\\s*\"([^\"]+)\"".toRegex()
+            val shaMatch = shaPattern.find(responseBody)
+            val sha = shaMatch?.groupValues?.get(1)
+
+            return Pair(content, sha)
+        }
+    }
+
+    /**
+     * Process the logo file and convert to SVG if needed
      */
     private fun processLogoFile(logoPath: String): String? {
         try {
+            Napier.d("Processing logo from: $logoPath")
+
             val logoFile = File(logoPath)
-            if (logoFile.exists()) {
-                Napier.d("✅ Logo file found: $logoPath")
-                val logoContent = logoFile.readText()
-                Napier.d("✅ Logo file read successfully")
-                return logoContent
-            } else {
-                Napier.w("⚠️ Logo file not found: $logoPath")
+            if (!logoFile.exists()) {
+                Napier.e("Logo file not found: $logoPath")
+                return null
             }
+
+            Napier.d("Logo file exists, size: ${logoFile.length()} bytes")
+
+            // Read the file bytes
+            val logoBytes = logoFile.readBytes()
+            Napier.d("Read ${logoBytes.size} bytes from logo")
+
+            // Determine MIME type based on file extension
+            val mimeType = when {
+                logoPath.endsWith(".png", ignoreCase = true) -> "image/png"
+                logoPath.endsWith(".jpg", ignoreCase = true) ||
+                        logoPath.endsWith(".jpeg", ignoreCase = true) -> "image/jpeg"
+                logoPath.endsWith(".svg", ignoreCase = true) -> "image/svg+xml"
+                else -> "image/png"
+            }
+
+            // If already SVG, just return the content
+            if (logoPath.endsWith(".svg", ignoreCase = true)) {
+                return String(logoBytes)
+            }
+
+            // For non-SVG, encode as base64 and embed in SVG
+            val base64Content = Base64.getEncoder().encodeToString(logoBytes)
+            val svgWrapper = """
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+          <image href="data:${mimeType};base64,${base64Content}" width="100" height="100"/>
+        </svg>
+        """.trimIndent()
+
+            Napier.d("Created SVG with embedded image, length: ${svgWrapper.length}")
+            return svgWrapper
         } catch (e: Exception) {
-            Napier.e("❌ Error processing logo file: ${e.message}", e)
-        }
-        return null
-    }
-
-    private fun getJetpackThemeName(extractedDir: String): String {
-        return if (extractedDir.isNotEmpty()) {
-            val dir = File(extractedDir)
-            dir.name.takeIf { it.isNotEmpty() } ?: "Custom Jetpack Theme"
-        } else {
-            "Default Jetpack Theme"
+            Napier.e("Error processing logo: ${e.message}", e)
+            return null
         }
     }
 
-    private fun getMuiThemeName(muiThemePath: String?): String {
-        return if (!muiThemePath.isNullOrEmpty()) {
-            val file = File(muiThemePath)
-            file.nameWithoutExtension.takeIf { it.isNotEmpty() } ?: "Custom MUI Theme"
-        } else {
-            "Default MUI Theme"
-        }
-    }
-
-    private fun processJetpackThemeFiles(extractedDir: String): Map<String, String> {
-        val themeFile = File(extractedDir, "ui/theme/Theme.kt")
-        val colorFile = File(extractedDir, "ui/theme/Color.kt")
-        val result = mutableMapOf<String, String>()
-
-        Napier.d("📂 Checking files:")
-        Napier.d("📄 Theme.kt exists: ${themeFile.exists()} (${themeFile.absolutePath})")
-        Napier.d("📄 Color.kt exists: ${colorFile.exists()} (${colorFile.absolutePath})")
-
-        if (!themeFile.exists() || !colorFile.exists()) {
-            Napier.e("❌ theme.kt or color.kt not found!")
-            throw IllegalArgumentException("theme.kt or color.kt not found!")
-        }
-
-        Napier.d("✅ Processing theme files...")
-
-        // Process Theme.kt
-        val themeContent = themeFile.readText()
-        val modifiedThemeContent = processThemeContent(themeContent)
-        themeFile.writeText(modifiedThemeContent)
-        Napier.d("✅ Theme.kt modification done!")
-
-        // Process Color.kt
-        val colorContent = colorFile.readText()
-        val modifiedColorContent = colorContent.replace(
-            "package com.example.compose",
-            "package com.ustadmobile.libuicompose.theme"
-        )
-        colorFile.writeText(modifiedColorContent)
-        Napier.d("✅ Color.kt modification done!")
-
-        // Copy files to project directory
-        copyFilesToProject(themeFile, colorFile)
-
-        // Add to changed files list
-        result["lib-ui-compose/src/commonMain/kotlin/com/ustadmobile/libuicompose/theme/Theme.kt"] = modifiedThemeContent
-        result["lib-ui-compose/src/commonMain/kotlin/com/ustadmobile/libuicompose/theme/Color.kt"] = modifiedColorContent
-
-        return result
-    }
-
+    /**
+     * Process Theme.kt content by replacing package names and method definitions
+     */
     private fun processThemeContent(themeContent: String): String {
         return themeContent
             .replace("package com.example.compose", "package com.ustadmobile.libuicompose.theme")
@@ -227,54 +450,63 @@ fun UstadAppTheme(
             )
     }
 
-    private fun copyFilesToProject(themeFile: File, colorFile: File) {
-        val projectDir = System.getProperty("user.dir")
-        val targetThemeDir = File("$projectDir/lib-ui-compose/src/commonMain/kotlin/libuicompose/theme")
-        targetThemeDir.mkdirs()
-
-        val targetThemeFile = File(targetThemeDir, "Theme.kt")
-        val targetColorFile = File(targetThemeDir, "Color.kt")
-
-        themeFile.copyTo(targetThemeFile, overwrite = true)
-        colorFile.copyTo(targetColorFile, overwrite = true)
-
-        Napier.d("✅ Files copied to project directory")
-    }
-
-    private fun updateStringsXml(orgName: String?, jetpackThemeName: String, muiThemeName: String): String? {
+    /**
+     * Update strings.xml with organization name and theme names
+     */
+    private fun updateStringsXml(
+        orgName: String?,
+        jetpackThemeName: String?,
+        muiThemeName: String?,
+        currentContent: String
+    ): String {
         try {
-            Napier.d("🔄 Updating strings.xml with new values")
+            Napier.d("Updating strings.xml with: orgName=$orgName, jetpackTheme=$jetpackThemeName, muiTheme=$muiThemeName")
 
-            // Fetch current strings.xml content and SHA
-            val (currentContent, _) = fetchStringXmlContent() ?: return null
+            var updatedContent = currentContent
 
-            // Update content with new values
-            val modifiedContent = updateStringsContent(currentContent, orgName, jetpackThemeName, muiThemeName)
-
-            // Only return content if it has actually changed
-            if (modifiedContent != currentContent) {
-                return modifiedContent
+            // Update app_name if orgName is provided
+            if (!orgName.isNullOrBlank()) {
+                val appNamePattern = "<string name=\"app_name\">.*</string>".toRegex()
+                if (appNamePattern.containsMatchIn(updatedContent)) {
+                    updatedContent = updatedContent.replace(appNamePattern, "<string name=\"app_name\">$orgName</string>")
+                    Napier.d("Updated app_name to: $orgName")
+                } else {
+                    updatedContent = updatedContent.replace(
+                        "</resources>",
+                        "    <string name=\"app_name\">$orgName</string>\n</resources>"
+                    )
+                    Napier.d("Added app_name: $orgName")
+                }
             }
 
-            return null
+            // Update theme names
+            updatedContent = updateThemeNamesInStringsXml(jetpackThemeName, muiThemeName, updatedContent)
+
+            // Log the updated content excerpt
+            Napier.d("Updated strings.xml content (excerpt): ${updatedContent.take(200)}...")
+
+            return updatedContent
         } catch (e: Exception) {
-            Napier.e("❌ Error updating strings.xml: ${e.message}", e)
-            return null
+            Napier.e("Error updating strings.xml: ${e.message}", e)
+            return currentContent
         }
     }
 
+    /**
+     * Fetch strings.xml content from GitHub
+     */
     private fun fetchStringXmlContent(): Pair<String, String?>? {
         val fileUrl = "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/contents/$STRINGS_XML_PATH?ref=$BRANCH"
 
-        val fileRequest = Request.Builder()
+        val request = Request.Builder()
             .url(fileUrl)
             .header("Authorization", "token $GITHUB_TOKEN")
             .header("Accept", "application/vnd.github.v3+json")
             .build()
 
-        httpClient.newCall(fileRequest).execute().use { response ->
+        httpClient.newCall(request).execute().use { response ->
             if (!response.isSuccessful) {
-                Napier.e("❌ Failed to retrieve strings.xml: ${response.code}")
+                Napier.e("Failed to fetch strings.xml: ${response.code}")
                 return null
             }
 
@@ -283,272 +515,92 @@ fun UstadAppTheme(
             // Extract content
             val contentPattern = "\"content\":\\s*\"([^\"]+)\"".toRegex()
             val contentMatch = contentPattern.find(responseBody)
-            val encodedContent = contentMatch?.groupValues?.get(1)?.replace("\\n", "")
-                ?: return null
+            val encodedContent = contentMatch?.groupValues?.get(1)?.replace("\\n", "") ?: return null
 
             val content = String(Base64.getDecoder().decode(encodedContent))
-            Napier.d("✅ Successfully retrieved strings.xml content")
 
             // Extract SHA
             val shaPattern = "\"sha\":\\s*\"([^\"]+)\"".toRegex()
             val shaMatch = shaPattern.find(responseBody)
             val sha = shaMatch?.groupValues?.get(1)
-            Napier.d("🔑 strings.xml SHA: $sha")
 
             return Pair(content, sha)
         }
     }
 
-    private fun updateStringsContent(
-        currentContent: String,
-        orgName: String?,
-        jetpackThemeName: String,
-        muiThemeName: String
-    ): String {
-        var modifiedContent = currentContent
-
-        // Update app_name if orgName is provided
-        if (!orgName.isNullOrEmpty()) {
-            val appNamePattern = "<string name=\"app_name\">([^<]+)</string>".toRegex()
-            modifiedContent = modifiedContent.replace(appNamePattern, "<string name=\"app_name\">$orgName</string>")
-            Napier.d("✅ Updated app_name to: $orgName")
-        }
-
-        // Update or add jetpack theme name
-        modifiedContent = updateOrAddStringEntry(
-            modifiedContent,
-            "jetpack_compose_theme_name",
-            jetpackThemeName
-        )
-
-        // Update or add mui theme name
-        modifiedContent = updateOrAddStringEntry(
-            modifiedContent,
-            "mui_theme_name",
-            muiThemeName
-        )
-
-        return modifiedContent
-    }
-
-    private fun updateOrAddStringEntry(content: String, entryName: String, entryValue: String): String {
-        val pattern = "<string name=\"$entryName\">([^<]+)</string>".toRegex()
-
-        return if (pattern.containsMatchIn(content)) {
-            // Update existing entry
-            val updated = content.replace(pattern, "<string name=\"$entryName\">$entryValue</string>")
-            Napier.d("✅ Updated $entryName to: $entryValue")
-            updated
-        } else {
-            // Add new entry before closing tag
-            val updated = content.replace(
-                "</resources>",
-                "    <string name=\"$entryName\">$entryValue</string>\n</resources>"
-            )
-            Napier.d("✅ Added new entry $entryName: $entryValue")
-            updated
-        }
-    }
-
-    private fun createOrganizationConfig(orgName: String?, orgLogo: String?): String {
-        Napier.d("🔄 Creating organization config JSON")
-
-        // Create config file content
-        return buildString {
-            append("{\n")
-            if (orgName != null) {
-                append("  \"name\": \"$orgName\"")
-                if (orgLogo != null) append(",\n")
-            }
-            if (orgLogo != null) {
-                append("  \"logo\": \"$orgLogo\"")
-            }
-            append("\n}")
-        }
-    }
-
-    private fun processMuiThemeIfExists(muiThemePath: String?): String? {
-        if (!muiThemePath.isNullOrEmpty()) {
-            val muiThemeFile = File(muiThemePath)
-            if (muiThemeFile.exists()) {
-                Napier.d("✅ MUI theme file found, reading content")
-                return muiThemeFile.readText()
-            } else {
-                Napier.w("⚠️ MUI theme file not found: $muiThemePath")
-            }
-        }
-        return null
-    }
-
     /**
-     * Creates a descriptive commit message based on what's being changed
+     * Get the SHA of a file in GitHub to enable updating existing files
      */
-    private fun buildCommitMessage(
-        extractedDir: String,
-        orgName: String?,
-        orgLogo: String?,
-        muiThemePath: String?
-    ): String {
-        val changes = mutableListOf<String>()
-
-        if (extractedDir.isNotEmpty()) {
-            changes.add("Jetpack Compose theme")
-        }
-
-        if (orgName != null) {
-            changes.add("organization name")
-        }
-
-        if (orgLogo != null) {
-            changes.add("organization logo")
-        }
-
-        if (!muiThemePath.isNullOrEmpty()) {
-            changes.add("MUI theme")
-        }
-
-        return if (changes.isEmpty()) {
-            "Update application settings"
-        } else {
-            "Update " + changes.joinToString(", ")
-        }
-    }
-
-    /**
-     * Push all changed files to GitHub with a single commit message
-     */
-    private fun pushChangedFiles(changedFiles: Map<String, String>, commitMessage: String) {
-        try {
-            Napier.d("🔄 Pushing ${changedFiles.size} changed files to GitHub with message: $commitMessage")
-
-            // Currently, the GitHub API doesn't support multi-file commits through the REST API in a simple way
-            // So we'll push files individually but with the same commit message
-            changedFiles.forEach { (filePath, content) ->
-                val fileSha = getFileSha(filePath)
-                val result = pushFileToGitHub(content, filePath, commitMessage, fileSha)
-                Napier.d("🔄 GitHub push result for $filePath: $result")
-            }
-
-            Napier.d("✅ All files pushed successfully")
-        } catch (e: Exception) {
-            Napier.e("❌ Error pushing files to GitHub: ${e.message}", e)
-        }
-    }
-
-    private fun pushFileToGitHub(
-        fileContent: String,
-        filePath: String,
-        commitMessage: String,
-        existingSha: String? = null
-    ): String {
-        return try {
-            // Encode file content to base64
-            val base64Content = Base64.getEncoder().encodeToString(fileContent.toByteArray())
-
-            // Verify repository exists
-            val repoUrl = "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME"
-            if (!checkRepositoryExists(repoUrl)) {
-                return "Repository check failed"
-            }
-
-            // Get file SHA if needed
-            val fileSha = existingSha ?: getFileSha(filePath)
-
-            // Push file
-            return pushFileContent(filePath, commitMessage, base64Content, fileSha)
-
-        } catch (e: Exception) {
-            Napier.e("❌ Exception during GitHub push", e)
-            "Error during GitHub push: ${e.message}"
-        }
-    }
-
-    private fun checkRepositoryExists(repoUrl: String): Boolean {
-        Napier.d("🌐 Checking repository at: $repoUrl")
-
-        val repoRequest = Request.Builder()
-            .url(repoUrl)
-            .header("Authorization", "token $GITHUB_TOKEN")
-            .header("Accept", "application/vnd.github.v3+json")
-            .build()
-
-        httpClient.newCall(repoRequest).execute().use { repoResponse ->
-            if (!repoResponse.isSuccessful) {
-                val errorBody = repoResponse.body?.string() ?: "No error details"
-                Napier.e("❌ Repository check failed: ${repoResponse.code} - $errorBody")
-                return false
-            }
-
-            Napier.d("✅ Repository exists, proceeding to file operation")
-            return true
-        }
-    }
-
     private fun getFileSha(filePath: String): String? {
         val fileUrl = "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/contents/$filePath?ref=$BRANCH"
-        Napier.d("🔍 Checking if file exists at: $fileUrl")
 
-        val fileCheckRequest = Request.Builder()
+        val request = Request.Builder()
             .url(fileUrl)
             .header("Authorization", "token $GITHUB_TOKEN")
             .header("Accept", "application/vnd.github.v3+json")
             .build()
 
-        httpClient.newCall(fileCheckRequest).execute().use { fileCheckResponse ->
-            if (fileCheckResponse.isSuccessful) {
-                val responseBody = fileCheckResponse.body?.string()
-                if (responseBody != null) {
-                    // Extract SHA
-                    val shaPattern = "\"sha\":\\s*\"([^\"]+)\"".toRegex()
-                    val shaMatch = shaPattern.find(responseBody)
-                    val sha = shaMatch?.groupValues?.get(1)
-                    Napier.d("🔑 Existing file found, SHA: $sha")
-                    return sha
-                }
-            } else {
-                Napier.d("📄 File doesn't exist yet, will create new file")
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                return null
             }
-            return null
+
+            val responseBody = response.body?.string() ?: return null
+
+            val shaPattern = "\"sha\":\\s*\"([^\"]+)\"".toRegex()
+            val shaMatch = shaPattern.find(responseBody)
+            return shaMatch?.groupValues?.get(1)
         }
     }
 
-    private fun pushFileContent(
+    /**
+     * Push file content to GitHub
+     */
+    private fun pushFileToGitHub(
+        fileContent: String,
         filePath: String,
         commitMessage: String,
-        base64Content: String,
-        fileSha: String?
+        existingSha: String?
     ): String {
-        // Create request body
-        val requestBody = buildString {
-            append("{")
-            append("\"message\": \"$commitMessage\",")
-            append("\"branch\": \"$BRANCH\",")
-            append("\"content\": \"$base64Content\"")
-            if (fileSha != null) {
-                append(",\"sha\": \"$fileSha\"")
+        try {
+            Napier.d("Pushing file to GitHub: $filePath")
+
+            // Encode file content to base64
+            val base64Content = Base64.getEncoder().encodeToString(fileContent.toByteArray())
+
+            val requestBodyJson = buildString {
+                append("{")
+                append("\"message\": \"$commitMessage\",")
+                append("\"branch\": \"$BRANCH\",")
+                append("\"content\": \"$base64Content\"")
+                if (existingSha != null) {
+                    append(",\"sha\": \"$existingSha\"")
+                }
+                append("}")
             }
-            append("}")
-        }
 
-        Napier.d("📝 Preparing to ${if (fileSha != null) "update" else "create"} file at path: $filePath")
+            val contentUrl = "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/contents/$filePath"
+            val request = Request.Builder()
+                .url(contentUrl)
+                .put(requestBodyJson.toRequestBody("application/json".toMediaType()))
+                .header("Authorization", "token $GITHUB_TOKEN")
+                .header("Accept", "application/vnd.github.v3+json")
+                .build()
 
-        val contentUrl = "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/contents/$filePath"
-        val request = Request.Builder()
-            .url(contentUrl)
-            .put(requestBody.toRequestBody("application/json".toMediaType()))
-            .header("Authorization", "token $GITHUB_TOKEN")
-            .header("Accept", "application/vnd.github.v3+json")
-            .build()
+            httpClient.newCall(request).execute().use { response ->
+                val responseBody = response.body?.string() ?: "No response body"
 
-        httpClient.newCall(request).execute().use { response ->
-            return if (response.isSuccessful) {
-                Napier.d("✅ Successfully pushed file to GitHub")
-                "Success! File pushed to GitHub."
-            } else {
-                val errorBody = response.body?.string() ?: "No error details"
-                Napier.e("❌ GitHub push failed: ${response.code} - $errorBody")
-                "Failed to push to GitHub (${response.code}): $errorBody"
+                return if (response.isSuccessful) {
+                    Napier.d("Successfully pushed file to GitHub: $filePath")
+                    "Success! File pushed to GitHub."
+                } else {
+                    Napier.e("Failed to push file to GitHub: ${response.code} - $responseBody")
+                    "Failed to push to GitHub (${response.code}): $responseBody"
+                }
             }
+        } catch (e: Exception) {
+            Napier.e("Exception during GitHub push: ${e.message}", e)
+            return "Error during GitHub push: ${e.message}"
         }
     }
 }

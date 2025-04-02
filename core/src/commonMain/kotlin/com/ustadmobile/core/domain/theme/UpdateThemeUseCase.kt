@@ -10,7 +10,7 @@ interface ThemeUploadUseCase {
     @Serializable
     data class ThemeUploadRequest(
         val orgName: String? = null,
-        val orgLogo: String? = null
+        val orgLogo: String? = null,
     )
 
     @Serializable
@@ -22,6 +22,8 @@ interface ThemeUploadUseCase {
     suspend operator fun invoke(
         request: ThemeUploadRequest,
         jetpackThemeFile: String? = null,
-        muiThemeFile: String? = null
+        muiThemeFile: String? = null,
+        jetpackComposeThemeName: String?,
+        muiThemeName: String?
     ): Result<ThemeUploadResponse>
 }

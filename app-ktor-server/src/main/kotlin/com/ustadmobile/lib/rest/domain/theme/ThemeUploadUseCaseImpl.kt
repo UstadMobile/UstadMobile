@@ -18,18 +18,21 @@ class ThemeUploadUseCaseImpl(
     override suspend fun invoke(
         request: ThemeUploadUseCase.ThemeUploadRequest,
         jetpackThemeFile: String?,
-        muiThemeFile: String?
+        muiThemeFile: String?,
+        jetpackComposeThemeName: String?,
+        muiThemeName: String?
     ): Result<ThemeUploadUseCase.ThemeUploadResponse> {
         try {
-            Napier.d("🟢 Theme upload initiated with:")
-            Napier.d("📄 Organization name: ${request.orgName}")
-            Napier.d("📄 Organization logo: ${request.orgLogo}")
-            Napier.d("📄 Jetpack theme file: $jetpackThemeFile")
-            Napier.d("📄 MUI theme file: $muiThemeFile")
+            Napier.d("Theme upload initiated with:")
+            Napier.d("Organization name: ${request.orgName}")
+            Napier.d("Organization logo: ${request.orgLogo}")
+            Napier.d("Jetpack theme file: $jetpackThemeFile")
+            Napier.d("Jetpack theme name: $jetpackComposeThemeName")
+            Napier.d("MUI theme file: $muiThemeFile")
+            Napier.d("MUI theme name: $muiThemeName")
 
             var extractDir: String? = null
 
-            // Extract Jetpack Compose theme if provided
             if (jetpackThemeFile != null) {
                 val zipFile = File(jetpackThemeFile)
                 if (!zipFile.exists()) {
@@ -38,12 +41,10 @@ class ThemeUploadUseCaseImpl(
 
                 Napier.d("Processing Jetpack Compose theme: ${zipFile.absolutePath}")
 
-                // Create extraction directory
                 val tempDir = System.getProperty("java.io.tmpdir")
                 extractDir = "$tempDir/theme_extract_${UUID.randomUUID()}"
                 File(extractDir).mkdirs()
 
-                // Unzip the theme file
                 val unzipResult = unzipFileUseCase.invoke(
                     zipFile.absolutePath,
                     "file://$extractDir"
@@ -56,12 +57,13 @@ class ThemeUploadUseCaseImpl(
                 }
             }
 
-            // Process theme files and organization details
             val processResult = processThemeFilesUseCase.invoke(
                 extractedDir = extractDir ?: "",
                 orgName = request.orgName,
                 orgLogo = request.orgLogo,
-                muiThemePath = muiThemeFile
+                muiThemePath = muiThemeFile,
+                jetpackComposeThemeName = jetpackComposeThemeName,
+                muiThemeName = muiThemeName
             )
 
             if (processResult.isFailure) {
