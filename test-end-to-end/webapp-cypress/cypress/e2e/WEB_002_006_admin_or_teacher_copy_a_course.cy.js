@@ -73,7 +73,7 @@ it('Admin create a course', () => {
    cy.contains('Discussion 1').click()
    cy.contains('Post 1').should('not.exist')
    cy.contains('Courses', { timeout: 10000 }).scrollIntoView().should('be.visible').click();
-   cy.wait(3000); // Allow time for UI to update
+   cy.wait(3000);
    cy.contains('New Test Course', { timeout: 10000 }).scrollIntoView().should('exist');
 })
 
