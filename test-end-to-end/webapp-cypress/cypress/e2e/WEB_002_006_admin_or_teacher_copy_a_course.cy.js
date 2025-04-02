@@ -71,7 +71,6 @@ it('Admin create a course', () => {
   cy.contains('Courses', { timeout: 10000 }).click();
   cy.wait(5000);
   cy.contains('New Test Course', { timeout: 10000 }).should('exist');
-
    cy.contains('Term 1').should('exist')
    cy.contains('Text 1').should('exist')
    cy.contains('Assignment 1').should('exist')
