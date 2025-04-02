@@ -64,9 +64,14 @@ it('Admin create a course', () => {
    cy.get('input[id="title"]').type('Text 1');
    cy.contains('button', 'Done').click()
    cy.contains('Text 1').should('exist')
-   cy.contains('button', 'Save', { timeout: 10000 }).click()
-   cy.contains('button', 'Save').should('not.exist')
-   cy.wait(3000)
+  cy.contains('button', 'Save', { timeout: 10000 }).click();
+  cy.contains('button', 'Save').should('not.exist');
+  cy.wait(5000);
+  cy.reload();
+  cy.contains('Courses', { timeout: 10000 }).click();
+  cy.wait(5000);
+  cy.contains('New Test Course', { timeout: 10000 }).should('exist');
+
    cy.contains('Term 1').should('exist')
    cy.contains('Text 1').should('exist')
    cy.contains('Assignment 1').should('exist')
@@ -74,7 +79,7 @@ it('Admin create a course', () => {
    cy.contains('Post 1').should('not.exist')
    cy.contains('Courses', { timeout: 10000 }).scrollIntoView().should('be.visible').click();
    cy.wait(3000);
-   cy.contains('New Test Course', { timeout: 10000 }).scrollIntoView().should('exist');
+   cy.contains('Copy of Test Course Block'', { timeout: 10000 }).scrollIntoView().should('exist');
 })
 
 it('Teacher has no permission to add a course ', () => {
