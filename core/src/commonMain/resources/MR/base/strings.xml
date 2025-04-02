@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="app_name">Prashant ORG</string>
+    <string name="app_name">blob:http://192.168.31.209:8087/f4f55cc8-e613-45f2-a6e8-7434681eda22</string>
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
