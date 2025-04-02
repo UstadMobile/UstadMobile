@@ -35,6 +35,7 @@ import com.ustadmobile.core.domain.contententry.importcontent.EnqueueImportConte
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExecuteMediaInfoUseCase
 import com.ustadmobile.core.domain.extractmediametadata.mediainfo.ExtractMediaMetadataUseCaseMediaInfo
+import com.ustadmobile.core.domain.file.UriFileUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
@@ -181,6 +182,8 @@ val DesktopHttpModule = DI.Module("Desktop-HTTP") {
     bind<MimeTypeHelper>() with singleton {
         FileMimeTypeHelperImpl()
     }
+
+    bind<UriFileUseCase>() with singleton { UriFileUseCase(di) }
 
     bind<UriHelper>() with singleton {
         UriHelperJvm(

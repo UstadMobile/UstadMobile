@@ -33,7 +33,6 @@ import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.pct
 import web.html.InputType
-import web.url.URL
 
 val AppearanceEditScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
@@ -55,7 +54,7 @@ val AppearanceEditScreen = FC<Props> {
         }
         onChange = {
             it.target.files?.item(0)?.also { file ->
-                viewModel.onJetpackComposeThemeChanged(URL.createObjectURL(file))
+                viewModel.onJetpackComposeThemeChanged(file.name)
             }
         }
     }
@@ -70,7 +69,7 @@ val AppearanceEditScreen = FC<Props> {
         }
         onChange = {
             it.target.files?.item(0)?.also { file ->
-                viewModel.onMuiThemeChanged(URL.createObjectURL(file))
+                viewModel.onMuiThemeChanged(file.name)
             }
         }
     }
@@ -135,9 +134,7 @@ val AppearanceEditComponent = FC<AppearanceEditProps> { props ->
             OutlinedInput {
                 fullWidth = true
                 disabled = true
-                value = props.uiState.jetpackComposeTheme?.let {
-                    URL(it).pathname.split("/").last()
-                } ?: strings[MR.strings.no_file_chosen]
+                value = props.uiState.jetpackComposeTheme ?: strings[MR.strings.no_file_chosen]
 
                 startAdornment = InputAdornment.create {
                     position = InputAdornmentPosition.start
@@ -158,9 +155,6 @@ val AppearanceEditComponent = FC<AppearanceEditProps> { props ->
                                 props.onJetpackComposeThemeChanged(null)
                             }
                             disabled = !props.uiState.fieldsEnabled
-
-                            // Assuming you have a clear/close icon component
-                            // If not, you can use a text button
                             mui.icons.material.Close()
                         }
                     }
@@ -175,9 +169,7 @@ val AppearanceEditComponent = FC<AppearanceEditProps> { props ->
             OutlinedInput {
                 fullWidth = true
                 disabled = true
-                value = props.uiState.muiTheme?.let {
-                    URL(it).pathname.split("/").last()
-                } ?: strings[MR.strings.no_file_chosen]
+                value = props.uiState.muiTheme ?: strings[MR.strings.no_file_chosen]
 
                 startAdornment = InputAdornment.create {
                     position = InputAdornmentPosition.start
@@ -198,7 +190,6 @@ val AppearanceEditComponent = FC<AppearanceEditProps> { props ->
                                 props.onMuiThemeChanged(null)
                             }
                             disabled = !props.uiState.fieldsEnabled
-
                             mui.icons.material.Close()
                         }
                     }

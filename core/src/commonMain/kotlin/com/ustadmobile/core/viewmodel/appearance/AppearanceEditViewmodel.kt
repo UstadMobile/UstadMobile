@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.appearance
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.file.UriFileUseCase
 import com.ustadmobile.core.domain.theme.ThemeUploadUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -9,9 +10,14 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.forms.formData
-import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import io.ktor.http.content.PartData
 import io.ktor.http.isSuccess
+import io.ktor.utils.io.core.ByteReadPacket
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -41,7 +47,7 @@ class AppearanceEditViewModel(
 
 
     private val httpClient: HttpClient by instance()
-
+    private val uriFileUseCase: UriFileUseCase by instance()
 
     init {
         loadingState = LoadingUiState.NOT_LOADING
@@ -107,69 +113,136 @@ class AppearanceEditViewModel(
     fun onClickSave() {
         viewModelScope.launch {
             try {
-                println("🟢 Save button clicked - starting theme upload process")
                 loadingState = LoadingUiState.INDETERMINATE
                 _uiState.update { it.copy(errorMessage = null) }
 
                 val apiBaseUrl = accountManager.activeEndpoint.url
-                println("Using API base URL: $apiBaseUrl")
 
-                println("Preparing form data with:")
-                println("  - orgName: ${_uiState.value.organisationName}")
-                println("  - orgLogo: ${_uiState.value.organisationLogo}")
-                println("  - jetpackComposeTheme: ${_uiState.value.jetpackComposeTheme}")
-                println("  - muiTheme: ${_uiState.value.muiTheme}")
+                val formParts = mutableListOf<PartData>()
 
-                val formData = formData {
-                    _uiState.value.organisationName?.let {
-                        append("orgName", it)
-                        println("  - Added orgName to form data")
-                    }
-                    _uiState.value.organisationLogo?.let {
-                        append("orgLogo", it)
-                        println("  - Added orgLogo to form data")
-                    }
-                    _uiState.value.jetpackComposeTheme?.let { themeUri ->
-                        append("jetpackComposeThemeUri", themeUri)
-                        println("  - Added jetpackComposeThemeUri to form data")
-                    }
-                    _uiState.value.muiTheme?.let { themeUri ->
-                        append("muiThemeUri", themeUri)
-                        println("  - Added muiThemeUri to form data")
+                _uiState.value.organisationName?.let { orgName ->
+                    formParts.add(
+                        PartData.FormItem(
+                            value = orgName,
+                            dispose = {},
+                            partHeaders = Headers.build {
+                                append(HttpHeaders.ContentDisposition, "form-data; name=\"organisationName\"")
+                            }
+                        )
+                    )
+                }
+
+                _uiState.value.organisationLogo?.let { logoUri ->
+                    val uriFileData = uriFileUseCase(logoUri)
+
+                    if (uriFileData.bytes != null) {
+                        formParts.add(
+                            PartData.FileItem(
+                                provider = { ByteReadPacket(uriFileData.bytes) },
+                                dispose = {},
+                                partHeaders = Headers.build {
+                                    append(HttpHeaders.ContentDisposition,
+                                        "form-data; name=\"orgLogo\"; filename=\"${uriFileData.filename}\"")
+                                    append(HttpHeaders.ContentType, uriFileData.mimeType)
+                                }
+                            )
+                        )
+                    } else {
+                        formParts.add(
+                            PartData.FormItem(logoUri, { "orgLogo" }, Headers.build {})
+                        )
                     }
                 }
 
-                println("Sending request to: ${apiBaseUrl}api/theme/upload")
-                val response = httpClient.submitFormWithBinaryData(
-                    url = "${apiBaseUrl}api/theme/upload",
-                    formData = formData
-                )
+                _uiState.value.jetpackComposeTheme?.let { themeUri ->
+                    val themeName = themeUri.substringAfterLast("/").substringBefore(".")
+                    formParts.add(
+                        PartData.FormItem(
+                            value = themeName,
+                            dispose = {},
+                            partHeaders = Headers.build {
+                                append(HttpHeaders.ContentDisposition, "form-data; name=\"jetpackComposeThemeName\"")
+                            }
+                        )
+                    )
+                    val uriFileData = uriFileUseCase(themeUri)
 
-                println("Received response with status: ${response.status}")
+                    if (uriFileData.bytes != null) {
+                        formParts.add(
+                            PartData.FileItem(
+                                provider = { ByteReadPacket(uriFileData.bytes) },
+                                dispose = {},
+                                partHeaders = Headers.build {
+                                    append(HttpHeaders.ContentDisposition,
+                                        "form-data; name=\"jetpackComposeTheme\"; filename=\"${uriFileData.filename}\"")
+                                    append(HttpHeaders.ContentType, uriFileData.mimeType)
+                                }
+                            )
+                        )
+                    } else {
+                        formParts.add(
+                            PartData.FormItem(themeUri, { "jetpackComposeTheme" }, Headers.build {})
+                        )
+                    }
+                }
+
+                _uiState.value.muiTheme?.let { themeUri ->
+                    val themeName = themeUri.substringAfterLast("/").substringBefore(".")
+                    formParts.add(
+                        PartData.FormItem(
+                            value = themeName,
+                            dispose = {},
+                            partHeaders = Headers.build {
+                                append(HttpHeaders.ContentDisposition, "form-data; name=\"muiThemeName\"")
+                            }
+                        )
+                    )
+                    val uriFileData = uriFileUseCase(themeUri)
+
+                    if (uriFileData.bytes != null) {
+                        formParts.add(
+                            PartData.FileItem(
+                                provider = { ByteReadPacket(uriFileData.bytes) },
+                                dispose = {},
+                                partHeaders = Headers.build {
+                                    append(HttpHeaders.ContentDisposition,
+                                        "form-data; name=\"muiTheme\"; filename=\"${uriFileData.filename}\"")
+                                    append(HttpHeaders.ContentType, uriFileData.mimeType)
+                                }
+                            )
+                        )
+                    } else {
+                        formParts.add(
+                            PartData.FormItem(themeUri, { "muiTheme" }, Headers.build {})
+                        )
+                    }
+                }
+
+                val multipartContent = MultiPartFormDataContent(formParts)
+
+                val response = httpClient.post("${apiBaseUrl}api/theme/upload") {
+                    setBody(multipartContent)
+                }
 
                 val result = response.body<ThemeUploadUseCase.ThemeUploadResponse>()
-                println("Response body: success=${result.success}, message=${result.message}")
 
                 if (response.status.isSuccess() && result.success) {
-                    println("✅ Theme upload successful!")
                     loadingState = LoadingUiState.NOT_LOADING
                     _uiState.update { it.copy(
                         showSuccessMessage = true,
                         errorMessage = null
                     )}
                 } else {
-                    println("Theme upload failed: ${result.message}")
                     loadingState = LoadingUiState.NOT_LOADING
                     _uiState.update { it.copy(
                         errorMessage = result.message
                     )}
                 }
             } catch (e: Exception) {
-                println("Exception during theme upload: ${e.message}")
                 e.printStackTrace()
                 loadingState = LoadingUiState.NOT_LOADING
                 _uiState.update { it.copy(
-                    errorMessage = "Error: ${e.message}"
+                    errorMessage = e.message
                 )}
             }
         }
