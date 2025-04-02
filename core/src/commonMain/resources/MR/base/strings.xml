@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="app_name">TWITTTER</string>
+    <string name="app_name">TWITTTER2</string>
     <!--suppress CheckTagEmptyBody -->
     <string name="blank" translatable="false"></string>
     <string name="login">Login</string>
@@ -1950,6 +1950,6 @@
     <string name="subtitles">Subtitles</string>
 
 
-    <string name="jetpack_compose_theme_name">theme_extract_7783d786-dd52-40d4-b62b-45606bfa1ab2</string>
+    <string name="jetpack_compose_theme_name">theme_extract_86a86b13-1cc0-488e-acfd-2840add73414</string>
     <string name="mui_theme_name">Default MUI Theme</string>
 </resources>
