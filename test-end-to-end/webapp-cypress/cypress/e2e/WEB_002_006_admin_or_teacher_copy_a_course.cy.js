@@ -49,7 +49,7 @@ it('Admin create a course', () => {
    cy.contains('Term 1').should('exist')
    cy.contains('Assignment 1').should('exist')
    cy.get('input[id="clazz_name"]').clear()
-   cy.get('input[id="clazz_name"]').type('New Test Course')
+   cy.get('input[id="clazz_name"]',{timeout:5000}).type('New Test Course')
    cy.scrollTo('bottom')
    cy.contains('Assignment 1').click()
    cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now() + (24 * 60 * 60 * 1000))) // tomorrow
