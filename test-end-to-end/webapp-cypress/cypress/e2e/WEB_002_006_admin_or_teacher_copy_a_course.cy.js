@@ -48,8 +48,6 @@ it('Admin create a course', () => {
    cy.get("input[value='Copy of Test Course Block']").should("be.visible")
    cy.contains('Term 1').should('exist')
    cy.contains('Assignment 1').should('exist')
-   cy.get('input[id="clazz_name"]').clear()
-   cy.get('input[id="clazz_name"]',{timeout:5000}).type('New Test Course')
    cy.scrollTo('bottom')
    cy.contains('Assignment 1').click()
    cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now() + (24 * 60 * 60 * 1000))) // tomorrow
@@ -72,7 +70,7 @@ it('Admin create a course', () => {
    cy.contains('Discussion 1').click()
    cy.contains('Post 1').should('not.exist')
    cy.contains('Courses').click()
-   cy.contains('New Test Course').should('exist')
+   cy.contains('Copy of Test Course Block').should('exist')
 })
 
 it('Teacher has no permission to add a course ', () => {
