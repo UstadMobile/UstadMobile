@@ -224,7 +224,6 @@ val ClazzDetailOverviewScreen = FC<Props> {
         onClickClazzCode = viewModel::onClickClazzCode
         onClickPermissions = viewModel::onClickPermissions
         onClickCopyCourse = viewModel::onClickCopyCourse
-
     }
 }
 

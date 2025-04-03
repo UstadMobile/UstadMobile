@@ -63,7 +63,6 @@ data class ClazzDetailOverviewUiState(
 
     val canAddNewCourse: Boolean = false,
 
-
     ) {
     val clazz: Clazz?
         get() = clazzAndDetail?.clazz
