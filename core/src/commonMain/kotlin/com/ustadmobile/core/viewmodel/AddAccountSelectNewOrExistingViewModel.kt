@@ -23,6 +23,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_GENDER
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_NAME
@@ -254,9 +255,20 @@ class AddAccountSelectNewOrExistingViewModel(
     }
 
     private fun goToNextDestAfterSignIn(person: Person, serverUrl: String) {
+
+        if (savedStateHandle[ARG_CHILD_NAME]!=null){
+            val arg = buildMap {
+                putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+                apiUrlConfig.presetLearningSpaceUrl?.let {
+                    put(ARG_LEARNINGSPACE_URL, it)
+                }
+            }
+            navController.navigate(AddChildProfilesViewModel.DEST_NAME, arg)
+            return
+        }
+
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
         Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
-
         if (person.isPersonalAccount) {
             nextDestination = ContentEntryListViewModel.DEST_NAME_HOME
         }
