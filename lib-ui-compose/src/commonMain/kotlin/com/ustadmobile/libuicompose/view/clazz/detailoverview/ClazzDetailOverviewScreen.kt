@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.FileCopy
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -73,7 +74,9 @@ fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
         onClickCourseBlock = viewModel::onClickCourseBlock,
         onClickClassCode = viewModel::onClickClazzCode,
         onClickPermissions = viewModel::onClickPermissions,
-    )
+        onClickCopyCourse = viewModel::onClickCopyCourse,
+
+        )
 }
 
 @Composable
@@ -82,7 +85,9 @@ fun ClazzDetailOverviewScreen(
     onClickClassCode: (String) -> Unit = {},
     onClickCourseBlock: (CourseBlock) -> Unit = {},
     onClickPermissions: () -> Unit = { },
-) {
+    onClickCopyCourse: () -> Unit = { },
+
+    ) {
 
     val clazzDateRange = rememberFormattedDateRange(
         startTimeInMillis = uiState.clazz?.clazzStartTime ?: 0L,
@@ -128,6 +133,13 @@ fun ClazzDetailOverviewScreen(
                                 imageVector = Icons.Default.Shield,
                                 labelText = stringResource(MR.strings.permissions),
                                 onClick = onClickPermissions,
+                            )
+                        }
+                        if (uiState.canAddNewCourse) {
+                            UstadQuickActionButton(
+                                imageVector = Icons.Default.FileCopy,
+                                labelText = stringResource(MR.strings.copy),
+                                onClick = onClickCopyCourse ,
                             )
                         }
                     }

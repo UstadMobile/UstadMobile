@@ -14,6 +14,7 @@ import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
@@ -60,7 +61,10 @@ data class ClazzDetailOverviewUiState(
 
     val managePermissionVisible: Boolean = false,
 
-) {
+    val canAddNewCourse: Boolean = false,
+
+
+    ) {
     val clazz: Clazz?
         get() = clazzAndDetail?.clazz
 
@@ -123,6 +127,19 @@ class ClazzDetailOverviewViewModel(
             )
         }
 
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
+                    accountManager.currentAccount.personUid, PermissionFlags.ADD_COURSE
+                ).distinctUntilChanged().collect { hasPermission ->
+                    _uiState.update { prev ->
+                        prev.copy(
+                            canAddNewCourse = hasPermission,
+                        )
+                    }
+                }
+            }
+        }
 
         val permissionFlow = activeRepo.coursePermissionDao()
             .personHasPermissionWithClazzTripleAsFlow(
@@ -285,6 +302,10 @@ class ClazzDetailOverviewViewModel(
             CoursePermissionListViewModel.DEST_NAME,
             mapOf(ARG_CLAZZUID to entityUidArg.toString())
         )
+    }
+     fun onClickCopyCourse() {
+        navController.navigate(ClazzEditViewModel.DEST_NAME,
+            mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()))
     }
 
     companion object {
