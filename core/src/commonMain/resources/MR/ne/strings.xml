@@ -812,6 +812,7 @@
     <string name="permission_key">अनुमति</string>
     <string name="entry_key">प्रविष्टि</string>
     <string name="permissions">अनुमतिहरू</string>
+    <string name="copy"> प्रतिलिपि</string>
     <string name="members_key">सदस्यहरू</string>
     <string name="assignment">गृहकार्य</string>
     <string name="clazz_assignment">गृहकार्य</string>

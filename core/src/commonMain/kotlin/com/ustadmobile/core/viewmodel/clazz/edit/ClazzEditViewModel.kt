@@ -189,6 +189,11 @@ class ClazzEditViewModel(
                                             coursePicture = CoursePicture(
                                                 coursePictureUid = entityUidArg
                                             )
+                                            clazzName = if (actionType == COPY) {
+                                                "${systemImpl.getString(MR.strings.copy_of)} ${this.clazzName}"
+                                            } else {
+                                                this.clazzName
+                                            }
                                         }
                                     }
                                 }
@@ -214,13 +219,7 @@ class ClazzEditViewModel(
                         uiUpdate = {
                             _uiState.update { prev ->
                                 prev.copy(
-                                    entity = it?.shallowCopy {
-                                        clazzName = if (actionType == COPY) {
-                                            "${systemImpl.getString(MR.strings.copy_of)} ${it.clazzName}"
-                                        } else {
-                                            it.clazzName
-                                        }
-                                    }
+                                    entity = it
                                 )
                             }
                         }
