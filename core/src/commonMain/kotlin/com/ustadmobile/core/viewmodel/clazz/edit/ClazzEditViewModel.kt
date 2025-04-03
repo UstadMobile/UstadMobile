@@ -503,6 +503,7 @@ class ClazzEditViewModel(
         return clazzStartDateError != null || clazzEndDateError != null || clazzNameError != null
     }
 
+/*
     fun onClickSave() {
         val initEntity = _uiState.value.entity ?: return
         if(loadingState == LoadingUiState.INDETERMINATE) {
@@ -694,6 +695,249 @@ class ClazzEditViewModel(
             finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
         }
     }
+*/
+fun onClickSave() {
+    val initEntity = _uiState.value.entity ?: return
+    if (loadingState == LoadingUiState.INDETERMINATE) {
+        Napier.d("onClickSave: indeterminate")
+        return
+    }
+
+    // ✅ Validation checks
+    if (initEntity.clazzStartTime == 0L) {
+        _uiState.update { prev -> prev.copy(clazzStartDateError = systemImpl.getString(MR.strings.field_required_prompt)) }
+        return
+    }
+    if (initEntity.clazzEndTime <= initEntity.clazzStartTime) {
+        _uiState.update { prev -> prev.copy(clazzEndDateError = systemImpl.getString(MR.strings.end_is_before_start)) }
+        return
+    }
+    if (initEntity.clazzName.isNullOrBlank()) {
+        _uiState.update { prev -> prev.copy(clazzNameError = systemImpl.getString(MR.strings.required)) }
+        return
+    }
+    if (_uiState.value.hasErrors()) {
+        Napier.d("onClickSave: hasErrors")
+        return
+    }
+
+
+    // ✅ Prepare new entity (copy if needed)
+    val entity = initEntity.shallowCopy {
+        clazzName = clazzName?.trim()
+        clazzStartTime = Instant.fromEpochMilliseconds(initEntity.clazzStartTime)
+            .toLocalMidnight(initEntity.effectiveTimeZone).toEpochMilliseconds()
+        if (clazzEndTime != Long.MAX_VALUE) {
+            clazzEndTime = Instant.fromEpochMilliseconds(initEntity.clazzEndTime)
+                .toLocalEndOfDay(initEntity.effectiveTimeZone).toEpochMilliseconds()
+        }
+        if (clazzAction== ClazzAction.COPY) {
+            clazzUid = 0L // New UID for copied entity
+            clazzOwnerPersonUid = accountManager.currentAccount.personUid // Set new owner
+
+        }
+    }
+
+    _uiState.update { prev -> prev.copy(entity = entity) }
+
+    launchWithLoadingIndicator(
+        onSetFieldsEnabled = { _uiState.update { prev -> prev.copy(fieldsEnabled = it) } }
+    ) {
+        val initState = savedStateHandle.getJson(KEY_INIT_STATE, ClazzEditUiState.serializer())
+            ?: return@launchWithLoadingIndicator
+        Napier.d("onClickSave: start transaction")
+
+        val courseBlockListVal = _uiState.value.courseBlockList
+        val coursePictureVal = entity.coursePicture
+        val updateImage = coursePictureVal != null &&
+                savedStateHandle[INIT_PIC_URI] != (entity.coursePicture?.coursePictureUri ?: "")
+
+        val updatedCourseBlockPictures = courseBlockListVal.mapNotNull { block ->
+            val imageUriNow = block.courseBlockPicture?.cbpPictureUri
+            val initImageUri = initState.courseBlockList.firstOrNull {
+                it.courseBlockPicture?.cbpUid == block.courseBlockPicture?.cbpUid
+            }?.courseBlockPicture?.cbpPictureUri
+
+            block.courseBlockPicture?.takeIf { imageUriNow != initImageUri }
+        }
+        val copiedCoursePicture = if ((clazzAction== ClazzAction.COPY) && coursePictureVal != null) {
+            coursePictureVal.copy(
+                coursePictureUid = 0L, // Assign new UID for the copied image
+            )
+        } else null
+
+
+        activeDb.withDoorTransactionAsync {
+            if ((clazzAction== ClazzAction.COPY) || entityUidArg == 0L) {
+                createNewClazzUseCase(entity) // ✅ Create a new course
+            } else {
+                activeRepo.clazzDao().updateAsync(entity) // ✅ Update existing course
+            }
+
+            if (updateImage && coursePictureVal != null) {
+                coursePictureVal.coursePictureLct = systemTimeInMillis()
+                activeDb.coursePictureDao().upsertAsync(coursePictureVal)
+            }
+
+            if ((clazzAction== ClazzAction.COPY) && coursePictureVal != null) {
+                val copiedCoursePicture = coursePictureVal.copy(
+                    coursePictureUid = 0L, // Assign new UID for copied picture
+                ).also { it.coursePictureLct = systemTimeInMillis() }
+
+                activeDb.coursePictureDao().upsertAsync(copiedCoursePicture)
+            }
+
+            val clazzUid = entity.clazzUid
+
+            val copiedCourseBlocks = courseBlockListVal.map { block ->
+                block.copy(
+                    courseBlock = block.courseBlock.copy(
+                        cbUid = if ((clazzAction== ClazzAction.COPY)) 0L else block.courseBlock.cbUid,
+                        cbClazzUid = clazzUid
+                    )
+                )
+            }
+            activeRepo.courseBlockDao()
+                .upsertListAsync(copiedCourseBlocks.map { it.courseBlock })
+
+            if (clazzAction != ClazzAction.COPY) {
+                val blocksToDeactivate =
+                    initState.courseBlockList.findKeysNotInOtherList(copiedCourseBlocks) { it.courseBlock.cbUid }
+                activeRepo.courseBlockDao()
+                    .deactivateByUids(blocksToDeactivate, systemTimeInMillis())
+            }
+
+            val copiedAssignments = courseBlockListVal.mapNotNull { block ->
+                block.assignment?.let { assignment ->
+                    assignment.copy(
+                        caUid = if ((clazzAction== ClazzAction.COPY)) 0L else assignment.caUid, // Explicitly reference `assignment`
+                        caClazzUid = clazzUid
+                    )
+                }
+            }
+            activeRepo.clazzAssignmentDao().upsertListAsync(copiedAssignments)
+
+            if (clazzAction != ClazzAction.COPY) {
+                val assignmentsToDeactivate = initState.courseBlockList
+                    .mapNotNull { it.assignment }
+                    .findKeysNotInOtherList(copiedAssignments) { it.caUid }
+
+                activeRepo.clazzAssignmentDao()
+                    .updateActiveByList(assignmentsToDeactivate, false, systemTimeInMillis())
+            }
+
+            val copiedPeerReviewAllocations = courseBlockListVal.flatMap {
+                it.assignmentPeerAllocations.map { allocation ->
+                    allocation.copy(praUid = if ((clazzAction== ClazzAction.COPY)) 0L else allocation.praUid)
+                }
+            }
+            activeRepo.peerReviewerAllocationDao().upsertList(copiedPeerReviewAllocations)
+
+            if (clazzAction != ClazzAction.COPY) {
+                val peerReviewsToDeactivate =
+                    initState.courseBlockList.flatMap { it.assignmentPeerAllocations }
+                        .findKeysNotInOtherList(copiedPeerReviewAllocations) { it.praUid }
+
+                activeRepo.peerReviewerAllocationDao()
+                    .deactivateByUids(peerReviewsToDeactivate, systemTimeInMillis())
+            }
+
+            val schedulesToCommit = _uiState.value.clazzSchedules.map {
+                it.shallowCopy { scheduleClazzUid = clazzUid }
+            }
+
+            activeRepo.scheduleDao().upsertListAsync(schedulesToCommit)
+
+            activeDb.courseBlockPictureDao()
+                .takeIf { updatedCourseBlockPictures.isNotEmpty() }
+                ?.upsertListAsync(updatedCourseBlockPictures)
+
+            // ✅ Handle Content Import Jobs
+            courseBlockListVal.mapNotNull { it.contentJobItem }.forEach {
+                importContentUseCase.invoke(it)
+            }
+
+            if (clazzAction != ClazzAction.COPY) {
+                activeRepo.scheduleDao().deactivateByUids(
+                    initState.clazzSchedules.findKeysNotInOtherList(schedulesToCommit) { it.scheduleUid },
+                    systemTimeInMillis()
+                )
+            }
+
+            Napier.d("onClickSave: transaction block done")
+        }
+
+        Napier.d("onClickSave: transaction done")
+
+        //Saving the ContentEntry entity can include saving the picture for the content entry.
+        //Because enqueueing a save picture must be done only after the entity with the picture
+        //itself is committed, SaveContentEntry must be invoked outside the main transaction so
+        //that SaveContentEntryUseCase can control the transactions.
+        courseBlockListVal.forEach { block ->
+            block.contentEntry?.also { contentEntry ->
+                saveContentEntryUseCase(
+                    contentEntry = contentEntry,
+                    joinToParentUid = null,
+                    picture = block.contentEntryPicture,
+                    initPictureUri = initState.courseBlockList.firstOrNull {
+                        it.courseBlockPicture?.cbpUid == block.courseBlockPicture?.cbpUid
+                    }?.courseBlockPicture?.cbpPictureUri
+                )
+            }
+        }
+
+        if (updateImage && coursePictureVal != null) {
+            enqueueSavePictureUseCase(
+                entityUid = entity.clazzUid,
+                tableId = CoursePicture.TABLE_ID,
+                pictureUri = coursePictureVal.coursePictureUri
+            )
+        }
+        if ((clazzAction== ClazzAction.COPY) && copiedCoursePicture != null) {
+            enqueueSavePictureUseCase(
+                entityUid = copiedCoursePicture.coursePictureUid,
+                tableId = CoursePicture.TABLE_ID,
+                pictureUri = copiedCoursePicture.coursePictureUri
+            )
+        }
+
+        updatedCourseBlockPictures.forEach {
+            enqueueSavePictureUseCase(
+                entityUid = it.cbpUid,
+                tableId = CourseBlockPicture.TABLE_ID,
+                pictureUri = it.cbpPictureUri
+            )
+        }
+
+        enqueueSavePictureUseCase.takeIf { updateImage }?.invoke(
+            entityUid = entity.clazzUid,
+            tableId = CoursePicture.TABLE_ID,
+            pictureUri = coursePictureVal?.coursePictureUri
+        )
+
+        updatedCourseBlockPictures.forEach {
+            enqueueSavePictureUseCase(
+                entityUid = it.cbpUid,
+                tableId = CourseBlockPicture.TABLE_ID,
+                pictureUri = it.cbpPictureUri
+            )
+        }
+
+        val entityTimeZone = TimeZone.of(entity.effectiveTimeZone)
+        val fromLocalDate = Clock.System.now().toLocalDateTime(entityTimeZone)
+            .toLocalMidnight()
+        val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()
+        clazzLogCreatorManager.requestClazzLogCreation(
+            entity.clazzUid,
+            accountManager.currentAccount.endpointUrl,
+            fromLocalDate.toInstant(entityTimeZone).toEpochMilliseconds(),
+            fromLocalDate.toLocalEndOfDay().toInstant(entityTimeZone).toEpochMilliseconds()
+        )
+        Napier.d("onClickSave: done")
+        finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
+    }
+}
+
 
 
     fun onCourseBlockMoved(from: Int, to: Int) {
