@@ -127,7 +127,7 @@ trickle -s -d 128 -u 128 bash
 
 7.2e [When personal accounts are enabled by setting a personal learning space URL: parents can register and add child profiles](test-descriptions/007_002e_user_registration_personalal_account_can_add_child_profiles.md)
 
-7.3 [When registration is enabled: Users under 13 can register using parental approval link](test-descriptions/007_003_users_under_13_can_register_using_parental_approval_link_test_description.md)
+7.3 [When registration is enabled: Users under 13 can register using parental approval link](test-descriptions/007_003b_users_under_13_can_register_using_parental_approval_link_existing_parent_test_description)
 
 7.4 [The username validation and adding a profile photo](test-descriptions/007_004_username_validation_and_add_profile_pic_test_description.md)
 
