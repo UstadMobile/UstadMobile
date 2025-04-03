@@ -86,7 +86,6 @@ fun ClazzDetailOverviewScreen(
     onClickCourseBlock: (CourseBlock) -> Unit = {},
     onClickPermissions: () -> Unit = { },
     onClickCopyCourse: () -> Unit = { },
-
     ) {
 
     val clazzDateRange = rememberFormattedDateRange(
