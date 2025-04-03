@@ -293,7 +293,9 @@ class ClazzDetailOverviewViewModel(
 
     private fun onClickEdit() {
         navController.navigate(ClazzEditViewModel.DEST_NAME,
-            mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()))
+            mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString(),
+                UstadView.CLAZZ_ACTION to ClazzAction.EDIT.name)
+        )
     }
 
     fun onClickPermissions() {
@@ -304,12 +306,18 @@ class ClazzDetailOverviewViewModel(
     }
      fun onClickCopyCourse() {
         navController.navigate(ClazzEditViewModel.DEST_NAME,
-            mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()))
+            mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString(),
+                UstadView.CLAZZ_ACTION  to ClazzAction.COPY.name)
+        )
     }
 
     companion object {
-
         const val DEST_NAME = "CourseDetailOverviewView"
-
     }
+
+    enum class ClazzAction {
+        EDIT,
+        COPY
+    }
+
 }

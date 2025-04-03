@@ -20,6 +20,7 @@ import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyLi
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel.ClazzAction
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel.Companion.ARG_TERMINOLOGY
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
@@ -136,8 +137,15 @@ class ClazzEditViewModel(
 
     private val createNewClazzUseCase: CreateNewClazzUseCase by di.onActiveEndpoint().instance()
 
+    val clazzAction: ClazzAction = savedStateHandle[UstadView.CLAZZ_ACTION]
+        ?.let { ClazzAction.valueOf(it) } ?: ClazzAction.EDIT
+
+
     init {
-        val title = createEditTitle(MR.strings.add_a_new_course, MR.strings.edit_course)
+
+        val title = createEditTitle(MR.strings.add_a_new_course,
+            if (clazzAction == ClazzAction.COPY) MR.strings.copy_course else MR.strings.edit_course)
+
         _appUiState.update {
             AppUiState(
                 title = title,
@@ -175,7 +183,13 @@ class ClazzEditViewModel(
                                             coursePicture = CoursePicture(
                                                 coursePictureUid = entityUidArg
                                             )
+                                            clazzName = if (clazzAction == ClazzAction.COPY) {
+                                                "${systemImpl.getString(MR.strings.copy_of)} ${this.clazzName}"
+                                            } else {
+                                                this.clazzName
+                                            }
                                         }
+
                                     }
                                 }
                         },

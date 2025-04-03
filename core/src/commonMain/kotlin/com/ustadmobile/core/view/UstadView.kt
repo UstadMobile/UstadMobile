@@ -57,6 +57,8 @@ interface UstadView {
 
         //Begin common arguments
 
+        const val CLAZZ_ACTION = "clazzAction"
+
         const val ARG_ENTITY_UID = "entityUid"
 
         const val ARG_CONTAINER_UID = "containerUid"
