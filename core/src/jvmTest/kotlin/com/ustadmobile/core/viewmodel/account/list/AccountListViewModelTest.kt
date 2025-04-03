@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel.accountlist
+package com.ustadmobile.core.viewmodel.account.list
 
 import app.cash.turbine.test
 import com.ustadmobile.core.account.LearningSpace
@@ -8,7 +8,7 @@ import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.lib.db.entities.Site
 import org.junit.Test

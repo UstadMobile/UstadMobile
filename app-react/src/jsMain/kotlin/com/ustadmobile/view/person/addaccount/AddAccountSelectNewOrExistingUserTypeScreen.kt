@@ -2,11 +2,10 @@ package com.ustadmobile.view.person.addaccount
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUserTypeUiState
+import com.ustadmobile.core.viewmodel.account.addaccountselectusertype.AddAccountSelectNewOrExistingUserTypeUiState
 import com.ustadmobile.core.hooks.useStringProvider
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUserTypeViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectusertype.AddAccountSelectNewOrExistingUserTypeViewModel
 import com.ustadmobile.hooks.useUstadViewModel
-import mui.icons.material.Add
 import mui.material.*
 import react.FC
 import react.Props

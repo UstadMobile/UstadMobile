@@ -8,10 +8,10 @@ import com.ustadmobile.core.MR
 import io.ktor.util.encodeBase64
 import kotlin.random.Random
 
-class PasskeyRequestJsonUseCase(
+class CreatePasskeyRequestJsonUseCase(
     private val systemImpl: UstadMobileSystemImpl,
     private val json: Json,
-    ) {
+) {
 
     /**
      * https://developer.android.com/identity/sign-in/credential-manager#format-json-request
@@ -19,11 +19,11 @@ class PasskeyRequestJsonUseCase(
      * here we are taking   username,  personUid,doorNodeIdu,sStartTime  to create challenge
      * challenge is  encoded string , created with above params
      *
-     *serverurl is added in id because it will be used during signin with passkey, suppose there
+     * serverurl is added in id because it will be used during signin with passkey, suppose there
      * are multiple domain , and we dont know from which domain user created the passkey ,
      * so adding @serverUrl in id we can check during signin which domain user registered
      */
-    fun createPasskeyRequestJson(
+    fun invoke(
         createPasskeyParams: CreatePasskeyParams
     ): String {
         val userId = randomString(16)
@@ -39,6 +39,7 @@ class PasskeyRequestJsonUseCase(
         val challengeBase64Encoded =   challenge.encodeBase64()
         val useridBase64Encoded =  "$userId@${createPasskeyParams.serverUrl}".encodeBase64()
 
+        //See https://developers.google.com/identity/passkeys/developer-guides/server-registration
         val requestJson = """
                   {
                     "challenge": "${challengeBase64Encoded}",

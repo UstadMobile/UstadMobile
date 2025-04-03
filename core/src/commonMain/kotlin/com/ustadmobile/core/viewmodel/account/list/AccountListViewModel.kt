@@ -1,4 +1,4 @@
-package com.ustadmobile.core.viewmodel.accountlist
+package com.ustadmobile.core.viewmodel.account.list
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
@@ -21,7 +21,7 @@ import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
@@ -190,7 +190,7 @@ class AccountListViewModel(
                 goOptions = UstadMobileSystemCommon.UstadGoOptions(
                     clearStack = true,
                 ),
-                repo = { di.on(it).direct.instance<UmAppDataLayer>().requireRepository() },
+                checkRegistrationAllowedUseCase = { di.on(it).direct.instance() },
                 presetLearningSpaceUrl = apiUrlConfig.presetLearningSpaceUrl
             )
         }
@@ -210,7 +210,7 @@ class AccountListViewModel(
             if (endpointFilter != null)
                 put(ARG_SERVER_URL, endpointFilter)
 
-            putFromSavedStateIfPresent(listOf(ARG_NEXT, ARG_DONT_SET_CURRENT_SESSION))
+            putAllFromSavedStateIfPresent(listOf(ARG_NEXT, ARG_DONT_SET_CURRENT_SESSION))
 
             put(ARG_MAX_DATE_OF_BIRTH, savedStateHandle[ARG_MAX_DATE_OF_BIRTH] ?: "0")
         }
@@ -220,7 +220,7 @@ class AccountListViewModel(
                     .getSiteAsync()?.registrationAllowed == false
             ) {
                 val arg = buildMap {
-                    putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+                    putAllFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
                     put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, "existing")
                     put(
                         ARG_LEARNINGSPACE_URL,

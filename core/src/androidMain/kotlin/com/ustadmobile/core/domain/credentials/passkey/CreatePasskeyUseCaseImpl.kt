@@ -12,8 +12,7 @@ import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import io.github.aakira.napier.Napier
 import org.json.JSONObject
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase.CreatePasskeyResult
-import com.ustadmobile.core.domain.credentials.PasskeyRequestJsonUseCase
-
+import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
 
 /**
  * the CreatePasskeyPrompt will show the google bottomsheet to create passkey
@@ -21,19 +20,22 @@ import com.ustadmobile.core.domain.credentials.PasskeyRequestJsonUseCase
  */
 class CreatePasskeyUseCaseImpl(
     val context: Context,
-    val passkeyRequestJsonUseCase: PasskeyRequestJsonUseCase
+    val passkeyRequestJsonUseCase: CreatePasskeyRequestJsonUseCase
 ) : CreatePasskeyUseCase {
+
+    /**
+     * @throws CreateCredentialException if CredentialManager throws an exception
+     */
     @SuppressLint("PublicKeyCredential")
-    override suspend fun invoke(createPassKeyParams: CreatePasskeyParams): CreatePasskeyResult? {
+    override suspend fun invoke(createPassKeyParams: CreatePasskeyParams): CreatePasskeyResult {
         val credentialManager = CredentialManager.create(context)
-        /**credentialManager to create credential requires a request
+
+        /** credentialManager to create credential requires a request
          * https://developer.android.com/identity/sign-in/credential-manager#format-json-request
          */
-
-        var passkeyResult: CreatePasskeyResult? = null
         try {
             val request = CreatePublicKeyCredentialRequest(
-                passkeyRequestJsonUseCase.createPasskeyRequestJson(
+                passkeyRequestJsonUseCase.invoke(
                     createPassKeyParams
                 )
             )
@@ -59,7 +61,7 @@ class CreatePasskeyUseCaseImpl(
             val originString = clientDataJsonObject.optString("origin", "")
             val challengeString = clientDataJsonObject.optString("challenge", "")
 
-            passkeyResult = CreatePasskeyResult(
+            return CreatePasskeyResult(
                 attestationObj = attestationObject,
                 clientDataJson = clientDataJsonString,
                 originString = originString,
@@ -71,9 +73,10 @@ class CreatePasskeyUseCaseImpl(
                 person=createPassKeyParams.person
             )
         } catch (e: CreateCredentialException) {
-            Napier.e(e) { "Failed to create passkey: ${e.message}" }
+            Napier.e(
+                message = "CreatePassKeyUseCaseImpl: exception", throwable = e
+            )
+            throw e
         }
-
-        return passkeyResult
     }
 }

@@ -13,14 +13,14 @@ import androidx.credentials.exceptions.NoCredentialException
 import com.ustadmobile.core.util.ext.formattedHost
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
 import com.ustadmobile.core.domain.credentials.PassKeySignInData
-import com.ustadmobile.core.domain.credentials.PasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import io.ktor.http.Url
 import org.json.JSONObject
 
 class GetCredentialUseCaseImpl(
     private val context: Context,
-    private val passkeyRequestJsonUseCase: PasskeyRequestJsonUseCase,
+    private val passkeyRequestJsonUseCase: CreatePasskeyRequestJsonUseCase,
     private val apiUrlConfig: SystemUrlConfig,
 ) : GetCredentialUseCase {
 

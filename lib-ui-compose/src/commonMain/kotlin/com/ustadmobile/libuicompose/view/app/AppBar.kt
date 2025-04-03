@@ -46,7 +46,7 @@ import com.ustadmobile.core.impl.appstate.AppBarColors
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.core.viewmodel.account.list.AccountListViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.libuicompose.components.UstadActionButtonIcon
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar

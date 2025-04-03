@@ -54,7 +54,7 @@ val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
             TextField {
                 sx { width = 100.pct; marginTop = 16.px }
                 label = ReactNode("${strings[MR.strings.full_name]}*")
-                value = props.uiState.firstName ?: ""
+                value = props.uiState.fullName ?: ""
                 onTextChange = {
                     props.onFullNameValueChange(it)
                 }
@@ -157,7 +157,7 @@ val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
                     variant = ButtonVariant.contained
                     id = "next_button"
                     onClick = { props.onClickSignUpWithPasskey() }
-                    +"${strings[MR.strings.next]}"
+                    + strings[MR.strings.next]
                 }
             }
         }

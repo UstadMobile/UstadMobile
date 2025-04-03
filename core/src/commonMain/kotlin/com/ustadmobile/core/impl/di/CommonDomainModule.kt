@@ -15,6 +15,7 @@ import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.invite.ResendInviteUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
+import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
 import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
@@ -128,6 +129,13 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
         FormatStatementResponseUseCase(
             db = instance(tag = DoorTag.TAG_DB),
             repo = instanceOrNull(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<GetDefaultDestinationUseCase>() with scoped(learningSpaceScope).singleton {
+        GetDefaultDestinationUseCase(
+            systemUrlConfig = instance(),
+            learningSpace = context,
         )
     }
 

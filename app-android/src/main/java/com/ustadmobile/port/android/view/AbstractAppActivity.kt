@@ -28,7 +28,7 @@ import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseAndroid
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
-import com.ustadmobile.core.domain.credentials.PasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
@@ -123,8 +123,8 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 languagesConfig = instance()
             )
         }
-        bind<PasskeyRequestJsonUseCase>()  with provider {
-            PasskeyRequestJsonUseCase(
+        bind<CreatePasskeyRequestJsonUseCase>()  with provider {
+            CreatePasskeyRequestJsonUseCase(
                 systemImpl = instance(),
                 json = instance()
             )

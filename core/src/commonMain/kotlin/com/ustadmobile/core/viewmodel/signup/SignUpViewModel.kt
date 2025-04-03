@@ -65,7 +65,7 @@ data class SignUpUiState(
 
     val registrationMode: Int = 0,
 
-    val firstName: String? = null,
+    val fullName: String? = null,
 
     val parentEmail: String? = null,
 
@@ -82,8 +82,6 @@ data class SignUpUiState(
     val isTeacher: Boolean = false,
 
     val passkeySupported: Boolean = true,
-
-    val doorNodeId: String? = null,
 
     val serverUrl_: String? = null,
 
@@ -157,8 +155,7 @@ class SignUpViewModel(
             )
         }
         loadingState = LoadingUiState.INDETERMINATE
-        val title =
-            systemImpl.getString(MR.strings.create_account)
+        val title = systemImpl.getString(MR.strings.create_account)
         viewModelScope.launch {
             val person = savedStateHandle.getJson(
                 OtherSignUpOptionSelectionViewModel.ARG_PERSON, Person.serializer(),
@@ -170,13 +167,11 @@ class SignUpViewModel(
                 prev.copy(
                     person = person,
                     personPicture=personPicture,
-                    firstName = if (person.firstNames == "") {
+                    fullName = if (person.firstNames == "") {
                         null
                     }else{
                         person.fullName()
                     }
-
-
                 )
             }
         }
@@ -211,8 +206,7 @@ class SignUpViewModel(
                 serverUrl_ = serverUrl,
                 passkeySupported = createPasskeyUseCase != null,
                 showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke(),
-
-                )
+            )
         }
     }
 
@@ -324,15 +318,13 @@ class SignUpViewModel(
     fun onFullNameValueChange(fullName: String) {
         _uiState.update { prev ->
             prev.copy(
-                firstName = fullName
+                fullName = fullName
             )
         }
-
     }
 
     private fun SignUpUiState.hasErrors(): Boolean {
-        return fullNameError != null ||
-                genderError != null
+        return fullNameError != null || genderError != null
     }
     private fun SignUpUiState.hasErrorsIfBelow13(): Boolean {
         return fullNameError != null ||
@@ -346,7 +338,7 @@ class SignUpViewModel(
         loadingState = LoadingUiState.INDETERMINATE
 
         // full name splitting into first name and last name
-        val fullName = _uiState.value.firstName?.trim()
+        val fullName = _uiState.value.fullName?.trim()
         val parts = fullName?.trim()?.split(" ", limit = 2)
         val firstName = parts?.get(0)
         val lastName = parts?.getOrElse(1) { "" }
@@ -363,8 +355,14 @@ class SignUpViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                fullNameError = if (savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
-                genderError = if (savePerson.gender == GENDER_UNSET) requiredFieldMessage else null,
+                fullNameError = if (savePerson.firstNames.isNullOrEmpty())
+                    requiredFieldMessage
+                else
+                    null,
+                genderError = if (savePerson.gender == GENDER_UNSET)
+                    requiredFieldMessage
+                else
+                    null,
             )
         }
 
@@ -373,15 +371,16 @@ class SignUpViewModel(
             return
         }
 
+        val createPasskeyUseCaseVal = createPasskeyUseCase
+
         viewModelScope.launch {
-
-
             try {
                 val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
                 savePerson.personUid = uid
 
-                if (_uiState.value.passkeySupported ){
-                    val passkeyCreated = createPasskeyUseCase?.invoke(
+                if(createPasskeyUseCaseVal != null) {
+                    //This should use try - catch
+                    val passkeyCreated = createPasskeyUseCaseVal(
                         CreatePasskeyParams(
                             username = savePerson.firstNames.toString(),
                             personUid = uid.toString(),
@@ -392,14 +391,15 @@ class SignUpViewModel(
                             person = savePerson
                         )
                     )
-                    passkeyCreated?.let {
-                        accountManager.registerWithPasskey(
-                            serverUrl,
-                            it,
-                            savePerson,
-                            _uiState.value.personPicture
-                        )
-                    }
+
+
+                    accountManager.registerWithPasskey(
+                        serverUrl,
+                        passkeyCreated!!,
+                        savePerson,
+                        _uiState.value.personPicture
+                    )
+
                     if (passkeyCreated == null) {
                         snackDispatcher.showSnackBar(Snack(message = systemImpl.getString(MR.strings.sorry_something_went_wrong)))
                         Napier.e { "Error occurred during creating passkey" }
@@ -423,7 +423,7 @@ class SignUpViewModel(
                 } else {
                     navController.navigate(SignupEnterUsernamePasswordViewModel.DEST_NAME,
                         args = buildMap {
-                            putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                            putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
                             putFromSavedStateIfPresent(ARG_NEXT)
                             put(
                                 OtherSignUpOptionSelectionViewModel.ARG_PERSON,
@@ -463,7 +463,7 @@ class SignUpViewModel(
             navController.navigate(AddChildProfilesViewModel.DEST_NAME,
                 args = buildMap {
                     put(ARG_NEXT, nextDestination)
-                    putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                    putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
                     putFromSavedStateIfPresent(ARG_NEXT)
                 }
             )
@@ -485,7 +485,7 @@ class SignUpViewModel(
 
     fun onClickOtherOption() {
         // full name splitting into first name and last name
-        val fullName = _uiState.value.firstName?.trim()
+        val fullName = _uiState.value.fullName?.trim()
         val parts = fullName?.trim()?.split(" ", limit = 2)
         val firstName = parts?.get(0)
         val lastName = parts?.getOrElse(1) { "" }
@@ -511,7 +511,7 @@ class SignUpViewModel(
         }
         navController.navigate(OtherSignUpOptionSelectionViewModel.DEST_NAME,
             args = buildMap {
-                putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
                 putFromSavedStateIfPresent(ARG_NEXT)
                 put(
                     OtherSignUpOptionSelectionViewModel.ARG_PERSON,

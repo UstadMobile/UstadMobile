@@ -97,7 +97,7 @@ class RegisterAgeRedirectViewModel(
         val isMinor = dateOfBirthInstant.isDateOfBirthAMinor()
 
         val args = buildMap {
-            putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+            putAllFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             putFromSavedStateIfPresent(ARG_NEXT)
             put(ARG_SHOW_ACCEPT_BUTTON,true.toString())
             put(SignUpViewModel.ARG_IS_MINOR,isMinor.toString())

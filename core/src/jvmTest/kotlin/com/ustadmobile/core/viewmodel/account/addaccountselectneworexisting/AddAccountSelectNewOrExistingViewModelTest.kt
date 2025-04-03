@@ -1,10 +1,11 @@
-package com.ustadmobile.core.viewmodel
+package com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting
 
 import app.cash.turbine.test
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
+import com.ustadmobile.core.viewmodel.account.addaccountselectusertype.AddAccountSelectNewOrExistingUserTypeViewModel
 import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import org.junit.Test
 import org.kodein.di.bind
