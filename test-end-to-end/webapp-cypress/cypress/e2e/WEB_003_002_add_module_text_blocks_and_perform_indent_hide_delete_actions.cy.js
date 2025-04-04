@@ -41,7 +41,7 @@ describe('WEB_003_002_add_module_text_blocks_and_perform_indent_hide_delete_acti
     // Hide the text block
     cy.contains('li', 'Hide').click();
     cy.contains('button', 'Save').click();
-    cy.get('Text 1').should('not.exist');
+    cy.get('text 1').should('not.exist');
 
     // Unhide and Indent the text block
     cy.contains('button', 'Edit').click();
@@ -108,5 +108,5 @@ describe('WEB_003_002_add_module_text_blocks_and_perform_indent_hide_delete_acti
   after(() => {
     // Stop Test Server after tests are complete
     cy.ustadStopTestServer();
-  });
+  })
 });
