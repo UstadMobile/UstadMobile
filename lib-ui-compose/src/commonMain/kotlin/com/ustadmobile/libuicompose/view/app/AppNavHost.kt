@@ -136,6 +136,8 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.core.viewmodel.respect.respectapp.list.RespectAppListViewModel
+import com.ustadmobile.core.viewmodel.respect.respectassignment.list.RespectAssignmentListViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
 import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
@@ -169,6 +171,8 @@ import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
+import com.ustadmobile.libuicompose.view.respect.respectapp.list.RespectAppListScreen
+import com.ustadmobile.libuicompose.view.respect.respectassignment.list.RespectAssignmentListScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
 import com.ustadmobile.libuicompose.view.systempermission.detail.SystemPermissionDetailScreen
 import com.ustadmobile.libuicompose.view.systempermission.edit.SystemPermissionEditScreen
@@ -290,6 +294,26 @@ fun AppNavHost(
             contentScene("/${OnBoardingViewModel.DEST_NAME}") { backStackEntry ->
                 OnboardingScreen(
                     appViewModel(backStackEntry, OnBoardingViewModel::class, ::OnBoardingViewModel)
+                )
+            }
+
+            contentScene(
+                route = "/${RespectAppListViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                RespectAppListScreen(
+                    appViewModel(backStackEntry, RespectAppListViewModel::class) { di, savedStateHandle ->
+                        RespectAppListViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+
+            contentScene(
+                route = "/${RespectAssignmentListViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                RespectAssignmentListScreen(
+                    appViewModel(backStackEntry, RespectAssignmentListViewModel::class) { di, savedStateHandle ->
+                        RespectAssignmentListViewModel(di, savedStateHandle)
+                    }
                 )
             }
 

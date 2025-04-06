@@ -105,15 +105,17 @@ class ClazzListViewModel(
         )
     }
 
+    private val isForAssignment = savedStateHandle[ARG_GO_TO_ON_SELECT_CLAZZ]?.toBoolean() ?: false
+
     init {
         _appUiState.update { prev ->
             prev.copy(
                 navigationVisible = true,
                 searchState = createSearchEnabledState(),
-                title = listTitle(MR.strings.courses, MR.strings.courses),
+                title = listTitle(MR.strings.classes, MR.strings.classes),
                 fabState = createFabState(
                     hasAddPermission = activeUserPersonUid != 0L,
-                    stringResource = MR.strings.course,
+                    stringResource = MR.strings.clazz,
                 )
             )
         }
@@ -171,6 +173,7 @@ class ClazzListViewModel(
     }
 
     fun onClickEntry(entry: Clazz) {
+
         navigateOnItemClicked(ClazzDetailViewModel.DEST_NAME, entry.clazzUid, entry)
     }
 
@@ -216,6 +219,7 @@ class ClazzListViewModel(
 
         const val ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST = "excludeAlreadySelectedClazzList"
 
+        const val ARG_GO_TO_ON_SELECT_CLAZZ = "goToOnSelectClazz"
 
     }
 

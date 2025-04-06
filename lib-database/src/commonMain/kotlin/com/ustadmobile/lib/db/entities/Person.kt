@@ -86,6 +86,8 @@ data class Person(
     @ColumnInfo(defaultValue = "${TYPE_NORMAL_PERSON}")
     var personType: Int = TYPE_NORMAL_PERSON,
 
+    var personPrimaryRole: Int = PRIMARY_ROLE_STUDENT,
+
     @Deprecated("Will be removed in Aug/24 once door update that handles missing columns in replication goes online")
     @MasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0,
@@ -175,6 +177,10 @@ data class Person(
                  ON $FROM_PERSON_TO_SCOPEDGRANT_JOIN_ON_CLAUSE
         """
 
+
+        const val PRIMARY_ROLE_TEACHER = ClazzEnrolment.ROLE_TEACHER
+
+        const val PRIMARY_ROLE_STUDENT = ClazzEnrolment.ROLE_STUDENT
 
     }
 

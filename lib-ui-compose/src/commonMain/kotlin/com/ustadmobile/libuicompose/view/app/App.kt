@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.LocalLibrary
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.School
@@ -42,6 +44,8 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
+import com.ustadmobile.core.viewmodel.respect.respectapp.list.RespectAppListViewModel
+import com.ustadmobile.core.viewmodel.respect.respectassignment.list.RespectAssignmentListViewModel
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
@@ -59,20 +63,21 @@ data class TopNavigationItem(
 
 val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
+        destRoute = RespectAppListViewModel.DEST_NAME,
+        icon = Icons.Outlined.Apps,
+        label = MR.strings.apps,
+    ),
+    TopNavigationItem(
+        destRoute = RespectAssignmentListViewModel.DEST_NAME,
+        icon = Icons.AutoMirrored.Outlined.Assignment,
+        label = MR.strings.assignments,
+    ),
+    TopNavigationItem(
         destRoute = ClazzListViewModel.DEST_NAME_HOME,
         icon = Icons.Outlined.School,
-        label = MR.strings.courses,
+        label = MR.strings.classes,
     ),
-    TopNavigationItem(
-        destRoute = ContentEntryListViewModel.DEST_NAME_HOME,
-        icon = Icons.Outlined.LocalLibrary,
-        label = MR.strings.library,
-    ),
-    TopNavigationItem(
-        destRoute = ConversationListViewModel.DEST_NAME_HOME,
-        icon = Icons.AutoMirrored.Outlined.Chat,
-        label = MR.strings.messages,
-    ),
+
     TopNavigationItem(
         destRoute = PersonListViewModel.DEST_NAME_HOME,
         icon = Icons.Outlined.Person,

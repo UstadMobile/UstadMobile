@@ -36,6 +36,7 @@ class ClazzDetailViewModel(
         showMembers: Boolean,
         showProgressReport: Boolean,
     ): List<TabItem> {
+        /*
         val tabs = mutableListOf(
             TabItem(
                 viewName = ClazzDetailOverviewViewModel.DEST_NAME,
@@ -43,6 +44,7 @@ class ClazzDetailViewModel(
                 label = systemImpl.getString(MR.strings.course),
             ),
         )
+
         if(showMembers) {
             tabs.add(
                 TabItem(
@@ -78,8 +80,15 @@ class ClazzDetailViewModel(
                 label = systemImpl.getString(MR.strings.groups),
             )
         )
+        */
 
-        return tabs.toList()
+        return listOf(
+            TabItem(
+                viewName = ClazzMemberListViewModel.DEST_NAME,
+                args = mapOf(UstadView.ARG_CLAZZUID to entityUidArg.toString()),
+                label = systemImpl.getString(MR.strings.members_key).capitalizeFirstLetter(),
+            )
+        )
     }
 
     init {

@@ -2,8 +2,9 @@ package com.ustadmobile.libuicompose.view.clazz.gradebook
 
 import androidx.compose.ui.graphics.Color
 import com.ustadmobile.lib.db.entities.CourseBlock
-import com.ustadmobile.libuicompose.theme.md_theme_dark_onError
-import com.ustadmobile.libuicompose.theme.md_theme_dark_onErrorContainer
+import com.ustadmobile.libuicompose.theme.onErrorContainerDark
+import com.ustadmobile.libuicompose.theme.onErrorDark
+import com.ustadmobile.libuicompose.theme.onErrorContainerLight
 import com.ustadmobile.libuicompose.theme.onSuccessContainerDark
 import com.ustadmobile.libuicompose.theme.successContainerDark
 
@@ -13,6 +14,6 @@ fun CourseBlock.colorsForMark(scoredScaled: Float): Pair<Color, Color> {
     return when {
         scoredScaled >= 0.75f -> Pair(onSuccessContainerDark, successContainerDark)
         scoredScaled >= 0.5f -> Pair(Color.Black, Color.Yellow)//should be updated
-        else -> Pair(md_theme_dark_onError, md_theme_dark_onErrorContainer)
+        else -> Pair(onErrorDark, onErrorContainerDark)
     }
 }

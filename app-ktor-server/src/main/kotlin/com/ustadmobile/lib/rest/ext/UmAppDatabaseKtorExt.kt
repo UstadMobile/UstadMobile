@@ -20,6 +20,8 @@ import org.kodein.di.on
 import java.io.File
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.lib.db.entities.respect.RespectApp
 
 fun UmAppDatabase.insertCourseTerminology(di: DI){
     val termList = courseTerminologyDao().findAllCourseTerminologyList()
@@ -95,6 +97,24 @@ suspend fun UmAppDatabase.initAdminUser(
     }
 }
 
+fun UmAppDatabase.respectDbInit(
+    xxHasher64: XXStringHasher
+) {
+    respectAppDao().insertOrIgnore(
+        listOf(
+            RespectApp(
+                raUid = xxHasher64.hash("org.chimple"),
+                raName = "Chimple",
+            )
+        )
+    )
+}
+
+
 fun UmAppDatabase.ktorInitDb(di: DI) {
     insertCourseTerminology(di)
+    respectDbInit(
+        xxHasher64 = di.direct.instance()
+    )
 }
+

@@ -30,10 +30,16 @@ import com.ustadmobile.lib.db.entities.xapi.StatementContextActivityJoin
 import com.ustadmobile.core.db.dao.xapi.StatementContextActivityJoinDao
 import com.ustadmobile.core.db.dao.xapi.StatementEntityJsonDao
 import com.ustadmobile.core.db.dao.xapi.XapiSessionEntityDao
+import com.ustadmobile.lib.db.entities.respect.RespectApp
+import com.ustadmobile.lib.db.entities.respect.RespectAssignment
 import com.ustadmobile.lib.db.entities.xapi.ActivityExtensionEntity
 import com.ustadmobile.lib.db.entities.xapi.StateEntity
 import com.ustadmobile.lib.db.entities.xapi.StatementEntityJson
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
+import com.ustadmobile.core.db.dao.respect.RespectAppDao
+import com.ustadmobile.core.db.dao.respect.RespectAssignmentDao
+import com.ustadmobile.core.db.dao.respect.RespectLessonDao
+import com.ustadmobile.lib.db.entities.respect.RespectLesson
 
 @DoorDatabase(entities = [
     ClazzLog::class, ClazzLogAttendanceRecord::class,
@@ -93,13 +99,17 @@ import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
     StateEntity::class,
     StateDeleteCommand::class,
 
+    RespectApp::class,
+    RespectAssignment::class,
+    RespectLesson::class,
+
     //Door entities
     OutgoingReplication::class,
     ReplicationOperation::class,
     PendingRepositorySession::class,
     DoorNode::class,
 
-], version = 204)
+], version = 300)
 expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract fun personDao(): PersonDao
@@ -248,6 +258,10 @@ expect abstract class UmAppDatabase : RoomDatabase {
 
     abstract fun stateDeleteCommandDao(): StateDeleteCommandDao
 
+    abstract fun respectAppDao(): RespectAppDao
 
+    abstract fun respectAssignmentDao(): RespectAssignmentDao
+
+    abstract fun respectLessonDao(): RespectLessonDao
 
 }
