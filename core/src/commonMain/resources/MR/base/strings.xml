@@ -1950,6 +1950,6 @@
     <string name="subtitles">Subtitles</string>
 
 
-    <string name="jetpack_compose_theme_name">msf%3A1000000035</string>
-    <string name="mui_theme_name">msf%3A1000000036</string>
+    <string name="jetpack_compose_theme_name">material-theme.zip</string>
+    <string name="mui_theme_name">material-theme(1).json</string>
 </resources>
