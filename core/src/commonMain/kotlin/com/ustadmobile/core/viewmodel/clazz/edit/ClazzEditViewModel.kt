@@ -9,6 +9,7 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.UstadGoOptions
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -741,7 +742,18 @@ fun onClickSave() {
             fromLocalDate.toLocalEndOfDay().toInstant(entityTimeZone).toEpochMilliseconds()
         )
         Napier.d("onClickSave: done")
-        finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
+        if (clazzAction == ClazzAction.COPY) {
+            navController.navigate(
+                viewName = ClazzDetailViewModel.DEST_NAME,
+                args = mapOf(ARG_ENTITY_UID to entity.clazzUid.toString()),
+                goOptions = UstadGoOptions(
+                    popUpToViewName = DEST_NAME,
+                    popUpToInclusive = true
+                )
+            )
+        } else {
+            finishWithResult(ClazzDetailViewModel.DEST_NAME, entity.clazzUid, entity)
+        }
     }
 }
 
