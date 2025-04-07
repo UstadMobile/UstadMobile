@@ -24,7 +24,7 @@ class ProcessThemeFilesUseCaseImpl : ProcessThemeFilesUseCase {
         private const val GITHUB_TOKEN = ""
         private const val REPO_OWNER = ""
         private const val REPO_NAME = ""
-        private const val BRANCH = "dev-admin-branding-customization-testing"
+        private const val BRANCH = ""
         private const val STRINGS_XML_PATH = "core/src/commonMain/resources/MR/base/strings.xml"
         private const val THEME_KT_PATH = "lib-ui-compose/src/commonMain/kotlin/com/ustadmobile/libuicompose/theme/Theme.kt"
         private const val COLOR_KT_PATH = "lib-ui-compose/src/commonMain/kotlin/com/ustadmobile/libuicompose/theme/Color.kt"
