@@ -20,6 +20,7 @@ import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
+import react.dom.html.ReactHTML
 import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.pct
@@ -49,16 +50,10 @@ val AppearanceDetailComponent = FC<AppearanceDetailProps> { props ->
 
             spacing = responsive(2)
 
-            Box {
-                sx {
-                    display = Display.flex
-                    justifyContent = JustifyContent.center
-                    width = 100.pct
-                }
-                Avatar {
-                    sx { width = 60.px; height = 60.px }
-                    AccountCircle()
-                }
+            ReactHTML.img {
+                src = "assets/logo.svg"
+                alt = "App Icon"
+                height = 60.0
             }
 
             TextField {

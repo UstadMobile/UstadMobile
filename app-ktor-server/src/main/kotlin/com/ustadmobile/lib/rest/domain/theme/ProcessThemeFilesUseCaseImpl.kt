@@ -21,14 +21,16 @@ import java.util.concurrent.TimeUnit
 
 class ProcessThemeFilesUseCaseImpl : ProcessThemeFilesUseCase {
     companion object {
-        private const val GITHUB_TOKEN = ""
-        private const val REPO_OWNER = ""
-        private const val REPO_NAME = ""
-        private const val BRANCH = "" 
+        private const val GITHUB_TOKEN = "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"
+        private const val REPO_OWNER = "UstadMobile"
+        private const val REPO_NAME = "UstadMobile"
+        private const val BRANCH = "dev-admin-branding-customization-testing"
         private const val STRINGS_XML_PATH = "core/src/commonMain/resources/MR/base/strings.xml"
         private const val THEME_KT_PATH = "lib-ui-compose/src/commonMain/kotlin/com/ustadmobile/libuicompose/theme/Theme.kt"
         private const val COLOR_KT_PATH = "lib-ui-compose/src/commonMain/kotlin/com/ustadmobile/libuicompose/theme/Color.kt"
-        private const val LOGO_TARGET_PATH = "core/src/commonMain/resources/MR/images/ustad_logo.svg"
+        private const val ANDROID_LOGO_TARGET_PATH = "app-android/src/main/res/drawable/ic_launcher_icon.xml"
+        private const val WEB_LOGO_TARGET_PATH = "app-react/src/jsMain/resources/assets/logo.svg"
+        private const val DESKTOP_LOGO_TARGET_PATH = "lib-ui-compose/src/desktopMain/resources/img/logo.svg"
         private const val MUI_THEME_KT_PATH = "app-react/src/jsMain/kotlin/com/ustadmobile/mui/theme/Themes.kt"
 
         private val httpClient = OkHttpClient.Builder()
@@ -98,8 +100,10 @@ class ProcessThemeFilesUseCaseImpl : ProcessThemeFilesUseCase {
                 try {
                     val logoContent = processLogoFile(orgLogo)
                     if (logoContent != null) {
-                        changedFiles[LOGO_TARGET_PATH] = logoContent
-                        Napier.d("Added logo to be pushed")
+                        changedFiles[ANDROID_LOGO_TARGET_PATH] = logoContent
+                        changedFiles[WEB_LOGO_TARGET_PATH] = logoContent
+                        changedFiles[DESKTOP_LOGO_TARGET_PATH] = logoContent
+                        Napier.d("Added logo to be pushed to Android, Web, and Desktop")
                     }
                 } catch (e: Exception) {
                     Napier.e("Failed to process logo: ${e.message}", e)
