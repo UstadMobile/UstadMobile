@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.appearance
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.file.BlobFileUseCase
 import com.ustadmobile.core.domain.file.UriFileUseCase
 import com.ustadmobile.core.domain.theme.ThemeUploadUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
@@ -29,7 +30,9 @@ data class AppearanceEditUiState(
     val organisationName: String? = null,
     val organisationLogo: String? = null,
     val jetpackComposeTheme: String? = null,
+    val jetpackComposeThemeName: String? = null,
     val muiTheme: String? = null,
+    val muiThemeName: String? = null,
     val fieldsEnabled: Boolean = true,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
@@ -48,6 +51,7 @@ class AppearanceEditViewModel(
 
     private val httpClient: HttpClient by instance()
     private val uriFileUseCase: UriFileUseCase by instance()
+    private val blobFileUseCase: BlobFileUseCase by di.instance()
 
     init {
         loadingState = LoadingUiState.NOT_LOADING
@@ -90,20 +94,22 @@ class AppearanceEditViewModel(
         }
     }
 
-    fun onJetpackComposeThemeChanged(theme: String?) {
+    fun onJetpackComposeThemeChanged(uri: String?, name: String?) {
         _uiState.update { prev ->
             prev.copy(
-                jetpackComposeTheme = theme,
+                jetpackComposeTheme = uri,
+                jetpackComposeThemeName = name,
                 errorMessage = null,
                 showSuccessMessage = false
             )
         }
     }
 
-    fun onMuiThemeChanged(theme: String?) {
+    fun onMuiThemeChanged(uri: String?, name: String?) {
         _uiState.update { prev ->
             prev.copy(
-                muiTheme = theme,
+                muiTheme = uri,
+                muiThemeName = name,
                 errorMessage = null,
                 showSuccessMessage = false
             )
@@ -154,8 +160,8 @@ class AppearanceEditViewModel(
                     }
                 }
 
-                _uiState.value.jetpackComposeTheme?.let { themeUri ->
-                    val themeName = themeUri.substringAfterLast("/").substringBefore(".")
+                _uiState.value.jetpackComposeTheme?.let { uri ->
+                    val themeName = _uiState.value.jetpackComposeThemeName ?: uri.substringAfterLast("/").substringBefore(".")
                     formParts.add(
                         PartData.FormItem(
                             value = themeName,
@@ -165,29 +171,43 @@ class AppearanceEditViewModel(
                             }
                         )
                     )
-                    val uriFileData = uriFileUseCase(themeUri)
 
-                    if (uriFileData.bytes != null) {
-                        formParts.add(
-                            PartData.FileItem(
-                                provider = { ByteReadPacket(uriFileData.bytes) },
-                                dispose = {},
-                                partHeaders = Headers.build {
-                                    append(HttpHeaders.ContentDisposition,
-                                        "form-data; name=\"jetpackComposeTheme\"; filename=\"${uriFileData.filename}\"")
-                                    append(HttpHeaders.ContentType, uriFileData.mimeType)
-                                }
+                    if (uri.startsWith("blob:")) {
+                        val fileBytes = blobFileUseCase(uri, themeName, "application/zip")
+                        if (fileBytes != null) {
+                            formParts.add(
+                                PartData.FileItem(
+                                    provider = { ByteReadPacket(fileBytes) },
+                                    dispose = {},
+                                    partHeaders = Headers.build {
+                                        append(HttpHeaders.ContentDisposition,
+                                            "form-data; name=\"jetpackComposeTheme\"; filename=\"${themeName}\"")
+                                        append(HttpHeaders.ContentType, "application/zip")
+                                    }
+                                )
                             )
-                        )
+                        }
                     } else {
-                        formParts.add(
-                            PartData.FormItem(themeUri, { "jetpackComposeTheme" }, Headers.build {})
-                        )
+                        val uriFileData = uriFileUseCase(uri)
+
+                        if (uriFileData.bytes != null) {
+                            formParts.add(
+                                PartData.FileItem(
+                                    provider = { ByteReadPacket(uriFileData.bytes) },
+                                    dispose = {},
+                                    partHeaders = Headers.build {
+                                        append(HttpHeaders.ContentDisposition,
+                                            "form-data; name=\"jetpackComposeTheme\"; filename=\"${uriFileData.filename}\"")
+                                        append(HttpHeaders.ContentType, uriFileData.mimeType)
+                                    }
+                                )
+                            )
+                        }
                     }
                 }
 
-                _uiState.value.muiTheme?.let { themeUri ->
-                    val themeName = themeUri.substringAfterLast("/").substringBefore(".")
+                _uiState.value.muiTheme?.let { uri ->
+                    val themeName = _uiState.value.muiThemeName ?: uri.substringAfterLast("/").substringBefore(".")
                     formParts.add(
                         PartData.FormItem(
                             value = themeName,
@@ -197,24 +217,38 @@ class AppearanceEditViewModel(
                             }
                         )
                     )
-                    val uriFileData = uriFileUseCase(themeUri)
+                    if (uri.startsWith("blob:")) {
+                        val fileBytes = blobFileUseCase(uri, themeName, "application/json")
 
-                    if (uriFileData.bytes != null) {
-                        formParts.add(
-                            PartData.FileItem(
-                                provider = { ByteReadPacket(uriFileData.bytes) },
-                                dispose = {},
-                                partHeaders = Headers.build {
-                                    append(HttpHeaders.ContentDisposition,
-                                        "form-data; name=\"muiTheme\"; filename=\"${uriFileData.filename}\"")
-                                    append(HttpHeaders.ContentType, uriFileData.mimeType)
-                                }
+                        if (fileBytes != null) {
+                            formParts.add(
+                                PartData.FileItem(
+                                    provider = { ByteReadPacket(fileBytes) },
+                                    dispose = {},
+                                    partHeaders = Headers.build {
+                                        append(HttpHeaders.ContentDisposition,
+                                            "form-data; name=\"muiTheme\"; filename=\"${themeName}\"")
+                                        append(HttpHeaders.ContentType, "application/json")
+                                    }
+                                )
                             )
-                        )
+                        }
                     } else {
-                        formParts.add(
-                            PartData.FormItem(themeUri, { "muiTheme" }, Headers.build {})
-                        )
+                        val uriFileData = uriFileUseCase(uri)
+
+                        if (uriFileData.bytes != null) {
+                            formParts.add(
+                                PartData.FileItem(
+                                    provider = { ByteReadPacket(uriFileData.bytes) },
+                                    dispose = {},
+                                    partHeaders = Headers.build {
+                                        append(HttpHeaders.ContentDisposition,
+                                            "form-data; name=\"muiTheme\"; filename=\"${uriFileData.filename}\"")
+                                        append(HttpHeaders.ContentType, uriFileData.mimeType)
+                                    }
+                                )
+                            )
+                        }
                     }
                 }
 
