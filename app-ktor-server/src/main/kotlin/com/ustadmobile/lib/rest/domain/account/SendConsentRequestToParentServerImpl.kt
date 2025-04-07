@@ -7,6 +7,8 @@ import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.lib.rest.NotificationSender
+import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
+import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCaseImpl
 import io.github.aakira.napier.Napier
 
 
@@ -14,8 +16,7 @@ import io.github.aakira.napier.Napier
  * UseCase server-side implementation to send consent request to parent via email, sms
  */
 class SendConsentRequestToParentServerImpl(
-    private val notificationSender: NotificationSender,
-    private val db: UmAppDatabase,
+    private val sendEmailUseCase: SendEmailUseCase,
     private val learningSpace: LearningSpace,
 ) : SendConsentRequestToParentUseCase {
 
@@ -30,10 +31,10 @@ class SendConsentRequestToParentServerImpl(
                     AddChildProfilesViewModel.ARG_CHILD_DATE_OF_BIRTH to request.childDateOfBirth.toString(),
                 ).toQueryString()
             ).fullUrl()
-            notificationSender.sendEmail(
-                request.parentContact,
-                "Parental Consent Required for ${request.childFullName}’s Registration",
-                "To approve your child’s registration, please click the link below:\n" +
+            sendEmailUseCase.invoke(
+                subject = "Parental Consent Required for ${request.childFullName}’s Registration",
+                email = request.parentContact,
+                link = "To approve your child’s registration, please click the link below:\n" +
                         link
             )
         } catch (e: Exception) {

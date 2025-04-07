@@ -44,18 +44,18 @@ class ResendInviteUseCase(
                     learningSpace.url, ClazzInviteRedeemViewModel.DEST_NAME,
                     "inviteCode=${clazzInvite.inviteToken}"
                 ).fullUrl()
-
+            val emailSubject = "Invitation to $clazzName"
             when (clazzInvite.inviteType) {
                 1 -> {
-                    clazzInvite.inviteContact?.let { sendEmailUseCase.invoke(clazzName, it, inviteLink) }
+                    clazzInvite.inviteContact.let { sendEmailUseCase.invoke(emailSubject, it, inviteLink) }
                 }
 
                 2 -> {
-                    clazzInvite.inviteContact?.let { sendSmsUseCase.invoke(clazzName, it, inviteLink) }
+                    clazzInvite.inviteContact.let { sendSmsUseCase.invoke(clazzName, it, inviteLink) }
                 }
 
                 3 -> {
-                    clazzInvite.inviteContact?.let { sendMessageUseCase.invoke(clazzName, it, inviteLink, personUid) }
+                    clazzInvite.inviteContact.let { sendMessageUseCase.invoke(clazzName, it, inviteLink, personUid) }
                 }
             }
 

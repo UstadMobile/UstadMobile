@@ -939,8 +939,7 @@ fun Application.umRestApplication(
         }
         bind<SendConsentRequestToParentUseCase>() with scoped(LearningSpaceScope.Default).provider {
             SendConsentRequestToParentServerImpl(
-                notificationSender = instance(),
-                db = instance(tag = DoorTag.TAG_DB),
+                sendEmailUseCase = instance(),
                 learningSpace = context,
             )
         }

@@ -60,10 +60,11 @@ class SendClazzInvitesUseCaseServerImpl(
                     ClazzInviteRedeemViewModel.DEST_NAME,
                         "inviteCode=${invite.inviteToken}"
                 ).fullUrl()
+                val emailSubject = "Invitation to $clazzName"
 
                 when (invite.inviteType) {
                     ClazzInvite.EMAIL -> {
-                        sendEmailUseCase.invoke(clazzName, invite.inviteContact, inviteLink)
+                        sendEmailUseCase.invoke(emailSubject, invite.inviteContact, inviteLink)
                     }
 
                     ClazzInvite.PHONE -> {

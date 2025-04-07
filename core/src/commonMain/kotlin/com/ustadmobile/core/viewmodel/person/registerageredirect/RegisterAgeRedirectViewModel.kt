@@ -103,8 +103,14 @@ class RegisterAgeRedirectViewModel(
             put(SignUpViewModel.ARG_IS_MINOR,isMinor.toString())
             put(PersonEditViewModel.ARG_DATE_OF_BIRTH, date.toString())
         }
-
-        navController.navigate(SiteTermsDetailViewModel.DEST_NAME, args)
+        when {
+            isMinor -> {
+                navController.navigate(SignUpViewModel.DEST_NAME, args)
+            }
+            else -> {
+                navController.navigate(SiteTermsDetailViewModel.DEST_NAME, args)
+            }
+        }
 
 
 
