@@ -33,6 +33,7 @@ import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.pct
 import web.html.InputType
+import web.url.URL
 
 val AppearanceEditScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
@@ -54,7 +55,8 @@ val AppearanceEditScreen = FC<Props> {
         }
         onChange = {
             it.target.files?.item(0)?.also { file ->
-                viewModel.onJetpackComposeThemeChanged(file.name)
+                val blobUrl = URL.createObjectURL(file)
+                viewModel.onJetpackComposeThemeChanged(blobUrl, file.name)
             }
         }
     }
@@ -69,7 +71,8 @@ val AppearanceEditScreen = FC<Props> {
         }
         onChange = {
             it.target.files?.item(0)?.also { file ->
-                viewModel.onMuiThemeChanged(file.name)
+                val blobUrl = URL.createObjectURL(file)
+                viewModel.onMuiThemeChanged(blobUrl, file.name)
             }
         }
     }
@@ -78,8 +81,12 @@ val AppearanceEditScreen = FC<Props> {
         this.uiState = uiState
         onOrganisationNameChanged = viewModel::onOrganisationNameChanged
         onOrganisationLogoChanged = viewModel::onOrganisationLogoChanged
-        onJetpackComposeThemeChanged = viewModel::onJetpackComposeThemeChanged
-        onMuiThemeChanged = viewModel::onMuiThemeChanged
+        onJetpackComposeThemeChanged = { uri, name ->
+            viewModel.onJetpackComposeThemeChanged(uri, name)
+        }
+        onMuiThemeChanged = { uri, name ->
+            viewModel.onMuiThemeChanged(uri, name)
+        }
         onClickChooseComposeFile = {
             composeFileInputRef.current?.click()
         }
@@ -93,8 +100,8 @@ external interface AppearanceEditProps : Props {
     var uiState: AppearanceEditUiState
     var onOrganisationNameChanged: (String) -> Unit
     var onOrganisationLogoChanged: (String?) -> Unit
-    var onJetpackComposeThemeChanged: (String?) -> Unit
-    var onMuiThemeChanged: (String?) -> Unit
+    var onJetpackComposeThemeChanged: (uri: String?, name: String?) -> Unit
+    var onMuiThemeChanged: (uri: String?, name: String?) -> Unit
     var onClickChooseComposeFile: () -> Unit
     var onClickChooseMuiFile: () -> Unit
 }
@@ -134,7 +141,9 @@ val AppearanceEditComponent = FC<AppearanceEditProps> { props ->
             OutlinedInput {
                 fullWidth = true
                 disabled = true
-                value = props.uiState.jetpackComposeTheme ?: strings[MR.strings.no_file_chosen]
+                value = props.uiState.jetpackComposeThemeName ?:
+                        (props.uiState.jetpackComposeTheme?.substringAfterLast('/')?.substringBefore('?') ?:
+                        strings[MR.strings.no_file_chosen])
 
                 startAdornment = InputAdornment.create {
                     position = InputAdornmentPosition.start
@@ -152,7 +161,7 @@ val AppearanceEditComponent = FC<AppearanceEditProps> { props ->
                         position = InputAdornmentPosition.end
                         IconButton {
                             onClick = {
-                                props.onJetpackComposeThemeChanged(null)
+                                props.onJetpackComposeThemeChanged(null, null)
                             }
                             disabled = !props.uiState.fieldsEnabled
                             mui.icons.material.Close()
@@ -169,7 +178,9 @@ val AppearanceEditComponent = FC<AppearanceEditProps> { props ->
             OutlinedInput {
                 fullWidth = true
                 disabled = true
-                value = props.uiState.muiTheme ?: strings[MR.strings.no_file_chosen]
+                value = props.uiState.muiThemeName ?:
+                        (props.uiState.muiTheme?.substringAfterLast('/')?.substringBefore('?') ?:
+                        strings[MR.strings.no_file_chosen])
 
                 startAdornment = InputAdornment.create {
                     position = InputAdornmentPosition.start
@@ -187,7 +198,7 @@ val AppearanceEditComponent = FC<AppearanceEditProps> { props ->
                         position = InputAdornmentPosition.end
                         IconButton {
                             onClick = {
-                                props.onMuiThemeChanged(null)
+                                props.onMuiThemeChanged(null, null)
                             }
                             disabled = !props.uiState.fieldsEnabled
                             mui.icons.material.Close()

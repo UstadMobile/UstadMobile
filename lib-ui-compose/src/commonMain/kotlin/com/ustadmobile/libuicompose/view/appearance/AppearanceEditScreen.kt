@@ -48,16 +48,20 @@ fun AppearanceEditScreen(
     uiState: AppearanceEditUiState = AppearanceEditUiState(),
     onOrganisationNameChanged: (String) -> Unit = {},
     onOrganisationLogoChanged: (String?) -> Unit = {},
-    onChooseJetpackComposeTheme: (String?) -> Unit = {},
-    onChooseMuiTheme: (String?) -> Unit = {}
+    onChooseJetpackComposeTheme: (String?, String?) -> Unit = { _, _ -> },
+    onChooseMuiTheme: (String?, String?) -> Unit = { _, _ -> }
 ) {
 
-    val jetpackComposeThemeLauncher = rememberUstadFilePickLauncher { result ->
-        onChooseJetpackComposeTheme(result.uri)
+    val jetpackComposeThemeLauncher = rememberUstadFilePickLauncher(
+        fileExtensions = listOf("zip")
+    ) { result ->
+        onChooseJetpackComposeTheme(result.uri, result.fileName)
     }
 
-    val muiThemeLauncher = rememberUstadFilePickLauncher { result ->
-        onChooseMuiTheme(result.uri)
+    val muiThemeLauncher = rememberUstadFilePickLauncher(
+        fileExtensions = listOf("json")
+    ) { result ->
+        onChooseMuiTheme(result.uri, result.fileName)
     }
 
 
@@ -71,7 +75,7 @@ fun AppearanceEditScreen(
             onImageUriChanged = onOrganisationLogoChanged,
             modifier = Modifier.height(20.dp),
 
-        )
+            )
 
         OutlinedTextField(
             modifier = Modifier
@@ -113,10 +117,11 @@ fun AppearanceEditScreen(
                     Text(stringResource(MR.strings.choose_file))
                 }
                 Text(
-                    text = uiState.jetpackComposeTheme?.let { uri ->
-                        uri.substringAfterLast('/').takeIf { it.isNotBlank() }
-                            ?: stringResource(MR.strings.no_file_chosen)
-                    } ?: stringResource(MR.strings.no_file_chosen),
+                    text = uiState.jetpackComposeThemeName
+                        ?: uiState.jetpackComposeTheme?.let { uri ->
+                            uri.substringAfterLast('/').takeIf { it.isNotBlank() }
+                                ?: stringResource(MR.strings.no_file_chosen)
+                        } ?: stringResource(MR.strings.no_file_chosen),
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1
@@ -154,10 +159,11 @@ fun AppearanceEditScreen(
                     Text(stringResource(MR.strings.choose_file))
                 }
                 Text(
-                    text = uiState.muiTheme?.let { uri ->
-                        uri.substringAfterLast('/').takeIf { it.isNotBlank() }
-                            ?: stringResource(MR.strings.no_file_chosen)
-                    } ?: stringResource(MR.strings.no_file_chosen),
+                    text = uiState.muiThemeName
+                        ?: uiState.muiTheme?.let { uri ->
+                            uri.substringAfterLast('/').takeIf { it.isNotBlank() }
+                                ?: stringResource(MR.strings.no_file_chosen)
+                        } ?: stringResource(MR.strings.no_file_chosen),
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1
