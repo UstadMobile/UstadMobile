@@ -21,9 +21,9 @@ import java.util.concurrent.TimeUnit
 
 class ProcessThemeFilesUseCaseImpl : ProcessThemeFilesUseCase {
     companion object {
-        private const val GITHUB_TOKEN = "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"
-        private const val REPO_OWNER = "UstadMobile"
-        private const val REPO_NAME = "UstadMobile"
+        private const val GITHUB_TOKEN = ""
+        private const val REPO_OWNER = ""
+        private const val REPO_NAME = ""
         private const val BRANCH = "dev-admin-branding-customization-testing"
         private const val STRINGS_XML_PATH = "core/src/commonMain/resources/MR/base/strings.xml"
         private const val THEME_KT_PATH = "lib-ui-compose/src/commonMain/kotlin/com/ustadmobile/libuicompose/theme/Theme.kt"
