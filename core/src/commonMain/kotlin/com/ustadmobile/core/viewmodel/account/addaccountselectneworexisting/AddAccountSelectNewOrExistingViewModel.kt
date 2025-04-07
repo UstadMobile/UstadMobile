@@ -98,18 +98,20 @@ class AddAccountSelectNewOrExistingViewModel(
     val uiState: Flow<AddAccountSelectNewOrExistingUiState> = _uiState.asStateFlow()
 
     init {
-        nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
+        val nextDestination = savedStateHandle[UstadView.ARG_NEXT]
+        if (nextDestination !=null){
+            val questionIndex = nextDestination.indexOf('?')
+            val args = if(questionIndex > 0) {
+                UMFileUtil.parseURLQueryString(nextDestination.substring(questionIndex))
+            }else {
+                emptyMap()
+            }
+            if (args.containsKey(ARG_CHILD_NAME)){
+                savedStateHandle[ARG_CHILD_NAME] = args[ARG_CHILD_NAME]
+                savedStateHandle[ARG_CHILD_GENDER] = args[ARG_CHILD_GENDER]
+                savedStateHandle[ARG_CHILD_DATE_OF_BIRTH] = args[ARG_CHILD_DATE_OF_BIRTH]
+            }
 
-        val questionIndex = nextDestination.indexOf('?')
-        val args = if(questionIndex > 0) {
-            UMFileUtil.parseURLQueryString(nextDestination.substring(questionIndex))
-        }else {
-            emptyMap()
-        }
-        if (args.containsKey(ARG_CHILD_NAME)){
-           savedStateHandle[ARG_CHILD_NAME] = args[ARG_CHILD_NAME]
-           savedStateHandle[ARG_CHILD_GENDER] = args[ARG_CHILD_GENDER]
-           savedStateHandle[ARG_CHILD_DATE_OF_BIRTH] = args[ARG_CHILD_DATE_OF_BIRTH]
         }
 
         _appUiState.value = AppUiState(

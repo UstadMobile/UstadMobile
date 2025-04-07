@@ -250,7 +250,7 @@ class SignUpViewModel(
         val parentEmail = _uiState.value.parentEmail
         _uiState.update { prev ->
             prev.copy(
-                fullNameError = if (_uiState.value.firstName.isNullOrEmpty()) requiredFieldMessage else null,
+                fullNameError = if (_uiState.value.fullName.isNullOrEmpty()) requiredFieldMessage else null,
                 parentEmailError = when{
                     parentEmail.isNullOrEmpty() -> requiredFieldMessage
                     parentEmail.let { validateEmailUseCase.invoke(it) } == null -> {
@@ -268,7 +268,7 @@ class SignUpViewModel(
             try {
                 sendConsentRequestToParentUseCase(
                     SendConsentRequestToParentUseCase.SendConsentRequestToParentRequest(
-                        childFullName = _uiState.value.firstName?:"",
+                        childFullName = _uiState.value.fullName?:"",
                         childDateOfBirth = dateOfBirth,
                         childGender = _uiState.value.person?.gender?:0,
                         parentContact = _uiState.value.parentEmail?:""

@@ -230,7 +230,7 @@ class LoginViewModel(
                     AddChildProfilesViewModel.DEST_NAME,
                     args = buildMap {
                         put(ARG_NEXT, nextDestination)
-                        putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                        putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
                         putFromSavedStateIfPresent(ARG_NEXT)
                     }
                 )

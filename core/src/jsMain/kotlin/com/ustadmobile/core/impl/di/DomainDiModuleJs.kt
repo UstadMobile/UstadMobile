@@ -2,6 +2,7 @@ package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.db.UmAppDataLayer
+import com.ustadmobile.core.domain.account.CheckRegistrationAllowedUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseJs
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
@@ -153,6 +154,12 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
             repo = instance<UmAppDataLayer>().repository,
             compressImageUseCase = CompressImageUseCaseJs(),
             deleteUrisUseCase = instance(),
+        )
+    }
+
+    bind<CheckRegistrationAllowedUseCase>() with scoped(endpointScope).singleton {
+        CheckRegistrationAllowedUseCase(
+            dataLayer = instance<UmAppDataLayer>()
         )
     }
 
