@@ -32,7 +32,7 @@ When registration is enabled: Users over 13 can register directly
 24. Click on the "Accept" button 
 25. Enter Full name.
 26. Select Gender
-27. If platform supports passkeys, click on "Other options", then signup with username and password. 
+27. If platform does not supports passkeys, click on "Other options", then signup with username and password. 
 28. Enter username and password
 29. Click on "Signup" button
 30. User logged into the app
