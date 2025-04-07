@@ -46,11 +46,8 @@ fun AppearanceDetailScreen(
     ) {
         Spacer(Modifier.height(16.dp))
 
-        Image(
-            imageVector = Icons.Default.AccountCircle,
-            contentDescription =  stringResource(MR.strings.organisation_logo),
-            modifier = Modifier.size(60.dp)
-        )
+
+        AppIcon()
 
         OutlinedTextField(
             modifier = Modifier
