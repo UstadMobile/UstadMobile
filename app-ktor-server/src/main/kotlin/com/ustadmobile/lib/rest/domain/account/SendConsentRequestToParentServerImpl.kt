@@ -34,8 +34,7 @@ class SendConsentRequestToParentServerImpl(
             sendEmailUseCase.invoke(
                 subject = "Parental Consent Required for ${request.childFullName}’s Registration",
                 email = request.parentContact,
-                link = "To approve your child’s registration, please click the link below:\n" +
-                        link
+                link = link
             )
         } catch (e: Exception) {
             Napier.e(e) { "SendConsentRequestToParentUseCase: ${e.message}" }
