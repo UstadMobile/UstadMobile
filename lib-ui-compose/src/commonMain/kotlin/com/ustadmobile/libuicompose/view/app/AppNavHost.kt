@@ -137,7 +137,10 @@ import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.core.viewmodel.respect.respectapp.list.RespectAppListViewModel
+import com.ustadmobile.core.viewmodel.respect.respectassignment.detail.RespectAssignmentDetailViewModel
+import com.ustadmobile.core.viewmodel.respect.respectassignment.edit.RespectAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.respect.respectassignment.list.RespectAssignmentListViewModel
+import com.ustadmobile.core.viewmodel.respect.respectlesson.list.RespectLessonListViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
 import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
@@ -172,7 +175,10 @@ import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRu
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.libuicompose.view.respect.respectapp.list.RespectAppListScreen
+import com.ustadmobile.libuicompose.view.respect.respectassignment.detail.RespectAssignmentDetailScreen
+import com.ustadmobile.libuicompose.view.respect.respectassignment.edit.RespectAssignmentEditScreen
 import com.ustadmobile.libuicompose.view.respect.respectassignment.list.RespectAssignmentListScreen
+import com.ustadmobile.libuicompose.view.respect.respectlesson.list.RespectLessonListScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
 import com.ustadmobile.libuicompose.view.systempermission.detail.SystemPermissionDetailScreen
 import com.ustadmobile.libuicompose.view.systempermission.edit.SystemPermissionEditScreen
@@ -956,6 +962,27 @@ fun AppNavHost(
             contentScene("/${GetSubtitleViewModel.DEST_NAME}") { backStackEntry ->
                 GetSubtitleScreen(
                     appViewModel(backStackEntry, GetSubtitleViewModel::class, ::GetSubtitleViewModel)
+                )
+            }
+
+            contentScene("/${RespectLessonListViewModel.DEST_NAME}") { backStackEntry ->
+                RespectLessonListScreen(
+                    appViewModel(backStackEntry, RespectLessonListViewModel::class,
+                        ::RespectLessonListViewModel)
+                )
+            }
+
+            contentScene("/${RespectAssignmentEditViewModel.DEST_NAME}") { backStackEntry ->
+                RespectAssignmentEditScreen(
+                    appViewModel(backStackEntry, RespectAssignmentEditViewModel::class,
+                        ::RespectAssignmentEditViewModel)
+                )
+            }
+
+            contentScene("/${RespectAssignmentDetailViewModel.DEST_NAME}") { backStackEntry ->
+                RespectAssignmentDetailScreen(
+                    appViewModel(backStackEntry, RespectAssignmentDetailViewModel::class,
+                        ::RespectAssignmentDetailViewModel)
                 )
             }
 

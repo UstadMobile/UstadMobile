@@ -81,7 +81,7 @@ abstract class UstadEditViewModel(
                     put(ARG_ENTITY_UID, entityUid.toString())
                 },
                 goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                    popUpToViewName = CURRENT_DEST,
+                    popUpToViewName = savedStateHandle[ARG_POPUPTO_ON_FINISH] ?: CURRENT_DEST,
                     popUpToInclusive = true
                 )
             )

@@ -219,15 +219,16 @@ fun ClazzListScreen(
             )
         }
 
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            UstadListFilterChipsHeader(
-                filterOptions = uiState.filterOptions,
-                selectedChipId = uiState.selectedChipId,
-                enabled = uiState.fieldsEnabled,
-                onClickFilterChip = onClickFilterChip,
-            )
+        if(uiState.showChips) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                UstadListFilterChipsHeader(
+                    filterOptions = uiState.filterOptions,
+                    selectedChipId = uiState.selectedChipId,
+                    enabled = uiState.fieldsEnabled,
+                    onClickFilterChip = onClickFilterChip,
+                )
+            }
         }
-
 
         if(!hasPendingEnrolments && doorRepoPager.isSettledEmpty) {
             item(span = { GridItemSpan(maxLineSpan) }, key = "empty_message") {

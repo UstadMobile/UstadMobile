@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 300,
-    "identityHash": "43fdf634e11365586c81ccec9784a168",
+    "identityHash": "c93d83951a7474fd9676cc8a9f3c0fe6",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -6261,7 +6261,7 @@
       },
       {
         "tableName": "RespectAssignment",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`razUid` INTEGER NOT NULL, `razToClazzUid` INTEGER NOT NULL, `razTitle` TEXT NOT NULL, `razDescription` TEXT NOT NULL, `razRlUid` INTEGER NOT NULL, `razDeadline` INTEGER NOT NULL, `razLastMod` INTEGER NOT NULL, PRIMARY KEY(`razUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`razUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `razToClazzUid` INTEGER NOT NULL, `razTitle` TEXT NOT NULL, `razDescription` TEXT NOT NULL, `razRlUid` INTEGER NOT NULL, `razDeadline` INTEGER NOT NULL, `razLastMod` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "razUid",
@@ -6307,7 +6307,7 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "razUid"
           ]
@@ -6317,7 +6317,7 @@
       },
       {
         "tableName": "RespectLesson",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rlUid` INTEGER NOT NULL, `rlRaUid` INTEGER NOT NULL, `rlLastModified` INTEGER NOT NULL, `rlUri` TEXT NOT NULL, `rlExpectedDuration` INTEGER NOT NULL, `rlTitle` TEXT NOT NULL, `rlDescription` TEXT NOT NULL, PRIMARY KEY(`rlUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rlUid` INTEGER NOT NULL, `rlRaUid` INTEGER NOT NULL, `rlLastModified` INTEGER NOT NULL, `rlUri` TEXT NOT NULL, `rlExpectedDuration` INTEGER NOT NULL, `rlTitle` TEXT NOT NULL, `rlDescription` TEXT NOT NULL, `rlThumbnailUri` TEXT, PRIMARY KEY(`rlUid`))",
         "fields": [
           {
             "fieldPath": "rlUid",
@@ -6360,6 +6360,12 @@
             "columnName": "rlDescription",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "rlThumbnailUri",
+            "columnName": "rlThumbnailUri",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -6532,7 +6538,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '43fdf634e11365586c81ccec9784a168')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c93d83951a7474fd9676cc8a9f3c0fe6')"
     ]
   }
 }

@@ -10,6 +10,7 @@ import com.ustadmobile.door.annotation.Triggers
 import com.ustadmobile.lib.db.entities.TRIGGER_CONDITION_WHERE_NEWER
 import com.ustadmobile.lib.db.entities.TRIGGER_UPSERT
 import com.ustadmobile.lib.db.entities.respect.RespectLesson.Companion.TABLE_ID
+import kotlinx.serialization.Serializable
 
 @ReplicateEntity(
     tableId = TABLE_ID,
@@ -28,6 +29,7 @@ import com.ustadmobile.lib.db.entities.respect.RespectLesson.Companion.TABLE_ID
     )
 )
 @Entity
+@Serializable
 data class RespectLesson(
     @PrimaryKey
     var rlUid: Long = 0,
@@ -39,6 +41,7 @@ data class RespectLesson(
     var rlExpectedDuration: Long = 0,
     var rlTitle: String = "",
     var rlDescription: String = "",
+    var rlThumbnailUri: String? = null,
 ) {
 
     companion object {

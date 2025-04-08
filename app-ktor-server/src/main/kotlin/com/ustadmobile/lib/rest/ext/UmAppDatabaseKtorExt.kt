@@ -22,6 +22,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.xxhash.XXStringHasher
 import com.ustadmobile.lib.db.entities.respect.RespectApp
+import com.ustadmobile.lib.db.entities.respect.RespectLesson
 
 fun UmAppDatabase.insertCourseTerminology(di: DI){
     val termList = courseTerminologyDao().findAllCourseTerminologyList()
@@ -100,13 +101,31 @@ suspend fun UmAppDatabase.initAdminUser(
 fun UmAppDatabase.respectDbInit(
     xxHasher64: XXStringHasher
 ) {
+    val chimpleRaUid = xxHasher64.hash("org.chimple")
+
     respectAppDao().insertOrIgnore(
         listOf(
             RespectApp(
-                raUid = xxHasher64.hash("org.chimple"),
+                raUid = chimpleRaUid,
                 raName = "Chimple",
             )
         )
+    )
+
+    respectLessonDao().insertOrIgnore(
+        listOf(
+            "https://chimple.cc/topic/learningUnit1/",
+            "https://chimple.cc/topic/learningUnit1/?activity_id=d4OYtGy5HojUFNraFYTo"
+        ).mapIndexed { index, lessonUri ->
+            RespectLesson(
+                rlUid = xxHasher64.hash(lessonUri),
+                rlRaUid = chimpleRaUid,
+                rlUri = lessonUri,
+                rlLastModified = systemTimeInMillis(),
+                rlExpectedDuration = (5 * 60 * 1000),
+                rlTitle = "Chimple Lesson ${index + 1}",
+            )
+        }
     )
 }
 

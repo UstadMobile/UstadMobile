@@ -16,7 +16,9 @@ import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.respect.respectassignment.edit.RespectAssignmentEditViewModel
 
 data class RespectAssignmentListUiState(
     val assignments: () -> PagingSource<Int, RespectAssignment> = { EmptyPagingSource() },
@@ -76,6 +78,7 @@ class RespectAssignmentListViewModel(
         navController.navigate(
             viewName = ClazzListViewModel.DEST_NAME,
             args = mapOf(
+                ARG_TASK to RespectAssignmentEditViewModel.ARG_TASK_NAME_NEW_ASSIGNMENT,
                 UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString()
             )
         )

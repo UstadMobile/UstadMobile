@@ -612,6 +612,13 @@ abstract class UstadViewModel(
          */
         const val ARG_RESULT_DEST_KEY = "result_key"
 
+        /**
+         * Some flows e.g. creating a new RESPECT assignment need to be recognized throughout, so
+         * each ViewModel along the way can make its decision about where to take the user next
+         */
+        const val ARG_TASK = "task"
+
+
 
 
     }

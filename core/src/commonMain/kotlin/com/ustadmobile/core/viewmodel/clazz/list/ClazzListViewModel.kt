@@ -15,8 +15,11 @@ import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.dayStringResource
+import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.respect.respectassignment.edit.RespectAssignmentEditViewModel
+import com.ustadmobile.core.viewmodel.respect.respectlesson.list.RespectLessonListViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.EnrolmentRequestAndCoursePic
 import com.ustadmobile.lib.db.entities.Clazz
@@ -60,7 +63,9 @@ data class ClazzListUiState(
 
     val localDateTimeNow: LocalDateTime = Clock.System.now().toLocalDateTime(
         TimeZone.currentSystemDefault()
-    )
+    ),
+
+    val showChips: Boolean = true,
 
 ) {
     companion object {
@@ -105,14 +110,20 @@ class ClazzListViewModel(
         )
     }
 
-    private val isForAssignment = savedStateHandle[ARG_GO_TO_ON_SELECT_CLAZZ]?.toBoolean() ?: false
+    private val argTask = savedStateHandle[ARG_TASK]
+
+    private val selectForAssignment = argTask == RespectAssignmentEditViewModel.ARG_TASK_NAME_NEW_ASSIGNMENT
 
     init {
         _appUiState.update { prev ->
             prev.copy(
                 navigationVisible = true,
                 searchState = createSearchEnabledState(),
-                title = listTitle(MR.strings.classes, MR.strings.classes),
+                title = if(selectForAssignment) {
+                    systemImpl.getString(MR.strings.select_class)
+                }else {
+                    listTitle(MR.strings.classes, MR.strings.classes)
+                },
                 fabState = createFabState(
                     hasAddPermission = activeUserPersonUid != 0L,
                     stringResource = MR.strings.clazz,
@@ -125,7 +136,8 @@ class ClazzListViewModel(
                 dayOfWeekStrings = DayOfWeek.values().associateWith {
                     systemImpl.getString(it.dayStringResource)
                 },
-                clazzList = pagingSourceFactory
+                clazzList = pagingSourceFactory,
+                showChips =  !selectForAssignment
             )
         }
 
@@ -173,8 +185,19 @@ class ClazzListViewModel(
     }
 
     fun onClickEntry(entry: Clazz) {
-
-        navigateOnItemClicked(ClazzDetailViewModel.DEST_NAME, entry.clazzUid, entry)
+        if(argTask == RespectAssignmentEditViewModel.ARG_TASK_NAME_NEW_ASSIGNMENT) {
+            navController.navigate(
+                viewName = RespectLessonListViewModel.DEST_NAME,
+                args = buildMap {
+                    putFromSavedStateIfPresent(
+                        RespectAssignmentEditViewModel.NEW_ASSIGNMENT_ARGS_TO_PASS
+                    )
+                    put(ARG_CLAZZUID, entry.clazzUid.toString())
+                }
+            )
+        }else {
+            navigateOnItemClicked(ClazzDetailViewModel.DEST_NAME, entry.clazzUid, entry)
+        }
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -218,8 +241,6 @@ class ClazzListViewModel(
         val ALL_DEST_NAMES = listOf(DEST_NAME, DEST_NAME_HOME)
 
         const val ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST = "excludeAlreadySelectedClazzList"
-
-        const val ARG_GO_TO_ON_SELECT_CLAZZ = "goToOnSelectClazz"
 
     }
 
