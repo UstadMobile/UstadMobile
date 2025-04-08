@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.respect.respectassignment.detail.RespectAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.respect.respectassignment.edit.RespectAssignmentEditViewModel
 
 data class RespectAssignmentListUiState(
@@ -80,6 +81,15 @@ class RespectAssignmentListViewModel(
             args = mapOf(
                 ARG_TASK to RespectAssignmentEditViewModel.ARG_TASK_NAME_NEW_ASSIGNMENT,
                 UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString()
+            )
+        )
+    }
+
+    fun onClickItem(assignment: RespectAssignment) {
+        navController.navigate(
+            viewName = RespectAssignmentDetailViewModel.DEST_NAME,
+            args = mapOf(
+                ARG_ENTITY_UID to assignment.razUid.toString(),
             )
         )
     }

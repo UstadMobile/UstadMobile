@@ -40,9 +40,7 @@ fun RespectAssignmentDetailScreen(
         timeZoneId = TimeZone.currentSystemDefault().id,
     )
 
-    UstadLazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    UstadLazyColumn(modifier = Modifier.fillMaxSize()) {
         item("details") {
             Text(
                 text = uiState.assignment?.assignment?.razDescription ?: "",
