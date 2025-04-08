@@ -56,6 +56,9 @@ data class RespectAssignment(
     @ReplicateEtag
     @ReplicateLastModified
     var razLastMod: Long = 0,
+
+    var razAssignedByPersonUid: Long = 0,
+
 ) {
 
     companion object {

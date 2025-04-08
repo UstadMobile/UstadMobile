@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 300,
-    "identityHash": "c93d83951a7474fd9676cc8a9f3c0fe6",
+    "identityHash": "4c61d6d2e71b21d7da887e67fc6759ec",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -6261,7 +6261,7 @@
       },
       {
         "tableName": "RespectAssignment",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`razUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `razToClazzUid` INTEGER NOT NULL, `razTitle` TEXT NOT NULL, `razDescription` TEXT NOT NULL, `razRlUid` INTEGER NOT NULL, `razDeadline` INTEGER NOT NULL, `razLastMod` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`razUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `razToClazzUid` INTEGER NOT NULL, `razTitle` TEXT NOT NULL, `razDescription` TEXT NOT NULL, `razRlUid` INTEGER NOT NULL, `razDeadline` INTEGER NOT NULL, `razLastMod` INTEGER NOT NULL, `razAssignedByPersonUid` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "razUid",
@@ -6302,6 +6302,12 @@
           {
             "fieldPath": "razLastMod",
             "columnName": "razLastMod",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "razAssignedByPersonUid",
+            "columnName": "razAssignedByPersonUid",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -6538,7 +6544,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c93d83951a7474fd9676cc8a9f3c0fe6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4c61d6d2e71b21d7da887e67fc6759ec')"
     ]
   }
 }

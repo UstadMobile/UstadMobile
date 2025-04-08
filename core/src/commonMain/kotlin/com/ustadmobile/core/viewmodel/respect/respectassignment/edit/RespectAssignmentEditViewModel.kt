@@ -50,7 +50,8 @@ class RespectAssignmentEditViewModel(
                 makeDefault = {
                     RespectAssignment(
                         razToClazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: -1,
-                        razRlUid = savedStateHandle[ARG_RESPECT_LESSON_UID]?.toLong() ?: -1
+                        razRlUid = savedStateHandle[ARG_RESPECT_LESSON_UID]?.toLong() ?: -1,
+                        razAssignedByPersonUid = activeUserPersonUid,
                     )
                 },
                 uiUpdate = {

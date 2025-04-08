@@ -8,6 +8,8 @@ import androidx.room.Query
 import app.cash.paging.PagingSource
 import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.lib.db.entities.respect.RespectAssignment
+import com.ustadmobile.lib.db.entities.respect.RespectAssignmentLessonAndApp
+import kotlinx.coroutines.flow.Flow
 
 @DoorDao
 @Repository
@@ -36,5 +38,17 @@ expect abstract class RespectAssignmentDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertAsync(entity: RespectAssignment)
+
+    @HttpAccessible
+    @Query("""
+        SELECT RespectAssignment.*, RespectLesson.*, RespectApp.*
+          FROM RespectAssignment
+               JOIN RespectLesson
+                    ON RespectLesson.rlUid = RespectAssignment.razRlUid
+               JOIN RespectApp
+                    ON RespectApp.raUid = RespectLesson.rlRaUid
+         WHERE RespectAssignment.razUid = :razUid
+    """)
+    abstract fun findByUidAsFlow(razUid: Long): Flow<RespectAssignmentLessonAndApp?>
 
 }
