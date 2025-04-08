@@ -108,6 +108,7 @@ fun UmAppDatabase.respectDbInit(
             RespectApp(
                 raUid = chimpleRaUid,
                 raName = "Chimple",
+                raAndroidPackageName = "org.chimple.bahama",
             )
         )
     )

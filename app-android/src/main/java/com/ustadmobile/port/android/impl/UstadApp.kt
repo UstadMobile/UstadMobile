@@ -112,6 +112,8 @@ import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
+import com.ustadmobile.core.domain.respect.RespectLaunchUseCase
+import com.ustadmobile.core.domain.respect.RespectLaunchUseCaseAndroid
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -1124,6 +1126,17 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 uriHelper = instance(),
                 dispatcher = Dispatchers.IO,
                 supportedLanguagesConfig = instance(),
+            )
+        }
+
+        bind<RespectLaunchUseCase>() with scoped(EndpointScope.Default).singleton {
+            RespectLaunchUseCaseAndroid(
+                context = applicationContext,
+                accountManager = instance(),
+                resumeOrStartXapiSessionUseCase = instance(),
+                getApiUrlUseCase = instance(),
+                json = instance(),
+                endpoint = context,
             )
         }
 

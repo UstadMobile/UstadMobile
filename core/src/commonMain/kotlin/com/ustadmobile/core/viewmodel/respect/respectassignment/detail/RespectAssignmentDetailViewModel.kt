@@ -1,6 +1,8 @@
 package com.ustadmobile.core.viewmodel.respect.respectassignment.detail
 
+import com.ustadmobile.core.domain.respect.RespectLaunchUseCase
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.lib.db.entities.respect.RespectAssignment
 import com.ustadmobile.lib.db.entities.respect.RespectAssignmentLessonAndApp
@@ -10,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.instanceOrNull
 
 data class RespectAssignmentDetailUiState(
     val assignment: RespectAssignmentLessonAndApp? = null,
@@ -23,6 +26,8 @@ class RespectAssignmentDetailViewModel(
     private val _uiState = MutableStateFlow(RespectAssignmentDetailUiState())
 
     val uiState: Flow<RespectAssignmentDetailUiState> = _uiState.asStateFlow()
+
+    private val launchUseCase: RespectLaunchUseCase? by di.onActiveEndpoint().instanceOrNull()
 
     init {
         viewModelScope.launch {
@@ -40,6 +45,16 @@ class RespectAssignmentDetailViewModel(
 
 
     fun onClickLaunch() {
+        val assignmentVal = _uiState.value.assignment ?: return
+
+        viewModelScope.launch {
+            launchUseCase?.invoke(
+                app = assignmentVal.app,
+                lesson = assignmentVal.lesson,
+                assignment = assignmentVal.assignment,
+            )
+        }
+
 
     }
 
