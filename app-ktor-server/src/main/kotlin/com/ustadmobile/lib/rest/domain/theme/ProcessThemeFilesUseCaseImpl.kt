@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Server-side implementation of ProcessThemeFilesUseCase that processes theme files and pushes to GitHub
- */
+ **/
 
 
 class ProcessThemeFilesUseCaseImpl : ProcessThemeFilesUseCase {
