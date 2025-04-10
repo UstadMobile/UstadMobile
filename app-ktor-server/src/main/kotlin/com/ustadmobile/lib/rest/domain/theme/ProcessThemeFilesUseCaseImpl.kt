@@ -21,10 +21,10 @@ import java.util.concurrent.TimeUnit
 
 class ProcessThemeFilesUseCaseImpl : ProcessThemeFilesUseCase {
     companion object {
-        private const val GITHUB_TOKEN = ""
-        private const val REPO_OWNER = ""
-        private const val REPO_NAME = ""
-        private const val BRANCH = ""
+        private const val GITHUB_TOKEN = "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"
+        private const val REPO_OWNER = "UstadMobile"
+        private const val REPO_NAME = "UstadMobile"
+        private const val BRANCH = "dev-admin-branding-customization-testing"
         private const val STRINGS_XML_PATH = "core/src/commonMain/resources/MR/base/strings.xml"
         private const val THEME_KT_PATH = "lib-ui-compose/src/commonMain/kotlin/com/ustadmobile/libuicompose/theme/Theme.kt"
         private const val COLOR_KT_PATH = "lib-ui-compose/src/commonMain/kotlin/com/ustadmobile/libuicompose/theme/Color.kt"
@@ -560,7 +560,7 @@ fun UstadAppTheme(
     /**
      * Push file content to GitHub
      */
-    private fun pushFileToGitHub(
+    private suspend fun pushFileToGitHub(
         fileContent: String,
         filePath: String,
         commitMessage: String,
@@ -595,6 +595,8 @@ fun UstadAppTheme(
                 val responseBody = response.body?.string() ?: "No response body"
 
                 return if (response.isSuccessful) {
+                    pullAndRebuild("/home/prashant/StudioProjects/UstadMobile", BRANCH)
+
                     Napier.d("Successfully pushed file to GitHub: $filePath")
                     "Success! File pushed to GitHub."
                 } else {
@@ -605,6 +607,63 @@ fun UstadAppTheme(
         } catch (e: Exception) {
             Napier.e("Exception during GitHub push: ${e.message}", e)
             return "Error during GitHub push: ${e.message}"
+        }
+    }
+
+    /**
+     * Simple function to update web theme after GitHub push
+     * Makes web UI changes visible with minimal complexity
+     *
+     * @param projectDir The directory containing the Kotlin Multiplatform project
+     * @param branch The git branch to pull from (defaults to the branch defined in companion object)
+     * @return Result containing success or failure information
+     */
+    suspend fun pullAndRebuild(
+        projectDir: String,
+        branch: String = BRANCH
+    ): Result<Unit> {
+        try {
+            Napier.d("Starting simple web theme update process")
+
+            // 1. Fetch and reset to handle divergent branches
+            val fetchProcess = ProcessBuilder("git", "fetch", "origin", branch)
+                .directory(File(projectDir))
+                .redirectErrorStream(true)
+                .start()
+
+            if (fetchProcess.waitFor() != 0) {
+                Napier.e("Git fetch failed")
+                return Result.failure(Exception("Git fetch failed"))
+            }
+
+            val resetProcess = ProcessBuilder("git", "reset", "--hard", "origin/$branch")
+                .directory(File(projectDir))
+                .redirectErrorStream(true)
+                .start()
+
+            if (resetProcess.waitFor() != 0) {
+                Napier.e("Git reset failed")
+                return Result.failure(Exception("Git reset failed"))
+            }
+
+            Napier.d("Git reset successful, local branch now matches origin/$branch")
+
+            // 2. Build the web resources
+            val buildProcess = ProcessBuilder(
+                "./gradlew",
+                ":app-react:build",
+                "--rerun-tasks"
+            )
+                .directory(File(projectDir))
+                .redirectErrorStream(true)
+                .start()
+
+            buildProcess.waitFor(5, TimeUnit.MINUTES)
+            Napier.d("App-react build completed")
+            return Result.success(Unit)
+        } catch (e: Exception) {
+            Napier.e("Error during web theme update: ${e.message}", e)
+            return Result.failure(e)
         }
     }
 }
