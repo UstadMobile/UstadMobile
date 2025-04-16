@@ -26,13 +26,14 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentConsentWaitingScreenViewModel
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_GENDER
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_NAME
+import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -155,7 +156,12 @@ class SignUpViewModel(
             )
         }
         loadingState = LoadingUiState.INDETERMINATE
-        val title = systemImpl.getString(MR.strings.create_account)
+
+        val title = if (_uiState.value.isMinor) {
+            systemImpl.getString(MR.strings.your_profile)
+        } else {
+            systemImpl.getString(MR.strings.create_account)
+        }
         viewModelScope.launch {
             val person = savedStateHandle.getJson(
                 OtherSignUpOptionSelectionViewModel.ARG_PERSON, Person.serializer(),
@@ -183,7 +189,7 @@ class SignUpViewModel(
                 userAccountIconVisible = false,
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = _uiState.value.isMinor,
-                    text = systemImpl.getString(MR.strings.done),
+                    text = systemImpl.getString(MR.strings.next),
                     onClick = this::onClickDone
                 )
             )
@@ -276,10 +282,14 @@ class SignUpViewModel(
                 )
 
                 navController.navigate(
-                    viewName = ParentConsentWaitingScreenViewModel.DEST_NAME,
+                    viewName = RegisterMinorWaitForParentViewModel.DEST_NAME,
                     args = emptyMap(),
                     goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
                 )
+                val goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                    RegisterAgeRedirectViewModel.DEST_NAME, true)
+                navController.navigate(RegisterMinorWaitForParentViewModel.DEST_NAME, emptyMap(),
+                    goOptions)
 
             }catch(e: Throwable) {
                 snackDispatcher.showSnackBar(Snack(e.message.toString()))

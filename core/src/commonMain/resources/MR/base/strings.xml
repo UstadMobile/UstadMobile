@@ -2080,5 +2080,9 @@
 
     <string name="wait_for_parent_to_consent">Wait for Parent to consent</string>
 
+    <string name="policy">Policy</string>
+
+    <string name="your_profile">Your profile</string>
+
 
 </resources>

@@ -13,6 +13,8 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
@@ -65,59 +67,79 @@ class AddChildProfilesViewModel(
                 parent = accountManager.currentUserSession.person,
             )
         }
-        _appUiState.update { prev ->
-            prev.copy(
-                title = systemImpl.getString(MR.strings.add_child_profiles),
-                hideBottomNavigation = true,
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.finish),
-                    onClick = this@AddChildProfilesViewModel::onClickFinish,
-
-                    ),
-                navigationVisible = false,
-                userAccountIconVisible = false,
+        val childName =  savedStateHandle[ARG_CHILD_NAME]?:""
+        val childGender =  savedStateHandle[ARG_CHILD_GENDER]?:""
+        val childDateOfBirth = savedStateHandle[ARG_CHILD_DATE_OF_BIRTH]?:""
+        ifLoggedInElseNavigateToLoginWithNextDestSet(
+            requireAdultAccount = false,
+            args = mapOf(
+                ARG_CHILD_NAME to childName,
+                ARG_CHILD_GENDER to childGender,
+                ARG_CHILD_DATE_OF_BIRTH to childDateOfBirth,
             )
-        }
-
-        launchIfHasPermission(
-            permissionCheck = {
-                true
-            }
         ) {
-            async {
-                loadEntity(
-                    serializer = ListSerializer(Person.serializer()),
-                    loadFromStateKeys = listOf(STATE_KEY_PERSONS),
-                    onLoadFromDb = {
-                        _uiState.value.childProfiles
-
-                    },
-                    makeDefault = {
-                        _uiState.value.childProfiles
-                    },
-                    uiUpdate = {
-                        _uiState.update { prev ->
-                            prev.copy(childProfiles = it ?: emptyList())
-                        }
-                    }
+            if (savedStateHandle[ARG_CHILD_NAME]!=null){
+                addChildIntoUiState()
+            }
+            _uiState.update { prev ->
+                prev.copy(
+                    parent = accountManager.currentUserSession.person,
                 )
+            }
+            _appUiState.update { prev ->
+                prev.copy(
+                    title = systemImpl.getString(MR.strings.add_child_profiles),
+                    hideBottomNavigation = true,
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = systemImpl.getString(MR.strings.finish),
+                        onClick = this@AddChildProfilesViewModel::onClickFinish,
 
+                        ),
+                    navigationVisible = false,
+                    userAccountIconVisible = false,
+                )
+            }
 
-                navResultReturner.filteredResultFlowForKey(RESULT_KEY_PERSON).collect { result ->
-                    val childProfileResult = result.result as? Person
-                        ?: return@collect
+            launchIfHasPermission(
+                permissionCheck = {
+                    true
+                }
+            ) {
+                async {
+                    loadEntity(
+                        serializer = ListSerializer(Person.serializer()),
+                        loadFromStateKeys = listOf(STATE_KEY_PERSONS),
+                        onLoadFromDb = {
+                            _uiState.value.childProfiles
+                        },
+                        makeDefault = {
+                            _uiState.value.childProfiles
+                        },
+                        uiUpdate = {
+                            _uiState.update { prev ->
+                                prev.copy(childProfiles = it ?: emptyList())
+                            }
 
-                    val newChildProfileList =
-                        _uiState.value.childProfiles.replaceOrAppend(childProfileResult) {
-                            it.personUid == childProfileResult.personUid
                         }
+                    )
 
-                    updateChildProfileList(newChildProfileList)
+
+                    navResultReturner.filteredResultFlowForKey(RESULT_KEY_PERSON).collect { result ->
+                        val childProfileResult = result.result as? Person
+                            ?: return@collect
+
+                        val newChildProfileList =
+                            _uiState.value.childProfiles.replaceOrAppend(childProfileResult) {
+                                it.personUid == childProfileResult.personUid
+                            }
+
+                        updateChildProfileList(newChildProfileList)
+                    }
+
                 }
 
             }
-
         }
 
 
@@ -160,9 +182,8 @@ class AddChildProfilesViewModel(
             val childName = savedStateHandle[ARG_CHILD_NAME]
             val childGender = savedStateHandle[ARG_CHILD_GENDER]?.toInt()?:0
             val childDateOfBirth = savedStateHandle[ARG_CHILD_DATE_OF_BIRTH]?.toLong()?:0L
-            // full name splitting into first name and last name
             val fullName = childName?.trim()
-            val parts = fullName?.trim()?.split(" ", limit = 2)
+            val parts = fullName?.trim()?.split(".", limit = 2)
             val firstName = parts?.get(0)
             val lastName = parts?.getOrElse(1) { "" }
             val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
