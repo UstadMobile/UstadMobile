@@ -54,40 +54,43 @@ fun RegisterMinorWaitForParentScreen(
             .fillMaxSize()
             .padding(16.dp)
     )  {
-        UstadDetailField2(
-            valueText = uiState.username ?: "",
-            labelText = stringResource(MR.strings.username),
-            icon = Icons.Default.AccountCircle,
-        )
+        if (uiState.showUsernameAndPassword){
+            UstadDetailField2(
+                valueText = uiState.username ?: "",
+                labelText = stringResource(MR.strings.username),
+                icon = Icons.Default.AccountCircle,
+            )
 
-        Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-        UstadDetailField2(
-            valueContent = { Text(if(passwordVisible) { uiState.password } else { "*****" }) },
-            labelContent = { Text(stringResource(MR.strings.password)) },
-            leadingContent = {
-                Icon(
-                    imageVector = Icons.Default.VpnKey,
-                    contentDescription = null,
-                )
-            },
-            trailingContent = {
-                IconButton(
-                    onClick = {
-                        passwordVisible = !passwordVisible
-                    },
-                ) {
+            UstadDetailField2(
+                valueContent = { Text(if(passwordVisible) { uiState.password } else { "*****" }) },
+                labelContent = { Text(stringResource(MR.strings.password)) },
+                leadingContent = {
                     Icon(
-                        imageVector = if(!passwordVisible) {
-                            Icons.Filled.Visibility
-                        }else {
-                            Icons.Filled.VisibilityOff
-                        },
-                        contentDescription = stringResource(MR.strings.toggle_visibility),
+                        imageVector = Icons.Default.VpnKey,
+                        contentDescription = null,
                     )
+                },
+                trailingContent = {
+                    IconButton(
+                        onClick = {
+                            passwordVisible = !passwordVisible
+                        },
+                    ) {
+                        Icon(
+                            imageVector = if(!passwordVisible) {
+                                Icons.Filled.Visibility
+                            }else {
+                                Icons.Filled.VisibilityOff
+                            },
+                            contentDescription = stringResource(MR.strings.toggle_visibility),
+                        )
+                    }
                 }
-            }
-        )
+            )
+
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 

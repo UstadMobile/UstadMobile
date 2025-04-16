@@ -21,6 +21,7 @@ import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.appendSelectedAccount
+import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
@@ -280,16 +281,19 @@ class SignUpViewModel(
                         parentContact = _uiState.value.parentEmail?:""
                     )
                 )
-
+                val args = mutableMapOf<String, String>().also {
+                    it[RegisterMinorWaitForParentViewModel.ARG_USERNAME] = _uiState.value.person?.username ?: ""
+                    it[RegisterMinorWaitForParentViewModel.ARG_PARENT_CONTACT] =
+                        _uiState.value.parentEmail?: ""
+                    it[RegisterMinorWaitForParentViewModel.ARG_PASSWORD] = _uiState.value.password ?: ""
+                    it.putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_POPUPTO_ON_FINISH)
+                }
                 navController.navigate(
                     viewName = RegisterMinorWaitForParentViewModel.DEST_NAME,
-                    args = emptyMap(),
+                    args = args,
                     goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
                 )
-                val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                    RegisterAgeRedirectViewModel.DEST_NAME, true)
-                navController.navigate(RegisterMinorWaitForParentViewModel.DEST_NAME, emptyMap(),
-                    goOptions)
+
 
             }catch(e: Throwable) {
                 snackDispatcher.showSnackBar(Snack(e.message.toString()))

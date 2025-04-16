@@ -17,32 +17,37 @@ data class RegisterMinorWaitForParentUiState(
 
     val parentContact: String = "",
 
-)
+    val showUsernameAndPassword: Boolean = true,
+
+    )
 
 class RegisterMinorWaitForParentViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle
-): UstadViewModel(di, savedStateHandle, DEST_NAME) {
+) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(RegisterMinorWaitForParentUiState())
 
-    val uiState : Flow<RegisterMinorWaitForParentUiState> = _uiState.asStateFlow()
+    val uiState: Flow<RegisterMinorWaitForParentUiState> = _uiState.asStateFlow()
 
     init {
-        _appUiState.update { prev ->
-            prev.copy(
-                title = systemImpl.getString(MR.strings.register),
-                navigationVisible = false,
-                userAccountIconVisible = false,
-            )
-        }
         _uiState.update { prev ->
             prev.copy(
                 username = savedStateHandle[ARG_USERNAME] ?: "",
                 password = savedStateHandle[ARG_PASSWORD] ?: "",
                 parentContact = savedStateHandle[ARG_PARENT_CONTACT] ?: "",
+                showUsernameAndPassword = savedStateHandle[ARG_SHOW_USERNAME_PASSWORD].toBoolean(),
             )
         }
+        _appUiState.update { prev ->
+            prev.copy(
+                title = if (_uiState.value.showUsernameAndPassword) systemImpl.getString(MR.strings.register)
+                else systemImpl.getString(MR.strings.wait_for_parent),
+                navigationVisible = false,
+                userAccountIconVisible = false,
+            )
+        }
+
     }
 
     fun onClickOK() {
@@ -63,6 +68,8 @@ class RegisterMinorWaitForParentViewModel(
         const val ARG_PASSWORD = "password"
 
         const val ARG_PARENT_CONTACT = "parentContact"
+
+        const val ARG_SHOW_USERNAME_PASSWORD = "showUsernamePassword"
 
     }
 }

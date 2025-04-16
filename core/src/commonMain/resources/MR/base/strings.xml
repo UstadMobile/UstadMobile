@@ -2079,9 +2079,11 @@
     <string name="parent_email">Parent email</string>
 
     <string name="wait_for_parent_to_consent">Wait for Parent to consent</string>
+    <string name="wait_for_parent">Wait for Parent</string>
 
     <string name="policy">Policy</string>
 
+    <string name="your_profile">Your profile</string>
     <string name="your_profile">Your profile</string>
 
 

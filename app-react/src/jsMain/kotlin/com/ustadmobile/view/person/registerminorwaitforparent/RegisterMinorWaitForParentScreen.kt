@@ -40,31 +40,31 @@ val RegisterMinorWaitForParentComponent2 = FC<RegisterMinorWaitForParentScreenPr
     UstadStandardContainer {
         Stack {
             spacing = responsive(20.px)
+            if (props.uiState.showUsernameAndPassword) {
+                UstadDetailField {
+                    valueText = ReactNode(props.uiState.username)
+                    labelText = strings[MR.strings.username]
+                    icon = AccountCircleIcon.create()
+                }
 
-            UstadDetailField {
-                valueText = ReactNode(props.uiState.username)
-                labelText = strings[MR.strings.username]
-                icon = AccountCircleIcon.create()
-            }
+                UstadDetailField {
+                    valueText = ReactNode(password)
+                    labelText = strings[MR.strings.password]
+                    icon = KeyIcon.create()
 
-            UstadDetailField {
-                valueText = ReactNode(password)
-                labelText = strings[MR.strings.password]
-                icon = KeyIcon.create()
+                    secondaryActionContent = IconButton.create {
+                        onClick = {
+                            passwordVisible = !passwordVisible
+                        }
 
-                secondaryActionContent = IconButton.create {
-                    onClick = {
-                        passwordVisible = !passwordVisible
-                    }
-
-                    if(!passwordVisible) {
-                        VisibilityIcon()
-                    }else {
-                        VisibilityOffIcon()
+                        if (!passwordVisible) {
+                            VisibilityIcon()
+                        } else {
+                            VisibilityOffIcon()
+                        }
                     }
                 }
             }
-
             Typography {
                 + strings.format(MR.strings.we_sent_a_message_to_your_parent, props.uiState.parentContact)
             }
