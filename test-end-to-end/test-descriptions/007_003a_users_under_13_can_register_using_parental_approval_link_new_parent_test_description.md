@@ -43,10 +43,10 @@ When registration is enabled: Users under 13 can register using parental approva
 35. User logged into the app
 36. User can see list of the child profiles
 37. Parent clicks on the child profile (the one who requested permission).
-38. Verify Parent able to see child details, "I consent" and "I do not consent" buttons.
-39. Parent can edit child details if needed.
-40. Parent clicks on "I consent" button.
-41. Clicks on "Next" button.
+38. Parent can edit child details if needed.
+39. Clicks on "Next" button.
+40. Parent able to see POLICY page.
+41. User clicks on "Accept" button.
 42. User able to see dialogue asking to continue as "Child user" or "Parent user"
 43. User clicks "Child user"
 44. Child user able to access courses, library features in the app.
