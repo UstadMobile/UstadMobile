@@ -131,7 +131,6 @@ trickle -s -d 128 -u 128 bash
 
 7.3b [When registration is enabled: Users under 13 can register using parental approval link - existing parent user](test-descriptions/007_003b_users_under_13_can_register_using_parental_approval_link_existing_parent_test_description.md)
 
-
 7.4 [The username validation and adding a profile photo](test-descriptions/007_004_username_validation_and_add_profile_pic_test_description.md)
 
 7.5 [Students user under 13 is added by a teacher/admin, don't require parental approval](test-descriptions/007_005_student_registered_by_admin_or_teacher_dont_need_parentConsent_test_description.md)
