@@ -39,10 +39,11 @@ it('Admin user create a course and add members to the course', () => {
   cy.contains('Permissions').click()
   cy.contains('button', 'Edit').click()
   cy.wait(1000)
+  //cy.get(".MuiFormControlLabel-root.Mui-disabled",{timeout:6000}).should('not.exist')
+  cy.contains('Add new courses',{timeout:6000}).should('be.visible')
   cy.contains('Add new courses',{timeout:5000}).click()
   cy.contains("button","Save",{timeout:5000}).click()
 // Add course blocks
-  cy.contains("Library").click()
   cy.contains("Courses").click()
   cy.contains('Test Course Block').click()
 // Add module block
@@ -69,7 +70,7 @@ it('Admin user create a course and add members to the course', () => {
   cy.contains('Edit course').should('be.visible')
   cy.contains("button","Save",{timeout:5000}).click()
 // Add post to the discussion
-  cy.contains("Library").click()
+
   cy.contains("Courses").click()
   cy.contains('All').click()
   cy.contains('Test Course Block').click()
@@ -80,7 +81,6 @@ it('Admin user create a course and add members to the course', () => {
   cy.get('#actionBarButton').click()
   cy.contains('Post 1',{timeout:5000}).should('be.visible')
 // Copy the existing course
-  cy.contains("Library").click()
   cy.contains("Courses").click()
   cy.contains('All').click()
   cy.contains('Test Course Block').click()
