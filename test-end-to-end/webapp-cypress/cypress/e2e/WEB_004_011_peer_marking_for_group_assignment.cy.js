@@ -120,6 +120,23 @@ it('Student2 -Group 1 view his grade', () => {
   cy.contains('SUBMIT').should('not.exist') // assertion to make sure multiple submission is not allowed
 })
 
+it('Admin copy existing course - verify assignment submissions and reviewer', () => {
+  cy.ustadClearDbAndLogin('admin','testpass')
+  cy.contains('Test Course Block').click()
+  cy.contains('Copy').should('exist')
+  cy.contains('Copy').click()
+  cy.contains("#appbar_title", "Copy course").should("be.visible")
+  cy.get("input[value='Copy of Test Course Block']").should("be.visible")
+  cy.contains('button', 'Save',{timeout:5000}).click()
+  cy.contains('button', 'Save',{timeout:5000}).should('not.exist')
+  cy.contains('Courses').click()
+  cy.contains('Copy of Test Course Block').click()
+  cy.contains("Assignment 1").click()
+  cy.contains("Submissions").click()
+  cy.contains("Group 1").should('not.be.visible')
+  cy.contains("Group 2").should('not.be.visible')
+})
+
   after(() => {
     // Stop Test Server after tests are complete
     cy.ustadStopTestServer();
