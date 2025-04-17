@@ -43,7 +43,7 @@ trickle -s -d 128 -u 128 bash
 
 ### 2: Course creation, enrolment, attendance, progress
 
-2.1 [Add new course, add members to that course and add a course banner](test-descriptions/002_001_admin_add_new_course_members_and_set_course_banner_test_description.md))
+2.1 [Add new course, add members to that course , add a course banner and admin copy the course](test-descriptions/002_001_admin_add_new_course_members_and_set_course_banner_test_description.md))
 
 2.2 [Students can join class using class code or link](test-descriptions/002_002_student_joining_course_using_code_test_description.md)
 
@@ -52,8 +52,6 @@ trickle -s -d 128 -u 128 bash
 2.4 [Teacher/admin can remove people from a course](test-descriptions/002_004_teacher_or_admin_can%20remove_people_from_a_course_test_description.md)
 
 2.5 [Teacher and admin user can grant permission for the course to other users](test-descriptions/002_005_admin_grant_permissions_test_description.md)
-
-2.6 [Teacher and admin user can copy a course](test-descriptions/002_006_admin_or_teacher_can_copy_a_course_test_description.md)
 
 ### 3: Course block editing
 
