@@ -174,26 +174,28 @@ class ClazzEditViewModel(
                         serializer = ClazzWithHolidayCalendarAndAndTerminology.serializer(),
                         onLoadFromDb = {
                             it.clazzDao().takeIf { entityUidArg != 0L }
-                                ?.findByUidWithHolidayCalendarAsync(entityUidArg).let { dbResult ->
-                                    val hasPicture = dbResult?.coursePicture != null
-                                    //Add CoursePicture entity if not already present
-                                    if(dbResult == null || hasPicture){
-                                        dbResult
-                                    }else {
-                                        dbResult.shallowCopy {
+                                ?.findByUidWithHolidayCalendarAsync(entityUidArg)?.let { dbResult ->
+                                    var updatedClazz = dbResult
+
+                                    // Always update the name if action is COPY
+                                    if (clazzAction == ClazzAction.COPY) {
+                                        updatedClazz = updatedClazz.shallowCopy {
+                                            clazzName =
+                                                "${systemImpl.getString(MR.strings.copy_of)} ${this.clazzName}"
+                                        }
+                                    }
+                                    // Add CoursePicture if it's missing
+                                    if (dbResult.coursePicture == null) {
+                                        updatedClazz = updatedClazz.shallowCopy {
                                             coursePicture = CoursePicture(
                                                 coursePictureUid = entityUidArg
                                             )
-                                            clazzName = if (clazzAction == ClazzAction.COPY) {
-                                                "${systemImpl.getString(MR.strings.copy_of)} ${this.clazzName}"
-                                            } else {
-                                                this.clazzName
-                                            }
                                         }
-
                                     }
+                                    updatedClazz
                                 }
                         },
+
                         makeDefault = {
                             ClazzWithHolidayCalendarAndAndTerminology().apply {
                                 clazzUid = effectiveClazzUid
