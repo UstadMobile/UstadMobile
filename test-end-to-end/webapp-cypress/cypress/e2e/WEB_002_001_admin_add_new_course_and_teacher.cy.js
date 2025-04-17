@@ -39,7 +39,7 @@ it('Admin user create a course and add members to the course', () => {
   cy.contains('Permissions').click()
   cy.contains('button', 'Edit').click()
   cy.wait(1000)
-  //cy.get(".MuiFormControlLabel-root.Mui-disabled",{timeout:6000}).should('not.exist')
+  //cy.get(".MuiFormControlLabel-root.Mui-disabled",{timeout:6000}).should('not.exist') // this one not working always so added wait command
   cy.contains('Add new courses',{timeout:6000}).should('be.visible')
   cy.contains('Add new courses',{timeout:5000}).click()
   cy.contains("button","Save",{timeout:5000}).click()
