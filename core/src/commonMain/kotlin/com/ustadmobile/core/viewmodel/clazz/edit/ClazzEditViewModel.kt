@@ -621,7 +621,10 @@ fun onClickSave() {
                 block.assignment?.let { assignment ->
                     assignment.copy(
                         caUid = if ((clazzAction== ClazzAction.COPY)) 0L else assignment.caUid, // Explicitly reference `assignment`
-                        caClazzUid = clazzUid
+                        caClazzUid = clazzUid,
+                        caGroupUid = if (clazzAction == ClazzAction.COPY) 0L else assignment.caGroupUid, // 👈 make group → individual on copy
+                        caMarkingType = if (clazzAction == ClazzAction.COPY) ClazzAssignment.MARKED_BY_COURSE_LEADER else assignment.caMarkingType
+
                     )
                 }
             }
