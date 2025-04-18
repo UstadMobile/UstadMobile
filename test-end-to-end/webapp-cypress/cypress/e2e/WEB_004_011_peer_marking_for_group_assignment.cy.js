@@ -133,8 +133,8 @@ it('Admin copy existing course - verify assignment submissions and reviewer', ()
   cy.contains('Copy of Test Course Block').click()
   cy.contains("Assignment 1").click()
   cy.contains("Submissions").click()
-  cy.contains("Group 1").should('not.be.visible')
-  cy.contains("Group 2").should('not.be.visible')
+  cy.contains("Group 1").should('not.exist')
+  cy.contains("Group 2").should('not.exist')
 })
 
   after(() => {
