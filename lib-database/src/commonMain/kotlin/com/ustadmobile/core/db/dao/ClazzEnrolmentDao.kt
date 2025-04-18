@@ -28,6 +28,7 @@ import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPersonDetailDetails
 import com.ustadmobile.lib.db.composites.CourseNameAndPersonName
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.respect.EnrolmentAndPerson
 import com.ustadmobile.lib.db.entities.xapi.ActorEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -230,6 +231,24 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         permission: Long,
     ): PagingSource<Int, PersonAndClazzMemberListDetails>
 
+
+    @HttpAccessible
+    @Query("""
+        SELECT Person.*, ClazzEnrolment.*, PersonPicture.*
+          FROM ClazzEnrolment
+               LEFT JOIN Person
+                         ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+               LEFT JOIN PersonPicture
+                         ON PersonPicture.personPictureUid = ClazzEnrolment.clazzEnrolmentPersonUid
+         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = (
+               SELECT RespectAssignment.razToClazzUid
+                 FROM RespectAssignment
+                WHERE RespectAssignment.razUid = :razUid)                
+           AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+    """)
+    abstract fun findByRespectAssignmentUid(
+        razUid: Long
+    ): PagingSource<Int, EnrolmentAndPerson>
 
     /**
      * This is effectively the same query as above, however needs to trigger additional

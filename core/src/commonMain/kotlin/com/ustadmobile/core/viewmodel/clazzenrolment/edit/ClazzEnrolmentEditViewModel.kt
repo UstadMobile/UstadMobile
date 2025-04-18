@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -93,7 +94,7 @@ class ClazzEnrolmentEditViewModel(
                             ?: ClazzEnrolment.ROLE_STUDENT
                         timeZone = activeRepo.clazzDao().getClazzTimeZoneByClazzUidAsync(
                             clazzEnrolmentClazzUid
-                        ) ?: throw IllegalStateException("Could not find timezone for clazzUid")
+                        ) ?: TimeZone.currentSystemDefault().id
                     }
                 },
                 uiUpdate = {

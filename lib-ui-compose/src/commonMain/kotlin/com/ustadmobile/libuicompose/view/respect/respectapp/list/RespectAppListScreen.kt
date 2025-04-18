@@ -1,6 +1,7 @@
 package com.ustadmobile.libuicompose.view.respect.respectapp.list
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,13 +41,13 @@ fun RespectAppListScreen(
     )
 
     UstadLazyVerticalGrid(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().padding(16.dp),
 
         // 600 width of the smallest iPad,
         // subtracted 16 = horizontal padding & space between cards,
         // half of 584 is 292
         // card width = 292dp.
-        columns = GridCells.Adaptive(146.dp)
+        columns = GridCells.Adaptive(128.dp)
     ) {
         ustadPagedItems(
             pagingItems = doorRepoPager.lazyPagingItems,

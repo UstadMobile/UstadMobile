@@ -109,6 +109,13 @@ fun UmAppDatabase.respectDbInit(
                 raUid = chimpleRaUid,
                 raName = "Chimple",
                 raAndroidPackageName = "org.chimple.bahama",
+                raIconUrl = "https://www.ustadmobile.com/files/icons/chimple.png"
+            ),
+            RespectApp(
+                raUid = xxHasher64.hash("org.tangerine"),
+                raName = "Tangerine",
+                raAndroidPackageName = "org.rti.tangerine",
+                raIconUrl = "https://www.ustadmobile.com/files/icons/tangerine_icon.png"
             )
         )
     )

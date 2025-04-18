@@ -7,6 +7,7 @@ import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.lib.db.entities.respect.RespectApp
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
+import com.ustadmobile.core.MR
 
 data class RespectAppListUiState(
     val appList: () -> PagingSource<Int, RespectApp> = { EmptyPagingSource() },
@@ -21,6 +22,7 @@ class RespectAppListViewModel(
 ) {
 
     init {
+        _appUiState.update { it.copy(title = systemImpl.getString(MR.strings.apps)) }
         _uiState.update { prev ->
             prev.copy(
                 appList = { activeRepo.respectAppDao().findAllAsPagingSource() }
