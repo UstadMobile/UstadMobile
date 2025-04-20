@@ -21,8 +21,10 @@ it('Child user aged below 13 register as a new user', () => {
   cy.get('div[id="gender"]').click()
   cy.contains("li","Female").click()
   cy.contains("label", "Parent email*").parent().find("input").clear().type('parent@email.com')
-  cy.contains('button','Done').click()
-  cy.contains("Wait for Parent to consent").should('exist')
+  cy.contains('button','Next').click()
+  cy.contains("Wait for Parent").should('exist')
+  //cy.contains('button','OK').click()
+ // cy.wait(5000)
 })
 
 it('Parent user clicks on link in the email received from ustad mobile', () => {

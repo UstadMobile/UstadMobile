@@ -22,31 +22,34 @@ When registration is enabled: Users under 13 can register using parental approva
 14. Select Gender.
 15. Enter Parents' email address.
 16. Click on Done.
-17. Child user gets a page showing "Waiting for parent Consent"
-18. Clear the app storage
-19. Parent user gets an email asking for parent consent for the child user
-20. Parent user clicks on the link in the email.
-21. Ustad Mobile app gets open
-22. Parent user clicks on "New User" button.
-23. Parent select their date of birth.
-24. Click on "Next" button.
-25. User read "Terms and Condition".
-26. User clicks "Accept" button.
-27. User gets "Create account" page.
-28. Enter "Full name".
-29. Selects Gender.
-30. Enter Parent email/phone
-31. Verify a checkbox with tickmark next to Parents is visible but not editable to user
-32. Click on "Other options", then signup with username and password.
-33. Enter username and password
-34. Click on "Signup" button
-35. User logged into the app
-36. User can see list of the child profiles
-37. Parent clicks on the child profile (the one who requested permission).
-38. Parent can edit child details if needed.
-39. Clicks on "Next" button.
-40. Parent able to see POLICY page.
-41. User clicks on "Accept" button.
-42. User able to see dialogue asking to continue as "Child user" or "Parent user"
-43. User clicks "Child user"
-44. Child user able to access courses, library features in the app.
+17. Child user gets "Wait for parent Consent" screen with "OK" button
+18. Child user clicks on "OK" button
+19. Child user gets New user/Existing user screen
+20. Clear the app storage
+21. Parent user gets an email asking for parental consent for the registered child user
+22. Parent user clicks on the link in the email.
+23. Ustad Mobile app gets open
+24. Parent user clicks on "New User" button.
+25. Parent select their date of birth.
+26. Click on "Next" button.
+27. User read "Terms and Condition".
+28. User clicks "Accept" button.
+29. User gets "Create account" page.
+30. Enter "Full name".
+31. Selects Gender.
+32. Enter Parent email/phone
+33. Verify a checkbox with tickmark next to Parents is visible
+34. Click on "Other options", then signup with username and password.
+35. Enter username and password
+36. Click on "Signup" button
+37. User logged into the app
+38. User can see list of the child profiles
+39. Parent clicks on the child profile (the one who requested permission).
+40. Parent can verify child details added by child.
+41. Clicks on "Done" button.
+42. User can see list of the child profiles
+43. Clicks on "Done" button.
+44. User able to see popup appears asking "Select account to start with" 
+45. Verify Child name and Parent name are visible in that popup
+46. User clicks "Child name"
+47. Child user able to access courses, library features in the app.
