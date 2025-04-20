@@ -1,7 +1,9 @@
 package com.ustadmobile.core.viewmodel.signup
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.SendConsentRequestToParentUseCase
 import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
@@ -17,18 +19,24 @@ import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.appendSelectedAccount
+import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.REGISTER_MODE_MINOR
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_REFERER_SCREEN
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_MINOR
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
@@ -98,6 +106,8 @@ class SignupEnterUsernamePasswordViewModel(
 
     private val isParent = savedStateHandle[IS_PARENT].toBoolean()
 
+    private val isMinor = savedStateHandle[ARG_IS_MINOR].toBoolean()
+
     private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]
         ?: apiUrlConfig.newPersonalAccountsLearningSpaceUrl ?: "http://localhost"
 
@@ -112,6 +122,8 @@ class SignupEnterUsernamePasswordViewModel(
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
         on(LearningSpace(serverUrl)).instance()
 
+    val sendConsentRequestToParentUseCase : SendConsentRequestToParentUseCase =
+        di.on(LearningSpace(serverUrl)).direct.instance()
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -253,10 +265,15 @@ class SignupEnterUsernamePasswordViewModel(
                 savePerson.personUid = uid
 
                 val passwordVal = _uiState.value.password ?: return@launch
+                val parentJoin = PersonParentJoin(ppjEmail = savedStateHandle[SignUpViewModel.ARG_PARENT_CONTACT])
                 accountManager.register(
                     person = savePerson,
                     password = passwordVal,
-                    learningSpaceUrl = serverUrl
+                    learningSpaceUrl = serverUrl,
+                    accountRegisterOptions = AccountRegisterOptions(
+                        makeAccountActive = !isMinor,
+                        parentJoin = parentJoin
+                    ),
                 )
 
                 val personPictureVal = _uiState.value.personPicture
@@ -314,7 +331,7 @@ class SignupEnterUsernamePasswordViewModel(
     private fun navigateToAppropriateScreen(savePerson: Person) {
 
         if (isParent) {
-            navController.navigate(AddChildProfilesViewModel.DEST_NAME,
+            navController.navigate(ChildProfileListViewModel.DEST_NAME,
                 args = buildMap {
                     put(ARG_NEXT, nextDestination)
                     putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
@@ -322,6 +339,11 @@ class SignupEnterUsernamePasswordViewModel(
                 }
             )
 
+        } else if (isMinor){
+            viewModelScope.launch {
+                sendConsentAndNavigateToMinorWaitScreen(true)
+
+            }
         } else {
 
             val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
@@ -334,6 +356,37 @@ class SignupEnterUsernamePasswordViewModel(
                 goOptions
             )
 
+        }
+    }
+    private suspend fun sendConsentAndNavigateToMinorWaitScreen(showUsernamePassword: Boolean) {
+        try {
+            val savePerson = _uiState.value.person ?: throw IllegalStateException("child details are empty")
+            val parentContact = savedStateHandle[SignUpViewModel.ARG_PARENT_CONTACT]
+            sendConsentRequestToParentUseCase(
+                SendConsentRequestToParentUseCase.SendConsentRequestToParentRequest(
+                    childFullName = savePerson.fullName(),
+                    childDateOfBirth = savePerson.dateOfBirth,
+                    childGender = savePerson.gender,
+                    parentContact = parentContact?:""
+                )
+            )
+            val args = mutableMapOf<String, String>().also {
+                it[RegisterMinorWaitForParentViewModel.ARG_USERNAME] = _uiState.value.person?.username ?: ""
+                it[RegisterMinorWaitForParentViewModel.ARG_SHOW_USERNAME_PASSWORD] =
+                    showUsernamePassword.toString()
+                it[RegisterMinorWaitForParentViewModel.ARG_PARENT_CONTACT] =
+                    parentContact?:""
+                it[RegisterMinorWaitForParentViewModel.ARG_PASSWORD] =  ""
+                it.putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_POPUPTO_ON_FINISH)
+                it[ARG_REFERER_SCREEN] = "AddAccountSelectNewOrExisting"
+            }
+            navController.navigate(
+                viewName = RegisterMinorWaitForParentViewModel.DEST_NAME,
+                args = args,
+                goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+            )
+        } catch (e: Exception) {
+            Napier.e("Error : ${e.message}", e)
         }
     }
 

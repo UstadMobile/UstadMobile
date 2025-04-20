@@ -2,8 +2,8 @@ package com.ustadmobile.view.person.child
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesUiState
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListUiState
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel
 import mui.material.*
 import react.*
 import com.ustadmobile.core.MR
@@ -24,20 +24,20 @@ import web.cssom.pct
 import web.cssom.px
 
 
-external interface AddChildProfilesProps : Props {
-    var uiState: AddChildProfilesUiState
+external interface ChildProfileListProps : Props {
+    var uiState: ChildProfileListUiState
     var onClickEditChild: (Person) -> Unit
     var onClickDeleteChileProfile: (Person) -> Unit
     var onClickAddChild: () -> Unit
 
 }
 
-val AddChildProfilesScreen = FC<Props> {
+val ChildProfileListScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
-        AddChildProfilesViewModel(di, savedStateHandle)
+        ChildProfileListViewModel(di, savedStateHandle)
     }
 
-    val uiState by viewModel.uiState.collectAsState(AddChildProfilesUiState())
+    val uiState by viewModel.uiState.collectAsState(ChildProfileListUiState())
     println("childProfiles = ${uiState.childProfiles}")
 
     Dialog {
@@ -74,7 +74,7 @@ val AddChildProfilesScreen = FC<Props> {
         onClickAddChild = viewModel::onClickAddChileProfile
     }
 }
-val AddChildProfilesComponent2 = FC<AddChildProfilesProps> { props ->
+val AddChildProfilesComponent2 = FC<ChildProfileListProps> { props ->
     val strings = useStringProvider()
     val muiAppState = useMuiAppState()
 

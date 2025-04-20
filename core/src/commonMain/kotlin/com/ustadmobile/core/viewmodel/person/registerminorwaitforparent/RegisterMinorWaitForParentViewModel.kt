@@ -30,6 +30,8 @@ class RegisterMinorWaitForParentViewModel(
 
     val uiState: Flow<RegisterMinorWaitForParentUiState> = _uiState.asStateFlow()
 
+    val refererScreen = savedStateHandle[ARG_REFERER_SCREEN]
+
     init {
         _uiState.update { prev ->
             prev.copy(
@@ -56,6 +58,10 @@ class RegisterMinorWaitForParentViewModel(
          * redirect and person edit itself), so if the user goes back, they go back to the login
          * screen.
          */
+        if (refererScreen!=null){
+            navController.popBackStack(refererScreen, true)
+            return
+        }
         navController.popBackStack(DEST_NAME, true)
     }
 
@@ -70,6 +76,8 @@ class RegisterMinorWaitForParentViewModel(
         const val ARG_PARENT_CONTACT = "parentContact"
 
         const val ARG_SHOW_USERNAME_PASSWORD = "showUsernamePassword"
+
+        const val ARG_REFERER_SCREEN = "RefererScreen"
 
     }
 }

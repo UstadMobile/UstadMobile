@@ -99,12 +99,12 @@ import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.view.dbexport.DbExportScreen
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.child.EditChildProfileViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.core.viewmodel.signup.SignupEnterUsernamePasswordViewModel
 import com.ustadmobile.view.accountlist.AccountListScreen
 import com.ustadmobile.view.person.accountedit.PersonAccountEditScreen
-import com.ustadmobile.view.person.child.AddChildProfilesScreen
+import com.ustadmobile.view.person.child.ChildProfileListScreen
 import com.ustadmobile.view.person.child.EditChildProfileScreen
 import com.ustadmobile.core.viewmodel.account.list.AccountListViewModel
 import com.ustadmobile.view.contententry.importlink.ContentEntryImportLinkScreen
@@ -244,8 +244,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         SignUpEnterUsernamePasswordScreen
     ),
     UstadScreen(
-        AddChildProfilesViewModel.DEST_NAME, "Add Child Profiles Screen",
-        AddChildProfilesScreen
+        ChildProfileListViewModel.DEST_NAME, "Add Child Profiles Screen",
+        ChildProfileListScreen
     ),
     UstadScreen(
         EditChildProfileViewModel.DEST_NAME, "Edit Child Profile Screen",

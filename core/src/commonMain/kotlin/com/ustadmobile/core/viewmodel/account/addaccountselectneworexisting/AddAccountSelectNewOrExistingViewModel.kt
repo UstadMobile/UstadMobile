@@ -24,12 +24,12 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.account.addaccountselectusertype.AddAccountSelectNewOrExistingUserTypeViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_GENDER
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_NAME
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_GENDER
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_NAME
 import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.lib.db.entities.Person
 import io.github.aakira.napier.Napier
@@ -98,6 +98,16 @@ class AddAccountSelectNewOrExistingViewModel(
     val uiState: Flow<AddAccountSelectNewOrExistingUiState> = _uiState.asStateFlow()
 
     init {
+        /**
+         * this check is for RegisterMinorWaitForParentViewModel
+         * If the app is being used for the first time, then it goes back to the start screen (SelectNewOrExisting).
+         * If this was reached through the account manager - then go back to the account manager
+         */
+        if (savedStateHandle[RegisterMinorWaitForParentViewModel.ARG_REFERER_SCREEN]!=null){
+            savedStateHandle[RegisterMinorWaitForParentViewModel.ARG_REFERER_SCREEN]=
+                DEST_NAME
+
+        }
         val nextDestination = savedStateHandle[UstadView.ARG_NEXT]
         if (nextDestination !=null){
             val questionIndex = nextDestination.indexOf('?')

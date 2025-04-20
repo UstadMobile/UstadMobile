@@ -2,6 +2,7 @@ package com.ustadmobile.core.viewmodel.signup
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.account.SendConsentRequestToParentUseCase
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.credentials.CreatePasskeyParams
@@ -13,11 +14,15 @@ import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
+import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_REFERER_SCREEN
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_MINOR
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -55,6 +60,7 @@ class OtherSignUpOptionSelectionViewModel(
 
     private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]?: "http://localhost"
     private val isParent = savedStateHandle[IS_PARENT].toBoolean()
+    private val isMinor = savedStateHandle[ARG_IS_MINOR].toBoolean()
 
     private val apiUrlConfig: SystemUrlConfig by instance()
 
@@ -70,6 +76,8 @@ class OtherSignUpOptionSelectionViewModel(
     private val enrollToCourseFromInviteCodeUseCase: EnrollToCourseFromInviteCodeUseCase =
         di.on(LearningSpace(serverUrl)).direct.instance()
 
+    val sendConsentRequestToParentUseCase : SendConsentRequestToParentUseCase =
+        di.on(LearningSpace(serverUrl)).direct.instance()
     init {
         viewModelScope.launch {
             val person = savedStateHandle.getJson(ARG_PERSON, Person.serializer()) ?: Person()
@@ -139,7 +147,7 @@ class OtherSignUpOptionSelectionViewModel(
             }
             if (isParent) {
                 navController.navigate(
-                    AddChildProfilesViewModel.DEST_NAME,
+                    ChildProfileListViewModel.DEST_NAME,
                     args = buildMap {
                         put(ARG_NEXT, nextDestination)
                         putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
@@ -147,7 +155,10 @@ class OtherSignUpOptionSelectionViewModel(
                     }
                 )
 
-            } else {
+            }else if (isMinor){
+                sendConsentAndNavigateToMinorWaitScreen(true)
+            }
+            else {
                 enrollToCourseFromInviteUid(savePerson.personUid)
                 val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
                 Napier.d { "AddSignUpPresenter: go to next destination: $nextDestination" }
@@ -165,6 +176,38 @@ class OtherSignUpOptionSelectionViewModel(
        // navController.popBackStack(SignUpViewModel.DEST_NAME,false)
 
     }
+    private suspend fun sendConsentAndNavigateToMinorWaitScreen(showUsernamePassword: Boolean) {
+        try {
+            val savePerson = _uiState.value.person ?: throw IllegalStateException("child details are empty")
+            val parentContact = savedStateHandle[SignUpViewModel.ARG_PARENT_CONTACT]
+            sendConsentRequestToParentUseCase(
+                SendConsentRequestToParentUseCase.SendConsentRequestToParentRequest(
+                    childFullName = savePerson.fullName(),
+                    childDateOfBirth = savePerson.dateOfBirth,
+                    childGender = savePerson.gender,
+                    parentContact = parentContact?:""
+                )
+            )
+            val args = mutableMapOf<String, String>().also {
+                it[RegisterMinorWaitForParentViewModel.ARG_USERNAME] = _uiState.value.person?.username ?: ""
+                it[RegisterMinorWaitForParentViewModel.ARG_SHOW_USERNAME_PASSWORD] =
+                    showUsernamePassword.toString()
+                it[RegisterMinorWaitForParentViewModel.ARG_PARENT_CONTACT] =
+                    parentContact?:""
+                it[RegisterMinorWaitForParentViewModel.ARG_PASSWORD] =  ""
+                it.putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_POPUPTO_ON_FINISH)
+                it[ARG_REFERER_SCREEN] = savedStateHandle[ARG_REFERER_SCREEN]?:""
+            }
+            navController.navigate(
+                viewName = RegisterMinorWaitForParentViewModel.DEST_NAME,
+                args = args,
+                goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+            )
+        } catch (e: Exception) {
+        Napier.e("Error : ${e.message}", e)
+        }
+}
+
     fun onClickCreateLocalAccount() {
         loadingState = LoadingUiState.INDETERMINATE
 

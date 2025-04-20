@@ -78,7 +78,7 @@ import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel
 import com.ustadmobile.core.viewmodel.person.child.EditChildProfileViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
@@ -183,7 +183,7 @@ import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConse
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
-import com.ustadmobile.libuicompose.view.person.child.AddChildProfilesScreen
+import com.ustadmobile.libuicompose.view.person.child.ChildProfileListScreen
 import com.ustadmobile.libuicompose.view.person.child.EditChildProfileScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
@@ -386,13 +386,13 @@ fun AppNavHost(
                 )
             }
             contentScene(
-                route = "/${AddChildProfilesViewModel.DEST_NAME}"
+                route = "/${ChildProfileListViewModel.DEST_NAME}"
             ) { backStackEntry ->
-                AddChildProfilesScreen (
+                ChildProfileListScreen (
                     viewModel = appViewModel(
-                        backStackEntry, AddChildProfilesViewModel::class,
+                        backStackEntry, ChildProfileListViewModel::class,
                     ) { di, savedStateHandle ->
-                        AddChildProfilesViewModel(di, savedStateHandle)
+                        ChildProfileListViewModel(di, savedStateHandle)
                     }
                 )
             }

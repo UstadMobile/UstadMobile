@@ -19,6 +19,7 @@ import com.ustadmobile.core.util.ext.isTemporary
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
@@ -28,8 +29,17 @@ import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_GENDER
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_NAME
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.RESULT_KEY_PERSON
+import com.ustadmobile.core.viewmodel.person.child.EditChildProfileViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
+import com.ustadmobile.core.viewmodel.person.toFirstAndLastNameExt
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -219,6 +229,7 @@ class AccountListViewModel(
             if (presetRepo != null && presetRepo.siteDao()
                     .getSiteAsync()?.registrationAllowed == false
             ) {
+                savedStateHandle[RegisterMinorWaitForParentViewModel.ARG_REFERER_SCREEN]=DEST_NAME
                 val arg = buildMap {
                     putAllFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
                     put(SignUpViewModel.ARG_NEW_OR_EXISTING_USER, "existing")
@@ -246,18 +257,53 @@ class AccountListViewModel(
      * Switch accounts
      */
     fun onClickAccount(sessionWithPersonAndLearningSpace: UserSessionWithPersonAndLearningSpace) {
-        val viewName = if (sessionWithPersonAndLearningSpace.person.isPersonalAccount) {
-            ContentEntryListViewModel.DEST_NAME_HOME
-        } else {
-            ClazzListViewModel.DEST_NAME_HOME
+        viewModelScope.launch {
+            if (savedStateHandle[ARG_CHILD_NAME] != null){
+                val person = getChildDetail()
+                navigateForResult(
+                    nextViewName = EditChildProfileViewModel.DEST_NAME,
+                    key = RESULT_KEY_PERSON,
+                    serializer = Person.serializer(),
+                    args = buildMap {
+                        savedStateHandle[ARG_ENTITY_JSON]
+                    },
+                    currentValue = person,
+                )
+                return@launch
+            }
+            val viewName = if (sessionWithPersonAndLearningSpace.person.isPersonalAccount) {
+                ContentEntryListViewModel.DEST_NAME_HOME
+            } else {
+                ClazzListViewModel.DEST_NAME_HOME
+            }
+            startUserSessionUseCase(
+                session = sessionWithPersonAndLearningSpace,
+                navController = navController,
+                nextDest = savedStateHandle[ARG_NEXT] ?: viewName,
+                dontSetCurrentSession = dontSetCurrentSession,
+            )
         }
-        startUserSessionUseCase(
-            session = sessionWithPersonAndLearningSpace,
-            navController = navController,
-            nextDest = savedStateHandle[ARG_NEXT] ?: viewName,
-            dontSetCurrentSession = dontSetCurrentSession,
+
+    }
+
+    private suspend fun getChildDetail(): Person {
+        val childName = savedStateHandle[ARG_CHILD_NAME]
+        val childGender = savedStateHandle[ARG_CHILD_GENDER]?.toInt() ?: 0
+        val childDateOfBirth = savedStateHandle[ARG_CHILD_DATE_OF_BIRTH]?.toLong() ?: 0L
+        val (firstName, lastName) = childName.toFirstAndLastNameExt()
+
+        val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
+
+        return Person(
+            personUid = uid,
+            firstNames = firstName,
+            lastName = lastName,
+            gender = childGender,
+            dateOfBirth = childDateOfBirth,
+            isPersonalAccount = true
         )
     }
+
 
     fun onClickDeleteAccount(session: UserSessionWithPersonAndLearningSpace) {
         viewModelScope.launch {

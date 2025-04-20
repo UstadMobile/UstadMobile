@@ -15,8 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesUiState
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListUiState
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -28,11 +28,11 @@ import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import java.util.UUID
 
 @Composable
-fun AddChildProfilesScreen(viewModel: AddChildProfilesViewModel) {
-    val uiState: AddChildProfilesUiState by viewModel.uiState.collectAsStateWithLifecycle(
-        AddChildProfilesUiState(), Dispatchers.Main.immediate
+fun ChildProfileListScreen(viewModel: ChildProfileListViewModel) {
+    val uiState: ChildProfileListUiState by viewModel.uiState.collectAsStateWithLifecycle(
+        ChildProfileListUiState(), Dispatchers.Main.immediate
     )
-    AddChildProfilesScreen(
+    ChildProfileListScreen(
         uiState = uiState,
         onClickAddChild = viewModel::onClickAddChileProfile,
         onClickEditChild = viewModel::onClickEditChileProfile,
@@ -56,8 +56,8 @@ fun AddChildProfilesScreen(viewModel: AddChildProfilesViewModel) {
 }
 
 @Composable
-fun AddChildProfilesScreen(
-    uiState: AddChildProfilesUiState,
+fun ChildProfileListScreen(
+    uiState: ChildProfileListUiState,
     onClickAddChild: () -> Unit = {},
     onClickEditChild: (Person) -> Unit = {},
     onClickDeleteChileProfile: (Person) -> Unit = {},
@@ -67,7 +67,7 @@ fun AddChildProfilesScreen(
     ) {
         item(key = "add_account") {
             UstadAddListItem(
-                text = stringResource(MR.strings.child_profile),
+                text = stringResource(MR.strings.child_profiles),
                 icon = Icons.Default.Add,
                 onClickAdd = { onClickAddChild() },
             )

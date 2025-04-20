@@ -27,8 +27,8 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel.Companion.ARG_CHILD_NAME
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_NAME
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
 import com.ustadmobile.door.ext.doorIdentityHashCode
@@ -44,7 +44,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 
@@ -227,7 +226,7 @@ class LoginViewModel(
              */
             if (parentApprovingChildProfile){
                 navController.navigate(
-                    AddChildProfilesViewModel.DEST_NAME,
+                    ChildProfileListViewModel.DEST_NAME,
                     args = buildMap {
                         put(ARG_NEXT, nextDestination)
                         putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)

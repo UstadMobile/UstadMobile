@@ -29,6 +29,7 @@ fun EditChildProfileScreen(viewModel: EditChildProfileViewModel) {
     EditChildProfileScreen(
         uiState = uiState,
         onPersonChanged = viewModel::onEntityChanged,
+        onFullNameValueChange = viewModel::onFullNameValueChange,
     )
 }
 
@@ -36,43 +37,26 @@ fun EditChildProfileScreen(viewModel: EditChildProfileViewModel) {
 fun EditChildProfileScreen(
     uiState: EditChildProfileUiState,
     onPersonChanged: (Person?) -> Unit = {},
+    onFullNameValueChange: (String) -> Unit = { },
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
     )  {
 
         OutlinedTextField(
-            modifier = Modifier.testTag("first_names").fillMaxWidth()
+            modifier = Modifier
+                .testTag("full_name")
+                .fillMaxWidth()
                 .defaultItemPadding(),
-            value = uiState.person?.firstNames ?: "",
-            label = { Text(stringResource(MR.strings.first_names) +"*") },
-            isError = uiState.firstNameError != null,
+            value = uiState.fullName ?: "",
+            label = { Text(stringResource(MR.strings.full_name) + "*") },
+            isError = uiState.fullNameError != null,
             singleLine = true,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy{
-                    firstNames = it
-                })
+            onValueChange = { fullName ->
+                onFullNameValueChange(fullName)
             },
             supportingText = {
-                Text(uiState.firstNameError ?: stringResource(MR.strings.required))
-            }
-        )
-
-
-        OutlinedTextField(
-            modifier = Modifier.testTag("last_name").fillMaxWidth()
-                .defaultItemPadding(),
-            value = uiState.person?.lastName ?: "",
-            label = { Text(stringResource(MR.strings.last_name) +"*") },
-            isError = uiState.lastNameError != null,
-            singleLine = true,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy{
-                    lastName = it
-                })
-            },
-            supportingText = {
-                Text(uiState.lastNameError ?: stringResource(MR.strings.required))
+                Text(uiState.fullNameError ?: stringResource(MR.strings.required))
             }
         )
 

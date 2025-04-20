@@ -132,27 +132,24 @@ fun SignUpScreen(
                 modifier = Modifier.padding(vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (!uiState.isParentalConsentForMinor){
-                    Checkbox(
-                        checked = uiState.isTeacher,
-                        onCheckedChange = {
-                            onTeacherCheckChanged(it)
+                Checkbox(
+                    checked = uiState.isTeacher,
+                    onCheckedChange = {
+                        onTeacherCheckChanged(it)
 
-                        }
-                    )
-                    Text(
-                        text = stringResource(MR.strings.i_am_teacher),
-                        modifier = Modifier.padding(start = 4.dp, end = 16.dp)
-                    )
-                }
+                    }
+                )
+                Text(
+                    text = stringResource(MR.strings.i_am_teacher),
+                    modifier = Modifier.padding(start = 4.dp, end = 16.dp)
+                )
 
 
                 Checkbox(
                     checked = uiState.isParent,
                     onCheckedChange = {
                         onParentCheckChanged(it)
-                    },
-                    enabled = !uiState.isParentalConsentForMinor
+                    }
                 )
                 Text(
                     text = stringResource(MR.strings.i_am_parent),
@@ -160,7 +157,7 @@ fun SignUpScreen(
                 )
             }
         }
-        if (!uiState.isMinor){
+        if (uiState.showPasskeyButton){
             Button(
                 onClick = onclickSignUpWithPasskey,
                 modifier = Modifier
@@ -177,7 +174,7 @@ fun SignUpScreen(
                 )
             }
         }
-        if (!uiState.isMinor) {
+        if (!(uiState.isMinor&&uiState.isPersonalAccount)) {
             OutlinedButton(
                 onClick = onclickOtherOptions,
                 modifier = Modifier.fillMaxWidth().defaultItemPadding()

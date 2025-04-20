@@ -8,9 +8,11 @@ import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.person.toFirstAndLastNameExt
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +34,10 @@ data class EditChildProfileUiState(
 
     val lastNameError: String? = null,
 
+    val fullNameError: String? = null,
+
+    val fullName: String? = null,
+
     )
 
 class EditChildProfileViewModel(
@@ -49,8 +55,7 @@ class EditChildProfileViewModel(
 
     private fun EditChildProfileUiState.hasErrors(): Boolean {
         return dateOfBirthError != null ||
-                firstNameError != null ||
-                lastNameError != null ||
+                fullNameError != null ||
                 genderError != null
     }
 
@@ -66,7 +71,7 @@ class EditChildProfileViewModel(
                 hideAppBar =false,
                 navigationVisible = false,
                 userAccountIconVisible = false,
-                title = systemImpl.getString(MR.strings.child_profile),
+                title = systemImpl.getString(MR.strings.add_child_profile),
                 hideBottomNavigation = true,
             )
         }
@@ -76,8 +81,8 @@ class EditChildProfileViewModel(
             prev.copy(
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = systemImpl.getString(MR.strings.done),
-                    onClick = this@EditChildProfileViewModel::onClickDone
+                    text = systemImpl.getString(MR.strings.save),
+                    onClick = this@EditChildProfileViewModel::onClickSave
                 )
             )
         }
@@ -95,7 +100,14 @@ class EditChildProfileViewModel(
                 onLoadFromDb = { null },
                 uiUpdate = {
                     _uiState.update { prev ->
-                        prev.copy(person = it)
+                        prev.copy(
+                            person = it,
+                            fullName = if (it?.firstNames == "") {
+                                null
+                            } else {
+                                it?.fullName()
+                            }
+                        )
                     }
                 }
             )
@@ -112,13 +124,9 @@ class EditChildProfileViewModel(
                     prev.person?.gender,
                     entity?.gender, prev.genderError
                 ),
-                firstNameError = updateErrorMessageOnChange(
+                fullNameError = updateErrorMessageOnChange(
                     prev.person?.firstNames,
-                    entity?.firstNames, prev.firstNameError
-                ),
-                lastNameError = updateErrorMessageOnChange(
-                    prev.person?.lastName,
-                    entity?.lastName, prev.lastNameError
+                    entity?.firstNames, prev.fullNameError
                 ),
 
                 )
@@ -129,8 +137,14 @@ class EditChildProfileViewModel(
             commitDelay = 200
         )
     }
-
-    fun onClickDone() {
+    fun onFullNameValueChange(fullName: String) {
+        _uiState.update { prev ->
+            prev.copy(
+                fullName = fullName
+            )
+        }
+    }
+    fun onClickSave() {
 
         loadingState = LoadingUiState.INDETERMINATE
         val savePerson = _uiState.value.person ?: return
@@ -139,14 +153,13 @@ class EditChildProfileViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                firstNameError = if (savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
-                lastNameError = if (savePerson.lastName.isNullOrEmpty()) requiredFieldMessage else null,
                 dateOfBirthError = if (savePerson.dateOfBirth == 0L) {
                     requiredFieldMessage
                 } else {
                     null
                 },
                 genderError = if (savePerson.gender == GENDER_UNSET) requiredFieldMessage else null,
+                fullNameError = if (_uiState.value.fullName.isNullOrEmpty()) requiredFieldMessage else null,
             )
         }
 
@@ -154,8 +167,14 @@ class EditChildProfileViewModel(
             loadingState = LoadingUiState.NOT_LOADING
             return
         }
-
-
+        val fullName = _uiState.value.fullName?.trim()
+        val (firstName, lastName) = fullName.toFirstAndLastNameExt()
+        onEntityChanged(
+            _uiState.value.person?.shallowCopy {
+                this.firstNames = firstName
+                this.lastName = lastName
+            }
+        )
         finishWithResult(_uiState.value.person)
     }
 

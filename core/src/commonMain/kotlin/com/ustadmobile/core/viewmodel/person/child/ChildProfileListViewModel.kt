@@ -14,7 +14,6 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
@@ -32,7 +31,7 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 
 
-data class AddChildProfilesUiState(
+data class ChildProfileListUiState(
     val onAddChildProfile: String? = null,
     val childProfiles: List<Person> = emptyList(),
     val personParenJoinList: List<PersonParentJoin> = emptyList(),
@@ -43,20 +42,20 @@ data class AddChildProfilesUiState(
         get() = (parent?.let { listOf(it) } ?: emptyList()) + childProfiles
 }
 
-class AddChildProfilesViewModel(
+class ChildProfileListViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(
-        AddChildProfilesUiState()
+        ChildProfileListUiState()
     )
     private var nextDestination: String =
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
     val repo: UmAppDatabase by di.onActiveLearningSpace().instance()
 
-    val uiState: Flow<AddChildProfilesUiState> = _uiState.asStateFlow()
+    val uiState: Flow<ChildProfileListUiState> = _uiState.asStateFlow()
 
     init {
         if (savedStateHandle[ARG_CHILD_NAME]!=null){
@@ -88,12 +87,12 @@ class AddChildProfilesViewModel(
             }
             _appUiState.update { prev ->
                 prev.copy(
-                    title = systemImpl.getString(MR.strings.add_child_profiles),
+                    title = systemImpl.getString(MR.strings.child_profiles),
                     hideBottomNavigation = true,
                     actionBarButtonState = ActionBarButtonUiState(
                         visible = true,
-                        text = systemImpl.getString(MR.strings.finish),
-                        onClick = this@AddChildProfilesViewModel::onClickFinish,
+                        text = systemImpl.getString(MR.strings.done),
+                        onClick = this@ChildProfileListViewModel::onClickDone,
 
                         ),
                     navigationVisible = false,
@@ -162,7 +161,7 @@ class AddChildProfilesViewModel(
         }
     }
 
-    fun onClickFinish() {
+    fun onClickDone() {
         //if parent not added any child profiles then not showing any dialog
         if (_uiState.value.childProfiles.isNotEmpty()) {
             _uiState.update { prev ->
@@ -192,7 +191,8 @@ class AddChildProfilesViewModel(
                 firstNames = firstName,
                 lastName = lastName,
                 gender = childGender,
-                dateOfBirth = childDateOfBirth
+                dateOfBirth = childDateOfBirth,
+                isPersonalAccount = true
             )
             updateChildProfileList(listOf(childProfile))
         }
@@ -277,7 +277,7 @@ class AddChildProfilesViewModel(
                 accountManager.currentUserSession = sessionWithPersonAndLearningSpace
             }
             navController.navigateToViewUri(
-                nextDestination.appendSelectedAccount(
+                ContentEntryListViewModel.DEST_NAME_HOME.appendSelectedAccount(
                     profile.personUid,
                     LearningSpace(accountManager.activeLearningSpace.url)
                 ),
@@ -290,7 +290,7 @@ class AddChildProfilesViewModel(
 
     companion object {
 
-        const val DEST_NAME = "AddChildProfile"
+        const val DEST_NAME = "ChildProfileList"
 
         const val RESULT_KEY_PERSON = "person"
 
