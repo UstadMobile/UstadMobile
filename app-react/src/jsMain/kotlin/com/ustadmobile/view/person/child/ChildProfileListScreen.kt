@@ -103,7 +103,7 @@ val AddChildProfilesComponent2 = FC<ChildProfileListProps> { props ->
                     }
 
                     ListItemText {
-                        primary = ReactNode(strings[MR.strings.child_profile])
+                        primary = ReactNode(strings[MR.strings.child_profiles])
 
                     }
                 }
