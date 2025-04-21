@@ -13,7 +13,7 @@ it('Admin enable registration', () => {
 it('Child user aged below 13 register as a new user', () => {
   cy.ustadClearIndexDb()
   cy.visit('/', {timeout:60000})
-  cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').click();
+  cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').click()
   cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date(Date.now() - (10 * 365 * 24 * 60 * 60 * 1000))) //kids age 10
   cy.contains('button','Next').click()
   cy.contains('New Terms').should('not.exist')
@@ -23,8 +23,8 @@ it('Child user aged below 13 register as a new user', () => {
   cy.contains("label", "Parent email*").parent().find("input").clear().type('parent@email.com')
   cy.contains('button','Next').click()
   cy.contains("Wait for Parent").should('exist')
-  //cy.contains('button','OK').click()
- // cy.wait(5000)
+  cy.contains('button','OK').click()
+  cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').should('exist')
 })
 
 it('Parent user clicks on link in the email received from ustad mobile', () => {
@@ -41,7 +41,8 @@ it('Parent user clicks on link in the email received from ustad mobile', () => {
   cy.contains("label", "Full name*").parent().find("input").clear().type('Parent User')
   cy.get('div[id="gender"]').click()
   cy.contains("li","Male").click()
-  cy.contains('button','Next').click()
+  cy.get('Tickmark').contains("I'm a parent").should('exist')
+  cy.contains('Sign up with passkey').click()
   cy.contains("label", "Username").parent().find("input").clear().type('parentuser')
   cy.contains("label", "Password").parent().find("input").clear().type('test1234')
   cy.contains('SIGN-UP').click()
@@ -50,12 +51,12 @@ it('Parent user clicks on link in the email received from ustad mobile', () => {
   cy.get("#appbar_title").contains("Add child profile").should("exist")
   cy.contains('Child User').should('be.visible')
   cy.contains('Female').should('be.visible')
-  cy.contains('Child User').should('be.visible')
-  // verify date of birth
-  cy.contains('button','Next').click()
-  cy.contains('Policy').should('be.visible')
-  cy.get('#accept_button').click()
-  cy.contains('Courses',{timeout:2000}).should('be.visible')
+  //verify date of birth
+  cy.contains('button','Save').click()
+  cy.contains('button','Done').click()
+  cy.contains('Select account to start with',{timeout:5000}).should('be.visible')
+  cy.contains('Child User').click()
+  cy.contains('Courses',{timeout:5000}).should('be.visible')
 })
 
   after(() => {
