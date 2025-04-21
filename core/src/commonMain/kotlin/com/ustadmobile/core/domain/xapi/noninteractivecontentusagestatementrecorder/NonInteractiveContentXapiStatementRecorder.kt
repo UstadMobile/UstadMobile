@@ -43,6 +43,8 @@ class NonInteractiveContentXapiStatementRecorder(
 
     private val activeStartTime = atomic(0L)
 
+    private val isCompleted = atomic(false)
+
     /*
      * Invoked by the underlying content view model:
      * For videos: this should be based on the video being played/paused
@@ -67,28 +69,37 @@ class NonInteractiveContentXapiStatementRecorder(
         maxProgressPoint.update { maxOf(it, progress) }
     }
 
-    fun onComplete() {
-        val usageDurationVal = totalUsageTime.getAndUpdate { 0L }
-        val activeStartTimeVal = activeStartTime.getAndUpdate { 0L }
-        val timeSinceActive = if(activeStartTimeVal != 0L) {
-            systemTimeInMillis() - activeStartTimeVal
-        } else {
-            0L
-        }
+    /**
+     * @param oneCompletionStatementOnly page based content (e.g. EPUB, PDF) can call this function
+     *        more than once when it reaches the last page.
+     */
+    fun onComplete(
+        oneCompletionStatementOnly: Boolean = false,
+    ) {
+        Napier.v { "ContentUsageStatementRecorder: completed" }
+        if(!isCompleted.getAndUpdate { true } || !oneCompletionStatementOnly) {
+            val usageDurationVal = totalUsageTime.getAndUpdate { 0L }
+            val activeStartTimeVal = activeStartTime.getAndUpdate { 0L }
+            val timeSinceActive = if(activeStartTimeVal != 0L) {
+                systemTimeInMillis() - activeStartTimeVal
+            } else {
+                0L
+            }
 
-        maxProgressPoint.update { 0 }
+            maxProgressPoint.update { 0 }
 
-        scope.launch {
-            xapiStatementResource.post(
-                statements = listOf(
-                    createXapiStatement(
-                        totalDuration = usageDurationVal + timeSinceActive,
-                        progress = 100,
-                        isComplete = true,
-                    )
-                ),
-                xapiSession = xapiSession,
-            )
+            scope.launch {
+                xapiStatementResource.post(
+                    statements = listOf(
+                        createXapiStatement(
+                            totalDuration = usageDurationVal + timeSinceActive,
+                            progress = 100,
+                            isComplete = true,
+                        )
+                    ),
+                    xapiSession = xapiSession,
+                )
+            }
         }
     }
 

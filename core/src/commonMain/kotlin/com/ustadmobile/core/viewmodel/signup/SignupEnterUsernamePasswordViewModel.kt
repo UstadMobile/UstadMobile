@@ -6,7 +6,7 @@ import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
-import com.ustadmobile.core.domain.password.SavePasswordUseCase
+import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -73,10 +73,7 @@ data class SignupEnterUsernamePasswordUiState(
     val passkeySupported: Boolean = true,
 
     val isPersonalAccount: Boolean = false,
-) {
-
-
-}
+)
 
 class SignupEnterUsernamePasswordViewModel(
     di: DI,
@@ -111,19 +108,19 @@ class SignupEnterUsernamePasswordViewModel(
     private val enrollToCourseFromInviteCodeUseCase:EnrollToCourseFromInviteCodeUseCase =
     di.on(LearningSpace(serverUrl)).direct.instance()
 
-        //Run EnqueueSavePictureUseCase after the database transaction has finished.
+    //Run EnqueueSavePictureUseCase after the database transaction has finished.
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
-    on(LearningSpace(serverUrl)).instance()
+        on(LearningSpace(serverUrl)).instance()
 
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
-        val title =
-            systemImpl.getString(MR.strings.create_account)
+        val title = systemImpl.getString(MR.strings.create_account)
         viewModelScope.launch {
             val person = savedStateHandle.getJson(
                 OtherSignUpOptionSelectionViewModel.ARG_PERSON, Person.serializer(),
             ) ?: Person()
+
             val personPicture = savedStateHandle.getJson(
                 OtherSignUpOptionSelectionViewModel.ARG_PERSON_PROFILE_PIC,
                 PersonPicture.serializer(),
@@ -227,7 +224,6 @@ class SignupEnterUsernamePasswordViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-
                 usernameError = if (!validateUsernameUseCase.invoke(
                         savePerson.username ?: ""
                     )
@@ -263,7 +259,6 @@ class SignupEnterUsernamePasswordViewModel(
                     learningSpaceUrl = serverUrl
                 )
 
-
                 val personPictureVal = _uiState.value.personPicture
                 if (personPictureVal != null) {
                     personPictureVal.personPictureUid = savePerson.personUid
@@ -285,7 +280,7 @@ class SignupEnterUsernamePasswordViewModel(
                 )
 
                 try {
-                    val viewUri= savedStateHandle[UstadView.ARG_NEXT]
+                    val viewUri = savedStateHandle[UstadView.ARG_NEXT]
                     if (viewUri != null&&viewUri.contains("ClazzInviteRedeem")) {
                         nextDestination = ClazzListViewModel.DEST_NAME_HOME
                         enrollToCourseFromInviteCodeUseCase.invoke(
@@ -322,7 +317,7 @@ class SignupEnterUsernamePasswordViewModel(
             navController.navigate(AddChildProfilesViewModel.DEST_NAME,
                 args = buildMap {
                     put(ARG_NEXT, nextDestination)
-                    putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                    putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
                     putFromSavedStateIfPresent(ARG_NEXT)
                 }
             )

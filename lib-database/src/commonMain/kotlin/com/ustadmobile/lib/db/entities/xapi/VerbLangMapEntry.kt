@@ -37,7 +37,7 @@ import kotlinx.serialization.Serializable
  *
  * @param vlmeVerbUid the foreign key e.g. VerbEntity.verbUid (xxhash of the Verb's id url)
  * @param vlmeLangHash the xxhash of the language code as per the lang map e.g. en-US
- * @param vlmeEntryString the actual string e.g. as will be displayed to the user
+ * @param vlmeEntryString the actual string e.g. as will be displayed to the user e.g. 'Completed'
  * @param vlmeLangCode the lang code as per the Language Map
  * @param vlmeLastModified the last time this entry was modified
  */

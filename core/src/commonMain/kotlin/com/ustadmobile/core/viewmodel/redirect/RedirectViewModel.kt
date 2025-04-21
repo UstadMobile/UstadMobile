@@ -1,23 +1,14 @@
 package com.ustadmobile.core.viewmodel.redirect
 
-import com.russhwolf.settings.Settings
-import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
+import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.navigateToLink
-import com.ustadmobile.core.util.ext.onActiveLearningSpace
-import com.ustadmobile.core.util.ext.requireHttpPrefix
-import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -38,9 +29,6 @@ class RedirectViewModel(
     private val deepLink = savedStateHandle[UstadView.ARG_OPEN_LINK]
 
     private val apiUrlConfig: SystemUrlConfig by instance()
-    private val makeLinkUseCase: MakeLinkUseCase by di.onActiveLearningSpace().instance()
-
-    private val settings: Settings by instance()
 
     init {
         _appUiState.value = AppUiState(
@@ -69,32 +57,8 @@ class RedirectViewModel(
             println(db)
         }
 
-        /**
-         *if account is personal then the default clazz type will be library screen else
-         * course screen
-         */
-        val clazzType = if (accountManager.currentUserSession.person.isPersonalAccount) {
-            ContentEntryListViewModel.DEST_NAME_HOME
-        } else {
-            ClazzListViewModel.DEST_NAME_HOME
-        }
-        val presetLearningSpaceUrl = apiUrlConfig.presetLearningSpaceUrl
-        val destination = if (!presetLearningSpaceUrl.isNullOrEmpty()) {
-            makeLinkUseCase.invoke(
-                destinationArg ?: clazzType,
-                args = buildMap {
-                    putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
-                    put(
-                        ARG_LEARNINGSPACE_URL,
-                        presetLearningSpaceUrl.requireHttpPrefix()
-                            .requirePostfix("/")
-                    )
-                }
-            )
-        } else {
-            destinationArg ?: clazzType
-        }
-
+        val destination = destinationArg ?: di.on(accountManager.currentUserSession.learningSpace)
+            .direct.instance<GetDefaultDestinationUseCase>().invoke()
 
         viewModelScope.launch {
             navController.navigateToLink(
@@ -106,7 +70,7 @@ class RedirectViewModel(
                     clearStack = true
                 ),
                 forceAccountSelection = destinationArg != null,
-                repo = { di.on(it).direct.instance<UmAppDataLayer>().requireRepository()},
+                checkRegistrationAllowedUseCase = { di.on(it).direct.instance() },
                 presetLearningSpaceUrl = apiUrlConfig.presetLearningSpaceUrl
             )
         }

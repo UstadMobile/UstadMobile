@@ -26,10 +26,10 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseAndroid
-import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
-import com.ustadmobile.core.domain.passkey.GetCredentialUseCase
-import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
-import com.ustadmobile.core.domain.password.SavePasswordUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
+import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -56,9 +56,9 @@ import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
-import com.ustadmobile.core.impl.passkey.CreatePasskeyUseCaseImpl
-import com.ustadmobile.core.impl.passkey.GetCredentialUseCaseImpl
-import com.ustadmobile.core.impl.password.SavePasswordUseCaseImpl
+import com.ustadmobile.core.domain.credentials.passkey.CreatePasskeyUseCaseImpl
+import com.ustadmobile.core.domain.credentials.passkey.GetCredentialUseCaseImpl
+import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCaseImpl
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
@@ -123,8 +123,8 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 languagesConfig = instance()
             )
         }
-        bind<PasskeyRequestJsonUseCase>()  with provider {
-            PasskeyRequestJsonUseCase(
+        bind<CreatePasskeyRequestJsonUseCase>()  with provider {
+            CreatePasskeyRequestJsonUseCase(
                 systemImpl = instance(),
                 json = instance()
             )
@@ -147,10 +147,11 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
             )
         }
 
-        bind<GetCredentialUseCase>() with scoped(LearningSpaceScope.Default).singleton{
+        bind<GetCredentialUseCase>() with singleton{
             GetCredentialUseCaseImpl(
                 context=this@AbstractAppActivity,
-                passkeyRequestJsonUseCase = instance()
+                passkeyRequestJsonUseCase = instance(),
+                apiUrlConfig = instance(),
             )
         }
 

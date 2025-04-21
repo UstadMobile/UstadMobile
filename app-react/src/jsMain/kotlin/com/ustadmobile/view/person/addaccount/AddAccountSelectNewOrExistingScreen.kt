@@ -6,8 +6,8 @@ import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUiState
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingUiState
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.mui.components.UstadLanguageSelect
 import com.ustadmobile.mui.components.UstadStandardContainer
 import mui.material.*

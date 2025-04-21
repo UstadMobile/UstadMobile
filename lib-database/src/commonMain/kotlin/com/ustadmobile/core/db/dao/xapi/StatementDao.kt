@@ -5,11 +5,19 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
 import app.cash.paging.PagingSource
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon.PERSON_UIDS_FOR_PAGED_GRADEBOOK_QUERY_CTE
+import com.ustadmobile.core.db.dao.SystemPermissionDaoCommon
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.ACTOR_UIDS_FOR_PERSONUIDS_CTE
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.DISTINCT_REGISTRATION_UIDS_FOR_PERSON_AND_CONTENT
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.DISTINCT_REGISTRATION_UIDS_PERMISSION_CHECK
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENTS_WHERE_MATCHES_CONTENT_ENTRY_UID_AND_HAS_PERMISSION
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CLAZZ_STUDENT
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_STATUS_STATEMENTS_FOR_CONTENT_ENTRY
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.FROM_STATEMENT_ENTITY_WHERE_MATCHES_ACCOUNT_PERSON_UID_AND_PARENT_CONTENT_ENTRY_ROOT
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.PERSON_WITH_ATTEMPTS_MAXSCORE
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.PERSON_WITH_ATTEMPTS_MAX_PROGRESS
+import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.PERSON_WITH_ATTEMPTS_MOST_RECENT_TIME
 import com.ustadmobile.core.db.dao.xapi.StatementDaoCommon.SELECT_STATUS_STATEMENTS_FOR_ACTOR_PERSON_UIDS
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.DoorDao
@@ -18,11 +26,23 @@ import com.ustadmobile.door.annotation.HttpServerFunctionCall
 import com.ustadmobile.door.annotation.HttpServerFunctionParam
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.composites.AttemptsPersonListConst
 import com.ustadmobile.lib.db.composites.BlockStatus
+import com.ustadmobile.lib.db.composites.PersonAndPictureAndNumAttempts
+import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfo
+import com.ustadmobile.lib.db.composites.xapi.SessionTimeAndProgressInfoConst
+import com.ustadmobile.lib.db.composites.xapi.StatementAndActivity
+import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_SCORE_ASC
+import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_SCORE_DESC
+import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_TIMESTAMP_ASC
+import com.ustadmobile.lib.db.composites.xapi.StatementConst.SORT_BY_TIMESTAMP_DESC
 import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndRelated
+import com.ustadmobile.lib.db.composites.xapi.StatementEntityAndVerb
+import com.ustadmobile.lib.db.composites.xapi.VerbEntityAndName
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.StatementEntityAndDisplayDetails
 import com.ustadmobile.lib.db.entities.StatementReportData
+import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.lib.db.entities.xapi.ActorEntity
 import com.ustadmobile.lib.db.entities.xapi.StatementEntity
 import kotlinx.coroutines.flow.Flow
@@ -278,5 +298,491 @@ expect abstract class StatementDao {
         actorUid: Long,
     ): StatementEntity?
 
+
+    /**
+     * Get StatementEntities required for findPersonsWithAttempts when running over http
+     *
+     * For each person in the list, select the statement that has the maximum progress, the maximum
+     * score, and the most recent statement (this is required to ensure that the attempt is
+     * displayed even when there is no statement that counts as completion or progress for the
+     * content itself e.g. completionOrProgress = true). See StataementEntity.completionOrProgress.
+     */
+    @Query("""
+        SELECT StatementEntity.*
+          FROM Person
+               JOIN StatementEntity
+                    ON (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN
+                            (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+                               FROM StatementEntity
+                              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                                AND StatementEntity.statementActorPersonUid = Person.personUid
+                                AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                           ORDER BY StatementEntity.extensionProgress DESC
+                              LIMIT 1)
+                    OR (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN    
+                          (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+                           FROM StatementEntity
+                          WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                            AND StatementEntity.statementActorPersonUid = Person.personUid
+                            AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                       ORDER BY StatementEntity.resultScoreScaled DESC
+                       LIMIT 1)
+                    OR (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN    
+                          (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo
+                           FROM StatementEntity
+                          WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                            AND StatementEntity.statementActorPersonUid = Person.personUid
+                       ORDER BY StatementEntity.timestamp DESC
+                       LIMIT 1)    
+         WHERE Person.personUid IN
+            (SELECT DISTINCT StatementEntity.statementActorPersonUid
+                    $FROM_STATEMENTS_WHERE_MATCHES_CONTENT_ENTRY_UID_AND_HAS_PERMISSION)      
+            AND (   :searchText = '%' 
+                 OR Person.firstNames || ' ' || Person.lastName LIKE :searchText) 
+                          
+    """)
+    abstract suspend fun findPersonsWithAttemptsStatements(
+        contentEntryUid: Long,
+        accountPersonUid: Long,
+        searchText: String? = "%",
+    ): List<StatementEntity>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findPersonsWithAttempts"),
+            HttpServerFunctionCall("findPersonsWithAttemptsStatements")
+        )
+    )
+    @Query("""
+     SELECT Person.*, PersonPicture.*,
+            (SELECT COUNT(*)
+               FROM (SELECT DISTINCT StatementEntity.contextRegistrationHi, StatementEntity.contextRegistrationLo
+                       FROM StatementEntity
+                      WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                        AND StatementEntity.statementActorPersonUid = Person.personUid
+                    ) AS DistinctRegistrations) AS numAttempts,
+            (SELECT EXISTS(
+                    SELECT 1
+                      FROM StatementEntity
+                     WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                       AND StatementEntity.statementActorPersonUid = Person.personUid
+                       AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                       AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1)) AS isCompleted,
+            (SELECT CASE
+                    WHEN EXISTS(
+                         SELECT 1
+                           FROM StatementEntity
+                          WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                            AND StatementEntity.statementActorPersonUid = Person.personUid
+                            AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                            AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 1
+                    WHEN EXISTS(
+                         SELECT 1
+                           FROM StatementEntity
+                          WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                            AND StatementEntity.statementActorPersonUid = Person.personUid
+                            AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                            AND StatementEntity.resultSuccess IS NOT NULL
+                            AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 0
+                    ELSE NULL
+                    END) AS isSuccessful,
+            ($PERSON_WITH_ATTEMPTS_MAX_PROGRESS) AS maxProgress,
+            ($PERSON_WITH_ATTEMPTS_MAXSCORE) AS maxScore,
+            
+            ($PERSON_WITH_ATTEMPTS_MOST_RECENT_TIME) AS mostRecentAttemptTime    
+       FROM Person
+            LEFT JOIN PersonPicture
+                 ON PersonPicture.personPictureUid = Person.personUid
+      WHERE Person.personUid IN
+            (SELECT DISTINCT StatementEntity.statementActorPersonUid
+                    $FROM_STATEMENTS_WHERE_MATCHES_CONTENT_ENTRY_UID_AND_HAS_PERMISSION)      
+            AND (   :searchText = '%' 
+                 OR Person.firstNames || ' ' || Person.lastName LIKE :searchText)
+     ORDER BY 
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_SCORE_ASC} THEN (${PERSON_WITH_ATTEMPTS_MAXSCORE})
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_COMPLETION_ASC} THEN ($PERSON_WITH_ATTEMPTS_MAX_PROGRESS)
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_RECENT_ATTEMPT_ASC} THEN ($PERSON_WITH_ATTEMPTS_MOST_RECENT_TIME)
+        ELSE 0
+    END ASC,
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_FIRST_NAME_ASC} THEN Person.firstNames
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_LAST_NAME_ASC} THEN Person.lastName
+        ELSE ''
+    END ASC,    
+    CASE 
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_SCORE_DESC} THEN (${PERSON_WITH_ATTEMPTS_MAXSCORE})
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_COMPLETION_DESC} THEN (${PERSON_WITH_ATTEMPTS_MAX_PROGRESS})
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_BY_RECENT_ATTEMPT_DESC} THEN ($PERSON_WITH_ATTEMPTS_MOST_RECENT_TIME)
+        ELSE 0
+    END DESC,
+    CASE
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_FIRST_NAME_DESC} THEN Person.firstNames
+        WHEN :sortOrder = ${AttemptsPersonListConst.SORT_LAST_NAME_DESC} THEN Person.lastName
+    END DESC    
+""")
+    abstract fun findPersonsWithAttempts(
+        contentEntryUid: Long,
+        accountPersonUid: Long,
+        searchText: String? = "%",
+        sortOrder: Int,
+    ): PagingSource<Int, PersonAndPictureAndNumAttempts>
+
+
+    /**
+     * Find the statement entities required for findSessionsByPersonAndContent - for each distinct
+     * session for the given user/contententry we need to find the statement with the maximum
+     * progress, maximum score, time started, and completion.
+     */
+    @Query("""
+        WITH $DISTINCT_REGISTRATION_UIDS_FOR_PERSON_AND_CONTENT
+        SELECT StatementEntity.*
+          FROM DistinctRegistrationUids
+               JOIN StatementEntity 
+                    ON (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN 
+                        -- Statement for time started
+                        (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo 
+                           FROM StatementEntity
+                          WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                            AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                       ORDER BY StatementEntity.timestamp ASC
+                          LIMIT 1)
+                          
+                       --statement for max progress   
+                    OR (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN 
+                       (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo 
+                          FROM StatementEntity
+                         WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                           AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                           AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                      ORDER BY StatementEntity.extensionProgress DESC
+                         LIMIT 1) 
+                         
+                       --statement for max score  
+                    OR (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN 
+                       (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo 
+                          FROM StatementEntity
+                         WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                           AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                           AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                      ORDER BY StatementEntity.resultScoreScaled DESC
+                         LIMIT 1)
+                         
+                        --statement with completion  
+                    OR (StatementEntity.statementIdHi, StatementEntity.statementIdLo) IN 
+                       (SELECT StatementEntity.statementIdHi, StatementEntity.statementIdLo 
+                          FROM StatementEntity
+                         WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                           AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                           AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                           AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
+                         LIMIT 1)
+         WHERE ($DISTINCT_REGISTRATION_UIDS_PERMISSION_CHECK)
+    """)
+    abstract suspend fun findSessionsByPersonAndContentStatements(
+        contentEntryUid: Long,
+        personUid: Long,
+        accountPersonUid: Long,
+    ): List<StatementEntity>
+
+    /**
+     * Get a list of the distinct sessions for a given user/contententry.
+     */
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findSessionsByPersonAndContentStatements"),
+            HttpServerFunctionCall("findSessionsByPersonAndContent")
+        )
+    )
+    @Query("""
+ WITH $DISTINCT_REGISTRATION_UIDS_FOR_PERSON_AND_CONTENT,
+      SessionsByPerson(contextRegistrationHi, contextRegistrationLo, timeStarted, maxProgress, maxScore, isCompleted, isSuccessful, resultDuration) AS (
+       SELECT DistinctRegistrationUids.contextRegistrationHi AS contextRegistrationHi,
+              DistinctRegistrationUids.contextRegistrationLo AS contextRegistrationLo,
+              (SELECT MIN(StatementEntity.timestamp)
+                 FROM StatementEntity
+                WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                  AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                  AND StatementEntity.statementActorPersonUid = :personUid
+                  AND StatementEntity.statementContentEntryUid = :contentEntryUid
+              ) AS timeStarted,
+              
+              (SELECT MAX(StatementEntity.extensionProgress)
+                 FROM StatementEntity
+                WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                  AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                  AND StatementEntity.statementActorPersonUid = :personUid
+                  AND StatementEntity.statementContentEntryUid = :contentEntryUid
+                  AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+               ) AS maxProgress,
+               
+              (SELECT MAX(StatementEntity.resultScoreScaled)
+                 FROM StatementEntity
+                WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                  AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                  AND StatementEntity.statementActorPersonUid = :personUid
+                  AND StatementEntity.statementContentEntryUid = :contentEntryUid
+                  AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+               ) AS maxScore,
+               
+              (SELECT EXISTS(
+                      SELECT 1 
+                        FROM StatementEntity
+                       WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                         AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                         AND StatementEntity.statementActorPersonUid = :personUid
+                         AND StatementEntity.statementContentEntryUid = :contentEntryUid
+                         AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                         AND CAST(StatementEntity.resultCompletion AS INTEGER) = 1
+              )) AS isCompleted,
+              (SELECT CASE 
+                      WHEN EXISTS(
+                           SELECT 1 
+                             FROM StatementEntity
+                            WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                              AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                              AND StatementEntity.statementActorPersonUid = :personUid
+                              AND StatementEntity.statementContentEntryUid = :contentEntryUid
+                              AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                              AND CAST(StatementEntity.resultSuccess AS INTEGER) = 1) THEN 1
+                      WHEN EXISTS(
+                           SELECT 1 
+                             FROM StatementEntity
+                            WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                              AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                              AND StatementEntity.statementActorPersonUid = :personUid
+                              AND StatementEntity.statementContentEntryUid = :contentEntryUid
+                              AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+                              AND StatementEntity.resultSuccess IS NOT NULL
+                              AND CAST(StatementEntity.resultSuccess AS INTEGER) = 0) THEN 0
+                      ELSE NULL
+                      END) AS isSuccessful,
+                      (SELECT MAX(StatementEntity.resultDuration)
+                         FROM StatementEntity
+                        WHERE StatementEntity.contextRegistrationHi = DistinctRegistrationUids.contextRegistrationHi
+                          AND StatementEntity.contextRegistrationLo = DistinctRegistrationUids.contextRegistrationLo
+                          AND StatementEntity.statementActorPersonUid = :personUid
+                          AND StatementEntity.statementContentEntryUid = :contentEntryUid) AS resultDuration
+         FROM DistinctRegistrationUids
+         WHERE ($DISTINCT_REGISTRATION_UIDS_PERMISSION_CHECK)) 
+      SELECT SessionsByPerson.*
+        FROM SessionsByPerson
+    ORDER BY  
+        CASE :sortOrder
+            WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_TIMESTAMP_DESC} THEN timeStarted
+            ELSE NULL
+        END DESC,
+        CASE :sortOrder
+            WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_TIMESTAMP_ASC} THEN timeStarted
+            ELSE NULL
+        END ASC,
+        CASE :sortOrder
+            WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_SCORE_DESC} THEN maxScore
+            ELSE NULL
+        END DESC,
+        CASE :sortOrder
+            WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_SCORE_ASC} THEN maxScore
+            ELSE NULL
+        END ASC,
+        CASE :sortOrder
+            WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_COMPLETION_DESC} THEN maxProgress
+            ELSE NULL
+        END DESC,
+        CASE :sortOrder
+            WHEN ${SessionTimeAndProgressInfoConst.SORT_BY_COMPLETION_ASC} THEN maxProgress
+            ELSE NULL
+        END ASC
+   """)
+    abstract fun findSessionsByPersonAndContent(
+        contentEntryUid: Long,
+        personUid: Long,
+        accountPersonUid: Long,
+        sortOrder: Int
+    ): PagingSource<Int, SessionTimeAndProgressInfo>
+
+
+    @Query("""
+        SELECT ActivityLangMapEntry.*
+          FROM ActivityLangMapEntry
+         WHERE ActivityLangMapEntry.almeActivityUid IN (
+               SELECT DISTINCT StatementEntity.statementObjectUid1
+                 FROM StatementEntity
+                WHERE StatementEntity.contextRegistrationHi = :registrationHi
+                  AND StatementEntity.contextRegistrationLo = :registrationLo)
+    """)
+    abstract suspend fun findActivityEntryLangMapsForStatementsBySession(
+        registrationHi: Long,
+        registrationLo: Long
+    ): List<ActivityLangMapEntry>
+
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES,
+        pullQueriesToReplicate = arrayOf(
+            HttpServerFunctionCall("findStatementsBySession"),
+            HttpServerFunctionCall("findActivityEntryLangMapsForStatementsBySession")
+        )
+    )
+    @Query("""
+    SELECT StatementEntity.*, VerbEntity.*, VerbLangMapEntry.*, ActivityEntity.*,
+           ActivityLangMapEntry.*,
+           ActivityLangMapDescription.almeValue AS statementActivityDescription
+    FROM StatementEntity
+    LEFT JOIN VerbEntity
+        ON StatementEntity.statementVerbUid = VerbEntity.verbUid
+    LEFT JOIN VerbLangMapEntry 
+        ON (VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash) = 
+            (SELECT VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash
+            FROM VerbLangMapEntry
+            WHERE VerbLangMapEntry.vlmeVerbUid = VerbEntity.verbUid
+            ORDER BY VerbLangMapEntry.vlmeLastModified DESC
+            LIMIT 1)
+    LEFT JOIN ActivityEntity
+              ON ActivityEntity.actUid = StatementEntity.statementObjectUid1
+    LEFT JOIN ActivityLangMapEntry
+              ON (ActivityLangMapEntry.almeActivityUid, ActivityLangMapEntry.almeHash) = 
+                 (SELECT ActivityLangMapEntry.almeActivityUid, ActivityLangMapEntry.almeHash
+                    FROM ActivityLangMapEntry
+                   WHERE ActivityLangMapEntry.almeActivityUid = StatementEntity.statementObjectUid1
+                     AND ActivityLangMapEntry.almePropName = '${ActivityLangMapEntry.PROPNAME_NAME}'
+                   LIMIT 1)
+    LEFT JOIN ActivityLangMapEntry ActivityLangMapDescription
+              ON (ActivityLangMapDescription.almeActivityUid, ActivityLangMapDescription.almeHash) = 
+                 (SELECT ActivityLangMapDescription.almeActivityUid, ActivityLangMapDescription.almeHash
+                    FROM ActivityLangMapEntry ActivityLangMapDescription
+                   WHERE ActivityLangMapDescription.almeActivityUid = StatementEntity.statementObjectUid1
+                     AND ActivityLangMapDescription.almePropName = '${ActivityLangMapEntry.PROPNAME_DESCRIPTION}'
+                   LIMIT 1)
+    LEFT JOIN ClazzEnrolment 
+        ON ClazzEnrolment.clazzEnrolmentUid =
+            COALESCE(
+                (SELECT ClazzEnrolment.clazzEnrolmentUid 
+                FROM ClazzEnrolment
+                WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                    AND ClazzEnrolment.clazzEnrolmentActive
+                    AND ClazzEnrolment.clazzEnrolmentClazzUid = StatementEntity.statementClazzUid 
+                ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
+                LIMIT 1), 0)
+    WHERE StatementEntity.contextRegistrationHi = :registrationHi
+    AND StatementEntity.contextRegistrationLo = :registrationLo  
+    AND StatementEntity.statementActorPersonUid = :selectedPersonUid
+    AND StatementEntity.statementContentEntryUid = :contentEntryUid
+    AND (:searchText = '%' OR VerbEntity.verbUrlId LIKE :searchText)
+    AND StatementEntity.statementVerbUid NOT IN (:deSelectedVerbUids)
+    /* Permission check */
+    AND (
+        :accountPersonUid = :selectedPersonUid 
+        OR EXISTS(
+            SELECT CoursePermission.cpUid
+            FROM CoursePermission
+            WHERE CoursePermission.cpClazzUid = StatementEntity.statementClazzUid
+            AND (
+                CoursePermission.cpToPersonUid = :accountPersonUid 
+                OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole
+            )
+            AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
+            AND NOT CoursePermission.cpIsDeleted
+        )
+        OR (
+            ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
+            ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+            ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}
+        )
+    )
+    ORDER BY 
+    CASE :sortOrder
+        WHEN ${SORT_BY_TIMESTAMP_DESC} THEN StatementEntity.timestamp
+        ELSE NULL
+    END DESC,
+    CASE :sortOrder
+        WHEN ${SORT_BY_TIMESTAMP_ASC} THEN StatementEntity.timestamp
+        ELSE NULL
+    END ASC,
+    CASE :sortOrder
+        WHEN ${SORT_BY_SCORE_DESC} THEN StatementEntity.resultScoreRaw
+        ELSE NULL
+    END DESC,
+    CASE :sortOrder
+        WHEN ${SORT_BY_SCORE_ASC} THEN StatementEntity.resultScoreRaw
+        ELSE NULL
+    END ASC
+""")
+    abstract fun findStatementsBySession(
+        registrationHi: Long,
+        registrationLo: Long,
+        accountPersonUid: Long,
+        selectedPersonUid: Long,
+        contentEntryUid: Long,
+        searchText: String = "%",
+        sortOrder: Int,
+        deSelectedVerbUids: List<Long>
+    ): PagingSource<Int, StatementEntityAndVerb>
+
+    @HttpAccessible
+    @Query("""
+    WITH DistinctVerbUrls(statementVerbUid) AS (
+        SELECT DISTINCT StatementEntity.statementVerbUid
+        FROM StatementEntity
+        WHERE StatementEntity.contextRegistrationHi = :registrationHi
+            AND StatementEntity.contextRegistrationLo = :registrationLo
+            AND StatementEntity.statementActorPersonUid = :selectedPersonUid
+            AND StatementEntity.statementContentEntryUid = :contentEntryUid
+    )
+    
+    SELECT VerbEntity.*,
+           VerbLangMapEntry.*
+    FROM DistinctVerbUrls
+         JOIN VerbEntity 
+              ON VerbEntity.verbUid = DistinctVerbUrls.statementVerbUid
+         LEFT JOIN VerbLangMapEntry
+                  ON (VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash) = 
+                     (SELECT VerbLangMapEntry.vlmeVerbUid, VerbLangMapEntry.vlmeLangHash
+                      FROM VerbLangMapEntry
+                      WHERE VerbLangMapEntry.vlmeVerbUid = DistinctVerbUrls.statementVerbUid
+                      ORDER BY VerbLangMapEntry.vlmeLastModified DESC
+                      LIMIT 1)
+""")
+    abstract fun getUniqueVerbsForSession(
+        registrationHi: Long,
+        registrationLo: Long,
+        selectedPersonUid: Long,
+        contentEntryUid: Long
+    ): Flow<List<VerbEntityAndName>>
+
+    @HttpAccessible
+    @Query("""
+        SELECT * 
+          FROM (SELECT StatementEntity.*
+                 $FROM_STATEMENTS_WHERE_MATCHES_CONTENT_ENTRY_UID_AND_HAS_PERMISSION
+                   AND (     StatementEntity.extensionProgress IS NOT NULL
+                         AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1)
+                 LIMIT 1) AS ProgressStatements
+        UNION
+        SELECT * 
+          FROM (SELECT StatementEntity.*
+                 $FROM_STATEMENTS_WHERE_MATCHES_CONTENT_ENTRY_UID_AND_HAS_PERMISSION
+                   AND (     StatementEntity.resultScoreScaled IS NOT NULL
+                         AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1)
+                 LIMIT 1) AS ScoreStatements
+    """)
+    abstract suspend fun scoreOrProgressDataExistsForContent(
+        contentEntryUid: Long,
+        accountPersonUid: Long,
+    ): List<StatementEntity>
+
+
+    @Query("""
+        SELECT StatementEntity.*, ActivityEntity.*
+          FROM StatementEntity
+               LEFT JOIN ActivityEntity
+                         ON ActivityEntity.actUid = StatementEntity.statementObjectUid1
+         WHERE StatementEntity.statementIdHi = :statementIdHi
+           AND StatementEntity.statementIdLo = :statementIdLo
+    """)
+    abstract suspend fun findByUidWithActivityAsync(
+        statementIdHi: Long,
+        statementIdLo: Long,
+    ): StatementAndActivity?
 
 }

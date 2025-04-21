@@ -50,6 +50,11 @@
     <string name="confirm_password">Confirm password</string>
     <string name="last_name">Last name</string>
     <string name="first_name">First name</string>
+    <string name="least_recent">Least Recent</string>
+    <string name="by_score">Score</string>
+    <string name="by_completion">Completion Percent</string>
+    <string name="by_recent_attempt">Most Recent Attempt Time</string>
+    <string name="by_timestamp">Time Stamp</string>
     <string name="register_now">Register Now</string>
     <string name="new_password">New password</string>
     <string name="phone_memory">Phone memory</string>
@@ -102,8 +107,11 @@
     <string name="failed">Failed</string>
     <string name="passed">Passed</string>
     <string name="success">Success</string>
+    <string name="failure">Failure</string>
     <string name="incomplete">Incomplete</string>
     <string name="completed">Completed</string>
+    <string name="experience">Experience</string>
+    <string name="answered">Answered</string>
     <string name="select_subtitle_video">Select Subtitle Language</string>
     <string name="no_subtitle">No Subtitles</string>
     <string name="no_video_file_found">No video file found</string>
@@ -308,6 +316,8 @@
     <string name="xapi_verb_header">Did what</string>
     <string name="xapi_result_header">Result</string>
     <string name="xapi_score">Score (%)</string>
+    <string name="content_score">score</string>
+    <string name="completion_key">completion</string>
     <string name="import_title_not_entered">Title not entered</string>
     <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>
@@ -2014,6 +2024,13 @@
 
     <string name="subtitles">Subtitles</string>
 
+    <string name="progress_key">Progress</string>
+
+    <string name="response">Response</string>
+
+    <string name="true_key">true</string>
+
+    <string name="false_key">false</string>
 
     <string name="invite_via_contact">Invite Via Contact</string>
 
@@ -2056,6 +2073,28 @@
     <string name="invite_code_expired">Invite code is expired</string>
 
     <string name="invitation_is_revoked">Invitation is revoked</string>
+
+    <string name="security">Security</string>
+
+    <string name="manage_account">Manage account</string>
+
+    <string name="passkeys">Passkeys</string>
+
+    <string name="manage">Manage</string>
+
+    <string name="created">Created</string>
+
+    <string name="create_passkey">Create a passkey</string>
+
+    <string name="last_updated">Last Updated</string>
+
+    <string name="delete_this_passkey">Delete this passkey?</string>
+
+    <string name="loss_access_passkey_dialog">You could lose access to the account if you dont have another way to sign in.</string>
+
+    <string name="sign_in_faster_next_time">Sign in faster next time</string>
+
+    <string name="secure_passkey_detail_text">You can sign in securly with your passkey using your fingerprint, face, or other lock screen method.</string>
 
     <string name="invitations_sent">Invitations sent</string>
 

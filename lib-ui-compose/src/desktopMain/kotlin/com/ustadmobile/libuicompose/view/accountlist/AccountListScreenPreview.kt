@@ -4,7 +4,7 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
-import com.ustadmobile.core.viewmodel.accountlist.AccountListUiState
+import com.ustadmobile.core.viewmodel.account.list.AccountListUiState
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
 

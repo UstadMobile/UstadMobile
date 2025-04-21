@@ -112,7 +112,7 @@ import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
-import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
+import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid

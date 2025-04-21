@@ -3,8 +3,8 @@ package com.ustadmobile.entities
 import com.ustadmobile.core.components.NAVHOST_CLEARSTACK_VIEWNAME
 import com.ustadmobile.core.components.NavHostClearStackPlaceholder
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUserTypeViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectusertype.AddAccountSelectNewOrExistingUserTypeViewModel
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 import com.ustadmobile.mui.components.*
 import com.ustadmobile.view.*
@@ -106,7 +106,7 @@ import com.ustadmobile.view.accountlist.AccountListScreen
 import com.ustadmobile.view.person.accountedit.PersonAccountEditScreen
 import com.ustadmobile.view.person.child.AddChildProfilesScreen
 import com.ustadmobile.view.person.child.EditChildProfileScreen
-import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.core.viewmodel.account.list.AccountListViewModel
 import com.ustadmobile.view.contententry.importlink.ContentEntryImportLinkScreen
 import com.ustadmobile.core.viewmodel.contententry.importlink.ContentEntryImportLinkViewModel
 import com.ustadmobile.view.contententry.getmetadata.ContentEntryGetMetadataScreen
@@ -175,6 +175,9 @@ import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunIm
 import com.ustadmobile.core.viewmodel.clazz.gradebook.ClazzGradebookViewModel
 import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import com.ustadmobile.core.viewmodel.clazz.inviteredeem.ClazzInviteRedeemViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsSessionListViewModel
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsStatementListViewModel
 import com.ustadmobile.view.clazz.gradebook.ClazzGradebookScreen
 import com.ustadmobile.mui.components.UstadChipsDemo
 import com.ustadmobile.view.person.addaccount.AddAccountSelectNewOrExistingScreen
@@ -182,12 +185,17 @@ import com.ustadmobile.view.signup.SignUpScreen
 import com.ustadmobile.view.person.addaccount.AddAccountSelectNewOrExistingUserTypeScreen
 import com.ustadmobile.view.person.learningspacelist.LearningSpaceListScreen
 import com.ustadmobile.view.signup.SignUpEnterUsernamePasswordScreen
+import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsPersonListScreen
+import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsSessionListScreen
+import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAttemptsStatementListScreen
 import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
 import com.ustadmobile.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
+import com.ustadmobile.core.viewmodel.person.manageaccount.ManageAccountViewModel
 import com.ustadmobile.view.contententry.subtitleedit.SubtitleEditScreen
 
 import com.ustadmobile.view.clazz.inviteredeem.ClazzInviteRedeemScreen
+import com.ustadmobile.view.person.manageaccount.ManageAccountScreen
 
 //As per entities/Showcases.kt on MUI-showcase #d71c6d1
 
@@ -292,6 +300,21 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         "ContentEntryDetailOverview",
         ContentEntryDetailOverviewScreen
     ),
+    UstadScreen(
+        ContentEntryDetailAttemptsPersonListViewModel.DEST_NAME,
+        "ContentEntryDetailAttemptsPersonList",
+        ContentEntryDetailAttemptsPersonListScreen
+    ),
+    UstadScreen(
+        ContentEntryDetailAttemptsSessionListViewModel.DEST_NAME,
+        "ContentEntryDetailAttemptsSessionList",
+        ContentEntryDetailAttemptsSessionListScreen
+    ),
+    UstadScreen(
+        ContentEntryDetailAttemptsStatementListViewModel.DEST_NAME,
+        "ContentEntryDetailAttemptsStatementList",
+        ContentEntryDetailAttemptsStatementListScreen
+    ),
     UstadScreen(HolidayCalendarEditViewModel.DEST_NAME, "HolidayCalendarEdit Preview",
         HolidayCalendarEditPreview),
     UstadScreen(
@@ -342,6 +365,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen(ContentEntryListViewModel.DEST_NAME_PICKER, "ContentEntryListPicker",
         ContentEntryListScreen),
     UstadScreen(AccountListViewModel.DEST_NAME, "AccountList", AccountListScreen),
+    UstadScreen(ManageAccountViewModel.DEST_NAME, "AccountList", ManageAccountScreen),
     UstadScreen(
         ClazzMemberListViewModel.DEST_NAME, "ClazzMemberList Preview", ClazzMemberListScreen
     ),

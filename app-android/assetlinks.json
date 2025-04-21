@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.toughra.ustadmobile",
+      "sha256_cert_fingerprints": [
+        "A6:64:4D:03:C2:D8:BC:AE:06:C1:F8:48:1C:F6:86:23:B0:96:30:AB:27:DC:86:6B:90:57:A5:AC:6F:CA:D0:D2"
+      ]
+    }
+  }
+]
