@@ -81,7 +81,7 @@ fun ClazzMemberListScreen(
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickFilterChip: (MessageIdOption2) -> Unit = {},
     onClickRevokeInvite:(String) -> Unit,
-    onClickResendInvite:(String) -> Unit
+    onClickResendInvite:(ClazzInvite) -> Unit
 ) {
 
     val teacherListPager = rememberDoorRepositoryPager(
@@ -270,7 +270,7 @@ fun ClazzMemberListScreen(
 @Composable
 fun PendingInvitesListItem(
     item: ClazzInvite?,
-    onClickResendInvite:(String)->Unit,
+    onClickResendInvite:(ClazzInvite)->Unit,
     onClickRevokeInvite:(String)->Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
@@ -311,7 +311,7 @@ fun PendingInvitesListItem(
                     text = { Text(stringResource(MR.strings.resend)) },
                     onClick = {
                         menuExpanded = false
-                        item?.inviteContact?.let { onClickResendInvite(it) }
+                        item?.inviteContact?.let { onClickResendInvite(item) }
                     }
                 )
                 DropdownMenuItem(

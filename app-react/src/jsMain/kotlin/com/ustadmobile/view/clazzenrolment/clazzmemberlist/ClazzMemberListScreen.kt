@@ -78,7 +78,7 @@ external interface ClazzMemberListScreenProps : Props {
 
     var onClickRevokeInvite: (String) -> Unit
 
-    var onClickResendInvite: (String) -> Unit
+    var onClickResendInvite: (ClazzInvite) -> Unit
 
 }
 
@@ -348,7 +348,7 @@ external interface PendingInvitesListItemProps : Props {
 
     var item : ClazzInvite?
 
-    var onClickResendInvite: (String) -> Unit
+    var onClickResendInvite: (ClazzInvite) -> Unit
 
 }
 
@@ -482,7 +482,7 @@ private val PendingInvitesListItem = FC<PendingInvitesListItemProps> { props ->
                 }
                 MenuItem {
                     onClick = {
-                        props.onClickResendInvite(props.item?.inviteContact ?: "")
+                        props.item?.let { it1 -> props.onClickResendInvite(it1) }
                         overflowAnchor = null
                     }
 
