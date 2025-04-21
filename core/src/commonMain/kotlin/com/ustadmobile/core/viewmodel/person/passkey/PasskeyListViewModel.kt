@@ -10,7 +10,7 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.passkey.UserPasskeyChallenge
+import com.ustadmobile.core.domain.credentials.UserPasskeyChallenge
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.viewmodel.ListPagingSourceFactory
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource

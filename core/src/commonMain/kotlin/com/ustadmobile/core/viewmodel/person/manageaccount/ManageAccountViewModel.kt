@@ -4,9 +4,9 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
-import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
-import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyParams
+import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
+import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
@@ -62,7 +62,7 @@ class ManageAccountViewModel(
 
     val uiState: Flow<ManageAccountUiState> = _uiState.asStateFlow()
 
-    val savePassKeyUseCase: SavePersonPasskeyUseCase ?=
+    private val savePassKeyUseCase: SavePersonPasskeyUseCase?=
         di.on(LearningSpace(apiUrlConfig.systemBaseUrl)).direct.instanceOrNull()
 
     init {
@@ -99,11 +99,11 @@ class ManageAccountViewModel(
                 di.on(LearningSpace(apiUrlConfig.systemBaseUrl)).direct.instance<UmAppDataLayer>()
                     .requireRepository()
             val activePasskeys = repo.personPasskeyDao().getAllActivePasskeys(accountManager.currentAccount.personUid)
-            activePasskeys.collect { activePasskeys_ ->
+            activePasskeys.collect {
                 _uiState.update { prev ->
                     prev.copy(
-                        showCreatePasskey = activePasskeys_.isEmpty(),
-                        passkeyCount = activePasskeys_.size
+                        showCreatePasskey = it.isEmpty(),
+                        passkeyCount = it.size
                     )
                 }
             }
@@ -120,7 +120,7 @@ class ManageAccountViewModel(
         navController.navigate(
             PasskeyListViewModel.DEST_NAME,
             args = buildMap {
-                putFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+                putAllFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             }
         )
     }

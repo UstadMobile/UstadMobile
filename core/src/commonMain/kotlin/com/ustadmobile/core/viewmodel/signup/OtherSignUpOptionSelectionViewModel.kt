@@ -127,7 +127,6 @@ class OtherSignUpOptionSelectionViewModel(
             passkeyCreated?.let {
                 accountManager.registerWithPasskey(
                     serverUrl,
-                    apiUrlConfig.systemBaseUrl,
                     it,
                     savePerson,
                     _uiState.value.personPicture

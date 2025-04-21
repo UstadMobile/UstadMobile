@@ -16,9 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.passkey.UserPasskeyChallenge
+import com.ustadmobile.core.domain.credentials.UserPasskeyChallenge
 import com.ustadmobile.core.paging.RefreshCommand
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.viewmodel.person.passkey.PasskeyListUiState
 import com.ustadmobile.core.viewmodel.person.passkey.PasskeyListViewModel
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
@@ -119,13 +118,13 @@ fun PasskeyListScreen(
         }
         ustadPagedItems(
             pagingItems = passkeyListItems,
-            key = { it.personPasskeyUid ?: 0 }
+            key = { it.personPasskeyUid }
         ) { passkeyListItem ->
-            val userChallenge = userChallenge(passkeyListItem?.ppChallengeString.toString())
+            val userChallengeItem = userChallenge(passkeyListItem?.ppChallengeString.toString())
             PasskeyListItem(
                 item = passkeyListItem,
                 onClickRevokePasskey = onClickRevokePasskey,
-                userChallenge = userChallenge
+                userChallenge = userChallengeItem
             )
         }
     }
