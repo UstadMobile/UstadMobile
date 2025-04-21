@@ -2,6 +2,7 @@ package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.db.UmAppDataLayer
+import com.ustadmobile.core.domain.account.CheckRegistrationAllowedUseCase
 import com.ustadmobile.core.domain.assignment.submitmark.SubmitMarkUseCase
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
@@ -137,6 +138,10 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
             systemUrlConfig = instance(),
             learningSpace = context,
         )
+    }
+
+    bind<CheckRegistrationAllowedUseCase>() with scoped(learningSpaceScope).singleton {
+        CheckRegistrationAllowedUseCase(dataLayer = instance())
     }
 
 }
