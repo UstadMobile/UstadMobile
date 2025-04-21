@@ -168,31 +168,6 @@ fun MoreOptionsSection(
             HorizontalDivider(thickness = 1.dp)
         }
 
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultScreenPadding(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                IconTextButton(
-                    icon = Icons.Default.Share,
-                    text = stringResource(MR.strings.share),
-                    onClick = { /* Handle share */ }
-                )
-
-                IconTextButton(
-                    icon = Icons.Default.ImportExport,
-                    text = stringResource(MR.strings.export_data),
-                    onClick = { onShowDialog() }
-                )
-            }
-        }
-
-        item {
-            HorizontalDivider(thickness = 1.dp)
-        }
-
         items(data) { series ->
             DataTable(data = series.data)
             Spacer(modifier = Modifier.height(16.dp))

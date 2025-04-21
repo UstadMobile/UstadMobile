@@ -162,24 +162,6 @@ private val moreOption = FC<ReportDetailProps> { props ->
             direction = responsive(StackDirection.column)
             spacing = responsive(8.px)
             Divider { orientation = Orientation.horizontal }
-            Stack {
-                direction = responsive(StackDirection.row)
-                UstadQuickActionButton {
-                    icon = Share.create()
-                    text = strings[MR.strings.share]
-                    onClick = {
-                    }
-                }
-                UstadQuickActionButton {
-                    icon = ImportExport.create()
-                    text = strings[MR.strings.export_data]
-                    onClick = {
-                        props.onShowDialog()
-                    }
-                }
-
-            }
-            Divider { orientation = Orientation.horizontal }
 
             // data table
             Card {
