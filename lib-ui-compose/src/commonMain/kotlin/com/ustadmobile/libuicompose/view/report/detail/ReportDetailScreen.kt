@@ -176,26 +176,6 @@ fun MoreOptionsSection(
 }
 
 @Composable
-fun IconTextButton(
-    icon: ImageVector,
-    text: String,
-    onClick: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clickable(onClick = onClick)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = text,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = text, style = MaterialTheme.typography.labelMedium)
-    }
-}
-
-@Composable
 fun DataTable(data: List<ReportResultQueryRow>) {
     val header = listOf(
         stringResource(MR.strings.x_axis),
