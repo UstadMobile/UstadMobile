@@ -83,6 +83,8 @@ import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
+import com.ustadmobile.core.viewmodel.person.manageaccount.ManageAccountViewModel
+import com.ustadmobile.core.viewmodel.person.passkey.PasskeyListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
@@ -191,6 +193,8 @@ import com.ustadmobile.libuicompose.view.systempermission.edit.SystemPermissionE
 import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
 import com.ustadmobile.libuicompose.view.person.addaccount.AddAccountSelectNewOrExistingScreen
 import com.ustadmobile.libuicompose.view.person.learningspacelist.LearningSpaceListScreen
+import com.ustadmobile.libuicompose.view.person.manageaccount.ManageAccountScreen
+import com.ustadmobile.libuicompose.view.person.passkey.PasskeyListScreen
 import com.ustadmobile.libuicompose.view.signup.OtherSignUpOptionSelectionScreen
 import com.ustadmobile.libuicompose.view.signup.SignUpEnterUsernamePasswordScreen
 import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
@@ -402,6 +406,28 @@ fun AppNavHost(
                         backStackEntry, LearningSpaceListViewModel::class,
                     ) { di, savedStateHandle ->
                         LearningSpaceListViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${ManageAccountViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                ManageAccountScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, ManageAccountViewModel::class,
+                    ) { di, savedStateHandle ->
+                        ManageAccountViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${PasskeyListViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                PasskeyListScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, PasskeyListViewModel::class,
+                    ) { di, savedStateHandle ->
+                        PasskeyListViewModel(di, savedStateHandle)
                     }
                 )
             }

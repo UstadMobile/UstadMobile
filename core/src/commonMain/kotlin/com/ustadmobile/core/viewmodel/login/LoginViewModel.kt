@@ -265,12 +265,6 @@ class LoginViewModel(
                         )
                     }
 
-                    //this emit the passkeydata to show prompt to user to create passkey
-                    accountManager.createPassKeyPrompt(
-                        username.trim(), account.personUid, di.doorIdentityHashCode.toString(),
-                        systemTimeInMillis(), serverUrl
-                    )
-
                     goToNextDestAfterLoginOrGuestSelected(account.toPerson())
                 } catch (e: AdultAccountRequiredException) {
                     errorMessage = impl.getString(MR.strings.adult_account_required)
