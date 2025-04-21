@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  * Represents an interaction component as per
  * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#interaction-activities
  *
- * Used as a 1:many join with Xobject (xoieObjectUid is the foreign key)
+ * Used as a 1:many join with ActivityEntity (aieActivityUid is the foreign key)
  *
  * @param aieActivityUid activity uid (foreign key)
  * @param aieHash hash of "$aieProp$aieId" used to uniquely identify the Interaction component

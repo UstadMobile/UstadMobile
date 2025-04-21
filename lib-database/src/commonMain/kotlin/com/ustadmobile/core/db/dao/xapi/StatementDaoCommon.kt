@@ -1,6 +1,8 @@
 package com.ustadmobile.core.db.dao.xapi
 
+import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDaoCommon
+import com.ustadmobile.core.db.dao.SystemPermissionDaoCommon
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.CourseBlock
 import com.ustadmobile.lib.db.entities.xapi.XapiEntityObjectTypeFlags
@@ -266,6 +268,92 @@ object StatementDaoCommon {
                    OR StatementEntity.resultSuccess IS NOT NULL
                    OR StatementEntity.extensionProgress IS NOT NULL 
                )
+    """
+
+    const val PERSON_WITH_ATTEMPTS_MAXSCORE = """
+             SELECT MAX(StatementEntity.resultScoreScaled)
+               FROM StatementEntity
+              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                AND StatementEntity.statementActorPersonUid = Person.personUid
+                AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+    """
+
+    const val PERSON_WITH_ATTEMPTS_MAX_PROGRESS = """
+             SELECT MAX(StatementEntity.extensionProgress)
+               FROM StatementEntity
+              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                AND StatementEntity.statementActorPersonUid = Person.personUid
+                AND CAST(StatementEntity.completionOrProgress AS INTEGER) = 1
+    """
+
+    const val PERSON_WITH_ATTEMPTS_MOST_RECENT_TIME = """
+        SELECT MAX(StatementEntity.timestamp)
+               FROM StatementEntity
+              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                AND StatementEntity.statementActorPersonUid = Person.personUid
+    """
+
+
+    const val FROM_STATEMENTS_WHERE_MATCHES_CONTENT_ENTRY_UID_AND_HAS_PERMISSION = """
+        FROM StatementEntity
+                    LEFT JOIN ClazzEnrolment 
+                         ON ClazzEnrolment.clazzEnrolmentUid =
+                           COALESCE(
+                            (SELECT ClazzEnrolment.clazzEnrolmentUid 
+                               FROM ClazzEnrolment
+                              WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                                AND ClazzEnrolment.clazzEnrolmentActive
+                                AND ClazzEnrolment.clazzEnrolmentClazzUid = StatementEntity.statementClazzUid 
+                           ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
+                              LIMIT 1), 0)
+              WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                /* permission check */
+                AND (    StatementEntity.statementActorPersonUid = :accountPersonUid
+                      OR EXISTS(SELECT CoursePermission.cpUid
+                                  FROM CoursePermission
+                                 WHERE CoursePermission.cpClazzUid = StatementEntity.statementClazzUid
+                                   AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
+                                        OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
+                                   AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
+                                   AND NOT CoursePermission.cpIsDeleted)
+                      OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
+                          ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                          ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2}))
+    """
+
+    const val DISTINCT_REGISTRATION_UIDS_FOR_PERSON_AND_CONTENT = """
+             DistinctRegistrationUids(contextRegistrationHi, contextRegistrationLo, statementClazzUid) AS (
+      SELECT DISTINCT StatementEntity.contextRegistrationHi, 
+                     StatementEntity.contextRegistrationLo,
+                     StatementEntity.statementClazzUid
+                 FROM StatementEntity
+                WHERE StatementEntity.statementContentEntryUid = :contentEntryUid
+                  AND StatementEntity.statementActorPersonUid = :personUid)
+    """
+
+    const val DISTINCT_REGISTRATION_UIDS_PERMISSION_CHECK = """
+            :personUid = :accountPersonUid 
+                OR EXISTS(
+                    SELECT CoursePermission.cpUid
+                      FROM CoursePermission
+                           LEFT JOIN ClazzEnrolment 
+                                ON ClazzEnrolment.clazzEnrolmentUid =
+                                  COALESCE(
+                                   (SELECT ClazzEnrolment.clazzEnrolmentUid 
+                                      FROM ClazzEnrolment
+                                     WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :accountPersonUid
+                                       AND ClazzEnrolment.clazzEnrolmentActive
+                                       AND ClazzEnrolment.clazzEnrolmentClazzUid = DistinctRegistrationUids.statementClazzUid 
+                                  ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC   
+                                     LIMIT 1), 0)
+                     WHERE CoursePermission.cpClazzUid = DistinctRegistrationUids.statementClazzUid
+                       AND (   CoursePermission.cpToPersonUid = :accountPersonUid 
+                            OR CoursePermission.cpToEnrolmentRole = ClazzEnrolment.clazzEnrolmentRole )
+                       AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0 
+                       AND NOT CoursePermission.cpIsDeleted)
+                OR (${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT1}
+                    ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}
+                    ${SystemPermissionDaoCommon.SYSTEM_PERMISSIONS_EXISTS_FOR_ACCOUNTUID_SQL_PT2})
     """
 
 

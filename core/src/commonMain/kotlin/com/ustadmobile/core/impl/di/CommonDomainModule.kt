@@ -2,6 +2,7 @@ package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.db.UmAppDataLayer
+import com.ustadmobile.core.domain.account.CheckRegistrationAllowedUseCase
 import com.ustadmobile.core.domain.assignment.submitmark.SubmitMarkUseCase
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
@@ -15,12 +16,15 @@ import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.invite.ResendInviteUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
+import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
+import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 import org.kodein.di.provider
 import org.kodein.di.scoped
 import org.kodein.di.singleton
@@ -121,4 +125,23 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
             stringHasher = instance(),
         )
     }
+
+    bind<FormatStatementResponseUseCase>() with scoped(learningSpaceScope).singleton {
+        FormatStatementResponseUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instanceOrNull(tag = DoorTag.TAG_REPO),
+        )
+    }
+
+    bind<GetDefaultDestinationUseCase>() with scoped(learningSpaceScope).singleton {
+        GetDefaultDestinationUseCase(
+            systemUrlConfig = instance(),
+            learningSpace = context,
+        )
+    }
+
+    bind<CheckRegistrationAllowedUseCase>() with scoped(learningSpaceScope).singleton {
+        CheckRegistrationAllowedUseCase(dataLayer = instance())
+    }
+
 }

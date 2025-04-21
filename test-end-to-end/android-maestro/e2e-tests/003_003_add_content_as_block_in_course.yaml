@@ -1,0 +1,304 @@
+appId: com.toughra.ustadmobile
+tags:
+  - courseBlocks
+env:
+  TESTRESULTSDIR: "build/reports/maestro/003_003_add_content_as_block_in_course/Screenshots"
+onFlowStart:
+  - startRecording: 003_003_add_content_as_block_in_course
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+---
+# Download test file
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "H5p_Content.h5p"
+- runScript:
+    file: "common/import_users_via_http.js"
+    env:
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
+    # admin add content in library
+- runFlow:
+    file: "common/clear_login_and_add_content.yaml"
+    env:
+     TESTFILENAME: "Video_Content.mp4"
+- tapOn: "Save"
+- tapOn: "Video"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 80000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 80000
+# teacher add existing content in library to course as a content block
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: "courses"
+- tapOn: "Test Course Block"
+- runFlow:
+    file: "common/add_existing_content_block_to_course.yaml"
+- tapOn: "Video"
+- tapOn: "Done"
+- tapOn: "SAVE"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add block"
+- tapOn: "Content"
+- tapOn: "My content"
+- tapOn: "Import from file"
+- runFlow:
+    file: "common/select_file_from_picker.yaml"
+    env:
+      TESTFILENAME: "H5p_Content.h5p"
+  # verify content block title is mandatory
+- longPressOn: "True/False Question"
+- tapOn: "Select all"
+- eraseText
+- tapOn: "Next"
+#Assertion to make sure the page is not saved because title is blank
+- assertNotVisible:
+    id: "app_title"
+    text: "Edit content block"
+- hideKeyboard
+- back
+- back
+- tapOn: "Save"
+- runFlow:
+    file: "common/add_new_content_block_to_course.yaml"
+    env:
+      TESTFILENAME: "H5p_Content.h5p"
+- scrollUntilVisible:
+    element:
+      text:  "True/False Question"
+    direction: DOWN
+- assertVisible:
+    text: "Video_Content.mp4"
+- tapOn:
+    text:  "True/False Question"
+- assertVisible:
+    text:  "Test Course Block"
+    id: "app_title"
+- extendedWaitUntil:
+    notVisible: "Importing"
+    timeout: 80000
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 80000
+- tapOn: "Open"
+- assertVisible: "Check"
+
+# Student 1 attempt video content
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: "Test Course Block"
+- scrollUntilVisible:
+    element:
+      text: "Video"
+    direction: DOWN
+- tapOn: "Video"
+- tapOn: "Open"
+- tapOn: "Play"
+- extendedWaitUntil:
+    visible: "Play"
+    timeout: 20000
+- back
+# Verify student able to see attempts made in course content
+- tapOn: "Attempts"
+- assertVisible:
+    text: "Video_Content.mp4"
+    id: "app_title"
+- assertVisible: "Student 1: Completed"
+- assertVisible:  "Progress"
+- assertVisible: "100%"
+- assertVisible:
+    id: "progress_bar"
+- tapOn: "Student 1: Completed"
+- assertVisible:
+    text: "Student 1 - Video_Content.mp4"
+    id: "app_title"
+- assertVisible: "Completed"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+- assertVisible:
+    id: "progress_bar"
+- tapOn: "Completed"
+- assertVisible:
+    text: "Video_Content.mp4"
+    id: "app_title"
+- assertVisible: "Completed"
+- assertVisible: "Progressed"
+- assertVisible: "Progressed Video_Content.mp4"
+- assertVisible: "Completed Video_Content.mp4"
+- assertVisible:
+      id: "progress_bar"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+  # verify filter
+- tapOn: "Completed"
+- assertNotVisible: "Completed Video_Content.mp4"
+
+
+# Student 2 attempt H5p content
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud2"
+      PASSWORD: "tests2"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+- tapOn: "Open"
+- runFlow:
+    file: "common/chrome-first-run-check.yaml"
+# Student answered wrong
+- tapOn: "No "
+- tapOn: "Check"
+- tapOn: "Close tab"
+- tapOn: "Attempts"
+- assertVisible:
+    text: "True/False Question"
+    id: "app_title"
+- assertVisible: "Student 2: Completed"
+- assertVisible:  "Score"
+- assertVisible: "0%"
+- assertVisible:
+      id: "progress_bar"
+- tapOn:
+    id: "progress_bar"
+- assertVisible:
+    text: "Student 2 - True/False Question"
+    id: "app_title"
+- assertVisible: "Failed"
+- tapOn:
+    id: "progress_bar"
+- assertVisible:
+    text: "True/False Question"
+    id: "app_title"
+- assertVisible: "0%"
+- assertVisible: "Score"
+
+# Student 3 makes attempt on H5p content
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud3"
+      PASSWORD: "tests3"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+- tapOn: "Open"
+- tapOn: "Yes "
+- tapOn: "Check"
+- tapOn: "Close tab"
+# Verify student 3 able to see attempts made in course content
+- tapOn: "Attempts"
+- assertVisible:
+    text: "True/False Question"
+    id: "app_title"
+- assertVisible: "Student 3: Passed"
+- assertVisible: "100%"
+- assertVisible: "Score"
+- tapOn: "Student 3: Passed"
+- assertVisible:
+    text: "Student 3 - True/False Question"
+    id: "app_title"
+- assertVisible: "Passed"
+- assertVisible:
+    id: "progress_bar"
+- assertVisible: "100%"
+- assertVisible: "Score"
+- tapOn:
+    id: "progress_bar"
+- assertVisible:
+    text: "True/False Question"
+    id: "app_title"
+- assertVisible: "Answered"
+- assertVisible: "Answered "
+- assertVisible: "100%"
+- assertVisible: "Score"
+
+# verify teacher able to see students attempts
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: "Test Course Block"
+- tapOn: "Members"
+- assertVisible: "Student 1"
+- tapOn: "Course"
+- scrollUntilVisible:
+    element:
+      text: "True/False Question"
+    direction: "DOWN"
+- tapOn: "True/False Question"
+# Verify teacher able to see attempts made in course content
+- tapOn: "Attempts"
+- assertVisible:
+    text: "True/False Question"
+    id: "app_title"
+- assertVisible: "Student 2: Completed"
+- assertVisible: "Student 3: Passed"
+- assertVisible: "100%"
+- assertVisible: "Score"
+- tapOn: "Student 3: Passed"
+- assertVisible: "Passed"
+- assertVisible:
+    text: "Student 3 - True/False Question"
+    id: "app_title"
+- assertVisible:
+    id: "progress_bar"
+- assertVisible: "100%"
+- assertVisible: "Score"
+- tapOn:
+    id: "progress_bar"
+- assertVisible:
+    text: "True/False Question"
+    id: "app_title"
+    # On maestro Teacher not able to see progress -
+- assertVisible:
+    text: "Answered"
+    index: 0
+- assertVisible: "100%"
+- assertVisible: "Score"
+  # Verify student 1 not able to see attempts made in course content by Student 2
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: "Test Course Block"
+- tapOn: "True/False Question"
+- tapOn: "Attempts"
+- assertVisible:
+    text: "True/False Question"
+    id: "app_title"
+- assertVisible: "Nothing here, yet"

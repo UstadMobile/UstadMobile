@@ -37,11 +37,11 @@ onFlowComplete:
 - tapOn: "True/False Question"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 60000
+    timeout: 80000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 60000
-- tapOn: Open
+    timeout: 80000
+- tapOn: "Open"
 - runFlow:
     file: "common/chrome-first-run-check.yaml"
 - assertVisible: "Check"
@@ -53,8 +53,8 @@ onFlowComplete:
     visible: "True/False Question"
     timeout: 60000
 - tapOn: "True/False Question"
-- tapOn: Download
-- tapOn: Open
+- tapOn: "Download"
+- tapOn: "Open"
 - extendedWaitUntil:
     visible: "Check"
     timeout: 5000

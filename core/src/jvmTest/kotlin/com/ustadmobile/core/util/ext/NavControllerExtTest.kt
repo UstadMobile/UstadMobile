@@ -10,9 +10,8 @@ import com.ustadmobile.core.impl.nav.UstadNavController
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
-import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
-import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
+import com.ustadmobile.core.viewmodel.account.list.AccountListViewModel
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UserSession
 import kotlinx.coroutines.runBlocking

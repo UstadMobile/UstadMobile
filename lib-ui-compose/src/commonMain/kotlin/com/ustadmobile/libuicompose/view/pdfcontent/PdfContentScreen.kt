@@ -31,7 +31,7 @@ fun PdfContentScreen(
         uiState = uiState,
         onActiveChanged = viewModel::onActiveChanged,
         onProgressed = viewModel::onProgressed,
-        onComplete = viewModel::onComplete,
+        onComplete = { viewModel.onComplete(oneCompletionStatementOnly = true) },
     )
 }
 

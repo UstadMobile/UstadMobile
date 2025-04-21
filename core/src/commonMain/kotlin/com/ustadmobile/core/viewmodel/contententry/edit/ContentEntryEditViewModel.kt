@@ -428,7 +428,7 @@ class ContentEntryEditViewModel(
                             ContentEntryAndContentJob.serializer(), entityVal
                         )
 
-                        putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                        putAllFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
                     }
                 )
             }

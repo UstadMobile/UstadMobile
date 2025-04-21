@@ -18,8 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUserTypeUiState
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUserTypeViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectusertype.AddAccountSelectNewOrExistingUserTypeUiState
+import com.ustadmobile.core.viewmodel.account.addaccountselectusertype.AddAccountSelectNewOrExistingUserTypeViewModel
 import com.ustadmobile.libuicompose.images.UstadImage
 import com.ustadmobile.libuicompose.images.ustadAppImagePainter
 import dev.icerock.moko.resources.compose.stringResource
@@ -30,7 +30,9 @@ import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 fun AddAccountSelectNewOrExistingUserTypeScreen(
     viewModel: AddAccountSelectNewOrExistingUserTypeViewModel,
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle(AddAccountSelectNewOrExistingUserTypeUiState())
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
+        AddAccountSelectNewOrExistingUserTypeUiState()
+    )
 
     AddAccountSelectNewOrExistingUserTypeScreen(
         uiState = uiState,

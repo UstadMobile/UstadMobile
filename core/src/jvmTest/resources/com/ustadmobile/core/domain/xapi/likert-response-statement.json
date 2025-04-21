@@ -1,0 +1,62 @@
+{
+  "actor": {
+    "account" : {
+      "name": "user",
+      "homePage": "http://localhost/"
+    }
+  },
+  "verb":{
+    "id":"http://adlnet.gov/expapi/verbs/attempted",
+    "display":{
+      "en-US":"attempted"
+    }
+  },
+  "object":{
+    "id":"http://example.adlnet.gov/xapi/example/simpleCBT",
+    "definition": {
+      "description": {
+        "en-US": "How awesome is Experience API?"
+      },
+      "type": "http://adlnet.gov/expapi/activities/cmi.interaction",
+      "interactionType": "likert",
+      "correctResponsesPattern": [
+        "likert_3"
+      ],
+      "scale": [
+        {
+          "id": "likert_0",
+          "description": {
+            "en-US": "It's OK"
+          }
+        },
+        {
+          "id": "likert_1",
+          "description": {
+            "en-US": "It's Pretty Cool"
+          }
+        },
+        {
+          "id": "likert_2",
+          "description": {
+            "en-US": "It's Damn Cool"
+          }
+        },
+        {
+          "id": "likert_3",
+          "description": {
+            "en-US": "It's Gonna Change the World"
+          }
+        }
+      ]
+    }
+  },
+  "result":{
+    "score":{
+      "scaled":0.95
+    },
+    "success":true,
+    "completion":true,
+    "duration": "PT1234S",
+    "response" : "likert_3"
+  }
+}

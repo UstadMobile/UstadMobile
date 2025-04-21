@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest.domain.passkey.verify
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.passkey.PasskeyVerifyResult
+import com.ustadmobile.core.domain.credentials.PasskeyVerifyResult
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.PersonPasskey
 import com.webauthn4j.WebAuthnManager

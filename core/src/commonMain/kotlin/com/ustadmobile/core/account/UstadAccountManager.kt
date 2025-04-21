@@ -6,10 +6,10 @@ import com.ustadmobile.core.account.UstadAccountManager.EndpointFilter
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
-import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase.CreatePasskeyResult
-import com.ustadmobile.core.domain.passkey.PassKeySignInData
-import com.ustadmobile.core.domain.passkey.PasskeyVerifyResult
-import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase.CreatePasskeyResult
+import com.ustadmobile.core.domain.credentials.PassKeySignInData
+import com.ustadmobile.core.domain.credentials.PasskeyVerifyResult
+import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
 import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup

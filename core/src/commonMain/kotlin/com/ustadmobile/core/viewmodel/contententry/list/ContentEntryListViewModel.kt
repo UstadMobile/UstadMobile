@@ -445,7 +445,7 @@ class ContentEntryListViewModel(
                 put(ContentEntryEditViewModel.ARG_LEAF, true.toString())
                 put(ARG_PARENT_UID, parentEntryUid.toString())
                 put(ARG_NEXT, ContentEntryEditViewModel.DEST_NAME)
-                putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                putAllFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
             }
         )
     }
@@ -458,7 +458,7 @@ class ContentEntryListViewModel(
                 put(ContentEntryGetMetadataViewModel.ARG_URI, fileUri)
                 put(ContentEntryGetMetadataViewModel.ARG_FILENAME, fileName)
                 put(ARG_PARENT_UID, parentEntryUid.toString())
-                putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                putAllFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
             }
         )
     }
@@ -485,7 +485,7 @@ class ContentEntryListViewModel(
                     serializer = CourseBlockAndEditEntities.serializer(),
                     overwriteDestination = false,
                     args = buildMap {
-                        putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                        putAllFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
                         put(
                             CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY,
                             json.encodeToString(
