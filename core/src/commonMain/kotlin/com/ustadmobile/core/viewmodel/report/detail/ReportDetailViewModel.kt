@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -76,9 +78,13 @@ class ReportDetailViewModel(
                     setLoadingState = true,
                     permissionCheck = { true }
                 ) {
-                    val siteFlow = activeRepo.reportDao().findByUidLive(reportUid)
+                    val reportFlow = activeRepo.reportDao().findByUidLive(reportUid)
                     launch {
-                        siteFlow.collect { report ->
+                        reportFlow
+                            .distinctUntilChanged { old, new ->
+                                old?.reportLastModTime == new?.reportLastModTime
+                            }
+                            .collectLatest { report ->
                             try {
                                 val reportNonNull = report
                                     ?: throw IllegalStateException("Report not found for uid $reportUid")
@@ -88,7 +94,7 @@ class ReportDetailViewModel(
                                 val parsedOptions = when {
                                     !optionsJson.isNullOrBlank() -> {
                                         try {
-                                            Json.decodeFromString(
+                                            json.decodeFromString(
                                                 ReportOptions2.serializer(),
                                                 optionsJson
                                             )
@@ -112,7 +118,11 @@ class ReportDetailViewModel(
                                     accountPersonUid = activeUserPersonUid,
                                     timeZone = TimeZone.currentSystemDefault()
                                 )
-                                runReport(request)
+                                runReportUseCase(request).collect { reportResult ->
+                                    _uiState.update { prev ->
+                                        prev.copy(reportResults = reportResult.results)
+                                    }
+                                }
 
                             } catch (e: Exception) {
                                 _appUiState.update { it.copy(loadingState = NOT_LOADING) }
@@ -124,26 +134,6 @@ class ReportDetailViewModel(
         }
     }
 
-    private fun runReport(request: RunReportUseCase.RunReportRequest) {
-        _appUiState.update { it.copy(loadingState = INDETERMINATE) }
-        runReportUseCase(request)
-            .onEach { result ->
-                _uiState.update { prev ->
-                    prev.copy(reportResults = result.results)
-                }
-                println("Flow: ${result.results}")
-            }
-            .catch { e ->
-                println("Flow error: $e")
-            }
-            .launchIn(viewModelScope)
-            .invokeOnCompletion { cause ->
-                _appUiState.update { it.copy(loadingState = NOT_LOADING) }
-                cause?.let { println("Flow Completion cause: $it") }
-            }
-    }
-
-
     fun onClickEdit() {
         navController.navigate(
             ReportEditViewModel.DEST_NAME,
@@ -151,18 +141,7 @@ class ReportDetailViewModel(
         )
     }
 
-    fun onDismissDialog() {
-        _uiState.update { prev -> prev.copy(dialogVisible = false) }
-
-    }
-
-    fun onShowDialog() {
-        _uiState.update { prev -> prev.copy(dialogVisible = true) }
-
-    }
-
     companion object {
         const val DEST_NAME = "ReportDetailView"
-        const val RESULT_KEY_REPORT_DETAIL = "detailReport"
     }
 }

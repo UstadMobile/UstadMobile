@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.replace
+import com.ustadmobile.core.util.ext.replaceOrAppend
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
@@ -221,16 +222,15 @@ class ReportEditViewModel(
 
 
     fun onSeriesChanged(updatedSeries: ReportSeries2) {
-        _uiState.update { prev ->
-            prev.copy(
-                reportOptions2 = prev.reportOptions2.copy(
-                    series = prev.reportOptions2.series.replace(updatedSeries) {
+        onEntityChanged(
+            _uiState.value.reportOptions2.let { reportOptions ->
+                reportOptions.copy(
+                    series = reportOptions.series.replace(updatedSeries) {
                         it.reportSeriesUid == updatedSeries.reportSeriesUid
                     }
                 )
-            )
-        }
-        onEntityChanged(_uiState.value.reportOptions2)
+            }
+        )
     }
 
 
@@ -239,9 +239,10 @@ class ReportEditViewModel(
             _uiState.update { prev ->
                 val updatedSeriesList = prev.reportOptions2.series.map { series ->
                     if (series.reportSeriesUid == seriesId) {
-                        val updatedFilters =
-                            series.reportSeriesFilters?.toMutableList() ?: mutableListOf()
-                        updatedFilters.add(filter2)
+                        val existingFilters = series.reportSeriesFilters?.toMutableList() ?: emptyList()
+                        val updatedFilters = existingFilters.replaceOrAppend(filter2) {
+                            it.reportFilterUid == filter2.reportFilterUid
+                        }
                         series.copy(reportSeriesFilters = updatedFilters)
                     } else {
                         series

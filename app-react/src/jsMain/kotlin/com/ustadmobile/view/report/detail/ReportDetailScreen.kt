@@ -39,8 +39,6 @@ import web.cssom.px
 
 external interface ReportDetailProps : Props {
     var uiState: ReportDetailUiState
-    var onDismissDialog: () -> Unit
-    var onShowDialog: () -> Unit
 }
 
 val ReportDetailScreen = FC<Props> {
@@ -49,44 +47,10 @@ val ReportDetailScreen = FC<Props> {
     }
     val uiState by viewModel.uiState.collectAsState(ReportDetailUiState())
     val appState by viewModel.appUiState.collectAsState(AppUiState())
-    val strings = useStringProvider()
 
     UstadFab { fabState = appState.fabState }
-    Dialog {
-        open = uiState.dialogVisible
-
-        onClose = { _, _ ->
-            viewModel.onDismissDialog()
-        }
-
-        mui.material.List {
-            ListItem {
-                ListItemButton {
-                    id = "share"
-                    onClick = {
-                    }
-                    ListItemText {
-                        primary = ReactNode(strings[MR.strings.share])
-                    }
-                }
-            }
-
-            ListItem {
-                ListItemButton {
-                    id = "export data"
-                    onClick = {
-                    }
-                    ListItemText {
-                        primary = ReactNode(strings[MR.strings.export_data])
-                    }
-                }
-            }
-        }
-    }
     ReportDetailComponent2 {
         this.uiState = uiState
-        onShowDialog = viewModel::onShowDialog
-        onDismissDialog = viewModel::onDismissDialog
     }
 }
 
@@ -124,8 +88,6 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
 
             moreOption {
                 uiState = props.uiState
-                onShowDialog = props.onShowDialog
-                onDismissDialog = props.onDismissDialog
             }
         }
     }
