@@ -13,7 +13,8 @@ it('Admin enable registration', () => {
 it('Child user aged below 13 register as a new user', () => {
   cy.ustadClearIndexDb()
   cy.visit('/', {timeout:60000})
-  cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').click();
+  cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').click()
+  cy.ustadPersonalOrLearningSpace('Learning_space')
   cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date(Date.now() - (10 * 365 * 24 * 60 * 60 * 1000))) //kids age 10
   cy.contains('button','Next').click()
   cy.contains('New Terms').should('not.exist')
@@ -21,8 +22,13 @@ it('Child user aged below 13 register as a new user', () => {
   cy.get('div[id="gender"]').click()
   cy.contains("li","Female").click()
   cy.contains("label", "Parent email*").parent().find("input").clear().type('parent@email.com')
-  cy.contains('button','Done').click()
-  cy.contains("Wait for Parent to consent").should('exist')
+  cy.contains('button','Other options').click()
+  cy.contains("label", "Username").parent().find("input").clear().type('childuser')
+  cy.contains("label", "Password").parent().find("input").clear().type('test1234')
+  cy.contains('SIGN-UP').click()
+  cy.contains("Wait for Parent").should('exist')
+  cy.contains('button','OK').click()
+  cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').should('exist')
 })
 
 it('Parent User register as a new user', () => {
@@ -50,14 +56,13 @@ it('Parent user clicks on link in the email received from ustad mobile', () => {
  // Call the custom command to fetch the email and open the URL
   cy.UstadOpenInviteLinkFromEmail(email, baseUrl, {timeout:60000})
   cy.contains('Parent User').click() // Accounts screen
-  cy.contains('Child User').should('be.visible') //List of child profiles
-  cy.get("#appbar_title").contains("Add child profile").should("exist")
+  cy.get("#appbar_title").contains("Consent management").should("exist")
+  cy.contains('Consent text and details').should('be.visible')
+  cy.get("#relationship").contains("Father").should("exist") //Default relation- male gender so father
+  cy.contains("Terms and policies").should("exist")
+  cy.contains('I consent').click()
+  cy.contains("Child personal detail screen").should("exist")
   cy.contains('Child User').should('be.visible')
-  cy.contains('Female').should('be.visible')
-  // Verify DOB of child
-  cy.contains('Child User').should('be.visible')
-  cy.contains('button','Save').click()
-  cy.contains('Courses',{timeout:2000}).should('be.visible')
 })
   after(() => {
     // Stop Test Server after tests are complete

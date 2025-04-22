@@ -127,9 +127,13 @@ trickle -s -d 128 -u 128 bash
 
 7.2e [When personal accounts are enabled by setting a personal learning space URL: parents can register and add child profiles](test-descriptions/007_002e_user_registration_personalal_account_can_add_child_profiles.md)
 
-7.3a [When registration is enabled: Users under 13 can register using parental approval link - new parent user](test-descriptions/007_003a_users_under_13_can_register_using_parental_approval_link_new_parent_test_description.md)
+7.3a [When registration is enabled: Users under 13 can register using parental approval link - personal space - new parent user](test-descriptions/007_003a_users_under_13_can_register_using_parental_approval_link_on_personal_space_new_parent_test_description.md)
 
-7.3b [When registration is enabled: Users under 13 can register using parental approval link - existing parent user](test-descriptions/007_003b_users_under_13_can_register_using_parental_approval_link_existing_parent_test_description.md)
+7.3b [When registration is enabled: Users under 13 can register using parental approval link - personal space -existing parent user](test-descriptions/007_003b_users_under_13_can_register_using_parental_approval_link_on_personal_space_existing_parent_test_description.md)
+
+7.3c [When registration is enabled: Users under 13 can register using parental approval link - learning space - new parent user](test-descriptions/007_003c_users_under_13_can_register_using_parental_approval_link_on_learning_space_new_parent_test_description.md)
+
+7.3d [When registration is enabled: Users under 13 can register using parental approval link - learning space -existing parent user](test-descriptions/007_003d_users_under_13_can_register_using_parental_approval_link_on_learning_space_existing_parent_test_description.md)
 
 7.4 [The username validation and adding a profile photo](test-descriptions/007_004_username_validation_and_add_profile_pic_test_description.md)
 

@@ -1,0 +1,93 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "build/reports/maestro/007_003a_users_under_13_can_register_using_parental_approval_link_new_parent/Screenshots"
+onFlowStart:
+  - startRecording: 007_003a_users_under_13_can_register_using_parental_approval_link_new_parent
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+
+---
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+#admin enable user registration
+- runFlow:
+    file: "common/admin_login.yaml"
+- runFlow:
+    file: "common/enable_user_registration.yaml"
+- assertVisible: "Yes"
+- runFlow: "common/clear_state_and_learning_space_new_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- tapOn: 2025
+- longPressOn: 2025
+- inputText: 2016
+- hideKeyboard
+- tapOn: 2016
+- tapOn: "* Required"
+- tapOn: "Next"
+- tapOn: "Full name*"
+- inputText: "Child user"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Parent email*"
+- inputText: "parent@email.com"
+- hideKeyboard
+- tapOn: "Done"
+- assertVisible: "Wait for Parent to consent"
+
+# Fetch the invitation email via HTTP
+- clearState: com.toughra.ustadmobile
+- runScript:
+    file: "common/fetch_invitation_link.js"
+    env:
+      EMAIL: "parent@email.com"
+  # Parent user register to ustad mobile
+- tapOn: "New user"
+- runFlow:
+    when:
+      visible: "Personal"
+    commands:
+      - tapOn: "Join Learning Space"
+- tapOn: "Enter link manually"
+- runFlow: "common/select_site.yaml"
+- tapOn: 2025
+- longPressOn: 2025
+- inputText: 2000
+- hideKeyboard
+- tapOn: 2000
+- tapOn: "* Required"
+- tapOn: "Next"
+- extendedWaitUntil:
+    visible:  "Terms and company policies"
+    timeout: 10000
+- tapOn: "Accept"
+- tapOn: "Full name*"
+- inputText: "Parent User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Parent email/phone"
+- assertVisible:
+    id: "checkbox"
+- tapOn: "Other options"
+- tapOn: "Create username and password"
+- tapOn: "Username"
+- inputText: "parentuser"
+- tapOn: "Password"
+- inputText: "test1234"
+- tapOn: "Sign-up"
+- assertVisible: "Child user" #list view of child profile
+- tapOn: "Child user"
+- assertVisible: "Add child profile"
+- assertVisible: "Child"
+- assertVisible: "user"
+- assertVisible: "Female"
+- tapOn: "Next"
+- assertVisible: "Policy"
+- tapOn: "Accept"
+- assertVisible: "Which profile do you want to start with?"
+- tapOn: "Child user"
+- assertVisible: "Courses"
