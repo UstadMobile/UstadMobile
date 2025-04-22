@@ -14,8 +14,11 @@ import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.paging.RefreshCommand
-import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.view.UstadEditView
+import com.ustadmobile.core.viewmodel.UstadEditViewModel.Companion.INIT_PIC_URI
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel.Companion.STATE_KEY_SCHEDULES
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
@@ -26,6 +29,7 @@ import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.composites.ClazzAndDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
 import com.ustadmobile.lib.db.entities.*
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,12 +46,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+import kotlin.getValue
+import kotlinx.serialization.encodeToString
+
 
 data class ClazzDetailOverviewUiState(
 
     val clazzAndDetail: ClazzAndDisplayDetails? = null,
 
     val scheduleList: List<Schedule> = emptyList(),
+
+    val coursePicture: CoursePicture?=null,
 
     val courseBlockList: List<CourseBlockAndDisplayDetails> = emptyList(),
 
@@ -114,6 +123,9 @@ class ClazzDetailOverviewViewModel(
 
     val listRefreshCommandFlow: Flow<RefreshCommand> = _listRefreshCommandFlow.asSharedFlow()
 
+    private val copyCourseUseCase: CopyCourseUseCase by di.onActiveEndpoint().instance()
+
+
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -178,6 +190,15 @@ class ClazzDetailOverviewViewModel(
                                 ).collect { blockStatuses ->
                                     _uiState.update { prev ->
                                         prev.copy(blockStatusesForActiveUser = blockStatuses)
+                                    }
+                                }
+                            }
+                            launch {
+                                activeRepo.scheduleDao().findAllSchedulesByClazzUidAsLiveList(
+                                    clazzUid = entityUidArg,
+                                ).collect { scheduleList ->
+                                    _uiState.update { prev ->
+                                        prev.copy(scheduleList = scheduleList)
                                     }
                                 }
                             }
@@ -304,11 +325,25 @@ class ClazzDetailOverviewViewModel(
             mapOf(ARG_CLAZZUID to entityUidArg.toString())
         )
     }
-     fun onClickCopyCourse() {
-        navController.navigate(ClazzEditViewModel.DEST_NAME,
-            mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString(),
-                UstadView.CLAZZ_ACTION  to ClazzAction.COPY.name)
-        )
+
+    fun onClickCopyCourse() {
+        viewModelScope.launch {
+            val originalClazz = _uiState.value.clazz ?: return@launch
+            val originalCourseBlocks = _uiState.value.courseBlockList ?: emptyList()
+            val originalSchedule = _uiState.value.scheduleList ?: emptyList()
+            val originalCoursePicture = _uiState.value.clazzAndDetail?.coursePicture
+            val copyResult = copyCourseUseCase(originalClazz, originalCourseBlocks, originalSchedule, originalCoursePicture)
+
+            navController.navigate(
+                ClazzEditViewModel.DEST_NAME,
+                mapOf(
+                    UstadView.CLAZZ_ACTION to ClazzAction.COPY.name,
+                    UstadEditView.ARG_ENTITY_JSON to json.encodeToString(copyResult.clazz),
+                    ClazzEditViewModel.STATE_KEY_COURSEBLOCKS to json.encodeToString(copyResult.courseBlocks),
+                    STATE_KEY_SCHEDULES to json.encodeToString(copyResult.schedules),
+                    ))
+
+        }
     }
 
     companion object {
@@ -321,3 +356,4 @@ class ClazzDetailOverviewViewModel(
     }
 
 }
+

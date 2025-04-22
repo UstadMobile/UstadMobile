@@ -93,6 +93,28 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
          WHERE Clazz.clazzUid = :uid""")
     abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendarAndAndTerminology?
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+    SELECT Clazz.*, 
+           CoursePicture.*,
+           HolidayCalendar.*, 
+           CourseTerminology.*
+      FROM Clazz 
+           LEFT JOIN HolidayCalendar 
+                     ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
+
+           LEFT JOIN CourseTerminology
+                     ON CourseTerminology.ctUid = Clazz.clazzTerminologyUid
+                  
+           LEFT JOIN CoursePicture
+                     ON CoursePicture.coursePictureUid = :uid
+     WHERE Clazz.clazzUid = :uid
+""")
+    abstract fun findByUidWithHolidayCalendarAsFlow(uid: Long): Flow<ClazzWithHolidayCalendarAndAndTerminology?>
+
+
     @Update
     abstract suspend fun updateAsync(entity: Clazz): Int
 
