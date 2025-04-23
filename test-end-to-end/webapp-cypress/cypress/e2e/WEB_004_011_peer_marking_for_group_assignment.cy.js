@@ -123,6 +123,7 @@ it('Student2 -Group 1 view his grade', () => {
 it('Admin copy existing course - verify assignment submissions and reviewer', () => {
   cy.ustadClearDbAndLogin('admin','testpass')
   cy.contains('Test Course Block').click()
+  cy.contains("Assignment 1").should('exist')
   cy.contains('Copy').should('exist')
   cy.contains('Copy').click()
   cy.contains("#appbar_title", "Copy course").should("be.visible")

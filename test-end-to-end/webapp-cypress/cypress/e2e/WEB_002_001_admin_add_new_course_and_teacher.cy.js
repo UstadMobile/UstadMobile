@@ -60,7 +60,7 @@ it('Admin user create a course and add members to the course', () => {
   cy.contains('Assignment').click();
   cy.get('input[id="title"]').type('Assignment 1')
   cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now() - (365 * 24 * 60 * 60 * 1000))) // last year
-  cy.contains('button', 'Done').click()
+  cy.contains('button', 'Done',{timeout:5000}).click()
   cy.contains('Assignment 1').should('be.visible')
 // Set Course start and end dates
   cy.ustadSetDate(cy.get("#clazz_start_time"), new Date(Date.now() - (2 * 365 * 24 * 60 * 60 * 1000))) // 2 years ago
@@ -95,8 +95,8 @@ it('Admin user create a course and add members to the course', () => {
   cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now() + (24 * 60 * 60 * 1000))) // tomorrow
   cy.get('#caSubmissionPolicy').click()
   cy.contains('Can make multiple submissions').click()
-  cy.contains("button","Done").should('be.visible')
-  cy.contains("button","Done").click()
+  cy.contains("button","Done",{timeout:5000}).should('be.visible')
+  cy.contains("button","Done",{timeout:5000}).click()
   cy.get("#clazz_start_time", { timeout: 10000 }).should("be.visible")
   cy.ustadSetDate(cy.get("#clazz_start_time"), new Date(Date.now() - (24 * 60 * 60 * 1000))) //yesterday
   cy.get("#clazz_end_time").clear()
