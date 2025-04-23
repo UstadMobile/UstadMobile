@@ -1,7 +1,9 @@
 package com.ustadmobile.core.viewmodel.clazz.detailoverview
 
+import com.ustadmobile.core.MR.strings.assignment
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel.ClazzAction
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
@@ -40,11 +42,13 @@ class CopyCourseUseCase(
 
             val newCourseBlockUid = primaryKeyManager.nextIdAsync(CourseBlock.TABLE_ID)
 
-            val copiedAssignment = block.assignment?.copy(
+            val assignments = block.assignment
+            val copiedAssignment = assignments?.copy(
                 caUid = primaryKeyManager.nextIdAsync(ClazzAssignment.TABLE_ID),
                 caClazzUid = newClazzUid,
+                caGroupUid = 0,
+                caMarkingType = ClazzAssignment.MARKED_BY_COURSE_LEADER
             )
-
             block.copy(
                 courseBlock = block.courseBlock.copy(
                     cbUid = newCourseBlockUid,
