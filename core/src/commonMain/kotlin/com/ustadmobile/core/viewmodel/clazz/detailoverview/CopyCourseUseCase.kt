@@ -45,8 +45,6 @@ class CopyCourseUseCase(
             CoursePicture()
         }
 
-        Napier.d("CopyCoursePicture:  -> ${copiedCoursePicture?.coursePictureUri}")
-
         val courseBlocks = courseBlockListVal.map { block ->
             block.copy(
                 courseBlock = block.courseBlock?.copy(

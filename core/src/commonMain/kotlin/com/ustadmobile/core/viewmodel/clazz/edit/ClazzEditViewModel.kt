@@ -9,7 +9,6 @@ import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
-import com.ustadmobile.core.impl.UstadMobileSystemCommon.UstadGoOptions
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -174,23 +173,28 @@ class ClazzEditViewModel(
                         serializer = ClazzWithHolidayCalendarAndAndTerminology.serializer(),
                         onLoadFromDb = {
                             it.clazzDao().takeIf { entityUidArg != 0L }
-                                ?.findByUidWithHolidayCalendarAsync(entityUidArg).let { dbResult ->
+                                ?.findByUidWithHolidayCalendarAsync(entityUidArg)?.let { dbResult ->
+                                    var updatedClazz = dbResult
 
-                                    Napier.d("CopyCoursePicture:  -> ${dbResult?.coursePicture}")
-
-                                    val hasPicture = dbResult?.coursePicture != null
-                                    //Add CoursePicture entity if not already present
-                                    if(dbResult == null || hasPicture){
-                                        dbResult
-                                    }else {
-                                        dbResult.shallowCopy {
+                                    // Always update the name if action is COPY
+                                    if (clazzAction == ClazzAction.COPY) {
+                                        updatedClazz = updatedClazz.shallowCopy {
+                                            clazzName =
+                                                "${systemImpl.getString(MR.strings.copy_of)} ${this.clazzName}"
+                                        }
+                                    }
+                                    // Add CoursePicture if it's missing
+                                    if (dbResult.coursePicture == null) {
+                                        updatedClazz = updatedClazz.shallowCopy {
                                             coursePicture = CoursePicture(
                                                 coursePictureUid = entityUidArg
                                             )
                                         }
                                     }
+                                    updatedClazz
                                 }
                         },
+
                         makeDefault = {
                             ClazzWithHolidayCalendarAndAndTerminology().apply {
                                 clazzUid = effectiveClazzUid
