@@ -63,7 +63,7 @@ it('Admin user add content to the library', () => {
 // User making attempt on Epub content
   cy.contains("Library").click()
   cy.contains('Content_002').click()
-  cy.ustadOpenH5pEpub('Content_002')
+  cy.contains('OPEN', { timeout: 20000 }).click()
   cy.ustadVerifyEpub('THE ADOPTING OF ROSA MARIE')
   cy.contains("THE ADOPTING OF ROSA MARIE").click()
 // Attempts made on epub
