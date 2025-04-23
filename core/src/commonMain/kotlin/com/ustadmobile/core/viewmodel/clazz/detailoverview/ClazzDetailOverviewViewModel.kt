@@ -28,6 +28,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.composites.ClazzAndDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
+import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.*
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.BufferOverflow
@@ -59,6 +60,9 @@ data class ClazzDetailOverviewUiState(
     val coursePicture: CoursePicture?=null,
 
     val courseBlockList: List<CourseBlockAndDisplayDetails> = emptyList(),
+
+    var courseBlocks: List<CourseBlockAndEditEntities> = emptyList(),
+
 
     val blockStatusesForActiveUser: List<BlockStatus> = emptyList(),
 
@@ -179,6 +183,38 @@ class ClazzDetailOverviewViewModel(
                                     _uiState.update { prev ->
                                         prev.copy(courseBlockList = courseBlockList)
                                     }
+                                }
+                            }
+                            launch {
+                                val courseBlocksDb = activeRepo.courseBlockDao().findAllCourseBlockByClazzUidAsync(
+                                    clazzUid = entityUidArg,
+                                    includeInactive = false
+                                )
+
+                                val assignmentPeerAllocations = activeRepo.peerReviewerAllocationDao()
+                                    .getAllPeerReviewerAllocationsByClazzUid(
+                                        clazzUid = entityUidArg,
+                                        includeInactive = false
+                                    )
+
+                                //  Map to CourseBlockAndEditEntities
+                                val courseBlocksMapped = courseBlocksDb.map {
+                                    CourseBlockAndEditEntities(
+                                        courseBlock = it.courseBlock!!,
+                                        courseBlockPicture = it.courseBlockPicture ?: CourseBlockPicture(
+                                            cbpUid = it.courseBlock!!.cbUid
+                                        ),
+                                        contentEntry = it.contentEntry,
+                                        contentEntryLang = it.contentEntryLang,
+                                        assignment = it.assignment,
+                                        assignmentCourseGroupSetName = it.assignmentCourseGroupSetName,
+                                        assignmentPeerAllocations = assignmentPeerAllocations.filter { allocation ->
+                                            allocation.praAssignmentUid == it.assignment?.caUid
+                                        }
+                                    )
+                                }
+                                _uiState.update { prev ->
+                                    prev.copy(courseBlocks = courseBlocksMapped)
                                 }
                             }
 
@@ -329,7 +365,7 @@ class ClazzDetailOverviewViewModel(
     fun onClickCopyCourse() {
         viewModelScope.launch {
             val originalClazz = _uiState.value.clazz ?: return@launch
-            val originalCourseBlocks = _uiState.value.courseBlockList ?: emptyList()
+            val originalCourseBlocks = _uiState.value.courseBlocks ?: emptyList()
             val originalSchedule = _uiState.value.scheduleList ?: emptyList()
             val originalCoursePicture = _uiState.value.clazzAndDetail?.coursePicture
             val copyResult = copyCourseUseCase(
