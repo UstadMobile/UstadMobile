@@ -35,13 +35,17 @@ class CopyCourseUseCase(
         clazz.clazzUid = newClazzUid
         clazz.clazzOwnerPersonUid = currentPersonUid
 
-        val copiedCoursePicture = coursePicture?.copy(
-            coursePictureUid = newClazzUid,
-            coursePictureLct = systemTimeInMillis(),
-            coursePictureUri = coursePicture.coursePictureUri,
-        )
-        Napier.d("CopyCoursePicture:  -> ${copiedCoursePicture?.coursePictureUri}")
+        val copiedCoursePicture =  if(coursePicture?.coursePictureUri !=  null ) {
+            coursePicture.copy(
+                coursePictureUid = newClazzUid,
+                coursePictureLct = systemTimeInMillis(),
+                coursePictureUri = coursePicture.coursePictureUri,
+            )
+        } else {
+            CoursePicture()
+        }
 
+        Napier.d("CopyCoursePicture:  -> ${copiedCoursePicture?.coursePictureUri}")
 
         val courseBlocks = courseBlockListVal.map { block ->
             block.copy(
