@@ -191,7 +191,6 @@ class ClazzEditViewModel(
 
                         makeDefault = {
                             ClazzWithHolidayCalendarAndAndTerminology().apply {
-                                Napier.d("ClazzAction default- $clazzAction")
 
                                 clazzUid = effectiveClazzUid
                                 clazzName = ""
