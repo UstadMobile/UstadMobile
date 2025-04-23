@@ -587,6 +587,7 @@ class ClazzEditViewModel(
 
                 if(updateImage && coursePictureVal != null) {
                     coursePictureVal.coursePictureLct = systemTimeInMillis()
+                    coursePictureVal.coursePictureUid = entity.clazzUid
                     activeDb.coursePictureDao().upsertAsync(coursePictureVal)
                 }
 
