@@ -1,5 +1,7 @@
 const { defineConfig } = require("cypress");
 module.exports = defineConfig({
+    projectId: "sf751g",
+    retries: 2,
     video: true,
     e2e: {
         chromeWebSecurity: false,
