@@ -97,6 +97,7 @@ it('Admin user create a course and add members to the course', () => {
   cy.contains('Can make multiple submissions').click()
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()
+  cy.get("#clazz_start_time", { timeout: 10000 }).should("be.visible")
   cy.ustadSetDate(cy.get("#clazz_start_time"), new Date(Date.now() - (24 * 60 * 60 * 1000))) //yesterday
   cy.get("#clazz_end_time").clear()
   cy.contains('Add block').click();
