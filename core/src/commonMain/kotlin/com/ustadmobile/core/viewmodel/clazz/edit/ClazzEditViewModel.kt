@@ -141,6 +141,7 @@ class ClazzEditViewModel(
         ?.let { ClazzAction.valueOf(it) } ?: ClazzAction.EDIT
 
 
+
     init {
 
         val title = createEditTitle(MR.strings.add_a_new_course,
@@ -179,8 +180,7 @@ class ClazzEditViewModel(
                                     // Always update the name if action is COPY
                                     if (clazzAction == ClazzAction.COPY) {
                                         updatedClazz = updatedClazz.shallowCopy {
-                                            clazzName =
-                                                "${systemImpl.getString(MR.strings.copy_of)} ${this.clazzName}"
+                                            clazzName = "${systemImpl.getString(MR.strings.copy_of)} ${this.clazzName}"
                                         }
                                     }
                                     // Add CoursePicture if it's missing
@@ -197,6 +197,8 @@ class ClazzEditViewModel(
 
                         makeDefault = {
                             ClazzWithHolidayCalendarAndAndTerminology().apply {
+                                Napier.d("ClazzAction default- $clazzAction")
+
                                 clazzUid = effectiveClazzUid
                                 clazzName = ""
                                 isClazzActive = true
