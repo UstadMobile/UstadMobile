@@ -177,12 +177,6 @@ class ClazzEditViewModel(
                                 ?.findByUidWithHolidayCalendarAsync(entityUidArg)?.let { dbResult ->
                                     var updatedClazz = dbResult
 
-                                    // Always update the name if action is COPY
-                                    if (clazzAction == ClazzAction.COPY) {
-                                        updatedClazz = updatedClazz.shallowCopy {
-                                            clazzName = "${systemImpl.getString(MR.strings.copy_of)} ${this.clazzName}"
-                                        }
-                                    }
                                     // Add CoursePicture if it's missing
                                     if (dbResult.coursePicture == null) {
                                         updatedClazz = updatedClazz.shallowCopy {
