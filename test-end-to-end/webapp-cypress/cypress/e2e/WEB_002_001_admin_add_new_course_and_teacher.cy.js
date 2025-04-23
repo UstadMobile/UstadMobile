@@ -49,10 +49,10 @@ it('Admin user create a course and add members to the course', () => {
 // Add module block
   cy.contains('button', 'Edit').click();
   cy.contains('Add block').click();
-  cy.contains('Module').click();
-  cy.get('input[id="title"]').type('Term 1');
-  cy.contains('button', 'Done').click();
-  cy.contains('Term 1').should('be.visible')
+  cy.contains('Module', { timeout: 5000 }).click();
+  cy.get('input[id="title"]', { timeout: 5000 }).should('be.visible').type('Term 1');
+  cy.contains('button', 'Done', { timeout: 5000 }).should('be.enabled').click();
+  cy.contains('Term 1', { timeout: 5000 }).should('be.visible');
   cy.contains('button', 'Save').click();
 // Add Assignment
   cy.contains('button', 'Edit').click();
