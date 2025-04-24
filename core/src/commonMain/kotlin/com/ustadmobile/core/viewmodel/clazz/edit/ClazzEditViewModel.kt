@@ -799,6 +799,7 @@ class ClazzEditViewModel(
                 )
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
+
                 navigateForResult(
                     nextViewName = ClazzAssignmentEditViewModel.DEST_NAME,
                     key = RESULT_KEY_COURSEBLOCK,

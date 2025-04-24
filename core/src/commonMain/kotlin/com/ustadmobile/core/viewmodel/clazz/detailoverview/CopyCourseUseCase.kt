@@ -26,12 +26,17 @@ class CopyCourseUseCase(
     private val accountManager: UstadAccountManager
 ) {
 
+    @Serializable
+    data class CopyCourseResult(
+        val clazz: ClazzWithHolidayCalendarAndAndTerminology,
+        val courseBlocks: List<CourseBlockAndEditEntities>,
+        val schedules: List<Schedule>,
+    )
+
     suspend operator fun invoke(
         clazz: Clazz,
         scheduleListVal: List<Schedule>,
-        coursePicture: CoursePicture?
     ): CopyCourseResult {
-
             val courseBlocksDb = repoOrDb.courseBlockDao().findAllCourseBlockByClazzUidAsync(
                 clazzUid = clazz.clazzUid,
                 includeInactive = false
@@ -43,10 +48,12 @@ class CopyCourseUseCase(
                     includeInactive = false
                 )
 
-            //  Map to CourseBlockAndEditEntities
+        val clazzWithHolidayCalendarAndAndTerminology = repoOrDb.clazzDao().findByUidWithHolidayCalendarAsync(clazz.clazzUid)  ?: ClazzWithHolidayCalendarAndAndTerminology()
+
+        //  Map to CourseBlockAndEditEntities
             val courseBlocksMapped = courseBlocksDb.map {
                 CourseBlockAndEditEntities(
-                    courseBlock = it.courseBlock!!,
+                    courseBlock = it.courseBlock!!, //CourseBlock can't be null as per query
                     courseBlockPicture = it.courseBlockPicture ?: CourseBlockPicture(
                         cbpUid = it.courseBlock!!.cbUid
                     ),
@@ -65,15 +72,13 @@ class CopyCourseUseCase(
         val currentPersonUid = accountManager.currentAccount.personUid
         val newScheduleUid = primaryKeyManager.nextIdAsync(Schedule.TABLE_ID)
 
-        clazz.clazzUid = newClazzUid
-        clazz.clazzOwnerPersonUid = currentPersonUid
+
 
         val courseBlocks = courseBlocksMapped.map { block ->
 
             val newCourseBlockUid = primaryKeyManager.nextIdAsync(CourseBlock.TABLE_ID)
 
-            val assignments = block.assignment
-            val copiedAssignment = assignments?.copy(
+            val copiedAssignment = block.assignment?.copy(
                 caUid = primaryKeyManager.nextIdAsync(ClazzAssignment.TABLE_ID),
                 caClazzUid = newClazzUid,
                 caGroupUid = 0,
@@ -82,32 +87,19 @@ class CopyCourseUseCase(
             block.copy(
                 courseBlock = block.courseBlock.copy(
                     cbUid = newCourseBlockUid,
-                    cbClazzUid = newClazzUid
+                    cbClazzUid = newClazzUid,
+                    cbEntityUid = copiedAssignment?.caUid ?: 0
                 ),
                 assignment = copiedAssignment,
 
             )
         }
-
-        val copiedCoursePicture =  if(coursePicture?.coursePictureUri !=  null ) {
-            coursePicture.copy(
-                coursePictureUid = newClazzUid,
-                coursePictureLct = systemTimeInMillis(),
-                coursePictureUri = coursePicture.coursePictureUri,
-            )
-        } else {
-            CoursePicture()
-        }
-
-        val clazzWithHolidayCalendarAndAndTerminology = ClazzWithHolidayCalendarAndAndTerminology()
-        clazzWithHolidayCalendarAndAndTerminology.coursePicture = copiedCoursePicture
-
-        clazzWithHolidayCalendarAndAndTerminology.clazzUid = newClazzUid
-
-        clazzWithHolidayCalendarAndAndTerminology.clazzOwnerPersonUid = currentPersonUid
-
         clazz.shallowCopyTo(clazzWithHolidayCalendarAndAndTerminology)
-
+        clazzWithHolidayCalendarAndAndTerminology.coursePicture = clazzWithHolidayCalendarAndAndTerminology.coursePicture?.copy(newClazzUid) ?: CoursePicture(newClazzUid)
+        clazzWithHolidayCalendarAndAndTerminology.clazzUid = newClazzUid
+        clazzWithHolidayCalendarAndAndTerminology.clazzOwnerPersonUid = currentPersonUid
+        clazzWithHolidayCalendarAndAndTerminology.clazzUid = newClazzUid
+        clazzWithHolidayCalendarAndAndTerminology.clazzOwnerPersonUid = currentPersonUid
 
         val schedules = scheduleListVal.map { originalSchedule ->
             originalSchedule.shallowCopy {
@@ -118,13 +110,11 @@ class CopyCourseUseCase(
         return CopyCourseResult(
             clazzWithHolidayCalendarAndAndTerminology,
             courseBlocks,
-            schedules,
-            copiedCoursePicture
-        )
+            schedules)
     }
 }
 
-fun Clazz.shallowCopyTo(target: Clazz) {
+private fun Clazz.shallowCopyTo(target: Clazz) {
     target.clazzName = this.clazzName
     target.clazzDesc = this.clazzDesc
     target.attendanceAverage = this.attendanceAverage
@@ -150,10 +140,3 @@ fun Clazz.shallowCopyTo(target: Clazz) {
     target.clazzCode = this.clazzCode
 }
 
-@Serializable
-data class CopyCourseResult(
-    val clazz: ClazzWithHolidayCalendarAndAndTerminology,
-    val courseBlocks: List<CourseBlockAndEditEntities>,
-    val schedules: List<Schedule>,
-    val coursePicture: CoursePicture?
-)

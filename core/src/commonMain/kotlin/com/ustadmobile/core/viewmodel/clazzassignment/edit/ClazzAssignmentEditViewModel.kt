@@ -118,6 +118,7 @@ class ClazzAssignmentEditViewModel(
     private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: 0
 
     init {
+
         _appUiState.update { prev ->
             prev.copy(
                 hideBottomNavigation = true,

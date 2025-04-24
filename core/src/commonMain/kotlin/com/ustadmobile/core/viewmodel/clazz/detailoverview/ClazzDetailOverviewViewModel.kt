@@ -333,15 +333,12 @@ class ClazzDetailOverviewViewModel(
         viewModelScope.launch {
             val originalClazz = _uiState.value.clazz ?: return@launch
             val originalSchedule = _uiState.value.scheduleList ?: emptyList()
-            val originalCoursePicture = _uiState.value.clazzAndDetail?.coursePicture
             val copyResult = copyCourseUseCase(
                 originalClazz,
-                originalSchedule,
-                originalCoursePicture
-            ).also {
+                originalSchedule).also {
                 it.clazz.clazzName = "${systemImpl.getString(MR.strings.copy_of)} ${it.clazz.clazzName}"
             }
-            originalClazz.clazzName = "${systemImpl.getString(MR.strings.copy_of)} ${originalClazz.clazzName}"
+
             navController.navigate(
                 ClazzEditViewModel.DEST_NAME,
                 mapOf(
