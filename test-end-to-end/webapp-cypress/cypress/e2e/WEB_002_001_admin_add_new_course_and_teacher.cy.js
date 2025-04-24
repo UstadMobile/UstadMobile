@@ -38,11 +38,9 @@ it('Admin user create a course and add members to the course', () => {
   cy.ustadCreateUserAccount('teach1','testt1')
   cy.contains('Permissions').click()
   cy.contains('button', 'Edit').click()
-  cy.wait(1000)
-  //cy.get(".MuiFormControlLabel-root.Mui-disabled",{timeout:6000}).should('not.exist') // this one not working always so added wait command
-  cy.contains('Add new courses',{timeout:6000}).should('be.visible')
-  cy.contains('Add new courses',{timeout:5000}).click()
-  cy.contains("button","Save",{timeout:5000}).click()
+  cy.get('span.MuiFormControlLabel-label').contains('Add new courses')
+    .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click() //permission switches need to be active before click
+  cy.contains('button', 'Save', {timeout: 5000}).should('be.visible').click()
 // Add course blocks
   cy.contains("Courses").click()
   cy.contains('Test Course Block').click()
@@ -83,13 +81,15 @@ it('Admin user create a course and add members to the course', () => {
 // Copy the existing course
   cy.contains("Courses").click()
   cy.contains('All').click()
-  cy.contains('Test Course Block').click()
+  cy.contains('Test Course Block',{timeout:5000}).click()
+  cy.contains('Term 1',{timeout:10000}).should('be.visible')
+  cy.contains('Assignment 1',{timeout:10000}).should('be.visible')
   cy.contains('Copy').should('be.visible')
   cy.contains('Copy').click()
   cy.contains("#appbar_title", "Copy course").should("be.visible")
   cy.get("input[value='Copy of Test Course Block']").should("be.visible")
-  cy.contains('Term 1').should('exist')
-  cy.contains('Assignment 1').should('exist')
+  cy.contains('Term 1',{timeout:10000}).should('exist')
+  cy.contains('Assignment 1',{timeout:10000}).should('exist')
   cy.scrollTo('bottom')
   cy.contains('Assignment 1').click()
   cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now() + (24 * 60 * 60 * 1000))) // tomorrow
