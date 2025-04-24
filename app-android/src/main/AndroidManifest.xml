@@ -117,6 +117,12 @@
 
 
         <!--
+        Required to use passkeys as per
+        https://developer.android.com/identity/sign-in/credential-manager#prerequisites
+        -->
+        <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
+
+        <!--
         When the app APK itself is shared locally (eg. using the share app menu which
         triggers nearby share), then we can set the filename of the APK as the user sees it.
         The name will be basename-version.apk.
@@ -144,6 +150,9 @@
 
             </intent-filter>
 
+            <!--
+            App link intent filter
+            -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -152,6 +161,9 @@
 
                 <data android:scheme="https" />
                 <data android:host="*.testproxy.devserver3.ustadmobile.com" />
+                <data android:host="testproxy.devserver3.ustadmobile.com" />
+
+
             </intent-filter>
         </activity>
 

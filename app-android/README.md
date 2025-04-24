@@ -35,28 +35,35 @@ Windows:
 $ gradlew app-android:assembleDebug
 ```
 
-### App links
+### Digital asset links
 
-Verified [app links](https://developer.android.com/training/app-links/verify-android-applinks#manual-verification) 
+Verified digital assets links [e.g. app links](https://developer.android.com/training/app-links/verify-android-applinks) 
 are required for deep links and passkeys. The SHA-256 signature on Google Play Console can be found 
 under Test and Release, Setup, App Signing.
 
 The [official docs](https://developer.android.com/training/app-links#manage-verify)
 cover verifying links for the version delivered through Google Play (e.g. using Google Play signing keys).
 
-To test/debug:
-* Build the apk
+__When using a test/debug version__:
+* Build the apk (e.g. ```./gradlew app-android:assembleDebug```)
 * Get the SHA256
 ```
 ~/Android/Sdk/build-tools/33.0.1/apksigner verify --print-certs ./build/outputs/apk/debug/app-android-debug.apk
 ```
 * Convert the generated SHA-256 into : separated version
 ```
-echo (sha256 from apksigner verify) | sed 's/../&:/g; s/:$//' | | tr [:lower:] [:upper:]
+echo (sha256 from apksigner verify) | sed 's/../&:/g; s/:$//' | tr [:lower:] [:upper:]
 ```
 * Add the SHA-256 to [assetlinks.json] and publish assetlinks.json in .well-known on https for domain.
   Note: the SHA-256 in the default assetlinks.json is the Google Play signing key for the Ustad Mobile
-  app.
+  app. The assetlinks.json file can be checked using [Google's statement list tester](https://developers.google.com/digital-asset-links/tools/generator).
+
+__Setting or adding a domain for app links and passkeys:__
+
+* Set systemUrl in buildconfig properties (see KDoc on [SystemUrlConfig.kt](../core/src/commonMain/kotlin/com/ustadmobile/core/impl/config/SystemUrlConfig.kt))
+* Add the domain to [AndroidManifest.xml](./src/main/AndroidManifest.xml) app link intent-filter
+* Publish [assetlinks.json] as per [official docs](https://developer.android.com/training/app-links#manage-verify) including SHA256 fingerprints
+* Add domain to [assets_statement_values.xml](app-android/src/main/res/values/assets_statement_values.xml)
 
 ### Command line signing (for release APK) :
 

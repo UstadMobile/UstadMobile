@@ -126,6 +126,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         bind<CreatePasskeyRequestJsonUseCase>()  with provider {
             CreatePasskeyRequestJsonUseCase(
                 systemImpl = instance(),
+                systemUrlConfig = instance(),
                 json = instance()
             )
         }

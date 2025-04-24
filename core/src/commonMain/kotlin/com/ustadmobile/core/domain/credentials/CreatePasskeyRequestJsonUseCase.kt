@@ -5,11 +5,14 @@ import io.github.aakira.napier.Napier
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.config.SystemUrlConfig
+import io.ktor.http.Url
 import io.ktor.util.encodeBase64
 import kotlin.random.Random
 
 class CreatePasskeyRequestJsonUseCase(
     private val systemImpl: UstadMobileSystemImpl,
+    private val systemUrlConfig: SystemUrlConfig,
     private val json: Json,
 ) {
 
@@ -40,11 +43,13 @@ class CreatePasskeyRequestJsonUseCase(
         val useridBase64Encoded =  "$userId@${createPasskeyParams.serverUrl}".encodeBase64()
 
         //See https://developers.google.com/identity/passkeys/developer-guides/server-registration
+        // https://codelabs.developers.google.com/credential-manager-api-for-android#2
+        //TODO: Change user.id
         val requestJson = """
                   {
                     "challenge": "${challengeBase64Encoded}",
                     "rp": {
-                      "id": "credential-manager-${createPasskeyParams.masterDomainName}",
+                      "id": "${Url(systemUrlConfig.systemBaseUrl).host}",
                       "name": "${systemImpl.getString(MR.strings.app_name)}"
                     },
                     "pubKeyCredParams": [
@@ -59,10 +64,13 @@ class CreatePasskeyRequestJsonUseCase(
                     ],
                     "authenticatorSelection": {
                       "authenticatorAttachment": "platform",
-                      "residentKey": "required"
+                      "residentKey": "required",
+                      "requireResidentKey": true,
+                      "userVerification": "required"
                     },
+                    "timeout": 1800000,
                     "user": {
-                      "id": "$useridBase64Encoded",
+                      "id": "foobar3",
                       "name": "${createPasskeyParams.username}@${createPasskeyParams.serverDomainName}",
                       "displayName": "${createPasskeyParams.username}@${createPasskeyParams.serverDomainName}"
                     }

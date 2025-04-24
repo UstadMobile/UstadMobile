@@ -35,9 +35,10 @@ class CreatePasskeyUseCaseImpl(
          */
         try {
             val request = CreatePublicKeyCredentialRequest(
-                passkeyRequestJsonUseCase.invoke(
+                requestJson = passkeyRequestJsonUseCase.invoke(
                     createPassKeyParams
-                )
+                ),
+                preferImmediatelyAvailableCredentials = false,
             )
             val response = credentialManager.createCredential(
                 context,
@@ -73,6 +74,7 @@ class CreatePasskeyUseCaseImpl(
                 person=createPassKeyParams.person
             )
         } catch (e: CreateCredentialException) {
+            // See https://codelabs.developers.google.com/credential-manager-api-for-android#1
             Napier.e(
                 message = "CreatePassKeyUseCaseImpl: exception", throwable = e
             )
