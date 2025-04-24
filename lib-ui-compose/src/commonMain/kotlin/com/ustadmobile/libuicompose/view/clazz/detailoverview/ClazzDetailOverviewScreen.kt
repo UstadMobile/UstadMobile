@@ -75,7 +75,6 @@ fun ClazzDetailOverviewScreen(viewModel: ClazzDetailOverviewViewModel) {
         onClickClassCode = viewModel::onClickClazzCode,
         onClickPermissions = viewModel::onClickPermissions,
         onClickCopyCourse = viewModel::onClickCopyCourse,
-
         )
 }
 

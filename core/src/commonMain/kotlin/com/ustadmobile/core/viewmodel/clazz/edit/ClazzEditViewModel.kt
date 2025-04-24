@@ -140,8 +140,6 @@ class ClazzEditViewModel(
     val clazzAction: ClazzAction = savedStateHandle[UstadView.CLAZZ_ACTION]
         ?.let { ClazzAction.valueOf(it) } ?: ClazzAction.EDIT
 
-
-
     init {
 
         val title = createEditTitle(MR.strings.add_a_new_course,
@@ -191,7 +189,6 @@ class ClazzEditViewModel(
 
                         makeDefault = {
                             ClazzWithHolidayCalendarAndAndTerminology().apply {
-
                                 clazzUid = effectiveClazzUid
                                 clazzName = ""
                                 isClazzActive = true
@@ -556,7 +553,6 @@ class ClazzEditViewModel(
                 ?: return@launchWithLoadingIndicator
 
             Napier.d("onClickSave: start transaction")
-
             val courseBlockListVal = _uiState.value.courseBlockList
             val coursePictureVal = entity.coursePicture
             val updateImage = coursePictureVal != null &&
@@ -799,7 +795,6 @@ class ClazzEditViewModel(
                 )
             }
             CourseBlock.BLOCK_ASSIGNMENT_TYPE -> {
-
                 navigateForResult(
                     nextViewName = ClazzAssignmentEditViewModel.DEST_NAME,
                     key = RESULT_KEY_COURSEBLOCK,

@@ -16,7 +16,6 @@ import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.view.UstadEditView
-import com.ustadmobile.core.viewmodel.UstadEditViewModel.Companion.INIT_PIC_URI
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel.Companion.STATE_KEY_SCHEDULES
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
@@ -28,9 +27,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.BlockStatus
 import com.ustadmobile.lib.db.composites.ClazzAndDisplayDetails
 import com.ustadmobile.lib.db.composites.CourseBlockAndDisplayDetails
-import com.ustadmobile.lib.db.composites.CourseBlockAndEditEntities
 import com.ustadmobile.lib.db.entities.*
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -57,12 +54,7 @@ data class ClazzDetailOverviewUiState(
 
     val scheduleList: List<Schedule> = emptyList(),
 
-    val coursePicture: CoursePicture?=null,
-
     val courseBlockList: List<CourseBlockAndDisplayDetails> = emptyList(),
-
-    var courseBlocks: List<CourseBlockAndEditEntities> = emptyList(),
-
 
     val blockStatusesForActiveUser: List<BlockStatus> = emptyList(),
 
@@ -128,7 +120,6 @@ class ClazzDetailOverviewViewModel(
     val listRefreshCommandFlow: Flow<RefreshCommand> = _listRefreshCommandFlow.asSharedFlow()
 
     private val copyCourseUseCase: CopyCourseUseCase by di.onActiveEndpoint().instance()
-
 
     init {
         _appUiState.update { prev ->
@@ -332,7 +323,7 @@ class ClazzDetailOverviewViewModel(
     fun onClickCopyCourse() {
         viewModelScope.launch {
             val originalClazz = _uiState.value.clazz ?: return@launch
-            val originalSchedule = _uiState.value.scheduleList ?: emptyList()
+            val originalSchedule = _uiState.value.scheduleList
             val copyResult = copyCourseUseCase(
                 originalClazz,
                 originalSchedule).also {
@@ -347,7 +338,6 @@ class ClazzDetailOverviewViewModel(
                     ClazzEditViewModel.STATE_KEY_COURSEBLOCKS to json.encodeToString(copyResult.courseBlocks),
                     STATE_KEY_SCHEDULES to json.encodeToString(copyResult.schedules),
                     ))
-
         }
     }
 
