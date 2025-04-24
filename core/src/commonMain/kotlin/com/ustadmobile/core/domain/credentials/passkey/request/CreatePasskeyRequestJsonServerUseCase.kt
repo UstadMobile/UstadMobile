@@ -7,31 +7,30 @@ import com.ustadmobile.core.domain.credentials.passkey.model.PublicKeyCredential
 import com.ustadmobile.core.domain.credentials.passkey.model.PublicKeyCredentialRpEntity
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.LearningSpace
-import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
 import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticatorSelectionCriteria
 import com.ustadmobile.core.domain.credentials.passkey.model.PublicKeyCredentialParameters
 import com.ustadmobile.core.domain.credentials.passkey.model.PublicKeyCredentialUserEntityJSON
+import com.ustadmobile.core.domain.credentials.username.CreateCredentialUsernameUseCase
+import io.ktor.http.Url
 import io.ktor.util.encodeBase64
 
 class CreatePasskeyRequestJsonServerUseCase(
     private val systemUrlConfig: SystemUrlConfig,
     private val systemImpl: UstadMobileSystemImpl,
-    private val learningSpace: LearningSpace,
+    private val createCredentialUsernameUseCase: CreateCredentialUsernameUseCase,
 ) {
 
     operator fun invoke(
         username: String,
     ): PublicKeyCredentialCreationOptionsJSON {
         val challenge = randomString(16)
-        val credentialUsername = GetCredentialUseCase.credentialUsernameForUserAndLearningSpace(
+        val credentialUsername = createCredentialUsernameUseCase(
             username = username,
-            learningSpace = learningSpace,
         )
 
         return PublicKeyCredentialCreationOptionsJSON(
             rp = PublicKeyCredentialRpEntity(
-                id = "credential-manager-${systemUrlConfig.passkeyRpId}",
+                id = Url(systemUrlConfig.systemBaseUrl).host,
                 name = systemImpl.getString(MR.strings.app_name),
                 icon = null,
             ),

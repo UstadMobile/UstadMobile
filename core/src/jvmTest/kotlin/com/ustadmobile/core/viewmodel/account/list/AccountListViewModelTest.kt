@@ -42,7 +42,7 @@ class AccountListViewModelTest : AbstractMainDispatcherTest() {
 
                 bind<SystemUrlConfig>(overrides = true) with singleton {
                     SystemUrlConfig(
-                        "http://app.ustadmobile.com/", "app.ustadmobile.com",
+                        systemBaseUrl = "http://app.ustadmobile.com/",
                         presetLearningSpaceUrl = "http://app.ustadmobile.com/"
                     )
                 }

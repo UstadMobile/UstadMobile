@@ -138,13 +138,14 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         bind<CreatePasskeyUseCase>() with singleton {
             CreatePasskeyUseCaseImpl(
                 context=this@AbstractAppActivity,
-                passkeyRequestJsonUseCase = instance()
+                createPasskeyRequestJsonUseCase = instance()
             )
         }
 
-        bind<SavePasswordUseCase>() with singleton {
+        bind<SavePasswordUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             SavePasswordUseCaseImpl(
                 context=this@AbstractAppActivity,
+                createCredentialUsernameUseCase = instance(),
             )
         }
 

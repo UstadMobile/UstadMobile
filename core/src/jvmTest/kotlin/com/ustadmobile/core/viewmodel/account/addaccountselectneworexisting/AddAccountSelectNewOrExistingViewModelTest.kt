@@ -27,7 +27,7 @@ class AddAccountSelectNewOrExistingViewModelTest : AbstractMainDispatcherTest() 
             extendDi {
                 bind<SystemUrlConfig>(overrides = true) with singleton {
                     SystemUrlConfig(
-                        "http://app.ustadmobile.com/", "app.ustadmobile.com",
+                        "http://app.ustadmobile.com/",
                         newPersonalAccountsLearningSpaceUrl = "http://app.ustadmobile.com/"
                     )
                 }
@@ -60,7 +60,7 @@ class AddAccountSelectNewOrExistingViewModelTest : AbstractMainDispatcherTest() 
             extendDi {
                 bind<SystemUrlConfig>(overrides = true) with singleton {
                     SystemUrlConfig(
-                        "http://app.ustadmobile.com/", "app.ustadmobile.com",
+                        "http://app.ustadmobile.com/",
                         newPersonalAccountsLearningSpaceUrl = "http://app.ustadmobile.com/"
                     )
                 }
@@ -94,7 +94,7 @@ class AddAccountSelectNewOrExistingViewModelTest : AbstractMainDispatcherTest() 
             extendDi {
                 bind<SystemUrlConfig>(overrides = true) with singleton {
                     SystemUrlConfig(
-                        "http://app.ustadmobile.com/", "app.ustadmobile.com",
+                        "http://app.ustadmobile.com/",
                     )
                 }
 
@@ -127,7 +127,7 @@ class AddAccountSelectNewOrExistingViewModelTest : AbstractMainDispatcherTest() 
             extendDi {
                 bind<SystemUrlConfig>(overrides = true) with singleton {
                     SystemUrlConfig(
-                        "http://app.ustadmobile.com/", "app.ustadmobile.com",
+                        "http://app.ustadmobile.com/",
                     )
                 }
 

@@ -13,6 +13,8 @@ import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.RequestEnrolm
 import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
+import com.ustadmobile.core.domain.credentials.username.CreateCredentialUsernameUseCase
+import com.ustadmobile.core.domain.credentials.username.ParseCredentialUsernameUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
@@ -135,6 +137,14 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
 
     bind<CheckRegistrationAllowedUseCase>() with scoped(learningSpaceScope).singleton {
         CheckRegistrationAllowedUseCase(dataLayer = instance())
+    }
+
+    bind<CreateCredentialUsernameUseCase>() with scoped(learningSpaceScope).singleton {
+        CreateCredentialUsernameUseCase(learningSpace = context)
+    }
+
+    bind<ParseCredentialUsernameUseCase>() with singleton {
+        ParseCredentialUsernameUseCase()
     }
 
 }

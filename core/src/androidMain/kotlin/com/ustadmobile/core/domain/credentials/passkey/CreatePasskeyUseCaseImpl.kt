@@ -20,7 +20,7 @@ import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
  */
 class CreatePasskeyUseCaseImpl(
     val context: Context,
-    val passkeyRequestJsonUseCase: CreatePasskeyRequestJsonUseCase
+    val createPasskeyRequestJsonUseCase: CreatePasskeyRequestJsonUseCase
 ) : CreatePasskeyUseCase {
 
     /**
@@ -35,9 +35,7 @@ class CreatePasskeyUseCaseImpl(
          */
         try {
             val request = CreatePublicKeyCredentialRequest(
-                requestJson = passkeyRequestJsonUseCase.invoke(
-                    createPassKeyParams
-                ),
+                requestJson = createPasskeyRequestJsonUseCase(createPassKeyParams),
                 preferImmediatelyAvailableCredentials = false,
             )
             val response = credentialManager.createCredential(

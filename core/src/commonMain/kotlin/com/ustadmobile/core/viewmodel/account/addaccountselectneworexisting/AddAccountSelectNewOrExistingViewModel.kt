@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
+import com.ustadmobile.core.domain.credentials.username.ParseCredentialUsernameUseCase
 import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -92,6 +93,8 @@ class AddAccountSelectNewOrExistingViewModel(
 
     val uiState: Flow<AddAccountSelectNewOrExistingUiState> = _uiState.asStateFlow()
 
+    private val parseCredentialUsernameUseCase: ParseCredentialUsernameUseCase by instance()
+
     init {
         _appUiState.value = AppUiState(
             navigationVisible = false,
@@ -156,9 +159,7 @@ class AddAccountSelectNewOrExistingViewModel(
     ) {
         viewModelScope.launch {
             var errorMessage: String? = null
-            val (learningSpace, username) = GetCredentialUseCase.learningSpaceAndUsernameForCredentialUsername(
-                credentialUsername
-            )
+            val (learningSpace, username) = parseCredentialUsernameUseCase(credentialUsername)
 
             try {
                 val account = accountManager.login(

@@ -8,6 +8,13 @@ Blob urls faciltiate offline access to data. The cache (as implemented in lib-ca
 caches data (as a "normal" cache would) and allows cache entries to be marked as to be retained 
 indefinitely (eg. where a user has selected those items for offline use).
 
+# Package com.ustadmobile.core.domain.credentials.passkey
+
+Passkeys are setup as follows:
+
+* The rpId is the SystemBaseUrl (as per SystemUrlConfig) hostname
+* User.name is username@host (as per CreateCredentialUsernameUseCase)
+
 ## HTTP API
 
 ### POST /api/blob/upload-init-batch (start a batch upload)

@@ -111,8 +111,6 @@
 
         <meta-data android:name="com.ustadmobile.system.systemBaseUrl" android:value="${systemBaseUrl}"/>
 
-        <meta-data android:name="com.ustadmobile.system.passkeyRpId" android:value="${passkeyRpId}"/>
-
         <meta-data android:name="com.ustadmobile.system.newPersonalAccountsLsUrl" android:value="${newPersonalAccountsLsUrl}"/>
 
 
@@ -160,8 +158,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="https" />
-                <data android:host="*.testproxy.devserver3.ustadmobile.com" />
-                <data android:host="testproxy.devserver3.ustadmobile.com" />
+                <data android:host="*.${systemBaseUrlHost}" />
+                <data android:host="${systemBaseUrlHost}" />
 
 
             </intent-filter>

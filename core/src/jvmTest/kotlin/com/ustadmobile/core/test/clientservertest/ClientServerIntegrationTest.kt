@@ -139,8 +139,7 @@ private fun clientServerCommonDiModule(
     bind<SystemUrlConfig>() with singleton {
         SystemUrlConfig(
             systemBaseUrl = "http://localhost:8087/",
-            passkeyRpId = "localhost",
-            presetLearningSpaceUrl = null
+            presetLearningSpaceUrl = null,
         )
     }
 }
