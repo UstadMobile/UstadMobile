@@ -12,10 +12,13 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndAndTerminology
 import com.ustadmobile.lib.db.entities.CourseBlock
+import com.ustadmobile.lib.db.entities.CourseBlockPicture
 import com.ustadmobile.lib.db.entities.CoursePicture
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 class CopyCourseUseCase(
@@ -25,10 +28,37 @@ class CopyCourseUseCase(
 
     suspend operator fun invoke(
         clazz: Clazz,
-        courseBlockListVal: List<CourseBlockAndEditEntities>,
         scheduleListVal: List<Schedule>,
         coursePicture: CoursePicture?
     ): CopyCourseResult {
+
+            val courseBlocksDb = repoOrDb.courseBlockDao().findAllCourseBlockByClazzUidAsync(
+                clazzUid = clazz.clazzUid,
+                includeInactive = false
+            )
+
+            val assignmentPeerAllocations = repoOrDb.peerReviewerAllocationDao()
+                .getAllPeerReviewerAllocationsByClazzUid(
+                    clazzUid = clazz.clazzUid,
+                    includeInactive = false
+                )
+
+            //  Map to CourseBlockAndEditEntities
+            val courseBlocksMapped = courseBlocksDb.map {
+                CourseBlockAndEditEntities(
+                    courseBlock = it.courseBlock!!,
+                    courseBlockPicture = it.courseBlockPicture ?: CourseBlockPicture(
+                        cbpUid = it.courseBlock!!.cbUid
+                    ),
+                    contentEntry = it.contentEntry,
+                    contentEntryLang = it.contentEntryLang,
+                    assignment = it.assignment,
+                    assignmentCourseGroupSetName = it.assignmentCourseGroupSetName,
+                    assignmentPeerAllocations = assignmentPeerAllocations.filter { allocation ->
+                        allocation.praAssignmentUid == it.assignment?.caUid
+                    }
+                )
+        }
 
         val primaryKeyManager = repoOrDb.doorPrimaryKeyManager
         val newClazzUid = primaryKeyManager.nextIdAsync(Clazz.TABLE_ID)
@@ -38,7 +68,7 @@ class CopyCourseUseCase(
         clazz.clazzUid = newClazzUid
         clazz.clazzOwnerPersonUid = currentPersonUid
 
-        val courseBlocks = courseBlockListVal.map { block ->
+        val courseBlocks = courseBlocksMapped.map { block ->
 
             val newCourseBlockUid = primaryKeyManager.nextIdAsync(CourseBlock.TABLE_ID)
 
@@ -68,6 +98,7 @@ class CopyCourseUseCase(
         } else {
             CoursePicture()
         }
+
         val clazzWithHolidayCalendarAndAndTerminology = ClazzWithHolidayCalendarAndAndTerminology()
         clazzWithHolidayCalendarAndAndTerminology.coursePicture = copiedCoursePicture
 

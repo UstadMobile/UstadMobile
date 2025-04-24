@@ -186,39 +186,6 @@ class ClazzDetailOverviewViewModel(
                                 }
                             }
                             launch {
-                                val courseBlocksDb = activeRepo.courseBlockDao().findAllCourseBlockByClazzUidAsync(
-                                    clazzUid = entityUidArg,
-                                    includeInactive = false
-                                )
-
-                                val assignmentPeerAllocations = activeRepo.peerReviewerAllocationDao()
-                                    .getAllPeerReviewerAllocationsByClazzUid(
-                                        clazzUid = entityUidArg,
-                                        includeInactive = false
-                                    )
-
-                                //  Map to CourseBlockAndEditEntities
-                                val courseBlocksMapped = courseBlocksDb.map {
-                                    CourseBlockAndEditEntities(
-                                        courseBlock = it.courseBlock!!,
-                                        courseBlockPicture = it.courseBlockPicture ?: CourseBlockPicture(
-                                            cbpUid = it.courseBlock!!.cbUid
-                                        ),
-                                        contentEntry = it.contentEntry,
-                                        contentEntryLang = it.contentEntryLang,
-                                        assignment = it.assignment,
-                                        assignmentCourseGroupSetName = it.assignmentCourseGroupSetName,
-                                        assignmentPeerAllocations = assignmentPeerAllocations.filter { allocation ->
-                                            allocation.praAssignmentUid == it.assignment?.caUid
-                                        }
-                                    )
-                                }
-                                _uiState.update { prev ->
-                                    prev.copy(courseBlocks = courseBlocksMapped)
-                                }
-                            }
-
-                            launch {
                                 activeRepo.statementDao().findStatusForStudentsInClazzAsFlow(
                                     clazzUid = entityUidArg,
                                     studentPersonUids = listOf(activeUserPersonUid),
@@ -365,12 +332,10 @@ class ClazzDetailOverviewViewModel(
     fun onClickCopyCourse() {
         viewModelScope.launch {
             val originalClazz = _uiState.value.clazz ?: return@launch
-            val originalCourseBlocks = _uiState.value.courseBlocks ?: emptyList()
             val originalSchedule = _uiState.value.scheduleList ?: emptyList()
             val originalCoursePicture = _uiState.value.clazzAndDetail?.coursePicture
             val copyResult = copyCourseUseCase(
                 originalClazz,
-                originalCourseBlocks,
                 originalSchedule,
                 originalCoursePicture
             ).also {
