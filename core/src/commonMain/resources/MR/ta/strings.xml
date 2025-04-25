@@ -221,7 +221,7 @@
     <string name="wrong_user_pass_combo">தவறான பயனர்பெயர்/கடவுச்சொல்: மீண்டும் முயற்சிக்கவும்.</string>
     <string name="login_network_error">பிணைய பிழை: நீங்கள் ஆன்லைனில் இருப்பதை சரிபார்க்கவும்.</string>
     <string name="download">பதிவிறக்கம்</string>
-    <string name="downloaded">பதிவிறக்கம்</string>
+    <string name="downloaded">பதிவிறக்கப்பட்டது</string>
     <string name="recycled">மறுசுழற்சி</string>
     <string name="libraries">நூலகங்கள்</string>
     <string name="pause_download">இடைநிறுத்தம் பதிவிறக்கம்</string>
@@ -253,8 +253,8 @@
     <string name="unset">அமைக்கப்படாதது</string>
     <string name="settings">அமைப்புகள்</string>
     <string name="language">மொழி</string>
-    <string name="add_a_new_language">புதிய மொழியைச் சேர்க்கவும்</string>
-    <string name="add_new_language">புதிய மொழியைச் சேர்க்கவும்</string>
+    <string name="add_a_new_language">ஒரு புதிய மொழியைச் சேர்</string>
+    <string name="add_new_language">புதிய மொழியைச் சேர்</string>
     <string name="select_language">மொழியைத் தேர்ந்தெடுங்கள்</string>
     <string name="languages">மொழிகள்</string>
     <string name="edit_language">மொழியைத் திருத்து</string>
@@ -269,7 +269,7 @@
     <string name="notifications">அறிவிப்புகள்</string>
     <string name="account">கணக்கு</string>
     <string name="accounts">கணக்குகள்</string>
-    <string name="share">பங்கு</string>
+    <string name="share">பகிர்</string>
     <string name="send">அனுப்பு</string>
     <string name="open">திற</string>
     <string name="downloading">பதிவிறக்குகிறது</string>
@@ -293,11 +293,11 @@
     <string name="move">நகர்த்தவும்</string>
     <string name="hide">மறை</string>
     <string name="unhide">இரக்கமற்றது</string>
-    <string name="compress">சுருக்க</string>
+    <string name="compress">சுருக்கு</string>
     <string name="and_key">மற்றும்</string>
     <string name="added">சேர்க்கப்பட்டது</string>
     <string name="attempts">முயற்சிகள்</string>
-    <string name="add_link_description">வலை இணைப்பைப் பயன்படுத்தி கல்வி உள்ளடக்கத்தைச் சேர்க்கவும், பின்னர் அதை ஆஃப்லைனில் பயன்படுத்தவும்</string>
+    <string name="add_link_description">வலை இணைப்பைப் பயன்படுத்தி கல்வி உள்ளடக்கத்தைச் சேர், பின்னர் அதை இணையம் இல்லாமல் பயன்படுத்து</string>
     <string name="add_file_description">உதவி வடிவங்களைப் பயன்படுத்தி கல்வி உள்ளடக்கத்தைச் சேர்க்கவும் எ.கா. PDF, XAPI, H5P, EPUB</string>
     <string name="error_this_device_doesnt_support_bluetooth_sharing">மன்னிக்கவும், ஊடலை மீது கோப்புகளை அனுப்ப இந்த சாதனம் ஆதரிக்காது.</string>
     <string name="share_offline_zip_checkbox_label">சிப் கோப்பில் அனுப்பவும்</string>
@@ -308,9 +308,9 @@
     <string name="field_required_prompt">இந்த புலம் தேவை</string>
     <string name="field_password_error_min">கடவுச்சொல் குறைந்தது 5 எழுத்துகளாக இருக்க வேண்டும்</string>
     <string name="filed_password_no_match">பொருந்தாத கடவுச்சொற்கள். மீண்டும் முயற்சிக்கவும்.</string>
-    <string name="update">புதுப்பிப்பு</string>
+    <string name="update">புதுப்பி</string>
     <string name="profile">சுயவிவரம்</string>
-    <string name="dialog_download_from_playstore_message">கல்வி உள்ளடக்கத்தை ஆஃப்லைனில் அணுகவும் பகிரவும்</string>
+    <string name="dialog_download_from_playstore_message">கல்வி உள்ளடக்கத்தை இணையம் இல்லாமல் அணுகவும் பகிரவும்</string>
     <string name="dialog_download_from_playstore_ok">இப்போது பதிவிறக்கவும் (இலவசம்)</string>
     <string name="also_available_in">மேலும் கிடைக்கிறது</string>
     <string name="created_partnership">அதனுடன் இணைந்து உருவாக்கப்பட்டது:</string>
@@ -400,7 +400,7 @@
     <string name="selected_custom_range">தனிப்பயன் வரம்பு: %1$s %</string>
     <string name="year">ஆண்டு</string>
     <string name="from">இருந்து</string>
-    <string name="done">முடிந்தது</string>
+    <string name="done">முடி</string>
     <string name="xapi_options_general">பொது</string>
     <string name="xapi_options_report_title">அறிக்கை தலைப்பு</string>
     <string name="xapi_options_visual_type">காட்சிப்படுத்தல் வகை</string>
@@ -429,7 +429,7 @@
     <string name="field_content_progress">உள்ளடக்க முன்னேற்றம்</string>
     <string name="field_attendance_percentage">வருகை விழுக்காடு</string>
     <string name="condition_is">என்பது</string>
-    <string name="condition_is_not">இல்லை</string>
+    <string name="condition_is_not">இது இல்லை</string>
     <string name="condition_greater_than">விட பெரியது</string>
     <string name="condition_less_than">குறைவாக</string>
     <string name="condition_in_list">பட்டியலில்</string>
@@ -460,7 +460,7 @@
     <string name="repo_loading_status_failed_noconnection">இணைப்பு அல்லது பியர் இல்லை</string>
     <string name="repo_loading_status_failed_connection_error">இணைப்பு பிழை</string>
     <string name="licence_type_cc_by">சி.சி மூலம்</string>
-    <string name="licence_type_cc_by_sa">சி.சி.</string>
+    <string name="licence_type_cc_by_sa">சிசி எச்ஏ மூலம்</string>
     <string name="licence_type_cc_by_sa_nc">சி.சி என்.சி.</string>
     <string name="licence_type_cc_by_nc">சி.சி.</string>
     <string name="licence_type_cc_by_nc_sa">சி.சி.</string>
