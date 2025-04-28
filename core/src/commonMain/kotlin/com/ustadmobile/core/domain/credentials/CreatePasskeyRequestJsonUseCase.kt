@@ -5,25 +5,32 @@ import io.github.aakira.napier.Napier
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.config.SystemUrlConfig
+import io.ktor.http.Url
 import io.ktor.util.encodeBase64
 import kotlin.random.Random
 
+/**
+ * As per https://developer.android.com/identity/sign-in/credential-manager#create-passkey
+ * the passkey creation request Json must follow the schema as per
+ * https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptionsjson
+ *
+ * https://developer.android.com/identity/sign-in/credential-manager#format-json-request
+ * creating request json for createCredential request ,
+ * here we are taking   username,  personUid,doorNodeIdu,sStartTime  to create challenge
+ * challenge is  encoded string , created with above params
+ *
+ * serverurl is added in id because it will be used during signin with passkey, suppose there
+ * are multiple domain , and we dont know from which domain user created the passkey ,
+ * so adding @serverUrl in id we can check during signin which domain user registered
+ */
 class CreatePasskeyRequestJsonUseCase(
     private val systemImpl: UstadMobileSystemImpl,
+    private val systemUrlConfig: SystemUrlConfig,
     private val json: Json,
 ) {
 
-    /**
-     * https://developer.android.com/identity/sign-in/credential-manager#format-json-request
-     * creating request json for createCredential request ,
-     * here we are taking   username,  personUid,doorNodeIdu,sStartTime  to create challenge
-     * challenge is  encoded string , created with above params
-     *
-     * serverurl is added in id because it will be used during signin with passkey, suppose there
-     * are multiple domain , and we dont know from which domain user created the passkey ,
-     * so adding @serverUrl in id we can check during signin which domain user registered
-     */
-    fun invoke(
+    operator fun invoke(
         createPasskeyParams: CreatePasskeyParams
     ): String {
         val userId = randomString(16)
@@ -40,11 +47,13 @@ class CreatePasskeyRequestJsonUseCase(
         val useridBase64Encoded =  "$userId@${createPasskeyParams.serverUrl}".encodeBase64()
 
         //See https://developers.google.com/identity/passkeys/developer-guides/server-registration
+        // https://codelabs.developers.google.com/credential-manager-api-for-android#2
+        //TODO: Change user.id
         val requestJson = """
                   {
                     "challenge": "${challengeBase64Encoded}",
                     "rp": {
-                      "id": "credential-manager-${createPasskeyParams.masterDomainName}",
+                      "id": "${Url(systemUrlConfig.systemBaseUrl).host}",
                       "name": "${systemImpl.getString(MR.strings.app_name)}"
                     },
                     "pubKeyCredParams": [
@@ -59,10 +68,13 @@ class CreatePasskeyRequestJsonUseCase(
                     ],
                     "authenticatorSelection": {
                       "authenticatorAttachment": "platform",
-                      "residentKey": "required"
+                      "residentKey": "required",
+                      "requireResidentKey": true,
+                      "userVerification": "required"
                     },
+                    "timeout": 1800000,
                     "user": {
-                      "id": "$useridBase64Encoded",
+                      "id": "foobar3",
                       "name": "${createPasskeyParams.username}@${createPasskeyParams.serverDomainName}",
                       "displayName": "${createPasskeyParams.username}@${createPasskeyParams.serverDomainName}"
                     }

@@ -93,8 +93,6 @@ class SignupEnterUsernamePasswordViewModel(
         SignupEnterUsernamePasswordUiState()
     )
 
-    private val savePasswordUseCase: SavePasswordUseCase? by instanceOrNull()
-
     private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
 
     private var nextDestination: String =
@@ -290,10 +288,12 @@ class SignupEnterUsernamePasswordViewModel(
 
                 }
 
+                val savePasswordUseCase: SavePasswordUseCase? = di.on(LearningSpace(serverUrl))
+                    .direct.instanceOrNull()
+
                 savePasswordUseCase?.invoke(
                     username = savePerson.username.toString(),
-                    password = _uiState.value.password.toString(),
-                    learningSpace = serverUrl
+                    password = passwordVal,
                 )
 
                 try {

@@ -416,7 +416,7 @@ class SignUpViewModel(
 
 
                     accountManager.registerWithPasskey(
-                        serverUrl,
+                        learningSpaceUrl = serverUrl,
                         passkeyCreated!!,
                         savePerson,
                         _uiState.value.personPicture
@@ -427,6 +427,7 @@ class SignUpViewModel(
                         Napier.e { "Error occurred during creating passkey" }
                         return@launch
                     }
+
                     val personPictureVal = _uiState.value.personPicture
                     if (personPictureVal != null) {
                         personPictureVal.personPictureUid = savePerson.personUid

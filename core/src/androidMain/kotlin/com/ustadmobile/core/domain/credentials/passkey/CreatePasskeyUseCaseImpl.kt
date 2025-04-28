@@ -20,7 +20,7 @@ import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
  */
 class CreatePasskeyUseCaseImpl(
     val context: Context,
-    val passkeyRequestJsonUseCase: CreatePasskeyRequestJsonUseCase
+    val createPasskeyRequestJsonUseCase: CreatePasskeyRequestJsonUseCase
 ) : CreatePasskeyUseCase {
 
     /**
@@ -35,9 +35,8 @@ class CreatePasskeyUseCaseImpl(
          */
         try {
             val request = CreatePublicKeyCredentialRequest(
-                passkeyRequestJsonUseCase.invoke(
-                    createPassKeyParams
-                )
+                requestJson = createPasskeyRequestJsonUseCase(createPassKeyParams),
+                preferImmediatelyAvailableCredentials = false,
             )
             val response = credentialManager.createCredential(
                 context,
@@ -73,6 +72,7 @@ class CreatePasskeyUseCaseImpl(
                 person=createPassKeyParams.person
             )
         } catch (e: CreateCredentialException) {
+            // See https://codelabs.developers.google.com/credential-manager-api-for-android#1
             Napier.e(
                 message = "CreatePassKeyUseCaseImpl: exception", throwable = e
             )

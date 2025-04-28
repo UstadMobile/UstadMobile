@@ -943,16 +943,6 @@ fun Application.umRestApplication(
                 learningSpace = context,
             )
         }
-        bind<ResendInviteUseCase>() with scoped(LearningSpaceScope.Default).provider {
-            ResendInviteUseCase(
-                sendEmailUseCase = instance(),
-                sendSmsUseCase = instance(),
-                sendMessageUseCase = instance(),
-                db = instance(tag = DoorTag.TAG_DB),
-                learningSpace = context,
-                repo = null
-            )
-        }
         registerContextTranslator { call: ApplicationCall ->
             call.callLearningSpace
         }
@@ -1108,13 +1098,6 @@ fun Application.umRestApplication(
                     )
                 }
 
-                route("resendinvite") {
-                    ResendInviteRoute(
-                        useCase = { call ->
-                            di.on(call).direct.instance()
-                        }
-                    )
-                }
                 route("passkey"){
 
                     VerifySignInWithPasskeyRoute(

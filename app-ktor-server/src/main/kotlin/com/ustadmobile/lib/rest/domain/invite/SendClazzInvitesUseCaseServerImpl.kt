@@ -37,50 +37,75 @@ class SendClazzInvitesUseCaseServerImpl(
         val invitesToSend = parseInviteUseCase(request.contacts.joinToString(separator = ","))
 
         try {
-            val invites = invitesToSend.filter { it.isValid }.map { contact ->
-                ClazzInvite(
-                    ciPersonUid = request.personUid,
-                    ciRoleId = request.role,
-                    ciClazzUid = request.clazzUid,
-                    inviteType = contact.inviteType,
-                    inviteToken = uuid4().toString(),
-                    inviteContact = contact.text,
-                    inviteExpire = currentTimeMillis() + (7 * 24 * 60 * 60 * 1000)
-                )
+            val newInvites = mutableListOf<ClazzInvite>()
+            val resendInvites = mutableListOf<ClazzInvite>()
+
+            invitesToSend.forEach { contact ->
+                val existingInvite = db.clazzInviteDao().findClazzInviteFromContact(contact.text)
+
+                if (existingInvite != null) {
+                    // Update expiration for existing invite
+                    resendInvites.add(existingInvite.copy(inviteExpire = existingInvite.inviteExpire + (7 * 24 * 60 * 60 * 1000)))
+                } else {
+                    // Create new invite
+                    newInvites.add(
+                        ClazzInvite(
+                            ciPersonUid = request.personUid,
+                            ciRoleId = request.role,
+                            ciClazzUid = request.clazzUid,
+                            inviteType = contact.inviteType,
+                            inviteToken = uuid4().toString(),
+                            inviteContact = contact.text,
+                            inviteExpire = currentTimeMillis() + (7 * 24 * 60 * 60 * 1000)
+                        )
+                    )
+                }
             }
 
             db.withDoorTransactionAsync {
-                db.clazzInviteDao().insertAll(invites)
+                if (newInvites.isNotEmpty()) {
+                    db.clazzInviteDao().insertAll(newInvites)
+                }
+                if (resendInvites.isNotEmpty()) {
+                    db.clazzInviteDao().updateAll(resendInvites)
+                }
             }
 
-            val clazzName = db.clazzDao().findByUidAsync(request.clazzUid)?.clazzName?:""
-            invites.forEach { invite ->
+            val clazzName = db.clazzDao().findByUidAsync(request.clazzUid)?.clazzName ?: ""
+            (newInvites + resendInvites).forEach { invite ->
                 val inviteLink = UstadUrlComponents(
-                    learningSpace.url,
-                    ClazzInviteRedeemViewModel.DEST_NAME,
-                        "inviteCode=${invite.inviteToken}"
+                    learningSpace.url, ClazzInviteRedeemViewModel.DEST_NAME,
+                    "inviteCode=${invite.inviteToken}"
                 ).fullUrl()
                 val emailSubject = "Invitation to $clazzName"
 
                 when (invite.inviteType) {
+
                     ClazzInvite.EMAIL -> {
-                        sendEmailUseCase.invoke(emailSubject, invite.inviteContact, inviteLink)
+                        sendEmailUseCase.invoke(
+                            emailSubject,
+                            invite.inviteContact,
+                            inviteLink)
                     }
 
-                    ClazzInvite.PHONE -> {
-                        sendSmsUseCase.invoke(clazzName, invite.inviteContact, inviteLink)
-                    }
+                    ClazzInvite.PHONE -> sendSmsUseCase.invoke(
+                        clazzName,
+                        invite.inviteContact,
+                        inviteLink)
 
-                    ClazzInvite.INTERNAL_MESSAGE -> {
-                        sendMessageUseCase.invoke(
-                            clazzName,invite.inviteContact, inviteLink, request.personUid
-                        )
-                    }
+                    ClazzInvite.INTERNAL_MESSAGE -> sendMessageUseCase.invoke(
+                        clazzName,
+                        invite.inviteContact,
+                        inviteLink,
+                        request.personUid
+                    )
                 }
             }
         } catch (e: Exception) {
-            Napier.e(e) { "ProcessInviteUseCase: ${e.message}" }
+            Napier.e(e) { "SendClazzInvitesUseCase: ${e.message}" }
             throw e
         }
     }
 }
+
+

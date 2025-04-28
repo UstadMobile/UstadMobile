@@ -59,7 +59,7 @@ val PersonDetailScreen = FC<Props> {
     PersonDetailComponent2 {
         this.uiState = uiState
         onClickChat = viewModel::onClickChat
-        onClickChangePassword = viewModel::onClickChangePassword
+        onClickManageAccount = viewModel::onClickManageAccount
         onClickCreateAccount = viewModel::onClickCreateAccount
         onClickManageParentalConsent = viewModel::onClickManageParentalConsent
         onClickDial = viewModel::onClickDial
@@ -74,7 +74,7 @@ external interface PersonDetailProps : Props {
     var onClickDial: () -> Unit
     var onClickEmail: () -> Unit
     var onClickCreateAccount: () -> Unit
-    var onClickChangePassword: () -> Unit
+    var onClickManageAccount: () -> Unit
     var onClickManageParentalConsent: () -> Unit
     var onClickChat: () -> Unit
     var onClickPermissions: () -> Unit
@@ -231,11 +231,11 @@ private val QuickActionBar = FC<PersonDetailProps> { props ->
             }
         }
 
-        if (props.uiState.changePasswordVisible) {
+        if (props.uiState.manageAccountVisible) {
             UstadQuickActionButton {
                 icon = KeyIcon.create()
-                text = strings[MR.strings.change_password]
-                onClick = { props.onClickChangePassword() }
+                text = strings[MR.strings.manage_account]
+                onClick = { props.onClickManageAccount() }
             }
         }
 

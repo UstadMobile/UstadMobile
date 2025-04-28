@@ -2,6 +2,7 @@ package com.ustadmobile.core.impl.di
 
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.db.UmAppDataLayer
+import com.ustadmobile.core.domain.account.CheckRegistrationAllowedUseCase
 import com.ustadmobile.core.domain.assignment.submitmark.SubmitMarkUseCase
 import com.ustadmobile.core.domain.assignment.submittername.GetAssignmentSubmitterNameUseCase
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
@@ -12,8 +13,9 @@ import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.RequestEnrolm
 import com.ustadmobile.core.domain.contententry.launchcontent.DefaultLaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.launchcontent.LaunchContentEntryVersionUseCase
 import com.ustadmobile.core.domain.contententry.save.SaveContentEntryUseCase
+import com.ustadmobile.core.domain.credentials.username.CreateCredentialUsernameUseCase
+import com.ustadmobile.core.domain.credentials.username.ParseCredentialUsernameUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
-import com.ustadmobile.core.domain.invite.ResendInviteUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
@@ -92,13 +94,7 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
             repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
-    bind<ResendInviteUseCase>() with scoped(learningSpaceScope).provider {
-        ResendInviteUseCase(
-            httpClient = instance(),
-            learningSpace = context,
-            json = instance()
-        )
-    }
+
     bind<ParseInviteUseCase>() with singleton {
         ParseInviteUseCase(
             phoneNumValidatorUseCase = instance(),
@@ -137,6 +133,18 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
             systemUrlConfig = instance(),
             learningSpace = context,
         )
+    }
+
+    bind<CheckRegistrationAllowedUseCase>() with scoped(learningSpaceScope).singleton {
+        CheckRegistrationAllowedUseCase(dataLayer = instance())
+    }
+
+    bind<CreateCredentialUsernameUseCase>() with scoped(learningSpaceScope).singleton {
+        CreateCredentialUsernameUseCase(learningSpace = context)
+    }
+
+    bind<ParseCredentialUsernameUseCase>() with singleton {
+        ParseCredentialUsernameUseCase()
     }
 
 }

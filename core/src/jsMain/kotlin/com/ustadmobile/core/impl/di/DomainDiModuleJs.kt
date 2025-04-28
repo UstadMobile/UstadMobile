@@ -79,6 +79,7 @@ import org.kodein.di.provider
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 
+@Suppress("FunctionName")
 fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiModuleJs") {
     bind<EnqueueContentEntryImportUseCase>() with scoped(endpointScope).provider {
         EnqueueImportContentEntryUseCaseRemote(
@@ -183,6 +184,7 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
     bind<CreatePasskeyRequestJsonUseCase>() with provider {
         CreatePasskeyRequestJsonUseCase(
             systemImpl = instance(),
+            systemUrlConfig = instance(),
             json = instance()
         )
     }

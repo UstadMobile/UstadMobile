@@ -1,5 +1,13 @@
 ### Pull Request Checklist
 
+#### Very important:
+
+* Don't repeat yourself (DRY): follow the don't repeat yourself principle: logic must **NEVER** be repeated or duplicated by copy/paste, typing the same thing again, or making a completely new code that does almost the same thing as existing code. Use domain use cases, inheritence, extension functions as appropriate. When logic is duplicated, any bug would also be duplicated, maintenance will be harder, the code will be harder to understand, etc.
+* Don't silently ignore null instead of throwing exceptions/showing error messages: do not use inappropriate ```?.let```, ```?.also``` etc. Code that silently ignores when something is wrong is **MUCH** worse (and harder to debug/find any error) than code that throws an exception. Don't make variables nullable when they should not be. Don't silently ignore null. Don't fail to throw exceptions when something can go wrong. Those exceptions should be caught/displayed/logged appropriately.
+* Don't ignore pull request / task guidance/feedback. Feedback/guidance can be freely questioned and alternatives suggested, but not ignored.
+* Never comment out code instead of deleting it, unless there is a defined reason why it needs temporarily disabled and when it will be restored.
+
+
 #### Coding style
 
 * Ensure all code follows the [Coding Style](CODING-STYLE.md)

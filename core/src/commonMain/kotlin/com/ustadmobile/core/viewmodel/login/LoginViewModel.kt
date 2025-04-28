@@ -10,6 +10,7 @@ import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
 import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
+import com.ustadmobile.core.domain.credentials.username.ParseCredentialUsernameUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.validateusername.ValidationResult
@@ -46,6 +47,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 data class LoginUiState(
     val username: String = "",
@@ -107,13 +109,13 @@ class LoginViewModel(
     private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
         ?.toBoolean() ?: false
 
-    private val savePasswordUseCase: SavePasswordUseCase? by instanceOrNull()
-
     //Short-term internal variable used so that we can avoid showing a save password prompt if/when
     //the user just used their saved password
     private var usingSavedPassword = false
 
     private val getCredentialUseCase: GetCredentialUseCase? by instanceOrNull()
+
+    private val parseCredentialUsernameUseCase: ParseCredentialUsernameUseCase by instance()
 
     init {
         nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
@@ -283,16 +285,12 @@ class LoginViewModel(
                     )
 
                     if(!usingSavedPassword) {
+                        val savePasswordUseCase = di.on(LearningSpace(serverUrl)).direct
+                            .instanceOrNull<SavePasswordUseCase>()
                         savePasswordUseCase?.invoke(
-                            username.trim(), password.trim(), learningSpace = serverUrl
+                            username = username.trim(), password = password.trim()
                         )
                     }
-
-                    //this emit the passkeydata to show prompt to user to create passkey
-                    accountManager.createPassKeyPrompt(
-                        username.trim(), account.personUid, di.doorIdentityHashCode.toString(),
-                        systemTimeInMillis(), serverUrl
-                    )
 
                     goToNextDestAfterLoginOrGuestSelected(account.toPerson())
                 } catch (e: AdultAccountRequiredException) {
@@ -378,10 +376,8 @@ class LoginViewModel(
                     }
 
                     is GetCredentialUseCase.PasswordCredentialResult -> {
-                        val (learningSpace, username) = GetCredentialUseCase
-                            .learningSpaceAndUsernameForCredentialUsername(
-                                credentialResult.credentialUsername
-                            )
+                        val (learningSpace, username) = parseCredentialUsernameUseCase(
+                            credentialResult.credentialUsername)
 
                         onUsernameChanged(username)
                         onPasswordChanged(credentialResult.password)

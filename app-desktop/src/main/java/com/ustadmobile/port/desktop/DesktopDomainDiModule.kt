@@ -539,6 +539,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     bind<CreatePasskeyRequestJsonUseCase>()  with provider {
         CreatePasskeyRequestJsonUseCase(
             systemImpl = instance(),
+            systemUrlConfig = instance(),
             json = instance()
         )
     }

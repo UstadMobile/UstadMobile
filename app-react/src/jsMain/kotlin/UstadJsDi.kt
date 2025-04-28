@@ -78,7 +78,6 @@ internal fun ustadJsDi(
         BuildConfigMap(
             buildMap {
                 put(UstadBuildConfig.KEY_SYSTEM_URL, BuildConfigJs.SYSTEM_URL)
-                put(UstadBuildConfig.KEY_PASSKEY_RP_ID, BuildConfigJs.PASSKEY_RP_ID)
                 put(UstadBuildConfig.KEY_PRESET_LEARNING_SPACE_URL,
                     BuildConfigJs.PRESET_LEARNING_SPACE_URL)
                 put(UstadBuildConfig.KEY_NEW_PERSONAL_ACCOUNT_LEARNING_SPACE_URL,

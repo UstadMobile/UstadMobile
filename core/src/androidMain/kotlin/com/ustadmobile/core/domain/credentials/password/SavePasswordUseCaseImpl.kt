@@ -5,8 +5,7 @@ import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.CreateCredentialNoCreateOptionException
-import com.ustadmobile.core.account.LearningSpace
-import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
+import com.ustadmobile.core.domain.credentials.username.CreateCredentialUsernameUseCase
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,13 +13,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class SavePasswordUseCaseImpl(
-    val context: Context
+    val context: Context,
+    private val createCredentialUsernameUseCase: CreateCredentialUsernameUseCase,
 ): SavePasswordUseCase {
 
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
     override suspend fun invoke(
-        username: String, password: String, learningSpace: String
+        username: String, password: String
     ) {
         /* Credential manager can take time, so run it in a coroutine on a separate scope to the
          * view model so that it won't keep the user waiting.
@@ -31,10 +31,7 @@ class SavePasswordUseCaseImpl(
                 credentialManager.createCredential(
                     context = context,
                     request = CreatePasswordRequest(
-                        id = GetCredentialUseCase.credentialUsernameForUserAndLearningSpace(
-                            username = username,
-                            learningSpace = LearningSpace(learningSpace),
-                        ),
+                        id = createCredentialUsernameUseCase(username = username),
                         password = password,
                     )
                 )
