@@ -158,11 +158,7 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
         )
     }
 
-    bind<CheckRegistrationAllowedUseCase>() with scoped(endpointScope).singleton {
-        CheckRegistrationAllowedUseCase(
-            dataLayer = instance<UmAppDataLayer>()
-        )
-    }
+
 
     bind<SaveLocalUrisAsBlobsUseCase>() with scoped(endpointScope).singleton {
         SaveLocalUrisAsBlobUseCaseJs(

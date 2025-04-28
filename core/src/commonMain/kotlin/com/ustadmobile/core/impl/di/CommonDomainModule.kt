@@ -135,9 +135,6 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
         )
     }
 
-    bind<CheckRegistrationAllowedUseCase>() with scoped(learningSpaceScope).singleton {
-        CheckRegistrationAllowedUseCase(dataLayer = instance())
-    }
 
     bind<CreateCredentialUsernameUseCase>() with scoped(learningSpaceScope).singleton {
         CreateCredentialUsernameUseCase(learningSpace = context)

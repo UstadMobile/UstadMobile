@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.person.toFirstAndLastNameExt
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
@@ -182,9 +183,7 @@ class ChildProfileListViewModel(
             val childGender = savedStateHandle[ARG_CHILD_GENDER]?.toInt()?:0
             val childDateOfBirth = savedStateHandle[ARG_CHILD_DATE_OF_BIRTH]?.toLong()?:0L
             val fullName = childName?.trim()
-            val parts = fullName?.trim()?.split(".", limit = 2)
-            val firstName = parts?.get(0)
-            val lastName = parts?.getOrElse(1) { "" }
+            val (firstName, lastName) = fullName.toFirstAndLastNameExt()
             val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
             val childProfile = Person(
                 personUid =uid,

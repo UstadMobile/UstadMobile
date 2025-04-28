@@ -14,6 +14,7 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isGuestUser
 import com.ustadmobile.core.util.ext.isTemporary
 import com.ustadmobile.core.util.ext.navigateToLink
@@ -22,6 +23,7 @@ import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
+import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -29,6 +31,7 @@ import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_GENDER
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_NAME
@@ -40,6 +43,8 @@ import com.ustadmobile.core.viewmodel.person.toFirstAndLastNameExt
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonParentJoin
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -122,7 +127,21 @@ class AccountListViewModel(
         ?.toBoolean() ?: false
 
     init {
+        val nextDestination = savedStateHandle[UstadView.ARG_NEXT]
+        if (nextDestination !=null){
+            val questionIndex = nextDestination.indexOf('?')
+            val args = if(questionIndex > 0) {
+                UMFileUtil.parseURLQueryString(nextDestination.substring(questionIndex))
+            }else {
+                emptyMap()
+            }
+            if (args.containsKey(ARG_CHILD_NAME)){
+                savedStateHandle[ARG_CHILD_NAME] = args[ARG_CHILD_NAME]
+                savedStateHandle[ARG_CHILD_GENDER] = args[ARG_CHILD_GENDER]
+                savedStateHandle[ARG_CHILD_DATE_OF_BIRTH] = args[ARG_CHILD_DATE_OF_BIRTH]
+            }
 
+        }
         _appUiState.value = AppUiState(
             userAccountIconVisible = false,
             navigationVisible = false,
@@ -259,16 +278,21 @@ class AccountListViewModel(
     fun onClickAccount(sessionWithPersonAndLearningSpace: UserSessionWithPersonAndLearningSpace) {
         viewModelScope.launch {
             if (savedStateHandle[ARG_CHILD_NAME] != null){
-                val person = getChildDetail()
-                navigateForResult(
-                    nextViewName = EditChildProfileViewModel.DEST_NAME,
-                    key = RESULT_KEY_PERSON,
-                    serializer = Person.serializer(),
-                    args = buildMap {
-                        savedStateHandle[ARG_ENTITY_JSON]
-                    },
-                    currentValue = person,
-                )
+                if (sessionWithPersonAndLearningSpace.person.isPersonalAccount) {
+                    val person = getChildDetail()
+                    navigateForResult(
+                        nextViewName = EditChildProfileViewModel.DEST_NAME,
+                        key = RESULT_KEY_PERSON,
+                        serializer = Person.serializer(),
+                        args = buildMap {
+                            savedStateHandle[ARG_ENTITY_JSON]
+                        },
+                        currentValue = person,
+                    )
+                }else{
+                    navigateToConsentManagementScreen(accountManager.currentAccount.toPerson())
+                }
+
                 return@launch
             }
             val viewName = if (sessionWithPersonAndLearningSpace.person.isPersonalAccount) {
@@ -302,6 +326,23 @@ class AccountListViewModel(
             dateOfBirth = childDateOfBirth,
             isPersonalAccount = true
         )
+    }
+    private fun navigateToConsentManagementScreen(savePerson: Person) {
+        viewModelScope.launch {
+            val childProfile = getChildDetail()
+            activeRepoWithFallback.personDao().insertOrReplace(childProfile)
+            val parentPersonParentJoin = PersonParentJoin().shallowCopy {
+                ppjParentPersonUid = savePerson.personUid
+                ppjMinorPersonUid = childProfile.personUid
+            }
+            val ppjUid = activeRepoWithFallback.personParentJoinDao().upsertAsync(parentPersonParentJoin)
+            navController.navigate(
+                ParentalConsentManagementViewModel.DEST_NAME,
+                mapOf(ARG_ENTITY_UID to ppjUid.toString(),
+                    ARG_NEXT to CURRENT_DEST
+                ))
+        }
+
     }
 
 

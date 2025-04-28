@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 import org.kodein.di.on
@@ -285,8 +286,8 @@ class LoginViewModel(
                     )
 
                     if(!usingSavedPassword) {
-                        val savePasswordUseCase = di.on(LearningSpace(serverUrl)).direct
-                            .instanceOrNull<SavePasswordUseCase>()
+                        val savePasswordUseCase: SavePasswordUseCase? = di.on(LearningSpace(serverUrl))
+                            .direct.instanceOrNull()
                         savePasswordUseCase?.invoke(
                             username = username.trim(), password = password.trim()
                         )

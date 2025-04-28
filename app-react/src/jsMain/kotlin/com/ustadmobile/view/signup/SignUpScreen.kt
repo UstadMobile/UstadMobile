@@ -152,7 +152,7 @@ val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
                     height = 10.px
                 }
             }
-            if (!props.uiState.isMinor) {
+            if (!props.uiState.isPersonalAccount&&props.uiState.isMinor) {
                 Button {
                     variant = ButtonVariant.contained
                     id = "next_button"

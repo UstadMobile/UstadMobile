@@ -157,8 +157,6 @@ import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
 import com.ustadmobile.lib.rest.domain.account.SendConsentRequestToParentRoute
 import com.ustadmobile.lib.rest.domain.account.SendConsentRequestToParentServerImpl
-import com.ustadmobile.lib.rest.domain.invite.ResendInviteRoute
-import com.ustadmobile.lib.rest.domain.invite.ResendInviteUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockSendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCaseImpl
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockEmailSender

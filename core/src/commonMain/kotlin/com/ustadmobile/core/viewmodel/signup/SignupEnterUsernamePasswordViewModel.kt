@@ -21,14 +21,19 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_GENDER
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_NAME
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.REGISTER_MODE_MINOR
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_REFERER_SCREEN
+import com.ustadmobile.core.viewmodel.person.toFirstAndLastNameExt
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_MINOR
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
@@ -103,6 +108,8 @@ class SignupEnterUsernamePasswordViewModel(
     private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val isParent = savedStateHandle[IS_PARENT].toBoolean()
+
+    private val isPersonalAccount = savedStateHandle[ARG_IS_PERSONAL_ACCOUNT].toBoolean()
 
     private val isMinor = savedStateHandle[ARG_IS_MINOR].toBoolean()
 
@@ -331,13 +338,19 @@ class SignupEnterUsernamePasswordViewModel(
     private fun navigateToAppropriateScreen(savePerson: Person) {
 
         if (isParent) {
-            navController.navigate(ChildProfileListViewModel.DEST_NAME,
-                args = buildMap {
-                    put(ARG_NEXT, nextDestination)
-                    putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
-                    putFromSavedStateIfPresent(ARG_NEXT)
-                }
-            )
+            if (!isPersonalAccount&&savedStateHandle[ARG_CHILD_NAME]!=null){
+                navigateToConsentManagementScreen(savePerson)
+            }else{
+                navController.navigate(ChildProfileListViewModel.DEST_NAME,
+                    args = buildMap {
+                        put(ARG_NEXT, nextDestination)
+                        putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                        putFromSavedStateIfPresent(ARG_NEXT)
+                    }
+                )
+            }
+
+
 
         } else if (isMinor){
             viewModelScope.launch {
@@ -358,6 +371,38 @@ class SignupEnterUsernamePasswordViewModel(
 
         }
     }
+
+    private fun navigateToConsentManagementScreen(savePerson: Person) {
+        viewModelScope.launch {
+            val childName = savedStateHandle[ARG_CHILD_NAME]
+            val childGender = savedStateHandle[ARG_CHILD_GENDER]?.toInt()?:0
+            val childDateOfBirth = savedStateHandle[ARG_CHILD_DATE_OF_BIRTH]?.toLong()?:0L
+            val fullName = childName?.trim()
+            val (firstName, lastName) = fullName.toFirstAndLastNameExt()
+            val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
+            val childProfile = Person(
+                personUid =uid,
+                firstNames = firstName,
+                lastName = lastName,
+                gender = childGender,
+                dateOfBirth = childDateOfBirth,
+                isPersonalAccount = true
+            )
+            activeRepoWithFallback.personDao().insertOrReplace(childProfile)
+            val parentPersonParentJoin = PersonParentJoin().shallowCopy {
+                ppjParentPersonUid = savePerson.personUid
+                ppjMinorPersonUid = childProfile.personUid
+            }
+           val ppjUid = activeRepoWithFallback.personParentJoinDao().upsertAsync(parentPersonParentJoin)
+            navController.navigate(
+                ParentalConsentManagementViewModel.DEST_NAME,
+                mapOf(ARG_ENTITY_UID to ppjUid.toString(),
+                    ARG_NEXT to CURRENT_DEST
+                ))
+        }
+
+    }
+
     private suspend fun sendConsentAndNavigateToMinorWaitScreen(showUsernamePassword: Boolean) {
         try {
             val savePerson = _uiState.value.person ?: throw IllegalStateException("child details are empty")

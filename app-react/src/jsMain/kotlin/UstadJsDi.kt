@@ -46,6 +46,7 @@ import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
 import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
+import com.ustadmobile.core.domain.account.CheckRegistrationAllowedUseCase
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.impl.di.commonClientDomainDiModule
 import com.ustadmobile.util.resolveEndpoint
@@ -250,7 +251,11 @@ internal fun ustadJsDi(
             }
         }
     }
-
+    bind<CheckRegistrationAllowedUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+        CheckRegistrationAllowedUseCase(
+            dataLayer = instance<UmAppDataLayer>()
+        )
+    }
     bind<GetVersionUseCase>() with singleton {
         GetVersionUseCaseJs()
     }
