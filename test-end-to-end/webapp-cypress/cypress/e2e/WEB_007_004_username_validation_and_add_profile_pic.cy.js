@@ -35,7 +35,7 @@ describe('WEB_007_004_username_validation_and_add_profile_pic', () => {
   cy.get('#newpassword').type("test1234")
   cy.contains("button","Save").click()
   cy.contains('usera',{timeout:2000}).should('be.visible')
-  cy.contains('Change Password',{timeout:2000}).should('be.visible')
+  cy.contains('Manage account',{timeout:6000}).should('be.visible')
   cy.contains("People").click()
   cy.contains("button","Person").click()
   cy.contains("Add Person").click()
@@ -50,7 +50,8 @@ describe('WEB_007_004_username_validation_and_add_profile_pic', () => {
   cy.get('#newpassword').type("test1234")
   cy.contains("button","Save").click()
   cy.contains('user.b_123',{timeout:2000}).should('be.visible')
-  cy.contains('Change Password',{timeout:2000}).should('be.visible')
+  cy.contains('Manage account',{timeout:6000}).should('be.visible')
+
 })
 
 it('User login and adding profile pic', () => {
@@ -68,5 +69,6 @@ it('User login and adding profile pic', () => {
   cy.get('input[type="file"]').selectFile('../test-files/content/profile_Pic.jpg',{force:true})
   cy.contains("button","Save").click()
   cy.get('img[alt="user image"]').should('exist')
+  cy.contains('Manage account',{timeout:6000}).should('be.visible')
 })
 })
