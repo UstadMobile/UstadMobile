@@ -156,7 +156,7 @@ class OtherSignUpOptionSelectionViewModel(
                 )
 
             }else if (isMinor){
-                sendConsentAndNavigateToMinorWaitScreen(true)
+                sendConsentAndNavigateToMinorWaitScreen(false)
             }
             else {
                 enrollToCourseFromInviteUid(savePerson.personUid)

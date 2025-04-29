@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 
 data class RegisterMinorWaitForParentUiState(
 
@@ -59,7 +60,11 @@ class RegisterMinorWaitForParentViewModel(
          * screen.
          */
         if (refererScreen!=null){
-            navController.popBackStack(refererScreen, true)
+            navController.navigate(
+                viewName = refererScreen,
+                args = emptyMap(),
+                goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+            )
             return
         }
         navController.popBackStack(DEST_NAME, true)

@@ -240,7 +240,7 @@ class AccountListViewModel(
                 put(ARG_SERVER_URL, endpointFilter)
 
             putAllFromSavedStateIfPresent(listOf(ARG_NEXT, ARG_DONT_SET_CURRENT_SESSION))
-
+            put(RegisterMinorWaitForParentViewModel.ARG_REFERER_SCREEN, DEST_NAME)
             put(ARG_MAX_DATE_OF_BIRTH, savedStateHandle[ARG_MAX_DATE_OF_BIRTH] ?: "0")
         }
 
