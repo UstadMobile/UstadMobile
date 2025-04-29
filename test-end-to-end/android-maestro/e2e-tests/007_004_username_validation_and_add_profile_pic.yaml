@@ -59,7 +59,7 @@ onFlowComplete:
 - inputText: uSer@ A
 - tapOn: "SAVE"
 - assertVisible: "usera"
-- assertVisible: "Change Password"
+- assertVisible: "Manage account"
 - tapOn: "People"
 - tapOn:
     id: "floating_action_button"
