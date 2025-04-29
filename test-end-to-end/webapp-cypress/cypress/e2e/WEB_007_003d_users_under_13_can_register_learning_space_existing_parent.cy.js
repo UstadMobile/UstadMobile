@@ -1,4 +1,4 @@
-describe('WEB_007_003b_users_under_13_can_register_using_parental_approval_link_existing_parent', () => {
+describe('WEB_007_003d_users_under_13_can_register_learning_space_existing_parent', () => {
  before(() => {
     // Start Test Server
     cy.ustadStartTestServer(6000)
