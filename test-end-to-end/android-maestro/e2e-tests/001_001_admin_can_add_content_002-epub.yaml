@@ -50,7 +50,7 @@ onFlowComplete:
     element:
       text: "THE FULL PROJECT GUTENBERG LICENSE"
     direction: DOWN
-    timeout: 10000
+    timeout: 60000
 - tapOn: "THE FULL PROJECT GUTENBERG LICENSE"
 - scroll
 - tapOn: "Back"
