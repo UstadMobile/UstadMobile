@@ -14,7 +14,8 @@ it('Child user aged below 13 register as a new user', () => {
   cy.ustadClearIndexDb()
   cy.visit('/', {timeout:60000})
   cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').click()
-  cy.ustadPersonalOrLearningSpace('Personal')
+  cy.contains('personal').click()
+  //cy.ustadPersonalOrLearningSpace('Personal')
   cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date(Date.now() - (10 * 365 * 24 * 60 * 60 * 1000))) //kids age 10
   cy.contains('button','Next').click()
   cy.contains('New Terms').should('not.exist')
