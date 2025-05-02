@@ -2023,7 +2023,9 @@
     <string name="graph_data">Graph data</string>
     <string name="raw_data">Raw data</string>
     <string name="count">Count</string>
-
+    <string name="invalid_report_format">invalid report format</string>
+    <string name="invalid_report_config">invalid report config</string>
+    <string name="unknown_error">unknown error</string>
 
 
     <string name="months">Months</string>

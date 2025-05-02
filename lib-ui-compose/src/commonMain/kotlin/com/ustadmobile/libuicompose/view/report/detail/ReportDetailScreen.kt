@@ -59,7 +59,6 @@ fun ReportDetailScreen(
 
 @Composable
 fun BarGraphSampleScreen(
-    onShowDialog: () -> Unit = { },
     reportOptions: ReportOptions2,
     statementReportRow: List<List<StatementReportRow>>
 ) {
@@ -109,7 +108,7 @@ fun BarGraphSampleScreen(
             )
         }
     } else {
-        androidx.compose.material.Text("empty data") // need to change
+        Text("empty data")
     }
 }
 

@@ -2,7 +2,6 @@ package com.ustadmobile.core.viewmodel.report.detail
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.ReportOptions2
-import com.ustadmobile.core.domain.report.model.ReportPeriod
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.INDETERMINATE
@@ -17,21 +16,16 @@ import com.ustadmobile.lib.db.entities.Report
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
 data class ReportDetailUiState(
     val report: Report? = null,
-    val dialogVisible: Boolean = false,
     val reportOptions2: ReportOptions2 = ReportOptions2(),
     val reportResults: List<List<StatementReportRow>> = emptyList(),
     val errorMessage: String? = null
@@ -85,49 +79,64 @@ class ReportDetailViewModel(
                                 old?.reportLastModTime == new?.reportLastModTime
                             }
                             .collectLatest { report ->
-                            try {
-                                val reportNonNull = report
-                                    ?: throw IllegalStateException("Report not found for uid $reportUid")
-                                val optionsJson = reportNonNull.reportOptions
-                                val reportTitle = reportNonNull.reportTitle
+                                try {
+                                    val reportNonNull = report
+                                        ?: throw IllegalStateException("Report not found for uid $reportUid")
+                                    val optionsJson = reportNonNull.reportOptions
+                                    val reportTitle = reportNonNull.reportTitle
 
-                                val parsedOptions = when {
-                                    !optionsJson.isNullOrBlank() -> {
-                                        try {
-                                            json.decodeFromString(
-                                                ReportOptions2.serializer(),
-                                                optionsJson
-                                            )
-                                        } catch (e: Exception) {
-                                            throw IllegalArgumentException("Invalid report options format")
+                                    val parsedOptions = when {
+                                        !optionsJson.isNullOrBlank() -> {
+                                            try {
+                                                json.decodeFromString(
+                                                    ReportOptions2.serializer(),
+                                                    optionsJson
+                                                )
+                                            } catch (e: Exception) {
+                                                throw IllegalArgumentException("Invalid report options format")
+                                            }
+                                        }
+
+                                        !reportTitle.isNullOrBlank() -> {
+                                            ReportOptions2(title = reportTitle)
+                                        }
+
+                                        else -> throw IllegalStateException("Report $reportUid has no options or title")
+                                    }
+
+                                    _uiState.update { it.copy(reportOptions2 = parsedOptions) }
+
+                                    val request = RunReportUseCase.RunReportRequest(
+                                        reportUid = reportUid,
+                                        reportOptions = parsedOptions,
+                                        accountPersonUid = activeUserPersonUid,
+                                        timeZone = TimeZone.currentSystemDefault()
+                                    )
+                                    runReportUseCase(request).collect { reportResult ->
+                                        _uiState.update { prev ->
+                                            prev.copy(reportResults = reportResult.results)
                                         }
                                     }
 
-                                    !reportTitle.isNullOrBlank() -> {
-                                        ReportOptions2(title = reportTitle)
+                                } catch (e: Exception) {
+                                    val errorMsg = when (e) {
+                                        is IllegalArgumentException -> systemImpl.getString(
+                                            MR.strings.invalid_report_format
+                                        )
+
+                                        is IllegalStateException -> e.message
+                                            ?: systemImpl.getString(MR.strings.invalid_report_config)
+
+                                        else -> e.message
+                                            ?: systemImpl.getString(MR.strings.unknown_error)
                                     }
-
-                                    else -> throw IllegalStateException("Report $reportUid has no options or title")
-                                }
-
-                                _uiState.update { it.copy(reportOptions2 = parsedOptions) }
-
-                                val request = RunReportUseCase.RunReportRequest(
-                                    reportUid = reportUid,
-                                    reportOptions = parsedOptions,
-                                    accountPersonUid = activeUserPersonUid,
-                                    timeZone = TimeZone.currentSystemDefault()
-                                )
-                                runReportUseCase(request).collect { reportResult ->
-                                    _uiState.update { prev ->
-                                        prev.copy(reportResults = reportResult.results)
+                                    _uiState.update {
+                                        it.copy(errorMessage = errorMsg)
                                     }
+                                } finally {
+                                    _appUiState.update { it.copy(loadingState = NOT_LOADING) }
                                 }
-
-                            } catch (e: Exception) {
-                                _appUiState.update { it.copy(loadingState = NOT_LOADING) }
                             }
-                        }
                     }
                 }
             }

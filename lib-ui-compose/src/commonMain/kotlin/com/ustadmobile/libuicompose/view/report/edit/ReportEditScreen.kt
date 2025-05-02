@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
@@ -120,9 +119,11 @@ private fun ReportEditScreen(
                             optionPeriod?.rangeUnit == currentPeriod.rangeUnit &&
                                     optionPeriod?.rangeQuantity == currentPeriod.rangeQuantity
                         }
+
                         is FixedReportTimeRange -> {
                             option == ReportPeriodOption.CUSTOM_DATE_RANGE
                         }
+
                         else -> false
                     }
                 } ?: run {
@@ -140,7 +141,11 @@ private fun ReportEditScreen(
                 options = ReportPeriodOption.entries,
                 selectedValue = selected,
                 onOptionSelected = { selectedOption ->
-                    handleTimeRangeSelection(selectedOption, uiState.reportOptions2, onReportChanged)
+                    handleTimeRangeSelection(
+                        selectedOption,
+                        uiState.reportOptions2,
+                        onReportChanged
+                    )
                 },
                 isError = uiState.timeRangeError != null && selected == null,
                 supportingText = {
@@ -231,10 +236,11 @@ private fun ReportEditScreen(
                                 val updatedSeries = seriesItem.copy(reportSeriesTitle = newTitle)
                                 onSeriesChanged(updatedSeries)
                             },
-                            isError = uiState.seriesTitleError != null,
+                            isError = uiState.seriesTitleErrors[seriesItem.reportSeriesUid] != null,
                             supportingText = {
                                 Text(
-                                    uiState.seriesTitleError ?: stringResource(MR.strings.required)
+                                    uiState.seriesTitleErrors[seriesItem.reportSeriesUid]
+                                        ?: stringResource(MR.strings.required)
                                 )
                             },
                         )
@@ -257,6 +263,13 @@ private fun ReportEditScreen(
                         onOptionSelected = { selectedYAxis ->
                             val updatedSeries = seriesItem.copy(reportSeriesYAxis = selectedYAxis)
                             onSeriesChanged(updatedSeries)
+                        },
+                        isError = uiState.yAxisErrors[seriesItem.reportSeriesUid] != null,
+                        supportingText = {
+                            Text(
+                                uiState.yAxisErrors[seriesItem.reportSeriesUid]
+                                    ?: stringResource(MR.strings.required)
+                            )
                         },
                         disabledOptions = requiredYAxisType?.let { requiredType ->
                             ReportSeriesYAxis.entries.filter { it.type != requiredType }
@@ -447,7 +460,7 @@ fun CustomPeriodInputs(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             isError = quantityError != null,
             supportingText = { quantityError?.let { Text(it) } },
-            )
+        )
 
 
         ExposedDropdownMenu(
@@ -477,7 +490,7 @@ fun CustomDateRangeInputs(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         DatePickerButton(
-            label = stringResource(MR.strings.from) ,
+            label = stringResource(MR.strings.from),
             timestamp = currentRange.fromDateMillis,
             onDateSelected = { newFrom ->
                 onDateRangeChanged(newFrom, currentRange.toDateMillis)

@@ -27,13 +27,11 @@ import com.ustadmobile.view.report.graph.ReportGraph
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import mui.material.Box
 import mui.material.Container
 import mui.material.ListItem
 import mui.material.ListItemButton
 import mui.material.ListItemIcon
 import mui.material.ListItemText
-import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
@@ -42,13 +40,9 @@ import react.router.useLocation
 import react.useMemo
 import tanstack.react.query.UseInfiniteQueryResult
 import web.cssom.Contain
-import web.cssom.FlexShrink
 import web.cssom.Height
 import web.cssom.Overflow
-import web.cssom.atrule.height
-import web.cssom.atrule.width
 import web.cssom.pct
-import web.cssom.px
 
 external interface ReportListProps : Props {
     var uiState: ReportListUiState

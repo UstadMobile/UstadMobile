@@ -11,19 +11,12 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.mui.components.UstadQuickActionButton
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.report.graph.ReportGraph
-import mui.icons.material.ImportExport
-import mui.icons.material.Share
 import mui.material.Box
 import mui.material.Card
-import mui.material.Dialog
 import mui.material.Divider
-import mui.material.ListItem
-import mui.material.ListItemButton
-import mui.material.ListItemText
 import mui.material.Orientation
 import mui.material.Typography
 import mui.system.Stack
@@ -32,8 +25,6 @@ import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
-import react.ReactNode
-import react.create
 import react.useMemo
 import web.cssom.px
 
@@ -57,24 +48,25 @@ val ReportDetailScreen = FC<Props> {
 val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
     val string = useStringProvider()
 
-    val graphSeriesList = useMemo(listOf(props.uiState.reportResults, props.uiState.reportOptions2.series)) {
-        props.uiState.reportOptions2.series.mapIndexed { index, reportSeries ->
-            GraphSeries(
-                type = when (reportSeries.reportSeriesVisualType) {
-                    ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
-                    else -> SeriesType.BAR
-                },
-                data = props.uiState.reportResults.getOrNull(index)?.map { statementRow ->
-                    ReportResultQueryRow(
-                        xAxis = statementRow.xAxis,
-                        yAxis = statementRow.yAxis,
-                        subgroup = statementRow.subgroup
-                    )
-                } ?: emptyList(),
-                name = reportSeries.reportSeriesTitle
-            )
+    val graphSeriesList =
+        useMemo(listOf(props.uiState.reportResults, props.uiState.reportOptions2.series)) {
+            props.uiState.reportOptions2.series.mapIndexed { index, reportSeries ->
+                GraphSeries(
+                    type = when (reportSeries.reportSeriesVisualType) {
+                        ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
+                        else -> SeriesType.BAR
+                    },
+                    data = props.uiState.reportResults.getOrNull(index)?.map { statementRow ->
+                        ReportResultQueryRow(
+                            xAxis = statementRow.xAxis,
+                            yAxis = statementRow.yAxis,
+                            subgroup = statementRow.subgroup
+                        )
+                    } ?: emptyList(),
+                    name = reportSeries.reportSeriesTitle
+                )
+            }
         }
-    }
     UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)

@@ -31,8 +31,8 @@ data class ReportEditUiState(
     val reportOptions2: ReportOptions2 = ReportOptions2(),
     val reportTitleError: String? = null,
     val xAxisError: String? = null,
-    val yAxisError: String? = null,
-    val seriesTitleError: String? = null,
+    val seriesTitleErrors: Map<Int, String> = emptyMap(),
+    val yAxisErrors: Map<Int, String> = emptyMap(),
     val subGroupError: String? = null,
     val chartTypeError: String? = null,
     val timeRangeError: String? = null,
@@ -134,12 +134,27 @@ class ReportEditViewModel(
         } else {
             null
         }
+
+        // Validate series-specific fields
+        val seriesTitleErrors = currentReport.series.mapNotNull { series ->
+            series.reportSeriesTitle.takeIf { it.isEmpty() }
+                ?.let { series.reportSeriesUid to requiredFieldMessage }
+        }.toMap()
+
+        val yAxisErrors = currentReport.series.mapNotNull { series ->
+            if (series.reportSeriesYAxis == null) {
+                series.reportSeriesUid to requiredFieldMessage
+            } else {
+                null
+            }
+        }.toMap()
+
         _uiState.update { prev ->
             prev.copy(
                 reportTitleError = if (prev.reportOptions2.title.isEmpty()) requiredFieldMessage else null,
                 xAxisError = if (prev.reportOptions2.xAxis == null) requiredFieldMessage else null,
-                seriesTitleError = if (prev.reportOptions2.series.any { it.reportSeriesTitle.isEmpty() }) requiredFieldMessage else null,
-                yAxisError = if (prev.reportOptions2.series.any { it.reportSeriesYAxis == null }) requiredFieldMessage else null,
+                seriesTitleErrors = seriesTitleErrors,
+                yAxisErrors = yAxisErrors,
                 timeRangeError = null,
                 quantityError = quantityError
             )
@@ -195,16 +210,8 @@ class ReportEditViewModel(
                     newOptions.xAxis,
                     currentState.xAxisError
                 ),
-                seriesTitleError = updateErrorMessageOnChange(
-                    currentState.reportOptions2.series.map { it.reportSeriesTitle },
-                    newOptions.series.map { it.reportSeriesTitle },
-                    currentState.seriesTitleError
-                ),
-                yAxisError = updateErrorMessageOnChange(
-                    currentState.reportOptions2.series.map { it.reportSeriesYAxis },
-                    newOptions.series.map { it.reportSeriesYAxis },
-                    currentState.yAxisError
-                ),
+                seriesTitleErrors = emptyMap(),
+                yAxisErrors = emptyMap(),
                 timeRangeError = updateErrorMessageOnChange(
                     currentState.reportOptions2.period,
                     newOptions.period,
@@ -219,8 +226,6 @@ class ReportEditViewModel(
             commitDelay = 200
         )
     }
-
-
     fun onSeriesChanged(updatedSeries: ReportSeries2) {
         onEntityChanged(
             _uiState.value.reportOptions2.let { reportOptions ->
@@ -324,10 +329,10 @@ class ReportEditViewModel(
     private fun ReportEditUiState.hasErrors(): Boolean {
         return reportTitleError != null ||
                 xAxisError != null ||
-                seriesTitleError != null ||
+                seriesTitleErrors.isNotEmpty() ||
+                yAxisErrors.isNotEmpty() ||
                 subGroupError != null ||
                 chartTypeError != null ||
-                yAxisError != null ||
                 timeRangeError != null ||
                 quantityError != null
     }
