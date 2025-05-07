@@ -12,15 +12,22 @@ import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import io.github.aakira.napier.Napier
 import org.json.JSONObject
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase.CreatePasskeyResult
-import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 /**
- * the CreatePasskeyPrompt will show the google bottomsheet to create passkey
- * https://developer.android.com/identity/sign-in/credential-manager#create-passkey
+ * Create a passkey on Android. This will show a bottom sheet for the user to aprove creating a new
+ * passkey.
+ *
+ * @param context : this must be an activity context as per the Android docs
+ *
+ * See https://developer.android.com/identity/sign-in/credential-manager#create-passkey
  */
 class CreatePasskeyUseCaseImpl(
     val context: Context,
-    val createPasskeyRequestJsonUseCase: CreatePasskeyRequestJsonUseCase
+    private val json: Json,
+    private val createPublicKeyJsonUseCase: CreatePublicKeyCredentialCreationOptionsJsonUseCase
 ) : CreatePasskeyUseCase {
 
     /**
@@ -30,12 +37,11 @@ class CreatePasskeyUseCaseImpl(
     override suspend fun invoke(createPassKeyParams: CreatePasskeyParams): CreatePasskeyResult {
         val credentialManager = CredentialManager.create(context)
 
-        /** credentialManager to create credential requires a request
-         * https://developer.android.com/identity/sign-in/credential-manager#format-json-request
-         */
         try {
             val request = CreatePublicKeyCredentialRequest(
-                requestJson = createPasskeyRequestJsonUseCase(createPassKeyParams),
+                requestJson = json.encodeToString(
+                    createPublicKeyJsonUseCase(createPassKeyParams.username)
+                ),
                 preferImmediatelyAvailableCredentials = false,
             )
             val response = credentialManager.createCredential(

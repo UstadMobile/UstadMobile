@@ -4,9 +4,6 @@ import com.ustadmobile.lib.db.entities.Person
 
 interface CreatePasskeyUseCase {
 
-    suspend operator fun invoke(createPassKeyParams:CreatePasskeyParams): CreatePasskeyResult?
-
-
     data class CreatePasskeyResult(
         val attestationObj: String,
         val clientDataJson: String,
@@ -18,4 +15,7 @@ interface CreatePasskeyUseCase {
         val personUid: Long,
         val person: Person
     )
+
+    suspend operator fun invoke(createPassKeyParams:CreatePasskeyParams): CreatePasskeyResult
+
 }
