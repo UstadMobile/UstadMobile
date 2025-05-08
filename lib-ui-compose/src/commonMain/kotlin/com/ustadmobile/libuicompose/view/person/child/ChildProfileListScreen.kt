@@ -1,18 +1,22 @@
 package com.ustadmobile.libuicompose.view.person.child
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListUiState
@@ -21,6 +25,7 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.libuicompose.components.UstadAddListItem
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
+import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.view.person.addaccount.ParentAndChildrenProfileSelectionDialog
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +41,8 @@ fun ChildProfileListScreen(viewModel: ChildProfileListViewModel) {
         uiState = uiState,
         onClickAddChild = viewModel::onClickAddChileProfile,
         onClickEditChild = viewModel::onClickEditChileProfile,
-        onClickDeleteChileProfile = viewModel::onClickDeleteChildProfile
+        onClickDeleteChileProfile = viewModel::onClickDeleteChildProfile,
+        onClickFinish = viewModel::onClickDone
     )
 
     if (uiState.showProfileSelectionDialog) {
@@ -45,10 +51,15 @@ fun ChildProfileListScreen(viewModel: ChildProfileListViewModel) {
             onDismissRequest = viewModel::onDismissLangDialog,
 
             ) {
-            Text(text = stringResource(MR.strings.which_profile_do_you_want_to_start), modifier = Modifier.padding(16.dp))
+            Text(
+                text = stringResource(MR.strings.which_profile_do_you_want_to_start),
+                modifier = Modifier.padding(16.dp)
+            )
             uiState.personAndChildrenList.forEach { profile ->
-                ListItem(modifier = Modifier.clickable { viewModel.onProfileSelected(profile) },
-                    headlineContent = { Text(profile.fullName()) },)
+                ListItem(
+                    modifier = Modifier.clickable { viewModel.onProfileSelected(profile) },
+                    headlineContent = { Text(profile.fullName()) },
+                )
             }
         }
 
@@ -59,37 +70,48 @@ fun ChildProfileListScreen(viewModel: ChildProfileListViewModel) {
 fun ChildProfileListScreen(
     uiState: ChildProfileListUiState,
     onClickAddChild: () -> Unit = {},
+    onClickFinish: () -> Unit = {},
     onClickEditChild: (Person) -> Unit = {},
     onClickDeleteChileProfile: (Person) -> Unit = {},
 ) {
-    UstadLazyColumn(
-        modifier = Modifier.fillMaxWidth()
+    Column(
+        modifier = Modifier.fillMaxSize()
     ) {
-        item(key = "add_account") {
-            UstadAddListItem(
-                text = stringResource(MR.strings.child_profiles),
-                icon = Icons.Default.Add,
-                onClickAdd = { onClickAddChild() },
-            )
+        UstadLazyColumn(
+            modifier = Modifier.weight(1f),
+        ) {
+            item(key = "add_account") {
+                UstadAddListItem(
+                    text = stringResource(MR.strings.child_profiles),
+                    icon = Icons.Default.Add,
+                    onClickAdd = { onClickAddChild() },
+                )
+            }
+
+            items(
+                uiState.childProfiles,
+                key = {
+                    "${it.personUid} ${UUID.randomUUID()}"
+                }
+            ) { childProfile ->
+                childProfileItem(
+                    childProfile = childProfile,
+                    onClickEditChild = onClickEditChild,
+                    onClickDeleteChileProfile = onClickDeleteChileProfile
+                )
+            }
         }
 
-
-        items(
-            uiState.childProfiles,
-            key = {
-                "${it.personUid} ${UUID.randomUUID()}"
-            }
-        ) { childProfile ->
-
-            childProfileItem(
-                childProfile = childProfile,
-                onClickEditChild = onClickEditChild,
-                onClickDeleteChileProfile = onClickDeleteChileProfile
-            )
-
+        Button(
+            onClick = onClickFinish,
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding()
+                .testTag("finish"),
+        ) {
+            Text(stringResource(MR.strings.finish))
         }
     }
-
 
 }
 

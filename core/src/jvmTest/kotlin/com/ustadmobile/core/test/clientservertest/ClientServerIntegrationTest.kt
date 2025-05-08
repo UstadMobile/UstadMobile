@@ -37,6 +37,7 @@ import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.rest.InsertDefaultSiteCallback
+import com.ustadmobile.lib.rest.NotificationSender
 import com.ustadmobile.lib.rest.personAuthRegisterRoute
 import io.ktor.client.HttpClient
 import io.ktor.serialization.kotlinx.json.json
@@ -219,7 +220,9 @@ fun clientServerIntegrationTest(
             extend(serverDi)
         }
         routing {
-            personAuthRegisterRoute()
+            personAuthRegisterRoute(
+                notificationSender = NotificationSender(serverDi)
+            )
 
             route("UmAppDatabase") {
                 UmAppDatabase_KtorRoute(doorServerConfig) { serverDb }

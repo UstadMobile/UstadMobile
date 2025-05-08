@@ -357,7 +357,7 @@ class SignUpViewModel(
 
     fun onClickedSignup() {
 
-
+        savedStateHandle[ARG_PARENT_CONTACT] = _uiState.value.parentEmail
         loadingState = LoadingUiState.INDETERMINATE
 
         // full name splitting into first name and last name

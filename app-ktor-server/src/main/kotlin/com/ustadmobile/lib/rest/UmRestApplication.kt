@@ -1023,7 +1023,9 @@ fun Application.umRestApplication(
 
         prefixRoute(sitePrefix) {
             //addHostCheckIntercept()
-            personAuthRegisterRoute()
+            personAuthRegisterRoute(
+                notificationSender = NotificationSender(di),
+            )
             route("UmAppDatabase") {
                 UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json, logger = NapierDoorLogger())) { call ->
                     di.on(call).direct.instance(tag = DoorTag.TAG_DB)

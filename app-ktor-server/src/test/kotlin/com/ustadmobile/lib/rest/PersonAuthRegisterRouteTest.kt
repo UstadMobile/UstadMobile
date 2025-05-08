@@ -103,7 +103,9 @@ class PersonAuthRegisterRouteTest {
                 }
 
                 routing {
-                    personAuthRegisterRoute()
+                    personAuthRegisterRoute(
+                        notificationSender = NotificationSender(serverDi),
+                    )
                 }
             }
 

@@ -29,6 +29,7 @@ external interface ChildProfileListProps : Props {
     var onClickEditChild: (Person) -> Unit
     var onClickDeleteChileProfile: (Person) -> Unit
     var onClickAddChild: () -> Unit
+    var onClickFinish: () -> Unit
 
 }
 
@@ -72,6 +73,7 @@ val ChildProfileListScreen = FC<Props> {
         onClickEditChild = viewModel::onClickEditChileProfile
         onClickDeleteChileProfile = viewModel::onClickDeleteChildProfile
         onClickAddChild = viewModel::onClickAddChileProfile
+        onClickFinish = viewModel::onClickDone
     }
 }
 val AddChildProfilesComponent2 = FC<ChildProfileListProps> { props ->
@@ -118,7 +120,12 @@ val AddChildProfilesComponent2 = FC<ChildProfileListProps> { props ->
 
                 }
             }
-
+            Button {
+                variant = ButtonVariant.contained
+                id = "next_button"
+                onClick = { props.onClickFinish() }
+                + strings[MR.strings.next]
+            }
 
         }
         Container {

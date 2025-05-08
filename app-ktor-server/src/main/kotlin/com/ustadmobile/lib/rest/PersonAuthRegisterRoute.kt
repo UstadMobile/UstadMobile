@@ -31,7 +31,9 @@ import com.ustadmobile.core.account.doubleEncryptWithPbkdf2V2
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 
-fun Route.personAuthRegisterRoute() {
+fun Route.personAuthRegisterRoute(
+    notificationSender: NotificationSender,
+) {
 
     route("auth") {
         post("login") {
@@ -132,7 +134,6 @@ fun Route.personAuthRegisterRoute() {
                     MR.strings.parent_child_register_message_subject, mLangCode)
                     .replace("%1\$s", appName)
 
-                val notificationSender: NotificationSender by closestDI().instance()
                 notificationSender.sendEmail(mParentContactVal, subjectText, emailText)
             }
 

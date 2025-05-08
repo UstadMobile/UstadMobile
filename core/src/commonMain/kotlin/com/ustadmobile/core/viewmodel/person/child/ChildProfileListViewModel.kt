@@ -90,12 +90,6 @@ class ChildProfileListViewModel(
                 prev.copy(
                     title = systemImpl.getString(MR.strings.child_profiles),
                     hideBottomNavigation = true,
-                    actionBarButtonState = ActionBarButtonUiState(
-                        visible = true,
-                        text = systemImpl.getString(MR.strings.done),
-                        onClick = this@ChildProfileListViewModel::onClickDone,
-
-                        ),
                     navigationVisible = false,
                     userAccountIconVisible = false,
                 )
