@@ -12,9 +12,14 @@ it('Admin enable registration', () => {
 
 it('Child user aged below 13 register as a new user', () => {
   cy.ustadClearIndexDb()
+  const baseUrl = '/'
   cy.visit('/', {timeout:60000})
   cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').click()
-  cy.ustadPersonalOrLearningSpace('Learning_space')
+  cy.contains('Join Learning Space').click()
+  cy.contains('learningspacetitle').click() // learning space name
+  cy.contains('Site link').type(baseUrl)
+
+  //cy.ustadPersonalOrLearningSpace('Join Learning Space')
   cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date(Date.now() - (10 * 365 * 24 * 60 * 60 * 1000))) //kids age 10
   cy.contains('button','Next').click()
   cy.contains('New Terms').should('not.exist')
@@ -22,10 +27,11 @@ it('Child user aged below 13 register as a new user', () => {
   cy.get('div[id="gender"]').click()
   cy.contains("li","Female").click()
   cy.contains("label", "Parent email*").parent().find("input").clear().type('parent@email.com')
-  cy.contains('button','Other options').click()
+  cy.contains('Next').click()
   cy.contains("label", "Username").parent().find("input").clear().type('childuser')
   cy.contains("label", "Password").parent().find("input").clear().type('test1234')
   cy.contains('SIGN-UP').click()
+  cy.wait(10000)
   cy.contains("Wait for Parent").should('exist')
   cy.contains('button','OK').click()
   cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').should('exist')
