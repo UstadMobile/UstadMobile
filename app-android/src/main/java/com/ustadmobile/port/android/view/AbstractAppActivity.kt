@@ -59,6 +59,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.core.domain.credentials.passkey.CreatePasskeyUseCaseImpl
 import com.ustadmobile.core.domain.credentials.passkey.GetCredentialUseCaseImpl
+import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
 import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCaseImpl
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
@@ -136,10 +137,12 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         bind<GoToLearningSpaceUseCase>() with provider {
             GoToLearningSpaceUseCaseAndroid()
         }
-        bind<CreatePasskeyUseCase>() with singleton {
+
+        bind<CreatePasskeyUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             CreatePasskeyUseCaseImpl(
                 context=this@AbstractAppActivity,
-                createPasskeyRequestJsonUseCase = instance()
+                json = instance(),
+                createPublicKeyJsonUseCase = instance(),
             )
         }
 
@@ -206,6 +209,14 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
             BulkAddPersonsFromLocalUriUseCaseCommonJvm(
                 bulkAddPersonsUseCase = instance(),
                 uriHelper = instance(),
+            )
+        }
+
+        bind<CreatePublicKeyCredentialCreationOptionsJsonUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            CreatePublicKeyCredentialCreationOptionsJsonUseCase(
+                systemUrlConfig = instance(),
+                systemImpl = instance(),
+                createCredentialUsernameUseCase = instance(),
             )
         }
 

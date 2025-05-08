@@ -14,7 +14,13 @@ import com.ustadmobile.core.domain.credentials.username.CreateCredentialUsername
 import io.ktor.http.Url
 import io.ktor.util.encodeBase64
 
-class CreatePasskeyRequestJsonServerUseCase(
+/**
+ * Create the Json that is used to request creation of a new passkey. This should work on all
+ * platforms where passkeys are supported (Android, Web, etc).
+ *
+ * As per https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptionsjson
+ */
+class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
     private val systemUrlConfig: SystemUrlConfig,
     private val systemImpl: UstadMobileSystemImpl,
     private val createCredentialUsernameUseCase: CreateCredentialUsernameUseCase,

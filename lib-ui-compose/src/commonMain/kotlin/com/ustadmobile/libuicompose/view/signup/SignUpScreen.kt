@@ -42,7 +42,7 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
         onPersonPictureUriChanged = viewModel::onPersonPictureChanged,
         onTeacherCheckChanged = viewModel::onTeacherCheckChanged,
         onParentCheckChanged = viewModel::onParentCheckChanged,
-        onclickSignUpWithPasskey = viewModel::onClickedSignup,
+        onclickSignUpWithPasskey = viewModel::onClickSignup,
         onclickOtherOptions = viewModel::onClickOtherOption,
         onFullNameValueChange = viewModel::onFullNameValueChange,
         onParentEmailValueChange = viewModel::onParentEmailValueChange,

@@ -178,7 +178,7 @@ val SignUpScreen = FC<Props> {
         onPersonPictureUriChanged = viewModel::onPersonPictureChanged
         onTeacherCheckChanged = viewModel::onTeacherCheckChanged
         onParentCheckChanged = viewModel::onParentCheckChanged
-        onClickSignUpWithPasskey = viewModel::onClickedSignup
+        onClickSignUpWithPasskey = viewModel::onClickSignup
         onFullNameValueChange = viewModel::onFullNameValueChange
         onParentEmailValueChange = viewModel::onParentEmailValueChange
     }
