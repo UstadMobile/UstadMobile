@@ -24,6 +24,7 @@ import kotlin.random.Random
  * are multiple domain , and we dont know from which domain user created the passkey ,
  * so adding @serverUrl in id we can check during signin which domain user registered
  */
+@Deprecated("Replaced by CreatePublicKeyCredentialCreationOptionsJsonUseCase")
 class CreatePasskeyRequestJsonUseCase(
     private val systemImpl: UstadMobileSystemImpl,
     private val systemUrlConfig: SystemUrlConfig,
