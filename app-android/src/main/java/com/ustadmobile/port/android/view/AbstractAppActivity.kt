@@ -157,6 +157,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 context=this@AbstractAppActivity,
                 passkeyRequestJsonUseCase = instance(),
                 apiUrlConfig = instance(),
+                json = instance()
             )
         }
 

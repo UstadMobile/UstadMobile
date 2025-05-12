@@ -59,6 +59,7 @@ generateuuid =  "0.8.4"
 urlencoder =  "1.4.0"
 nestedscroll-webview =  "0.1.6"
 androidx-webkit =  "1.10.0"
+codegen =  "0.120"
 androidx-browser =  "1.8.0"
 conveyor =  "1.5"
 download-task =  "5.5.0"
@@ -236,6 +237,7 @@ generateuuid = { module = "com.benasher44:uuid", version.ref = "generateuuid"}
 urlencoder = { module = "net.thauvin.erik.urlencoder:urlencoder-lib", version.ref = "urlencoder"}
 nestedscroll-webview = { module = "com.telefonica:nestedscrollwebview", version.ref = "nestedscroll-webview"}
 androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "androidx-webkit"}
+codegen = { module = "net.pwall.json:json-kotlin-schema-codegen", version.ref = "codegen"}
 androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser"}
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify"}
 apache-commons-pool2 = { module = "org.apache.commons:commons-pool2", version.ref = "apache-commons-pool2"}

@@ -13,6 +13,8 @@ import io.github.aakira.napier.Napier
 import org.json.JSONObject
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase.CreatePasskeyResult
 import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
+import com.ustadmobile.core.domain.credentials.passkey.webAuthn.ClientDataJSON
+import com.ustadmobile.core.domain.credentials.passkey.webAuthn.PasskeyWebAuthNResponse
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -50,32 +52,23 @@ class CreatePasskeyUseCaseImpl(
             ) as CreatePublicKeyCredentialResponse
 
             Napier.d { "passkey response: ${response.registrationResponseJson}" }
+            Napier.d { "domain: ${createPassKeyParams.masterDomainName}" }
 
-            val jsonObject = JSONObject(response.registrationResponseJson)
-            val responseObject = jsonObject.getJSONObject("response")
+            val passkeyResponse = json.decodeFromString<PasskeyWebAuthNResponse>(response.registrationResponseJson)
 
-            val clientDataJsonString = responseObject.getString("clientDataJSON")
-            val attestationObject = responseObject.getString("attestationObject")
-            val publicKey = responseObject.getString("publicKey")
-            val id = jsonObject.getString("id")
-
-            val decodedClientDataJsonBytes = Base64.decode(clientDataJsonString, Base64.DEFAULT)
-            val decodedClientDataJson = String(decodedClientDataJsonBytes)
-            val clientDataJsonObject = JSONObject(decodedClientDataJson)
-
-            val originString = clientDataJsonObject.optString("origin", "")
-            val challengeString = clientDataJsonObject.optString("challenge", "")
+            val decodedClientDataBytes = Base64.decode(passkeyResponse.response.clientDataJSON, Base64.DEFAULT)
+            val clientDataJson = json.decodeFromString<ClientDataJSON>(decodedClientDataBytes.decodeToString())
 
             return CreatePasskeyResult(
-                attestationObj = attestationObject,
-                clientDataJson = clientDataJsonString,
-                originString = originString,
-                rpid = "credential-manager-${createPassKeyParams.masterDomainName}",
-                challengeString = challengeString,
-                publicKey = publicKey,
-                id = id,
+                attestationObj = passkeyResponse.response.attestationObject,
+                clientDataJson = passkeyResponse.response.clientDataJSON,
+                originString = clientDataJson.origin,
+                rpid ="credential-manager-${createPassKeyParams.masterDomainName}",
+                challengeString = clientDataJson.challenge,
+                publicKey = passkeyResponse.response.publicKey,
+                id = passkeyResponse.id,
                 personUid = createPassKeyParams.personUid.toLong(),
-                person=createPassKeyParams.person
+                person = createPassKeyParams.person
             )
         } catch (e: CreateCredentialException) {
             // See https://codelabs.developers.google.com/credential-manager-api-for-android#1

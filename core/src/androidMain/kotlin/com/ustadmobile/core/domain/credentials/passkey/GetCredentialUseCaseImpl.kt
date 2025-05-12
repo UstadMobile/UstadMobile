@@ -14,14 +14,18 @@ import com.ustadmobile.core.util.ext.formattedHost
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
 import com.ustadmobile.core.domain.credentials.PassKeySignInData
 import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.credentials.passkey.webAuthn.ClientDataJSON
+import com.ustadmobile.core.domain.credentials.passkey.webAuthn.PasskeyWebAuthNResponse
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import io.ktor.http.Url
+import kotlinx.serialization.json.Json
 import org.json.JSONObject
 
 class GetCredentialUseCaseImpl(
     private val context: Context,
     private val passkeyRequestJsonUseCase: CreatePasskeyRequestJsonUseCase,
     private val apiUrlConfig: SystemUrlConfig,
+    private val json: Json,
 ) : GetCredentialUseCase {
 
     override suspend fun invoke(): GetCredentialUseCase.CredentialResult {
@@ -62,24 +66,21 @@ class GetCredentialUseCaseImpl(
                     )
 
                     if (authResponseJson != null) {
-                        val jsonObject = JSONObject(authResponseJson)
-                        val responseObject = jsonObject.getJSONObject("response")
+                        val parsedResponse = json.decodeFromString<PasskeyWebAuthNResponse>(authResponseJson)
 
-                        val clientDataJsonString = responseObject.getString("clientDataJSON")
-                        val decodedBytes = Base64.decode(clientDataJsonString, Base64.DEFAULT)
-                        val decodedJson = String(decodedBytes)
-                        val clientDataJson = JSONObject(decodedJson)
+                        val decodedBytes = Base64.decode(parsedResponse.response.clientDataJSON, Base64.DEFAULT)
+                        val clientDataJson = json.decodeFromString<ClientDataJSON>(decodedBytes.decodeToString())
 
                         GetCredentialUseCase.PasskeyCredentialResult(
                             PassKeySignInData(
-                                credentialId = jsonObject.getString("id"),
-                                userHandle = responseObject.getString("userHandle"),
-                                authenticatorData = responseObject.getString("authenticatorData"),
-                                clientDataJSON = clientDataJsonString,
-                                signature = responseObject.getString("signature"),
-                                origin = clientDataJson.getString("origin"),
+                                credentialId = parsedResponse.id,
+                                userHandle = parsedResponse.response.userHandle?:"",
+                                authenticatorData = parsedResponse.response.authenticatorData?:"",
+                                clientDataJSON = parsedResponse.response.clientDataJSON,
+                                signature = parsedResponse.response.signature?:"",
+                                origin = clientDataJson.origin,
                                 rpId = "credential-manager-${domain}",
-                                challenge = clientDataJson.getString("challenge")
+                                challenge = clientDataJson.challenge
                             )
                         )
                     } else {
