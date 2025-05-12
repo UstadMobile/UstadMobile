@@ -54,6 +54,7 @@ import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorJvm
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumberUtilJvm
 import com.ustadmobile.core.domain.report.query.GenerateReportQueriesUseCase
+import com.ustadmobile.core.domain.report.query.GenerateTestXapiStatementsUseCase
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.domain.report.query.RunReportUseCaseDatabaseImpl
 import com.ustadmobile.core.domain.tmpfiles.CreateTempUriUseCase
@@ -132,6 +133,7 @@ import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryIm
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.report.query.RunReportRoute
 import com.ustadmobile.lib.rest.domain.report.query.RunReportServerUseCase
+import com.ustadmobile.lib.rest.domain.report.query.RunTestReport
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
 import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
 import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
@@ -713,6 +715,13 @@ fun Application.umRestApplication(
                 storeActivitiesUseCase = instance(),
             )
         }
+        bind<GenerateTestXapiStatementsUseCase>() with singleton {
+            GenerateTestXapiStatementsUseCase(
+               db = instance(),
+               endpoint =  instance(),
+               xapiStatementResource =  instance()
+            )
+        }
 
         bind<ResumeOrStartXapiSessionUseCase>() with scoped(EndpointScope.Default).singleton {
             ResumeOrStartXapiSessionUseCaseLocal(
@@ -956,7 +965,15 @@ fun Application.umRestApplication(
                         }
                     )
                 }
-
+                route("test") {
+                    route("generate-xapi-statements") {
+                        RunTestReport(
+                            generateTestXapiStatementsUseCase = { call ->
+                                di.on(call).direct.instance()
+                            }
+                        )
+                    }
+                }
                 route("pbkdf2"){
                     Pbkdf2Route()
                 }
