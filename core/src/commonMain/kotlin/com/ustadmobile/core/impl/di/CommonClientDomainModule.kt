@@ -3,11 +3,13 @@ package com.ustadmobile.core.impl.di
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
 import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCaseSendToServerImpl
+import com.ustadmobile.core.domain.username.GetUsernameSuggestionUseCase
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.provider
 import org.kodein.di.scoped
+import org.kodein.di.singleton
 
 /**
  * Common domain layer DI for all clients (web, mobile, desktop)
@@ -20,6 +22,13 @@ fun commonClientDomainDiModule(
             httpClient = instance(),
             learningSpace = context,
             json = instance()
+        )
+    }
+
+    bind<GetUsernameSuggestionUseCase>() with scoped(learningSpaceScope).singleton {
+        GetUsernameSuggestionUseCase(
+            httpClient = instance(),
+            learningSpace = context,
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.ustadmobile.view.signup
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.viewmodel.signup.SignUpUiState
@@ -10,9 +11,11 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadStandardContainer
+import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
 import com.ustadmobile.view.components.UstadImageSelectButton
 import mui.material.*
+import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import web.cssom.pct
@@ -32,14 +35,28 @@ external interface SignUpScreenProps : Props {
     var onParentCheckChanged: (Boolean) -> Unit
     var onClickSignUpWithPasskey: () -> Unit
     var onFullNameValueChange: (String) -> Unit
+    var onFullNameFocusedChanged: (Boolean) -> Unit
+    var onUsernameValueChange: (String) -> Unit
+
 }
 
 val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
     val theme by useRequiredContext(ThemeContext)
-
+    val errorStr = props.uiState.errorText
     val strings = useStringProvider()
     UstadStandardContainer {
         Stack {
+            if(errorStr != null) {
+                Typography {
+                    sx {
+                        color = theme.palette.error.main
+                    }
+
+                    variant = TypographyVariant.body1
+
+                    + errorStr
+                }
+            }
             spacing = responsive(2)
 
             UstadImageSelectButton {
@@ -54,6 +71,15 @@ val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
                 value = props.uiState.fullName ?: ""
                 onTextChange = {
                     props.onFullNameValueChange(it)
+                }
+                onFocus = {
+
+                }
+                onFocus = {
+                    props.onFullNameFocusedChanged(true)
+                }
+                onBlur = {
+                    props.onFullNameFocusedChanged(false)
                 }
                 error = props.uiState.fullNameError != null
                 helperText = props.uiState.fullNameError?.let { ReactNode(it) }
@@ -95,6 +121,23 @@ val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
                             + ReactNode(strings[option.stringResource])
                         }
                     }
+                }
+
+                UstadTextField {
+                    id = "username"
+                    value = props.uiState.person?.username?:""
+                    label = ReactNode(strings[MR.strings.username])
+                    onTextChange = {
+                        props.onUsernameValueChange(it)
+                    }
+                    onKeyDown = { event ->
+                        val char = event.key.singleOrNull()
+                        if(char != null && !ValidateUsernameUseCase.isValidUsernameChar(char)) {
+                            event.preventDefault()
+                        }
+                    }
+                    error = props.uiState.usernameError != null
+                    helperText = props.uiState.usernameError?.let { ReactNode(it) }
                 }
 
                 FormHelperText {
