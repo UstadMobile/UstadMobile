@@ -30,62 +30,6 @@ class CreatePasskeyRequestJsonUseCase(
     private val json: Json,
 ) {
 
-    operator fun invoke(
-        createPasskeyParams: CreatePasskeyParams
-    ): String {
-        val userId = randomString(16)
-        val challenge = json.encodeToString(
-            UserPasskeyChallenge(
-                username = createPasskeyParams.username,
-                personUid = createPasskeyParams.personUid,
-                doorNodeId = createPasskeyParams.doorNodeId,
-                usStartTime = createPasskeyParams.usStartTime
-            )
-        )
-
-        val challengeBase64Encoded =   challenge.encodeBase64()
-        val useridBase64Encoded =  "$userId@${createPasskeyParams.serverUrl}".encodeBase64()
-
-        //See https://developers.google.com/identity/passkeys/developer-guides/server-registration
-        // https://codelabs.developers.google.com/credential-manager-api-for-android#2
-        //TODO: Change user.id
-        val requestJson = """
-                  {
-                    "challenge": "${challengeBase64Encoded}",
-                    "rp": {
-                      "id": "${Url(systemUrlConfig.systemBaseUrl).host}",
-                      "name": "${systemImpl.getString(MR.strings.app_name)}"
-                    },
-                    "pubKeyCredParams": [
-                      {
-                        "type": "public-key",
-                        "alg": -7
-                      },
-                      {
-                        "type": "public-key",
-                        "alg": -257
-                      }
-                    ],
-                    "authenticatorSelection": {
-                      "authenticatorAttachment": "platform",
-                      "residentKey": "required",
-                      "requireResidentKey": true,
-                      "userVerification": "required"
-                    },
-                    "timeout": 1800000,
-                    "user": {
-                      "id": "foobar3",
-                      "name": "${createPasskeyParams.username}@${createPasskeyParams.serverDomainName}",
-                      "displayName": "${createPasskeyParams.username}@${createPasskeyParams.serverDomainName}"
-                    }
-                  }
-              """.trimIndent()
-
-        Napier.e { requestJson }
-        return requestJson
-    }
-
-
     fun randomString(length: Int): String {
         val charPool = "abcdefghikjmnpqrstuvxwyz23456789"
 

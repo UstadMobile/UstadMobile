@@ -129,18 +129,13 @@ class ManageAccountViewModel(
         viewModelScope.launch {
             val passkeyCreated = createPasskeyUseCase?.invoke(
                 CreatePasskeyParams(
-                    username = accountManager.currentUserSession.person.firstNames.toString(),
-                    personUid = accountManager.currentUserSession.person.personUid.toString(),
-                    doorNodeId = di.doorIdentityHashCode.toString(),
-                    usStartTime = systemTimeInMillis(),
-                    serverUrl = accountManager.activeLearningSpace.url,
-                    masterUrl = apiUrlConfig.systemBaseUrl,
-                    person = accountManager.currentUserSession.person
+                    username = accountManager.currentUserSession.person.username.toString(),
                 )
             )
             if (passkeyCreated != null) {
                 savePassKeyUseCase?.invoke(
-                    passkeyResult = passkeyCreated
+                    passkeyResult = passkeyCreated,
+                    person = accountManager.currentUserSession.person
                 )
             }
 

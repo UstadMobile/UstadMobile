@@ -60,7 +60,7 @@ class OtherSignUpOptionSelectionViewModel(
 
     private val getLocalAccountsSupportedUseCase: GetLocalAccountsSupportedUseCase by instance()
 
-    private val createPasskeyUseCase: CreatePasskeyUseCase? by instanceOrNull()
+    private val createPasskeyUseCase: CreatePasskeyUseCase? by di.on(LearningSpace(serverUrl)).instanceOrNull()
 
     private var nextDestination: String =
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
@@ -115,13 +115,7 @@ class OtherSignUpOptionSelectionViewModel(
 
             val passkeyCreated = createPasskeyUseCase?.invoke(
                 CreatePasskeyParams(
-                    username = savePerson.firstNames.toString(),
-                    personUid = uid.toString(),
-                    doorNodeId = di.doorIdentityHashCode.toString(),
-                    usStartTime = systemTimeInMillis(),
-                    serverUrl = serverUrl,
-                    masterUrl = apiUrlConfig.systemBaseUrl,
-                    person = savePerson
+                    username = savePerson.username.toString()
                 )
             )
             passkeyCreated?.let {

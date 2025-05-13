@@ -87,8 +87,6 @@ data class SignUpUiState(
 
     val usernameError: String? = null,
 
-    val suggestedUsername: String? = null,
-
     val usernameSetByUser: Boolean = false,
 
     val errorText: String? = null,
@@ -280,7 +278,7 @@ class SignUpViewModel(
         val updatedPerson = _uiState.value.person?.shallowCopy {
             username = filteredValue
         }
-        if (_uiState.value.suggestedUsername!=filteredValue){
+        if (_uiState.value.person?.username!=filteredValue){
             _uiState.update {
                 it.copy(usernameSetByUser = true)
             }
@@ -303,11 +301,8 @@ class SignUpViewModel(
             if (fullName.isBlank()) return@launch
 
             try {
-                val suggestedUsername = getUsernameSuggestionUseCase(fullName)
 
-                _uiState.update {
-                    it.copy(suggestedUsername = suggestedUsername)
-                }
+                val suggestedUsername = getUsernameSuggestionUseCase(fullName)
 
                 val updatedPerson = _uiState.value.person?.shallowCopy {
                     username = suggestedUsername
@@ -385,13 +380,7 @@ class SignUpViewModel(
                 if(createPasskeyUseCaseVal != null) {
                     val passkeyCreated = createPasskeyUseCaseVal(
                         CreatePasskeyParams(
-                            username = savePerson.firstNames.toString(),
-                            personUid = uid.toString(),
-                            doorNodeId = di.doorIdentityHashCode.toString(),
-                            usStartTime = systemTimeInMillis(),
-                            serverUrl = serverUrl,
-                            masterUrl = apiUrlConfig.systemBaseUrl,
-                            person = savePerson
+                            username = savePerson.username.toString(),
                         )
                     )
 

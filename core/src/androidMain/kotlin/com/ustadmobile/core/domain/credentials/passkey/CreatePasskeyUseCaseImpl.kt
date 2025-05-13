@@ -10,8 +10,6 @@ import androidx.credentials.exceptions.CreateCredentialException
 import com.ustadmobile.core.domain.credentials.CreatePasskeyParams
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import io.github.aakira.napier.Napier
-import org.json.JSONObject
-import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase.CreatePasskeyResult
 import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
 import com.ustadmobile.core.domain.credentials.passkey.webAuthn.ClientDataJSON
 import com.ustadmobile.core.domain.credentials.passkey.webAuthn.PasskeyWebAuthNResponse
@@ -36,7 +34,7 @@ class CreatePasskeyUseCaseImpl(
      * @throws CreateCredentialException if CredentialManager throws an exception
      */
     @SuppressLint("PublicKeyCredential")
-    override suspend fun invoke(createPassKeyParams: CreatePasskeyParams): CreatePasskeyResult {
+    override suspend fun invoke(createPassKeyParams: CreatePasskeyParams): PasskeyWebAuthNResponse {
         val credentialManager = CredentialManager.create(context)
 
         try {
@@ -54,20 +52,7 @@ class CreatePasskeyUseCaseImpl(
             Napier.d { "passkey response: ${response.registrationResponseJson}" }
             val passkeyResponse = json.decodeFromString<PasskeyWebAuthNResponse>(response.registrationResponseJson)
 
-            val decodedClientDataBytes = Base64.decode(passkeyResponse.response.clientDataJSON, Base64.DEFAULT)
-            val clientDataJson = json.decodeFromString<ClientDataJSON>(decodedClientDataBytes.decodeToString())
-
-            return CreatePasskeyResult(
-                attestationObj = passkeyResponse.response.attestationObject?:"",
-                clientDataJson = passkeyResponse.response.clientDataJSON,
-                originString = clientDataJson.origin,
-                rpid ="credential-manager-${createPassKeyParams.masterDomainName}",
-                challengeString = clientDataJson.challenge,
-                publicKey = passkeyResponse.response.publicKey?:"",
-                id = passkeyResponse.id,
-                personUid = createPassKeyParams.personUid.toLong(),
-                person = createPassKeyParams.person
-            )
+            return passkeyResponse
         } catch (e: CreateCredentialException) {
             // See https://codelabs.developers.google.com/credential-manager-api-for-android#1
             Napier.e(
