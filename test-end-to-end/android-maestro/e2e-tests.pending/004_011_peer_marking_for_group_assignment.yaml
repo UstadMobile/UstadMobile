@@ -298,23 +298,24 @@ onFlowComplete:
 - assertVisible: "9.0/10.0 Points"
 #  Submission policy - Must submit all at once , so make sure Submit button is not visible
 - assertNotVisible: "Submit"
-# teacher can delete the course
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "common/user_login.yaml"
-    env:
-      USERNAME: "t1"
-      PASSWORD: "test"
+    file: "common/admin_login.yaml"
 - tapOn: "Courses"
 - tapOn: "Test Course Block"
-- tapOn:
-    id: "floating_action_button"
-- scrollUntilVisible:
-    element:
-      text: "Assignment 1"
-    direction: DOWN
-- tapOn: "More options"
-- tapOn: "Delete"
+- tapOn: "Copy"
+- assertVisible:
+    id: "app_title"
+    text: "Copy course"
+- assertVisible:
+    id: "name"
+    text: "Copy of Test Course Block"
 - tapOn: "Save"
-- assertNotVisible: "Assignment 1"
+- tapOn: "Assignment 1"
+# for copied course Peer marking should changed to Teacher by default
+- assertVisible: "Marked by: Teacher"
+- tapOn: "Submissions"
+# for copied course Group submission should changed to Individual submission by default
+- assertNotVisible: "Group 1"
+- assertNotVisible: "Group 1"

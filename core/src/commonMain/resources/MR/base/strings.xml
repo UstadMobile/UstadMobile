@@ -1967,4 +1967,12 @@
 
     <string name="false_key">false</string>
 
+    <string name="copy">Copy</string>
+
+    <string name="copy_course">Copy course</string>
+
+    <string name="copy_of">Copy of</string>
+
+
+
 </resources>

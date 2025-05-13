@@ -22,8 +22,6 @@ it('Admin add discussion board and post', () => {
   cy.get('#discussion_post_title').type('Topic 1')
   cy.get('.ql-editor').ustadTypeAndVerify('Discusssion post')
   cy.get('#actionBarButton').click()
-  cy.go('back')
-  cy.go('back')
 })
 
 it('Teacher able to add a new post and reply', () => {
