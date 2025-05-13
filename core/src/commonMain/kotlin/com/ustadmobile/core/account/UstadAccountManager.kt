@@ -6,10 +6,10 @@ import com.ustadmobile.core.account.UstadAccountManager.EndpointFilter
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
-import com.ustadmobile.core.domain.passkey.PassKeySignInData
-import com.ustadmobile.core.domain.passkey.PasskeyResult
-import com.ustadmobile.core.domain.passkey.PasskeyVerifyResult
-import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase.CreatePasskeyResult
+import com.ustadmobile.core.domain.credentials.PassKeySignInData
+import com.ustadmobile.core.domain.credentials.PasskeyVerifyResult
+import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
 import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
@@ -49,7 +49,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -123,17 +122,6 @@ class UstadAccountManager(
 
     val activeUserSessionsFlow: Flow<List<UserSessionWithPersonAndLearningSpace>>
         get() = _activeUserSessions.asStateFlow()
-
-    /**
-     * Flow that is use to show prompt to compose ui , to tell user that option to create passkey for
-     * easy login
-     */
-
-    private val _passKeyPromptFlow = MutableSharedFlow<PassKeyPromptData>()
-
-    val passKeyPromptFlow: Flow<PassKeyPromptData>
-        get() = _passKeyPromptFlow
-
 
     val activeLearningSpace: LearningSpace
         get() = _currentUserSession.value.learningSpace
@@ -331,33 +319,16 @@ class UstadAccountManager(
         }
     }
 
-   suspend fun createPassKeyPrompt(
-       username: String,
-       personUid: Long,
-       doorNodeId: String,
-       usStartTime: Long,
-       serverUrl: String
-   ) {
-        val promptData = PassKeyPromptData(
-            username = username,
-            personUid = personUid,
-            doorNodeId=doorNodeId,
-            usStartTime=usStartTime,
-            serverUrl=serverUrl
-        )
-
-       _passKeyPromptFlow.emit(promptData)
-
-   }
     suspend fun registerWithPasskey(
         learningSpaceUrl: String,
-        passkeyResult: PasskeyResult,
+        passkeyResult: CreatePasskeyResult,
         person: Person,
         personPicture: PersonPicture?,
     ) = withContext(Dispatchers.Default) {
         val learningSpace = LearningSpace(learningSpaceUrl)
 
-        val savePassKeyUseCase: SavePersonPasskeyUseCase = di.on(learningSpace).direct.instance()
+        val savePassKeyUseCase: SavePersonPasskeyUseCase = di
+            .on(LearningSpace(apiUrlConfig.systemBaseUrl)).direct.instance()
         savePassKeyUseCase.invoke(passkeyResult)
 
         val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
@@ -376,7 +347,7 @@ class UstadAccountManager(
                 repo.personDao().insertAsync(person)
             }
         }
-        val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
+        di.on(learningSpace).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
 
         currentUserSession = session
@@ -572,7 +543,7 @@ class UstadAccountManager(
             parameter("rpId", passKeySignInData.rpId)
             parameter("challenge", passKeySignInData.challenge)
         }.bodyAsText()
-        Napier.d { "passkeyres"+loginResponse.toString() }
+        Napier.d { "passkeyres : $loginResponse" }
        val passkeyVerifyResult= Json.decodeFromString<PasskeyVerifyResult>(loginResponse)
 
         if(!passkeyVerifyResult.isVerified) {

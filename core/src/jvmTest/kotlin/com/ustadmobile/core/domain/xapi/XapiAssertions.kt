@@ -14,7 +14,7 @@ import com.ustadmobile.core.domain.xapi.model.XapiInteractionType
 import com.ustadmobile.core.domain.xapi.model.XapiStatement
 import com.ustadmobile.core.domain.xapi.model.XapiStatementRef
 import com.ustadmobile.core.domain.xapi.model.identifierHash
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.lib.db.entities.xapi.ActivityInteractionEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry
 import com.ustadmobile.lib.db.entities.xapi.ActivityLangMapEntry.Companion.PROPNAME_DESCRIPTION
@@ -209,6 +209,7 @@ fun assertActivityLangMapEntriesMatch(
         assertNotNull(langMapEntity)
         assertEquals(nameEntry.key, langMapEntity.almeLangCode)
         assertEquals(nameEntry.value, langMapEntity.almeValue)
+        assertEquals(propName, langMapEntity.almePropName)
     }
 }
 

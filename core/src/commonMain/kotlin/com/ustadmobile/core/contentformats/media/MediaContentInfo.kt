@@ -15,4 +15,5 @@ import kotlinx.serialization.Serializable
 class MediaContentInfo(
     //Currently only one source is supported, this might change in future.
     val sources: List<MediaSource>,
+    val subtitles: List<SubtitleTrack> = emptyList(),
 )

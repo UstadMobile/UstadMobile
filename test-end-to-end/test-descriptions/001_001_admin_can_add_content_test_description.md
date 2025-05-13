@@ -9,7 +9,7 @@ Admin can add an H5P, Epub, Video, and Pdf content file from the device. Once ad
 1. Login as admin.
 2. Click on "Library."
 3. Click on the "+ Content" button.
-4. Click on the "From file" button.
+4. Click on the "From file" or "From folder" button.
 5. Select the content file.
 6. Click the "Save" button.
 7. Verify that the content is visible in the library.
@@ -25,3 +25,24 @@ Admin can add an H5P, Epub, Video, and Pdf content file from the device. Once ad
 17. Click the "Download" button.
 18. Click the "Open" button.
 19. Verify the content appears as expected.
+20. Back to content screen
+21. Click on "Attempts."
+22. Verify:
+    * The content title is visible
+    * User's name is listed.
+    * Progress bar is visible.
+    * "1 Attempt" is recorded.
+23. Click on "Admin User."
+24. Verify:
+    * The username - content title is visible
+    * Progress bar is visible.
+    * "% score/completion" is displayed.
+25. Click on the progress bar.
+26. Verify:
+    * The content title is visible
+    * Answered/Progressed verb is shown as per the content.
+27. Test filtering:
+    * Verify the progress bars are visible
+    * By default the filter chips are selected
+28. When filter chips are unselected corresponding progress bars are disappeared
+29. Verify "Nothing here, yet" is displayed.

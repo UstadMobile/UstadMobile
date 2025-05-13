@@ -1,14 +1,12 @@
 package com.ustadmobile.core.viewmodel.person.child
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.util.ext.onActiveEndpoint
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.Person
@@ -44,7 +42,6 @@ class EditChildProfileViewModel(
     private val _uiState = MutableStateFlow(
         EditChildProfileUiState()
     )
-    private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
 
     val uiState: Flow<EditChildProfileUiState> = _uiState.asStateFlow()
 
@@ -66,7 +63,9 @@ class EditChildProfileViewModel(
 
         _appUiState.update { prev ->
             prev.copy(
-
+                hideAppBar =false,
+                navigationVisible = false,
+                userAccountIconVisible = false,
                 title = systemImpl.getString(MR.strings.child_profile),
                 hideBottomNavigation = true,
             )
@@ -164,8 +163,6 @@ class EditChildProfileViewModel(
     companion object {
 
         const val DEST_NAME = "EditChildProfile"
-        const val STATE_KEY_PERSON = "person"
-        const val ARG_SELECTED_PERSON_ENTRY = "SelectedPersonEntry"
 
     }
 }

@@ -22,7 +22,7 @@ import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
@@ -190,9 +190,9 @@ class ContentEntryListViewModel(
      */
     private val showSelectFolderButton = selectFolderMode && listMode == ListViewMode.PICKER
 
-    private val moveContentEntriesUseCase: MoveContentEntriesUseCase by di.onActiveEndpoint().instance()
+    private val moveContentEntriesUseCase: MoveContentEntriesUseCase by di.onActiveLearningSpace().instance()
 
-    private val deleteEntriesUseCase: DeleteContentEntryParentChildJoinUseCase by di.onActiveEndpoint().instance()
+    private val deleteEntriesUseCase: DeleteContentEntryParentChildJoinUseCase by di.onActiveLearningSpace().instance()
 
     init {
         val savedStateSelectedEntries = savedStateHandle[KEY_SAVED_STATE_SELECTED_ENTRIES]?.let {
@@ -445,7 +445,7 @@ class ContentEntryListViewModel(
                 put(ContentEntryEditViewModel.ARG_LEAF, true.toString())
                 put(ARG_PARENT_UID, parentEntryUid.toString())
                 put(ARG_NEXT, ContentEntryEditViewModel.DEST_NAME)
-                putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                putAllFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
             }
         )
     }
@@ -458,7 +458,7 @@ class ContentEntryListViewModel(
                 put(ContentEntryGetMetadataViewModel.ARG_URI, fileUri)
                 put(ContentEntryGetMetadataViewModel.ARG_FILENAME, fileName)
                 put(ARG_PARENT_UID, parentEntryUid.toString())
-                putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                putAllFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
             }
         )
     }
@@ -485,7 +485,7 @@ class ContentEntryListViewModel(
                     serializer = CourseBlockAndEditEntities.serializer(),
                     overwriteDestination = false,
                     args = buildMap {
-                        putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                        putAllFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
                         put(
                             CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY,
                             json.encodeToString(

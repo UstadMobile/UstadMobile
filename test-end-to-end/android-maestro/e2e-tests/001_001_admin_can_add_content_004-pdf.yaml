@@ -1,35 +1,41 @@
 appId: com.toughra.ustadmobile
+tags:
+  - contentPdf
+  - contentTest
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_004-pdf"
-  TESTNAME: "001_001_admin_can_add_content_004-pdf"
+  TESTRESULTSDIR: "build/reports/maestro/001_001_admin_can_add_content_004-pdf/Screenshots"
+onFlowStart:
+  - startRecording: 001_001_admin_can_add_content_004-pdf
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
 - runFlow:
-    file: "../common/startserver.yaml"
+    file: "common/clear_login_and_add_content.yaml"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow:
-    file: "../common/clear_login_and_add_content.yaml"
-    env:
-      TESTFILENAME: Pdf_Content.pdf
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
+      TESTFILENAME: "Pdf_Content.pdf"
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- takeScreenshot: "${TESTRESULTSDIR}//content_add_to_library"
 - tapOn: "Document"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 10000
+    timeout: 80000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 10000
+    timeout: 80000
 - tapOn: Open
 - assertVisible: "PDF PAGE"
 - tapOn: "Back"
 - runFlow:
-    file: "../common/login_download_and_open_content.yaml"
+    file: "common/login_download_and_open_content.yaml"
 #Download and open content
 - tapOn: "Library"
 - extendedWaitUntil:
@@ -39,4 +45,30 @@ env:
 - tapOn: Download
 - tapOn: Open
 - assertVisible: "PDF PAGE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/pdf_content_download_and_open"
+- scroll
+- takeScreenshot: "${TESTRESULTSDIR}/pdf_content_download_and_open"
+- tapOn: "Back"
+- tapOn: "Attempts"
+- assertVisible:
+    text: "Pdf_Content"
+    id: "app_title"
+- assertVisible: "Admin User: Completed"
+- assertVisible: "1 Attempts"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+- tapOn: "Admin User: Completed"
+- assertVisible:
+    text: "Admin User - Pdf_Content"
+    id: "app_title"
+- assertVisible: "Completed"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+- tapOn: "Completed"
+- assertVisible:
+    text: "Pdf_Content"
+    id: "app_title"
+- assertVisible: "Completed "
+- assertVisible: "Progressed "
+- assertVisible: "100%"
+- assertVisible: "Progress"
+

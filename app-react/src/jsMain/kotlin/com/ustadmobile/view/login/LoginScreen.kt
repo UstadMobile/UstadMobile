@@ -14,6 +14,7 @@ import mui.system.responsive
 import mui.system.sx
 import react.*
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.mui.components.UstadLanguageSelect
@@ -43,7 +44,6 @@ val LoginScreen = FC<Props> {
     LoginComponent2 {
         this.uiState = uiState
         onClickLogin = viewModel::onClickLogin
-        onClickCreateAccount = viewModel::onClickCreateAccount
         onClickConnectAsGuest = viewModel::onClickConnectAsGuest
         onUsernameValueChange = viewModel::onUsernameChanged
         onPasswordValueChange = viewModel::onPasswordChanged
@@ -73,6 +73,12 @@ private val LoginComponent2 = FC<LoginProps> { props ->
                 label = ReactNode(strings[MR.strings.username])
                 onTextChange = {
                     props.onUsernameValueChange(it)
+                }
+                onKeyDown = { event ->
+                    val char = event.key.singleOrNull()
+                    if(char != null && !ValidateUsernameUseCase.isValidUsernameChar(char)) {
+                        event.preventDefault()
+                    }
                 }
                 error = props.uiState.usernameError != null
                 helperText = props.uiState.usernameError?.let { ReactNode(it) }

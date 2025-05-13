@@ -5,9 +5,11 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -152,12 +154,16 @@ class PersonEditViewModel(
 
     private val validateEmailUseCase = ValidateEmailUseCase()
 
+    private val validateUsernameUseCase = ValidateUsernameUseCase()
+
+    private val filterUsernameUseCase = FilterUsernameUseCase()
+
     private val genderConfig : GenderConfig by instance()
 
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
         on(accountManager.activeLearningSpace).instance()
 
-    private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveEndpoint().instance()
+    private val addNewPersonUseCase: AddNewPersonUseCase by di.onActiveLearningSpace().instance()
 
     private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
         ?.toBoolean() ?: false
@@ -290,7 +296,16 @@ class PersonEditViewModel(
     fun onEntityChanged(entity: Person?) {
         _uiState.update { prev ->
             prev.copy(
-                person = entity,
+                person = if(entity?.username != _uiState.value.person?.username) {
+                    entity?.shallowCopy {
+                        username = filterUsernameUseCase(
+                            username = entity.username ?: "",
+                            invalidCharReplacement = ""
+                        )
+                    }
+                }else {
+                    entity
+                },
                 genderError = updateErrorMessageOnChange(prev.person?.gender,
                     entity?.gender, prev.genderError),
                 firstNameError = updateErrorMessageOnChange(prev.person?.firstNames,
@@ -355,31 +370,6 @@ class PersonEditViewModel(
             phoneNumError != null
     }
 
-    private fun validateUsername(username: String): Boolean {
-        var isValid = true
-
-        if (username.isNullOrEmpty()){
-            isValid = false
-        }
-
-        if (isValid){
-            if (username.contains(" ")){
-                isValid = false
-            }
-        }
-
-        if (isValid){
-            var usernameChars = username.toCharArray()
-
-            for(i in 1..<usernameChars.count()){
-                if(usernameChars[i].isUpperCase()){
-                    isValid = false
-                }
-            }
-        }
-
-        return isValid
-    }
 
     fun onNationalPhoneNumSetChanged(phoneNumSet: Boolean) {
         _uiState.takeIf { it.value.nationalPhoneNumSet != phoneNumSet }?.update { prev ->
@@ -406,14 +396,15 @@ class PersonEditViewModel(
         val currentTime = systemTimeInMillis()
         val isRegistrationMode = registrationModeFlags.hasFlag(REGISTER_MODE_ENABLED)
         val validatedEmailAddr = savePerson.emailAddr?.let { validateEmailUseCase(it) }
+        val validationResult = if(isRegistrationMode) {
+            validateUsernameUseCase(savePerson.username ?: "")
+        } else null
 
         _uiState.update { prev ->
             prev.copy(
-                usernameError = if(isRegistrationMode && !validateUsername(savePerson.username ?: "")) {
-                    systemImpl.getString(MR.strings.invalid)
-                }else {
-                    null
-                },
+                usernameError = if(isRegistrationMode) {
+                    validationResult?.errorMessage?.let { systemImpl.getString(MR.strings.invalid) }
+                } else null,
                 passwordError = if(isRegistrationMode && savePerson.username.isNullOrBlank()) {
                     systemImpl.getString(MR.strings.field_required_prompt)
                 }else {

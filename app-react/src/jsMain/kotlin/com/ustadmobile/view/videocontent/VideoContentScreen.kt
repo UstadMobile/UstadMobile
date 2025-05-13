@@ -19,6 +19,8 @@ import web.cssom.vh
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
+import react.useMemo
+import react.useState
 import web.html.HTMLVideoElement
 
 external interface VideoContentProps: Props {
@@ -45,8 +47,22 @@ fun HTMLVideoElement.mediaPlayState(): VideoContentViewModel.MediaPlayState {
 
 val VideoContentComponent = FC<VideoContentProps> { props ->
 
+    var stateAttr by useState { "" }
+
     useOnUnloadEffect {
         props.onUnload()
+    }
+
+    val manifestUrlVal = props.uiState.manifestUrl
+    val firstSrcUrl = props.uiState.mediaContentInfo?.sources?.firstOrNull()?.uri
+    val contentManifestMap = props.uiState.contentManifestMap
+
+    val mediaSrc = useMemo(props.uiState.contentManifestMap, manifestUrlVal, firstSrcUrl) {
+        if(contentManifestMap != null && firstSrcUrl != null && manifestUrlVal != null) {
+            contentManifestMap.resolveUrl(manifestUrlVal, firstSrcUrl)
+        }else {
+            null
+        }
     }
 
     Container {
@@ -54,23 +70,29 @@ val VideoContentComponent = FC<VideoContentProps> { props ->
             spacing = responsive(2)
             direction = responsive(StackDirection.column)
 
-            props.uiState.mediaSrc?.also { mediaSrc ->
+            mediaSrc?.also { mediaSrc ->
                 video {
                     src = mediaSrc
                     controls = true
+                    //Custom HTML attribute is used by Cypress tests
+                    this.asDynamic()["data-ustad-video-state"] = stateAttr
+
                     onTimeUpdate = {
                         props.onPlayStateChanged(it.currentTarget.mediaPlayState())
                     }
 
                     onPlay = {
+                        stateAttr = "playing"
                         props.onPlayStateChanged(it.currentTarget.mediaPlayState())
                     }
 
                     onPause = {
+                        stateAttr = "paused"
                         props.onPlayStateChanged(it.currentTarget.mediaPlayState())
                     }
 
                     onEnded = {
+                        stateAttr = "ended"
                         props.onPlayStateChanged(it.currentTarget.mediaPlayState())
                         props.onComplete()
                     }
@@ -81,6 +103,14 @@ val VideoContentComponent = FC<VideoContentProps> { props ->
                         display = Display.block
                         marginLeft = Auto.auto
                         marginRight = Auto.auto
+                    }
+
+                    props.uiState.mediaContentInfo?.subtitles?.forEach { subtitle ->
+                        UstadVideoContentSubtitleTrack {
+                            subtitleTrack = subtitle
+                            manifestUrl = props.uiState.manifestUrl
+                            manifestMap = props.uiState.contentManifestMap
+                        }
                     }
                 }
             }
@@ -93,8 +123,6 @@ val VideoContentComponent = FC<VideoContentProps> { props ->
         }
 
     }
-
-
 }
 
 val VideoContentScreen = FC<Props> {
@@ -107,7 +135,7 @@ val VideoContentScreen = FC<Props> {
     VideoContentComponent {
         uiState = uiStateVal
         onPlayStateChanged = viewModel::onPlayStateChanged
-        onComplete = viewModel::onComplete
+        onComplete = { viewModel.onComplete() }
         onUnload = viewModel::onUnload
     }
 

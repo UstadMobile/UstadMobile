@@ -1,10 +1,8 @@
-import com.quittle.androidemulator.AndroidEmulatorExtension
 
 plugins {
     id("com.android.test")
     id("org.jetbrains.kotlin.android")
     id("androidx.baselineprofile")
-    alias(libs.plugins.android.emulator)
 }
 
 android {
@@ -12,12 +10,12 @@ android {
     compileSdk = 34
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     defaultConfig {
@@ -29,22 +27,30 @@ android {
 
     targetProjectPath = ":app-android"
 
-}
-
-configure<AndroidEmulatorExtension> {
-    emulator {
-        sdkVersion(33)
-        abi("x86_64")
-        includeGoogleApis = false
+    @Suppress("UnstableApiUsage")
+    testOptions {
+        managedDevices {
+            devices {
+                localDevices {
+                    create("pixel2api30") {
+                        // Use device profiles you typically see in Android Studio.
+                        device = "Pixel 2"
+                        // Use only API levels 27 and higher.
+                        apiLevel = 30
+                        // To include Google services, use "google".
+                        systemImageSource = "aosp"
+                    }
+                }
+            }
+        }
     }
-    headless = true
-    enableForAndroidTests = true
 }
 
 // This is the configuration block for the Baseline Profile plugin.
 // You can specify to run the generators on a managed devices or connected devices.
 baselineProfile {
-    useConnectedDevices = true
+    useConnectedDevices = false
+    managedDevices += "pixel2api30"
 }
 
 dependencies {

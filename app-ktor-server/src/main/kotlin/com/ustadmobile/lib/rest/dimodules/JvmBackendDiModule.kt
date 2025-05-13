@@ -1,10 +1,11 @@
 package com.ustadmobile.lib.rest.dimodules
 
+import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
-import com.ustadmobile.appconfigdb.SystemDb
-import com.ustadmobile.appconfigdb.entities.SystemConfig
-import com.ustadmobile.appconfigdb.entities.SystemConfigAuth
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight.Companion.CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -12,6 +13,7 @@ import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.ext.MIGRATE_USERNAME_SERVER
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_SERVER
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_NO_OFFLINE_ITEMS
 import com.ustadmobile.core.db.ext.MIGRATION_155_156_SERVER
@@ -37,13 +39,11 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.rest.InsertDefaultSiteCallback
-import com.ustadmobile.lib.rest.domain.systemconfig.sysconfiginit.GenerateSystemConfigAuthCallback
-import com.ustadmobile.lib.rest.ext.dbModeProperty
-import com.ustadmobile.lib.rest.ext.initAdminUser
-import com.ustadmobile.lib.rest.identifier
+import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
+import com.ustadmobile.lib.rest.domain.systemconfig.sysconfiginit.GenerateSystemConfigAuthUseCase
+import com.ustadmobile.lib.rest.sanitizedUrlForPaths
 import io.github.aakira.napier.Napier
 import io.ktor.server.config.*
-import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import java.io.File
 import com.ustadmobile.lib.rest.ext.absoluteDataDir
@@ -92,8 +92,6 @@ fun makeJvmBackendDiModule(
     val dataDirPath = config.absoluteDataDir()
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
-    val dbMode = config.dbModeProperty()
-
     bind<Json>() with singleton {
         json
     }
@@ -101,7 +99,7 @@ fun makeJvmBackendDiModule(
     bind<XapiJson>() with singleton { XapiJson() }
 
     bind<File>(tag = DiTag.TAG_CONTEXT_DATA_ROOT) with scoped(contextScope).singleton {
-        File(dataDirPath, context.identifier(dbMode)).also {
+        File(dataDirPath, context.sanitizedUrlForPaths()).also {
             it.takeIf { !it.exists() }?.mkdirs()
         }
     }
@@ -135,14 +133,27 @@ fun makeJvmBackendDiModule(
         Pbkdf2AuthenticateUseCase(encryptUseCase = instance())
     }
 
-    bind<SystemDb>() with singleton {
-        DatabaseBuilder.databaseBuilder(
-            dbClass = SystemDb::class,
-            dbUrl = "jdbc:sqlite:${config.absoluteDataDir().absolutePath}/system.db",
-            nodeId = 1L
-        ).addCallback(
-            GenerateSystemConfigAuthCallback(encryptor = instance(), dataDirPath = dataDirPath)
-        ).build()
+    bind<GenerateSystemConfigAuthUseCase>() with singleton {
+        GenerateSystemConfigAuthUseCase(encryptor = instance(), dataDirPath = dataDirPath)
+    }
+
+    bind<CentralAppConfigDb>() with singleton {
+        val dbFile = File(config.absoluteDataDir(), CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME)
+        val dbFileExists = dbFile.exists()
+
+        val driver: SqlDriver = JdbcSqliteDriver(
+            url = "jdbc:sqlite:${dbFile.absolutePath}"
+        )
+
+        if(!dbFileExists) {
+            CentralAppConfigDb.Schema.create(driver)
+        }
+
+        CentralAppConfigDb(driver).also {
+            if(!dbFileExists) {
+                instance<GenerateSystemConfigAuthUseCase>().invoke(it)
+            }
+        }
     }
 
     bind<UstadMobileSystemImpl>() with singleton {
@@ -153,13 +164,7 @@ fun makeJvmBackendDiModule(
     }
 
     bind<AuthManager>() with scoped(contextScope).singleton {
-        AuthManager(context, di).also { authManager ->
-            val db: UmAppDatabase = on(context).instance(tag = DoorTag.TAG_DB)
-            runBlocking {
-                db.initAdminUser(context, authManager, di,
-                    config.propertyOrNull("ktor.ustad.adminpass")?.getString())
-            }
-        }
+        AuthManager(context, di)
     }
 
     bind<Pbkdf2Params>() with singleton {
@@ -171,18 +176,18 @@ fun makeJvmBackendDiModule(
 
     bind<DbAndObservers>() with scoped(contextScope).singleton {
         instance<File>(DiTag.TAG_CONTEXT_DATA_ROOT) //Ensure data dir for context is created
+        val learningSpace = instance<LearningSpaceServerRepo>().findByUrl(context.url)
+            ?: throw IllegalStateException("No learning space found for url: ${context.url}")
 
-        val dbHostName = context.identifier(dbMode, "UmAppDatabase")
         val nodeIdAndAuth: NodeIdAndAuth = instance()
-        val dbUrl = config.property("ktor.database.url").getString()
-            .replace("(hostname)", dbHostName)
-            .replace("(datadir)", config.absoluteDataDir().absolutePath)
-        if(dbUrl.startsWith("jdbc:postgresql"))
+
+        if(learningSpace.config.dbUrl.startsWith("jdbc:postgresql"))
             Class.forName("org.postgresql.Driver")
+
         val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class,
-            dbUrl = dbUrl,
-            dbUsername = config.propertyOrNull("ktor.database.user")?.getString(),
-            dbPassword = config.propertyOrNull("ktor.database.password")?.getString(),
+            dbUrl = learningSpace.config.dbUrl,
+            dbUsername = learningSpace.config.dbUsername,
+            dbPassword = learningSpace.config.dbPassword,
             nodeId = nodeIdAndAuth.nodeId,
         )
             .addSyncCallback(nodeIdAndAuth)
@@ -196,6 +201,7 @@ fun makeJvmBackendDiModule(
             .addMigrations(MIGRATION_155_156_SERVER)
             .addMigrations(MIGRATION_161_162_SERVER)
             .addMigrations(MIGRATION_169_170_SERVER)
+            .addMigrations(MIGRATE_USERNAME_SERVER)
             .build().also {
                 it.ktorInitDb(di)
             }
@@ -231,7 +237,7 @@ fun makeJvmBackendDiModule(
 
     bind<NodeIdAndAuth>() with scoped(LearningSpaceScope.Default).singleton {
         val settings: Settings = instance()
-        val contextIdentifier: String = context.identifier(dbMode)
+        val contextIdentifier: String = context.sanitizedUrlForPaths()
         settings.getOrGenerateNodeIdAndAuth(contextIdentifier)
     }
 

@@ -1,4 +1,6 @@
 
+import java.net.URL
+
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.plugin.serialization'
@@ -7,7 +9,6 @@ plugins {
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.license)
     id 'androidx.baselineprofile'
-    alias(libs.plugins.android.emulator)
 }
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
@@ -78,11 +79,6 @@ android {
         freeCompilerArgs += "-Xopt-in=kotlinx.serialization.InternalSerializationApi"
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-        coreLibraryDesugaringEnabled true
-    }
 
     testOptions {
         execution 'ANDROIDX_TEST_ORCHESTRATOR'
@@ -90,6 +86,19 @@ android {
         unitTests {
             includeAndroidResources = true
             returnDefaultValues = true
+        }
+
+        managedDevices {
+            localDevices {
+                pixel2api30 {
+                    // Use device profiles you typically see in Android Studio.
+                    device = "Pixel 2"
+                    // Use only API levels 27 and higher.
+                    apiLevel = 30
+                    // To include Google services, use "google".
+                    systemImageSource = "aosp"
+                }
+            }
         }
     }
 
@@ -111,14 +120,13 @@ android {
     defaultConfig {
         applicationId 'com.savethechildren.learning_tree'
         testInstrumentationRunnerArguments clearPackageData: 'true', notAnnotation: 'com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest'
-
         manifestPlaceholders = [
             "presetLocale" : rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.presetlocale"),
             "uiLanguages": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.uilanguages"),
             "showPoweredByMsg": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.showpoweredbymsg"),
             "gopts": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.gopts"),
             "systemBaseUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.systemBaseUrl"),
-            "passkeyRpId": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.passkeyRpId"),
+            "systemBaseUrlHost": new URL(rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.systemBaseUrl")).getHost(),
             "presetLsUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.presetLsUrl"),
             "newPersonalAccountsLsUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.newPersonalAccountsLsUrl"),
         ]
@@ -187,27 +195,13 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
         jvmTarget = '17'
     }
 }
-
-/*
- * Android Emulator plugin will start the emulator required for baseline profile generation
- */
-androidEmulator {
-    emulator {
-        sdkVersion 33
-        abi 'x86_64'
-        includeGoogleApis false
-    }
-
-    enableForAndroidTests true
-    headless true
-}
-
 
 configurations.all {
     /**
@@ -219,6 +213,7 @@ configurations.all {
 
 dependencies {
     implementation libs.androidx.profileinstaller
+    implementation project(':lib-centralappconfigdb-sqldelight')
     baselineProfile project(':app-android-baselineprofile')
     coreLibraryDesugaring libs.android.desugar.libs
 
@@ -228,6 +223,7 @@ dependencies {
     implementation project(":lib-cache")
 
     implementation libs.door.runtime
+    implementation libs.sqldelight.sqlite.driver.android
     implementation project(':lib-database')
     implementation project(':lib-util')
 
@@ -322,6 +318,9 @@ dependencies {
     //Image loading
     implementation libs.coil
     implementation libs.coil.compose
+
+    //chip text fields
+    implementation libs.chiptextfield
 
     implementation libs.kotlinx.datetime
 

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.domain.xapi.state
 
-import com.ustadmobile.core.domain.xxhash.XXHasher64
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXHasher64
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.core.util.ext.toByteArray
 import io.ktor.utils.io.core.toByteArray
 

@@ -1,0 +1,46 @@
+appId: com.toughra.ustadmobile
+
+---
+# This test tests the adding profile pic to the profile
+# Test parameters needs to provide for this test :
+ # 1) TESTFILENAME : provide the profile pic file name
+
+# download the profile pic
+- runFlow:
+    file:  "./download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: ${TESTFILENAME}
+
+# clear the app
+- clearState: com.toughra.ustadmobile
+# get started
+- launchApp
+- tapOn: "Existing user"
+- runFlow:
+    when:
+      visible: "Personal"
+    commands:
+      - tapOn: "Join Learning Space"
+- tapOn: "Enter link manually"
+# select site
+- runFlow: "./select_site.yaml"
+# admin login
+- runFlow:
+    file: "./admin_login.yaml"
+- tapOn: "People"
+- tapOn: "Admin User"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add"
+- tapOn: "Select picture from files"
+- runFlow:
+    file: "./select_picture_from_files.yaml"
+    env:
+      TESTFILENAME: ${TESTFILENAME}
+- scrollUntilVisible:
+    element:
+      text: "Gender*"
+    direction: DOWN
+- tapOn: "Gender*"
+- tapOn: "Male"
+- tapOn: "SAVE"

@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 actual fun AppIcon() {
     Image(
-        painter = painterResource("/img/ic_launcher_icon.svg"),
+        painter = painterResource("/img/logo.svg"),
         contentDescription = "app_icon",
         modifier = Modifier.height(100.dp).fillMaxWidth()
             .padding(horizontal = 20.dp),

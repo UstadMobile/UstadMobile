@@ -2,7 +2,6 @@ package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.ustadmobile.appconfigdb.SystemDb
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.db.UmAppDatabase
@@ -18,6 +17,7 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
 import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseSox
@@ -53,6 +53,8 @@ import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorJvm
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumberUtilJvm
+import com.ustadmobile.core.domain.tmpfiles.CreateTempUriUseCase
+import com.ustadmobile.core.domain.tmpfiles.CreateTempUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -70,10 +72,10 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.lib.rest.ext.*
@@ -121,11 +123,26 @@ import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isWindowsOs
 import com.ustadmobile.door.log.NapierDoorLogger
+import com.ustadmobile.lib.rest.api.contentupload.GetSubtitleTrackServerRoute
+import com.ustadmobile.lib.rest.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriServerUseCase
 import com.ustadmobile.lib.rest.domain.contententry.importcontent.ContentEntryImportJobRoute
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyRoute
 import com.ustadmobile.lib.rest.domain.passkey.verify.VerifySignInWithPasskeyUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceApiRoute
+import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceClientRoute
+import com.ustadmobile.lib.rest.domain.learningspace.LearningSpaceServerRepo
+import com.ustadmobile.lib.rest.domain.learningspace.SystemConfigScriptRoute
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
+import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
+import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
+import com.ustadmobile.lib.rest.domain.invite.SendClazzInvitesRoute
+import com.ustadmobile.lib.rest.domain.invite.SendClazzInvitesUseCaseServerImpl
+import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
+import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
+import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
+import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCaseHttp
+import com.ustadmobile.lib.rest.domain.invite.sms.SmsProperties
+import com.ustadmobile.lib.rest.domain.invite.sms.twilio.TwilioHttpClient
 import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.systemconfig.verifyauth.VerifySystemConfigAuthUseCase
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
@@ -133,6 +150,15 @@ import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOn
 import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
+import com.ustadmobile.centralappconfigdb.datasource.LearningSpaceDataSource
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.core.domain.invite.ParseInviteUseCase
+import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
+import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockSendEmailUseCase
+import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCaseImpl
+import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockEmailSender
+import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.TestEmailRoute
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -145,8 +171,6 @@ const val TAG_UPLOAD_DIR = 10
 const val CONF_DBMODE_VIRTUALHOST = "virtualhost"
 
 const val CONF_DBMODE_SINGLETON = "singleton"
-
-const val CONF_GOOGLE_API = "secret"
 
 const val CONF_KEY_SITE_URL = "ktor.ustad.siteUrl"
 
@@ -167,19 +191,19 @@ val KTOR_SERVER_ROUTES = listOf(
     "/Site", "/import", "/contentupload", "/websocket", "/api", "/staticfiles","/.well-known"
 )
 
+/**
+ * The default javascript development server (e.g. webpack) server
+ */
+const val DEFAULT_JS_DEV_SERVER = "http://localhost:8080/"
+
+const val SERVER_PROPERTIES_KEY_PORT = "port"
+
 
 /**
  * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
  * containers, etc).
  */
-fun LearningSpace.identifier(
-    dbMode: String,
-    singletonName: String = CONF_DBMODE_SINGLETON
-) = if(dbMode == CONF_DBMODE_SINGLETON) {
-    singletonName
-}else {
-    sanitizeDbNameFromUrl(url)
-}
+fun LearningSpace.sanitizedUrlForPaths() = sanitizeDbNameFromUrl(url)
 
 @Suppress("unused") // This is used as the KTOR server main module via application.conf
 fun Application.umRestApplication(
@@ -187,27 +211,13 @@ fun Application.umRestApplication(
 ) {
     val appConfig = environment.config
 
-    val siteUrl = environment.config.propertyOrNull(CONF_KEY_SITE_URL)?.getString()
-
     val sitePrefix = environment.config.propertyOrNull(CONF_KEY_URL_PREFIX)?.getString()
 
     val dbMode = dbModeOverride ?:  appConfig.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
 
     val ktorAppHome = ktorAppHomeDir()
 
-//    if(dbMode != CONF_DBMODE_VIRTUALHOST && siteUrl.isNullOrBlank()) {
-//        val likelyAddr = NetworkInterface.getNetworkInterfaces().toList().filter {
-//            !it.isLoopback
-//        }.flatMap { netInterface ->
-//            netInterface.inetAddresses.toList().filter { it !is Inet6Address }
-//        }.firstOrNull()?.let { "http://${it.hostAddress}:${appConfig.port}/"} ?: ""
-//
-//        throw SiteConfigException("ERROR: Site URL is not set. You MUST specify the site url e.g. $likelyAddr \n" +
-//                "Please specify using the url parameter in command line e.g. add " +
-//                "--siteUrl $likelyAddr \n" +
-//                "to the command you are running or \n" +
-//                "set this in the config file e.g. uncomment siteUrl and set as siteUrl = \"$likelyAddr\"")
-//    }
+    val isRunningFromSource = ktorAppSourceDir() != null
 
     val mediaInfoFile = SysPathUtil.findCommandInPath(
         commandName = "mediainfo",
@@ -275,7 +285,21 @@ fun Application.umRestApplication(
         manuallySpecifiedLocation = appConfig.commandFileProperty("gs"),
     )
 
+    val serverProperties = Properties().apply {
+        setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
+    }
+
+    environment.config.absoluteDataDir().takeIf { !it.exists() }?.mkdirs()
+
+    ktorServerPropertiesFile(
+        dataDir = environment.config.absoluteDataDir()
+    ).writer().use { serverPropWriter ->
+        serverProperties.store(serverPropWriter, null)
+    }
+
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
+
+    val useMockEmail = environment.config.propertyOrNull("ktor.ustad.useMockEmail")?.getString().toBoolean()
 
     val json = Json {
         encodeDefaults = true
@@ -306,6 +330,7 @@ fun Application.umRestApplication(
             allowHeader("X-nid")
             allowHeader("door-dbversion")
             allowHeader("door-node")
+            allowHeader("access-control-allow-origin")
             anyHost()
         }
     }
@@ -326,19 +351,18 @@ fun Application.umRestApplication(
     //Avoid sending the body of content if it has not changed since the client last requested it.
     install(ConditionalHeaders)
 
-    val dataDirPath = environment.config.absoluteDataDir()
+    val dataDirPath = environment.config.absoluteDataDir().also {
+        if(!it.exists())
+            it.mkdirs()
+    }
+    Napier.i("UstadServer dataDir=$dataDirPath")
+    println("UstadServer dataDir=$dataDirPath")
 
-    val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
-
+    val wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
 
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
     }
-
-    dataDirPath.takeIf { !it.exists() }?.mkdirs()
-
-    val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
-
 
     di {
         import(
@@ -348,22 +372,21 @@ fun Application.umRestApplication(
         )
         import(ContentImportersDiModuleJvm)
 
+        if (useMockEmail){
+            bind<MockEmailSender>() with singleton { MockEmailSender() }
+        }
 
         bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
 
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(LearningSpaceScope.Default).singleton {
             val mainTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
-            File(mainTmpDir, context.identifier(dbMode)).also {
+            File(mainTmpDir, context.sanitizedUrlForPaths()).also {
                 it.takeIf { !it.exists() }?.mkdirs()
             }
         }
 
         bind<NodeIdAuthCache>() with scoped(LearningSpaceScope.Default).singleton {
             instance<UmAppDatabase>(tag = DoorTag.TAG_DB).nodeIdAuthCache
-        }
-
-        bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
-            apiKey
         }
 
         bind<Gson>() with singleton { Gson() }
@@ -399,6 +422,7 @@ fun Application.umRestApplication(
                 bindDataSourceIfNotExisting("quartzds", dbProperties)
                 initQuartzDb("java:/comp/env/jdbc/quartzds")
             }
+
             StdSchedulerFactory.getDefaultScheduler().also {
                 it.context.put("di", di)
             }
@@ -497,6 +521,11 @@ fun Application.umRestApplication(
                 authManager = instance()
             )
         }
+        bind<CreateTempUriUseCase>() with singleton {
+            CreateTempUriUseCaseCommonJvm(
+                rootTmpDir = instance<File>(tag = DiTag.TAG_TMP_DIR)
+            )
+        }
 
         bind<ValidateUserSessionOnServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             ValidateUserSessionOnServerUseCase(
@@ -585,11 +614,16 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<CreateNewClazzUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            CreateNewClazzUseCase(repoOrDb = instance(tag = DoorTag.TAG_DB))
+        }
+
         bind<BulkAddPersonsUseCase>() with scoped(LearningSpaceScope.Default).provider {
             BulkAddPersonsUseCaseImpl(
                 addNewPersonUseCase = instance(),
                 validateEmailUseCase  = instance(),
                 validatePhoneNumUseCase = instance(),
+                createNewClazzUseCase = instance(),
                 authManager = instance(),
                 enrolUseCase = instance(),
                 activeDb = instance(tag = DoorTag.TAG_DB),
@@ -600,6 +634,20 @@ fun Application.umRestApplication(
         bind<ValidateEmailUseCase>() with provider {
             ValidateEmailUseCase()
         }
+
+
+        bind<SendMessageUseCase>() with provider {
+            SendMessageUseCase(activeDb = instance(tag = DoorTag.TAG_DB))
+        }
+
+        bind<ParseInviteUseCase>() with provider {
+            ParseInviteUseCase(
+                validateEmailUseCase = instance(),
+                phoneNumValidatorUseCase = instance()
+            )
+        }
+
+
 
         bind<IPhoneNumberUtil>() with provider {
             PhoneNumberUtilJvm(PhoneNumberUtil.getInstance())
@@ -780,10 +828,16 @@ fun Application.umRestApplication(
         bind<GetApiUrlUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             GetApiUrlUseCaseDirect(context)
         }
-
+        bind<GetSubtitleTrackFromUriServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            GetSubtitleTrackFromUriServerUseCase(
+                saveLocalUrisAsBlobsUseCase = instance(),
+                createTempUriUseCase = instance(),
+                deleteUrisUseCase = instance(),
+            )
+        }
         bind<VerifySystemConfigAuthUseCase>() with singleton {
             VerifySystemConfigAuthUseCase(
-                systemDb = instance(),
+                centralAppConfigDb = instance(),
                 pbkdf2AuthenticateUseCase = instance()
             )
         }
@@ -791,8 +845,25 @@ fun Application.umRestApplication(
         bind<CreateLearningSpaceUseCase>() with singleton {
             CreateLearningSpaceUseCase(
                 xxStringHasher = instance(),
-                systemDb = instance()
+                learningSpaceServerRepo = instance(),
+                serverDataDir  = environment.config.absoluteDataDir(),
+                di = di,
             )
+        }
+        bind<UpdateLearningSpaceUseCase>() with singleton {
+            UpdateLearningSpaceUseCase(
+                learningSpaceServerRepo = instance()
+            )
+        }
+        bind<DeleteLearningSpaceUseCase>() with singleton {
+            DeleteLearningSpaceUseCase(
+                learningSpaceServerRepo = instance(),
+                di = di,
+            )
+        }
+
+        bind<LearningSpaceServerRepo>() with singleton {
+            LearningSpaceServerRepo(centralAppConfigDb = instance(), xxStringHasher = instance())
         }
 
         try {
@@ -820,36 +891,62 @@ fun Application.umRestApplication(
         }catch(e: Exception) {
             Napier.w("WARNING: Email sending not configured")
         }
+        try {
+            appConfig.config("sms")
+            bind<SmsProperties>() with singleton  {
+                SmsProperties(
+                    appConfig.property("sms.phone_number").getString(),
+                    appConfig.property("sms.provider_link").getString(),
+                    appConfig.property("sms.sid").getString(),
+                    appConfig.property("sms.token").getString(),
+                )
+            }
 
+            bind<TwilioHttpClient>() with singleton {
+                TwilioHttpClient(di)
+            }
+        }catch(e: Exception) {
+            Napier.w("WARNING: SMS. sending not configured ${e.message}")
+        }
+
+        bind<SendSmsUseCaseHttp>() with singleton {
+            SendSmsUseCaseHttp(di)
+        }
+
+        bind<SendEmailUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            if (useMockEmail) {
+                MockSendEmailUseCase(mockEmailSender = instance())
+            } else {
+                SendEmailUseCaseImpl(notificationSender = NotificationSender(di))
+            }
+        }
+        bind<SendSmsUseCase>() with singleton {
+            SendSmsUseCase(di)
+        }
+        bind<SendClazzInvitesUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            SendClazzInvitesUseCaseServerImpl(
+                sendEmailUseCase = instance(),
+                sendSmsUseCase = instance(),
+                sendMessageUseCase = instance(),
+                parseInviteUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                learningSpace = context,
+            )
+        }
         registerContextTranslator { call: ApplicationCall ->
             call.callLearningSpace
         }
 
         onReady {
-            if(dbMode == CONF_DBMODE_SINGLETON && siteUrl != null) {
-                val learningSpace = LearningSpace(siteUrl)
-                val passwordFile = di.on(learningSpace).direct.instance<File>(tag = DiTag.TAG_ADMIN_PASS_FILE)
-
-                /**
-                 * Eager initialization only if the initial admin password needs generated. This
-                 * avoids potential issue with startup script if this server starts before postgres
-                 * is ready.
-                 */
-                if(!passwordFile.exists()) {
-                    //Generate the admin username/password etc.
-                    di.on(learningSpace).direct.instance<AuthManager>()
-
-                    val db: UmAppDatabase by di.on(learningSpace).instance(tag = DoorTag.TAG_DB)
-                    println("init db: $db")
-                }
-            }
-
             instance<Scheduler>().start()
-            instance<SystemDb>()
+            instance<CentralAppConfigDb>()
 
-            Runtime.getRuntime().addShutdownHook(Thread{
-                instance<Scheduler>().shutdown()
-            })
+            Runtime.getRuntime().addShutdownHook(
+                Thread{
+                    Napier.i("UmRestApplication: Shutdown hook")
+                    instance<Scheduler>().shutdown()
+                }
+            )
         }
     }
 
@@ -861,7 +958,23 @@ fun Application.umRestApplication(
         }
     }
 
-    val jsDevServer = appConfig.propertyOrNull("ktor.ustad.jsDevServer")?.getString()
+    val jsDevServerProp = appConfig.propertyOrNull("ktor.ustad.jsDevServer")?.getString()
+
+    /*
+     * Use the devserver mode when:
+     *  a) there is an explicitly set development server to connect with
+     *  b) the server is being run from source
+     *
+     * See comments on the jsDevServer property in application.conf for expected behavior
+     */
+    val jsDevServer = if(
+        jsDevServerProp?.isNotBlank() == true  || (isRunningFromSource && jsDevServerProp == null)
+    ) {
+        jsDevServerProp ?: DEFAULT_JS_DEV_SERVER
+    }else {
+        null
+    }
+
     if(jsDevServer != null) {
         install(io.ktor.server.websocket.WebSockets)
 
@@ -882,12 +995,6 @@ fun Application.umRestApplication(
                     it
                 }
             }
-
-            //If the request is not using the correct url as per system config, reject it and finish
-//            if(!context.urlMatchesConfig()) {
-//                call.respondRequestUrlNotMatchingSiteConfUrl()
-//                return@intercept finish()
-//            }
 
             //If the request is not matching any API route, then use the reverse proxy to send the
             // request to the javascript development server.
@@ -914,6 +1021,7 @@ fun Application.umRestApplication(
                     di.on(call).direct.instance(tag = DoorTag.TAG_DB)
                 }
             }
+
             SiteRoute()
 
             GetAppRoute()
@@ -925,13 +1033,38 @@ fun Application.umRestApplication(
                     route("learningspaces") {
                         LearningSpaceApiRoute(
                             verifySystemConfigAuthUseCase = di.direct.instance(),
-                            createLearningSpaceUseCase = di.direct.instance()
+                            createLearningSpaceUseCase = di.direct.instance(),
+                            updateLearningSpaceUseCase = di.direct.instance(),
+                            deleteLearningSpaceUseCase = di.direct.instance()
                         )
                     }
+
                 }
             }
 
             route("api") {
+                if(useMockEmail){
+                    route("testemail") {
+                        TestEmailRoute(
+                            mockEmailSender = di.direct.instance()
+                        )
+                    }
+                }
+                route("sysconfig") {
+                    SystemConfigScriptRoute(
+                        systemDb = di.direct.instance(),
+                        xxStringHasher = di.direct.instance()
+                    )
+                }
+
+                route(CentralAppConfigDbDataSource.PATH) {
+                    route(LearningSpaceDataSource.PATH) {
+                        LearningSpaceClientRoute(
+                            learningSpaceServerRepo = di.direct.instance()
+                        )
+                    }
+                }
+
                 route("account"){
                     SetPasswordRoute(
                         useCase = { call ->
@@ -939,6 +1072,15 @@ fun Application.umRestApplication(
                         }
                     )
                 }
+
+                route("invite") {
+                    SendClazzInvitesRoute(
+                        useCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+                }
+
                 route("passkey"){
 
                     VerifySignInWithPasskeyRoute(
@@ -953,6 +1095,9 @@ fun Application.umRestApplication(
 
                 route("contentupload") {
                     ContentUploadRoute()
+                    GetSubtitleTrackServerRoute(
+                        getSubtitleTrackServerUseCase = { call -> di.on(call).direct.instance() }
+                    )
                 }
 
                 route("import") {
@@ -990,6 +1135,9 @@ fun Application.umRestApplication(
                         BulkAddPersonRoute(
                             enqueueBulkAddPersonServerUseCase = { call -> di.on(call).direct.instance() },
                             bulkAddPersonStatusMap = { call -> di.on(call).direct.instance() },
+                            bulkAddPersonUseCase = { call -> di.on(call).direct.instance() },
+                            authManager = { call -> di.on(call).direct.instance() },
+                            db = { call -> di.on(call).direct.instance(tag = DoorTag.TAG_DB) },
                             json = json,
                         )
                     }
@@ -1039,7 +1187,8 @@ fun Application.umRestApplication(
                 webSocketProxyRoute(jsDevServer)
             }else {
                 route("/"){
-                    get{
+                    get {
+                        call.response.cacheControl(CacheControl.NoStore(null))
                         call.respondRedirect("umapp/")
                     }
                 }
@@ -1056,7 +1205,7 @@ fun Application.umRestApplication(
         appConfig.siteUrl()
     }
 
-    println("Ustad server is running on $printableServerUrl . Logging to $logDir .")
+    println("Ustad server is running on $printableServerUrl\ndataDir=$dataDirPath logDir=$logDir . ")
     println()
     println("You can connect the Android client to this address as per README.md .")
     println()

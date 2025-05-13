@@ -4,7 +4,7 @@ import com.benasher44.uuid.uuid4
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.model.XapiActor
 import com.ustadmobile.core.domain.xapi.model.identifierHash
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import com.ustadmobile.lib.util.randomString
@@ -26,7 +26,8 @@ class ResumeOrStartXapiSessionUseCaseLocal(
         activityId: String,
         clazzUid: Long,
         cbUid: Long,
-        contentEntryUid: Long
+        contentEntryUid: Long,
+        contentEntryVersionUid: Long,
     ): XapiSessionEntity {
         val actorUid = actor.identifierHash(xxStringHasher)
         val rootActivityUid = xxStringHasher.hash(activityId)
@@ -36,12 +37,18 @@ class ResumeOrStartXapiSessionUseCaseLocal(
                 accountPersonUid = accountPersonUid,
                 actorUid = actorUid,
                 xseRootActivityUid = rootActivityUid,
+                contentEntryVersionUid = contentEntryVersionUid,
+                clazzUid = clazzUid,
             )
 
+        if(pendingSession != null) {
+            Napier.v("ResumeOrStartXapiSessionUseCase: found pending session: #${pendingSession.xseUid}")
+        }
+
         activeRepo?.also { repo ->
-            //Load/validate state associated with this activity and actor
+            //Load any state entities associated with this activity and actor
             try {
-                repo.stateEntityDao().findByAgentAndActivity(
+                val stateEntities = repo.stateEntityDao().findByAgentAndActivity(
                     accountPersonUid = accountPersonUid,
                     actorUid = actorUid,
                     seActivityUid = rootActivityUid,
@@ -49,8 +56,10 @@ class ResumeOrStartXapiSessionUseCaseLocal(
                     registrationUuidLo = pendingSession?.xseRegistrationLo,
                     modifiedSince = 0
                 )
+
+                Napier.v("ResumeOrStartXapiSessionUseCase: loaded: #${stateEntities.size} state entities")
             }catch(e: Throwable) {
-                Napier.w("ResumeOrStartXapiSession: attempted to load state for actor/activity: failed", e)
+                Napier.w("ResumeOrStartXapiSessionUseCase: attempted to load state for actor/activity: failed", e)
             }
         }
 
@@ -72,6 +81,7 @@ class ResumeOrStartXapiSessionUseCaseLocal(
                 xseRegistrationHi = registrationUuid.mostSignificantBits,
                 xseRegistrationLo = registrationUuid.leastSignificantBits,
                 xseAuth = randomString(16),
+                xseContentEntryVersionUid = contentEntryVersionUid,
             ).also {
                 (activeRepo ?: activeDb).xapiSessionEntityDao().insertAsync(it)
             }

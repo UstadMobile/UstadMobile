@@ -19,6 +19,8 @@ import com.ustadmobile.core.domain.compress.image.CompressImageUseCaseJs
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseJs
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCaseJs
 import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.DismissRemoteContentEntryImportErrorUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.EnqueueContentEntryImportUseCase
@@ -36,6 +38,7 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
+import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
@@ -51,6 +54,7 @@ import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCaseJs
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCaseJs
+import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
@@ -61,10 +65,10 @@ import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnlo
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnUnloadUseCaseJs
 import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCase
 import com.ustadmobile.core.domain.xapi.session.ResumeOrStartXapiSessionUseCaseJs
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryJs
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherJs
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.jsimpl.XXHasher64FactoryJs
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.jsimpl.XXStringHasherJs
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
@@ -74,6 +78,7 @@ import org.kodein.di.provider
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 
+@Suppress("FunctionName")
 fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiModuleJs") {
     bind<EnqueueContentEntryImportUseCase>() with scoped(endpointScope).provider {
         EnqueueImportContentEntryUseCaseRemote(
@@ -103,7 +108,9 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
     bind<PhoneNumValidatorUseCase>() with provider {
         PhoneNumValidatorUseCaseJs()
     }
-
+    bind<ValidateEmailUseCase>() with provider {
+        ValidateEmailUseCase()
+    }
     bind<OnClickPhoneNumUseCase>() with provider {
         OnClickPhoneNumUseCaseJs()
     }
@@ -167,6 +174,14 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
         )
     }
 
+    bind<CreatePasskeyRequestJsonUseCase>() with provider {
+        CreatePasskeyRequestJsonUseCase(
+            systemImpl = instance(),
+            systemUrlConfig = instance(),
+            json = instance()
+        )
+    }
+
     bind<SetPasswordUseCase>() with scoped(endpointScope).provider {
         SetPasswordUseCaseJs(
             learningSpace = context,
@@ -179,7 +194,7 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
         ResolveXapiLaunchHrefUseCase(
             activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             httpClient = instance(),
-            json = instance(),
+            json = instance<XapiJson>().json,
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             learningSpace = context,
             resumeOrStartXapiSessionUseCase = instance(),
@@ -333,6 +348,15 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
         AddNewPersonUseCase(
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance<UmAppDataLayer>().repository,
+        )
+    }
+
+    bind<GetSubtitleTrackFromUriUseCase>() with scoped(endpointScope).singleton {
+        GetSubtitleTrackFromUriUseCaseJs(
+            endpoint = context,
+            httpClient = instance(),
+            json = instance(),
+            supportedLanguagesConfig = instance(),
         )
     }
 

@@ -2,7 +2,7 @@ package com.ustadmobile.core.domain.xapi.model
 
 import com.ustadmobile.lib.db.entities.xapi.StatementContextActivityJoin
 import com.ustadmobile.core.domain.xapi.xapiRequireValidIRI
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.core.util.ext.toEmptyIfNull
 import com.ustadmobile.lib.db.entities.xapi.ActivityEntity
 import com.ustadmobile.lib.db.entities.xapi.ActivityExtensionEntity
@@ -76,6 +76,7 @@ fun XapiActivity?.toEntities(
             almeActivityUid = activityUid,
             almeHash = stringHasher.hash("$propName-$lang"),
             almeLangCode = lang,
+            almePropName = propName,
             almeValue = text,
             almeAieHash = almeAieHash,
         )

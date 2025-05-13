@@ -2,14 +2,12 @@ package com.ustadmobile.core.viewmodel.person.child
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
-import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.usersession.StartUserSessionUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.util.ext.replaceOrAppend
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
@@ -18,7 +16,6 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -29,7 +26,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 
 
@@ -48,15 +44,14 @@ class AddChildProfilesViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
-    val startUserSessionUseCase: StartUserSessionUseCase = StartUserSessionUseCase(
-        accountManager = di.direct.instance(),
-    )
+
     private val _uiState = MutableStateFlow(
         AddChildProfilesUiState()
     )
     private var nextDestination: String =
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
-    val repo: UmAppDatabase by di.onActiveEndpoint().instance()
+
+    val repo: UmAppDatabase by di.onActiveLearningSpace().instance()
 
     val uiState: Flow<AddChildProfilesUiState> = _uiState.asStateFlow()
 
@@ -75,7 +70,9 @@ class AddChildProfilesViewModel(
                     text = systemImpl.getString(MR.strings.finish),
                     onClick = this@AddChildProfilesViewModel::onClickFinish,
 
-                    )
+                    ),
+                navigationVisible = false,
+                userAccountIconVisible = false,
             )
         }
 
@@ -101,10 +98,8 @@ class AddChildProfilesViewModel(
                         }
                     }
                 )
-            }
-            launch {
-                //Handle text, module, and discussion topic (e.g. plain ChildProfile that does not
-                // include any other entities)
+
+
                 navResultReturner.filteredResultFlowForKey(RESULT_KEY_PERSON).collect { result ->
                     val childProfileResult = result.result as? Person
                         ?: return@collect
@@ -116,8 +111,11 @@ class AddChildProfilesViewModel(
 
                     updateChildProfileList(newChildProfileList)
                 }
+
             }
+
         }
+
 
     }
 
@@ -211,40 +209,31 @@ class AddChildProfilesViewModel(
                     )
                 }
                 _uiState.value.childProfiles.forEach {
-                    if (it != profile && it != accountManager.currentUserSession.person) {
+                    if (it != profile) {
                         accountManager.addSession(it, accountManager.activeLearningSpace.url, null)
                     }
                 }
 
                 effectiveDb.personParentJoinDao().insertListAsync(personParenJoinList)
-                if (profile != accountManager.currentUserSession.person) {
-                    val sessionWithPersonAndLearningSpace =
-                        accountManager.addSession(
-                            profile,
-                            accountManager.activeLearningSpace.url,
-                            null
-                        )
-                    accountManager.currentUserSession = sessionWithPersonAndLearningSpace
-                }
-                navController.navigateToViewUri(
-                    nextDestination.appendSelectedAccount(
-                        profile.personUid,
-                        LearningSpace(accountManager.activeLearningSpace.url)
-                    ),
-                    goOptions
-                )
 
-            } else {
-                accountManager.currentUserSession = accountManager.currentUserSession
 
-                navController.navigateToViewUri(
-                    nextDestination.appendSelectedAccount(
-                        profile.personUid,
-                        LearningSpace(accountManager.activeLearningSpace.url)
-                    ),
-                    goOptions
-                )
             }
+            if (profile != accountManager.currentUserSession.person) {
+                val sessionWithPersonAndLearningSpace =
+                    accountManager.addSession(
+                        profile,
+                        accountManager.activeLearningSpace.url,
+                        null
+                    )
+                accountManager.currentUserSession = sessionWithPersonAndLearningSpace
+            }
+            navController.navigateToViewUri(
+                nextDestination.appendSelectedAccount(
+                    profile.personUid,
+                    LearningSpace(accountManager.activeLearningSpace.url)
+                ),
+                goOptions
+            )
         }
 
 

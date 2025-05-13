@@ -3,9 +3,9 @@ package com.ustadmobile.port.android.impl
 import android.app.Application
 import android.content.Context
 import android.content.res.AssetManager
-import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.russhwolf.settings.Settings
@@ -79,6 +79,8 @@ import com.ustadmobile.core.domain.compress.video.CompressVideoUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.delete.DeleteContentEntryParentChildJoinUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCaseLocal
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseAndroid
 import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
@@ -103,17 +105,20 @@ import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseC
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCaseAndroid
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseAndroid
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
-import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
+import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.domain.storage.CachePathsProviderAndroid
 import com.ustadmobile.core.domain.storage.GetAndroidSdCardDirUseCase
 import com.ustadmobile.core.domain.storage.GetOfflineStorageAvailableSpace
@@ -130,6 +135,7 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
@@ -145,10 +151,10 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.core.embeddedhttp.EmbeddedHttpServer
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -200,8 +206,18 @@ import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 import rawhttp.core.RawHttp
-import com.toughra.ustadmobile.BuildConfig
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
+import com.ustadmobile.centralappconfigdb.repo.CentralAppConfigDbRepository
+import com.toughra.ustadmobile.BuildConfig
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight.Companion.CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME
+import com.ustadmobile.core.url.UrlKmp
+import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
+
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
 
@@ -255,6 +271,18 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 }
 
             }
+        }
+
+        bind<ShowSocialWarningUseCase>() with singleton {
+            ShowSocialWarningUseCase(
+                settings = instance()
+            )
+        }
+
+        bind<DismissSocialWarningUseCase>() with singleton {
+            DismissSocialWarningUseCase(
+                settings = instance()
+            )
         }
 
         bind<File>(tag = DiTag.TAG_TMP_DIR) with singleton {
@@ -329,13 +357,36 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             UstadAccountManager(settings = instance(), di = di)
         }
 
+        bind<CentralAppConfigDb>() with singleton {
+            CentralAppConfigDb(AndroidSqliteDriver(
+                CentralAppConfigDb.Schema, applicationContext, CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME)
+            )
+        }
+
+        bind<CentralAppConfigDbDataSource>() with singleton {
+            val systemUrlConfig:SystemUrlConfig = instance()
+
+            CentralAppConfigDbRepository(
+                local = CentralAppConfigDbDataSourceSqlDelight(
+                    centralAppConfigDb = instance(),
+                    xxStringHasher = instance(),
+                ),
+                remote = CentralAppConfigDbDataSourceHttp(
+                    url = UrlKmp(systemUrlConfig.systemBaseUrl)
+                        .resolve("api/${CentralAppConfigDbDataSource.PATH}/")
+                        .toString(),
+                    httpClient = instance()
+                )
+            )
+        }
+
+
         bind<DbAndObservers>() with scoped(LearningSpaceScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
 
 
             val nodeIdAndAuth: NodeIdAndAuth = instance()
 
-            Log.i("MigrateIssue", "Creating database name=$dbName")
             val db = DatabaseBuilder.databaseBuilder(
                 context = applicationContext,
                 dbClass = UmAppDatabase::class,
@@ -349,9 +400,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(MIGRATION_155_156_CLIENT)
                 .addMigrations(MIGRATION_161_162_CLIENT)
                 .addMigrations(MIGRATION_169_170_CLIENT)
+                .addMigrations(MIGRATE_USERNAME_CLIENT)
                 .build()
 
-            Log.i("MigrateIssue", "Database built: name=$dbName")
 
             val cache: UstadCache = instance()
 
@@ -463,6 +514,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             tmpPath = contentImportTmpPath,
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             compressListUseCase = instance(),
+                            mimeTypeHelper = instance(),
                         )
                     )
 
@@ -476,6 +528,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
                             json = instance(),
                             compressListUseCase = instance(),
+                            mimeTypeHelper = instance(),
                             h5pInStream = {
                                 applicationContext.assets.open("h5p/h5p-standalone-3.6.0.zip",
                                     AssetManager.ACCESS_STREAMING)
@@ -771,7 +824,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             ResolveXapiLaunchHrefUseCase(
                 activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
                 httpClient = instance(),
-                json = instance(),
+                json = instance<XapiJson>().json,
                 xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
                 learningSpace = context,
                 accountManager = instance(),
@@ -985,6 +1038,15 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             ValidateEmailUseCase()
         }
 
+        bind<FilterUsernameUseCase>() with provider {
+            FilterUsernameUseCase()
+        }
+
+        bind<ValidateUsernameUseCase>() with provider {
+            ValidateUsernameUseCase()
+        }
+
+
         bind<CancelRemoteContentEntryImportUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             CancelRemoteContentEntryImportUseCase(
                 learningSpace = context,
@@ -1028,6 +1090,21 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             GetOfflineStorageSettingUseCase(
                 getOfflineStorageOptionsUseCase = instance(),
                 settings = instance(),
+            )
+        }
+
+        bind<ClazzInviteRedeemUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            ClazzInviteRedeemUseCase(
+                enrolIntoCourseUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                repo = instance<UmAppDataLayer>().repository,
+                systemImpl = instance(),
+            )
+        }
+
+        bind<EnrollToCourseFromInviteCodeUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            EnrollToCourseFromInviteCodeUseCase(
+               clazzInviteRedeemUseCase = instance()
             )
         }
 
@@ -1118,7 +1195,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<CreateNewLocalAccountUseCase>() with singleton {
             CreateNewLocalAccountUseCase(di)
         }
-
+        bind<GetSubtitleTrackFromUriUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            GetSubtitleTrackFromUriUseCaseLocal(
+                uriHelper = instance(),
+                dispatcher = Dispatchers.IO,
+                supportedLanguagesConfig = instance(),
+            )
+        }
         registerContextTranslator { account: UmAccount -> LearningSpace(account.endpointUrl) }
     }
 

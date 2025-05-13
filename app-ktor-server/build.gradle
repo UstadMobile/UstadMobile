@@ -84,6 +84,8 @@ dependencies {
     implementation libs.ktor.server.status.pages
 
     implementation libs.ktor.client.okhttp
+    implementation libs.ktor.auth.okhttp
+    implementation libs.ktor.serialization.okhttp
     implementation libs.ktor.server.html.builder
     implementation libs.kotlinx.serialization
 
@@ -115,6 +117,7 @@ dependencies {
     implementation libs.door.room.annotations
     implementation libs.door.runtime
     implementation project(":lib-util")
+    implementation project(":lib-xxhashkmp-commonjvmimpl")
 
     implementation libs.kotlin.stdlib.jdk8
 
@@ -136,9 +139,12 @@ dependencies {
     implementation libs.hsqldb
 
     implementation libs.vlcj
+    implementation libs.generateuuid
 
     implementation project(":lib-ihttp-ktor-server")
-    implementation project(':lib-systemdb')
+    implementation project(':lib-centralappconfigdb-common')
+    implementation project(':lib-centralappconfigdb-sqldelight')
+    implementation libs.sqldelight.sqlite.driver.jvm
 
     //test
     testImplementation project(":lib-test-common")

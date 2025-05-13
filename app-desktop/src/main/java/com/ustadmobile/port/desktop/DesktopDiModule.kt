@@ -1,7 +1,10 @@
 package com.ustadmobile.port.desktop
 
+import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight
 import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.account.Pbkdf2Params
@@ -12,6 +15,7 @@ import com.ustadmobile.core.contentformats.ContentImportersDiModuleJvm
 import com.ustadmobile.core.contentformats.epub.XhtmlFixer
 import com.ustadmobile.core.contentformats.epub.XhtmlFixerJsoup
 import com.ustadmobile.core.db.UmAppDataLayer
+import com.ustadmobile.core.db.MIGRATE_USERNAME_CLIENT
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_148_149_CLIENT_WITH_OFFLINE_ITEMS
@@ -53,6 +57,7 @@ import com.ustadmobile.core.impl.locale.StringProviderJvm
 import com.ustadmobile.core.schedule.initQuartzDb
 import com.ustadmobile.core.uri.UriHelper
 import com.ustadmobile.core.uri.UriHelperJvm
+import com.ustadmobile.core.url.UrlKmp
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.getCommandFile
 import com.ustadmobile.core.util.ext.getOrGenerateNodeIdAndAuth
@@ -81,6 +86,11 @@ import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
+import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourceSqlDelight.Companion.CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME
+import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
+import com.ustadmobile.centralappconfigdb.repo.CentralAppConfigDbRepository
+import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -398,7 +408,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         val contextDataDir: File = on(context).instance(tag = DiTag.TAG_CONTEXT_DATA_ROOT)
         val dbUrl = "jdbc:sqlite:${contextDataDir.absolutePath}/UmAppDatabase.db"
         val nodeIdAndAuth: NodeIdAndAuth = instance()
-
+        Napier.i("db url for UmAppDatabase"+dbUrl)
         val db = DatabaseBuilder.databaseBuilder(UmAppDatabase::class, dbUrl, nodeIdAndAuth.nodeId)
             .addSyncCallback(nodeIdAndAuth)
             .addMigrations(*migrationList().toTypedArray())
@@ -407,6 +417,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             .addMigrations(MIGRATION_155_156_CLIENT)
             .addMigrations(MIGRATION_161_162_CLIENT)
             .addMigrations(MIGRATION_169_170_CLIENT)
+            .addMigrations(MIGRATE_USERNAME_CLIENT)
             .addCallback(AddOfflineItemInactiveTriggersCallback())
             .build()
 
@@ -416,6 +427,39 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
             updateCacheLockJoinUseCase = UpdateCacheLockJoinUseCase(
                 db = db,
                 cache = cache,
+            )
+        )
+    }
+
+    bind<CentralAppConfigDb>() with singleton {
+        val dataDir: File = instance(tag = TAG_DATA_DIR)
+        val dbFile = File(dataDir, CENTRAL_APP_CONFIG_DB_DEFAULT_FILENAME)
+        val dbFileExists = dbFile.exists()
+
+        val driver: SqlDriver = JdbcSqliteDriver(
+            url = "jdbc:sqlite:${dbFile.absolutePath}"
+        )
+
+        if(!dbFileExists) {
+            CentralAppConfigDb.Schema.create(driver)
+        }
+
+        CentralAppConfigDb(driver)
+    }
+
+    bind<CentralAppConfigDbDataSource>() with singleton {
+        val systemUrlConfig:SystemUrlConfig = instance()
+
+        CentralAppConfigDbRepository(
+            local = CentralAppConfigDbDataSourceSqlDelight(
+                centralAppConfigDb = instance(),
+                xxStringHasher = instance(),
+            ),
+            remote = CentralAppConfigDbDataSourceHttp(
+                url = UrlKmp(systemUrlConfig.systemBaseUrl)
+                    .resolve("api/${CentralAppConfigDbDataSource.PATH}/")
+                    .toString(),
+                httpClient = instance()
             )
         )
     }

@@ -68,7 +68,7 @@ fun PersonDetailScreen(viewModel: PersonDetailViewModel) {
     PersonDetailScreen(
         uiState = uiState,
         onClickCreateAccount = viewModel::onClickCreateAccount,
-        onClickChangePassword = viewModel::onClickChangePassword,
+        onClickManageAccount = viewModel::onClickManageAccount,
         onClickChat = viewModel::onClickChat,
         onClickManageParentalConsent = viewModel::onClickManageParentalConsent,
         onClickClazz = viewModel::onClickClazz,
@@ -86,7 +86,7 @@ fun PersonDetailScreen(
     onClickSms: () -> Unit = {},
     onClickEmail: () -> Unit = {},
     onClickCreateAccount: () -> Unit = {},
-    onClickChangePassword: () -> Unit = {},
+    onClickManageAccount: () -> Unit = {},
     onClickManageParentalConsent: () -> Unit = {},
     onClickChat: () -> Unit = {},
     onClickClazz: (ClazzEnrolmentAndPersonDetailDetails) -> Unit = {},
@@ -130,7 +130,7 @@ fun PersonDetailScreen(
             onClickSms,
             onClickEmail,
             onClickCreateAccount,
-            onClickChangePassword,
+            onClickManageAccount,
             onClickManageParentalConsent,
             onClickChat,
             onClickPermissions = onClickPermissions,
@@ -172,7 +172,7 @@ private fun QuickActionBar(
     onClickSms: () -> Unit = {},
     onClickEmail: () -> Unit = {},
     onClickCreateAccount: () -> Unit = {},
-    onClickChangePassword: () -> Unit = {},
+    onClickManageAccount: () -> Unit = {},
     onClickManageParentalConsent: () -> Unit = {},
     onClickChat: () -> Unit = {},
     onClickPermissions: () -> Unit = { },
@@ -213,11 +213,11 @@ private fun QuickActionBar(
             )
         }
 
-        if(uiState.changePasswordVisible){
+        if(uiState.manageAccountVisible){
             UstadQuickActionButton(
-                labelText = stringResource(MR.strings.change_password),
+                labelText = stringResource(MR.strings.manage_account),
                 imageVector = Icons.Default.Key,
-                onClick = onClickChangePassword
+                onClick = onClickManageAccount
             )
         }
 

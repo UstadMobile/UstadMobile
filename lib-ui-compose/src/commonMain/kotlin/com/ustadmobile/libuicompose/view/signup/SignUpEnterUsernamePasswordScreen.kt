@@ -33,7 +33,7 @@ fun SignUpEnterUsernamePasswordScreen(viewModel: SignupEnterUsernamePasswordView
     SignUpEnterUsernamePasswordScreen(
         uiState,
         onPersonChanged = viewModel::onEntityChanged,
-        onclickSignUpWithPasskey = viewModel::onClickedSignupEnterUsernamePassword,
+        onClickedSignupEnterUsernamePassword = viewModel::onClickedSignupEnterUsernamePassword,
         onPasswordChanged = viewModel::onPasswordChanged,
 
         )
@@ -44,7 +44,7 @@ fun SignUpEnterUsernamePasswordScreen(viewModel: SignupEnterUsernamePasswordView
 fun SignUpEnterUsernamePasswordScreen(
     uiState: SignupEnterUsernamePasswordUiState = SignupEnterUsernamePasswordUiState(),
     onPersonChanged: (Person?) -> Unit = {},
-    onclickSignUpWithPasskey: () -> Unit = {},
+    onClickedSignupEnterUsernamePassword: () -> Unit = {},
     onPasswordChanged: (String) -> Unit = { },
 
     ) {
@@ -52,43 +52,39 @@ fun SignUpEnterUsernamePasswordScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(16.dp))
+        OutlinedTextField(
+            modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding(),
+            value = uiState.person?.username ?: "",
+            label = { Text(stringResource(MR.strings.username)) },
+            isError = uiState.usernameError != null,
+            singleLine = true,
+            onValueChange = {
+                onPersonChanged(uiState.person?.shallowCopy {
+                    username = it
+                })
+            },
+            supportingText = {
+                Text(uiState.usernameError ?: stringResource(MR.strings.required))
+            }
+        )
 
 
+        UstadPasswordField(
+            modifier = Modifier.testTag("password").fillMaxWidth().defaultItemPadding(),
+            value = uiState.password ?: "",
+            label = { Text(stringResource(MR.strings.password)) },
+            isError = uiState.passwordError != null,
 
-
-            OutlinedTextField(
-                modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding(),
-                value = uiState.person?.username ?: "",
-                label = { Text(stringResource(MR.strings.username)) },
-                isError = uiState.usernameError != null,
-                singleLine = true,
-                onValueChange = {
-                    onPersonChanged(uiState.person?.shallowCopy {
-                        username = it
-                    })
-                },
-                supportingText = {
-                    Text(uiState.usernameError ?: stringResource(MR.strings.required))
-                }
-            )
-
-
-            UstadPasswordField(
-                modifier = Modifier.testTag("password").fillMaxWidth().defaultItemPadding(),
-                value = uiState.password ?: "",
-                label = { Text(stringResource(MR.strings.password)) },
-                isError = uiState.passwordError != null,
-
-                onValueChange = {
-                    onPasswordChanged(it)
-                },
-                supportingText = {
-                    Text(uiState.passwordError ?: stringResource(MR.strings.required))
-                }
-            )
+            onValueChange = {
+                onPasswordChanged(it)
+            },
+            supportingText = {
+                Text(uiState.passwordError ?: stringResource(MR.strings.required))
+            }
+        )
 
         Button(
-            onClick = onclickSignUpWithPasskey,
+            onClick = onClickedSignupEnterUsernamePassword,
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultItemPadding()
@@ -96,11 +92,10 @@ fun SignUpEnterUsernamePasswordScreen(
         ) {
             Text(
 
-                    stringResource(MR.strings.signup)
+                stringResource(MR.strings.signup)
 
             )
         }
-
 
 
     }

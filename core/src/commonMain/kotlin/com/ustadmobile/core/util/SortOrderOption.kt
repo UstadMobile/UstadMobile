@@ -16,7 +16,8 @@ data class SortOrderOption(
     /**
      * The order
      *
-     * Ascending = true, descending = false
+     * Ascending = true, descending = false, not applicable = null
+     * (e.g. 'Most recent' which is implicitly descending)
      */
-    val order: Boolean
+    val order: Boolean?
 )

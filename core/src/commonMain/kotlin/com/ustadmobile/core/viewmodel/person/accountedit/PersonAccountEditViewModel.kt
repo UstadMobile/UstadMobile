@@ -5,6 +5,9 @@ import com.ustadmobile.core.account.AuthManager
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
+import com.ustadmobile.core.domain.validateusername.ValidationResult
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -79,6 +82,10 @@ class PersonAccountEditViewModel(
 
     private val setPasswordUseCase: SetPasswordUseCase by on(accountManager.activeLearningSpace).instance()
 
+    private val validateUsernameUseCase = ValidateUsernameUseCase()
+
+    private val filterUsernameUseCase = FilterUsernameUseCase()
+
     init {
         _appUiState.value = AppUiState(
             loadingState = LoadingUiState.INDETERMINATE,
@@ -148,9 +155,19 @@ class PersonAccountEditViewModel(
     }
 
     fun onEntityChanged(entity: PersonUsernameAndPasswordModel?) {
+
         _uiState.update { prev ->
             prev.copy(
-                personAccount = entity,
+                personAccount = if(entity?.username != _uiState.value.personAccount?.username) {
+                    entity?.copy(
+                        username = filterUsernameUseCase(
+                            username = entity.username,
+                            invalidCharReplacement = ""
+                        )
+                    )
+                } else {
+                    entity
+                },
                 usernameError = if(prev.usernameError != null && prev.personAccount?.username == entity?.username) {
                     prev.usernameError
                 }else {
@@ -178,7 +195,6 @@ class PersonAccountEditViewModel(
         )
     }
 
-
     fun onClickSave() {
         if(loadingState == LoadingUiState.INDETERMINATE)
             return
@@ -192,9 +208,18 @@ class PersonAccountEditViewModel(
             )
         }
         viewModelScope.launch {
-            if(entity.mode == MODE_CREATE_ACCOUNT && entity.username.isBlank()) {
-                _uiState.update { prev ->
-                    prev.copy(usernameError = systemImpl.getString(MR.strings.field_required_prompt))
+
+            if(entity.mode == MODE_CREATE_ACCOUNT) {
+                val validationResult = validateUsernameUseCase(entity.username)
+                loadingState = LoadingUiState.NOT_LOADING
+                if (validationResult != ValidationResult.Valid) {
+                    _uiState.update { prev ->
+                        prev.copy(
+                            fieldsEnabled = true,
+                            usernameError = validationResult.errorMessage?.let { systemImpl.getString(it) }
+                        )
+                    }
+                    return@launch
                 }
             }
 

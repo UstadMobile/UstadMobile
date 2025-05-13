@@ -1,13 +1,20 @@
 package com.ustadmobile.libuicompose.view.contententry.edit
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.contentformats.media.SubtitleTrack
 import com.ustadmobile.core.domain.compress.CompressionLevel
 import com.ustadmobile.core.impl.locale.entityconstants.LicenceConstants
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditUiState
@@ -31,8 +39,12 @@ import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.core.viewmodel.contententry.stringResource
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.libuicompose.components.UstadAddListItem
+import com.ustadmobile.libuicompose.components.UstadFileDropZone
 import com.ustadmobile.libuicompose.components.UstadImageSelectButton
+import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.libuicompose.components.rememberUstadFilePickLauncher
 
 @Composable
 fun ContentEntryEditScreen(
@@ -46,6 +58,9 @@ fun ContentEntryEditScreen(
         onClickEditDescription = viewModel::onEditDescriptionInNewWindow,
         onSetCompressionLevel = viewModel::onSetCompressionLevel,
         onPictureChanged = viewModel::onPictureChanged,
+        onSubtitleFileSelected = viewModel::onSubtitleFileAdded,
+        onClickDeleteSubtitleTrack = viewModel::onClickDeleteSubtitleTrack,
+        onClickEditSubtitleTrack = viewModel::onClickEditSubtitleTrack,
     )
 }
 
@@ -58,7 +73,18 @@ fun ContentEntryEditScreen(
     onContentEntryChanged: (ContentEntry?) -> Unit = {},
     onSetCompressionLevel: (CompressionLevel) -> Unit = { },
     onPictureChanged: (String?) -> Unit = { },
+    onSubtitleFileSelected: (uri: String, filename: String) -> Unit = { _, _ -> },
+    onClickDeleteSubtitleTrack: (SubtitleTrack) -> Unit = { },
+    onClickEditSubtitleTrack: (SubtitleTrack) -> Unit = { },
 ) {
+    val fileLauncher = rememberUstadFilePickLauncher(
+        fileExtensions = listOf("vtt"),
+        mimeTypes = listOf(), //Android does not understand the mime type, so we can't use this filter
+        onFileSelected = {
+            onSubtitleFileSelected(it.uri, it.fileName)
+        }
+    )
+
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
     )  {
@@ -122,16 +148,54 @@ fun ContentEntryEditScreen(
             modifier = Modifier.fillMaxWidth().defaultItemPadding()
                 .testTag("description"),
             onHtmlChange = {
-                onContentEntryChanged(
-                    uiState.entity?.entry?.shallowCopy {
-                        description = it
-                    }
-                )
+                if(uiState.fieldsEnabled) {
+                    onContentEntryChanged(
+                        uiState.entity?.entry?.shallowCopy {
+                            description = it
+                        }
+                    )
+                }
             },
             onClickToEditInNewScreen = onClickEditDescription,
             editInNewScreenLabel = stringResource(MR.strings.description),
             placeholderText = stringResource(MR.strings.description),
         )
+
+        if(uiState.canModifySubtitles) {
+            UstadFileDropZone(
+                onFileDropped = {
+                    onSubtitleFileSelected(it.uri, it.fileName)
+                }
+            ) {
+                UstadAddListItem(
+                    text = stringResource(MR.strings.add_subtitles),
+                    onClickAdd = {
+                        fileLauncher(UstadPickFileOpts())
+                    }
+                )
+            }
+        }
+
+        uiState.subtitles.forEach {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickEditSubtitleTrack(it)
+                },
+                leadingContent = {
+                    Icon(Icons.Default.Subtitles, contentDescription = null)
+                },
+                headlineContent = {
+                    Text(it.title)
+                },
+                trailingContent = {
+                    IconButton(
+                        onClick = { onClickDeleteSubtitleTrack(it) },
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(MR.strings.delete))
+                    }
+                }
+            )
+        }
 
         OutlinedTextField(
             modifier = Modifier.testTag("author").fillMaxWidth().defaultItemPadding(),

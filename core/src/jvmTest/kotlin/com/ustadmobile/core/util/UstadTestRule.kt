@@ -116,7 +116,6 @@ class UstadTestRule(): TestWatcher() {
             bind<SystemUrlConfig>() with singleton {
                 SystemUrlConfig(
                     systemBaseUrl = "http://localhost:8087/",
-                    passkeyRpId = "localhost",
                 )
             }
             bind<UstadAccountManager>() with singleton {

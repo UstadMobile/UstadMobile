@@ -12,9 +12,11 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.config.SystemUrlConfig
@@ -122,6 +124,18 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
     private var diVar = DI {
         import(CommonJvmDiModule)
 
+        bind<ShowSocialWarningUseCase>() with singleton {
+            ShowSocialWarningUseCase(
+                settings = instance()
+            )
+        }
+
+        bind<DismissSocialWarningUseCase>() with singleton {
+            DismissSocialWarningUseCase(
+                settings = instance()
+            )
+        }
+
         bind<Json>() with singleton {
             Json {
                 encodeDefaults = true
@@ -134,7 +148,6 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         bind<SystemUrlConfig>() with singleton {
             SystemUrlConfig(
                 systemBaseUrl = "http://localhost:8087/",
-                passkeyRpId = "localhost",
             )
         }
 

@@ -16,10 +16,6 @@ import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseJvm
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
 import com.ustadmobile.core.domain.account.SetPasswordUseCaseCommonJvm
-import com.ustadmobile.core.domain.backup.JvmUnzipFileUseCase
-import com.ustadmobile.core.domain.backup.JvmZipFileUseCase
-import com.ustadmobile.core.domain.backup.UnzipFileUseCase
-import com.ustadmobile.core.domain.backup.ZipFileUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCase
 import com.ustadmobile.core.domain.blob.download.BlobDownloadClientUseCaseCommonJvm
 import com.ustadmobile.core.domain.blob.download.CancelDownloadUseCase
@@ -60,6 +56,8 @@ import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUr
 import com.ustadmobile.core.domain.contententry.getlocalurlforcontent.GetLocalUrlForContentUseCaseCommonJvm
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCase
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.ContentEntryGetMetaDataFromUriUseCaseCommonJvm
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCase
+import com.ustadmobile.core.domain.contententry.getsubtitletrackfromuri.GetSubtitleTrackFromUriUseCaseLocal
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCase
 import com.ustadmobile.core.domain.contententry.importcontent.CancelImportContentEntryUseCaseJvm
 import com.ustadmobile.core.domain.contententry.importcontent.CancelRemoteContentEntryImportUseCase
@@ -81,11 +79,17 @@ import com.ustadmobile.core.domain.deleteditem.DeletePermanentlyUseCase
 import com.ustadmobile.core.domain.deleteditem.RestoreDeletedItemUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
+import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
+import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJvm
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
@@ -98,6 +102,8 @@ import com.ustadmobile.core.domain.process.CloseProcessUseCaseJvm
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCase
 import com.ustadmobile.core.domain.sendemail.OnClickEmailUseCaseJvm
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
+import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
+import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCaseCommonJvm
 import com.ustadmobile.core.domain.tmpfiles.IsTempFileCheckerUseCase
@@ -106,7 +112,9 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
+import com.ustadmobile.core.domain.xapi.XapiJson
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.http.XapiHttpServerUseCase
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
@@ -119,10 +127,10 @@ import com.ustadmobile.core.domain.xapi.state.ListXapiStateIdsUseCase
 import com.ustadmobile.core.domain.xapi.state.RetrieveXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.StoreXapiStateUseCase
 import com.ustadmobile.core.domain.xapi.state.h5puserdata.H5PUserDataEndpointUseCase
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryCommonJvm
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
+import com.ustadmobile.xxhashkmp.XXStringHasher
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.core.impl.config.UstadBuildConfig
 import com.ustadmobile.core.impl.config.UstadBuildConfig.Companion.KEY_CONFIG_SHOW_POWERED_BY
 import com.ustadmobile.core.launchopenlicenses.LaunchOpenLicensesUseCaseJvm
@@ -130,6 +138,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.headers.FileMimeTypeHelperImpl
+import kotlinx.coroutines.Dispatchers
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import org.kodein.di.instance
@@ -141,10 +150,26 @@ import java.io.File
 
 val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
+    bind<ShowSocialWarningUseCase>() with singleton {
+        ShowSocialWarningUseCase(
+            settings = instance()
+        )
+    }
 
+    bind<DismissSocialWarningUseCase>() with singleton {
+        DismissSocialWarningUseCase(
+            settings = instance()
+        )
+    }
 
-    bind<UnzipFileUseCase>() with singleton { JvmUnzipFileUseCase() }
-    bind<ZipFileUseCase>() with singleton { JvmZipFileUseCase() }
+    bind<FilterUsernameUseCase>() with provider {
+        FilterUsernameUseCase()
+    }
+
+    bind<ValidateUsernameUseCase>() with provider {
+        ValidateUsernameUseCase()
+    }
+
 
     bind<OpenExternalLinkUseCase>() with provider {
         OpenExternalLinkUseCaseJvm()
@@ -349,7 +374,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         ResolveXapiLaunchHrefUseCase(
             activeRepoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
             httpClient = instance(),
-            json = instance(),
+            json = instance<XapiJson>().json,
             xppFactory = instance(tag = DiTag.XPP_FACTORY_NSAWARE),
             resumeOrStartXapiSessionUseCase  = instance(),
             getApiUrlUseCase = instance(),
@@ -411,7 +436,9 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
     bind<GetVersionUseCase>() with singleton {
         GetVersionUseCaseJvm()
     }
-
+    bind<GoToLearningSpaceUseCase>() with singleton {
+        GoToLearningSpaceUseCaseJvm()
+    }
     bind<LaunchOpenLicensesUseCase>() with singleton {
         LaunchOpenLicensesUseCaseJvm(
             launchChromeUseCase = instance(),
@@ -502,6 +529,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         )
     }
 
+    bind<CreatePasskeyRequestJsonUseCase>()  with provider {
+        CreatePasskeyRequestJsonUseCase(
+            systemImpl = instance(),
+            systemUrlConfig = instance(),
+            json = instance()
+        )
+    }
+
     bind<OpenBlobUiUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         OpenBlobUiUseCase(
             openBlobUseCase = instance(),
@@ -516,6 +551,7 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             validatePhoneNumUseCase = instance(),
             authManager = instance(),
             enrolUseCase = instance(),
+            createNewClazzUseCase = instance(),
             activeDb = instance(tag = DoorTag.TAG_DB),
             activeRepo = instance<UmAppDataLayer>().repository,
         )
@@ -562,6 +598,21 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             compressImageUseCase = instance(),
             compressAudioUseCase = instance(),
             mimeTypeHelper = instance(),
+        )
+    }
+
+    bind<ClazzInviteRedeemUseCase>() with scoped(LearningSpaceScope.Default).provider {
+        ClazzInviteRedeemUseCase(
+            enrolIntoCourseUseCase = instance(),
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance<UmAppDataLayer>().repository,
+            systemImpl = instance(),
+        )
+    }
+
+    bind<EnrollToCourseFromInviteCodeUseCase>() with scoped(LearningSpaceScope.Default).provider {
+        EnrollToCourseFromInviteCodeUseCase(
+            clazzInviteRedeemUseCase = instance()
         )
     }
 
@@ -686,6 +737,14 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
 
     bind<CreateNewLocalAccountUseCase>() with singleton {
         CreateNewLocalAccountUseCase(di)
+    }
+
+    bind<GetSubtitleTrackFromUriUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+        GetSubtitleTrackFromUriUseCaseLocal(
+            uriHelper = instance(),
+            dispatcher = Dispatchers.IO,
+            supportedLanguagesConfig = instance(),
+        )
     }
 
 }

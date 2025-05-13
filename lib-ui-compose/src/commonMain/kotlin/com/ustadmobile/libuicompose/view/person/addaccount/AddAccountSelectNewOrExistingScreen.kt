@@ -21,8 +21,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingViewModel
-import com.ustadmobile.core.viewmodel.AddAccountSelectNewOrExistingUiState
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingUiState
 import com.ustadmobile.libuicompose.components.UstadSetLanguageDropDown
 import com.ustadmobile.libuicompose.components.UstadWaitForRestartDialog
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -33,7 +33,9 @@ import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 fun AddAccountSelectNewOrExistingScreen(
     viewModel: AddAccountSelectNewOrExistingViewModel,
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle(AddAccountSelectNewOrExistingUiState())
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
+        AddAccountSelectNewOrExistingUiState()
+    )
 
     if (uiState.showWaitForRestart) {
         UstadWaitForRestartDialog()

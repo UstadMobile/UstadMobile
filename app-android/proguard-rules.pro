@@ -14,6 +14,11 @@
 -keep public class com.ustadmobile.core.db.**{
     public <init>(...);
 }
+-keep public class com.ustadmobile.centralappconfigdb.**{
+    public <init>(...);
+}
+
+
 -keep public class com.ustadmobile.core.controller.IndexLog{
        *;
 }

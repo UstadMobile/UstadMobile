@@ -186,7 +186,7 @@ fun String.displayFilename(
 }
 
 
-fun String.toNullIfBlank(): String? = if(isBlank()) { null } else { this }
+fun String.toNullIfBlank(): String? = ifBlank { null }
 
 fun String.substringUntilLastIndexOfInclusive(
     delimiter: String,

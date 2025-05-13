@@ -1,21 +1,26 @@
 appId: com.toughra.ustadmobile
+tags:
+  - contentTest
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_003_admin_can_delete_and_restore_content_001"
-  TESTNAME: "001_003_admin_can_delete_and_restore_content_001"
+  TESTRESULTSDIR: "build/reports/maestro/001_003_admin_can_delete_and_restore_content_001/Screenshots"
+onFlowStart:
+  - startRecording: 001_003_admin_can_delete_and_restore_content_001
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
 - runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow:
-    file: "../common/clear_login_and_add_content.yaml"
+    file: "common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Epub_Content1.epub
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
 - takeScreenshot: "${TESTRESULTSDIR}/screenshots/screen_before_hiding_content"
 - longPressOn:
@@ -26,11 +31,11 @@ env:
 
 # login to make sure the content is hidden
 #clear state and launch app
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
 #admin login
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/admin_login.yaml"
 - tapOn: "Library"
 - assertNotVisible: "E-book"
 - tapOn: "Settings"
@@ -41,11 +46,11 @@ env:
 
 # login to make sure the content is restored
 #clear state and launch app
-- runFlow: "../common/clear_state_and_get_started.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
 #admin login
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/admin_login.yaml"
 - tapOn: "Library"
 - assertVisible: "E-book"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/screen_after_restoring_content_from_library"
+- takeScreenshot: "${TESTRESULTSDIR}//screen_after_restoring_content_from_library"

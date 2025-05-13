@@ -1,0 +1,12 @@
+appId: com.toughra.ustadmobile
+---
+# this flow enter site link
+- tapOn: Site link
+- inputText: "${output.SERVER_URL}"
+- runFlow:
+    when:
+      notVisible: "NEXT"
+    commands:
+      - hideKeyboard
+- tapOn: "NEXT"
+

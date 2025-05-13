@@ -8,6 +8,7 @@ import com.ustadmobile.lib.db.entities.Clazz
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.viewmodel.contententry.detailattemptlisttab.ContentEntryDetailAttemptsPersonListViewModel
 import kotlinx.coroutines.flow.asStateFlow
 
 data class ContentEntryDetailUiState(
@@ -25,9 +26,17 @@ class ContentEntryDetailViewModel(
                 TabItem(
                     viewName = ContentEntryDetailOverviewViewModel.DEST_NAME,
                     args = buildMap {
-                        putFromSavedStateIfPresent(PASS_THROUGH_ARGS)
+                        putAllFromSavedStateIfPresent(PASS_THROUGH_ARGS)
                     },
                     label = systemImpl.getString(MR.strings.overview)
+                ),
+                TabItem(
+                    viewName = ContentEntryDetailAttemptsPersonListViewModel.DEST_NAME,
+                    args = buildMap {
+                        putAllFromSavedStateIfPresent(PASS_THROUGH_ARGS)
+                    },
+                    label = systemImpl.getString(MR.strings.attempts)
+
                 )
             )
         )

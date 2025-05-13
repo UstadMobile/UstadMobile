@@ -33,34 +33,115 @@ Cypress.on('uncaught:exception', (err) => {
   return true;
 });
 
+
 // Start Test Server
 Cypress.Commands.add('ustadStartTestServer', () => {
-  cy.visit('http://localhost:8075/start'); // Use cy.visit to navigate to the start page
-  cy.wait(6000); // Wait for 6 seconds after visiting the start page
+// https://docs.cypress.io/api/commands/request#Get-Data-URL-of-an-image
+  cy.request('/testcontroller/start').then((response) => {
+  const { url } = response.body
+  cy.log(`Learning Space Server started at: ${url}`)
+})
+})
+
+//Stop Test Server
+Cypress.Commands.add('ustadStopTestServer', () => {
+  cy.request('/testcontroller/stop').then((response) => {
+    if (response.body === 'OK'){
+  cy.log('Server successfully stopped');
+  }
+})
+})
+
+/*
+ *
+ * cy.importUsersViaHttp("your_csv_file.csv");
+ *
+*/
+Cypress.Commands.add("importUsersViaHttp", (csvFileName) => {
+    const maxAttempts = 4;
+
+    const attemptImport = (attempt) => {
+        cy.request({
+            method: "GET",
+            url: `/testcontroller/test-files/content/${csvFileName}`
+        }).then((response) => {
+            cy.log(`Received CSV content (Attempt ${attempt}):`);
+            cy.log(response.body); // Log full response body for debugging
+
+            if (!response.body || response.body.trim().length === 0) {
+                cy.log("Error: Received empty CSV content!");
+                return;
+            }
+
+            cy.request({
+                method: "POST",
+                url: `/api/person/bulkadd/import`, // Using relative URL
+                body: response.body,
+                headers: {
+                    Authorization: "Basic " + "YWRtaW46dGVzdHBhc3M="
+                }
+            }).then(() => {
+                cy.log(`importUsersViaHttp: SUCCESS : attempt: ${attempt}`);
+            }, () => {
+                cy.log(`POST request failed, retrying attempt ${attempt + 1}...`);
+                if (attempt < maxAttempts - 1) {
+                    attemptImport(attempt + 1);
+                }
+            });
+        }, () => {
+            cy.log(`GET request failed, retrying attempt ${attempt + 1}...`);
+            if (attempt < maxAttempts - 1) {
+                attemptImport(attempt + 1);
+            }
+        });
+    };
+
+    attemptImport(0);
 });
 
 
-//User Login
+// Clear DB and Login
 Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
+// Clearing IndexedDB for the dynamic hostname
+  cy.ustadClearIndexDb()
+// visit login page
+  cy.visit('/', {
+    timeout: 60000,
+  });
+   cy.wait(1000) //This wait helps the login screen to load
+   cy.get('body').then((body) =>
+  {
+  // Check if the "Existing user" button is present
+   if (body.find('#existing_user').length > 0) {
+  // User is on the "New user/Existing user" page
+   cy.log('User is on the New user/Existing user page');
+   cy.get('#existing_user').should('be.visible').click();
+  } else
+  {
+ // If the "Existing user" button is not found, user is on the login page
+   cy.log('User is on the login page');
+  }
+})
 
-//below command added as per : https://github.com/thisdot/open-source/blob/main/libs/cypress-indexeddb/README.md
-  cy.log('Clearing IndexedDB');
-  cy.clearIndexedDb('localhost_8087') // clearing index db
-// Adding query parameters on the url- below command added as per - https://docs.cypress.io/api/commands/visit#Add-query-parameters
-  cy.visit('http://localhost:8087/', {timeout:60000},{
-    qs: {
-      username,
-      password,
-    },
-
-  })
-  cy.get('input#username', { timeout: 10000 }).should('exist').type(username) // 10 seconds
-  cy.get('input#password').type(password)
-  cy.get('button#login_button').click()
+// Login to the webapp
+  cy.get('input#username', { timeout: 10000 }).should('exist').type(username); // 10 seconds
+  cy.get('input#password').type(password);
+  cy.get('button#login_button').click();
 });
+
+// Clearing IndexedDB
+Cypress.Commands.add('ustadClearIndexDb', () => {
+// Clearing IndexedDB for the dynamic hostname
+  const baseUrl = Cypress.config('baseUrl'); // Get the base URL
+  const url = new URL(baseUrl); // Create a URL object
+  const hostname = url.hostname;
+  const port = url.port;
+  const indexedDbName = `${hostname.replace(/\./g, '_')}_${port}`
+  cy.log(`Clearing IndexedDB: ${indexedDbName}`)
+  cy.clearIndexedDb(indexedDbName)
+})
 
 // Logout Flow
-
 Cypress.Commands.add('ustadLogout', () => {
    cy.get('#header_avatar').click()
    cy.contains('LOG OUT').click()
@@ -191,7 +272,7 @@ Cypress.Commands.add('ustadCreateUserAccount',(userName,password) => {
     cy.get('#username:not([disabled])').type(userName)
     cy.get('#newpassword').type(password)
     cy.contains("button","Save").click()
-    cy.contains('Change Password',{timeout:2000}).should('be.visible')
+    cy.contains('Manage account',{timeout:6000}).should('be.visible')
     cy.go('back')
     cy.go('back')
 })
@@ -365,6 +446,8 @@ Cypress.Commands.add("ustadBirthDate", (element, date) => {
      String(date.getDate()).padStart(2, '0')
      );
 });
+
+
 
 
 

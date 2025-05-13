@@ -2,6 +2,8 @@ package com.ustadmobile.libuicompose.viewmodel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import com.ustadmobile.core.domain.hidekeyboard.HideKeyboardUseCase
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavResultReturner
@@ -35,11 +37,17 @@ fun <T: UstadViewModel> ustadViewModel(
     block: (di: DI, savedStateHandle: UstadSavedStateHandle) -> T,
 ) : T {
     val di = localDI()
+    val keyboardManager = LocalSoftwareKeyboardController.current
     val diWithResultReturner = remember {
         DI {
             extend(di)
             bind<NavResultReturner>() with singleton { navResultReturner }
             bind<SnackBarDispatcher>() with singleton { onShowSnackBar }
+            bind<HideKeyboardUseCase>() with singleton {
+                HideKeyboardUseCase {
+                    keyboardManager?.hide()
+                }
+            }
         }
     }
 
