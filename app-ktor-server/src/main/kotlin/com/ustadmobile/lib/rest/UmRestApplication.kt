@@ -715,11 +715,11 @@ fun Application.umRestApplication(
                 storeActivitiesUseCase = instance(),
             )
         }
-        bind<GenerateTestXapiStatementsUseCase>() with singleton {
+        bind<GenerateTestXapiStatementsUseCase>() with scoped(EndpointScope.Default).singleton {
             GenerateTestXapiStatementsUseCase(
-               db = instance(),
-               endpoint =  instance(),
-               xapiStatementResource =  instance()
+                db = instance(tag = DoorTag.TAG_DB),
+                endpoint = context,
+                xapiStatementResource = instance()
             )
         }
 
@@ -965,14 +965,12 @@ fun Application.umRestApplication(
                         }
                     )
                 }
-                route("test") {
-                    route("generate-xapi-statements") {
-                        RunTestReport(
-                            generateTestXapiStatementsUseCase = { call ->
-                                di.on(call).direct.instance()
-                            }
-                        )
-                    }
+                route("generate-xapi-statements") {
+                    RunTestReport(
+                        generateTestXapiStatementsUseCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
                 }
                 route("pbkdf2"){
                     Pbkdf2Route()
