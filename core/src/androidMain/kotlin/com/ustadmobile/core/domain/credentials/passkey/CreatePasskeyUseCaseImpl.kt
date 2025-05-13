@@ -52,20 +52,18 @@ class CreatePasskeyUseCaseImpl(
             ) as CreatePublicKeyCredentialResponse
 
             Napier.d { "passkey response: ${response.registrationResponseJson}" }
-            Napier.d { "domain: ${createPassKeyParams.masterDomainName}" }
-
             val passkeyResponse = json.decodeFromString<PasskeyWebAuthNResponse>(response.registrationResponseJson)
 
             val decodedClientDataBytes = Base64.decode(passkeyResponse.response.clientDataJSON, Base64.DEFAULT)
             val clientDataJson = json.decodeFromString<ClientDataJSON>(decodedClientDataBytes.decodeToString())
 
             return CreatePasskeyResult(
-                attestationObj = passkeyResponse.response.attestationObject,
+                attestationObj = passkeyResponse.response.attestationObject?:"",
                 clientDataJson = passkeyResponse.response.clientDataJSON,
                 originString = clientDataJson.origin,
                 rpid ="credential-manager-${createPassKeyParams.masterDomainName}",
                 challengeString = clientDataJson.challenge,
-                publicKey = passkeyResponse.response.publicKey,
+                publicKey = passkeyResponse.response.publicKey?:"",
                 id = passkeyResponse.id,
                 personUid = createPassKeyParams.personUid.toLong(),
                 person = createPassKeyParams.person

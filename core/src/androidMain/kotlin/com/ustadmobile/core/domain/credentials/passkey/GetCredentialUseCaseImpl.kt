@@ -61,9 +61,7 @@ class GetCredentialUseCaseImpl(
                 }
 
                 is PublicKeyCredential -> {
-                    val authResponseJson = credential.data.getString(
-                        "androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON"
-                    )
+                    val authResponseJson = credential.authenticationResponseJson
 
                     if (authResponseJson != null) {
                         val parsedResponse = json.decodeFromString<PasskeyWebAuthNResponse>(authResponseJson)
