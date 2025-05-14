@@ -48,8 +48,11 @@ import react.ReactNode
 import react.dom.onChange
 import react.useRequiredContext
 import web.cssom.AlignItems
+import web.cssom.Auto
 import web.cssom.Color
+import web.cssom.Flex
 import web.cssom.JustifyContent
+import web.cssom.number
 import web.cssom.pct
 import web.cssom.px
 import web.html.HTMLInputElement
@@ -61,6 +64,7 @@ external interface ReportEditScreenProps : Props {
     var onAddSeries: () -> Unit
     var onAddFilter: (seriesId: Int) -> Unit
     var onRemoveFilter: (index: Int, seriesId: Int) -> Unit
+    var onRemoveSeries: (seriesId: Int) -> Unit
 }
 
 
@@ -276,22 +280,56 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     spacing = responsive(16.px)
 
                     // Series Title
-                    TextField {
-                        id = "series_title"
-                        value = series.reportSeriesTitle
-                        label = ReactNode(strings[MR.strings.series_title] + "*")
-                        onTextChange = { newValue ->
-                            props.onSeriesChanged(series.copy(reportSeriesTitle = newValue))
-
+                    Stack {
+                        direction = responsive(StackDirection.row)
+                        spacing = responsive(8.px)
+                        sx {
+                            justifyContent = JustifyContent.spaceBetween
+                            alignItems = AlignItems.center
                         }
-                        helperText = ReactNode(
-                            props.uiState.seriesTitleErrors[series.reportSeriesUid]
-                                ?: strings[MR.strings.required]
-                        )
-                        error = props.uiState.seriesTitleErrors[series.reportSeriesUid] != null
+
+                        TextField {
+                            sx {
+                                flexGrow = number(1.0)
+                                alignItems = AlignItems.start
+                            }
+                            fullWidth = true
+                            id = "series_title"
+                            value = series.reportSeriesTitle
+                            label = ReactNode(strings[MR.strings.series_title] + "*")
+                            onTextChange = { newValue ->
+                                props.onSeriesChanged(series.copy(reportSeriesTitle = newValue))
+                            }
+                            helperText = ReactNode(
+                                props.uiState.seriesTitleErrors[series.reportSeriesUid]
+                                    ?: strings[MR.strings.required]
+                            )
+                            error = props.uiState.seriesTitleErrors[series.reportSeriesUid] != null
+                        }
+
+                        IconButton {
+                            sx {
+                                marginLeft = Auto.auto
+                                padding = 8.px
+                            }
+                            onClick = { props.onRemoveSeries(series.reportSeriesUid) }
+                            Icon {
+                                sx {
+                                    width = 20.px
+                                    height = 20.px
+                                }
+                                Close {
+                                    sx {
+                                        width = 20.px
+                                        height = 20.px
+                                    }
+                                }
+                            }
+                        }
                     }
 
-                    // Y Axis Dropdown
+
+                    // Y Axis Dropdown (updated with series count check)
                     FormControl {
                         fullWidth = true
                         error = props.uiState.yAxisErrors[series.reportSeriesUid] != null
@@ -318,12 +356,14 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             }
 
                             ReportSeriesYAxis.entries.forEach { option ->
-                                val isDisabled =
+                                val isDisabled = if (props.uiState.reportOptions2.series.size > 1) {
                                     requiredYAxisType != null && option.type != requiredYAxisType
+                                } else {
+                                    false
+                                }
                                 MenuItem {
                                     value = option.name
-                                    disabled =
-                                        isDisabled  // Disable if it doesn’t match requiredYAxisType
+                                    disabled = isDisabled
                                     +ReactNode(strings[option.label])
                                 }
                             }
@@ -337,7 +377,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         }
                     }
 
-                    // Subgroup by Dropdown
+                    // Subgroup by Dropdown - Updated with disabled options
                     FormControl {
                         fullWidth = true
 
@@ -363,8 +403,20 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             }
 
                             ReportXAxis.entries.forEach { option ->
+                                val isXAxisDate =
+                                    props.uiState.reportOptions2.xAxis?.datePeriod != null
+                                val isOptionDate = option.datePeriod != null
+
+                                // Disable date options if X-axis is date-based, disable non-date options otherwise
+                                val disable = if (isXAxisDate) {
+                                    isOptionDate // Disable date options when X-axis is date-based
+                                } else {
+                                    !isOptionDate // Disable non-date options when X-axis is non-date
+                                }
+
                                 MenuItem {
                                     value = option.name
+                                    disabled = disable
                                     +ReactNode(strings[option.label])
                                 }
                             }
@@ -506,5 +558,6 @@ val ReportEditScreen = FC<Props> {
         onAddSeries = viewModel::onAddSeries
         onAddFilter = viewModel::onAddFilter
         onRemoveFilter = viewModel::onRemoveFilter
+        onRemoveSeries = viewModel::onRemoveSeries
     }
 }

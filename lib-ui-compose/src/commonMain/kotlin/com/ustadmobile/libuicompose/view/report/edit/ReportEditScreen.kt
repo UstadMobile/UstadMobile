@@ -271,11 +271,14 @@ private fun ReportEditScreen(
                                     ?: stringResource(MR.strings.required)
                             )
                         },
-                        disabledOptions = requiredYAxisType?.let { requiredType ->
-                            ReportSeriesYAxis.entries.filter { it.type != requiredType }
-                        } ?: emptyList()
+                        disabledOptions = if (uiState.reportOptions2.series.size > 1) {
+                            requiredYAxisType?.let { requiredType ->
+                                ReportSeriesYAxis.entries.filter { it.type != requiredType }
+                            } ?: emptyList()
+                        } else {
+                            emptyList()
+                        }
                     )
-
 
                     // Subgroup Dropdown
                     ExposedDropdownMenu(
@@ -286,6 +289,13 @@ private fun ReportEditScreen(
                             val updatedSeries =
                                 seriesItem.copy(reportSeriesSubGroup = selectedXAxis)
                             onSeriesChanged(updatedSeries)
+                        },
+                        disabledOptions = if (uiState.reportOptions2.xAxis?.datePeriod != null) {
+                            // X-axis is date-based: disable all date options (DAY, WEEK, MONTH, YEAR)
+                            ReportXAxis.entries.filter { it.datePeriod != null }
+                        } else {
+                            // X-axis is non-date (CLASS, GENDER, NONE): disable all non-date options
+                            ReportXAxis.entries.filter { it.datePeriod == null }
                         }
                     )
 
@@ -306,24 +316,24 @@ private fun ReportEditScreen(
             }
 
             // Filters Section
-            item {
-                if (!seriesItem.reportSeriesFilters.isNullOrEmpty()) {
+            if (!seriesItem.reportSeriesFilters.isNullOrEmpty()) {
+                item {
                     Text(
                         text = stringResource(MR.strings.filters),
                         modifier = Modifier.defaultScreenPadding()
                     )
                 }
-                seriesItem.reportSeriesFilters?.forEachIndexed { index, reportFilter2 ->
+            }
+            seriesItem.reportSeriesFilters?.forEachIndexed { index, reportFilter2 ->
+                item {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .defaultScreenPadding()
-
                     ) {
                         val fieldName = reportFilter2.reportFilterField?.name?.lowercase()
                             ?.replaceFirstChar { it.uppercase() } ?: ""
-                        val comparisonSymbol =
-                            reportFilter2.reportFilterCondition?.symbol ?: ""
+                        val comparisonSymbol = reportFilter2.reportFilterCondition?.symbol ?: ""
                         val filterText =
                             "$fieldName $comparisonSymbol ${reportFilter2.reportFilterValue?.lowercase()}"
 
@@ -342,6 +352,7 @@ private fun ReportEditScreen(
                     }
                 }
             }
+
 
             item {
                 Button(
