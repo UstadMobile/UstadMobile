@@ -2,6 +2,7 @@ package com.ustadmobile.core.username
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.username.helper.UsernameErrorException
 
 
 class UsernameSuggestionUseCase(
@@ -25,6 +26,6 @@ class UsernameSuggestionUseCase(
             }
         }
 
-        throw IllegalStateException("Unable to generate a unique username")
+        throw UsernameErrorException("Unable to generate a unique username")
     }
 }

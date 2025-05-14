@@ -19,6 +19,7 @@ import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.username.helper.UsernameErrorException
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.util.ext.stringResourceOrMessage
@@ -312,7 +313,13 @@ class SignUpViewModel(
                     it.copy(person = updatedPerson)
                 }
 
-            } catch (e: Exception) {
+            } catch (e: UsernameErrorException) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        usernameError = e.stringResourceOrMessage(systemImpl),
+                    )
+                }
+            }catch (e: Exception) {
                 _uiState.update { prev ->
                     prev.copy(
                         errorText = e.stringResourceOrMessage(systemImpl),
