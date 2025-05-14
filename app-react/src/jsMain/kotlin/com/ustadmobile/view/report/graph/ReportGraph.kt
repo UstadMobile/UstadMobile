@@ -20,6 +20,7 @@ import react.useEffect
 import react.useRef
 import space.kscience.plotly.bar
 import space.kscience.plotly.layout
+import space.kscience.plotly.models.AxisType
 import space.kscience.plotly.models.ScatterMode
 import space.kscience.plotly.models.TickMode
 import space.kscience.plotly.models.TraceType
@@ -46,6 +47,17 @@ val ReportGraph = FC<ReportGraphProps> { props ->
 
     useEffect(props.graphSeriesList, props.reportOptions) {
         val container = containerRef.current ?: return@useEffect
+        var maxUnitSuffix = "ms" // Default unit
+
+        val allYValues = props.graphSeriesList.flatMap { series ->
+            series.data.map { it.yAxis }
+        }
+        val maxY = allYValues.maxOrNull() ?: 0.0
+        val isDuration = props.reportOptions.series.any {
+            it.reportSeriesYAxis?.type == YAxisTypes.DURATION
+        }
+        val (_, calculatedUnit) = calculateConversionFactor(isDuration, maxY)
+        maxUnitSuffix = calculatedUnit
 
         (container as HTMLElement).clear()
         (container as HTMLElement).append {
@@ -55,7 +67,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         val groupedData = series.data.groupBy { it.subgroup }
 
                         groupedData.forEach { (subgroup, data) ->
-                            val transformedYValues = transformYAxisValues(
+                            val (transformedYValues, _) = transformYAxisValues(
                                 data,
                                 props.reportOptions,
                             )
@@ -90,10 +102,11 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                                 font { size = if (isCompact) 6 else 16 }
                             }
                             tickmode = TickMode.auto
+                            type = AxisType.category
                         }
                         yaxis {
                             title {
-                                text = getYAxisTitle(props.reportOptions, props.strings)
+                                text = getYAxisTitle(props.reportOptions, props.strings, maxUnitSuffix)
                                 font { size = if (isCompact) 6 else 16 }
                             }
                         }
@@ -118,37 +131,39 @@ private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<D
         isDuration -> when {
             maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, "hr")
             maxY >= 60_000 -> Pair(1.0 / 60_000, "min")
-            else -> Pair(1.0 / 1_000, "sec")
+            maxY >= 1_000 -> Pair(1.0 / 1_000, "sec")
+            else -> Pair(1.0, "ms")  // Handle milliseconds case
         }
-
         else -> Pair(1.0, "")
     }
 }
-
 private fun transformYAxisValues(
     data: List<ReportResultQueryRow>,
     reportOptions: ReportOptions2,
-): List<Double> {
+): Pair<List<Double>, String> {
     val isDuration = reportOptions.series.any {
         it.reportSeriesYAxis?.type == YAxisTypes.DURATION
     }
     val maxY = data.maxOfOrNull { it.yAxis } ?: 0.0
-    val (conversionFactor) = calculateConversionFactor(isDuration, maxY)
+    val (conversionFactor, unitSuffix) = calculateConversionFactor(isDuration, maxY)
 
-    return data.map { row ->
+    val transformedValues = data.map { row ->
         (row.yAxis * conversionFactor).let {
             if (isDuration) it else it.toInt().toDouble()
         }
     }
+
+    return Pair(transformedValues, unitSuffix)
 }
 
 private fun getYAxisTitle(
     reportOptions: ReportOptions2,
-    strings: StringProvider
+    strings: StringProvider,
+    unitSuffix: String
 ): String {
     val isDuration = reportOptions.series.any {
         it.reportSeriesYAxis?.type == YAxisTypes.DURATION
     }
-    return if (isDuration) strings[MR.strings.duration_hours]
+    return if (isDuration) "${strings[MR.strings.duration]} ($unitSuffix)"
     else strings[MR.strings.count]
 }
