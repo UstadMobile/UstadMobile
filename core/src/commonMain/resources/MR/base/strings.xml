@@ -2027,6 +2027,9 @@
     <string name="invalid_report_config">invalid report config</string>
     <string name="unknown_error">unknown error</string>
 
+    <string name="copy_of">Copy of</string>
+    <string name="copy">Copy</string>
+    <string name="copy_course">Copy course</string>
 
     <string name="months">Months</string>
     <string name="weeks">Weeks</string>
