@@ -252,8 +252,8 @@ Cypress.Commands.add('ustadCreateUserAccount',(userName,password) => {
     cy.get('#newpassword').type(password)
     cy.contains("button","Save").click()
     cy.contains('Change Password',{timeout:6000}).should('be.visible')
-    cy.go('back')
-    cy.go('back')
+   // cy.go('back')
+   // cy.go('back')
 })
 
   // Add a Module Block
@@ -421,13 +421,10 @@ Cypress.Commands.add("ustadSetDateTime", (element, date) => {
 */
 
 Cypress.Commands.add("ustadSetDate", (element, date) => {
-  const formattedDate = date.getFullYear() + "-" +
-                        String(date.getMonth() + 1).padStart(2, '0') + "-" +
-                        String(date.getDate()).padStart(2, '0');
-
-  element.clear().type(formattedDate);
+     element.type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +
+     String(date.getDate()).padStart(2, '0')
+     );
 });
-
 
 
 
