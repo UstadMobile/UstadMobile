@@ -36,18 +36,20 @@ class GenerateTestXapiStatementsUseCase(
 ) {
     suspend operator fun invoke(
         contentTitle: String,
-        personUid: Long,
+        personName: String,
         numDays: Int = DEFAULT_NUM_DAYS,
         numStatementsPerDay: Int = DEFAULT_NUM_STATEMENTS_PER_DAY,
         durationPerStatement: Long = DEFAULT_DURATION_PER_STATEMENT,
     ) {
         val contentEntry = db.contentEntryDao().findByTitle(contentTitle).firstOrNull()
             ?: throw IllegalArgumentException("Content entry '$contentTitle' not found")
+        val person = db.personDao().findByUsername(personName)
+            ?: throw IllegalArgumentException("Person '$personName' not found")
 
         val xapiSession = XapiSessionEntity(
             xseUid = db.doorPrimaryKeyManager.nextId(XapiSessionEntity.TABLE_ID),
             xseContentEntryUid = contentEntry.contentEntryUid,
-            xseAccountPersonUid = personUid,
+            xseAccountPersonUid = person.personUid,
             xseStartTime = systemTimeInMillis(),
             xseExpireTime = Long.MAX_VALUE,
             xseLastMod = systemTimeInMillis(),

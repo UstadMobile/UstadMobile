@@ -13,11 +13,18 @@ fun Route.RunTestReport(
 ) {
     get("runtest") {
         val contentTitle = call.request.queryParameters["contentTitle"] ?: ""
-        val personUid = call.request.queryParameters["personUid"]?.toLong() ?: 0L
+        val username = call.request.queryParameters["username"] ?: ""
+        if (username.isEmpty()) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                mapOf("error" to "username parameter is required")
+            )
+            return@get
+        }
         try {
             generateTestXapiStatementsUseCase(call).invoke(
                 contentTitle = contentTitle,
-                personUid = personUid,
+                personName = username,
             )
             call.respond(
                 HttpStatusCode.OK,
