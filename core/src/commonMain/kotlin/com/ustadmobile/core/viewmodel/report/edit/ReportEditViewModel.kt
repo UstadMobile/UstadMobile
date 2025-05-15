@@ -50,6 +50,7 @@ class ReportEditViewModel(
     val uiState: Flow<ReportEditUiState> = _uiState.asStateFlow()
     private val entityUid: Long
         get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
+    private var nextTempFilterUid = -1
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -195,6 +196,7 @@ class ReportEditViewModel(
             is RelativeRangeReportPeriod -> {
                 if (timeRange.rangeQuantity < 1) systemImpl.getString(MR.strings.quantity_must_be_at_least_1) else null
             }
+
             else -> null
         }
         _uiState.update { currentState ->
@@ -226,6 +228,7 @@ class ReportEditViewModel(
             commitDelay = 200
         )
     }
+
     fun onSeriesChanged(updatedSeries: ReportSeries2) {
         onEntityChanged(
             _uiState.value.reportOptions2.let { reportOptions ->
@@ -238,40 +241,46 @@ class ReportEditViewModel(
         )
     }
 
-
-    private fun onFilterChanged(filter2: ReportFilter3, seriesId: Int) {
-        if (filter2.reportFilterField != null) {
-            _uiState.update { prev ->
-                val updatedSeriesList = prev.reportOptions2.series.map { series ->
-                    if (series.reportSeriesUid == seriesId) {
-                        val existingFilters = series.reportSeriesFilters?.toMutableList() ?: emptyList()
-                        val updatedFilters = existingFilters.replaceOrAppend(filter2) {
-                            it.reportFilterUid == filter2.reportFilterUid
-                        }
-                        series.copy(reportSeriesFilters = updatedFilters)
-                    } else {
-                        series
+    private fun onFilterChanged(newFilter: ReportFilter3, seriesId: Int) {
+        _uiState.update { prevState ->
+            val updatedSeries = prevState.reportOptions2.series.map { series ->
+                if (series.reportSeriesUid == seriesId) {
+                    val currentFilters = series.reportSeriesFilters.orEmpty().toMutableList()
+                    // Check if the filter already exists by UID
+                    val existingIndex = currentFilters.indexOfFirst {
+                        it.reportFilterUid == newFilter.reportFilterUid
                     }
+                    if (existingIndex != -1) {
+                        // Replace existing filter
+                        currentFilters[existingIndex] = newFilter
+                    } else {
+                        // Append new filter
+                        currentFilters.add(newFilter)
+                    }
+                    series.copy(reportSeriesFilters = currentFilters)
+                } else {
+                    series
                 }
-
-                prev.copy(
-                    reportOptions2 = prev.reportOptions2.copy(
-                        series = updatedSeriesList
-                    )
-                )
             }
-            onEntityChanged(_uiState.value.reportOptions2)
+
+            prevState.copy(
+                reportOptions2 = prevState.reportOptions2.copy(series = updatedSeries)
+            )
         }
+        onEntityChanged(_uiState.value.reportOptions2)
     }
 
-
     fun onAddFilter(seriesId: Int) {
+        val tempFilterUid = nextTempFilterUid-- // Generate a new temporary UID
         navigateForResult(
             nextViewName = ReportFilterEditViewModel.DEST_NAME,
             key = RESULT_KEY_REPORT_FILTER,
             currentValue = null,
-            serializer = Report.serializer(),
-            args = mapOf(ARG_REPORT_SERIES_UID to seriesId.toString())
+            serializer = ReportFilter3.serializer(), // FIXED SERIALIZER
+            args = mapOf(
+                ARG_REPORT_SERIES_UID to seriesId.toString(),
+                ReportFilterEditViewModel.ARG_TEMP_FILTER_UID to tempFilterUid.toString()
+            )
         )
     }
 
@@ -326,6 +335,19 @@ class ReportEditViewModel(
         }
     }
 
+    fun onEditFilter(seriesId: Int, filter: ReportFilter3) {
+        navigateForResult(
+            nextViewName = ReportFilterEditViewModel.DEST_NAME,
+            key = RESULT_KEY_REPORT_FILTER,
+            currentValue = null,
+            serializer = Report.serializer(),
+            args = mapOf(
+                ARG_REPORT_SERIES_UID to seriesId.toString(),
+                ReportFilterEditViewModel.ARG_EXISTING_FILTER to json.encodeToString(filter)
+            )
+        )
+    }
+
     private fun ReportEditUiState.hasErrors(): Boolean {
         return reportTitleError != null ||
                 xAxisError != null ||
@@ -340,5 +362,6 @@ class ReportEditViewModel(
     companion object {
         const val DEST_NAME = "ReportEdit"
         const val RESULT_KEY_REPORT_FILTER = "reportFilter"
+        const val ARG_REPORT_SERIES_UID = "reportSeriesUid"
     }
 }

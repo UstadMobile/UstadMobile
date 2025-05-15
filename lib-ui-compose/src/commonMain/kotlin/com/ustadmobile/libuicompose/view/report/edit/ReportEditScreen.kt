@@ -33,6 +33,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.FixedReportTimeRange
 import com.ustadmobile.core.domain.report.model.OptionWithLabelStringResource
 import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
+import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportPeriodOption
 import com.ustadmobile.core.domain.report.model.ReportSeries2
@@ -64,7 +65,8 @@ fun ReportEditScreen(viewModel: ReportEditViewModel) {
         onSeriesChanged = viewModel::onSeriesChanged,
         onAddSeries = viewModel::onAddSeries,
         onRemoveFilter = viewModel::onRemoveFilter,
-        onRemoveSeries = viewModel::onRemoveSeries
+        onRemoveSeries = viewModel::onRemoveSeries,
+        onEditFilter = viewModel::onEditFilter
     )
 }
 
@@ -77,6 +79,7 @@ private fun ReportEditScreen(
     onSeriesChanged: (ReportSeries2) -> Unit = {},
     onRemoveFilter: (Int, Int) -> Unit = { _, _ -> },
     onRemoveSeries: (Int) -> Unit = { },
+    onEditFilter: (Int, ReportFilter3) -> Unit = { _, _ -> },
 ) {
     val requiredYAxisType: YAxisTypes? = uiState.reportOptions2.series
         .mapNotNull { it.reportSeriesYAxis?.type }
@@ -330,6 +333,7 @@ private fun ReportEditScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .defaultScreenPadding()
+                            .clickable { onEditFilter(seriesItem.reportSeriesUid, reportFilter2) }
                     ) {
                         val fieldName = reportFilter2.reportFilterField?.name?.lowercase()
                             ?.replaceFirstChar { it.uppercase() } ?: ""
