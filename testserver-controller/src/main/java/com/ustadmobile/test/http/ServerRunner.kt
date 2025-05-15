@@ -10,17 +10,18 @@ class ServerRunner(
     val mode: RunMode,
     private val okHttpClient: OkHttpClient,
     private val serverDir: File,
-    private val controllerUrl: URL,
-    private val learningSpaceHost: InetAddress,
-    private val baseDataDir: File,
+    controllerUrl: URL,
+    learningSpaceHost: InetAddress,
+    baseDataDir: File,
     @Suppress("unused") //reserved for future use
     private val adbDeviceSerial: String? = null,
     @Suppress("unused") //reserved for future use
     private val adbRecordEnabled: Boolean = false,
     @Suppress("unused") //reserved for future use
     private val adbVideoName: String? = null,
-    private val fromPort: Int = DEFAULT_FROM_PORT,
-    private val untilPort: Int = DEFAULT_UNTIL_PORT,
+    fromPort: Int = DEFAULT_FROM_PORT,
+    untilPort: Int = DEFAULT_UNTIL_PORT,
+    learningSpaceUrlTemplate: String = DEFAULT_LEARNING_SPACE_URL_TEMPLATE
 ) {
 
     val port = findFreePort(from = fromPort, until = untilPort)
@@ -28,10 +29,12 @@ class ServerRunner(
     val learningSpaceUrl = if(mode == RunMode.CYPRESS) {
         controllerUrl.toString()
     }else {
-        "http://${learningSpaceHost.hostAddress}:$port/"
+        learningSpaceUrlTemplate
+            .replace("{PORT}", port.toString())
+            .replace("{HOSTIP}", learningSpaceHost.hostAddress)
     }
 
-    val dataDir = File(baseDataDir, "server-$port")
+    private val dataDir = File(baseDataDir, "server-$port")
 
     val pid: Long
         get() = serverProcess?.pid() ?: -1
@@ -124,6 +127,12 @@ class ServerRunner(
             it.waitFor()
             serverProcess = null
         }
+    }
+
+    companion object {
+
+        const val DEFAULT_LEARNING_SPACE_URL_TEMPLATE = "http://{HOSTIP}:{PORT}/"
+
     }
 
 }

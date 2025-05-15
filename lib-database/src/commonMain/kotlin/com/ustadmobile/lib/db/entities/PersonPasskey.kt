@@ -34,8 +34,6 @@ data class PersonPasskey(
 
     var ppOriginString: String? = null,
 
-    var ppRpid: String? = null,
-
     var ppId: String? = null,
 
     var ppChallengeString: String? = null,

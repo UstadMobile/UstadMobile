@@ -9,13 +9,18 @@ Usage:
 Start the test server controller:
 
 ```
-./gradlew testserver-controller:run --args='-P:mode=cypress|maestro [-P:url=http://localhost:8075/] [-P:portRange=1025-65534]'
+./gradlew testserver-controller:run --args='-P:mode=cypress|maestro [-P:url=http://localhost:8075/] [-P:portRange=1025-65534] [-P:learningSpaceUrlTemplate=http://{HOSTIP}:{PORT}/]'
 ```
 If no URL is specified testserver-controller will automatically use http://localhost:8075/ by 
 default.
 
 ```-P:portRange```: Specifies the port range that will be used to run the actual server. This is 
 useful in a CI environment where a specific port range is allowed by the firewall.
+```-P:learningSpaceUrlTemplate```: Specifies the URL to use for the learning space, based on the
+allocated port/host ip address. ```{HOSTIP}``` will be replaced with the first non-local IPv4 address
+and ```{PORT}``` will be replaced with the allocated port. This can also be used to run tests over
+https e.g. as required for testing links and passkeys on Android e.g. use 
+https://{PORT}.wildcardhttpsdomain.org/ when a reverse proxy is setup to handle the HTTPS.
 
 Testserver-controller has two modes:
 
