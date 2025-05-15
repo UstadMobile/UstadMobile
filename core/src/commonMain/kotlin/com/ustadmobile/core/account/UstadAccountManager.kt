@@ -8,9 +8,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import com.ustadmobile.core.domain.credentials.PasskeyVerifyResult
 import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
-import com.ustadmobile.core.domain.credentials.passkey.webAuthn.ClientDataJSON
-import com.ustadmobile.core.domain.credentials.passkey.webAuthn.AuthenticationResponseJSON
-import com.ustadmobile.core.util.ext.base64StringToByteArray
+import com.ustadmobile.core.domain.credentials.passkey.model.ClientDataJSON
+import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed

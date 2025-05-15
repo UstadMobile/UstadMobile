@@ -1,9 +1,9 @@
 package com.ustadmobile.core.domain.credentials
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.credentials.passkey.webAuthn.ClientDataJSON
+import com.ustadmobile.core.domain.credentials.passkey.model.ClientDataJSON
 import com.ustadmobile.lib.db.entities.PersonPasskey
-import com.ustadmobile.core.domain.credentials.passkey.webAuthn.AuthenticationResponseJSON
+import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.serialization.json.Json
 import kotlin.io.encoding.Base64

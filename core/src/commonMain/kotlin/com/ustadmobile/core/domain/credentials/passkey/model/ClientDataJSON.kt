@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.credentials.passkey.webAuthn
+package com.ustadmobile.core.domain.credentials.passkey.model
 
 import kotlinx.serialization.Serializable
 

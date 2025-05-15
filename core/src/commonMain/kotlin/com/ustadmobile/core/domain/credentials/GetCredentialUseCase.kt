@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.credentials
 
-import com.ustadmobile.core.domain.credentials.passkey.webAuthn.AuthenticationResponseJSON
+import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
 
 /**
  * Use case to get a saved credential - passkey or username/password. This is a non-scoped

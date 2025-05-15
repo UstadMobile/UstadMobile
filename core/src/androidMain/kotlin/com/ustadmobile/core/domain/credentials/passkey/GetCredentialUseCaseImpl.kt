@@ -11,10 +11,9 @@ import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
 import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
-import com.ustadmobile.core.domain.credentials.passkey.webAuthn.AuthenticationResponseJSON
+import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import io.github.aakira.napier.Napier
-import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 
 class GetCredentialUseCaseImpl(

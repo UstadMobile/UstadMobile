@@ -9,7 +9,7 @@ import androidx.credentials.exceptions.CreateCredentialException
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
-import com.ustadmobile.core.domain.credentials.passkey.webAuthn.AuthenticationResponseJSON
+import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
