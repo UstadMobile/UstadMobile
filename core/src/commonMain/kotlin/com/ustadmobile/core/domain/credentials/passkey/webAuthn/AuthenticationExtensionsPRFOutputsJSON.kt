@@ -3,6 +3,6 @@ package com.ustadmobile.core.domain.credentials.passkey.webAuthn
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Prf(
+data class AuthenticationExtensionsPRFOutputsJSON(
     val enabled: Boolean? = false
 )

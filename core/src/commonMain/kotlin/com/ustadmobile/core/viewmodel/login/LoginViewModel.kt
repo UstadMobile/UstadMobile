@@ -344,7 +344,7 @@ class LoginViewModel(
                 when (val credentialResult = getCredentialUseCaseVal()) {
                     is GetCredentialUseCase.PasskeyCredentialResult -> {
                         val account = accountManager.loginWithPasskey(
-                            credentialResult.passKeySignInData,
+                            credentialResult.passkeyWebAuthNResponse,
                             serverUrl
                         )
                         goToNextDestAfterLoginOrGuestSelected(account.toPerson())

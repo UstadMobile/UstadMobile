@@ -38,7 +38,7 @@ class CreatePasskeyRequestJsonUseCase(
             .joinToString(separator = "")
     }
 
-    fun requestJsonForSignIn(domain: String): String {
+    fun requestJsonForSignIn(): String {
         val challenge = randomString(16)
 
         val requestJson = """
@@ -47,7 +47,7 @@ class CreatePasskeyRequestJsonUseCase(
     "allowCredentials": [],
     "timeout": 1800000,
     "userVerification": "required",
-    "rpId": "credential-manager-${domain}"
+    "rpId": "${Url(systemUrlConfig.systemBaseUrl).host}"
 }
 """.trimIndent()
         Napier.e { requestJson }

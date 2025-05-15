@@ -29,6 +29,7 @@ import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedi
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.lib.db.entities.Person
 import io.github.aakira.napier.Napier
+import io.ktor.util.decodeBase64String
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -117,16 +118,20 @@ class AddAccountSelectNewOrExistingViewModel(
             try {
                 when (val credentialResult = getCredentialUseCase?.invoke()) {
                     is GetCredentialUseCase.PasskeyCredentialResult -> {
-                        val userHandle = credentialResult.passKeySignInData.userHandle
-                            .base64StringToByteArray()
-                        val endpointUrl= userHandle.decodeToString().substringAfter("@")
+                        val userHandle = credentialResult.passkeyWebAuthNResponse.
+                        response.userHandle
+                            ?: throw IllegalStateException("userHandle not found")
+
+                        val learningSpace =
+                            userHandle.decodeBase64String().split("@", limit = 2).last()
+
 
                         val account = accountManager.loginWithPasskey(
-                            credentialResult.passKeySignInData,
-                            apiUrlConfig.systemBaseUrl,
+                            credentialResult.passkeyWebAuthNResponse,
+                            learningSpace,
                         )
 
-                        goToNextDestAfterSignIn(account.toPerson(), endpointUrl)
+                        goToNextDestAfterSignIn(account.toPerson(), learningSpace)
                     }
 
                     is GetCredentialUseCase.PasswordCredentialResult -> {

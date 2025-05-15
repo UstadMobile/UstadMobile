@@ -6,7 +6,6 @@ import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.core.domain.credentials.CreatePasskeyParams
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -279,20 +278,19 @@ class SignUpViewModel(
         val updatedPerson = _uiState.value.person?.shallowCopy {
             username = filteredValue
         }
-        if (_uiState.value.person?.username!=filteredValue){
-            _uiState.update {
-                it.copy(usernameSetByUser = true)
-            }
-        }
         _uiState.update {
-            it.copy(person = updatedPerson)
+            it.copy(
+                person = updatedPerson,
+                usernameSetByUser = updatedPerson?.username != filteredValue
+            )
         }
     }
 
     fun onFullNameFocusedChanged(hasFocused: Boolean){
         if (hasFocused) return
 
-        if (_uiState.value.usernameSetByUser&&!_uiState.value.person?.fullName().isNullOrEmpty()) return
+        if (_uiState.value.usernameSetByUser&&!_uiState.value.person?.fullName().isNullOrEmpty())
+            return
 
         usernameSuggestionJob?.cancel()
 
@@ -385,10 +383,11 @@ class SignUpViewModel(
                 savePerson.personUid = uid
 
                 if(createPasskeyUseCaseVal != null) {
+                    val username = savePerson.username ?: throw
+                    IllegalStateException("username can not be null")
+
                     val passkeyCreated = createPasskeyUseCaseVal(
-                        CreatePasskeyParams(
-                            username = savePerson.username.toString(),
-                        )
+                            username = username,
                     )
 
                     accountManager.registerWithPasskey(

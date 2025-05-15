@@ -2,17 +2,14 @@ package com.ustadmobile.core.domain.credentials.passkey
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Base64
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CredentialManager
 import androidx.credentials.exceptions.CreateCredentialException
-import com.ustadmobile.core.domain.credentials.CreatePasskeyParams
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
-import com.ustadmobile.core.domain.credentials.passkey.webAuthn.ClientDataJSON
-import com.ustadmobile.core.domain.credentials.passkey.webAuthn.PasskeyWebAuthNResponse
+import com.ustadmobile.core.domain.credentials.passkey.webAuthn.AuthenticationResponseJSON
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -34,13 +31,13 @@ class CreatePasskeyUseCaseImpl(
      * @throws CreateCredentialException if CredentialManager throws an exception
      */
     @SuppressLint("PublicKeyCredential")
-    override suspend fun invoke(createPassKeyParams: CreatePasskeyParams): PasskeyWebAuthNResponse {
+    override suspend fun invoke(username:String): AuthenticationResponseJSON {
         val credentialManager = CredentialManager.create(context)
 
         try {
             val request = CreatePublicKeyCredentialRequest(
                 requestJson = json.encodeToString(
-                    createPublicKeyJsonUseCase(createPassKeyParams.username)
+                    createPublicKeyJsonUseCase(username)
                 ),
                 preferImmediatelyAvailableCredentials = false,
             )
@@ -50,7 +47,7 @@ class CreatePasskeyUseCaseImpl(
             ) as CreatePublicKeyCredentialResponse
 
             Napier.d { "passkey response: ${response.registrationResponseJson}" }
-            val passkeyResponse = json.decodeFromString<PasskeyWebAuthNResponse>(response.registrationResponseJson)
+            val passkeyResponse = json.decodeFromString<AuthenticationResponseJSON>(response.registrationResponseJson)
 
             return passkeyResponse
         } catch (e: CreateCredentialException) {

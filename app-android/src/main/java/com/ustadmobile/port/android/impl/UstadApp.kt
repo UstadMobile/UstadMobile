@@ -988,7 +988,6 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             SavePersonPasskeyUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance<UmAppDataLayer>().repository,
-                systemUrlConfig = instance(),
                 json = instance(),
             )
         }

@@ -6,10 +6,10 @@ import com.ustadmobile.core.account.UstadAccountManager.EndpointFilter
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
-import com.ustadmobile.core.domain.credentials.PassKeySignInData
 import com.ustadmobile.core.domain.credentials.PasskeyVerifyResult
 import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
-import com.ustadmobile.core.domain.credentials.passkey.webAuthn.PasskeyWebAuthNResponse
+import com.ustadmobile.core.domain.credentials.passkey.webAuthn.ClientDataJSON
+import com.ustadmobile.core.domain.credentials.passkey.webAuthn.AuthenticationResponseJSON
 import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
@@ -42,6 +42,7 @@ import io.github.aakira.napier.Napier
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
 import io.ktor.http.contentType
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
@@ -66,6 +67,8 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
  * The app AccountManager. Users can have multiple accounts with active sessions at any given time.
@@ -321,7 +324,7 @@ class UstadAccountManager(
 
     suspend fun registerWithPasskey(
         learningSpaceUrl: String,
-        passkeyResult: PasskeyWebAuthNResponse,
+        passkeyResult: AuthenticationResponseJSON,
         person: Person,
         personPicture: PersonPicture?,
     ) = withContext(Dispatchers.Default) {
@@ -333,11 +336,11 @@ class UstadAccountManager(
 
         val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
             .requireRepository()
-        try {
-            getSiteFromDbOrLoadFromHttp(repo)
-        }catch (e:Exception){
-
-        }
+//        try {
+//            getSiteFromDbOrLoadFromHttp(repo)
+//        }catch (e:Exception){
+//
+//        }
 
 
 
@@ -523,25 +526,27 @@ class UstadAccountManager(
      *  so during login it return so endpointUrl we can get after @ , so with this url we can check in
      *  that database where person is added.
      */
+    @OptIn(ExperimentalEncodingApi::class)
     suspend fun loginWithPasskey(
-        passKeySignInData: PassKeySignInData,
+        passkeyWebAuthNResponse: AuthenticationResponseJSON,
         currentServerUrl:String
     ) : UmAccount = withContext(Dispatchers.Default){
         assertNotClosed()
 
-        val userHandle = passKeySignInData.userHandle.base64StringToByteArray()
-        val endpointUrl= userHandle.decodeToString().substringAfter("@")
+        val clientDataJSONBase64 = passkeyWebAuthNResponse.response.clientDataJSON
+        val decodedBytes = Base64.Default.decode(clientDataJSONBase64)
+        val clientDataJson = json.decodeFromString<ClientDataJSON>(decodedBytes.decodeToString())
 
         val loginResponse = httpClient.post {
-            url("${endpointUrl.removeSuffix("/")}/api/passkey/verifypasskey")
-            parameter("id", passKeySignInData.credentialId)
-            parameter("userHandle", passKeySignInData.userHandle)
-            parameter("authenticatorData", passKeySignInData.authenticatorData)
-            parameter("clientDataJSON", passKeySignInData.clientDataJSON)
-            parameter("signature", passKeySignInData.signature)
-            parameter("origin", passKeySignInData.origin)
-            parameter("rpId", passKeySignInData.rpId)
-            parameter("challenge", passKeySignInData.challenge)
+            url("${currentServerUrl.removeSuffix("/")}/api/passkey/verifypasskey")
+            parameter("id", passkeyWebAuthNResponse.id)
+            parameter("userHandle", passkeyWebAuthNResponse.response.userHandle)
+            parameter("authenticatorData", passkeyWebAuthNResponse.response.authenticatorData)
+            parameter("clientDataJSON", passkeyWebAuthNResponse.response.clientDataJSON)
+            parameter("signature", passkeyWebAuthNResponse.response.signature)
+            parameter("origin", clientDataJson.origin)
+            parameter("rpId", Url(apiUrlConfig.systemBaseUrl).host)
+            parameter("challenge", clientDataJson.challenge)
         }.bodyAsText()
         Napier.d { "passkeyres : $loginResponse" }
        val passkeyVerifyResult= Json.decodeFromString<PasskeyVerifyResult>(loginResponse)
@@ -551,7 +556,10 @@ class UstadAccountManager(
         }
         val responseAccount=UmAccount(personUid = passkeyVerifyResult.personUid)
         responseAccount.endpointUrl=currentServerUrl
-        val repo: UmAppDatabase = di.on(LearningSpace(endpointUrl)).direct.instance<UmAppDataLayer>()
+        if (currentServerUrl==null){
+             throw IllegalStateException("endpointUrl can not be null")
+        }
+        val repo: UmAppDatabase = di.on(LearningSpace(currentServerUrl)).direct.instance<UmAppDataLayer>()
             .requireRepository()
 
         //Make sure that we fetch the person and personpicture into the database.

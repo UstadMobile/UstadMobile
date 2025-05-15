@@ -4,7 +4,6 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.core.domain.credentials.CreatePasskeyParams
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -114,9 +113,7 @@ class OtherSignUpOptionSelectionViewModel(
             savePerson.personUid = uid
 
             val passkeyCreated = createPasskeyUseCase?.invoke(
-                CreatePasskeyParams(
                     username = savePerson.username.toString()
-                )
             )
             passkeyCreated?.let {
                 accountManager.registerWithPasskey(
