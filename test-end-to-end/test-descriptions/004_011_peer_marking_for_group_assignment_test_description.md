@@ -2,8 +2,7 @@
 
 ## Description:
 
-If assignment is set to be marked by peers and submitted by groups, where each assignment is marked by two peers, students can see assignment submissions for those that their group has been assigned to mark. Students can mark each others work according to the peer review allocation (as per group membership). Students will see the marks submitted by their peers (other groups).
-
+Teacher creates a group assignment with peer marking. Group members submit the assignment. Assigned peers review and rate submissions. Admin copies the course and verifies that peer submissions and reviews are not carried over.
 ## Step-by-Step Procedure:
 
 1. Using http api endpoint created a class with students and teachers already enrolled and setup.
@@ -57,3 +56,17 @@ If assignment is set to be marked by peers and submitted by groups, where each a
 49. Click on the course name. 
 50. Click on the assignment. 
 51. The student should see their graded assignment and the marks given by the peer.
+52. Clear storage and open the app
+53. Login as admin user with credentials 'admin' and 'testpass'.
+54. Click on "Test Course Block".
+55. Click "Copy".
+56. Verify "Copy course" title is visible.
+57. Verify input field contains "Copy of Test Course Block".
+58. Click "Save".
+59. Wait until save is complete.
+60. Click "Courses".
+61. Click on "Copy of Test Course Block".
+62. Open "Assignment 1".
+63. Click on "Submissions".
+64. Verify that "Group 1" and "Group 2" are not visible (submission data not carried over).
+

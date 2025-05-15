@@ -16,6 +16,7 @@ import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
 import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
+import com.ustadmobile.core.viewmodel.clazz.detailoverview.CopyCourseUseCase
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -85,6 +86,13 @@ fun commonDomainDiModule(endpointScope: EndpointScope) = DI.Module("CommonDomain
     bind<CreateNewClazzUseCase>() with scoped(endpointScope).singleton {
         CreateNewClazzUseCase(
             repoOrDb = instance(tag = DoorTag.TAG_REPO)
+        )
+    }
+
+    bind<CopyCourseUseCase>() with scoped(endpointScope).singleton {
+        CopyCourseUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            accountManager = instance()
         )
     }
 

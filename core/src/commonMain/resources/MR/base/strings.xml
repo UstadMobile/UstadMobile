@@ -2010,6 +2010,7 @@
 
     <string name="false_key">false</string>
 
+<<<<<<< HEAD
     <string name="equals">Equals</string>
     <string name="not_equals">Not Equals</string>
     <string name="greater">Greater</string>
@@ -2037,4 +2038,10 @@
 
     <string name="last_30_days">Last 30 days</string>
     <string name="last_3_months">Last 3 months</string>
+    <string name="copy">Copy</string>
+
+    <string name="copy_course">Copy course</string>
+
+    <string name="copy_of">Copy of</string>
+
 </resources>

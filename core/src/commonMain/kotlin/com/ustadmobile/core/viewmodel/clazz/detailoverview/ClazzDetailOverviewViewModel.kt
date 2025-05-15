@@ -14,7 +14,10 @@ import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.paging.RefreshCommand
+import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel.Companion.STATE_KEY_SCHEDULES
 import com.ustadmobile.core.viewmodel.clazz.parseAndUpdateTerminologyStringsIfNeeded
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
@@ -41,6 +44,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+import kotlin.getValue
+import kotlinx.serialization.encodeToString
+
 
 data class ClazzDetailOverviewUiState(
 
@@ -60,7 +66,9 @@ data class ClazzDetailOverviewUiState(
 
     val managePermissionVisible: Boolean = false,
 
-) {
+    val canAddNewCourse: Boolean = false,
+
+    ) {
     val clazz: Clazz?
         get() = clazzAndDetail?.clazz
 
@@ -111,6 +119,8 @@ class ClazzDetailOverviewViewModel(
 
     val listRefreshCommandFlow: Flow<RefreshCommand> = _listRefreshCommandFlow.asSharedFlow()
 
+    private val copyCourseUseCase: CopyCourseUseCase by di.onActiveEndpoint().instance()
+
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -123,6 +133,19 @@ class ClazzDetailOverviewViewModel(
             )
         }
 
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
+                    accountManager.currentAccount.personUid, PermissionFlags.ADD_COURSE
+                ).distinctUntilChanged().collect { hasPermission ->
+                    _uiState.update { prev ->
+                        prev.copy(
+                            canAddNewCourse = hasPermission,
+                        )
+                    }
+                }
+            }
+        }
 
         val permissionFlow = activeRepo.coursePermissionDao()
             .personHasPermissionWithClazzTripleAsFlow(
@@ -153,7 +176,6 @@ class ClazzDetailOverviewViewModel(
                                     }
                                 }
                             }
-
                             launch {
                                 activeRepo.statementDao().findStatusForStudentsInClazzAsFlow(
                                     clazzUid = entityUidArg,
@@ -162,6 +184,15 @@ class ClazzDetailOverviewViewModel(
                                 ).collect { blockStatuses ->
                                     _uiState.update { prev ->
                                         prev.copy(blockStatusesForActiveUser = blockStatuses)
+                                    }
+                                }
+                            }
+                            launch {
+                                activeRepo.scheduleDao().findAllSchedulesByClazzUidAsLiveList(
+                                    clazzUid = entityUidArg,
+                                ).collect { scheduleList ->
+                                    _uiState.update { prev ->
+                                        prev.copy(scheduleList = scheduleList)
                                     }
                                 }
                             }
@@ -277,7 +308,9 @@ class ClazzDetailOverviewViewModel(
 
     private fun onClickEdit() {
         navController.navigate(ClazzEditViewModel.DEST_NAME,
-            mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString()))
+            mapOf(UstadView.ARG_ENTITY_UID to entityUidArg.toString(),
+                UstadView.CLAZZ_ACTION to ClazzAction.EDIT.name)
+        )
     }
 
     fun onClickPermissions() {
@@ -287,9 +320,35 @@ class ClazzDetailOverviewViewModel(
         )
     }
 
-    companion object {
+    fun onClickCopyCourse() {
+        viewModelScope.launch {
+            val originalClazz = _uiState.value.clazz ?: return@launch
+            val originalSchedule = _uiState.value.scheduleList
+            val copyResult = copyCourseUseCase(
+                originalClazz,
+                originalSchedule).also {
+                it.clazz.clazzName = "${systemImpl.getString(MR.strings.copy_of)} ${it.clazz.clazzName}"
+            }
 
-        const val DEST_NAME = "CourseDetailOverviewView"
-
+            navController.navigate(
+                ClazzEditViewModel.DEST_NAME,
+                mapOf(
+                    UstadView.CLAZZ_ACTION to ClazzAction.COPY.name,
+                    UstadEditView.ARG_ENTITY_JSON to json.encodeToString(copyResult.clazz),
+                    ClazzEditViewModel.STATE_KEY_COURSEBLOCKS to json.encodeToString(copyResult.courseBlocks),
+                    STATE_KEY_SCHEDULES to json.encodeToString(copyResult.schedules),
+                    ))
+        }
     }
+
+    companion object {
+        const val DEST_NAME = "CourseDetailOverviewView"
+    }
+
+    enum class ClazzAction {
+        EDIT,
+        COPY
+    }
+
 }
+

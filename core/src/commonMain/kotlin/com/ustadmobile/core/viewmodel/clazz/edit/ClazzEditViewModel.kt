@@ -20,6 +20,7 @@ import com.ustadmobile.core.viewmodel.courseterminology.list.CourseTerminologyLi
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
+import com.ustadmobile.core.viewmodel.clazz.detailoverview.ClazzDetailOverviewViewModel.ClazzAction
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel.Companion.ARG_TERMINOLOGY
 import com.ustadmobile.core.viewmodel.contententry.edit.ContentEntryEditViewModel
@@ -136,8 +137,14 @@ class ClazzEditViewModel(
 
     private val createNewClazzUseCase: CreateNewClazzUseCase by di.onActiveEndpoint().instance()
 
+    val clazzAction: ClazzAction = savedStateHandle[UstadView.CLAZZ_ACTION]
+        ?.let { ClazzAction.valueOf(it) } ?: ClazzAction.EDIT
+
     init {
-        val title = createEditTitle(MR.strings.add_a_new_course, MR.strings.edit_course)
+
+        val title = createEditTitle(MR.strings.add_a_new_course,
+            if (clazzAction == ClazzAction.COPY) MR.strings.copy_course else MR.strings.edit_course)
+
         _appUiState.update {
             AppUiState(
                 title = title,
@@ -165,20 +172,21 @@ class ClazzEditViewModel(
                         serializer = ClazzWithHolidayCalendarAndAndTerminology.serializer(),
                         onLoadFromDb = {
                             it.clazzDao().takeIf { entityUidArg != 0L }
-                                ?.findByUidWithHolidayCalendarAsync(entityUidArg).let { dbResult ->
-                                    val hasPicture = dbResult?.coursePicture != null
-                                    //Add CoursePicture entity if not already present
-                                    if(dbResult == null || hasPicture){
-                                        dbResult
-                                    }else {
-                                        dbResult.shallowCopy {
+                                ?.findByUidWithHolidayCalendarAsync(entityUidArg)?.let { dbResult ->
+                                    var updatedClazz = dbResult
+
+                                    // Add CoursePicture if it's missing
+                                    if (dbResult.coursePicture == null) {
+                                        updatedClazz = updatedClazz.shallowCopy {
                                             coursePicture = CoursePicture(
                                                 coursePictureUid = entityUidArg
                                             )
                                         }
                                     }
+                                    updatedClazz
                                 }
                         },
+
                         makeDefault = {
                             ClazzWithHolidayCalendarAndAndTerminology().apply {
                                 clazzUid = effectiveClazzUid
@@ -568,6 +576,7 @@ class ClazzEditViewModel(
 
                 if(updateImage && coursePictureVal != null) {
                     coursePictureVal.coursePictureLct = systemTimeInMillis()
+                    coursePictureVal.coursePictureUid = entity.clazzUid
                     activeDb.coursePictureDao().upsertAsync(coursePictureVal)
                 }
 

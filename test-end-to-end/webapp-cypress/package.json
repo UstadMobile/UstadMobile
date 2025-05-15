@@ -21,5 +21,12 @@
     "test": "start-server-and-test start-server  http://localhost:8075/ cy:run",
     "cy:run-spec": "cypress run --spec $CYPRESS_SPEC",
     "test-spec": "start-server-and-test start-server http://localhost:8075/ cy:run-spec"
-  }
+  },
+  "name": "webapp-cypress",
+  "description": "These are end-to-end tests for the web version of the app built using [Cypress](https://cypress.io).",
+  "version": "1.0.0",
+  "main": "cypress.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
