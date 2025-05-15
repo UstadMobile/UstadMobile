@@ -252,8 +252,6 @@ Cypress.Commands.add('ustadCreateUserAccount',(userName,password) => {
     cy.get('#newpassword').type(password)
     cy.contains("button","Save").click()
     cy.contains('Change Password',{timeout:6000}).should('be.visible')
-   // cy.go('back')
-   // cy.go('back')
 })
 
   // Add a Module Block
@@ -423,9 +421,50 @@ Cypress.Commands.add("ustadSetDateTime", (element, date) => {
 Cypress.Commands.add("ustadSetDate", (element, date) => {
      element.type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +
      String(date.getDate()).padStart(2, '0')
-     );
-});
+     )
+})
+/*
+Cypress.Commands.add("UstadContentUsageData", (content_title, Person_username) => {
+    const maxAttempts = 4;
 
+    const attemptImport = (attempt) => {
+        cy.request({
+            method: "GET",
+            url: `/api/generate-xapi-statements/runtest?contentTitle=${content_title}&username=${Person_username}`,
+            failOnStatusCode: false
+        }).then((response) => {
+            cy.log(`Attempt ${attempt}: Status ${response.status}`);
+            cy.log(JSON.stringify(response.body));
+
+            const isSuccess = response.status === 200 && response.body.message === "Successfully generated test statements";
+
+            if (!isSuccess) {
+                cy.log(`Retrying... attempt ${attempt + 1}`);
+                if (attempt < maxAttempts - 1) {
+                    attemptImport(attempt + 1);
+                } else {
+                    throw new Error(`Failed after ${maxAttempts} attempts: ${JSON.stringify(response.body)}`);
+                }
+            }
+        });
+    };
+
+    attemptImport(0);
+});
+*/
+Cypress.Commands.add("UstadContentUsageData", (content_title, Person_username) => {
+    cy.request({
+        method: "GET",
+        url: `/api/generate-xapi-statements/runtest?contentTitle=${content_title}&username=${Person_username}`,
+        failOnStatusCode: false
+    }).then((response) => {
+        expect(response.status).to.eq(200);
+        expect(response.body.message).to.eq("Successfully generated test statements");
+    });
+
+    // Add wait after API call if graph rendering needs time
+    cy.wait(2000);
+});
 
 
 

@@ -25,7 +25,7 @@ it('Admin able to add content block from library', () => {
 
 it('Teacher able to add content block from file', () => {
   cy.ustadClearDbAndLogin('teach1','testt1')
- // Add Assignment block
+ // Add content block from file block
   cy.contains("Course").click()
   cy.contains("Test Course Block").click()
   cy.contains("button","Course").click()
