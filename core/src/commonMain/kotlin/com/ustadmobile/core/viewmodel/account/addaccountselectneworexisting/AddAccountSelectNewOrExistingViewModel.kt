@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
+import com.ustadmobile.core.domain.credentials.passkey.DecodeUserHandleUseCase
 import com.ustadmobile.core.domain.credentials.username.ParseCredentialUsernameUseCase
 import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -83,6 +84,8 @@ class AddAccountSelectNewOrExistingViewModel(
 
     private val setLanguageUseCase: SetLanguageUseCase by instance()
 
+    private val decodeUserHandleUseCase : DecodeUserHandleUseCase by instance()
+
     private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val impl: UstadMobileSystemImpl by instance()
@@ -121,17 +124,15 @@ class AddAccountSelectNewOrExistingViewModel(
                         val userHandle = credentialResult.passkeyWebAuthNResponse.
                         response.userHandle
                             ?: throw IllegalStateException("userHandle not found")
-
-                        val learningSpace =
-                            userHandle.decodeBase64String().split("@", limit = 2).last()
+                        val (learningSpace, personPasskeyUid) = decodeUserHandleUseCase(userHandle)
 
 
                         val account = accountManager.loginWithPasskey(
                             credentialResult.passkeyWebAuthNResponse,
-                            learningSpace,
+                            learningSpace.url,
                         )
 
-                        goToNextDestAfterSignIn(account.toPerson(), learningSpace)
+                        goToNextDestAfterSignIn(account.toPerson(), learningSpace.url)
                     }
 
                     is GetCredentialUseCase.PasswordCredentialResult -> {

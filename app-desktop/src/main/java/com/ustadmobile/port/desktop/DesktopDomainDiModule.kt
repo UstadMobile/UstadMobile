@@ -90,6 +90,8 @@ import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJvm
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
+import com.ustadmobile.core.domain.credentials.passkey.EncodeUserHandleUseCase
+import com.ustadmobile.core.domain.passkey.EncodeUserHandleUseCaseImpl
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
@@ -360,6 +362,11 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         SetPasswordUseCaseCommonJvm(authManager = instance())
     }
 
+    bind<EncodeUserHandleUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+        EncodeUserHandleUseCaseImpl(
+            learningSpace = context
+        )
+    }
 
 
     bind<GetStoragePathForUrlUseCase>() with singleton {
