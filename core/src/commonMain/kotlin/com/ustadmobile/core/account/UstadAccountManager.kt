@@ -532,32 +532,25 @@ class UstadAccountManager(
     ) : UmAccount = withContext(Dispatchers.Default){
         assertNotClosed()
 
-        val clientDataJSONBase64 = passkeyWebAuthNResponse.response.clientDataJSON
-        val decodedBytes = Base64.Default.decode(clientDataJSONBase64)
-        val clientDataJson = json.decodeFromString<ClientDataJSON>(decodedBytes.decodeToString())
 
         val loginResponse = httpClient.post {
             url("${currentServerUrl.removeSuffix("/")}/api/passkey/verifypasskey")
-            parameter("id", passkeyWebAuthNResponse.id)
-            parameter("userHandle", passkeyWebAuthNResponse.response.userHandle)
-            parameter("authenticatorData", passkeyWebAuthNResponse.response.authenticatorData)
-            parameter("clientDataJSON", passkeyWebAuthNResponse.response.clientDataJSON)
-            parameter("signature", passkeyWebAuthNResponse.response.signature)
-            parameter("origin", clientDataJson.origin)
+            setBodyJson(
+                json = json,
+                serializer = AuthenticationResponseJSON.serializer(),
+                value = passkeyWebAuthNResponse
+            )
             parameter("rpId", Url(apiUrlConfig.systemBaseUrl).host)
-            parameter("challenge", clientDataJson.challenge)
         }.bodyAsText()
         Napier.d { "passkeyres : $loginResponse" }
-       val passkeyVerifyResult= Json.decodeFromString<PasskeyVerifyResult>(loginResponse)
+       val passkeyVerifyResult= json.decodeFromString<PasskeyVerifyResult>(loginResponse)
 
         if(!passkeyVerifyResult.isVerified) {
             throw UnauthorizedException("Account not found")
         }
         val responseAccount=UmAccount(personUid = passkeyVerifyResult.personUid)
         responseAccount.endpointUrl=currentServerUrl
-        if (currentServerUrl==null){
-             throw IllegalStateException("endpointUrl can not be null")
-        }
+
         val repo: UmAppDatabase = di.on(LearningSpace(currentServerUrl)).direct.instance<UmAppDataLayer>()
             .requireRepository()
 

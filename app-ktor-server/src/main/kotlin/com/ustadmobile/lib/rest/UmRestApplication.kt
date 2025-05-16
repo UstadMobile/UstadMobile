@@ -505,6 +505,7 @@ fun Application.umRestApplication(
             VerifySignInWithPasskeyUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
+                json = json,
             )
         }
         bind<IsTempFileCheckerUseCase>() with singleton {

@@ -14,10 +14,14 @@ class EncodeUserHandleUseCaseImpl(
     override fun invoke(
         personPasskeyUid: Long
     ): String {
-        val stringToEncode = "@${learningSpace.url}"
+        val stringToEncode = learningSpace.url
         val stringBytes = stringToEncode.toByteArray()
 
-        val byteBuffer = ByteBuffer.allocate(64)
+        if (stringBytes.size > 55) {
+            throw IllegalArgumentException("Learning space URL is too long")
+        }
+
+        val byteBuffer = ByteBuffer.allocate(8 + stringBytes.size) // Clean: no unnecessary 64-byte array
         byteBuffer.putLong(personPasskeyUid)
         byteBuffer.put(stringBytes)
 
