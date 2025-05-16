@@ -19,7 +19,6 @@ class SavePersonPasskeyUseCase(
             ppAttestationObj = passkeyResult.attestationObj,
             ppClientDataJson = passkeyResult.clientDataJson,
             ppOriginString = passkeyResult.originString,
-            ppRpid = passkeyResult.rpid,
             ppId = passkeyResult.id,
             ppChallengeString = passkeyResult.challengeString,
             ppPublicKey = passkeyResult.publicKey
