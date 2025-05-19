@@ -1,5 +1,7 @@
 package com.ustadmobile.libuicompose.view.report.detail
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -13,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -21,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
@@ -104,7 +108,8 @@ fun BarGraphSampleScreen(
 
             MoreOptionsSection(
                 data = graphSeries,
-                modifier = Modifier.weight(0.4f)
+                modifier = Modifier.weight(0.4f),
+                reportOptions = reportOptions
             )
         }
     } else {
@@ -114,6 +119,7 @@ fun BarGraphSampleScreen(
 
 @Composable
 fun MoreOptionsSection(
+    reportOptions: ReportOptions2,
     data: List<GraphSeries>,
     modifier: Modifier = Modifier
 ) {
@@ -125,68 +131,108 @@ fun MoreOptionsSection(
         }
 
         items(data) { series ->
-            DataTable(data = series.data)
+            DataTable(data = series.data, reportOptions = reportOptions)
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-fun DataTable(data: List<ReportResultQueryRow>) {
+fun DataTable(
+    data: List<ReportResultQueryRow>,
+    reportOptions: ReportOptions2
+) {
+    val subgroupName = reportOptions.series
+        .firstOrNull()
+        ?.reportSeriesSubGroup
+        ?.label
+        ?.let { stringResource(it) }
+
+    val subgroupByStr = stringResource(MR.strings.subgroup_by)
+
+    val subgroupLabel = remember(subgroupName) {
+        if (subgroupName != null) {
+            "$subgroupByStr - $subgroupName"
+        } else {
+            subgroupByStr
+        }
+    }
+
     val header = listOf(
         stringResource(MR.strings.x_axis),
         stringResource(MR.strings.y_axis),
-        stringResource(MR.strings.subgroup_by)
+        subgroupLabel
     )
+
     Card(
         modifier = Modifier
-            .width(IntrinsicSize.Max),
-        elevation = 2.dp
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = 4.dp
     ) {
         Column {
             // Header Row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(Color.LightGray)
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 header.forEachIndexed { index, title ->
                     Text(
                         text = title,
-                        modifier = Modifier.weight(0.5f),
+                        modifier = Modifier.weight(1f),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyLarge
                     )
                     if (index < header.lastIndex) {
-                        VerticalDivider(modifier = Modifier.height(20.dp), color = Color.Black)
+                        VerticalDivider(
+                            modifier = Modifier.height(24.dp),
+                            color = Color.DarkGray,
+                            thickness = 1.dp
+                        )
                     }
                 }
             }
+
+            HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
 
             // Data Rows
             data.forEach { row ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(4.dp),
+                        .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = row.xAxis,
-                        modifier = Modifier.weight(0.5f),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium
                     )
-                    VerticalDivider(modifier = Modifier.height(20.dp), color = Color.Black)
-
+                    VerticalDivider(
+                        modifier = Modifier.height(24.dp),
+                        color = Color.LightGray,
+                        thickness = 1.dp
+                    )
                     Text(
                         text = row.yAxis.toString(),
-                        modifier = Modifier.weight(0.5f),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium
                     )
-                    VerticalDivider(modifier = Modifier.height(20.dp), color = Color.Black)
-
+                    VerticalDivider(
+                        modifier = Modifier.height(24.dp),
+                        color = Color.LightGray,
+                        thickness = 1.dp
+                    )
                     Text(
                         text = row.subgroup ?: "-",
-                        modifier = Modifier.weight(0.5f),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
+                HorizontalDivider(color = Color.LightGray)
             }
         }
     }

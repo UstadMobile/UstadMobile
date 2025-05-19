@@ -11,14 +11,17 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.report.graph.ReportGraph
 import mui.material.Box
 import mui.material.Card
 import mui.material.Divider
+import mui.material.Grid
 import mui.material.Orientation
 import mui.material.Typography
+import mui.material.styles.TypographyVariant
 import mui.system.Stack
 import mui.system.StackDirection
 import mui.system.responsive
@@ -26,6 +29,8 @@ import mui.system.sx
 import react.FC
 import react.Props
 import react.useMemo
+import web.cssom.Color
+import web.cssom.Overflow
 import web.cssom.px
 
 external interface ReportDetailProps : Props {
@@ -87,79 +92,90 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
 
 private val moreOption = FC<ReportDetailProps> { props ->
     val strings = useStringProvider()
-    val header = listOf(
+
+    val subgroupNamePart = props.uiState.reportOptions2.series
+        .firstOrNull()
+        ?.reportSeriesSubGroup
+        ?.label
+        ?.let { strings[it] }
+
+    val subgroupLabel = if (subgroupNamePart != null) {
+        "${strings[MR.strings.subgroup_by]} - $subgroupNamePart"
+    } else {
+        strings[MR.strings.subgroup_by]
+    }
+
+    val headerLabels = listOf(
         strings[MR.strings.x_axis],
         strings[MR.strings.y_axis],
-        strings[MR.strings.subgroup_by]
+        subgroupLabel
     )
 
-    val data = useMemo(props.uiState) {
-        props.uiState.reportOptions2.series.mapIndexed { index, reportSeries ->
-            GraphSeries(
-                type = when (reportSeries.reportSeriesVisualType) {
-                    ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
-                    else -> SeriesType.BAR
-                },
-                data = props.uiState.reportResults.getOrNull(index)?.map { statementRow ->
-                    ReportResultQueryRow(
-                        xAxis = statementRow.xAxis,
-                        yAxis = statementRow.yAxis,
-                        subgroup = statementRow.subgroup
-                    )
-                } ?: emptyList(),
-                name = reportSeries.reportSeriesTitle
-            )
-        }
-    }
     UstadStandardContainer {
-        Stack {
-            direction = responsive(StackDirection.column)
-            spacing = responsive(8.px)
-            Divider { orientation = Orientation.horizontal }
+        Card {
+            sx {
+                padding = 16.px
+                overflowX = "auto".unsafeCast<Overflow>()
+            }
 
-            // data table
-            Card {
-                Box {
-                    sx {
-                        padding = 8.px
-                    }
+            // Header
+            Grid {
+                container = true
+                spacing = responsive(2)
+                sx {
+                    padding = 8.px
+                    backgroundColor = "grey.100".unsafeCast<Color>()
+                }
 
-                    // Header Row
-                    Stack {
-                        direction = responsive(StackDirection.row)
-                        spacing = responsive(16.px)
-
-                        header.forEach { title ->
-                            Typography {
-                                +title
-                            }
+                headerLabels.forEach { label ->
+                    Grid {
+                        item = true
+                        xs = 4
+                        Typography {
+                            +label.toString()
+                            variant = TypographyVariant.h6
                         }
                     }
-                    // Data Rows
-                    data.forEach { row ->
-                        row.data.forEach {
-                            Stack {
-                                direction = responsive(StackDirection.row)
-                                spacing = responsive(8.px)
+                }
+            }
 
-                                Typography {
-                                    +it.xAxis
-                                }
+            Divider {}
 
-                                Divider { orientation = Orientation.vertical }
-
-                                Typography {
-                                    +it.yAxis.toString()
-                                }
-
-                                Divider { orientation = Orientation.vertical }
-
-                                Typography {
-                                    +it.subgroup ?: "-"
-                                }
+            // Data Rows
+            props.uiState.reportResults.forEachIndexed { seriesIndex, seriesRows ->
+                seriesRows.forEach { row ->
+                    Grid {
+                        container = true
+                        spacing = responsive(2)
+                        sx {
+                            padding = 8.px
+                            "&:hover" {
+                                backgroundColor = "action.hover".unsafeCast<Color>()
                             }
                         }
+
+                        // X-Axis
+                        Grid {
+                            item = true
+                            xs = 4
+                            Typography { +row.xAxis }
+                        }
+
+                        // Y-Axis
+                        Grid {
+                            item = true
+                            xs = 4
+                            Typography { +row.yAxis.toString() }
+                        }
+
+                        // Subgroup
+                        Grid {
+                            item = true
+                            xs = 4
+                            Typography { +(row.subgroup ?: "-") }
+                        }
                     }
+                    Divider {}
                 }
             }
         }
