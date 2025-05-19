@@ -280,8 +280,8 @@ class SignUpViewModel(
         }
         _uiState.update {
             it.copy(
+                usernameSetByUser = _uiState.value.person?.username != filteredValue,
                 person = updatedPerson,
-                usernameSetByUser = updatedPerson?.username != filteredValue
             )
         }
     }

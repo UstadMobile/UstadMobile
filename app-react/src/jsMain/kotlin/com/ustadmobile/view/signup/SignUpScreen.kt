@@ -124,6 +124,7 @@ val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
                 }
 
                 UstadTextField {
+                    sx { marginTop = 16.px }
                     id = "username"
                     value = props.uiState.person?.username?:""
                     label = ReactNode(strings[MR.strings.username])
@@ -201,5 +202,7 @@ val SignUpScreen = FC<Props> {
         onParentCheckChanged = viewModel::onParentCheckChanged
         onClickSignUpWithPasskey = viewModel::onClickSignup
         onFullNameValueChange = viewModel::onFullNameValueChange
+        onFullNameFocusedChanged = viewModel::onFullNameFocusedChanged
+        onUsernameValueChange = viewModel::onUsernameChanged
     }
 }
