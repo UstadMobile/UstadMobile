@@ -55,11 +55,11 @@ class ReportListViewModel(
                 navigationVisible = true,
                 searchState = createSearchEnabledState(visible = false),
                 title = savedStateHandle[ARG_TITLE] ?: listTitle(
-                    MR.strings.report,
+                    MR.strings.reports,
                     MR.strings.select_person
                 ),
                 fabState = FabUiState(
-                    text = systemImpl.getString(MR.strings.report),
+                    text = systemImpl.getString(MR.strings.reports),
                     icon = FabUiState.FabIcon.ADD,
                     onClick = this::onClickAdd,
                 )

@@ -62,8 +62,7 @@ class ReportDetailViewModel(
                         text = systemImpl.getString(MR.strings.edit),
                         icon = FabUiState.FabIcon.EDIT,
                         onClick = this@ReportDetailViewModel::onClickEdit
-                    ),
-                title = "Graph",
+                    )
             )
         }
         viewModelScope.launch {
@@ -103,9 +102,10 @@ class ReportDetailViewModel(
 
                                         else -> throw IllegalStateException("Report $reportUid has no options or title")
                                     }
-
                                     _uiState.update { it.copy(reportOptions2 = parsedOptions) }
-
+                                    _appUiState.update { prev ->
+                                        prev.copy(title = parsedOptions.title)
+                                    }
                                     val request = RunReportUseCase.RunReportRequest(
                                         reportUid = reportUid,
                                         reportOptions = parsedOptions,
