@@ -423,7 +423,7 @@ Cypress.Commands.add("ustadSetDate", (element, date) => {
      String(date.getDate()).padStart(2, '0')
      )
 })
-/*
+
 Cypress.Commands.add("UstadContentUsageData", (content_title, Person_username) => {
     const maxAttempts = 4;
 
@@ -450,25 +450,7 @@ Cypress.Commands.add("UstadContentUsageData", (content_title, Person_username) =
     };
 
     attemptImport(0);
-});
-*/
-Cypress.Commands.add("UstadContentUsageData", (content_title, Person_username) => {
-    cy.request({
-        method: "GET",
-        url: `/api/generate-xapi-statements/runtest?contentTitle=${content_title}&username=${Person_username}`,
-        failOnStatusCode: false
-    }).then((response) => {
-        expect(response.status).to.eq(200);
-        expect(response.body.message).to.eq("Successfully generated test statements");
-    });
-
-    // Add wait after API call if graph rendering needs time
-    cy.wait(2000);
-});
-
-
-
-
+})
 
 //commands.js
 //
