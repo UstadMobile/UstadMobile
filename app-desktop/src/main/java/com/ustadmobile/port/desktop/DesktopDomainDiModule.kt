@@ -362,11 +362,6 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         SetPasswordUseCaseCommonJvm(authManager = instance())
     }
 
-    bind<EncodeUserHandleUseCase>() with scoped(LearningSpaceScope.Default).singleton {
-        EncodeUserHandleUseCaseImpl(
-            learningSpace = context
-        )
-    }
 
 
     bind<GetStoragePathForUrlUseCase>() with singleton {
@@ -533,14 +528,6 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         OpenBlobUseCaseJvm(
             getStoragePathForUrlUseCase = instance(),
             rootTmpDir = instance(tag = DiTag.TAG_TMP_DIR)
-        )
-    }
-
-    bind<CreatePasskeyRequestJsonUseCase>()  with provider {
-        CreatePasskeyRequestJsonUseCase(
-            systemImpl = instance(),
-            systemUrlConfig = instance(),
-            json = instance()
         )
     }
 
