@@ -211,6 +211,8 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 systemUrlConfig = instance(),
                 systemImpl = instance(),
                 createCredentialUsernameUseCase = instance(),
+                learningSpace = context,
+                db = instance(tag = DoorTag.TAG_DB),
             )
         }
 

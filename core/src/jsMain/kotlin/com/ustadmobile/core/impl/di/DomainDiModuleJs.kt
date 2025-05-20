@@ -38,7 +38,6 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
-import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
@@ -171,14 +170,6 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
         ContentEntryGetMetaDataFromUriUseCaseJs(
             json = instance(),
             chunkedUploadClientLocalUriUseCase = instance()
-        )
-    }
-
-    bind<CreatePasskeyRequestJsonUseCase>() with provider {
-        CreatePasskeyRequestJsonUseCase(
-            systemImpl = instance(),
-            systemUrlConfig = instance(),
-            json = instance()
         )
     }
 
