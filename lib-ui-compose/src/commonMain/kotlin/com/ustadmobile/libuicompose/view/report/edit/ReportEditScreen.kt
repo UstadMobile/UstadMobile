@@ -102,13 +102,11 @@ private fun ReportEditScreen(
                     val updatedOptions = uiState.reportOptions2.copy(title = newTitle)
                     onReportChanged(updatedOptions)
                 },
-                isError = uiState.reportTitleError != null,
+                isError = uiState.submitted && uiState.reportTitleError != null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 supportingText = {
-                    Text(
-                        uiState.reportTitleError ?: stringResource(MR.strings.required)
-                    )
-                },
+                    Text(uiState.reportTitleError ?: stringResource(MR.strings.required))
+                }
             )
 
         }
@@ -150,7 +148,7 @@ private fun ReportEditScreen(
                         onReportChanged
                     )
                 },
-                isError = uiState.timeRangeError != null && selected == null,
+                isError = uiState.submitted && uiState.timeRangeError != null && selected == null,
                 supportingText = {
                     if (selected == null) {
                         Text(uiState.timeRangeError ?: stringResource(MR.strings.required))
@@ -196,12 +194,10 @@ private fun ReportEditScreen(
                     val updatedOptions = uiState.reportOptions2.copy(xAxis = it)
                     onReportChanged(updatedOptions)
                 },
-                isError = uiState.xAxisError != null,
+                isError = uiState.submitted && uiState.xAxisError != null,
                 supportingText = {
-                    Text(
-                        uiState.xAxisError ?: stringResource(MR.strings.required)
-                    )
-                },
+                    Text(uiState.xAxisError ?: stringResource(MR.strings.required))
+                }
             )
         }
 
@@ -239,7 +235,7 @@ private fun ReportEditScreen(
                                 val updatedSeries = seriesItem.copy(reportSeriesTitle = newTitle)
                                 onSeriesChanged(updatedSeries)
                             },
-                            isError = uiState.seriesTitleErrors[seriesItem.reportSeriesUid] != null,
+                            isError = uiState.submitted && uiState.seriesTitleErrors[seriesItem.reportSeriesUid] != null,
                             supportingText = {
                                 Text(
                                     uiState.seriesTitleErrors[seriesItem.reportSeriesUid]
@@ -267,7 +263,7 @@ private fun ReportEditScreen(
                             val updatedSeries = seriesItem.copy(reportSeriesYAxis = selectedYAxis)
                             onSeriesChanged(updatedSeries)
                         },
-                        isError = uiState.yAxisErrors[seriesItem.reportSeriesUid] != null,
+                        isError = uiState.submitted && uiState.yAxisErrors[seriesItem.reportSeriesUid] != null,
                         supportingText = {
                             Text(
                                 uiState.yAxisErrors[seriesItem.reportSeriesUid]
@@ -319,7 +315,7 @@ private fun ReportEditScreen(
                                     ?: stringResource(MR.strings.required)
                             )
                         },
-                        isError = uiState.chartTypeError[seriesItem.reportSeriesUid] != null,
+                        isError = uiState.submitted && uiState.chartTypeError[seriesItem.reportSeriesUid] != null,
                     )
 
                 }

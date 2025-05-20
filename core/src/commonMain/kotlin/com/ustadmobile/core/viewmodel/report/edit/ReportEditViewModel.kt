@@ -14,7 +14,6 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
-import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel.Companion.ARG_REPORT_SERIES_UID
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Report
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +35,7 @@ data class ReportEditUiState(
     val chartTypeError: Map<Int, String> = emptyMap(),
     val timeRangeError: String? = null,
     val quantityError: String? = null,
+    val submitted: Boolean = false
 )
 
 class ReportEditViewModel(
@@ -157,18 +157,21 @@ class ReportEditViewModel(
             }
         }.toMap()
 
-        _uiState.update { prev ->
-            prev.copy(
-                reportTitleError = if (prev.reportOptions2.title.isEmpty()) requiredFieldMessage else null,
-                xAxisError = if (prev.reportOptions2.xAxis == null) requiredFieldMessage else null,
-                seriesTitleErrors = seriesTitleErrors,
-                yAxisErrors = yAxisErrors,
-                timeRangeError = null,
-                quantityError = quantityError,
-                chartTypeError = chartTypeErrors
-            )
-        }
-        if (_uiState.value.hasErrors()) {
+        // Validate all fields
+        val newState = _uiState.value.copy(
+            submitted = true,
+            reportTitleError = if (currentReport.title.isEmpty()) requiredFieldMessage else null,
+            xAxisError = if (currentReport.xAxis == null) requiredFieldMessage else null,
+            timeRangeError = if (currentReport.period == null) requiredFieldMessage else null,
+            quantityError = quantityError,
+            chartTypeError = chartTypeErrors,
+            yAxisErrors = yAxisErrors,
+            seriesTitleErrors = seriesTitleErrors
+        )
+
+        _uiState.value = newState
+
+        if (newState.hasErrors()) {
             loadingState = LoadingUiState.NOT_LOADING
             println("Report options error")
             return
@@ -225,10 +228,12 @@ class ReportEditViewModel(
             .mapValues { it.value as String }
 
         _uiState.update { currentState ->
-            currentState.copy(
-                reportOptions2 = newOptions,
-                reportTitleError = if (newOptions.title.isEmpty()) requiredFieldMessage else null,
-                xAxisError = if (newOptions.xAxis == null) requiredFieldMessage else null,
+            val baseUpdate = currentState.copy(reportOptions2 = newOptions)
+
+            if (!baseUpdate.submitted) return@update baseUpdate
+            baseUpdate.copy(
+                reportTitleError = if (newOptions.title.isEmpty()) systemImpl.getString(MR.strings.field_required_prompt) else null,
+                xAxisError = if (newOptions.xAxis == null) systemImpl.getString(MR.strings.field_required_prompt) else null,
                 seriesTitleErrors = seriesTitleErrors,
                 yAxisErrors = yAxisErrors,
                 timeRangeError = updateErrorMessageOnChange(
@@ -366,7 +371,8 @@ class ReportEditViewModel(
         )
     }
 
-    private fun ReportEditUiState.hasErrors(): Boolean {
+    fun ReportEditUiState.hasErrors(): Boolean {
+        if (!submitted) return false
         return reportTitleError != null ||
                 xAxisError != null ||
                 seriesTitleErrors.isNotEmpty() ||
