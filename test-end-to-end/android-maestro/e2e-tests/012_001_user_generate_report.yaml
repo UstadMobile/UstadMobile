@@ -10,11 +10,16 @@ onFlowStart:
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
-  - runScript:
-      file: "common/stopserver.js"
-      env:
-        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  #- runScript:
+    #  file: "common/stopserver.js"
+    #  env:
+    #    TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+# Download test file
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Video_Content.mp4"
 - runScript:
     file: "common/import_users_via_http.js"
     env:
@@ -27,27 +32,50 @@ onFlowComplete:
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "common/user_login.yaml"
+    file: "common/admin_login.yaml"
+- tapOn: "courses"
+- tapOn: "Test Course Block"
+- runFlow:
+    file: "common/add_new_content_block_to_course.yaml"
     env:
-      USERNAME: "teach1"
-      PASSWORD: "testt1"
+      TESTFILENAME: "Video_Content.mp4"
+- runScript:
+    file: "common/generate_content_usage_data_via_http.js"
+    env:
+      TESTFILENAME: "Video_Content.mp4"
+      USERNAME: "stud1"
+
 - tapOn: "Reports"
 - tapOn:
     id: "floating_action_button"      #    +Report button
 - tapOn: "Title*"
 - inputText: "Test Report"
 - tapOn: "Time range*"
-- tapOn: "Custom period (e.g. last x days/weeks)"
+- tapOn: "Custom date range"
+- tapOn:
+    text: "dd/mm/yyyy"
+    index: 0
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.yesterdayDate}
+- tapOn: "dd/mm/yyyy"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.currentDate}
 - tapOn: "X Axis*"
 - tapOn: "Day"
 - tapOn: "Series Title*"
-- inputText: "Usage time by day this week"
+- inputText: "Series 1"
 - hideKeyboard
 - tapOn: "Y Axis*"
 - tapOn: "Total Duration"
+- scrollUntilVisible:
+    element:
+      text: "Chart type*"
+    direction: DOWN
 - tapOn: "Subgroup by"
 - tapOn: "Gender"
-- tapOn: "Chart type"
+- tapOn: "Chart type*"
 - tapOn: "Bar Chart"
 - tapOn: "Done"
 - tapOn:
@@ -72,22 +100,14 @@ onFlowComplete:
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Time range*"
-- tapOn: "Custom date range"
-- tapOn:
-    text: "dd/mm/yyyy"
-    index: 0
-- runScript:
-    file: "common/setDate.js"
-- inputText: ${output.yesterdayDate}
-- tapOn: "dd/mm/yyyy"
-- runScript:
-    file: "common/setDate.js"
-- inputText: ${output.currentDate}
+- tapOn: "Custom period (e.g. last x days/weeks)"
+- tapOn: "Days"
+- tapOn: "Weeks"
 - scrollUntilVisible:
     element:
-      text: "Chart type"
+      text: "Chart type*"
     direction: DOWN
-- tapOn: "Chart type"
+- tapOn: "Chart type*"
 - tapOn: "Line Chart"
 - tapOn: "Done"
 #- assertVisible: "SHARE"

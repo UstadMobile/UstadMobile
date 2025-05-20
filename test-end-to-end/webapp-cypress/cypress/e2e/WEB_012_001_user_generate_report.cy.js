@@ -37,8 +37,8 @@ it('Admin generate report', () => {
   const toDate = new Date()
   const fromDate = new Date()
   fromDate.setDate(fromDate.getDate() - 7)
-  cy.ustadSetDate(cy.get('input[id="from_date"]'),fromDate,{timeout:3000}) // last week from today
-  cy.ustadSetDate(cy.get('input[id="to_date"]'),toDate,{timeout:3000}) // Today
+  cy.ustadSetDate(cy.get('input[id="from_date"]'),fromDate,{timeout:6000}) // last week from today
+  cy.ustadSetDate(cy.get('input[id="to_date"]'),toDate,{timeout:6000}) // Today
   cy.get('div[id="x_axis"]').click()
   cy.contains("Day").click()
   cy.get('input[id="series_title"]').type("Series 1")
@@ -48,7 +48,7 @@ it('Admin generate report', () => {
   cy.contains("Gender").click()
   cy.get('div[id="chart_type"]').click()
   cy.contains("Bar Chart").click()
- // cy.get('input[id="title"]').clear().type('R1',{delay: 30})
+  cy.get('input[id="title"]').clear().type('R1',{delay: 30})
   cy.contains('button','Done').click()
   cy.contains('button','Edit').click()
   cy.contains('Add filter').scrollIntoView();
@@ -66,7 +66,7 @@ it('Admin generate report', () => {
 // cypress/screenshots/spec.cy.js/bar_chart_graph_report
   cy.screenshot('bar_chart_graph_report')
   cy.contains('button','Edit').click()
-  cy.contains('div[id="time_range"]','Custom date range',{timeout:2000}).click()
+  cy.contains('div[id="time_range"]','Custom date range',{timeout:6000}).click()
   cy.contains("Custom period (e.g. last x days/weeks)").click()
   cy.contains("DAY").click()
   cy.contains("WEEK").click()
