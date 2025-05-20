@@ -10,7 +10,6 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.replace
-import com.ustadmobile.core.util.ext.replaceOrAppend
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
@@ -34,7 +33,7 @@ data class ReportEditUiState(
     val seriesTitleErrors: Map<Int, String> = emptyMap(),
     val yAxisErrors: Map<Int, String> = emptyMap(),
     val subGroupError: String? = null,
-    val chartTypeError: String? = null,
+    val chartTypeError: Map<Int, String> = emptyMap(),
     val timeRangeError: String? = null,
     val quantityError: String? = null,
 )
@@ -150,6 +149,14 @@ class ReportEditViewModel(
             }
         }.toMap()
 
+        val chartTypeErrors = currentReport.series.mapNotNull { series ->
+            if (series.reportSeriesVisualType == null) {
+                series.reportSeriesUid to requiredFieldMessage
+            } else {
+                null
+            }
+        }.toMap()
+
         _uiState.update { prev ->
             prev.copy(
                 reportTitleError = if (prev.reportOptions2.title.isEmpty()) requiredFieldMessage else null,
@@ -157,7 +164,8 @@ class ReportEditViewModel(
                 seriesTitleErrors = seriesTitleErrors,
                 yAxisErrors = yAxisErrors,
                 timeRangeError = null,
-                quantityError = quantityError
+                quantityError = quantityError,
+                chartTypeError = chartTypeErrors
             )
         }
         if (_uiState.value.hasErrors()) {
@@ -192,6 +200,7 @@ class ReportEditViewModel(
     }
 
     fun onEntityChanged(newOptions: ReportOptions2) {
+        val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
         val quantityError = when (val timeRange = newOptions.period) {
             is RelativeRangeReportPeriod -> {
                 if (timeRange.rangeQuantity < 1) systemImpl.getString(MR.strings.quantity_must_be_at_least_1) else null
@@ -199,27 +208,36 @@ class ReportEditViewModel(
 
             else -> null
         }
+
+        val seriesTitleErrors = newOptions.series.associate { series ->
+            series.reportSeriesUid to if (series.reportSeriesTitle.isEmpty()) requiredFieldMessage else null
+        }.filterValues { it != null }
+            .mapValues { it.value as String }
+
+        val yAxisErrors = newOptions.series.associate { series ->
+            series.reportSeriesUid to if (series.reportSeriesYAxis == null) requiredFieldMessage else null
+        }.filterValues { it != null }
+            .mapValues { it.value as String }
+
+        val chartTypeErrors = newOptions.series.associate { series ->
+            series.reportSeriesUid to if (series.reportSeriesVisualType == null) requiredFieldMessage else null
+        }.filterValues { it != null }
+            .mapValues { it.value as String }
+
         _uiState.update { currentState ->
             currentState.copy(
                 reportOptions2 = newOptions,
-                reportTitleError = updateErrorMessageOnChange(
-                    currentState.reportOptions2.title,
-                    newOptions.title,
-                    currentState.reportTitleError
-                ),
-                xAxisError = updateErrorMessageOnChange(
-                    currentState.reportOptions2.xAxis,
-                    newOptions.xAxis,
-                    currentState.xAxisError
-                ),
-                seriesTitleErrors = emptyMap(),
-                yAxisErrors = emptyMap(),
+                reportTitleError = if (newOptions.title.isEmpty()) requiredFieldMessage else null,
+                xAxisError = if (newOptions.xAxis == null) requiredFieldMessage else null,
+                seriesTitleErrors = seriesTitleErrors,
+                yAxisErrors = yAxisErrors,
                 timeRangeError = updateErrorMessageOnChange(
                     currentState.reportOptions2.period,
                     newOptions.period,
                     currentState.timeRangeError
                 ),
-                quantityError = quantityError
+                quantityError = quantityError,
+                chartTypeError = chartTypeErrors,
             )
         }
         scheduleEntityCommitToSavedState(
@@ -354,7 +372,7 @@ class ReportEditViewModel(
                 seriesTitleErrors.isNotEmpty() ||
                 yAxisErrors.isNotEmpty() ||
                 subGroupError != null ||
-                chartTypeError != null ||
+                chartTypeError.isNotEmpty() ||
                 timeRangeError != null ||
                 quantityError != null
     }

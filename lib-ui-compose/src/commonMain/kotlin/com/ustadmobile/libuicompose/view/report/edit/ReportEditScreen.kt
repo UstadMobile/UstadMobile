@@ -305,14 +305,21 @@ private fun ReportEditScreen(
 
                     // Chart Type Dropdown
                     ExposedDropdownMenu(
-                        label = { Text(stringResource(MR.strings.chart_type)) },
+                        label = { Text(stringResource(MR.strings.chart_type) + "*") },
                         options = ReportSeriesVisualType.entries,
                         selectedValue = seriesItem.reportSeriesVisualType,
                         onOptionSelected = { selectedVisualType ->
                             val updatedSeries =
                                 seriesItem.copy(reportSeriesVisualType = selectedVisualType)
                             onSeriesChanged(updatedSeries)
-                        }
+                        },
+                        supportingText = {
+                            Text(
+                                uiState.chartTypeError[seriesItem.reportSeriesUid]
+                                    ?: stringResource(MR.strings.required)
+                            )
+                        },
+                        isError = uiState.chartTypeError[seriesItem.reportSeriesUid] != null,
                     )
 
                 }

@@ -50,7 +50,6 @@ import react.useRequiredContext
 import web.cssom.AlignItems
 import web.cssom.Auto
 import web.cssom.Color
-import web.cssom.Flex
 import web.cssom.JustifyContent
 import web.cssom.number
 import web.cssom.pct
@@ -387,7 +386,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             sx {
                                 backgroundColor = Color(theme.palette.background.default)
                             }
-                            +ReactNode(strings[MR.strings.subgroup_by] + "*")
+                            +ReactNode(strings[MR.strings.subgroup_by])
                         }
 
                         Select {
@@ -427,6 +426,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 // Chart Type Dropdown
                 FormControl {
                     fullWidth = true
+                    error = props.uiState.chartTypeError[series.reportSeriesUid] != null
                     InputLabel {
                         id = "chart_type_label"
                         shrink = true
@@ -454,6 +454,12 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                                 +ReactNode(strings[option.label])
                             }
                         }
+                    }
+                    FormHelperText {
+                        +ReactNode(
+                            props.uiState.chartTypeError[series.reportSeriesUid]
+                                ?: strings[MR.strings.required]
+                        )
                     }
                 }
 
