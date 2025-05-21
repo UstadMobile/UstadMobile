@@ -29,8 +29,8 @@ it('Admin generate report', () => {
   cy.UstadContentUsageData('Content_001','stud1')
   cy.contains("Reports").click()
   cy.get("svg[data-testid='AddIcon']").click()
-  //cy.get("#appbar_title").contains("Add a new report").should("exist")
-  cy.get('input[id="title"]').type('R1')
+  cy.get("#appbar_title").contains("Add a new report").should("exist")
+  cy.get('input[id="title"]').type('E2E')
   cy.contains('div[id="time_range"]','Last week',{timeout:2000}).click()
   cy.contains("Custom date range").click()
  // Set a custom report date range
@@ -48,11 +48,12 @@ it('Admin generate report', () => {
   cy.contains("Gender").click()
   cy.get('div[id="chart_type"]').click()
   cy.contains("Bar Chart").click()
-  cy.get('input[id="title"]').clear().type('R1',{delay: 30})
   cy.contains('button','Done').click()
   cy.contains('button','Edit').click()
+  cy.get("#appbar_title").contains("Edit report").should("exist")
   cy.contains('Add filter').scrollIntoView();
   cy.contains('Add filter').click()
+  cy.get("#appbar_title").contains("Edit filter").should("exist")
   cy.get("div[id='field']").click()
   cy.contains("Person age").click()
   cy.get('div[id="condition"]').click()
@@ -60,7 +61,7 @@ it('Admin generate report', () => {
   cy.get('#Value').click().type('13')
   cy.get('#actionBarButton').click()
   cy.get('#actionBarButton').click()
-  cy.get("#appbar_title").contains("R1").should("exist")
+  cy.get("#appbar_title").contains("E2E").should("exist")
   cy.wait(1000)  // This wait for the data to get loaded on the graph
 // screenshot will be saved as
 // cypress/screenshots/spec.cy.js/bar_chart_graph_report
@@ -74,21 +75,21 @@ it('Admin generate report', () => {
   cy.contains("Line Chart").click()
   cy.get('#actionBarButton').click()
   cy.contains('button','Edit').should("exist")
-  cy.get("#appbar_title").contains("R1").should("exist")
+  cy.get("#appbar_title").contains("E2E").should("exist")
   cy.wait(1000)  // This wait for the data to get loaded on the graph
 // screenshot will be saved as
 // cypress/screenshots/spec.cy.js/Line_chart_graph_report
   cy.screenshot('Line_chart_graph_report')
   cy.contains("Reports").click()
-  cy.contains("R1").should("exist")
+  cy.get("#appbar_title").contains("Reports").should("exist")
+  cy.contains("E2E").should("exist")
   cy.get("svg[data-testid='DeleteIcon']").should("exist")
  })
 
-/*it('Student views report', () => {
+it('Student views report', () => {
   cy.ustadClearDbAndLogin('stud1','tests1',{timeout:8000})
-  cy.contains("Reports").click()
   cy.contains("Reports").should("not.exist")
-  })*/
+  })
 
   after(() => {
     // Stop Test Server after tests are complete

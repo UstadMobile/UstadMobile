@@ -10,10 +10,10 @@ onFlowStart:
   - clearState: com.toughra.ustadmobile
 onFlowComplete:
   - stopRecording
-  #- runScript:
-    #  file: "common/stopserver.js"
-    #  env:
-    #    TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 # Download test file
 - runFlow:
@@ -32,7 +32,7 @@ onFlowComplete:
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "common/admin_login.yaml"
+     file: "common/admin_login.yaml"
 - tapOn: "courses"
 - tapOn: "Test Course Block"
 - runFlow:
@@ -46,8 +46,14 @@ onFlowComplete:
       USERNAME: "stud1"
 
 - tapOn: "Reports"
+- assertVisible:
+    text: "Reports"
+    id: "app_title"
 - tapOn:
-    id: "floating_action_button"      #    +Report button
+    id: "floating_action_button"      # +Report button
+- assertVisible:
+    text: "Add a new report"
+    id: "app_title"
 - tapOn: "Title*"
 - inputText: "Test Report"
 - tapOn: "Time range*"
@@ -79,12 +85,18 @@ onFlowComplete:
 - tapOn: "Bar Chart"
 - tapOn: "Done"
 - tapOn:
-    id: "floating_action_button"
+    id: "floating_action_button" #Edit button
+- assertVisible:
+    text: "Edit report"
+    id: "app_title"
 - scrollUntilVisible:
     element:
       text: "Add filter"
     direction: DOWN
 - tapOn: "Add filter"
+- assertVisible:
+    text: "Edit filter"
+    id: "app_title"
 - tapOn: "Field*"
 - tapOn: "Person age"
 - tapOn: "Condition*"
@@ -93,16 +105,22 @@ onFlowComplete:
 - inputText: "13"
 - tapOn: "Done"
 - tapOn: "Done"
+- assertVisible:
+    text: "Test Report"
+    id: "app_title"
 - takeScreenshot: "${TESTRESULTSDIR}/bar_chart_graph_report"
 - tapOn: "Reports"
 - assertVisible: "Test Report"
+- assertVisible:
+    text: "Reports"
+    id: "app_title"
 - tapOn: "Test Report"
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Time range*"
 - tapOn: "Custom period (e.g. last x days/weeks)"
 - tapOn: "Days"
-- tapOn: "Weeks"
+- tapOn: "Months"
 - scrollUntilVisible:
     element:
       text: "Chart type*"
@@ -110,6 +128,9 @@ onFlowComplete:
 - tapOn: "Chart type*"
 - tapOn: "Line Chart"
 - tapOn: "Done"
+- assertVisible:
+    text: "Test Report"
+    id: "app_title"
 #- assertVisible: "SHARE"
 #- assertVisible: "EXPORT DATA"
 - takeScreenshot: "${TESTRESULTSDIR}/line_chart_graph_report"
