@@ -270,7 +270,6 @@ kotlin {
                 implementation libs.httpoveripc.core
                 implementation libs.httpoveripc.server
                 implementation libs.rawhttp.core
-                implementation libs.json.kotlin.schema.codegen
 
             }
         }
