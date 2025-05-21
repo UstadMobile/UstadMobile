@@ -8,6 +8,7 @@ import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.credentials.passkey.EncodeUserHandleUseCase
 import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticatorSelectionCriteria
 import com.ustadmobile.core.domain.credentials.passkey.model.PublicKeyCredentialParameters
 import com.ustadmobile.core.domain.credentials.passkey.model.PublicKeyCredentialUserEntityJSON
@@ -42,6 +43,7 @@ class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
     private val createCredentialUsernameUseCase: CreateCredentialUsernameUseCase,
     private val learningSpace: LearningSpace,
     private val db: UmAppDatabase,
+    private val encodeUserHandleUseCase : EncodeUserHandleUseCase,
 ) {
 
     operator fun invoke(
@@ -53,6 +55,7 @@ class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
         )
 
         val personPasskeyUid = db.doorPrimaryKeyManager.nextId(PersonPasskey.TABLE_ID)
+        val encodeUserHandle = encodeUserHandleUseCase(personPasskeyUid)
 
         return PublicKeyCredentialCreationOptionsJSON(
             rp = PublicKeyCredentialRpEntity(
@@ -61,7 +64,7 @@ class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
                 icon = null,
             ),
             user = PublicKeyCredentialUserEntityJSON(
-                id = "$personPasskeyUid@${learningSpace.url}",
+                id = encodeUserHandle,
                 name = credentialUsername,
                 displayName = credentialUsername,
             ),

@@ -153,12 +153,15 @@ import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.centralappconfigdb.datasource.LearningSpaceDataSource
 import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockSendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCaseImpl
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockEmailSender
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.TestEmailRoute
+import com.ustadmobile.lib.rest.domain.username.UsernameSuggestionRoute
+import com.ustadmobile.core.username.UsernameSuggestionUseCase
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -502,6 +505,7 @@ fun Application.umRestApplication(
             VerifySignInWithPasskeyUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
+                json = json,
             )
         }
         bind<IsTempFileCheckerUseCase>() with singleton {
@@ -567,6 +571,10 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<FilterUsernameUseCase>() with provider {
+            FilterUsernameUseCase()
+        }
+
         bind<ExtractMediaMetadataUseCase>() with provider {
             ExtractMediaMetadataUseCaseMediaInfo(
                 executeMediaInfoUseCase = instance(),
@@ -630,7 +638,12 @@ fun Application.umRestApplication(
                 activeRepo = null,
             )
         }
-
+        bind<UsernameSuggestionUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            UsernameSuggestionUseCase(
+                filterUsernameUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB)
+            )
+        }
         bind<ValidateEmailUseCase>() with provider {
             ValidateEmailUseCase()
         }
@@ -1064,7 +1077,13 @@ fun Application.umRestApplication(
                         )
                     }
                 }
-
+                route("username"){
+                    UsernameSuggestionRoute(
+                        usernameSuggestionUseCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+                }
                 route("account"){
                     SetPasswordRoute(
                         useCase = { call ->

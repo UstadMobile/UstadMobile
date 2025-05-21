@@ -1,7 +1,6 @@
 package com.ustadmobile.core.domain.credentials.passkey
 
 import android.content.Context
-import android.util.Base64
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetPasswordOption
@@ -13,24 +12,25 @@ import androidx.credentials.exceptions.NoCredentialException
 import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
 import com.ustadmobile.core.util.ext.formattedHost
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
+import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
 import com.ustadmobile.core.domain.credentials.PassKeySignInData
 import com.ustadmobile.core.impl.config.SystemUrlConfig
-import io.ktor.http.Url
-import org.json.JSONObject
+import io.github.aakira.napier.Napier
+import kotlinx.serialization.json.Json
 
 class GetCredentialUseCaseImpl(
     private val context: Context,
     private val passkeyRequestJsonUseCase: CreatePasskeyRequestJsonUseCase,
     private val apiUrlConfig: SystemUrlConfig,
+    private val json: Json,
 ) : GetCredentialUseCase {
 
     override suspend fun invoke(): GetCredentialUseCase.CredentialResult {
         val credentialManager = CredentialManager.create(context)
-        val domain: String = Url(apiUrlConfig.systemBaseUrl).formattedHost()
 
         val getPasswordOption = GetPasswordOption()
         val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
-            requestJson = passkeyRequestJsonUseCase.requestJsonForSignIn(domain)
+            requestJson = passkeyRequestJsonUseCase.requestJsonForSignIn()
         )
 
         //As per https://developer.android.com/identity/sign-in/credential-manager#sign-in when
@@ -57,30 +57,15 @@ class GetCredentialUseCaseImpl(
                 }
 
                 is PublicKeyCredential -> {
-                    val authResponseJson = credential.data.getString(
-                        "androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON"
-                    )
+                    val authResponseJson = credential.authenticationResponseJson
+                    Napier.d {"passkey response ${authResponseJson}"}
 
                     if (authResponseJson != null) {
-                        val jsonObject = JSONObject(authResponseJson)
-                        val responseObject = jsonObject.getJSONObject("response")
+                        val parsedResponse = json.decodeFromString<AuthenticationResponseJSON>(authResponseJson)
 
-                        val clientDataJsonString = responseObject.getString("clientDataJSON")
-                        val decodedBytes = Base64.decode(clientDataJsonString, Base64.DEFAULT)
-                        val decodedJson = String(decodedBytes)
-                        val clientDataJson = JSONObject(decodedJson)
 
                         GetCredentialUseCase.PasskeyCredentialResult(
-                            PassKeySignInData(
-                                credentialId = jsonObject.getString("id"),
-                                userHandle = responseObject.getString("userHandle"),
-                                authenticatorData = responseObject.getString("authenticatorData"),
-                                clientDataJSON = clientDataJsonString,
-                                signature = responseObject.getString("signature"),
-                                origin = clientDataJson.getString("origin"),
-                                rpId = "credential-manager-${domain}",
-                                challenge = clientDataJson.getString("challenge")
-                            )
+                           parsedResponse
                         )
                     } else {
                         GetCredentialUseCase.Error("Auth response JSON is null.")

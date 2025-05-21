@@ -56,8 +56,6 @@ data class SignupEnterUsernamePasswordUiState(
 
     val registrationMode: Int = 0,
 
-    val usernameError: String? = null,
-
     val firstName: String? = null,
 
     val passwordError: String? = null,
@@ -170,12 +168,6 @@ class SignupEnterUsernamePasswordViewModel(
         _uiState.update { prev ->
             prev.copy(
                 person = entity,
-                usernameError = updateErrorMessageOnChange(
-                    prev.person?.username,
-                    entity?.username, prev.usernameError
-                ),
-
-
                 )
         }
 
@@ -196,8 +188,7 @@ class SignupEnterUsernamePasswordViewModel(
 
 
     private fun SignupEnterUsernamePasswordUiState.hasErrors(): Boolean {
-        return usernameError != null ||
-                passwordError != null
+        return passwordError != null
     }
 
 
@@ -222,14 +213,7 @@ class SignupEnterUsernamePasswordViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                usernameError = if (!validateUsernameUseCase.invoke(
-                        savePerson.username ?: ""
-                    )
-                ) {
-                    systemImpl.getString(MR.strings.invalid)
-                } else {
-                    null
-                },
+
                 passwordError = if (prev.password.isNullOrEmpty()) {
                     systemImpl.getString(MR.strings.field_required_prompt)
                 } else {
@@ -297,7 +281,7 @@ class SignupEnterUsernamePasswordViewModel(
             } catch (e: Exception) {
                 if (e is IllegalStateException) {
                     _uiState.update { prev ->
-                        prev.copy(usernameError = systemImpl.getString(MR.strings.person_exists))
+                        prev.copy(passwordError = systemImpl.getString(MR.strings.person_exists))
                     }
                 } else {
                     snackDispatcher.showSnackBar(

@@ -57,9 +57,13 @@ import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.core.domain.credentials.passkey.CreatePasskeyUseCaseImpl
+import com.ustadmobile.core.domain.credentials.passkey.DecodeUserHandleUseCase
+import com.ustadmobile.core.domain.credentials.passkey.EncodeUserHandleUseCase
 import com.ustadmobile.core.domain.credentials.passkey.GetCredentialUseCaseImpl
 import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
 import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCaseImpl
+import com.ustadmobile.core.domain.passkey.DecodeUserHandleUseCaseImpl
+import com.ustadmobile.core.domain.passkey.EncodeUserHandleUseCaseImpl
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
@@ -157,6 +161,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 context=this@AbstractAppActivity,
                 passkeyRequestJsonUseCase = instance(),
                 apiUrlConfig = instance(),
+                json = instance()
             )
         }
 
@@ -186,6 +191,16 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
             )
         }
 
+        bind<EncodeUserHandleUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            EncodeUserHandleUseCaseImpl(
+                learningSpace = context
+            )
+        }
+
+        bind<DecodeUserHandleUseCase>() with singleton {
+            DecodeUserHandleUseCaseImpl()
+        }
+
         bind<BulkAddPersonsUseCase>() with scoped(LearningSpaceScope.Default).provider {
             BulkAddPersonsUseCaseImpl(
                 addNewPersonUseCase = instance(),
@@ -213,6 +228,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 createCredentialUsernameUseCase = instance(),
                 learningSpace = context,
                 db = instance(tag = DoorTag.TAG_DB),
+                encodeUserHandleUseCase = instance()
             )
         }
 

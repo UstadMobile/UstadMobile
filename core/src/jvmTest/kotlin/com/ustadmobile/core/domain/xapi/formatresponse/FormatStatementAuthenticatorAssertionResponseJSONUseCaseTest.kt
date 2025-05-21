@@ -17,7 +17,7 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.xxhashkmp.commonjvmimpl.XXHasher64FactoryCommonJvm
 import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 
-class FormatStatementResponseUseCaseTest {
+class FormatStatementAuthenticatorAssertionResponseJSONUseCaseTest {
 
     private lateinit var db: UmAppDatabase
 
