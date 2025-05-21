@@ -65,7 +65,8 @@ __Setting or adding a domain for app links and passkeys:__
 
 * Set systemUrl in buildconfig properties (see KDoc on [SystemUrlConfig.kt](../core/src/commonMain/kotlin/com/ustadmobile/core/impl/config/SystemUrlConfig.kt))
 * Add the domain to [AndroidManifest.xml](./src/main/AndroidManifest.xml) app link intent-filter
-* Publish [assetlinks.json] as per [official docs](https://developer.android.com/training/app-links#manage-verify) including SHA256 fingerprints
+* Publish [assetlinks.json] as per [official docs](https://developer.android.com/training/app-links#manage-verify) including SHA256 fingerprints and update
+  the package_name if required.
 * Add domain to [assets_statement_values.xml](app-android/src/main/res/values/assets_statement_values.xml)
 
 ### Command line signing (for release APK) :
