@@ -26,9 +26,7 @@ onFlowComplete:
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
 
-# Add data to generate report ---------pending
-
-# verify teacher able to generate Report
+# verify admin able to generate Report
 - runFlow: "common/clear_state_and_get_started.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
@@ -44,7 +42,6 @@ onFlowComplete:
     env:
       TESTFILENAME: "Video_Content.mp4"
       USERNAME: "stud1"
-
 - tapOn: "Reports"
 - assertVisible:
     text: "Reports"
@@ -134,3 +131,13 @@ onFlowComplete:
 #- assertVisible: "SHARE"
 #- assertVisible: "EXPORT DATA"
 - takeScreenshot: "${TESTRESULTSDIR}/line_chart_graph_report"
+
+# Verify student user has no permission to see Reports tab
+- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- assertNotVisible: "Reports"
