@@ -57,6 +57,9 @@ echo (sha256 from apksigner verify) | sed 's/../&:/g; s/:$//' | tr [:lower:] [:u
 * Add the SHA-256 to [assetlinks.json] and publish assetlinks.json in .well-known on https for domain.
   Note: the SHA-256 in the default assetlinks.json is the Google Play signing key for the Ustad Mobile
   app. The assetlinks.json file can be checked using [Google's statement list tester](https://developers.google.com/digital-asset-links/tools/generator).
+  Google APIs can cache the statements; current status can be checked using the 
+  [Digital Asset Links API](https://developers.google.com/digital-asset-links/reference/rest) e.g.
+  ```https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://ustadmobile.app&relation=delegate_permission/common.handle_all_urls```
 
 __Setting or adding a domain for app links and passkeys:__
 
