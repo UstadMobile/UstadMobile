@@ -25,11 +25,15 @@ class VerifySignInWithPasskeyUseCase(
     private val db: UmAppDatabase,
     private val repo: UmAppDatabase?,
     private val json: Json,
-
-    ) {
+) {
 
     private val webAuthnManager: WebAuthnManager = WebAuthnManager.createNonStrictWebAuthnManager()
+
     var result: AuthenticationData? = null
+
+    /**
+     * TODO: Document what this code is based on and provide link
+     */
     suspend operator fun invoke(
         authenticationResponseJSON: AuthenticationResponseJSON,
         rpId: String,
@@ -102,7 +106,7 @@ class VerifySignInWithPasskeyUseCase(
         }
     }
 
-    private  fun createCredentialRecord(
+    private fun createCredentialRecord(
         passkeyData: PersonPasskey?,
     ): CredentialRecord?{
 

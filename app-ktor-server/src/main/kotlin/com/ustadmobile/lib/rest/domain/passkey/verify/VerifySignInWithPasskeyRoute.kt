@@ -16,7 +16,11 @@ fun Route.VerifySignInWithPasskeyRoute(
 ) {
     post("verifypasskey") {
         val authenticationResponseJSON: AuthenticationResponseJSON = call.receive()
-        val rpId = call.request.queryParameters["rpId"] ?: ""
+        val rpId = call.request.queryParameters["rpId"]
+        if(rpId == null) {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
 
         try {
             val response = useCase(call).invoke(

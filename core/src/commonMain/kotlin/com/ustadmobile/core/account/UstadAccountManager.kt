@@ -331,17 +331,10 @@ class UstadAccountManager(
 
         val savePassKeyUseCase: SavePersonPasskeyUseCase = di
             .on(LearningSpace(apiUrlConfig.systemBaseUrl)).direct.instance()
-        savePassKeyUseCase.invoke(passkeyResult,person)
+        savePassKeyUseCase(passkeyResult, person)
 
         val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
             .requireRepository()
-//        try {
-//            getSiteFromDbOrLoadFromHttp(repo)
-//        }catch (e:Exception){
-//
-//        }
-
-
 
         val session = addSession(person, learningSpaceUrl, null)
         repo.withDoorTransactionAsync {
@@ -351,9 +344,7 @@ class UstadAccountManager(
         }
         di.on(learningSpace).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
-
         currentUserSession = session
-
     }
 
     suspend fun register(
@@ -525,7 +516,6 @@ class UstadAccountManager(
      *  so during login it return so endpointUrl we can get after @ , so with this url we can check in
      *  that database where person is added.
      */
-    @OptIn(ExperimentalEncodingApi::class)
     suspend fun loginWithPasskey(
         passkeyWebAuthNResponse: AuthenticationResponseJSON,
         currentServerUrl:String
@@ -543,7 +533,7 @@ class UstadAccountManager(
             parameter("rpId", Url(apiUrlConfig.systemBaseUrl).host)
         }.bodyAsText()
         Napier.d { "passkeyres : $loginResponse" }
-       val passkeyVerifyResult= json.decodeFromString<PasskeyVerifyResult>(loginResponse)
+        val passkeyVerifyResult= json.decodeFromString<PasskeyVerifyResult>(loginResponse)
 
         if(!passkeyVerifyResult.isVerified) {
             throw UnauthorizedException("Account not found")

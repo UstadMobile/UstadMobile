@@ -5,6 +5,7 @@ import com.ustadmobile.door.entities.NodeIdAndAuth
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.ext.use
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.Person
@@ -20,13 +21,11 @@ class UsernameSuggestionUseCaseTest {
         expectedUsername: String,
     ) {
         val nodeIdAndAuth = NodeIdAndAuth(Random.nextLong(), randomUuid().toString())
-        val db = DatabaseBuilder.databaseBuilder(
+        DatabaseBuilder.databaseBuilder(
             UmAppDatabase::class,
             "jdbc:sqlite::memory:",
             nodeId = nodeIdAndAuth.nodeId
-        ).build()
-
-        try {
+        ).build().use { db ->
             runBlocking {
                 db.withDoorTransactionAsync {
                     existingUsernames.forEach {
@@ -44,8 +43,6 @@ class UsernameSuggestionUseCaseTest {
                 val result = useCase(inputName)
                 assertEquals(expectedUsername, result)
             }
-        } finally {
-            db.close()
         }
     }
 
