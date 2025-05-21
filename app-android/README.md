@@ -57,12 +57,16 @@ echo (sha256 from apksigner verify) | sed 's/../&:/g; s/:$//' | tr [:lower:] [:u
 * Add the SHA-256 to [assetlinks.json] and publish assetlinks.json in .well-known on https for domain.
   Note: the SHA-256 in the default assetlinks.json is the Google Play signing key for the Ustad Mobile
   app. The assetlinks.json file can be checked using [Google's statement list tester](https://developers.google.com/digital-asset-links/tools/generator).
+  Google APIs can cache the statements; current status can be checked using the 
+  [Digital Asset Links API](https://developers.google.com/digital-asset-links/reference/rest) e.g.
+  ```https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://ustadmobile.app&relation=delegate_permission/common.handle_all_urls```
 
 __Setting or adding a domain for app links and passkeys:__
 
 * Set systemUrl in buildconfig properties (see KDoc on [SystemUrlConfig.kt](../core/src/commonMain/kotlin/com/ustadmobile/core/impl/config/SystemUrlConfig.kt))
 * Add the domain to [AndroidManifest.xml](./src/main/AndroidManifest.xml) app link intent-filter
-* Publish [assetlinks.json] as per [official docs](https://developer.android.com/training/app-links#manage-verify) including SHA256 fingerprints
+* Publish [assetlinks.json] as per [official docs](https://developer.android.com/training/app-links#manage-verify) including SHA256 fingerprints and update
+  the package_name if required.
 * Add domain to [assets_statement_values.xml](app-android/src/main/res/values/assets_statement_values.xml)
 
 ### Command line signing (for release APK) :

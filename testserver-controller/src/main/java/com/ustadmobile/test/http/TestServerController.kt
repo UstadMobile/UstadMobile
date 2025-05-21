@@ -236,9 +236,10 @@ fun Application.testServerController() {
                             )
 
                             try {
-                                serverRunner.start()
                                 runningServers.add(serverRunner)
+                                serverRunner.start()
                             }catch(e: Throwable) {
+                                runningServers.remove(serverRunner)
                                 serverRunner.stop()
                                 throw e
                             }

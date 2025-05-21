@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
+import com.ustadmobile.core.domain.credentials.passkey.DecodeUserHandleUseCase
 import com.ustadmobile.core.domain.credentials.username.ParseCredentialUsernameUseCase
 import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -29,6 +30,7 @@ import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedi
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.lib.db.entities.Person
 import io.github.aakira.napier.Napier
+import io.ktor.util.decodeBase64String
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -82,6 +84,8 @@ class AddAccountSelectNewOrExistingViewModel(
 
     private val setLanguageUseCase: SetLanguageUseCase by instance()
 
+    private val decodeUserHandleUseCase : DecodeUserHandleUseCase by instance()
+
     private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val impl: UstadMobileSystemImpl by instance()
@@ -117,16 +121,18 @@ class AddAccountSelectNewOrExistingViewModel(
             try {
                 when (val credentialResult = getCredentialUseCase?.invoke()) {
                     is GetCredentialUseCase.PasskeyCredentialResult -> {
-                        val userHandle = credentialResult.passKeySignInData.userHandle
-                            .base64StringToByteArray()
-                        val endpointUrl= userHandle.decodeToString().substringAfter("@")
+                        val userHandle = credentialResult.passkeyWebAuthNResponse.
+                        response.userHandle
+                            ?: throw IllegalStateException("userHandle not found")
+                        val (learningSpace, personPasskeyUid) = decodeUserHandleUseCase(userHandle)
+
 
                         val account = accountManager.loginWithPasskey(
-                            credentialResult.passKeySignInData,
-                            apiUrlConfig.systemBaseUrl,
+                            credentialResult.passkeyWebAuthNResponse,
+                            learningSpace.url,
                         )
 
-                        goToNextDestAfterSignIn(account.toPerson(), endpointUrl)
+                        goToNextDestAfterSignIn(account.toPerson(), learningSpace.url)
                     }
 
                     is GetCredentialUseCase.PasswordCredentialResult -> {
