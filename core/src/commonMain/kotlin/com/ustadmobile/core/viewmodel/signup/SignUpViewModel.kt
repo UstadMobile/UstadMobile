@@ -6,9 +6,10 @@ import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.core.domain.credentials.CreatePasskeyParams
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
+import com.ustadmobile.core.domain.username.GetUsernameSuggestionUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -17,8 +18,10 @@ import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.username.helper.UsernameErrorException
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.appendSelectedAccount
+import com.ustadmobile.core.util.ext.stringResourceOrMessage
 import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
@@ -37,6 +40,7 @@ import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -80,7 +84,14 @@ data class SignUpUiState(
     val showOtherOption: Boolean = true,
 
     val isPersonalAccount: Boolean = false,
-) {
+
+    val usernameError: String? = null,
+
+    val usernameSetByUser: Boolean = false,
+
+    val errorText: String? = null,
+
+    ) {
 
 
 }
@@ -112,6 +123,12 @@ class SignUpViewModel(
     val addNewPersonUseCase: AddNewPersonUseCase = di.on(LearningSpace(serverUrl)).direct.instance()
 
     private val genderConfig: GenderConfig by instance()
+
+    private val getUsernameSuggestionUseCase :GetUsernameSuggestionUseCase = di.on(LearningSpace(serverUrl)).direct.instance()
+
+    private val filterUsernameUseCase = FilterUsernameUseCase()
+
+    private var usernameSuggestionJob: Job? = null
 
     //Run EnqueueSavePictureUseCase after the database transaction has finished.
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
@@ -199,6 +216,10 @@ class SignUpViewModel(
                     prev.person?.firstNames,
                     entity?.firstNames, prev.fullNameError
                 ),
+                usernameError = updateErrorMessageOnChange(
+                    prev.person?.username,
+                    entity?.username, prev.usernameError
+                ),
             )
         }
 
@@ -248,8 +269,68 @@ class SignUpViewModel(
         }
     }
 
+    fun onUsernameChanged(newValue: String) {
+        val filteredValue = filterUsernameUseCase(
+            username = newValue,
+            invalidCharReplacement = ""
+        )
+
+        val updatedPerson = _uiState.value.person?.shallowCopy {
+            username = filteredValue
+        }
+        _uiState.update {
+            it.copy(
+                usernameSetByUser = _uiState.value.person?.username != filteredValue,
+                person = updatedPerson,
+            )
+        }
+    }
+
+    fun onFullNameFocusedChanged(hasFocused: Boolean){
+        if (hasFocused) return
+
+        if (_uiState.value.usernameSetByUser&&!_uiState.value.person?.fullName().isNullOrEmpty())
+            return
+
+        usernameSuggestionJob?.cancel()
+
+        usernameSuggestionJob = viewModelScope.launch {
+
+            val fullName = _uiState.value.fullName.orEmpty()
+            if (fullName.isBlank()) return@launch
+
+            try {
+
+                val suggestedUsername = getUsernameSuggestionUseCase(fullName)
+
+                val updatedPerson = _uiState.value.person?.shallowCopy {
+                    username = suggestedUsername
+                }
+
+                _uiState.update {
+                    it.copy(person = updatedPerson)
+                }
+
+            } catch (e: UsernameErrorException) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        usernameError = e.stringResourceOrMessage(systemImpl),
+                    )
+                }
+            }catch (e: Exception) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        errorText = e.stringResourceOrMessage(systemImpl),
+                    )
+                }
+            }
+        }
+
+    }
+
+
     private fun SignUpUiState.hasErrors(): Boolean {
-        return fullNameError != null || genderError != null
+        return fullNameError != null || genderError != null|| usernameError != null
     }
 
 
@@ -282,6 +363,10 @@ class SignUpViewModel(
                     requiredFieldMessage
                 else
                     null,
+                usernameError = if (savePerson.username.isNullOrEmpty())
+                    requiredFieldMessage
+                else
+                    null,
             )
         }
 
@@ -298,16 +383,11 @@ class SignUpViewModel(
                 savePerson.personUid = uid
 
                 if(createPasskeyUseCaseVal != null) {
+                    val username = savePerson.username ?: throw
+                    IllegalStateException("username can not be null")
+
                     val passkeyCreated = createPasskeyUseCaseVal(
-                        CreatePasskeyParams(
-                            username = savePerson.firstNames.toString(),
-                            personUid = uid.toString(),
-                            doorNodeId = di.doorIdentityHashCode.toString(),
-                            usStartTime = systemTimeInMillis(),
-                            serverUrl = serverUrl,
-                            masterUrl = apiUrlConfig.systemBaseUrl,
-                            person = savePerson
-                        )
+                            username = username,
                     )
 
                     accountManager.registerWithPasskey(
@@ -413,7 +493,9 @@ class SignUpViewModel(
             prev.copy(
                 fullNameError = if (savePerson.firstNames.isNullOrEmpty()) requiredFieldMessage else null,
                 genderError = if (savePerson.gender == GENDER_UNSET) requiredFieldMessage else null,
-            )
+                usernameError = if (savePerson.username.isNullOrEmpty()) requiredFieldMessage else null,
+
+                )
         }
         if (_uiState.value.hasErrors()) {
             return

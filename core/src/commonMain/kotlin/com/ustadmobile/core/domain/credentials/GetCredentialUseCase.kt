@@ -1,5 +1,7 @@
 package com.ustadmobile.core.domain.credentials
 
+import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
+
 /**
  * Use case to get a saved credential - passkey or username/password. This is a non-scoped
  * singleton (because there is one credential manager on the system).
@@ -25,7 +27,7 @@ interface GetCredentialUseCase {
      * Passkey result
      */
     data class PasskeyCredentialResult(
-        val passKeySignInData: PassKeySignInData
+        val passkeyWebAuthNResponse: AuthenticationResponseJSON
     ) : CredentialResult()
 
     data class Error(

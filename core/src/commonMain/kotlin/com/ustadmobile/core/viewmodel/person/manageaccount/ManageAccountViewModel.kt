@@ -4,7 +4,6 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.domain.credentials.CreatePasskeyParams
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -128,19 +127,12 @@ class ManageAccountViewModel(
     fun onCreatePasskeyClick() {
         viewModelScope.launch {
             val passkeyCreated = createPasskeyUseCase?.invoke(
-                CreatePasskeyParams(
-                    username = accountManager.currentUserSession.person.firstNames.toString(),
-                    personUid = accountManager.currentUserSession.person.personUid.toString(),
-                    doorNodeId = di.doorIdentityHashCode.toString(),
-                    usStartTime = systemTimeInMillis(),
-                    serverUrl = accountManager.activeLearningSpace.url,
-                    masterUrl = apiUrlConfig.systemBaseUrl,
-                    person = accountManager.currentUserSession.person
-                )
+                    username = accountManager.currentUserSession.person.username.toString(),
             )
             if (passkeyCreated != null) {
                 savePassKeyUseCase?.invoke(
-                    passkeyResult = passkeyCreated
+                    passkeyResult = passkeyCreated,
+                    person = accountManager.currentUserSession.person
                 )
             }
 
