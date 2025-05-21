@@ -1667,6 +1667,7 @@ val MIGRATION_204_205 = DoorMigrationStatementList(204, 205) { db ->
         } else {
             add("CREATE TABLE IF NOT EXISTS PersonPasskey (  ppPersonUid  BIGINT  NOT NULL , ppAttestationObj  TEXT , ppClientDataJson  TEXT , ppOriginString  TEXT , ppId  TEXT , ppChallengeString  TEXT , ppPublicKey  TEXT , isRevoked  INTEGER  NOT NULL , ppPasskeyLct  BIGINT  NOT NULL , personPasskeyUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
         }
+
     }
 }
 
