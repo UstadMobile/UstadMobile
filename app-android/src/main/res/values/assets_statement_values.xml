@@ -2,7 +2,7 @@
 <resources>
     <string name="asset_statements" translatable="false">
     [{
-      \"include\": \"https://testproxy.devserver3.ustadmobile.com/.well-known/assetlinks.json\"
+      \"include\": \"https://learning-tree.app/.well-known/assetlinks.json\"
     }]
     </string>
 </resources>
