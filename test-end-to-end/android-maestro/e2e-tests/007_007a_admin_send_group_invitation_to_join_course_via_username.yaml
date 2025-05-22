@@ -1,0 +1,67 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "build/reports/maestro/007_007a_admin_send_group_invitation_to_join_course_via_username/Screenshots"
+onFlowStart:
+  - startRecording: 007_007a_admin_send_group_invitation_to_join_course_via_username
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+---
+- runScript:
+    file: "common/import_users_via_http.js"
+    env:
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Unenrolled_Teacher_And__Student_list.csv"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn:
+    text: "Members"
+    index: 0
+- tapOn: "Add a student"
+- tapOn: "Invite Via Contact"
+- tapOn: "Add Username, Email or Phone"
+- hideKeyboard
+- inputText: "@stud1 , @stud2"
+- tapOn: "Send"
+- tapOn: "Messages"
+- assertVisible: "Student 1"
+- assertVisible: "Student 2"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: "Messages"
+- tapOn: "Teacher 1"
+- runFlow:
+    when:
+      visible:
+        text: "Be careful interacting online and in-app!"
+    commands:
+      - tapOn: "Got it"
+- assertVisible: ".*Invitation to Test Course Block.*"
+- tapOn: ".*http.*"
+- tapOn: "Accept"
+- tapOn: "Courses"
+- tapOn: "Test Course Block"
+- tapOn:
+    text: "Members"
+    index: 0
+- assertVisible: "Student 1"
