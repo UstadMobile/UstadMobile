@@ -17,5 +17,12 @@ class PublicKeyCredentialCreationOptionsJSON(
     val attestation: String = "none",
     val attestationFormats: List<String> = emptyList(),
     val extensions: Map<String, String> = emptyMap()
-)
+) {
+    companion object {
+        //the time out value is required for for showing google password manager
+        const val TIME_OUT_VALUE : Long = 1800000
+
+    }
+}
+
 
