@@ -4,7 +4,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.report.query.RunReportUseCase.Companion.reportQueryResultsToResultStatementReportRows
 import com.ustadmobile.core.util.ext.age
-import com.ustadmobile.core.util.ext.bodyAsDecodedText
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.doorNodeIdHeader
 import com.ustadmobile.door.ext.setBodyJson
@@ -13,10 +12,13 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ReportQueryResult
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.appendPathSegments
+import io.ktor.http.isSuccess
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 
 /**
@@ -32,7 +34,7 @@ class RunReportUseCaseClientImpl(
     private val learningSpace: Endpoint,
     private val httpClient: HttpClient,
     private val json: Json,
-): RunReportUseCase {
+) : RunReportUseCase {
 
     constructor(
         db: UmAppDatabase,
@@ -40,7 +42,7 @@ class RunReportUseCaseClientImpl(
         learningSpace: Endpoint,
         httpClient: HttpClient,
         json: Json,
-    ): this(db, repo.config.nodeId, repo.config.auth, learningSpace, httpClient, json)
+    ) : this(db, repo.config.nodeId, repo.config.auth, learningSpace, httpClient, json)
 
     override fun invoke(
         request: RunReportUseCase.RunReportRequest
@@ -68,25 +70,65 @@ class RunReportUseCaseClientImpl(
                 timeZone = request.timeZone.id
             )
 
-            if(!isFresh) {
+            if (!isFresh) {
                 val rowsJsonText = try {
-                    httpClient.post {
+                    val response = httpClient.post {
                         url {
                             takeFrom(learningSpace.url)
                             appendPathSegments("api/report/run")
                         }
-
                         doorNodeIdHeader(clientNodeId, clientNodeAuth)
                         setBodyJson(json, RunReportUseCase.RunReportRequest.serializer(), request)
-                    }.bodyAsDecodedText()
-                }catch(e: Throwable) {
-                    e.printStackTrace()
-                    throw e
+                    }
+
+                    if (!response.status.isSuccess()) {
+                        val errorBody = response.bodyAsText()
+                        throw IOException("HTTP ${response.status}: ${errorBody.take(200)}")
+                    }
+
+                    val responseText = response.bodyAsText()
+                    println("DEBUG: Server response: $responseText")
+                    responseText
+                } catch (e: IOException) {
+                    emit(
+                        RunReportUseCase.RunReportResult(
+                            timestamp = systemTimeInMillis(),
+                            request = request,
+                            results = emptyList(),
+                            age = 0,
+                        )
+                    )
+                    return@flow
                 }
 
-                val response = json.decodeFromString(
-                    RunReportUseCase.RunReportResult.serializer(), rowsJsonText
-                )
+                if (rowsJsonText.isBlank()) {
+                    emit(
+                        RunReportUseCase.RunReportResult(
+                            timestamp = systemTimeInMillis(),
+                            request = request,
+                            results = emptyList(),
+                            age = 0,
+                        )
+                    )
+                    return@flow
+                }
+
+                val response = try {
+                    json.decodeFromString(
+                        RunReportUseCase.RunReportResult.serializer(),
+                        rowsJsonText
+                    )
+                } catch (e: Exception) {
+                    emit(
+                        RunReportUseCase.RunReportResult(
+                            timestamp = systemTimeInMillis(),
+                            request = request,
+                            results = emptyList(),
+                            age = 0,
+                        )
+                    )
+                    return@flow
+                }
                 val lastModTime = systemTimeInMillis() - (response.age * 1000)
 
                 val responseQueryResults = response.results.flatMapIndexed { index, rows ->

@@ -18,6 +18,8 @@ import react.Props
 import react.dom.html.ReactHTML
 import react.useEffect
 import react.useRef
+import space.kscience.dataforge.meta.configure
+import space.kscience.plotly.PlotlyConfig
 import space.kscience.plotly.bar
 import space.kscience.plotly.layout
 import space.kscience.plotly.models.AxisType
@@ -47,7 +49,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
 
     useEffect(props.graphSeriesList, props.reportOptions) {
         val container = containerRef.current ?: return@useEffect
-        var maxUnitSuffix = "ms" // Default unit
+        var maxUnitSuffix = "ms"
 
         val allYValues = props.graphSeriesList.flatMap { series ->
             series.data.map { it.yAxis }
@@ -62,7 +64,14 @@ val ReportGraph = FC<ReportGraphProps> { props ->
         (container as HTMLElement).clear()
         (container as HTMLElement).append {
             div {
-                plotDiv {
+                plotDiv(
+                    plotlyConfig = PlotlyConfig {
+                        configure {
+                            "displayModeBar" put !isCompact
+                            "staticPlot" put isCompact
+                        }
+                    }
+                ) {
                     props.graphSeriesList.forEach { series ->
                         val groupedData = series.data.groupBy { it.subgroup }
 
@@ -93,9 +102,16 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         if (isCompact) {
                             width = 250
                             height = 250
+                            margin {
+                                l = 40
+                                r = 20
+                                t = 30
+                                b = 40
+                                pad = 0
+                            }
                         }
-                        autosize = true
                         xaxis {
+                            automargin = true
                             title {
                                 text = props.reportOptions.xAxis?.name
                                     ?: props.strings[MR.strings.x_axis]
@@ -105,8 +121,10 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                             type = AxisType.category
                         }
                         yaxis {
+                            automargin = true  // Let Plotly handle margins
                             title {
-                                text = getYAxisTitle(props.reportOptions, props.strings, maxUnitSuffix)
+                                text =
+                                    getYAxisTitle(props.reportOptions, props.strings, maxUnitSuffix)
                                 font { size = if (isCompact) 6 else 16 }
                             }
                         }
@@ -134,9 +152,11 @@ private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<D
             maxY >= 1_000 -> Pair(1.0 / 1_000, "sec")
             else -> Pair(1.0, "ms")  // Handle milliseconds case
         }
+
         else -> Pair(1.0, "")
     }
 }
+
 private fun transformYAxisValues(
     data: List<ReportResultQueryRow>,
     reportOptions: ReportOptions2,

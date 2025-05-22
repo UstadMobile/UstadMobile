@@ -32,6 +32,8 @@ import mui.material.ListItem
 import mui.material.ListItemButton
 import mui.material.ListItemIcon
 import mui.material.ListItemText
+import mui.material.TypographyProps
+import mui.material.styles.TypographyOptions
 import react.FC
 import react.Props
 import react.ReactNode
@@ -39,10 +41,20 @@ import react.create
 import react.router.useLocation
 import react.useMemo
 import tanstack.react.query.UseInfiniteQueryResult
+import web.cssom.AlignItems
+import web.cssom.BackgroundColor
+import web.cssom.Color
 import web.cssom.Contain
+import web.cssom.FontSize
+import web.cssom.FontWeight
 import web.cssom.Height
 import web.cssom.Overflow
+import web.cssom.PlaceItems
+import web.cssom.Position
+import web.cssom.TextTransform
+import web.cssom.Top
 import web.cssom.pct
+import web.cssom.px
 
 external interface ReportListProps : Props {
     var uiState: ReportListUiState
@@ -89,25 +101,43 @@ val ReportListItem = FC<ReportListItemProps> { props ->
     }
 
     ListItem {
-        divider = true
+        sx = jso {
+            position = Position.relative
+            paddingTop = 16.px
+            paddingBottom = 16.px
+        }
+
+        mui.material.IconButton {
+            sx = jso {
+                position = Position.absolute
+                top = 16.px
+                right = 16.px
+            }
+            mui.icons.material.Close {
+                onClick = {
+                    props.onRemoveReport(props.report.reportUid)
+                }
+            }
+        }
+
         ListItemButton {
             onClick = { props.onListItemClick(props.report) }
+
             ReportGraph {
                 this.graphSeriesList = graphSeriesList
                 this.reportOptions = reportDataResult.options ?: ReportOptions2()
                 this.strings = string
                 this.compact = true
             }
+
             ListItemText {
+                sx = jso {
+                    fontWeight = FontWeight.bold
+                }
                 primary = ReactNode(props.report.reportTitle)
-            }
-        }
-        secondaryAction = ListItemIcon.create {
-            mui.material.IconButton {
-                mui.icons.material.Delete {
-                    onClick = {
-                        props.onRemoveReport(props.report.reportUid)
-                    }
+                primaryTypographyProps = jso {
+                    FontWeight.bold
+                    TextTransform.capitalize
                 }
             }
         }
