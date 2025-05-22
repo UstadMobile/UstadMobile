@@ -38,6 +38,7 @@ import react.FC
 import react.Props
 import react.ReactNode
 import react.create
+import react.dom.html.ReactHTML.div
 import react.router.useLocation
 import react.useMemo
 import tanstack.react.query.UseInfiniteQueryResult
@@ -103,8 +104,6 @@ val ReportListItem = FC<ReportListItemProps> { props ->
     ListItem {
         sx = jso {
             position = Position.relative
-            paddingTop = 16.px
-            paddingBottom = 16.px
         }
 
         mui.material.IconButton {
@@ -129,15 +128,13 @@ val ReportListItem = FC<ReportListItemProps> { props ->
                 this.strings = string
                 this.compact = true
             }
-
             ListItemText {
-                sx = jso {
-                    fontWeight = FontWeight.bold
-                }
                 primary = ReactNode(props.report.reportTitle)
                 primaryTypographyProps = jso {
-                    FontWeight.bold
-                    TextTransform.capitalize
+                    style = jso {
+                        fontWeight = FontWeight.bolder
+                        padding = 16.px
+                    }
                 }
             }
         }
