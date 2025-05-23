@@ -10,11 +10,11 @@ data class ReportSeries2(
 
     val reportSeriesUid: Int = 0,
 
-    val reportSeriesTitle: String = "",
+    val reportSeriesTitle: String = "Series 1",
 
-    val reportSeriesYAxis: ReportSeriesYAxis? = ReportSeriesYAxis.TOTAL_DURATION,
+    val reportSeriesYAxis: ReportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION,
 
-    val reportSeriesVisualType: ReportSeriesVisualType? = ReportSeriesVisualType.BAR_CHART,
+    val reportSeriesVisualType: ReportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
 
     val reportSeriesSubGroup: ReportXAxis? = ReportXAxis.NONE,
 

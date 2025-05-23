@@ -271,7 +271,7 @@
     <string name="verb">Verb</string>
     <string name="add_a_new_verb">Add a new verb</string>
     <string name="id_verbentity_urlid">ID: %s</string>
-    <string name="edit_filters">Edit filters</string>
+    <string name="edit_filters">Edit filter</string>
     <string name="field_person_gender">Person gender</string>
     <string name="field_person_age">Person age</string>
     <string name="field_content_completion">Content completion status</string>
@@ -1960,7 +1960,7 @@
     <string name="subtitles">Subtitles</string>
 
     <!--  Edit Report -->
-    <string name="edit_report">Edit Report</string>
+    <string name="edit_report">Edit report</string>
     <string name="add_a_new_report">Add a new report</string>
     <string name="field">Field</string>
     <string name="condition">Condition</string>

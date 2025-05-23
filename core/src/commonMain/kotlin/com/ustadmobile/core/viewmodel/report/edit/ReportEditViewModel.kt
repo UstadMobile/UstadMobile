@@ -5,6 +5,8 @@ import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
 import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
+import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
+import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -85,9 +87,9 @@ class ReportEditViewModel(
                         series = listOf(
                             ReportSeries2(
                                 reportSeriesUid = 1,
-                                reportSeriesVisualType = null,
+                                reportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
                                 reportSeriesSubGroup = null,
-                                reportSeriesYAxis = null,
+                                reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION,
                                 reportSeriesFilters = emptyList()
                             )
                         )
@@ -310,14 +312,15 @@ class ReportEditViewModel(
 
     fun onAddSeries() {
         _uiState.update { prev ->
+            val newUid = (prev.reportOptions2.series.maxOfOrNull { it.reportSeriesUid } ?: 0) + 1
             prev.copy(
                 reportOptions2 = prev.reportOptions2.copy(
                     series = prev.reportOptions2.series + ReportSeries2(
-                        reportSeriesUid = (prev.reportOptions2.series.maxOfOrNull { it.reportSeriesUid }
-                            ?: 0) + 1,
-                        reportSeriesVisualType = null,
+                        reportSeriesUid = newUid,
+                        reportSeriesTitle = "Series $newUid", // Set default title here
+                        reportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
                         reportSeriesSubGroup = null,
-                        reportSeriesYAxis = null
+                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
                     ),
                 )
             )
