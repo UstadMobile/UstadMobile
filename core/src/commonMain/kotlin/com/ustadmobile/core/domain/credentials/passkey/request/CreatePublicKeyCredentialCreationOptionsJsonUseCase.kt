@@ -68,6 +68,7 @@ class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
                 name = credentialUsername,
                 displayName = credentialUsername,
             ),
+            timeout = PublicKeyCredentialCreationOptionsJSON.TIME_OUT_VALUE,
             challenge = challenge.encodeBase64(),
             pubKeyCredParams = listOf(
                 PublicKeyCredentialParameters(
