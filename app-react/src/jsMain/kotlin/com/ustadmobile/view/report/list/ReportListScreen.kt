@@ -105,6 +105,7 @@ val ReportListItem = FC<ReportListItemProps> { props ->
         sx = jso {
             margin = 16.px
             padding = 16.px
+            backgroundColor =Color("#f5f5f5")
         }
 
         CardHeader {
@@ -170,7 +171,6 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
                 spacing = responsive(2)
                 sx = jso {
                     padding = 16.px
-                    backgroundColor = Color("#f0f0f0")
                 }
                 infiniteQueryItemsIndexed(
                     infiniteQueryResult = infiniteQueryResult,

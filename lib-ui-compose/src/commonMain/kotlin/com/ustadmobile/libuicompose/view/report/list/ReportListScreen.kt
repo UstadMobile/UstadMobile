@@ -142,7 +142,7 @@ private fun ReportGridCard(
                     modifier = Modifier
                         .height(200.dp)
                         .fillMaxWidth()
-                        .background(Color.LightGray.copy(alpha = 0.2f)),
+                        .background(Color.LightGray.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
                     when {
