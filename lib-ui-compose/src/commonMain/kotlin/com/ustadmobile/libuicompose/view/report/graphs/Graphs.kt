@@ -1,5 +1,6 @@
 package com.ustadmobile.libuicompose.view.report.graphs
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -117,11 +118,13 @@ fun CombinedGraph(
     }
 
     ChartLayout(
-        modifier = modifier.defaultChartPadding(),
+        modifier = modifier,
         legend = { if (!compactMode) CombinedLegend(series, colorMap) else null },
-        legendLocation = if (compactMode) LegendLocation.NONE else LegendLocation.BOTTOM
+        legendLocation = LegendLocation.BOTTOM
     ) {
         XYGraph(
+            modifier = modifier
+                .fillMaxSize(),
             xAxisModel = FloatLinearAxisModel(
                 range = (-0.5f)..(allXValues.size - 0.5f),
                 minimumMajorTickIncrement = 1f
@@ -137,7 +140,6 @@ fun CombinedGraph(
                     ReportXAxis.GENDER -> getGenderLabel(rawValue)
                     else -> rawValue?.toString() ?: ""
                 }
-                if (!compactMode)
                 AxisValue(
                     label = label,
                     Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
@@ -150,7 +152,7 @@ fun CombinedGraph(
                 } else {
                     "%.0f".format(it)  // Shows whole numbers for counts
                 }
-                if (!compactMode)
+
                 AxisValue(formattedValue, Modifier.defaultItemPadding(end = 4.dp))
             },
             yAxisTitle = {

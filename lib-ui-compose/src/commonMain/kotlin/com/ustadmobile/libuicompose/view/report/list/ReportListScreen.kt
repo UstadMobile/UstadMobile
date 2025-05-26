@@ -3,13 +3,20 @@ package com.ustadmobile.libuicompose.view.report.list
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -71,15 +78,19 @@ fun ReportListScreen(
         pagingSourceFactory = uiState.reportList,
         refreshCommandFlow = listRefreshCommand,
     )
+    val pagingItems = doorRepoPager.lazyPagingItems
 
-    UstadLazyColumn(
-        modifier = Modifier.fillMaxSize()
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(200.dp), // Minimum card width 300dp
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(4.dp)
     ) {
         ustadPagedItems(
-            pagingItems = doorRepoPager.lazyPagingItems,
+            pagingItems = pagingItems,
             key = { it.reportUid },
         ) { report ->
-            ReportListItem(
+            ReportGridCard(
                 report = report,
                 viewModel = viewModel,
                 onItemClick = onListItemClick,
@@ -90,7 +101,7 @@ fun ReportListScreen(
 }
 
 @Composable
-private fun ReportListItem(
+private fun ReportGridCard(
     report: Report?,
     viewModel: ReportListViewModel,
     onItemClick: (Report) -> Unit,
@@ -98,7 +109,6 @@ private fun ReportListItem(
 ) {
     if (report == null) return
 
-    // Collect report data
     val reportDataFlow = remember(report.reportUid) {
         viewModel.runReport(report)
     }
@@ -106,76 +116,95 @@ private fun ReportListItem(
         initial = ReportDataResult(null, emptyList())
     )
 
-    val graphSeries = remember(reportDataResult) {
-        reportDataResult.options?.series?.mapIndexed { index, reportSeries ->
-            GraphSeries(
-                type = when (reportSeries.reportSeriesVisualType) {
-                    ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
-                    else -> SeriesType.BAR
-                },
-                data = reportDataResult.data.getOrNull(index)?.map { statementRow ->
-                    ReportResultQueryRow(
-                        xAxis = statementRow.xAxis,
-                        yAxis = statementRow.yAxis,
-                        subgroup = statementRow.subgroup
-                    )
-                } ?: emptyList(),
-                name = reportSeries.reportSeriesTitle
-            )
-        } ?: emptyList()
-    }
-
-    ListItem(
+    Card(
         modifier = Modifier
-            .clickable { onItemClick(report) }
-            .fillMaxWidth(),
-        headlineContent = {
-            Text(
-                report.reportTitle ?: "",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        leadingContent = {
-            Box(
+            .padding(10.dp)
+            .fillMaxWidth()
+            .clickable { onItemClick(report) },
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Box {
+            Column(
                 modifier = Modifier
-                    .size(100.dp, 100.dp),
-                contentAlignment = Alignment.Center
+                    .padding(4.dp)
+                    .fillMaxWidth()
             ) {
-                when {
-                    reportDataResult.options == null ->
-                        CircularProgressIndicator(Modifier.size(24.dp))
-
-                    reportDataResult.data.isEmpty() ->
-                        Text("No data", style = MaterialTheme.typography.bodySmall)
-
-                    else -> CombinedGraph(
-                        series = graphSeries,
-                        xAxisLabel = reportDataResult.options?.xAxis ?: ReportXAxis.GENDER,
-                        yAxisLabel = stringResource(MR.strings.activity),
-                        isDurationType = reportDataResult.options?.series?.any {
-                            it.reportSeriesYAxis?.type == YAxisTypes.DURATION
-                        } ?: false,
-                        compactMode = true,
-                    )
-                }
-            }
-        },
-        trailingContent = {
-            Box(
-                modifier = Modifier
-                    .size(80.dp, 80.dp)
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.TopEnd
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = stringResource(MR.strings.delete),
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable { onRemove(report.reportUid) }
+                // Title above the chart
+                Text(
+                    report.reportTitle ?: "",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
+
+                // Chart content
+                Box(
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth()
+                        .background(Color.LightGray.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    when {
+                        reportDataResult.options == null ->
+                            CircularProgressIndicator(Modifier.size(32.dp))
+
+                        reportDataResult.data.isEmpty() ->
+                            Text("No data available", style = MaterialTheme.typography.bodyMedium)
+
+                        else -> {
+                            val graphSeries = remember(reportDataResult) {
+                                reportDataResult.options?.series?.mapIndexed { index, reportSeries ->
+                                    GraphSeries(
+                                        type = when (reportSeries.reportSeriesVisualType) {
+                                            ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
+                                            else -> SeriesType.BAR
+                                        },
+                                        data = reportDataResult.data.getOrNull(index)?.map { statementRow ->
+                                            ReportResultQueryRow(
+                                                xAxis = statementRow.xAxis,
+                                                yAxis = statementRow.yAxis,
+                                                subgroup = statementRow.subgroup
+                                            )
+                                        } ?: emptyList(),
+                                        name = reportSeries.reportSeriesTitle
+                                    )
+                                } ?: emptyList()
+                            }
+                            val yAxisLabel =
+                                if (reportDataResult.options?.series?.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION } == true) {
+                                    stringResource(MR.strings.duration_hours)
+                                } else {
+                                    stringResource(MR.strings.count)
+                                }
+
+                            CombinedGraph(
+                                series = graphSeries,
+                                xAxisLabel = reportDataResult.options?.xAxis ?: ReportXAxis.GENDER,
+                                yAxisLabel = yAxisLabel,
+                                isDurationType = reportDataResult.options?.series?.any {
+                                    it.reportSeriesYAxis?.type == YAxisTypes.DURATION
+                                } ?: false,
+                                compactMode = true,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
+
+            // Delete icon positioned in top-right corner
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = stringResource(MR.strings.delete),
+                modifier = Modifier
+                    .size(32.dp)
+                    .padding(8.dp)
+                    .clickable { onRemove(report.reportUid) }
+                    .align(Alignment.TopEnd)
+            )
         }
-    )
+    }
 }
