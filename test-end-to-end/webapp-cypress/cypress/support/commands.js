@@ -405,10 +405,10 @@ Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
  * cy.ustadSetDateTime(cy.get("input#id"), new Date(Date.now() + (2*60*1000))
  */
 Cypress.Commands.add("ustadSetDateTime", (element, date) => {
-    element.type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +
+    element.should('not.be.disabled').type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +
     String(date.getDate()).padStart(2, '0') + "T" + String(date.getHours()).padStart(2, '0') +
     ":" + String(date.getMinutes()).padStart(2,'0')
-  );
+, {timeout:12000} );
 });
 
 
