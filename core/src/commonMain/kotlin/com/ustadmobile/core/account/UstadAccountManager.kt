@@ -330,7 +330,7 @@ class UstadAccountManager(
         val learningSpace = LearningSpace(learningSpaceUrl)
 
         val savePassKeyUseCase: SavePersonPasskeyUseCase = di
-            .on(LearningSpace(apiUrlConfig.systemBaseUrl)).direct.instance()
+            .on(learningSpace).direct.instance()
         savePassKeyUseCase(passkeyResult, person)
 
         val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()

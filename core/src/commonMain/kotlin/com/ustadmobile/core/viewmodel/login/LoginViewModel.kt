@@ -61,6 +61,7 @@ data class LoginUiState(
     val showWaitForRestart: Boolean = false,
     val showPoweredBy: Boolean = false,
     val isPersonalAccount: Boolean = false,
+    val errorText: String? = null,
 
     )
 
@@ -369,6 +370,11 @@ class LoginViewModel(
                     }
 
                     is GetCredentialUseCase.Error -> {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                errorText = (credentialResult.message),
+                            )
+                        }
                         Napier.e { "Error occurred: ${credentialResult.message}"}
                     }
                 }

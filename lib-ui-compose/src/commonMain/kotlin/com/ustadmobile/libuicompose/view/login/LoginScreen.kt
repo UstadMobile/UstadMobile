@@ -70,7 +70,9 @@ fun LoginScreen(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
-
+        uiState.errorText?.also { errorText ->
+            Text(color = MaterialTheme.colorScheme.error, text = errorText)
+        }
         Text(text = uiState.loginIntentMessage ?: "")
 
         OutlinedTextField(

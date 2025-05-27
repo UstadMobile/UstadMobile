@@ -61,6 +61,7 @@ import com.ustadmobile.core.domain.credentials.passkey.DecodeUserHandleUseCase
 import com.ustadmobile.core.domain.credentials.passkey.EncodeUserHandleUseCase
 import com.ustadmobile.core.domain.credentials.passkey.GetCredentialUseCaseImpl
 import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
+import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialRequestOptionsJsonUseCase
 import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCaseImpl
 import com.ustadmobile.core.domain.passkey.DecodeUserHandleUseCaseImpl
 import com.ustadmobile.core.domain.passkey.EncodeUserHandleUseCaseImpl
@@ -159,7 +160,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         bind<GetCredentialUseCase>() with singleton{
             GetCredentialUseCaseImpl(
                 context=this@AbstractAppActivity,
-                passkeyRequestJsonUseCase = instance(),
+                createPublicKeyCredentialRequestOptionsJsonUseCase = instance(),
                 apiUrlConfig = instance(),
                 json = instance()
             )
@@ -231,7 +232,11 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 encodeUserHandleUseCase = instance()
             )
         }
-
+        bind<CreatePublicKeyCredentialRequestOptionsJsonUseCase>() with provider {
+            CreatePublicKeyCredentialRequestOptionsJsonUseCase(
+                systemUrlConfig = instance(),
+            )
+        }
         registerContextTranslator { call: NanoHttpdCall -> LearningSpace(call.urlParams["endpoint"] ?: "notfound") }
 
         onReady {

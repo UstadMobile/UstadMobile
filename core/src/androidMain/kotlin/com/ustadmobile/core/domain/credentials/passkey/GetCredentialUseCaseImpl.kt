@@ -9,18 +9,17 @@ import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
-import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
-import com.ustadmobile.core.util.ext.formattedHost
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
 import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
-import com.ustadmobile.core.domain.credentials.PassKeySignInData
+import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialRequestOptionsJsonUseCase
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import io.github.aakira.napier.Napier
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class GetCredentialUseCaseImpl(
     private val context: Context,
-    private val passkeyRequestJsonUseCase: CreatePasskeyRequestJsonUseCase,
+    private val createPublicKeyCredentialRequestOptionsJsonUseCase: CreatePublicKeyCredentialRequestOptionsJsonUseCase,
     private val apiUrlConfig: SystemUrlConfig,
     private val json: Json,
 ) : GetCredentialUseCase {
@@ -30,7 +29,7 @@ class GetCredentialUseCaseImpl(
 
         val getPasswordOption = GetPasswordOption()
         val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
-            requestJson = passkeyRequestJsonUseCase.requestJsonForSignIn()
+            requestJson = json.encodeToString(createPublicKeyCredentialRequestOptionsJsonUseCase())
         )
 
         //As per https://developer.android.com/identity/sign-in/credential-manager#sign-in when
