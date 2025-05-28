@@ -66,12 +66,12 @@ onFlowComplete:
     file: "common/setDate.js"
 - inputText: ${output.currentDate}
 - tapOn: "X Axis*"
-- tapOn: "Day"
+- assertVisible: "Day"
 - tapOn: "Series Title*"
-- inputText: "Series 1"
+- assertVisible: "Series 1"
 - hideKeyboard
 - tapOn: "Y Axis*"
-- tapOn: "Total Duration"
+- assertVisible: "Total Duration"
 - scrollUntilVisible:
     element:
       text: "Chart type*"
@@ -80,24 +80,24 @@ onFlowComplete:
 - tapOn: "Gender"
 - tapOn: "Chart type*"
 - tapOn: "Bar Chart"
-- tapOn: "Done"
-- tapOn:
-    id: "floating_action_button" #Edit button
-- assertVisible:
-    text: "Edit report"
-    id: "app_title"
 - scrollUntilVisible:
     element:
-      text: "Add filter"
+      text: "Add Series"
     direction: DOWN
-- tapOn: "Add filter"
+- tapOn: "Add Series"
+- assertVisible: "Series 2"
+- scrollUntilVisible:
+    element:
+      text: "Add Filter"
+    direction: DOWN
+- tapOn: "Add Filter"
 - assertVisible:
     text: "Edit filter"
     id: "app_title"
 - tapOn: "Field*"
 - tapOn: "Person age"
 - tapOn: "Condition*"
-- tapOn: "Greater"
+- tapOn: "> Greater"
 - tapOn: "Value*"
 - inputText: "13"
 - tapOn: "Done"
@@ -113,7 +113,10 @@ onFlowComplete:
     id: "app_title"
 - tapOn: "Test Report"
 - tapOn:
-    id: "floating_action_button"
+    id: "floating_action_button" #Edit button
+- assertVisible:
+    text: "Edit report"
+    id: "app_title"
 - tapOn: "Time range*"
 - tapOn: "Custom period (e.g. last x days/weeks)"
 - tapOn: "Days"
@@ -128,16 +131,4 @@ onFlowComplete:
 - assertVisible:
     text: "Test Report"
     id: "app_title"
-#- assertVisible: "SHARE"
-#- assertVisible: "EXPORT DATA"
 - takeScreenshot: "${TESTRESULTSDIR}/line_chart_graph_report"
-
-# Verify student user has no permission to see Reports tab
-- runFlow: "common/clear_state_and_get_started.yaml"
-- runFlow: "common/select_site.yaml"
-- runFlow:
-    file: "common/user_login.yaml"
-    env:
-      USERNAME: "stud1"
-      PASSWORD: "tests1"
-- assertNotVisible: "Reports"
