@@ -85,6 +85,7 @@
     <string name="attendance">Attendance</string>
     <string name="classes">Classes</string>
     <string name="exams">Exams</string>
+    <string name="report">Report</string>
     <string name="reports">Reports</string>
     <string name="choose_template">Choose template</string>
     <string name="save_as_template">Save as template</string>

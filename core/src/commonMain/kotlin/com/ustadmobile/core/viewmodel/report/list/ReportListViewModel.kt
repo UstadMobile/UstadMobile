@@ -59,7 +59,7 @@ class ReportListViewModel(
                     MR.strings.select_person
                 ),
                 fabState = FabUiState(
-                    text = systemImpl.getString(MR.strings.reports),
+                    text = systemImpl.getString(MR.strings.report),
                     icon = FabUiState.FabIcon.ADD,
                     onClick = this::onClickAdd,
                 )

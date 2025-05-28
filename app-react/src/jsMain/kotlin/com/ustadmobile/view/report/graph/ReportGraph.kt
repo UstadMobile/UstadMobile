@@ -29,6 +29,7 @@ import space.kscience.plotly.models.TraceType
 import space.kscience.plotly.plotDiv
 import space.kscience.plotly.scatter
 import web.cssom.Overflow
+import web.cssom.px
 
 external interface ReportGraphProps : Props {
     var graphSeriesList: List<GraphSeries>
@@ -66,6 +67,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
             div {
                 plotDiv(
                     plotlyConfig = PlotlyConfig {
+                        responsive = true
                         configure {
                             "displayModeBar" put !isCompact
                             "staticPlot" put isCompact
@@ -100,16 +102,17 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                     }
                     layout {
                         if (isCompact) {
-                            width = 320
+                           width = 320
                             height = 250
                             margin {
-                                l = 10
-                                r = 10
-                                t = 10
-                                b = 10
+                                l = 30
+                                r = 30
+                                t = 20
+                                b = 40
                                 pad = 0
                             }
                         }
+                        autosize = true
                         xaxis {
                             automargin = true
                             title {
@@ -121,7 +124,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                             type = AxisType.category
                         }
                         yaxis {
-                            automargin = true  // Let Plotly handle margins
+                            automargin = true
                             title {
                                 text =
                                     getYAxisTitle(props.reportOptions, props.strings, maxUnitSuffix)
@@ -139,6 +142,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
     ReactHTML.div {
         ref = containerRef
         style = jso {
+            padding = 4.px
             overflow = Overflow.clip
         }
     }

@@ -33,7 +33,6 @@ import mui.material.Card
 import mui.material.CardActionArea
 import mui.material.CardHeader
 import mui.material.Container
-import mui.material.Grid
 import mui.material.IconButton
 import mui.material.Stack
 import mui.material.StackDirection
@@ -43,6 +42,7 @@ import react.Props
 import react.ReactNode
 import react.create
 import react.router.useLocation
+import react.useEffect
 import react.useMemo
 import react.useRef
 import react.useState
@@ -54,7 +54,14 @@ import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
 import web.cssom.px
+import web.dom.getComputedStyle
+import web.events.Event
+import web.events.EventHandler
+import web.events.addEventListener
+import web.events.removeEventListener
 import web.html.HTMLElement
+import web.window.Window
+import web.window.resize
 import web.window.window
 
 external interface ReportListProps : Props {
@@ -104,9 +111,8 @@ val ReportListItem = FC<ReportListItemProps> { props ->
 
     Card {
         sx = jso {
-            margin = 16.px
-            padding = 16.px
-            width = (props.width).px
+            padding = 8.px
+            width = (props.width - 20).px
             backgroundColor = Color("#f5f5f5")
         }
 
@@ -126,6 +132,12 @@ val ReportListItem = FC<ReportListItemProps> { props ->
         }
 
         CardActionArea {
+            sx = jso {
+                width = 100.pct
+                display = web.cssom.Display.flex
+                flexDirection = web.cssom.FlexDirection.column
+                alignItems = web.cssom.AlignItems.center
+            }
             onClick = { props.onListItemClick(props.report) }
 
             ReportGraph {
@@ -158,6 +170,27 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
     val containerRef = useRef<HTMLElement>(null)
 
     val cardMinWidth = 320
+    useEffect(containerRef.current?.clientWidth) {
+        fun calcContainerWidth() {
+            val currentEl = containerRef.current
+            if(currentEl != null) {
+                val computedStyle = getComputedStyle(currentEl)
+                containerWidth = currentEl.clientWidth -
+                        computedStyle.paddingLeft.filter { it.isDigit() || it == '.' }.toInt() -
+                        computedStyle.paddingRight.filter { it.isDigit() }.toInt()
+            }
+        }
+
+        val eventListener :  EventHandler<Event, Window> = EventHandler {
+            calcContainerWidth()
+        }
+
+        window.addEventListener(Event.Companion.resize(), eventListener)
+
+        cleanup {
+            window.removeEventListener(Event.Companion.resize(), eventListener)
+        }
+    }
     val cardsPerRow = kotlin.math.max(containerWidth / cardMinWidth, 1)
     val cardWidth = containerWidth / cardsPerRow
 
@@ -169,34 +202,31 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
             overflowY = Overflow.scroll
         }
         content = virtualListContent {
-            Grid {
-                container = true
-                spacing = responsive(2)
-                sx = jso {
-                    padding = 16.px
-                }
-                infiniteQueryItemsIndexed(
-                    infiniteQueryResult = infiniteQueryResult,
-                    itemToKey = { _, index ->
-                        index.toString()
-                    },
-                    dataPagesToItems = { pages ->
-                        pages.mapNotNull { it as? PagingSourceLoadResultPage<Int, Report> }
-                            .flatMap {
-                                it.data
-                            }.chunked(cardsPerRow)
-                    },
-                ) { reports, _ ->
-                    Stack.create {
-                        direction = responsive(StackDirection.row)
-                        reports?.forEach { reportValue ->
-                            ReportListItem {
-                                this.report = reportValue ?: Report()
-                                this.onListItemClick = props.onListItemClick
-                                this.onRemoveReport = props.onRemoveReport
-                                this.runReport = props.runReport
-                                this.width = cardWidth
-                            }
+            infiniteQueryItemsIndexed(
+                infiniteQueryResult = infiniteQueryResult,
+                itemToKey = { _, index ->
+                    index.toString()
+                },
+                dataPagesToItems = { pages ->
+                    pages.mapNotNull { it as? PagingSourceLoadResultPage<Int, Report> }
+                        .flatMap {
+                            it.data
+                        }.chunked(cardsPerRow)
+                },
+            ) { reports, _ ->
+                Stack.create {
+                    spacing = responsive(2)
+                    sx = jso {
+                        padding = 12.px
+                    }
+                    direction = responsive(StackDirection.row)
+                    reports?.forEach { reportValue ->
+                        ReportListItem {
+                            this.report = reportValue ?: Report()
+                            this.onListItemClick = props.onListItemClick
+                            this.onRemoveReport = props.onRemoveReport
+                            this.runReport = props.runReport
+                            this.width = cardWidth
                         }
                     }
                 }
