@@ -2010,15 +2010,14 @@
 
     <string name="false_key">false</string>
 
-    <string name="equals">Equals</string>
-    <string name="not_equals">Not Equals</string>
-    <string name="greater">Greater</string>
-    <string name="lesser">Lesser</string>
-    <string name="between">Between</string>
+    <string name="equals">= Equals</string>
+    <string name="not_equals">!= Not Equals</string>
+    <string name="greater">&gt; Greater</string>
+    <string name="lesser">&lt; Lesser</string>
     <string name="in_list">In List</string>
     <string name="not_in_list">Not In List</string>
-    <string name="greater_or_equal">Greater Than or Equal</string>
-    <string name="lesser_or_equal">Less Than or Equal</string>
+    <string name="greater_or_equal">&gt; = Greater Than or Equal</string>
+    <string name="lesser_or_equal">&lt; = Less Than or Equal</string>
 
     <string name="other">Other</string>
     <string name="export_data">Export data</string>
