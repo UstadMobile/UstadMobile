@@ -1975,7 +1975,7 @@
     <string name="chart_type">Chart type</string>
     <string name="time_range">Time range</string>
     <string name="filters">Filters</string>
-    <string name="add_filter">Add filter</string>
+    <string name="add_filter">Add Filter</string>
     <string name="add_series">Add Series</string>
     <string name="total_duration">Total Duration</string>
     <string name="average_duration">Average Duration</string>
