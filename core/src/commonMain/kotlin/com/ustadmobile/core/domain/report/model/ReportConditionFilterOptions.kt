@@ -13,6 +13,8 @@ enum class Comparisons(
     NOT_EQUALS(MR.strings.not_equals, "!="),
     GREATER(MR.strings.greater, ">"),
     LESSER(MR.strings.lesser, "<"),
+    GREATER_OR_EQUAL(MR.strings.greater_or_equal, ">="),
+    LESSER_OR_EQUAL(MR.strings.lesser_or_equal, "<="),
     BETWEEN(MR.strings.between, "BETWEEN");
 }
 
@@ -33,6 +35,8 @@ sealed class ReportConditionFilterOptions(
             Comparisons.NOT_EQUALS,
             Comparisons.GREATER,
             Comparisons.LESSER,
+            Comparisons.GREATER_OR_EQUAL,
+            Comparisons.LESSER_OR_EQUAL,
             Comparisons.BETWEEN
         )
     )
