@@ -19,7 +19,6 @@ import mui.material.Box
 import mui.material.Card
 import mui.material.Divider
 import mui.material.Grid
-import mui.material.Orientation
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.Stack
@@ -93,56 +92,52 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
 private val moreOption = FC<ReportDetailProps> { props ->
     val strings = useStringProvider()
 
-    val subgroupNamePart = props.uiState.reportOptions2.series
-        .firstOrNull()
-        ?.reportSeriesSubGroup
-        ?.label
-        ?.let { strings[it] }
-
-    val subgroupLabel = if (subgroupNamePart != null) {
-        "${strings[MR.strings.subgroup_by]} - $subgroupNamePart"
-    } else {
-        strings[MR.strings.subgroup_by]
-    }
-
-    val headerLabels = listOf(
-        strings[MR.strings.x_axis],
-        strings[MR.strings.y_axis],
-        subgroupLabel
-    )
-
     UstadStandardContainer {
-        Card {
-            sx {
-                padding = 16.px
-                overflowX = "auto".unsafeCast<Overflow>()
+        props.uiState.reportResults.forEachIndexed { seriesIndex, seriesRows ->
+            val seriesConfig = props.uiState.reportOptions2.series.getOrNull(seriesIndex)
+            val subgroupNamePart = seriesConfig?.reportSeriesSubGroup?.label?.let { strings[it] }
+
+            val subgroupLabel = if (subgroupNamePart != null) {
+                "${strings[MR.strings.subgroup_by]} - $subgroupNamePart"
+            } else {
+                strings[MR.strings.subgroup_by]
             }
 
-            // Header
-            Grid {
-                container = true
-                spacing = responsive(2)
+            val headerLabels = listOf(
+                strings[MR.strings.x_axis],
+                strings[MR.strings.y_axis],
+                subgroupLabel
+            )
+
+            Card {
                 sx {
-                    padding = 8.px
-                    backgroundColor = "grey.100".unsafeCast<Color>()
+                    marginBottom = 16.px
+                    overflowX = "auto".unsafeCast<Overflow>()
                 }
 
-                headerLabels.forEach { label ->
-                    Grid {
-                        item = true
-                        xs = 4
-                        Typography {
-                            +label.toString()
-                            variant = TypographyVariant.h6
+                // Table Header
+                Grid {
+                    container = true
+                    spacing = responsive(2)
+                    sx {
+                        padding = 8.px
+                        backgroundColor = "grey.100".unsafeCast<Color>()
+                    }
+
+                    headerLabels.forEach { label ->
+                        Grid {
+                            item = true
+                            xs = 4
+                            Typography {
+                                +label.toString()
+                                variant = TypographyVariant.h6
+                            }
                         }
                     }
                 }
-            }
 
-            Divider {}
+                Divider {}
 
-            // Data Rows
-            props.uiState.reportResults.forEachIndexed { seriesIndex, seriesRows ->
                 seriesRows.forEach { row ->
                     Grid {
                         container = true
@@ -154,21 +149,18 @@ private val moreOption = FC<ReportDetailProps> { props ->
                             }
                         }
 
-                        // X-Axis
                         Grid {
                             item = true
                             xs = 4
                             Typography { +row.xAxis }
                         }
 
-                        // Y-Axis
                         Grid {
                             item = true
                             xs = 4
                             Typography { +row.yAxis.toString() }
                         }
 
-                        // Subgroup
                         Grid {
                             item = true
                             xs = 4
@@ -176,6 +168,12 @@ private val moreOption = FC<ReportDetailProps> { props ->
                         }
                     }
                     Divider {}
+                }
+            }
+
+            Box {
+                sx {
+                    height = 16.px
                 }
             }
         }

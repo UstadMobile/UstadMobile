@@ -1,16 +1,13 @@
 package com.ustadmobile.libuicompose.view.report.detail
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
@@ -30,6 +27,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
+import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
@@ -118,36 +116,11 @@ fun BarGraphSampleScreen(
 }
 
 @Composable
-fun MoreOptionsSection(
-    reportOptions: ReportOptions2,
-    data: List<GraphSeries>,
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        item {
-            HorizontalDivider(thickness = 1.dp)
-        }
-
-        items(data) { series ->
-            DataTable(data = series.data, reportOptions = reportOptions)
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
-
-@Composable
 fun DataTable(
     data: List<ReportResultQueryRow>,
-    reportOptions: ReportOptions2
+    reportSeries: ReportSeries2
 ) {
-    val subgroupName = reportOptions.series
-        .firstOrNull()
-        ?.reportSeriesSubGroup
-        ?.label
-        ?.let { stringResource(it) }
-
+    val subgroupName = reportSeries.reportSeriesSubGroup?.label?.let { stringResource(it) }
     val subgroupByStr = stringResource(MR.strings.subgroup_by)
 
     val subgroupLabel = remember(subgroupName) {
@@ -171,7 +144,6 @@ fun DataTable(
         elevation = 4.dp
     ) {
         Column {
-            // Header Row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -198,7 +170,6 @@ fun DataTable(
 
             HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
 
-            // Data Rows
             data.forEach { row ->
                 Row(
                     modifier = Modifier
@@ -233,6 +204,30 @@ fun DataTable(
                     )
                 }
                 HorizontalDivider(color = Color.LightGray)
+            }
+        }
+    }
+}
+
+@Composable
+fun MoreOptionsSection(
+    reportOptions: ReportOptions2,
+    data: List<GraphSeries>,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(modifier = modifier.fillMaxWidth()) {
+        item { HorizontalDivider(thickness = 1.dp) }
+
+        items(data) { series ->
+            // Get the corresponding report series by index
+            val reportSeries = reportOptions.series.getOrNull(data.indexOf(series))
+
+            reportSeries?.let {
+                DataTable(
+                    data = series.data,
+                    reportSeries = it
+                )
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

@@ -100,13 +100,13 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                     }
                     layout {
                         if (isCompact) {
-                            width = 250
+                            width = 320
                             height = 250
                             margin {
-                                l = 40
-                                r = 20
-                                t = 30
-                                b = 40
+                                l = 10
+                                r = 10
+                                t = 10
+                                b = 10
                                 pad = 0
                             }
                         }

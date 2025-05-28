@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +18,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +41,6 @@ import com.ustadmobile.core.viewmodel.report.list.ReportDataResult
 import com.ustadmobile.core.viewmodel.report.list.ReportListUiState
 import com.ustadmobile.core.viewmodel.report.list.ReportListViewModel
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.components.ustadPagedItems
 import com.ustadmobile.libuicompose.paging.rememberDoorRepositoryPager
 import com.ustadmobile.libuicompose.view.report.graphs.CombinedGraph
@@ -120,8 +117,9 @@ private fun ReportGridCard(
         modifier = Modifier
             .padding(10.dp)
             .fillMaxWidth()
-            .clickable { onItemClick(report) },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .clickable { onItemClick(report) }
+            .background(Color(0x1EF5F5F5)),
+         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box {
             Column(
@@ -141,8 +139,7 @@ private fun ReportGridCard(
                 Box(
                     modifier = Modifier
                         .height(200.dp)
-                        .fillMaxWidth()
-                        .background(Color.LightGray.copy(alpha = 0.12f)),
+                        .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
                     when {
@@ -187,6 +184,7 @@ private fun ReportGridCard(
                                 } ?: false,
                                 compactMode = true,
                                 modifier = Modifier.fillMaxSize()
+                                    .background(Color.White)
                             )
                         }
                     }

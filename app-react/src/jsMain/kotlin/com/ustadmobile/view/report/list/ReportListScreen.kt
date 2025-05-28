@@ -71,6 +71,7 @@ external interface ReportListItemProps : Props {
     var onListItemClick: (Report) -> Unit
     var onRemoveReport: (Long) -> Unit
     var runReport: (Report) -> Flow<ReportDataResult>
+    var width: Int
 }
 
 val ReportListItem = FC<ReportListItemProps> { props ->
@@ -105,7 +106,8 @@ val ReportListItem = FC<ReportListItemProps> { props ->
         sx = jso {
             margin = 16.px
             padding = 16.px
-            backgroundColor =Color("#f5f5f5")
+            width = (props.width).px
+            backgroundColor = Color("#f5f5f5")
         }
 
         CardHeader {
@@ -157,6 +159,7 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
 
     val cardMinWidth = 320
     val cardsPerRow = kotlin.math.max(containerWidth / cardMinWidth, 1)
+    val cardWidth = containerWidth / cardsPerRow
 
     VirtualList {
         style = jso {
@@ -192,6 +195,7 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
                                 this.onListItemClick = props.onListItemClick
                                 this.onRemoveReport = props.onRemoveReport
                                 this.runReport = props.runReport
+                                this.width = cardWidth
                             }
                         }
                     }
