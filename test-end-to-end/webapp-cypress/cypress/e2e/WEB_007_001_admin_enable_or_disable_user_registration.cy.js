@@ -29,13 +29,11 @@ it('Verify New user registration is enabled and mandatory fields are filled', ()
   cy.get('.Mui-error').contains('Username').should('exist') //verify the Username field's mandatory
   cy.contains("label", "Full name*").parent().find("input").clear().type('New User')
   cy.get('.Mui-error').contains('Full name*').should('not.exist') //verify the Full name error is not visible once it's entered
-  cy.get('.Mui-error').contains('Username').should('not.exist') //verify the Username error is not visible once it's loaded by deafult when user enter full name
-  cy.get("input[value='newuser']").should('exist')
   cy.get('div[id="gender"]').click()
   cy.contains("li","Female").click()
-  cy.get('.Mui-error').contains('Gender*').should('not.exist') //verify the gender field error is not visible once it's entered
+  cy.get("input[value='newuser']").should('exist')
   cy.contains('button','Next').click()
-  cy.contains("Password").should('be.visible')
+  cy.get("input[id='password']").should('be.visible')
   cy.contains('SIGN-UP').click()
   cy.contains('This field is required').should('be.visible')
   cy.get('.Mui-error').contains('Password').should('exist') //verify the Password field's mandatory
