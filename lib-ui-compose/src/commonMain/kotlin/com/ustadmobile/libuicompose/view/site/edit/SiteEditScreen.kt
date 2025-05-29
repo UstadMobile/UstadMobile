@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.Site
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadEditHeader
@@ -40,6 +41,7 @@ fun SiteEditScreen(
         onChangeTermsLanguage = viewModel::onChangeTermsLanguage,
         onChangeTermsHtml = viewModel::onChangeTermsHtml,
         onClickEditTermsInNewScreen = viewModel::onClickEditTermsInNewScreen,
+        onTogglePermission = viewModel::onTogglePermission,
     )
 }
 
@@ -51,6 +53,7 @@ fun SiteEditScreen(
     onChangeTermsLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit = { },
     onChangeTermsHtml: (String) -> Unit =  { },
     onClickEditTermsInNewScreen: () -> Unit = { },
+    onTogglePermission: (Long) -> Unit = { },
 ){
     UstadVerticalScrollColumn (
         modifier = Modifier.fillMaxSize(),
@@ -97,6 +100,17 @@ fun SiteEditScreen(
                         registrationAllowed = it
                     })
                 },
+            )
+        }
+        uiState.permissionLabels.forEach {  permissionLabel ->
+            UstadSwitchField(
+                checked = (uiState.site?.bottomNavVisibilityFlag ?: 0).hasFlag(permissionLabel.second),
+                label = stringResource(permissionLabel.first),
+                onChange = {
+                    onTogglePermission(permissionLabel.second)
+                },
+                modifier = Modifier.defaultItemPadding(),
+                enabled = uiState.fieldsEnabled,
             )
         }
 

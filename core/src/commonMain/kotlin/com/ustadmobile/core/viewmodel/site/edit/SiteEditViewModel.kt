@@ -16,9 +16,11 @@ import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.core.util.ext.replace
+import com.ustadmobile.core.util.ext.toggleFlag
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.updateAndGet
@@ -34,6 +36,7 @@ data class SiteEditUiState(
     val siteNameError: String? = null,
     val registrationEnabledError: String? = null,
     val currentSiteTermsLang: UstadMobileSystemCommon.UiLanguage = uiLangs.first(),
+    val permissionLabels: List<Pair<StringResource,Long>> = emptyList()
 ) {
     val hasErrors: Boolean = (siteNameError != null || registrationEnabledError != null)
 
@@ -59,6 +62,12 @@ class SiteEditViewModel(
     private var saveTermsHtmlJob: Job? = null
 
     init {
+
+        _uiState.update { prev ->
+            prev.copy(
+                permissionLabels = BottomNavPermissionConstants.BOTTOM_NAV_LABELS,
+            )
+        }
         val supportedLangs = languagesConfig.supportedUiLanguages
 
         val supportedLangCodes = supportedLangs.map { it.langCode }
@@ -158,7 +167,20 @@ class SiteEditViewModel(
             }
         }
     }
-
+    fun onTogglePermission(flag: Long) {
+        _uiState.update { prev ->
+            val entityVal = prev.site
+            if(entityVal != null) {
+                prev.copy(
+                    site = entityVal.shallowCopy {
+                        bottomNavVisibilityFlag = entityVal.bottomNavVisibilityFlag.toggleFlag(flag)
+                    }
+                )
+            }else {
+                prev
+            }
+        }
+    }
     fun onChangeTermsLanguage(
         uiLang: UstadMobileSystemCommon.UiLanguage
     ) {
