@@ -65,26 +65,30 @@ onFlowComplete:
 - runScript:
     file: "common/setDate.js"
 - inputText: ${output.currentDate}
-- tapOn: "X Axis*"
-- assertVisible: "Day"
-- tapOn: "Series Title*"
-- assertVisible: "Series 1"
 - hideKeyboard
+- assertVisible: "X Axis*"
+- assertVisible: "Day"
+- assertVisible: "Series Title*"
+- assertVisible: "Series 1"
 - tapOn: "Y Axis*"
-- assertVisible: "Total Duration"
+- tapOn: "Average Usage Time per User"
 - scrollUntilVisible:
     element:
       text: "Chart type*"
     direction: DOWN
 - tapOn: "Subgroup by"
 - tapOn: "Gender"
-- tapOn: "Chart type*"
-- tapOn: "Bar Chart"
+- assertVisible: "Chart type*"
+- assertVisible: "Bar Chart"
 - scrollUntilVisible:
     element:
       text: "Add Series"
     direction: DOWN
 - tapOn: "Add Series"
+- scrollUntilVisible:
+    element:
+      text: "Add Series"
+    direction: DOWN
 - assertVisible: "Series 2"
 - scrollUntilVisible:
     element:
@@ -120,7 +124,7 @@ onFlowComplete:
 - tapOn: "Time range*"
 - tapOn: "Custom period (e.g. last x days/weeks)"
 - tapOn: "Days"
-- tapOn: "Months"
+- tapOn: "Weeks"
 - scrollUntilVisible:
     element:
       text: "Chart type*"
