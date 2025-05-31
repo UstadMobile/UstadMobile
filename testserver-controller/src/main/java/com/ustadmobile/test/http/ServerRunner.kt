@@ -73,7 +73,8 @@ class ServerRunner(
                 "-config=${configFile.absolutePath}" +
                 "-P:ktor.deployment.port=$port" +
                 "-P:ktor.ustad.datadir=${dataDir.absolutePath}" +
-                "-P:ktor.ustad.jsDevServer="
+                "-P:ktor.ustad.jsDevServer=" +
+                "-P:ktor.ustad.useMockEmail=true"
 
         val commandLine = serverArgsWithSiteUrl.joinToString(separator = " ")
         println("TestServerController: exec $commandLine")

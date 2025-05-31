@@ -26,17 +26,18 @@ it('Verify New user registration is enabled and mandatory fields are filled', ()
   cy.contains('This field is required').should('be.visible')
   cy.get('.Mui-error').contains('Full name*').should('exist') //verify the Full name field's mandatory
   cy.get('.Mui-error').contains('Gender*').should('exist') //verify the Gender field's mandatory
+  cy.get('.Mui-error').contains('Username').should('exist') //verify the Username field's mandatory
   cy.contains("label", "Full name*").parent().find("input").clear().type('New User')
+  cy.get('.Mui-error').contains('Full name*').should('not.exist') //verify the Full name error is not visible once it's entered
   cy.get('div[id="gender"]').click()
   cy.contains("li","Female").click()
+  cy.get("input[value='newuser']").should('exist')
   cy.contains('button','Next').click()
-  cy.contains("label", "Username").should('be.visible')
+  cy.get("input[id='password']").should('be.visible')
   cy.contains('SIGN-UP').click()
   cy.contains('This field is required').should('be.visible')
-  cy.get('.Mui-error').contains('Username').should('exist') //verify the Username field's mandatory
   cy.get('.Mui-error').contains('Password').should('exist') //verify the Password field's mandatory
-  cy.contains("label", "Username").parent().find("input").clear().type('newuser')
-  cy.contains("label", "Password").parent().find("input").clear().type('test1234')
+  cy.get("input[id='password']").type('test1234')
   cy.contains('SIGN-UP').click()
   cy.contains('Courses',{timeout:2000}).should('be.visible')
 })

@@ -53,13 +53,8 @@ onFlowComplete:
 - tapOn: "Create username and password"
 - tapOn: "Sign-up"
 - assertVisible:
-    below:  "Username"
-    text: "This field is required" #verify the Username field's mandatory
-- assertVisible:
     below:  "Password"
     text: "This field is required" #verify the Password field's mandatory
-- tapOn: "Username"
-- inputText: "userabc"
 - tapOn: "Password"
 - inputText: "test1234"
 - tapOn: "Sign-up"
