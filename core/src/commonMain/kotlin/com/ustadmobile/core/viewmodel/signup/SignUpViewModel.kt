@@ -212,10 +212,6 @@ class SignUpViewModel(
                     prev.person?.gender,
                     entity?.gender, prev.genderError
                 ),
-                fullNameError = updateErrorMessageOnChange(
-                    prev.person?.firstNames,
-                    entity?.firstNames, prev.fullNameError
-                ),
                 usernameError = updateErrorMessageOnChange(
                     prev.person?.username,
                     entity?.username, prev.usernameError
@@ -264,7 +260,11 @@ class SignUpViewModel(
     fun onFullNameValueChange(fullName: String) {
         _uiState.update { prev ->
             prev.copy(
-                fullName = fullName
+                fullName = fullName,
+                fullNameError = updateErrorMessageOnChange(
+                    prev.fullName,
+                    fullName, prev.fullNameError
+                ),
             )
         }
     }
@@ -281,7 +281,13 @@ class SignUpViewModel(
         _uiState.update {
             it.copy(
                 usernameSetByUser = _uiState.value.person?.username != filteredValue,
+                usernameError = updateErrorMessageOnChange(
+                    _uiState.value.person?.username,
+                    updatedPerson?.username,
+                    _uiState.value.usernameError
+                ),
                 person = updatedPerson,
+
             )
         }
     }
@@ -308,7 +314,14 @@ class SignUpViewModel(
                 }
 
                 _uiState.update {
-                    it.copy(person = updatedPerson)
+                    it.copy(
+                        person = updatedPerson,
+                        usernameError = updateErrorMessageOnChange(
+                            _uiState.value.person?.username,
+                            updatedPerson?.username,
+                            _uiState.value.usernameError
+                        ),
+                    )
                 }
 
             } catch (e: UsernameErrorException) {
