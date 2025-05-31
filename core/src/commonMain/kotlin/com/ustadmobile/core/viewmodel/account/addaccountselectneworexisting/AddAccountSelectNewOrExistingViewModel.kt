@@ -49,6 +49,7 @@ data class AddAccountSelectNewOrExistingUiState(
     ),
     val languageList: List<UstadMobileSystemCommon.UiLanguage> = listOf(currentLanguage),
     val showWaitForRestart: Boolean = false,
+    val errorText: String? = null,
 )
 
 /**
@@ -144,6 +145,11 @@ class AddAccountSelectNewOrExistingViewModel(
 
                     is GetCredentialUseCase.Error -> {
                         Napier.e { "Error occurred: ${credentialResult.message}"}
+                        _uiState.update { prev ->
+                            prev.copy(
+                                errorText = (credentialResult.message),
+                            )
+                        }
                     }
 
                     null -> {

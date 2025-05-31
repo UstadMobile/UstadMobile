@@ -62,6 +62,9 @@ fun AddAccountSelectNewOrExistingScreen(
         modifier = Modifier.fillMaxHeight().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        uiState.errorText?.also { errorText ->
+            Text(color = MaterialTheme.colorScheme.error, text = errorText)
+        }
         Box {
             TopRow(
                 uiState, onSetLanguage = onSetLanguage
