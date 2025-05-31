@@ -353,7 +353,8 @@ class LoginViewModel(
 
                     is GetCredentialUseCase.PasswordCredentialResult -> {
                         val (learningSpace, username) = parseCredentialUsernameUseCase(
-                            credentialResult.credentialUsername)
+                            credentialResult.credentialUsername
+                        )
 
                         onUsernameChanged(username)
                         onPasswordChanged(credentialResult.password)
@@ -376,6 +377,10 @@ class LoginViewModel(
                             )
                         }
                         Napier.e { "Error occurred: ${credentialResult.message}"}
+                    }
+
+                    is GetCredentialUseCase.NoCredentialAvailableResult -> {
+                        //do nothing
                     }
                 }
             } catch (e: Exception) {

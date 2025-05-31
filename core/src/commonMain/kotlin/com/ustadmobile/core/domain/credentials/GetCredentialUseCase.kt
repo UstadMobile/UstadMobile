@@ -30,6 +30,22 @@ interface GetCredentialUseCase {
         val passkeyWebAuthNResponse: AuthenticationResponseJSON
     ) : CredentialResult()
 
+    /**
+     * No credentials are available: on Android this is represented as an error, but it's not really
+     * an error.
+     */
+    class NoCredentialAvailableResult: CredentialResult() {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is NoCredentialAvailableResult) return false
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return this::class.hashCode()
+        }
+    }
+
     data class Error(
         val message: String?
     ) : CredentialResult()

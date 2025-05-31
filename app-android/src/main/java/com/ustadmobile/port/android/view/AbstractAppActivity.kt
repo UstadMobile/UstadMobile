@@ -28,7 +28,6 @@ import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseAndroid
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
-import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
@@ -129,14 +128,6 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 languagesConfig = instance()
             )
         }
-        bind<CreatePasskeyRequestJsonUseCase>()  with provider {
-            CreatePasskeyRequestJsonUseCase(
-                systemImpl = instance(),
-                systemUrlConfig = instance(),
-                json = instance()
-            )
-        }
-
 
         bind<GoToLearningSpaceUseCase>() with provider {
             GoToLearningSpaceUseCaseAndroid()
@@ -161,7 +152,6 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
             GetCredentialUseCaseImpl(
                 context=this@AbstractAppActivity,
                 createPublicKeyCredentialRequestOptionsJsonUseCase = instance(),
-                apiUrlConfig = instance(),
                 json = instance()
             )
         }
@@ -227,7 +217,6 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 systemUrlConfig = instance(),
                 systemImpl = instance(),
                 createCredentialUsernameUseCase = instance(),
-                learningSpace = context,
                 db = instance(tag = DoorTag.TAG_DB),
                 encodeUserHandleUseCase = instance()
             )
