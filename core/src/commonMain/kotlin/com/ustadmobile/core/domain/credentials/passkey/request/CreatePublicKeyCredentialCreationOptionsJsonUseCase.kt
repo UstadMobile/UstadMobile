@@ -6,7 +6,6 @@ import com.ustadmobile.core.domain.credentials.passkey.model.PublicKeyCredential
 import com.ustadmobile.core.domain.credentials.passkey.model.PublicKeyCredentialRpEntity
 import com.ustadmobile.lib.util.randomString
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.credentials.passkey.EncodeUserHandleUseCase
 import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticatorSelectionCriteria
@@ -25,23 +24,15 @@ import io.ktor.util.encodeBase64
  * As per https://w3c.github.io/webauthn/#dictdef-publickeycredentialcreationoptionsjson
  *
  * The passkey rpId will always be the SystemUrlConfig.systemBaseUrl host
- * The passkey user.id will be a unique 64bit long @
+ * The passkey user.id will be a unique 64bit long.
  *
- * The passkey userHandle (e.g. PublicKeyCredentialUserEntityJSON.id) will be
- * "passkeyUid@https://learningspace.example.org/" where passkeyUid is the UID of the PersonPasskey
- * entity in the database and https://learningspace.example.org/ is the learning space url.
- * As per https://w3c.github.io/webauthn/#dictionary-user-credential-params the userHandle MUST
- * NOT contain any personally identifiable information (like usernames, email, phone etc).
- *
- * This user handle allows the app to verify the passkey on the server because it includes a) the
- * learning space url and b) the uid of the passkey itself. The server can then authenticate a
- * credential manager response (including determining the related user).
+ * The userHandle (PublicKeyCredentialUserEntityJSON.id) is encoded to include the person passkey
+ * UID and Learning Space URL - see EncodeUserHandleUseCase
  */
 class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
     private val systemUrlConfig: SystemUrlConfig,
     private val systemImpl: UstadMobileSystemImpl,
     private val createCredentialUsernameUseCase: CreateCredentialUsernameUseCase,
-    private val learningSpace: LearningSpace,
     private val db: UmAppDatabase,
     private val encodeUserHandleUseCase : EncodeUserHandleUseCase,
 ) {
@@ -68,6 +59,8 @@ class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
                 name = credentialUsername,
                 displayName = credentialUsername,
             ),
+            //Important: timeout may be optional as per the spec, but if omitted, Google Password
+            //Manager won't work as expected
             timeout = PublicKeyCredentialCreationOptionsJSON.TIME_OUT_VALUE,
             challenge = challenge.encodeBase64(),
             pubKeyCredParams = listOf(
