@@ -33,6 +33,7 @@ import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.libuicompose.components.UstadPasswordField
+import com.ustadmobile.libuicompose.components.UstadPickFileOpts
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import dev.icerock.moko.resources.compose.stringResource
@@ -49,7 +50,6 @@ fun LoginScreen(
     LoginScreen(
         uiState = uiState,
         onClickLogin = viewModel::onClickLogin,
-        onClickCreateAccount = viewModel::onClickCreateAccount,
         onClickConnectAsGuest = viewModel::onClickConnectAsGuest,
         onUsernameValueChange = viewModel::onUsernameChanged,
         onPasswordValueChange = viewModel::onPasswordChanged,
@@ -60,16 +60,19 @@ fun LoginScreen(
 fun LoginScreen(
     uiState: LoginUiState = LoginUiState(),
     onClickLogin: () -> Unit = {},
-    onClickCreateAccount: () -> Unit = {},
     onClickConnectAsGuest: () -> Unit = {},
     onUsernameValueChange: (String) -> Unit = {},
     onPasswordValueChange: (String) -> Unit = {},
 ) {
+
+
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
-
+        uiState.errorText?.also { errorText ->
+            Text(color = MaterialTheme.colorScheme.error, text = errorText)
+        }
         Text(text = uiState.loginIntentMessage ?: "")
 
         OutlinedTextField(
@@ -117,8 +120,7 @@ fun LoginScreen(
             }
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
-
+        Spacer(modifier = Modifier.height(8.dp))
         Text(text = uiState.errorMessage ?: "")
 
         Button(
@@ -130,21 +132,6 @@ fun LoginScreen(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        if(uiState.createAccountVisible) {
-            OutlinedButton(
-                onClick = onClickCreateAccount,
-                modifier = Modifier
-                    .testTag("create_account_button")
-                    .fillMaxWidth().defaultItemPadding(),
-                enabled = uiState.fieldsEnabled,
-            ) {
-                Text(stringResource(MR.strings.create_account))
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
         if(uiState.connectAsGuestVisible) {
             OutlinedButton(
                 onClick = onClickConnectAsGuest,
@@ -156,7 +143,7 @@ fun LoginScreen(
             ) {
                 Text(stringResource(MR.strings.connect_as_guest))
             }
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         Text(

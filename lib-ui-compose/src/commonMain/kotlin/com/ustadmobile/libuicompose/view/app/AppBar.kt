@@ -46,7 +46,7 @@ import com.ustadmobile.core.impl.appstate.AppBarColors
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.core.viewmodel.account.list.AccountListViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.libuicompose.components.UstadActionButtonIcon
 import com.ustadmobile.libuicompose.components.UstadPersonAvatar
@@ -77,8 +77,7 @@ fun UstadAppBar(
 
     val di = localDI()
     val accountManager: UstadAccountManager = di.direct.instance()
-    val currentSession by accountManager.currentUserSessionFlow
-        .collectAsState(null)
+    val currentSession by accountManager.currentUserSessionFlow.collectAsState(null)
 
     var searchActive by remember {
         mutableStateOf(false)
@@ -90,10 +89,13 @@ fun UstadAppBar(
 
     val focusRequester = remember { FocusRequester() }
 
+
     //Focus the search box when it appears after the user clicks the search icon
     LaunchedEffect(searchActive) {
         if(compactHeader && searchActive)
             focusRequester.requestFocus()
+
+
     }
 
     //As per https://developer.android.com/jetpack/compose/components/app-bars#small
@@ -278,6 +280,7 @@ fun UstadAppBar(
                 }
             }
         )
+
 
         if(appUiState.loadingState.loadingState == LoadingUiState.State.INDETERMINATE) {
             LinearProgressIndicator(

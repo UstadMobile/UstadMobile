@@ -17,20 +17,23 @@ import com.ustadmobile.core.impl.nav.NavResultReturnerImpl
 import com.ustadmobile.core.impl.nav.PopNavCommand
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.HtmlEditViewModel
-import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
-import com.ustadmobile.core.viewmodel.OnBoardingViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectusertype.AddAccountSelectNewOrExistingUserTypeViewModel
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.ClazzInviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.about.OpenLicensesViewModel
-import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.core.viewmodel.account.list.AccountListViewModel
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.ClazzInviteViaContactViewModel
 import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissiondetail.CoursePermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionedit.CoursePermissionEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.permissionlist.CoursePermissionListViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteredeem.ClazzInviteRedeemViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.detail.ClazzAssignmentDetailViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.edit.ClazzAssignmentEditViewModel
 import com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit.PeerReviewerAllocationEditViewModel
@@ -63,6 +66,7 @@ import com.ustadmobile.core.viewmodel.discussionpost.courediscussiondetail.Cours
 import com.ustadmobile.core.viewmodel.discussionpost.detail.DiscussionPostDetailViewModel
 import com.ustadmobile.core.viewmodel.discussionpost.edit.DiscussionPostEditViewModel
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
+import com.ustadmobile.core.viewmodel.individual.IndividualLearnerViewModel
 import com.ustadmobile.core.viewmodel.interop.externalapppermissionrequestredirect.GrantExternalAppPermissionRedirectViewModel
 import com.ustadmobile.core.viewmodel.interop.externalapppermissionrequest.ExternalAppPermissionRequestViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
@@ -73,15 +77,20 @@ import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
+import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
+import com.ustadmobile.core.viewmodel.person.child.EditChildProfileViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
+import com.ustadmobile.core.viewmodel.person.manageaccount.ManageAccountViewModel
+import com.ustadmobile.core.viewmodel.person.passkey.PasskeyListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
-import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
+import com.ustadmobile.core.viewmodel.siteenterlink.LearningSpaceEnterLinkViewModel
 import com.ustadmobile.core.viewmodel.timezone.TimeZoneListViewModel
 import com.ustadmobile.libuicompose.nav.UstadNavControllerPreCompose
 import com.ustadmobile.libuicompose.util.NavControllerUriHandler
@@ -110,7 +119,6 @@ import com.ustadmobile.libuicompose.view.discussionpost.detail.DiscussionPostDet
 import com.ustadmobile.libuicompose.view.discussionpost.edit.DiscussionPostEditScreen
 import com.ustadmobile.libuicompose.view.htmledit.HtmlEditScreen
 import com.ustadmobile.libuicompose.view.login.LoginScreen
-import com.ustadmobile.libuicompose.view.onboarding.OnboardingScreen
 import com.ustadmobile.libuicompose.view.person.accountedit.PersonAccountEditScreen
 import com.ustadmobile.libuicompose.view.person.detail.PersonDetailScreen
 import com.ustadmobile.libuicompose.view.person.edit.PersonEditScreen
@@ -121,7 +129,7 @@ import com.ustadmobile.libuicompose.view.settings.SettingsScreen
 import com.ustadmobile.libuicompose.view.site.detail.SiteDetailScreen
 import com.ustadmobile.libuicompose.view.site.edit.SiteEditScreen
 import com.ustadmobile.libuicompose.view.site.termsdetail.SiteTermsDetailScreen
-import com.ustadmobile.libuicompose.view.siteenterlink.SiteEnterLinkScreen
+import com.ustadmobile.libuicompose.view.siteenterlink.LearningSpaceEnterLinkScreen
 import com.ustadmobile.libuicompose.view.timezone.TimeZoneListScreen
 import com.ustadmobile.libuicompose.viewmodel.ustadViewModel
 import kotlinx.coroutines.channels.BufferOverflow
@@ -137,16 +145,21 @@ import org.kodein.di.instance
 import kotlin.reflect.KClass
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.core.viewmodel.settings.DeveloperSettingsViewModel
+import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
+import com.ustadmobile.core.viewmodel.signup.SignupEnterUsernamePasswordViewModel
 import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
 import com.ustadmobile.core.viewmodel.systempermission.edit.SystemPermissionEditViewModel
 import com.ustadmobile.core.viewmodel.videocontent.VideoContentViewModel
 import com.ustadmobile.core.viewmodel.xapicontent.XapiContentViewModel
 import com.ustadmobile.libuicompose.view.about.OpenLicensesScreen
-import com.ustadmobile.libuicompose.view.clazz.invitevialink.InviteViaLinkScreen
+import com.ustadmobile.libuicompose.view.clazz.invitevialink.ClazzInviteViaLinkScreen
 import com.ustadmobile.libuicompose.view.clazz.joinwithcode.JoinWithCodeScreen
 import com.ustadmobile.libuicompose.view.clazz.permissiondetail.CoursePermissionDetailScreen
 import com.ustadmobile.libuicompose.view.clazz.permissionedit.CoursePermissionEditScreen
 import com.ustadmobile.libuicompose.view.clazz.permissionlist.CoursePermissionListScreen
+import com.ustadmobile.libuicompose.view.clazz.inviteredeem.ClazzInviteRedeemScreen
+import com.ustadmobile.libuicompose.view.clazz.inviteviacontact.ClazzInviteViaContactScreen
 import com.ustadmobile.libuicompose.view.contententry.detail.ContentEntryDetailScreen
 import com.ustadmobile.libuicompose.view.contententry.edit.ContentEntryEditScreen
 import com.ustadmobile.libuicompose.view.contententry.getmetadata.ContentEntryGetMetadataScreen
@@ -161,18 +174,29 @@ import com.ustadmobile.libuicompose.view.contententry.detailattempttab.ContentEn
 import com.ustadmobile.libuicompose.view.contententry.detailattempttab.ContentEntryDetailAttemptsStatementListScreen
 import com.ustadmobile.libuicompose.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.libuicompose.view.contententry.subtitleedit.SubtitleEditScreen
+import com.ustadmobile.libuicompose.view.individual.IndividualLearnerScreen
 import com.ustadmobile.libuicompose.view.interop.externalapppermissionrequest.ExternalAppPermissionRequestScreen
 import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationListScreen
 import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
+import com.ustadmobile.libuicompose.view.newuser.AddAccountSelectNewOrExistingUserTypeScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
+import com.ustadmobile.libuicompose.view.person.child.AddChildProfilesScreen
+import com.ustadmobile.libuicompose.view.person.child.EditChildProfileScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
+import com.ustadmobile.libuicompose.view.signup.SignUpScreen
 import com.ustadmobile.libuicompose.view.systempermission.detail.SystemPermissionDetailScreen
 import com.ustadmobile.libuicompose.view.systempermission.edit.SystemPermissionEditScreen
 import com.ustadmobile.libuicompose.view.videocontent.VideoContentScreen
+import com.ustadmobile.libuicompose.view.person.addaccount.AddAccountSelectNewOrExistingScreen
+import com.ustadmobile.libuicompose.view.person.learningspacelist.LearningSpaceListScreen
+import com.ustadmobile.libuicompose.view.person.manageaccount.ManageAccountScreen
+import com.ustadmobile.libuicompose.view.person.passkey.PasskeyListScreen
+import com.ustadmobile.libuicompose.view.signup.OtherSignUpOptionSelectionScreen
+import com.ustadmobile.libuicompose.view.signup.SignUpEnterUsernamePasswordScreen
 import com.ustadmobile.libuicompose.view.xapicontent.XapiContentScreen
 import kotlinx.coroutines.flow.Flow
 
@@ -191,6 +215,8 @@ fun AppNavHost(
     navCommandFlow: Flow<NavCommand>? = null,
     initialRoute: String = "/${RedirectViewModel.DEST_NAME}",
 ) {
+    val di = localDI()
+
     val popCommandFlow = remember {
         MutableSharedFlow<PopNavCommand>(
             replay = 1,
@@ -261,7 +287,7 @@ fun AppNavHost(
         }
     }
 
-    val di = localDI()
+
 
     val navControllerUriHandler = remember {
         NavControllerUriHandler(
@@ -287,20 +313,32 @@ fun AppNavHost(
                 }
             }
 
-            contentScene("/${OnBoardingViewModel.DEST_NAME}") { backStackEntry ->
-                OnboardingScreen(
-                    appViewModel(backStackEntry, OnBoardingViewModel::class, ::OnBoardingViewModel)
+            contentScene("/${AddAccountSelectNewOrExistingViewModel.DEST_NAME}") { backStackEntry ->
+                AddAccountSelectNewOrExistingScreen(
+                    appViewModel(backStackEntry, AddAccountSelectNewOrExistingViewModel::class, ::AddAccountSelectNewOrExistingViewModel)
+                )
+            }
+            contentScene("/${AddAccountSelectNewOrExistingUserTypeViewModel.DEST_NAME}") { backStackEntry ->
+                AddAccountSelectNewOrExistingUserTypeScreen(
+                    appViewModel(backStackEntry, AddAccountSelectNewOrExistingUserTypeViewModel::class, ::AddAccountSelectNewOrExistingUserTypeViewModel)
+                )
+            }
+            contentScene("/${IndividualLearnerViewModel.DEST_NAME}") { backStackEntry ->
+                IndividualLearnerScreen(
+                    appViewModel(backStackEntry, IndividualLearnerViewModel::class) { di, savedStateHandle ->
+                        IndividualLearnerViewModel(di, savedStateHandle)
+                    }
                 )
             }
 
             contentScene(
-                route = "/${SiteEnterLinkViewModel.DEST_NAME}"
+                route = "/${LearningSpaceEnterLinkViewModel.DEST_NAME}"
             ) { backStackEntry ->
-                SiteEnterLinkScreen(
+                LearningSpaceEnterLinkScreen(
                     viewModel = appViewModel(
-                        backStackEntry, SiteEnterLinkViewModel::class
+                        backStackEntry, LearningSpaceEnterLinkViewModel::class
                     ) { di, savedStateHandle ->
-                        SiteEnterLinkViewModel(di, savedStateHandle)
+                        LearningSpaceEnterLinkViewModel(di, savedStateHandle)
                     }
                 )
             }
@@ -316,7 +354,94 @@ fun AppNavHost(
                     }
                 )
             }
-
+            contentScene(
+                route = "/${SignUpViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                SignUpScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, SignUpViewModel::class,
+                    ) { di, savedStateHandle ->
+                        SignUpViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${SignupEnterUsernamePasswordViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                SignUpEnterUsernamePasswordScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, SignupEnterUsernamePasswordViewModel::class,
+                    ) { di, savedStateHandle ->
+                        SignupEnterUsernamePasswordViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${OtherSignUpOptionSelectionViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                OtherSignUpOptionSelectionScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, OtherSignUpOptionSelectionViewModel::class,
+                    ) { di, savedStateHandle ->
+                        OtherSignUpOptionSelectionViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${AddChildProfilesViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                AddChildProfilesScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, AddChildProfilesViewModel::class,
+                    ) { di, savedStateHandle ->
+                        AddChildProfilesViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${LearningSpaceListViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                LearningSpaceListScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, LearningSpaceListViewModel::class,
+                    ) { di, savedStateHandle ->
+                        LearningSpaceListViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${ManageAccountViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                ManageAccountScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, ManageAccountViewModel::class,
+                    ) { di, savedStateHandle ->
+                        ManageAccountViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${PasskeyListViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                PasskeyListScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, PasskeyListViewModel::class,
+                    ) { di, savedStateHandle ->
+                        PasskeyListViewModel(di, savedStateHandle)
+                    }
+                )
+            }
+            contentScene(
+                route = "/${EditChildProfileViewModel.DEST_NAME}"
+            ) { backStackEntry ->
+                EditChildProfileScreen (
+                    viewModel = appViewModel(
+                        backStackEntry, EditChildProfileViewModel::class,
+                    ) { di, savedStateHandle ->
+                        EditChildProfileViewModel(di, savedStateHandle)
+                    }
+                )
+            }
             ContentEntryListViewModel.ALL_DEST_NAMES.forEach { destName ->
                 contentScene("/$destName") { backStackEntry ->
                     ContentEntryListScreenForViewModel(
@@ -810,12 +935,10 @@ fun AppNavHost(
                 )
             }
 
-            contentScene("/${InviteViaLinkViewModel.DEST_NAME}") { backStackEntry ->
-                InviteViaLinkScreen(
-                    appViewModel(
-                        backStackEntry, InviteViaLinkViewModel::class,
-                        ::InviteViaLinkViewModel
-                    )
+            contentScene("/${ClazzInviteViaLinkViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzInviteViaLinkScreen(
+                    appViewModel(backStackEntry, ClazzInviteViaLinkViewModel::class,
+                        ::ClazzInviteViaLinkViewModel)
                 )
             }
 
@@ -879,6 +1002,20 @@ fun AppNavHost(
                         backStackEntry, BulkAddPersonRunImportViewModel::class,
                         ::BulkAddPersonRunImportViewModel
                     )
+                )
+            }
+
+            contentScene("/${ClazzInviteViaContactViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzInviteViaContactScreen(
+                    appViewModel(backStackEntry, ClazzInviteViaContactViewModel::class,
+                        ::ClazzInviteViaContactViewModel)
+                )
+            }
+
+            contentScene("/${ClazzInviteRedeemViewModel.DEST_NAME}") { backStackEntry ->
+                ClazzInviteRedeemScreen(
+                    appViewModel(backStackEntry, ClazzInviteRedeemViewModel::class,
+                        ::ClazzInviteRedeemViewModel)
                 )
             }
 

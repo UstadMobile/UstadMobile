@@ -1,7 +1,6 @@
 package com.ustadmobile.core.viewmodel.clazzassignment.peerreviewerallocationedit
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZUID
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.AssignmentSubmitterAndAllocations
@@ -16,7 +15,7 @@ import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.peerreviewallocation.UpdatePeerReviewAllocationUseCase
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.util.ext.padEnd
 import com.ustadmobile.core.util.ext.replace
 import com.ustadmobile.core.util.ext.trimToSize
@@ -60,7 +59,7 @@ class PeerReviewerAllocationEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     private val updatePeerReviewAllocationUseCase: UpdatePeerReviewAllocationUseCase = UpdatePeerReviewAllocationUseCase(
-        db = di.onActiveEndpoint().direct.instance(tag = DoorTag.TAG_DB),
+        db = di.onActiveLearningSpace().direct.instance(tag = DoorTag.TAG_DB),
         systemImpl = di.direct.instance(),
     )
 ): UstadEditViewModel(

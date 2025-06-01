@@ -1,0 +1,19 @@
+appId: com.toughra.ustadmobile
+---
+
+# Test parameters needs to provide for this test :
+# 1) TESTRESULTSDIR : provide the path to store test results
+
+- tapOn: "Settings"
+- tapOn: "Site"
+- tapOn:
+      id: "floating_action_button"
+- tapOn:
+      id: "registration_allowed"
+- tapOn: "Terms and policies (English)"
+- tapOn:
+      id: "com.toughra.ustadmobile:id/editor"
+- inputText: "Terms and company policies"
+- tapOn: "Done"
+- tapOn: "Save"
+- takeScreenshot: "${TESTRESULTSDIR}/user_registration_enabled"

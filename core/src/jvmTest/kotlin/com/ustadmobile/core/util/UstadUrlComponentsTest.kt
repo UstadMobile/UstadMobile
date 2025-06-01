@@ -8,7 +8,7 @@ class UstadUrlComponentsTest {
     @Test
     fun givenUrlWithPathPrefixWithNoArgs_whenParsed_thenShouldInterpretCorrectly() {
         val components = UstadUrlComponents.parse("http://server:8087/umapp/#/AViewName")
-        assertEquals("http://server:8087/", components.endpoint)
+        assertEquals("http://server:8087/", components.learningSpace)
         assertEquals("AViewName", components.viewName)
         assertEquals("", components.queryString)
     }
@@ -16,7 +16,7 @@ class UstadUrlComponentsTest {
     @Test
     fun givenUrlWithNoPathPrefixWithNoArgs_whenParsed_thenShouldInterpretCorrectly() {
         val components = UstadUrlComponents.parse("http://server:8087/#/AViewName")
-        assertEquals("http://server:8087/", components.endpoint)
+        assertEquals("http://server:8087/", components.learningSpace)
         assertEquals("AViewName", components.viewName)
         assertEquals("", components.queryString)
     }
@@ -24,7 +24,7 @@ class UstadUrlComponentsTest {
     @Test
     fun givenUrlWithNoPathPrefixWithEmptyArgs_whenParsed_thenShouldInterpretCorrectly() {
         val components = UstadUrlComponents.parse("http://server:8087/#/AViewName?")
-        assertEquals("http://server:8087/", components.endpoint)
+        assertEquals("http://server:8087/", components.learningSpace)
         assertEquals("AViewName", components.viewName)
         assertEquals("", components.queryString)
     }
@@ -32,7 +32,7 @@ class UstadUrlComponentsTest {
     @Test
     fun givenUrlWithPathPrefixWithArgs_whenParsed_thenShouldInterpretCorrectly() {
         val components = UstadUrlComponents.parse("http://server:8087/umapp/#/AViewName?arg1=value1")
-        assertEquals("http://server:8087/", components.endpoint)
+        assertEquals("http://server:8087/", components.learningSpace)
         assertEquals("AViewName", components.viewName)
         assertEquals("arg1=value1", components.queryString)
     }

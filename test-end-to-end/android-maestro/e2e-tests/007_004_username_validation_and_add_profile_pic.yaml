@@ -23,7 +23,7 @@ onFlowComplete:
     file:  "common/download_file_via_browser.yaml"
     env:
       TESTFILENAME: "profile_Pic.jpg"
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/admin_login.yaml"
@@ -59,7 +59,7 @@ onFlowComplete:
 - inputText: uSer@ A
 - tapOn: "SAVE"
 - assertVisible: "usera"
-- assertVisible: "Change Password"
+- assertVisible: "Manage account"
 - tapOn: "People"
 - tapOn:
     id: "floating_action_button"
@@ -86,8 +86,8 @@ onFlowComplete:
 - inputText: 1234
 - tapOn: "SAVE"
 - assertVisible: "user.b_123"
-- assertVisible: "Change Password"
-- runFlow: "common/clear_state_and_get_started.yaml"
+- assertVisible: "Manage account"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
   # verify the uppercase, special characters and space are removed automatically
 - runFlow:
@@ -97,7 +97,7 @@ onFlowComplete:
       PASSWORD: "1234"
 - assertVisible: "Library"
   # verify the . _ characters are acceptable
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"

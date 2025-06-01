@@ -2,7 +2,6 @@ package com.ustadmobile.core.viewmodel.site.termsdetail
 
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_SHOW_ACCEPT_BUTTON
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.lib.db.entities.SiteTerms
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,12 +11,13 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
-import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.DetailViewModel
-import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import org.kodein.di.direct
 import org.kodein.di.on
 
@@ -29,7 +29,7 @@ data class SiteTermsDetailUiState(
 
     val error: String? = null,
 
-)
+    )
 
 class SiteTermsDetailViewModel(
     di: DI,
@@ -40,26 +40,34 @@ class SiteTermsDetailViewModel(
 
     val uiState: Flow<SiteTermsDetailUiState> = _uiState.asStateFlow()
 
-    private val getLocaleForSiteTermsUseCase: GetLocaleForSiteTermsUseCase by
-        on(accountManager.activeEndpoint).instance()
 
     init {
         val acceptButtonMode = savedStateHandle[ARG_SHOW_ACCEPT_BUTTON]?.toBoolean() ?: false
-        val apiUrl = savedStateHandle[ARG_API_URL]
+
+        val apiUrl = savedStateHandle[ARG_LEARNINGSPACE_URL]
+
+        val learningSpace=if(acceptButtonMode && apiUrl != null) {
+            LearningSpace(apiUrl)
+        }else{
+            accountManager.activeLearningSpace
+        }
+
+        val getLocaleForSiteTermsUseCase: GetLocaleForSiteTermsUseCase by on(learningSpace).instance()
 
         _appUiState.update { prev ->
             prev.copy(
                 navigationVisible = !acceptButtonMode,
-                userAccountIconVisible = !acceptButtonMode,
+                userAccountIconVisible = false,
+                hideBottomNavigation = true,
                 title = systemImpl.getString(MR.strings.terms_and_policies)
             )
         }
 
         viewModelScope.launch {
             val repo: UmAppDatabase = if(acceptButtonMode && apiUrl != null) {
-                di.direct.on(Endpoint(apiUrl)).instance(tag = DoorTag.TAG_REPO)
+                di.direct.on(learningSpace).instance<UmAppDataLayer>().repositoryOrLocalDb
             }else {
-                activeRepo
+                activeRepoWithFallback
             }
 
 
@@ -88,9 +96,10 @@ class SiteTermsDetailViewModel(
 
     fun onClickAccept() {
         navController.navigate(
-            PersonEditViewModel.DEST_NAME_REGISTER,
+            SignUpViewModel.DEST_NAME,
             args = buildMap {
-                putFromSavedStateIfPresent(PersonEditViewModel.REGISTRATION_ARGS_TO_PASS)
+                putAllFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
+                putFromSavedStateIfPresent(ARG_NEXT)
             }
         )
     }

@@ -3,9 +3,9 @@ package com.ustadmobile.core.domain.blob.download
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_CONTENTENTRYVERSION_UID
-import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_ENDPOINT
+import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_LEARNINGSPACE
 import com.ustadmobile.core.domain.blob.download.AbstractEnqueueContentManifestDownloadUseCase.Companion.DATA_JOB_UID
 import com.ustadmobile.core.domain.blob.upload.UpdateFailedTransferJobUseCase
 import kotlinx.coroutines.NonCancellable
@@ -24,14 +24,14 @@ class ContentManifestDownloadWorker(
     private val di: DI by closestDI { applicationContext }
 
     override suspend fun doWork(): Result {
-        val endpointUrl = inputData.getString(DATA_ENDPOINT) ?: return Result.failure()
-        val endpoint = Endpoint(endpointUrl)
+        val endpointUrl = inputData.getString(DATA_LEARNINGSPACE) ?: return Result.failure()
+        val learningSpace = LearningSpace(endpointUrl)
         val jobUid = inputData.getInt(DATA_JOB_UID, 0)
         val contentEntryVersionUid = inputData.getLong(DATA_CONTENTENTRYVERSION_UID, 0L)
 
-        val contentManifestDownloadUseCase: ContentManifestDownloadUseCase = di.on(endpoint).direct
+        val contentManifestDownloadUseCase: ContentManifestDownloadUseCase = di.on(learningSpace).direct
             .instance()
-        val updateFailedTransferJobUseCase: UpdateFailedTransferJobUseCase by di.on(endpoint)
+        val updateFailedTransferJobUseCase: UpdateFailedTransferJobUseCase by di.on(learningSpace)
             .instance()
 
         return try {

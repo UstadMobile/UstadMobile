@@ -22,7 +22,7 @@ import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.appstate.UstadContextMenuItem
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.MessageIdOption2
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.detail.ContentEntryDetailViewModel
@@ -147,16 +147,16 @@ class ContentEntryListViewModel(
 
     private val pagingSourceFactory: ListPagingSourceFactory<ContentEntryAndListDetail> = {
         when(_uiState.value.selectedChipId) {
-            FILTER_MY_CONTENT -> activeRepo.contentEntryDao().getContentByOwner(
+            FILTER_MY_CONTENT -> activeRepoWithFallback.contentEntryDao().getContentByOwner(
                 activeUserPersonUid
             )
 
-            FILTER_FROM_MY_COURSES -> activeRepo.contentEntryDao().getContentFromMyCourses(
+            FILTER_FROM_MY_COURSES -> activeRepoWithFallback.contentEntryDao().getContentFromMyCourses(
                 activeUserPersonUid
             )
 
             FILTER_FROM_LIBRARY -> {
-                activeRepo.contentEntryDao().getChildrenByParentUidWithCategoryFilterOrderByName(
+                activeRepoWithFallback.contentEntryDao().getChildrenByParentUidWithCategoryFilterOrderByName(
                     accountPersonUid = activeUserPersonUid,
                     parentUid = parentEntryUid,
                     langParam = 0,
@@ -167,7 +167,7 @@ class ContentEntryListViewModel(
             }
 
             FILTER_BY_PARENT_UID -> {
-                activeRepo.contentEntryDao().getChildrenByParentUidWithCategoryFilterOrderByName(
+                activeRepoWithFallback.contentEntryDao().getChildrenByParentUidWithCategoryFilterOrderByName(
                     accountPersonUid = activeUserPersonUid,
                     parentUid = parentEntryUid,
                     langParam = 0,
@@ -190,9 +190,9 @@ class ContentEntryListViewModel(
      */
     private val showSelectFolderButton = selectFolderMode && listMode == ListViewMode.PICKER
 
-    private val moveContentEntriesUseCase: MoveContentEntriesUseCase by di.onActiveEndpoint().instance()
+    private val moveContentEntriesUseCase: MoveContentEntriesUseCase by di.onActiveLearningSpace().instance()
 
-    private val deleteEntriesUseCase: DeleteContentEntryParentChildJoinUseCase by di.onActiveEndpoint().instance()
+    private val deleteEntriesUseCase: DeleteContentEntryParentChildJoinUseCase by di.onActiveLearningSpace().instance()
 
     init {
         val savedStateSelectedEntries = savedStateHandle[KEY_SAVED_STATE_SELECTED_ENTRIES]?.let {
@@ -244,7 +244,7 @@ class ContentEntryListViewModel(
             }
         }
 
-        val hasPermissionFlow = activeRepo.systemPermissionDao()
+        val hasPermissionFlow = activeRepoWithFallback.systemPermissionDao()
             .personHasSystemPermissionAsFlow(
                 accountManager.currentAccount.personUid, PermissionFlags.EDIT_LIBRARY_CONTENT
             ).shareIn(viewModelScope, SharingStarted.WhileSubscribed())
@@ -253,7 +253,7 @@ class ContentEntryListViewModel(
             defaultTitle = when {
                 (expectedResultDest != null && !selectFolderMode) -> systemImpl.getString(MR.strings.select_content)
                 parentEntryUid == LIBRARY_ROOT_CONTENT_ENTRY_UID -> systemImpl.getString(MR.strings.library)
-                else -> activeRepo.contentEntryDao().findTitleByUidAsync(parentEntryUid) ?: ""
+                else -> activeRepoWithFallback.contentEntryDao().findTitleByUidAsync(parentEntryUid) ?: ""
             }
 
             _appUiState.update { prev ->
@@ -445,7 +445,7 @@ class ContentEntryListViewModel(
                 put(ContentEntryEditViewModel.ARG_LEAF, true.toString())
                 put(ARG_PARENT_UID, parentEntryUid.toString())
                 put(ARG_NEXT, ContentEntryEditViewModel.DEST_NAME)
-                putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                putAllFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
             }
         )
     }
@@ -458,7 +458,7 @@ class ContentEntryListViewModel(
                 put(ContentEntryGetMetadataViewModel.ARG_URI, fileUri)
                 put(ContentEntryGetMetadataViewModel.ARG_FILENAME, fileName)
                 put(ARG_PARENT_UID, parentEntryUid.toString())
-                putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                putAllFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
             }
         )
     }
@@ -485,7 +485,7 @@ class ContentEntryListViewModel(
                     serializer = CourseBlockAndEditEntities.serializer(),
                     overwriteDestination = false,
                     args = buildMap {
-                        putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                        putAllFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
                         put(
                             CourseBlockEditViewModel.ARG_SELECTED_CONTENT_ENTRY,
                             json.encodeToString(

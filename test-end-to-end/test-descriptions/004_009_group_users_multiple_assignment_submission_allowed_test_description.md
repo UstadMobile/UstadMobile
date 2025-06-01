@@ -7,41 +7,45 @@ If assignment is set to allow multiple submissions, student can make another sub
 ## Step-by-Step Procedure:
 
 1. Using http api endpoint created a class with students and teachers already enrolled and setup.
-2. Login to the app using the teacher username and password.
-3. Click on "Courses" tab.
-4. Click on the course name.
-5. Click on "Edit" button.
-6. Click on "Add block" button
-7. Click on "Assignment".
-8. Enter the assignment title in the "Title" field.
-9. Enter the assignment description in the "Description" field.
-10. Click on "Group Submission" switch
-11. Click on "Groups" field.
-12. Click on "Add new groups".
-13. Enter a group title in "Title field"
-14. Enter 2 in "Number of groups" field.
-15. Assign first 3 students to Group 1.
-16. Assign last 3 students to Group 2.
-17. Click on "Save" button to save group details.
-18. Set the submission policy to "Can make multiple submissions".
-19. Click on the "Done" button.
-20. Click on the "Save" button.
-21. Clear the app storage
-22. Login to the app using the student username and password in group 1.
-23. Click on "Courses" tab.
-24. Click on the course name.
-25. Click on the assignment added by teacher.
-26. Enter the assignment text in the provided text field.
-27. Click on the "Submit" button.
-28. Verify the submit status changed to "Submitted".
-29. Clear the app storage
-30. Login to the app using the another student username and password in same group 1.
-31. Click on "Courses" tab.
-32. Click on the course name.
-33. Click on the assignment added by teacher. 
-34. The student should see their graded assignment and the marks. 
-35. Click on "Text" field 
-36. Enter the assignment text. 
-37. CLick on "Done" button. 
-38. Click on "Submit" button. 
-39. Verify the 2 submissions are visible to the user.
+2. Launch ustad app
+3. Click on "Existing User" button
+4. Click on "Enter link manually" button
+5. Enter the site link and click Next
+6. Login to the app using the teacher username and password.
+7. Click on "Courses" tab.
+8. Click on the course name.
+9. Click on "Edit" button.
+10. Click on "Add block" button
+11. Click on "Assignment".
+12. Enter the assignment title in the "Title" field.
+13. Enter the assignment description in the "Description" field.
+14. Click on "Group Submission" switch
+15. Click on "Groups" field.
+16. Click on "Add new groups".
+17. Enter a group title in "Title field"
+18. Enter 2 in "Number of groups" field.
+19. Assign first 3 students to Group 1.
+20. Assign last 3 students to Group 2.
+21. Click on "Save" button to save group details.
+22. Set the submission policy to "Can make multiple submissions".
+23. Click on the "Done" button.
+24. Click on the "Save" button.
+25. Clear the app storage
+26. Login to the app using the student username and password in group 1.
+27. Click on "Courses" tab.
+28. Click on the course name.
+29. Click on the assignment added by teacher.
+30. Enter the assignment text in the provided text field.
+31. Click on the "Submit" button.
+32. Verify the submit status changed to "Submitted".
+33. Clear the app storage
+34. Login to the app using the another student username and password in same group 1.
+35. Click on "Courses" tab.
+36. Click on the course name.
+37. Click on the assignment added by teacher. 
+38. The student should see their graded assignment and the marks. 
+39. Click on "Text" field 
+40. Enter the assignment text. 
+41. CLick on "Done" button. 
+42. Click on "Submit" button. 
+43. Verify the 2 submissions are visible to the user.

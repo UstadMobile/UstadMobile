@@ -105,11 +105,20 @@
 
 
         <!--
-        The API url endpoint can be explicitly specified by setting it in buildconfig.properties. If
-        it is not specified, the user will be prompted to enter the link.
+        UstadBuildConfig options - see buildconfig.default.properties and UstadBuildConfig.kt .
         -->
-        <meta-data android:name="com.ustadmobile.apiurl" android:value="${apiUrl}"/>
+        <meta-data android:name="com.ustadmobile.system.presetLsUrl" android:value="${presetLsUrl}"/>
 
+        <meta-data android:name="com.ustadmobile.system.systemBaseUrl" android:value="${systemBaseUrl}"/>
+
+        <meta-data android:name="com.ustadmobile.system.newPersonalAccountsLsUrl" android:value="${newPersonalAccountsLsUrl}"/>
+
+
+        <!--
+        Required to use passkeys as per
+        https://developer.android.com/identity/sign-in/credential-manager#prerequisites
+        -->
+        <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
 
         <!--
         When the app APK itself is shared locally (eg. using the share app menu which
@@ -136,6 +145,22 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+
+            </intent-filter>
+
+            <!--
+            App link intent filter
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" />
+                <data android:host="*.${systemBaseUrlHost}" />
+                <data android:host="${systemBaseUrlHost}" />
+
 
             </intent-filter>
         </activity>

@@ -31,7 +31,7 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.compose.AsyncImage
 import com.ustadmobile.core.domain.contententry.server.ContentEntryVersionServerUseCase
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentUiState
 import com.ustadmobile.core.viewmodel.epubcontent.EpubContentViewModel
 import com.ustadmobile.core.viewmodel.epubcontent.EpubScrollCommand
@@ -80,7 +80,7 @@ fun EpubContentScreen(
 ) {
     val di = localDI()
     val contentEntryVersionServer: ContentEntryVersionServerUseCase = remember {
-        di.onActiveEndpoint().direct.instance()
+        di.onActiveLearningSpace().direct.instance()
     }
 
     val recyclerViewAdapter = remember(uiState.contentEntryVersionUid) {

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.upload
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.BlobTransferJobItem
 import com.ustadmobile.core.domain.upload.ChunkInfo
@@ -54,7 +54,7 @@ class BlobUploadClientUseCaseJvmTest {
 
     private lateinit var itemsToUpload: List<BlobUploadRequestItem>
 
-    private lateinit var  endpoint: Endpoint
+    private lateinit var learningSpace: LearningSpace
 
     private lateinit var batchUuid: UUID
 
@@ -82,7 +82,7 @@ class BlobUploadClientUseCaseJvmTest {
     fun setup() {
         mockWebServer = MockWebServer()
         mockWebServer.start()
-        endpoint = Endpoint(mockWebServer.url("/").toString())
+        learningSpace = LearningSpace(mockWebServer.url("/").toString())
         val filesToUpload = (1..3).map {
             temporaryFolder.newFileFromResource(
                 javaClass, "/com/ustadmobile/core/container/testfile${it}.png"
@@ -95,7 +95,7 @@ class BlobUploadClientUseCaseJvmTest {
                 it.readSha256()
             }.encodeBase64()
 
-            val blobUrl = "${endpoint.url}api/blob/$fileSha256"
+            val blobUrl = "${learningSpace.url}api/blob/$fileSha256"
             urlMapMutable[blobUrl] = file
             BlobUploadRequestItem(
                 blobUrl = blobUrl,
@@ -197,7 +197,7 @@ class BlobUploadClientUseCaseJvmTest {
                     uploadUuid = any(),
                     totalSize = any(),
                     getChunk = any(),
-                    remoteUrl = eq("${endpoint.url}api/blob/upload-batch-data"),
+                    remoteUrl = eq("${learningSpace.url}api/blob/upload-batch-data"),
                     fromByte = any(),
                     chunkSize = any(),
                     onProgress = any(),
@@ -233,7 +233,7 @@ class BlobUploadClientUseCaseJvmTest {
         )
 
         val useCase = BlobUploadClientUseCaseJvm(
-            mockChunkedUploadUseCase, httpClient, mockCache, json, mockDatabase, mockDatabase, endpoint, testChunkSize,
+            mockChunkedUploadUseCase, httpClient, mockCache, json, mockDatabase, mockDatabase, learningSpace, testChunkSize,
         )
 
 
@@ -254,7 +254,7 @@ class BlobUploadClientUseCaseJvmTest {
                     BlobTransferJobItem(it.blobUrl, 0)
                 },
                 batchUuid = batchUuid.toString(),
-                endpoint = endpoint,
+                learningSpace = learningSpace,
                 onProgress = { },
             )
         }
@@ -272,7 +272,7 @@ class BlobUploadClientUseCaseJvmTest {
                         uploadUuid = eq(blobResponseItem.uploadUuid),
                         totalSize = eq(item.size),
                         getChunk = capture(),
-                        remoteUrl = eq("${endpoint.url}api/blob/upload-batch-data"),
+                        remoteUrl = eq("${learningSpace.url}api/blob/upload-batch-data"),
                         fromByte = eq(0),
                         chunkSize = eq(testChunkSize),
                         onProgress = any(),
@@ -320,7 +320,7 @@ class BlobUploadClientUseCaseJvmTest {
         }
 
         val useCase = BlobUploadClientUseCaseJvm(
-            mockChunkedUploadUseCase, httpClient, mockCache, json, mockDatabase, mockDatabase, endpoint, testChunkSize,
+            mockChunkedUploadUseCase, httpClient, mockCache, json, mockDatabase, mockDatabase, learningSpace, testChunkSize,
         )
         runBlocking {
             try {
@@ -329,7 +329,7 @@ class BlobUploadClientUseCaseJvmTest {
                         BlobTransferJobItem(it.blobUrl, 0)
                     },
                     batchUuid = batchUuid.toString(),
-                    endpoint = endpoint,
+                    learningSpace = learningSpace,
                     onProgress = { },
                 )
                 throw IllegalStateException("Shouldnt make it here")
@@ -377,7 +377,7 @@ class BlobUploadClientUseCaseJvmTest {
             }
 
             val useCase = BlobUploadClientUseCaseJvm(
-                mockChunkedUploadUseCase, httpClient, mockCache, json, realDatabase, mockDatabase, endpoint, testChunkSize,
+                mockChunkedUploadUseCase, httpClient, mockCache, json, realDatabase, mockDatabase, learningSpace, testChunkSize,
             )
 
             try {

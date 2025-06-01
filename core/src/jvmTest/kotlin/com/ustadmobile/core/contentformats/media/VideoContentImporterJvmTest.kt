@@ -76,7 +76,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             "/com/ustadmobile/core/container/BigBuckBunny.mp4")
 
         val importer = VideoContentImporterCommonJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             validateVideoFileUseCase = validateVideoUseCase,
@@ -99,7 +99,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
         val invalidVideoFile = temporaryFolder.newFile()
         invalidVideoFile.writeText("Hello World")
         val importer = VideoContentImporterCommonJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             validateVideoFileUseCase = validateVideoUseCase,
@@ -126,7 +126,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
         txtFile.writeText("Hello World")
 
         val importer = VideoContentImporterCommonJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             validateVideoFileUseCase = validateVideoUseCase,
@@ -148,7 +148,7 @@ class VideoContentImporterJvmTest : AbstractContentImporterTest() {
             "/com/ustadmobile/core/container/BigBuckBunny.mp4")
 
         val importer = VideoContentImporterCommonJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             validateVideoFileUseCase = validateVideoUseCase,

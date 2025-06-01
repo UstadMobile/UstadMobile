@@ -12,6 +12,8 @@
     <string name="send_apk_file">Send app file (APK)</string>
     <string name="send_app_link">Share app store link</string>
     <string name="error">Error</string>
+    <string name="create_backup">Create Backup</string>
+    <string name="create_backup_description">Backup your data</string>
     <string name="err_registering_new_user">Error registering new user:</string>
     <string name="register_empty_fields">Please fill out all required fields</string>
     <string name="register_incorrect_email">Wrong email address</string>
@@ -174,6 +176,21 @@
     <string name="onboarding_headline3">Stay organized</string>
     <string name="onboarding_subheadline3">Education content, assignments, classes, and attendance all in one place</string>
     <string name="download_continue_stacked_label">Continue download</string>
+
+    <string name="im_an_individual_learner">I\'m an individual learner</string>
+    <string name="im_an_individual_learner_description">I want to use educational content online or offline individually and track my own progress</string>
+    <string name="i_want_to_join_my_organization_school">I want to join my organization/school</string>
+    <string name="i_want_to_join_my_organization_school_description">My organization/school is already using the app</string>
+    <string name="i_want_to_add_my_organization_school">I want to add my organization/school</string>
+    <string name="i_want_to_add_my_organization_school_description">Add my organization/school so my teachers and students can use the app</string>
+    <string name="individual_action_title">Individual Learner</string>
+
+    <string name="create_new_local_account_title">Create new local account</string>
+    <string name="create_new_local_account_description">Your data will only be saved on your phone. You can manually backup to an SD card or USB drive</string>
+    <string name="restore_local_account_title">Restore local account from file</string>
+    <string name="restore_local_account_description">Create new scratch file from selection</string>
+
+
     <string name="download_continue_btn_label">Continue</string>
     <string name="download_wifi_only">Wi-Fi only</string>
     <string name="download_calculating">Calculating…</string>
@@ -1951,7 +1968,55 @@
 
     <string name="nothing_here_yet">Nothing here, yet</string>
 
+    <string name="signup_with_passkey">Sign-up with passkey</string>
+
+    <string name="other_options">Other options</string>
+
+    <string name="i_am_teacher">I\'m a teacher</string>
+
+    <string name="i_am_parent">I\'m a parent</string>
+
     <string name="select_picture_from_files">Select picture from files</string>
+
+    <string name="your_date_of_birth">Your date of birth</string>
+
+    <string name="add_child_profiles">Add Child Profiles</string>
+
+    <string name="child_profile">Child profile</string>
+
+    <string name="finish">Finish</string>
+
+    <string name="scan_badge_qr_code">Scan Badge/QR code</string>
+
+    <string name="new_user">New user</string>
+
+    <string name="existing_user">Existing user</string>
+
+    <string name="personal_account">Personal Account</string>
+    <string name="signup">Sign-up</string>
+
+    <string name="access_educational_content_download_offline">Access educational content and download for use offline for you, family members, etc.</string>
+
+    <string name="join_learning_space">Join Learning Space</string>
+
+    <string name="learning_space">Learning Space</string>
+
+    <string name="individual">Individual</string>
+
+    <string name="eg_for_your_school_organization">e.g. for your school/organization</string>
+
+    <string name="new_learning_space">New learning space</string>
+    <string name="full_name">Full name</string>
+
+    <string name="which_profile_do_you_want_to_start">Which profile do you want to start with?</string>
+    <string name="create_passkey_for_faster_and_easier_signin">Create a passkey for faster, easier sign-in</string>
+    <string name="create_username_and_password">Create username and password</string>
+    <string name="create_local_account">Create local account</string>
+    <string name="create_passkey_for_faster_and_easier_signin">Create a passkey for faster, easier sign-in</string>
+    <string name="with_passkeys_no_complex_passwords_needed">With passkeys, you don\'t need to remember complex passwords. Instead, you can use your fingerprint, face, or screen to sign in.</string>
+    <string name="enter_link_manually">Enter link manually</string>
+    <string name="registration_not_allowed">Learning space does not allow new user registration</string>
+
 
     <string name="add_subtitles">Add subtitles</string>
 
@@ -1973,6 +2038,73 @@
 
     <string name="copy_of">Copy of</string>
 
+    <string name="invite_via_contact">Invite Via Contact</string>
+
+    <string name="invite_to_course">Invite to course</string>
+
+    <string name="use_email">Use email</string>
+
+    <string name="use_phone_number">Use phone number</string>
+
+    <string name="add_username_email_phone">Add Username, Email or Phone</string>
+
+    <string name="no_valid_contact_found">No valid contact found</string>
+
+    <string name="no_contact_found">No contact found</string>
+
+    <string name="decline">Decline</string>
+
+    <string name="do_you_want_to_join_this_course">Do you want to join this course?</string>
+
+    <string name="invite_has_been_used">Invite has been used</string>
+
+    <string name="pending_invites">Pending invite</string>
+
+    <string name="expires">Expires: </string>
+
+    <string name="reminder">Reminder</string>
+
+    <string name="resend">Resend</string>
+
+    <string name="revoke">Revoke</string>
+
+    <string name="invite_code_redeemed">Invite code redeemed successfully</string>
+
+    <string name="invite_code_invalid">Invite code is invalid</string>
+
+    <string name="invite_declined">Invitation Declined</string>
+
+    <string name="invite_code_already_redeemed">Invite code is already redeemed</string>
+
+    <string name="invite_code_expired">Invite code is expired</string>
+
+    <string name="invitation_is_revoked">Invitation is revoked</string>
+
+    <string name="security">Security</string>
+
+    <string name="manage_account">Manage account</string>
+
+    <string name="passkeys">Passkeys</string>
+
+    <string name="manage">Manage</string>
+
+    <string name="created">Created</string>
+
+    <string name="create_passkey">Create a passkey</string>
+
+    <string name="last_updated">Last Updated</string>
+
+    <string name="delete_this_passkey">Delete this passkey?</string>
+
+    <string name="loss_access_passkey_dialog">You could lose access to the account if you dont have another way to sign in.</string>
+
+    <string name="sign_in_faster_next_time">Sign in faster next time</string>
+
+    <string name="secure_passkey_detail_text">You can sign in securly with your passkey using your fingerprint, face, or other lock screen method.</string>
+
+    <string name="invitations_sent">Invitations sent</string>
+
+    <string name="invitation_sent">Invitation sent</string>
 
 
 </resources>
