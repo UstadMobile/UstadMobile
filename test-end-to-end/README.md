@@ -43,7 +43,7 @@ trickle -s -d 128 -u 128 bash
 
 ### 2: Course creation, enrolment, attendance, progress
 
-2.1 [Add new course, add members to that course and add a course banner](test-descriptions/002_001_admin_add_new_course_members_and_set_course_banner_test_description.md))
+2.1 [Add new course, add members to that course , add a course banner and admin copy the course](test-descriptions/002_001_admin_add_new_course_members_and_set_course_banner_test_description.md))
 
 2.2 [Students can join class using class code or link](test-descriptions/002_002_student_joining_course_using_code_test_description.md)
 

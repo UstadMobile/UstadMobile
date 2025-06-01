@@ -38,6 +38,7 @@ import mui.icons.material.Login
 import react.dom.html.ReactHTML.img
 import react.router.useLocation
 import mui.icons.material.Shield as ShieldIcon
+import mui.icons.material.FileCopy as FileCopyIcon
 
 
 external interface ClazzDetailOverviewProps : Props {
@@ -51,6 +52,9 @@ external interface ClazzDetailOverviewProps : Props {
     var onClickCourseBlock: (CourseBlock) -> Unit
 
     var onClickPermissions: () -> Unit
+
+    var onClickCopyCourse: () -> Unit
+
 }
 
 val ClazzDetailOverviewComponent = FC<ClazzDetailOverviewProps> { props ->
@@ -108,6 +112,15 @@ val ClazzDetailOverviewComponent = FC<ClazzDetailOverviewProps> { props ->
                                     onClick = {
                                         props.onClickPermissions()
                                     }
+                                }
+                            }
+                            if(props.uiState.canAddNewCourse){
+                                UstadQuickActionButton {
+                                        text = strings[MR.strings.copy]
+                                        icon = FileCopyIcon.create()
+                                        onClick = {
+                                            props.onClickCopyCourse()
+                                        }
                                 }
                             }
                         }
@@ -210,6 +223,7 @@ val ClazzDetailOverviewScreen = FC<Props> {
         onClickCourseBlock = viewModel::onClickCourseBlock
         onClickClazzCode = viewModel::onClickClazzCode
         onClickPermissions = viewModel::onClickPermissions
+        onClickCopyCourse = viewModel::onClickCopyCourse
     }
 }
 
