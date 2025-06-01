@@ -14,7 +14,7 @@ import com.ustadmobile.core.domain.clipboard.SetClipboardStringUseCase
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.paging.RefreshCommand
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel.Companion.STATE_KEY_SCHEDULES
@@ -119,7 +119,7 @@ class ClazzDetailOverviewViewModel(
 
     val listRefreshCommandFlow: Flow<RefreshCommand> = _listRefreshCommandFlow.asSharedFlow()
 
-    private val copyCourseUseCase: CopyCourseUseCase by di.onActiveEndpoint().instance()
+    private val copyCourseUseCase: CopyCourseUseCase by di.onActiveLearningSpace().instance()
 
     init {
         _appUiState.update { prev ->
@@ -135,7 +135,7 @@ class ClazzDetailOverviewViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
+                activeRepoWithFallback.systemPermissionDao().personHasSystemPermissionAsFlow(
                     accountManager.currentAccount.personUid, PermissionFlags.ADD_COURSE
                 ).distinctUntilChanged().collect { hasPermission ->
                     _uiState.update { prev ->
@@ -188,7 +188,7 @@ class ClazzDetailOverviewViewModel(
                                 }
                             }
                             launch {
-                                activeRepo.scheduleDao().findAllSchedulesByClazzUidAsLiveList(
+                                activeRepoWithFallback.scheduleDao().findAllSchedulesByClazzUidAsLiveList(
                                     clazzUid = entityUidArg,
                                 ).collect { scheduleList ->
                                     _uiState.update { prev ->
