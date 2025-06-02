@@ -461,9 +461,9 @@
     <string name="repo_loading_status_failed_connection_error">இணைப்பு பிழை</string>
     <string name="licence_type_cc_by">சி.சி மூலம்</string>
     <string name="licence_type_cc_by_sa">சிசி எச்ஏ மூலம்</string>
-    <string name="licence_type_cc_by_sa_nc">சி.சி என்.சி.</string>
-    <string name="licence_type_cc_by_nc">சி.சி.</string>
-    <string name="licence_type_cc_by_nc_sa">சி.சி.</string>
+    <string name="licence_type_cc_by_sa_nc">எச என்சி மூலம் கபொ</string>
+    <string name="licence_type_cc_by_nc">என்சி மூலம் கபொ</string>
+    <string name="licence_type_cc_by_nc_sa">என்சி எச மூலம் கபொ</string>
     <string name="licence_type_public_domain">பொது களம்</string>
     <string name="licence_type_all_rights">அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை</string>
     <string name="license_type_cc_0">CC0</string>
@@ -502,7 +502,7 @@
     <string name="holiday">விடுமுறை</string>
     <string name="add_a_holiday">விடுமுறை சேர்க்கவும்</string>
     <string name="edit_holiday">விடுமுறையைத் திருத்து</string>
-    <string name="holidays">விடுமுறை</string>
+    <string name="holidays">விடுமுறைகள்</string>
     <string name="holiday_calendar">விடுமுறை நாட்காட்டி</string>
     <string name="add_a_new_holiday_calendar">புதிய விடுமுறை காலெண்டரைச் சேர்க்கவும்</string>
     <string name="once">ஒருமுறை</string>
@@ -582,7 +582,7 @@
     <string name="class_id">வகுப்பு ஐடி</string>
     <string name="gender_literal">பாலினம்</string>
     <string name="country">நாடு</string>
-    <string name="connectivity">இணைப்பு</string>
+    <string name="connectivity">இணைப்புதன்மை</string>
     <string name="home_internet_access">வீட்டு இணைய அணுகல்</string>
     <string name="mobile_internet_access">மொபைல் இணைய அணுகல்</string>
     <string name="connectivity_full">முழு - நான் விரும்பும் அளவுக்கு பதிவிறக்குகிறேன்</string>
@@ -674,7 +674,7 @@
     <string name="select_item">%1$s ஐத் தேர்ந்தெடுக்கவும்</string>
     <string name="from_to_date">%1$s - %2$s</string>
     <string name="num_items_with_name">%1$d %2$s</string>
-    <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4 $ s</string>
+    <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
     <string name="take_new_photo_from_camera">கேமராவிலிருந்து புதிய புகைப்படம் எடுக்கவும்</string>
     <string name="select_picture_from_gallery">கேலரியில் இருந்து படத்தைத் தேர்ந்தெடுக்கவும்</string>
     <string name="select_file">கோப்பைத் தேர்ந்தெடு</string>
@@ -727,7 +727,7 @@
     <string name="submission_type">சமர்ப்பிக்கும் வகை</string>
     <string name="public_comments">பொது கருத்துகள்</string>
     <string name="no_submission_required">சமர்ப்பிப்பு தேவையில்லை</string>
-    <string name="attachment">இணைப்பு</string>
+    <string name="attachment">இணைக்கப்பட்டது</string>
     <string name="quiz">நொடி வினா</string>
     <string name="allow_private_comments_from_students">மாணவர்களிடமிருந்து தனிப்பட்ட கருத்துகளை அனுமதிக்கவும்</string>
     <string name="add_class_comment">ஒரு வகுப்பு கருத்தைச் சேர்க்கவும்</string>
@@ -736,7 +736,7 @@
     <string name="create_site">புதிய தளத்தை உருவாக்கவும்</string>
     <string name="create_account">கணக்கை உருவாக்கவும்</string>
     <string name="my">எனது %1$s</string>
-    <string name="three_num_items_with_name_with_comma">%1$d %2$s, %3$d %4 $ s, %5 $ டி %6 $ s</string>
+    <string name="three_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d%6$s</string>
     <string name="marking">குறிக்கும்</string>
     <string name="return_and_mark_next">திரும்பவும் அடுத்து குறிக்கவும்</string>
     <string name="return_only">திரும்பவும் முடிக்கவும்</string>
@@ -1008,7 +1008,7 @@
     <string name="exit_app">வெளியேறும் பயன்பாடு</string>
     <string name="delete_app_data_from_device">சாதனத்திலிருந்து பயன்பாட்டு தரவை நீக்கு</string>
     <string name="more_options">மேலும் விருப்பங்கள்</string>
-    <string name="num_holidays">%1 $ விடுமுறை நாட்கள்</string>
+    <string name="num_holidays">%1$s விடுமுறைகள்</string>
     <string name="panic_button_explanation">%1$s தானாகவே வெளியேறலாம், இந்த சாதனத்தில் சேமிக்கப்பட்ட தரவை அழிக்கவும், பானிகிட் தரத்தை (சிற்றலை போன்றவை) ஆதரிக்கும் எந்த அச்சம் பொத்தான் பயன்பாட்டால் தூண்டப்படும்போது தன்னை மறைக்கவும் முடியும். சிற்றலை பதிவிறக்க தட்டவும்.</string>
     <string name="table_of_contents">உள்ளடக்க அட்டவணை</string>
     <string name="hide_app_explanation">மறைமுக குறியீடு: %2$s\n மறை பயன்பாடு இயக்கப்பட்டிருந்தால், அச்சம் பொத்தானைத் தூண்டும்போது %1$s மறைக்கப்பட்டு போலி நோட்பேட் பயன்பாட்டுடன் மாற்றப்படும். %1$s ஐ மறைக்க போலி நோட்பேட் பயன்பாட்டில் மேலே ( %2$s) மேலே உள்ள குறியீட்டை தட்டச்சு செய்ய வேண்டும்.</string>
