@@ -7,5 +7,4 @@ object BottomNavVisibilityFlags {
     const val SHOW_MESSAGES = 4L      // 2^2
     const val SHOW_PEOPLE = 8L        // 2^3
 
-    const val ALL = SHOW_COURSE or SHOW_LIBRARY or SHOW_MESSAGES or SHOW_PEOPLE
 }
