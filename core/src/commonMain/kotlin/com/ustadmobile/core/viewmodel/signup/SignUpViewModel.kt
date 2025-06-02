@@ -212,10 +212,6 @@ class SignUpViewModel(
                     prev.person?.gender,
                     entity?.gender, prev.genderError
                 ),
-                fullNameError = updateErrorMessageOnChange(
-                    prev.person?.firstNames,
-                    entity?.firstNames, prev.fullNameError
-                ),
                 usernameError = updateErrorMessageOnChange(
                     prev.person?.username,
                     entity?.username, prev.usernameError
@@ -264,7 +260,11 @@ class SignUpViewModel(
     fun onFullNameValueChange(fullName: String) {
         _uiState.update { prev ->
             prev.copy(
-                fullName = fullName
+                fullName = fullName,
+                fullNameError = updateErrorMessageOnChange(
+                    prev.fullName,
+                    fullName, prev.fullNameError
+                ),
             )
         }
     }
@@ -281,7 +281,13 @@ class SignUpViewModel(
         _uiState.update {
             it.copy(
                 usernameSetByUser = _uiState.value.person?.username != filteredValue,
+                usernameError = updateErrorMessageOnChange(
+                    _uiState.value.person?.username,
+                    updatedPerson?.username,
+                    _uiState.value.usernameError
+                ),
                 person = updatedPerson,
+
             )
         }
     }
@@ -308,7 +314,14 @@ class SignUpViewModel(
                 }
 
                 _uiState.update {
-                    it.copy(person = updatedPerson)
+                    it.copy(
+                        person = updatedPerson,
+                        usernameError = updateErrorMessageOnChange(
+                            _uiState.value.person?.username,
+                            updatedPerson?.username,
+                            _uiState.value.usernameError
+                        ),
+                    )
                 }
 
             } catch (e: UsernameErrorException) {
@@ -383,37 +396,46 @@ class SignUpViewModel(
                 savePerson.personUid = uid
 
                 if(createPasskeyUseCaseVal != null) {
-                    val username = savePerson.username ?: throw
-                    IllegalStateException("username can not be null")
+                    try {
+                        val username = savePerson.username ?: throw
+                        IllegalStateException("username can not be null")
 
-                    val passkeyCreated = createPasskeyUseCaseVal(
+                        val passkeyCreated = createPasskeyUseCaseVal(
                             username = username,
-                    )
-
-                    accountManager.registerWithPasskey(
-                        learningSpaceUrl = serverUrl,
-                        passkeyResult = passkeyCreated,
-                        person = savePerson,
-                        personPicture = _uiState.value.personPicture
-                    )
-
-
-                    val personPictureVal = _uiState.value.personPicture
-                    if (personPictureVal != null) {
-                        personPictureVal.personPictureUid = savePerson.personUid
-                        personPictureVal.personPictureLct = systemTimeInMillis()
-                        val personPictureUriVal = personPictureVal.personPictureUri
-
-                        enqueueSavePictureUseCase(
-                            entityUid = savePerson.personUid,
-                            tableId = PersonPicture.TABLE_ID,
-                            pictureUri = personPictureUriVal
                         )
 
+                        accountManager.registerWithPasskey(
+                            learningSpaceUrl = serverUrl,
+                            passkeyResult = passkeyCreated,
+                            person = savePerson,
+                            personPicture = _uiState.value.personPicture
+                        )
+
+
+                        val personPictureVal = _uiState.value.personPicture
+                        if (personPictureVal != null) {
+                            personPictureVal.personPictureUid = savePerson.personUid
+                            personPictureVal.personPictureLct = systemTimeInMillis()
+                            val personPictureUriVal = personPictureVal.personPictureUri
+
+                            enqueueSavePictureUseCase(
+                                entityUid = savePerson.personUid,
+                                tableId = PersonPicture.TABLE_ID,
+                                pictureUri = personPictureUriVal
+                            )
+
+                        }
+
+                        enrollToCourseFromInviteUid(savePerson.personUid)
+                        navigateToAppropriateScreen(savePerson)
+                    }catch (e:Exception){
+                        _uiState.update { prev ->
+                            prev.copy(
+                                errorText = e.stringResourceOrMessage(systemImpl),
+                            )
+                        }
                     }
 
-                    enrollToCourseFromInviteUid(savePerson.personUid)
-                    navigateToAppropriateScreen(savePerson)
                 } else {
                     navController.navigate(SignupEnterUsernamePasswordViewModel.DEST_NAME,
                         args = buildMap {

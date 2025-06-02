@@ -19,7 +19,6 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
-import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.account.addaccountselectusertype.AddAccountSelectNewOrExistingUserTypeViewModel
@@ -30,7 +29,6 @@ import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedi
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.lib.db.entities.Person
 import io.github.aakira.napier.Napier
-import io.ktor.util.decodeBase64String
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,6 +47,7 @@ data class AddAccountSelectNewOrExistingUiState(
     ),
     val languageList: List<UstadMobileSystemCommon.UiLanguage> = listOf(currentLanguage),
     val showWaitForRestart: Boolean = false,
+    val errorText: String? = null,
 )
 
 /**
@@ -121,11 +120,9 @@ class AddAccountSelectNewOrExistingViewModel(
             try {
                 when (val credentialResult = getCredentialUseCase?.invoke()) {
                     is GetCredentialUseCase.PasskeyCredentialResult -> {
-                        val userHandle = credentialResult.passkeyWebAuthNResponse.
-                        response.userHandle
+                        val userHandle = credentialResult.passkeyWebAuthNResponse.response.userHandle
                             ?: throw IllegalStateException("userHandle not found")
-                        val (learningSpace, personPasskeyUid) = decodeUserHandleUseCase(userHandle)
-
+                        val (learningSpace, _) = decodeUserHandleUseCase(userHandle)
 
                         val account = accountManager.loginWithPasskey(
                             credentialResult.passkeyWebAuthNResponse,
@@ -144,6 +141,15 @@ class AddAccountSelectNewOrExistingViewModel(
 
                     is GetCredentialUseCase.Error -> {
                         Napier.e { "Error occurred: ${credentialResult.message}"}
+                        _uiState.update { prev ->
+                            prev.copy(
+                                errorText = (credentialResult.message),
+                            )
+                        }
+                    }
+
+                    is GetCredentialUseCase.NoCredentialAvailableResult -> {
+                        //Do nothing
                     }
 
                     null -> {

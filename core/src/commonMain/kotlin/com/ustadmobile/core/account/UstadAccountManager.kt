@@ -8,7 +8,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import com.ustadmobile.core.domain.credentials.PasskeyVerifyResult
 import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
-import com.ustadmobile.core.domain.credentials.passkey.model.ClientDataJSON
 import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
@@ -66,8 +65,6 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
  * The app AccountManager. Users can have multiple accounts with active sessions at any given time.
@@ -330,7 +327,7 @@ class UstadAccountManager(
         val learningSpace = LearningSpace(learningSpaceUrl)
 
         val savePassKeyUseCase: SavePersonPasskeyUseCase = di
-            .on(LearningSpace(apiUrlConfig.systemBaseUrl)).direct.instance()
+            .on(learningSpace).direct.instance()
         savePassKeyUseCase(passkeyResult, person)
 
         val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
@@ -538,8 +535,8 @@ class UstadAccountManager(
         if(!passkeyVerifyResult.isVerified) {
             throw UnauthorizedException("Account not found")
         }
-        val responseAccount=UmAccount(personUid = passkeyVerifyResult.personUid)
-        responseAccount.endpointUrl=currentServerUrl
+        val responseAccount = UmAccount(personUid = passkeyVerifyResult.personUid)
+        responseAccount.endpointUrl = currentServerUrl
 
         val repo: UmAppDatabase = di.on(LearningSpace(currentServerUrl)).direct.instance<UmAppDataLayer>()
             .requireRepository()
@@ -550,8 +547,6 @@ class UstadAccountManager(
         val personInDb = personAndPicture.person!! //Cannot be null based on query
         responseAccount.isPersonalAccount=personInDb.isPersonalAccount
 
-       // val repoWithCurrentUrl: UmAppDatabase by di.on(LearningSpace(currentServerUrl)).instance(tag = DoorTag.TAG_REPO)
-
         getSiteFromDbOrLoadFromHttp(repo)
 
         val newSession = addSession(personInDb, currentServerUrl, null)
@@ -560,8 +555,6 @@ class UstadAccountManager(
         responseAccount
 
     }
-
-
 
     suspend fun login(
         username: String,

@@ -18,9 +18,11 @@ import com.ustadmobile.core.domain.credentials.username.ParseCredentialUsernameU
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
 import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
+import com.ustadmobile.core.viewmodel.clazz.detailoverview.CopyCourseUseCase
 import com.ustadmobile.core.username.UsernameSuggestionUseCase
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
@@ -106,6 +108,20 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
         ParseInviteUseCase(
             phoneNumValidatorUseCase = instance(),
             validateEmailUseCase = instance()
+        )
+    }
+
+    bind<CopyCourseUseCase>() with scoped(learningSpaceScope).singleton {
+        CopyCourseUseCase(
+            repoOrDb = instance(tag = DoorTag.TAG_REPO),
+            accountManager = instance()
+        )
+    }
+
+    bind<AddNewPersonUseCase>() with scoped(learningSpaceScope).singleton {
+        AddNewPersonUseCase(
+            db = instance(tag = DoorTag.TAG_DB),
+            repo = instance(tag = DoorTag.TAG_REPO),
         )
     }
 
