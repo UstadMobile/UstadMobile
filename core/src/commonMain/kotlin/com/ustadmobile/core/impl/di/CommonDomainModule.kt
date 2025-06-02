@@ -118,13 +118,6 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
         )
     }
 
-    bind<AddNewPersonUseCase>() with scoped(learningSpaceScope).singleton {
-        AddNewPersonUseCase(
-            db = instance(tag = DoorTag.TAG_DB),
-            repo = instance(tag = DoorTag.TAG_REPO),
-        )
-    }
-
     bind<SubmitMarkUseCase>() with scoped(learningSpaceScope).provider {
         SubmitMarkUseCase(
             repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
