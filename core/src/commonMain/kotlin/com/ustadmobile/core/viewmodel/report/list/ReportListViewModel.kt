@@ -29,7 +29,7 @@ class ReportListViewModel(
 ) {
 
     private val pagingSourceFactory: () -> PagingSource<Int, Report> = {
-        activeRepo.reportDao().findAllReports()
+        activeRepoWithFallback.reportDao().findAllReports()
     }
 
     init {
@@ -84,8 +84,8 @@ class ReportListViewModel(
 
     fun onRemoveReport(uid: Long) {
         viewModelScope.launch {
-            activeRepo.withDoorTransactionAsync {
-                activeRepo.reportDao().deleteReportByUid(uid)
+            activeRepoWithFallback.withDoorTransactionAsync {
+                activeRepoWithFallback.reportDao().deleteReportByUid(uid)
             }
         }
     }

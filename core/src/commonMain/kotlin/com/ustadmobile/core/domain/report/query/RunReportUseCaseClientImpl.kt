@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.report.query
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.report.query.RunReportUseCase.Companion.reportQueryResultsToResultStatementReportRows
 import com.ustadmobile.core.util.ext.age
@@ -29,7 +29,7 @@ class RunReportUseCaseClientImpl(
     private val db: UmAppDatabase,
     private val clientNodeId: Long,
     private val clientNodeAuth: String,
-    private val learningSpace: Endpoint,
+    private val learningSpace: LearningSpace,
     private val httpClient: HttpClient,
     private val json: Json,
 ): RunReportUseCase {
@@ -37,7 +37,7 @@ class RunReportUseCaseClientImpl(
     constructor(
         db: UmAppDatabase,
         repo: DoorDatabaseRepository,
-        learningSpace: Endpoint,
+        learningSpace: LearningSpace,
         httpClient: HttpClient,
         json: Json,
     ): this(db, repo.config.nodeId, repo.config.auth, learningSpace, httpClient, json)

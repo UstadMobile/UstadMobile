@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 207,
-    "identityHash": "9bec28e0e31ae15d6a349b56de026a6f",
+    "version": 208,
+    "identityHash": "bc5b6e3e276e9fe21a73cc6936760645",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -2014,6 +2014,7 @@
       },
       {
         "tableName": "StatementEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementIdHi` INTEGER NOT NULL, `statementIdLo` INTEGER NOT NULL, `statementActorPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `statementObjectType` INTEGER NOT NULL, `statementObjectUid1` INTEGER NOT NULL, `statementObjectUid2` INTEGER NOT NULL, `statementActorUid` INTEGER NOT NULL, `authorityActorUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER, `resultSuccess` INTEGER, `resultScoreScaled` REAL, `resultScoreRaw` REAL, `resultScoreMin` REAL, `resultScoreMax` REAL, `resultDuration` INTEGER, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistrationHi` INTEGER NOT NULL, `contextRegistrationLo` INTEGER NOT NULL, `contextRegistrationHash` INTEGER NOT NULL, `contextPlatform` TEXT, `contextStatementRefIdHi` INTEGER NOT NULL, `contextStatementRefIdLo` INTEGER NOT NULL, `contextInstructorActorUid` INTEGER NOT NULL, `statementLct` INTEGER NOT NULL, `extensionProgress` INTEGER, `completionOrProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `statementLearnerGroupUid` INTEGER NOT NULL, `statementClazzUid` INTEGER NOT NULL, `statementCbUid` INTEGER NOT NULL, `statementDoorNode` INTEGER NOT NULL, `isSubStatement` INTEGER NOT NULL, PRIMARY KEY(`statementIdHi`, `statementIdLo`))",
         "fields": [
           {
             "fieldPath": "statementIdHi",
@@ -2489,72 +2490,6 @@
           {
             "fieldPath": "reportUid",
             "columnName": "reportUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reportOwnerUid",
-            "columnName": "reportOwnerUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "xAxis",
-            "columnName": "xAxis",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reportDateRangeSelection",
-            "columnName": "reportDateRangeSelection",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fromDate",
-            "columnName": "fromDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fromRelTo",
-            "columnName": "fromRelTo",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fromRelOffSet",
-            "columnName": "fromRelOffSet",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fromRelUnit",
-            "columnName": "fromRelUnit",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "toDate",
-            "columnName": "toDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "toRelTo",
-            "columnName": "toRelTo",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "toRelOffSet",
-            "columnName": "toRelOffSet",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "toRelUnit",
-            "columnName": "toRelUnit",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -6550,7 +6485,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9bec28e0e31ae15d6a349b56de026a6f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bc5b6e3e276e9fe21a73cc6936760645')"
     ]
   }
 }
