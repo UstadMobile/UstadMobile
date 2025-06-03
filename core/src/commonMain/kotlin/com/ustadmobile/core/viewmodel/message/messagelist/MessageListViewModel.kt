@@ -52,7 +52,7 @@ class MessageListViewModel(
     private val openExternalLinkUseCase: OpenExternalLinkUseCase by di.instance()
 
     private val pagingSourceFactory: () -> PagingSource<Int, Message> = {
-        activeRepo.messageDao().messagesFromOtherUserAsPagingSource(
+        activeRepoWithFallback.messageDao().messagesFromOtherUserAsPagingSource(
             accountPersonUid = activeUserPersonUid,
             otherPersonUid = otherPersonUid
         )
@@ -80,7 +80,7 @@ class MessageListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.personDao().getNamesByUid(otherPersonUid).collect {
+                activeRepoWithFallback.personDao().getNamesByUid(otherPersonUid).collect {
                     _appUiState.update { prev ->
                         prev.copy(
                             title = "${it?.firstNames ?: ""} ${it?.lastName ?: ""}"
@@ -122,7 +122,7 @@ class MessageListViewModel(
 
     fun onClickSend() {
         viewModelScope.launch {
-            activeRepo.messageDao().insert(
+            activeRepoWithFallback.messageDao().insert(
                 Message(
                     messageSenderPersonUid = activeUserPersonUid,
                     messageText = _uiState.value.newMessageText.trim(),

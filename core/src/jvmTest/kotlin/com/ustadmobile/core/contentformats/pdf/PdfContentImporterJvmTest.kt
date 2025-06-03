@@ -41,7 +41,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
             "/com/ustadmobile/core/container/validPDFMetadata.pdf")
 
         val pdfPlugin = PdfContentImporterJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
@@ -66,7 +66,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
         testNotPdfFile.writeText("Hello World")
 
         val pdfPlugin = PdfContentImporterJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
@@ -90,7 +90,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
         invalidPdf.writeText("Hello World")
 
         val pdfPlugin = PdfContentImporterJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
@@ -116,7 +116,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
             "/com/ustadmobile/core/container/validPDFMetadata.pdf")
 
         val pdfPlugin = PdfContentImporterJvm(
-            endpoint = activeEndpoint,
+            learningSpace = activeLearningSpace,
             db = db,
             cache = ustadCache,
             saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,
@@ -159,7 +159,7 @@ class PdfContentImporterJvmTest : AbstractContentImporterTest() {
         mockWebServer.dispatcher = ResourcesDispatcher(this::class.java)
         try {
             val pdfPlugin = PdfContentImporterJvm(
-                endpoint = activeEndpoint,
+                learningSpace = activeLearningSpace,
                 db = db,
                 cache = ustadCache,
                 saveLocalUriAsBlobAndManifestUseCase = saveAndManifestUseCase,

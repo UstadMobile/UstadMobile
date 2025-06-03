@@ -45,7 +45,7 @@ class CoursePermissionListViewModel(
         ?: throw IllegalArgumentException("No clazzuid")
 
     private val pagingSource: () -> PagingSource<Int, CoursePermissionAndListDetail> = {
-        activeRepo.coursePermissionDao().findByClazzUidAsPagingSource(
+        activeRepoWithFallback.coursePermissionDao().findByClazzUidAsPagingSource(
             clazzUid = clazzUid, includeDeleted = false,
         )
     }
@@ -65,7 +65,7 @@ class CoursePermissionListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.coursePermissionDao().personHasPermissionWithClazzPairAsFlow(
+                activeRepoWithFallback.coursePermissionDao().personHasPermissionWithClazzPairAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     clazzUid = clazzUid,
                     firstPermission = PermissionFlags.COURSE_VIEW,
@@ -130,7 +130,7 @@ class CoursePermissionListViewModel(
 
     fun onClickDeleteEntry(coursePermission: CoursePermission) {
         viewModelScope.launch {
-            activeRepo.coursePermissionDao().setDeleted(
+            activeRepoWithFallback.coursePermissionDao().setDeleted(
                 coursePermission.cpUid, true, systemTimeInMillis(),
             )
         }

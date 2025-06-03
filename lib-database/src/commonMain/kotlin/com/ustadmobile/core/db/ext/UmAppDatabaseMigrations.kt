@@ -1691,9 +1691,57 @@ val MIGRATION_202_203 = DoorMigrationStatementList(202, 203) { db ->
     }
 }
 
-//203-204 is handled separately - see UmAppDatabaseMigration203_204 - responsible to add
-//StatementEntity.contextRegistrationHash
+
+
+val MIGRATION_203_204 = DoorMigrationStatementList(203, 204) { db ->
+    listOf("ALTER TABLE ActivityLangMapEntry ADD COLUMN almePropName TEXT")
+}
+
 val MIGRATION_204_205 = DoorMigrationStatementList(204, 205) { db ->
+    buildList {
+        if (db.dbType() == DoorDbType.SQLITE) {
+            add("CREATE TABLE IF NOT EXISTS PersonPasskey (  ppPersonUid  INTEGER  NOT NULL , ppAttestationObj  TEXT , ppClientDataJson  TEXT , ppOriginString  TEXT , ppId  TEXT , ppChallengeString  TEXT , ppPublicKey  TEXT , isRevoked  INTEGER  NOT NULL , ppPasskeyLct  INTEGER  NOT NULL , personPasskeyUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+
+        } else {
+            add("CREATE TABLE IF NOT EXISTS PersonPasskey (  ppPersonUid  BIGINT  NOT NULL , ppAttestationObj  TEXT , ppClientDataJson  TEXT , ppOriginString  TEXT , ppId  TEXT , ppChallengeString  TEXT , ppPublicKey  TEXT , isRevoked  INTEGER  NOT NULL , ppPasskeyLct  BIGINT  NOT NULL , personPasskeyUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+
+    }
+}
+
+val MIGRATION_205_206 = DoorMigrationStatementList(205, 206) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE Person ADD COLUMN isPersonalAccount INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE Person ADD COLUMN isPersonalAccount BOOL NOT NULL DEFAULT FALSE")
+        }
+    }
+}
+val MIGRATION_206_207 = DoorMigrationStatementList(206, 207) { db ->
+    buildList {
+        if (db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ClazzEnrolment ADD COLUMN clazzEnrolmentInviteUid INTEGER NOT NULL DEFAULT 0")
+            add("CREATE TABLE IF NOT EXISTS ClazzInvite (  ciPersonUid  INTEGER  NOT NULL , ciRoleId  INTEGER  NOT NULL , ciClazzUid  INTEGER  NOT NULL , inviteType  INTEGER  NOT NULL  DEFAULT 1 , inviteContact  TEXT NOT NULL, inviteToken  TEXT NOT NULL, inviteStatus  INTEGER  NOT NULL , inviteLct  INTEGER  NOT NULL , ciUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+        } else {
+            add("ALTER TABLE ClazzEnrolment ADD COLUMN clazzEnrolmentInviteUid INTEGER NOT NULL DEFAULT 0")
+            add("CREATE TABLE IF NOT EXISTS ClazzInvite (  ciPersonUid  BIGINT  NOT NULL , ciRoleId  BIGINT  NOT NULL , ciClazzUid  BIGINT  NOT NULL , inviteType  INTEGER  NOT NULL  DEFAULT 1 , inviteContact  TEXT NOT NULL, inviteToken  TEXT NOT NULL, inviteStatus  INTEGER  NOT NULL , inviteLct  BIGINT  NOT NULL , ciUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+val MIGRATION_207_208 = DoorMigrationStatementList(207, 208) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ClazzInvite ADD COLUMN inviteExpire INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE ClazzInvite ADD COLUMN inviteExpire BIGINT NOT NULL DEFAULT 0")
+        }
+    }
+}
+
+//StatementEntity.contextRegistrationHash
+val MIGRATION_208_209 = DoorMigrationStatementList(208, 209) { db ->
     buildList {
         if(db.dbType() == DoorDbType.SQLITE) {
             add("CREATE TABLE IF NOT EXISTS ReportQueryResult (  rqrReportUid  INTEGER  NOT NULL , rqrLastModified  INTEGER  NOT NULL , rqrLastValidated  INTEGER  NOT NULL , rqrReportSeriesUid  INTEGER  NOT NULL , rqrXAxis  TEXT  NOT NULL , rqrYAxis  REAl  NOT NULL , rqrSubgroup  TEXT  NOT NULL , rqrUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
@@ -1705,23 +1753,18 @@ val MIGRATION_204_205 = DoorMigrationStatementList(204, 205) { db ->
     }
 }
 
-val MIGRATION_205_206 = DoorMigrationStatementList(205, 206) { db ->
+val MIGRATION_209_210 = DoorMigrationStatementList(209, 210) { db ->
     val bigIntType = if(db.dbType() == DoorDbType.SQLITE) "INTEGER" else "BIGINT"
     listOf("ALTER TABLE Report ADD COLUMN reportOwnerPersonUid $bigIntType NOT NULL DEFAULT 0")
 }
 
-val MIGRATION_206_207 = DoorMigrationStatementList(206, 207) { db ->
+val MIGRATION_210_211 = DoorMigrationStatementList(210, 211) { db ->
     listOf(
         "ALTER TABLE ReportQueryResult ADD rqrTimeZone TEXT NOT NULL DEFAULT ''",
         "DROP INDEX IF EXISTS idx_reportqueryresult_rqrreportuid",
         "CREATE INDEX idx_reportqueryresult_rqrreportuid_rqrtimezone ON ReportQueryResult (rqrReportUid, rqrTimeZone)"
     )
 }
-
-val MIGRATION_203_204 = DoorMigrationStatementList(203, 204) { db ->
-    listOf("ALTER TABLE ActivityLangMapEntry ADD COLUMN almePropName TEXT")
-}
-
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
     MIGRATION_107_108, MIGRATION_108_109,
@@ -1740,6 +1783,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
     MIGRATION_199_200, MIGRATION_200_201, MIGRATION_201_202, MIGRATION_202_203,
     MIGRATION_203_204, MIGRATION_204_205, MIGRATION_205_206, MIGRATION_206_207,
+    MIGRATION_207_208, MIGRATION_208_209, MIGRATION_209_210, MIGRATION_210_211
 )
 
 

@@ -1,6 +1,5 @@
 package com.ustadmobile.core.domain.contententry
 
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.url.UrlKmp

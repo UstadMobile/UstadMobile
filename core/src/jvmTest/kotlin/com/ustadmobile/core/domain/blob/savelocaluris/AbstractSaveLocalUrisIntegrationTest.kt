@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.savelocaluris
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.tmpfiles.DeleteUrisUseCase
@@ -58,7 +58,7 @@ abstract class AbstractSaveLocalUrisIntegrationTest {
         encodeDefaults = true
     }
 
-    protected lateinit var endpoint: Endpoint
+    protected lateinit var learningSpace: LearningSpace
 
     protected lateinit var blobUploadServerUseCase: BlobUploadServerUseCase
 
@@ -88,7 +88,7 @@ abstract class AbstractSaveLocalUrisIntegrationTest {
     open fun setup() {
         initNapierLog()
         port = findFreePort()
-        endpoint = Endpoint("http://localhost:$port/")
+        learningSpace = LearningSpace("http://localhost:$port/")
         serverRootTmpDir = temporaryFolder.newFolder("tmproot-server")
         clientCacheDir = temporaryFolder.newFolder("httpfiles-client")
         clientCache = UstadCacheBuilder(
@@ -125,7 +125,7 @@ abstract class AbstractSaveLocalUrisIntegrationTest {
         serverDeleteUrisUseCase = DeleteUrisUseCaseCommonJvm(serverIsTempFileUseCase)
 
         serverSaveLocalUriAsBlobUseCase = SaveLocalUrisAsBlobsUseCaseJvm(
-            endpoint = endpoint,
+            learningSpace = learningSpace,
             cache = serverCache,
             uriHelper = uriHelper,
             tmpDir = Path(serverRootTmpDir.absolutePath),

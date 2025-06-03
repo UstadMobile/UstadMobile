@@ -10,6 +10,7 @@ appId: com.toughra.ustadmobile
 #    action=DownloadManager.ACTION_VIEW_DOWNLOADS (see AbstractAppActivity.kt)
 
 - repeat:
+    times: 3
     while:
       notVisible: ${TESTFILENAME}
     commands:

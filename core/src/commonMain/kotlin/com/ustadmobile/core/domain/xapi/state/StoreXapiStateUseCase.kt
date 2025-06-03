@@ -1,14 +1,13 @@
 package com.ustadmobile.core.domain.xapi.state
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.interop.HttpApiException
 import com.ustadmobile.core.domain.xapi.XapiJson
-import com.ustadmobile.core.domain.xapi.ext.agent
 import com.ustadmobile.core.domain.xapi.model.XapiAgent
 import com.ustadmobile.core.domain.xapi.model.identifierHash
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
-import com.ustadmobile.core.domain.xxhash.XXStringHasher
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
+import com.ustadmobile.xxhashkmp.XXStringHasher
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.core.util.ext.requireBodyAsBytes
 import com.ustadmobile.core.util.ext.requireBodyAsText
@@ -28,7 +27,7 @@ class StoreXapiStateUseCase(
     xapiJson: XapiJson,
     private val xxHasher64Factory: XXHasher64Factory,
     private val xxStringHasher: XXStringHasher,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
 ) {
 
     private val json = xapiJson.json

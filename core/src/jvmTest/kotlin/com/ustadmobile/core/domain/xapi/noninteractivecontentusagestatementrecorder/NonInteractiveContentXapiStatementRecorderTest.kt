@@ -1,14 +1,14 @@
 package com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder
 
 import com.benasher44.uuid.uuid4
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.ext.resultDurationMillis
 import com.ustadmobile.core.domain.xapi.ext.resultProgressExtension
 import com.ustadmobile.core.domain.xapi.model.XapiActivity
 import com.ustadmobile.core.domain.xapi.model.XapiActivityStatementObject
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
-import com.ustadmobile.core.domain.xxhash.XXStringHasherCommonJvm
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import com.ustadmobile.core.test.isWithinThreshold
 import com.ustadmobile.lib.db.entities.xapi.XapiSessionEntity
 import kotlinx.coroutines.CoroutineScope
@@ -67,7 +67,7 @@ class NonInteractiveContentXapiStatementRecorderTest {
                     )
                 )
             },
-            endpoint = Endpoint("http://example.org/")
+            learningSpace = LearningSpace("http://example.org/")
         )
     }
 

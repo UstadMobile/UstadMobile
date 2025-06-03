@@ -46,7 +46,7 @@ class ReportListViewModel(
     private val runReportUseCase: RunReportUseCase by di.onActiveEndpoint().instance()
 
     private val pagingSourceFactory: () -> PagingSource<Int, Report> = {
-        activeRepo.reportDao().findAllReports()
+        activeRepoWithFallback.reportDao().findAllReports()
     }
 
     init {
@@ -130,7 +130,7 @@ class ReportListViewModel(
 
     fun onRemoveReport(uid: Long) {
         viewModelScope.launch {
-            activeRepo.reportDao().deleteReportByUid(uid)
+            activeRepoWithFallback.reportDao().deleteReportByUid(uid)
 
         }
     }

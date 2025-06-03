@@ -26,7 +26,7 @@ onFlowComplete:
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
 
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -52,7 +52,7 @@ onFlowComplete:
 - assertVisible:
           text: "RED,BLUE,GREEN"
 - takeScreenshot: "${TESTRESULTSDIR}/text_block_admin_view"
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -73,7 +73,7 @@ onFlowComplete:
     text: "RED,BLUE,GREEN"
 - takeScreenshot: "${TESTRESULTSDIR}/text_block_student_view"
 #---------Launch App & Teacher Login------------------#
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"

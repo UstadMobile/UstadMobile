@@ -130,7 +130,7 @@ class CourseTerminologyEditViewModel(
 
         viewModelScope.launch {
             val terminology = _uiState.value.entity ?: return@launch
-            activeRepo.courseTerminologyDao().upsertAsync(terminology)
+            activeRepoWithFallback.courseTerminologyDao().upsertAsync(terminology)
 
             _uiState.update { prev ->
                 prev.copy(fieldsEnabled = true)

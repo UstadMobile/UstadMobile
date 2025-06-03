@@ -179,7 +179,7 @@ class ReportEditViewModel(
             return
         }
         viewModelScope.launch {
-            activeRepo.withDoorTransactionAsync {
+            activeRepoWithFallback.withDoorTransactionAsync {
                 val currentReports = _uiState.value.reportOptions2
                 val report = Report(
                     reportUid = entityUidArg,
@@ -189,10 +189,10 @@ class ReportEditViewModel(
                 )
                 try {
                     if (entityUidArg == 0L) {
-                        activeRepo.reportDao().insertAsync(report)
+                        activeRepoWithFallback.reportDao().insertAsync(report)
                         println("Report options inserted successfully: ${report}")
                     } else {
-                        activeRepo.reportDao().updateAsync(report)
+                        activeRepoWithFallback.reportDao().updateAsync(report)
                         println("Report options updated successfully: ${report}")
                     }
                 } catch (e: Exception) {

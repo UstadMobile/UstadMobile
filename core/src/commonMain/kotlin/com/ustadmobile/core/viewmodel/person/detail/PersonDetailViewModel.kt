@@ -28,6 +28,7 @@ import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.person.manageaccount.ManageAccountViewModel
 import com.ustadmobile.core.viewmodel.systempermission.detail.SystemPermissionDetailViewModel
 import com.ustadmobile.lib.db.composites.ClazzEnrolmentAndPersonDetailDetails
 import org.kodein.di.instanceOrNull
@@ -57,7 +58,7 @@ data class PersonDetailUiState(
         get() = person?.person?.gender  != null
                 && person.person?.gender != 0
 
-    val changePasswordVisible: Boolean
+    val manageAccountVisible: Boolean
         get() = person?.person?.username != null && hasChangePasswordPermission
 
     val showCreateAccountVisible: Boolean
@@ -132,12 +133,12 @@ class PersonDetailViewModel(
         }
 
         viewModelScope.launch {
-            val entityFlow = activeRepo.personDao().findByUidWithDisplayDetailsFlow(
+            val entityFlow = activeRepoWithFallback.personDao().findByUidWithDisplayDetailsFlow(
                 personUid = entityUidArg,
                 accountPersonUid = activeUserPersonUid,
             )
 
-            val viewAndEditPermissionFlow = activeRepo.systemPermissionDao()
+            val viewAndEditPermissionFlow = activeRepoWithFallback.systemPermissionDao()
                 .personHasEditAndViewPermissionForPersonAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     otherPersonUid = entityUidArg
@@ -238,10 +239,18 @@ class PersonDetailViewModel(
         navController.navigate(PersonAccountEditViewModel.DEST_NAME,
             mapOf(ARG_ENTITY_UID to personUid.toString()))
     }
-
+    private fun navigateToManageAccount(){
+        navController.navigate(
+            ManageAccountViewModel.DEST_NAME, buildMap {
+                put(ARG_ENTITY_UID, personUid.toString())
+                put(ManageAccountViewModel.PERSON_USERNAME,  _uiState.value.person?.person?.username.toString())
+                put(ManageAccountViewModel.PERSON_FULL_NAME,  _uiState.value.person?.person?.fullName().toString())
+            }
+        )
+    }
     fun onClickCreateAccount() = navigateToEditAccount()
 
-    fun onClickChangePassword() = navigateToEditAccount()
+    fun onClickManageAccount() = navigateToManageAccount()
 
     fun onClickChat() {
         navController.navigate(

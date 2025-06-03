@@ -1,6 +1,8 @@
 package com.ustadmobile.core.util.ext
 
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.domain.account.CheckRegistrationAllowedUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase.Companion.LinkTarget
 import com.ustadmobile.core.impl.UstadMobileConstants
@@ -11,12 +13,12 @@ import com.ustadmobile.core.util.UstadUrlComponents
 import com.ustadmobile.core.util.UstadUrlComponents.Companion.DEFAULT_DIVIDER
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_API_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_DONT_SET_CURRENT_SESSION
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
-import com.ustadmobile.core.viewmodel.accountlist.AccountListViewModel
+import com.ustadmobile.core.viewmodel.account.list.AccountListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
-import com.ustadmobile.core.viewmodel.siteenterlink.SiteEnterLinkViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -57,6 +59,11 @@ fun UstadNavController.navigateToViewUri(
  *
  * @param dontSetCurrentSession Set UstadViewModel.ARG_DONT_SET_CURRENT_SESSION when navigating to
  *        Login, AccountList, etc.
+ * @param presetLearningSpaceUrl as per SystemUrlConfig.presetLearningSpaceUrl - used to control
+ *        navigation
+ * @param checkRegistrationAllowedUseCase used to check if registration is allowed on a particular
+ *        site given a particular destination. If we know that registration is definitely not allowed
+ *        then we can skip the new or existing account screen and go directly to the login screen.
  *
  * @return If the link is internal, then opening the link will be done asynchronously (required to
  * check existing accounts etc) a Job will be returned. If the link is external, it is opened
@@ -74,21 +81,26 @@ fun UstadNavController.navigateToLink(
     scope: CoroutineScope = GlobalScope,
     linkTarget: LinkTarget = LinkTarget.DEFAULT,
     dontSetCurrentSession: Boolean = false,
+    presetLearningSpaceUrl :String? = null,
+    checkRegistrationAllowedUseCase: ((LearningSpace) -> CheckRegistrationAllowedUseCase)? = null,
 ) : Job? {
-    var endpointUrl: String? = null
+    var learningSpaceUrl: String? = null
     var viewUri: String? = null
-
 
     when {
         link.startsWithHttpProtocol() && link.contains(DEFAULT_DIVIDER) -> {
             val urlComponents = UstadUrlComponents.parse(link)
-            endpointUrl = urlComponents.endpoint
+            learningSpaceUrl = urlComponents.learningSpace
             viewUri = urlComponents.viewUri
         }
 
         !link.startsWithHttpProtocol() -> {
             viewUri = link
         }
+    }
+
+    presetLearningSpaceUrl?.also {
+        learningSpaceUrl = it
     }
 
     val maxDateOfBirth = if(viewUri?.startsWith(ParentalConsentManagementViewModel.DEST_NAME) == true) {
@@ -104,7 +116,7 @@ fun UstadNavController.navigateToLink(
      * via openExternalLinkUseCase
      */
     return if(viewUri == null ||
-        !userCanSelectServer && endpointUrl != null && endpointUrl != accountManager.activeEndpoint.url
+        !userCanSelectServer && learningSpaceUrl != null && learningSpaceUrl != accountManager.activeLearningSpace.url
     ) {
         //when the link is not an ustad link, open in browser
         openExternalLinkUseCase(link, linkTarget)
@@ -112,10 +124,10 @@ fun UstadNavController.navigateToLink(
     }else {
         scope.launch {
             when {
-                //When the account has already been selected and the endpoint url is known.
-                accountName != null && endpointUrl != null -> {
+                //When the account has already been selected and the learning space url is known.
+                accountName != null && learningSpaceUrl != null -> {
                     val session = accountManager.activeSessionsList { filterUrl ->
-                        filterUrl == endpointUrl
+                        filterUrl == learningSpaceUrl
                     }.firstOrNull {
                         it.person.username == accountName.substringBefore("@")
                     }
@@ -125,60 +137,63 @@ fun UstadNavController.navigateToLink(
                     }
                 }
 
-                //when the current account is already on the given endpoint, or there is no endpoint
-                //specified, then go directly to the given view (unless the force account selection option
+                //when the current account is already on the given learning space, or there is no learning space
+                //specified, then go directly to the destination viewUri (unless the force account selection option
                 //is set)
                 !forceAccountSelection
                         && !accountManager.currentUserSession.userSession.isTemporary()
-                        && (endpointUrl == null || accountManager.activeEndpoint.url == endpointUrl) ->
+                        && (learningSpaceUrl == null || accountManager.activeLearningSpace.url == learningSpaceUrl) ->
                 {
                     navigateToViewUri(viewUri, goOptions)
                 }
 
-                //If the endpoint Url is known and there are no active accounts for this server,
-                // go directly to login
-                (endpointUrl != null
-                        && accountManager.activeSessionCount(maxDateOfBirth) { it == endpointUrl } == 0 ) ||
-                //... or when the endpoint url is not known, but there are no accounts at all, and the user cannot
-                ///select a server, go directly to login
-                (endpointUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0
-                && !userCanSelectServer) ->
-                {
-                    val args = mutableMapOf(
-                        ARG_NEXT to viewUri,
-                        ARG_DONT_SET_CURRENT_SESSION to dontSetCurrentSession.toString(),
-                    )
+                //If the learning space Url is known and there are no active accounts for that
+                // learning space, go to new or existing account selector, and set the learning space
+                // url argument
+                (learningSpaceUrl != null
+                        && accountManager.activeSessionCount(maxDateOfBirth) { it == learningSpaceUrl } == 0 ) ||
+                //When the learning space url is not known, but there are no accounts at all, go to
+                // new or existing account selector screen
+                (learningSpaceUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0) -> {
+                    val args = buildMap {
+                        put(ARG_NEXT, viewUri)
+                        put(ARG_DONT_SET_CURRENT_SESSION, dontSetCurrentSession.toString())
+                        learningSpaceUrl?.also { learningSpaceUrlVal ->
+                            put(ARG_LEARNINGSPACE_URL, learningSpaceUrlVal)
+                        }
+                    }
 
-                    if(endpointUrl != null)
-                        args[ARG_API_URL] = endpointUrl
+                    //Decide if we are going to new or existing account selector, or directly to login
+                    //if we know for sure it is not possible to create a new account
+                    val canRegister = learningSpaceUrl?.let { learningSpaceUrlVal ->
+                        checkRegistrationAllowedUseCase?.invoke(LearningSpace(learningSpaceUrlVal))
+                            ?.invoke(viewUri)
+                    }
 
-                    navigate(LoginViewModel.DEST_NAME, args.toMap(), goOptions)
-                }
-                //If there are no accounts, the endpoint url is not specified, and the user can select the server, go to EnterLink
-                endpointUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0 && userCanSelectServer -> {
                     navigate(
-                        viewName = SiteEnterLinkViewModel.DEST_NAME,
-                        args = mapOf(
-                            ARG_NEXT to viewUri,
-                            ARG_DONT_SET_CURRENT_SESSION to dontSetCurrentSession.toString(),
-                        ),
-                        goOptions = goOptions
+                        viewName = if(canRegister == false) {
+                            LoginViewModel.DEST_NAME
+                        }else {
+                            AddAccountSelectNewOrExistingViewModel.DEST_NAME
+                        },
+                        args = args,
                     )
                 }
 
                 //else - go to the account manager
                 else -> {
-                    val args = mutableMapOf(
-                        ARG_NEXT to viewUri,
-                        ARG_DONT_SET_CURRENT_SESSION to dontSetCurrentSession.toString(),
-                    )
+                    val args = buildMap {
+                        put(ARG_NEXT, viewUri)
+                        put(ARG_DONT_SET_CURRENT_SESSION, dontSetCurrentSession.toString())
+                        learningSpaceUrl?.also { learningSpaceUrlVal ->
+                            put(AccountListViewModel.ARG_FILTER_BY_LEARNINGSPACE, learningSpaceUrlVal)
+                        }
 
-                    if(endpointUrl != null)
-                        args[AccountListViewModel.ARG_FILTER_BY_ENDPOINT] = endpointUrl
-
-                    args[AccountListViewModel.ARG_ACTIVE_ACCOUNT_MODE] = AccountListViewModel.ACTIVE_ACCOUNT_MODE_INLIST
-                    args[UstadView.ARG_LISTMODE] = ListViewMode.PICKER.toString()
-                    args[UstadView.ARG_MAX_DATE_OF_BIRTH] = maxDateOfBirth.toString()
+                        put(AccountListViewModel.ARG_ACTIVE_ACCOUNT_MODE,
+                            AccountListViewModel.ACTIVE_ACCOUNT_MODE_INLIST)
+                        put(UstadView.ARG_LISTMODE, ListViewMode.PICKER.toString())
+                        put(UstadView.ARG_MAX_DATE_OF_BIRTH, maxDateOfBirth.toString())
+                    }
 
                     navigate(AccountListViewModel.DEST_NAME, args.toMap(), goOptions)
                 }

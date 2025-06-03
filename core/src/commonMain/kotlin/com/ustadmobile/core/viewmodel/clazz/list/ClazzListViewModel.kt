@@ -17,6 +17,7 @@ import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.dayStringResource
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
 import com.ustadmobile.core.viewmodel.clazz.edit.ClazzEditViewModel
+import com.ustadmobile.core.viewmodel.clazz.joinwithcode.JoinWithCodeViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.composites.EnrolmentRequestAndCoursePic
 import com.ustadmobile.lib.db.entities.Clazz
@@ -94,7 +95,7 @@ class ClazzListViewModel(
 
 
     private val pagingSourceFactory: () -> PagingSource<Int, ClazzWithListDisplayDetails> =  {
-        activeRepo.clazzDao().findClazzesWithPermission(
+        activeRepoWithFallback.clazzDao().findClazzesWithPermission(
             searchQuery =  _appUiState.value.searchState.searchText.toQueryLikeParam(),
             accountPersonUid = accountManager.currentAccount.personUid,
             excludeSelectedClazzList = filterAlreadySelectedList,
@@ -129,7 +130,7 @@ class ClazzListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
+                activeRepoWithFallback.systemPermissionDao().personHasSystemPermissionAsFlow(
                     accountManager.currentAccount.personUid, PermissionFlags.ADD_COURSE
                 ).distinctUntilChanged().collect { hasPermission ->
                     _uiState.update { prev ->
@@ -144,7 +145,7 @@ class ClazzListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.enrolmentRequestDao().findRequestsForUserAsFlow(
+                activeRepoWithFallback.enrolmentRequestDao().findRequestsForUserAsFlow(
                     accountPersonUid = activeUserPersonUid,
                     statusFilter = EnrolmentRequest.STATUS_PENDING,
                 ).collect {
@@ -165,7 +166,7 @@ class ClazzListViewModel(
     }
 
     fun onClickJoinExistingClazz() {
-        navController.navigate(JoinWithCodeView.VIEW_NAME, mapOf(
+        navController.navigate(JoinWithCodeViewModel.DEST_NAME, mapOf(
             UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString()
         ))
     }
@@ -196,7 +197,7 @@ class ClazzListViewModel(
 
     fun onClickCancelEnrolmentRequest(enrolmentRequest: EnrolmentRequest) {
         viewModelScope.launch {
-            activeRepo.enrolmentRequestDao().updateStatus(
+            activeRepoWithFallback.enrolmentRequestDao().updateStatus(
                 uid = enrolmentRequest.erUid,
                 status = EnrolmentRequest.STATUS_CANCELED,
                 updateTime = systemTimeInMillis(),

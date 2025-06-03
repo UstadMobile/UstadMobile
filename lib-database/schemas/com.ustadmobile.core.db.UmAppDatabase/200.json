@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 200,
-    "identityHash": "ba912f37337119dbd28d7b21c7942193",
+    "identityHash": "ce1707fa66defffef6ee98369111b7fa",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -6011,6 +6011,86 @@
         "foreignKeys": []
       },
       {
+        "tableName": "PersonPasskey",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPasskeyUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ppPersonUid` INTEGER NOT NULL, `ppAttestationObj` TEXT, `ppClientDataJson` TEXT, `ppOriginString` TEXT, `ppRpid` TEXT, `ppId` TEXT, `ppChallengeString` TEXT, `ppPublicKey` TEXT, `isRevoked` INTEGER NOT NULL, `ppPasskeyLct` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "personPasskeyUid",
+            "columnName": "personPasskeyUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppPersonUid",
+            "columnName": "ppPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppAttestationObj",
+            "columnName": "ppAttestationObj",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ppClientDataJson",
+            "columnName": "ppClientDataJson",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ppOriginString",
+            "columnName": "ppOriginString",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ppRpid",
+            "columnName": "ppRpid",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ppId",
+            "columnName": "ppId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ppChallengeString",
+            "columnName": "ppChallengeString",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ppPublicKey",
+            "columnName": "ppPublicKey",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isRevoked",
+            "columnName": "isRevoked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppPasskeyLct",
+            "columnName": "ppPasskeyLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "personPasskeyUid"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "StateEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`seActorUid` INTEGER NOT NULL, `seHash` INTEGER NOT NULL, `seActivityUid` INTEGER NOT NULL, `seStateId` TEXT NOT NULL, `seLastMod` INTEGER NOT NULL, `seTimeStored` INTEGER NOT NULL, `seContentType` TEXT NOT NULL, `seCompressed` INTEGER NOT NULL, `seContent` TEXT NOT NULL, `seDeleted` INTEGER NOT NULL, `seRegistrationHi` INTEGER, `seRegistrationLo` INTEGER, `seH5PPreloaded` INTEGER NOT NULL, `seH5PSubContentId` TEXT, PRIMARY KEY(`seActorUid`, `seHash`))",
         "fields": [
@@ -6327,7 +6407,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ba912f37337119dbd28d7b21c7942193')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ce1707fa66defffef6ee98369111b7fa')"
     ]
   }
 }

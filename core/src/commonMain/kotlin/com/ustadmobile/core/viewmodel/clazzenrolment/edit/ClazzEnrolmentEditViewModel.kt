@@ -9,7 +9,7 @@ import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.locale.CourseTerminologyStrings
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MS_PER_HOUR
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -55,7 +55,7 @@ class ClazzEnrolmentEditViewModel(
 
     val uiState: Flow<ClazzEnrolmentEditUiState> = _uiState.asStateFlow()
 
-    private val enrolIntoCourseUseCase: EnrolIntoCourseUseCase by di.onActiveEndpoint().instance()
+    private val enrolIntoCourseUseCase: EnrolIntoCourseUseCase by di.onActiveLearningSpace().instance()
 
     init {
         _appUiState.update { prev ->
@@ -91,7 +91,7 @@ class ClazzEnrolmentEditViewModel(
                         clazzEnrolmentDateJoined = systemTimeInMillis()
                         clazzEnrolmentRole = savedStateHandle[ARG_ROLE]?.toInt()
                             ?: ClazzEnrolment.ROLE_STUDENT
-                        timeZone = activeRepo.clazzDao().getClazzTimeZoneByClazzUidAsync(
+                        timeZone = activeRepoWithFallback.clazzDao().getClazzTimeZoneByClazzUidAsync(
                             clazzEnrolmentClazzUid
                         ) ?: throw IllegalStateException("Could not find timezone for clazzUid")
                     }
@@ -116,7 +116,7 @@ class ClazzEnrolmentEditViewModel(
 
 
             val terminology = async {
-                activeRepo.courseTerminologyDao().getTerminologyForClazz(
+                activeRepoWithFallback.courseTerminologyDao().getTerminologyForClazz(
                     _uiState.value.clazzEnrolment?.clazzEnrolmentClazzUid ?: 0
                 )
             }

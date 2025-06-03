@@ -6,7 +6,7 @@ import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUs
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -58,10 +58,10 @@ class ContentEntryDetailAttemptsStatementListViewModel(
     private val argContentEntryUid = savedStateHandle[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
 
     private val formatStatementResponseUseCase: FormatStatementResponseUseCase by
-        di.onActiveEndpoint().instance()
+        di.onActiveLearningSpace().instance()
 
     private val attemptsStatementListPagingSource: ListPagingSourceFactory<StatementEntityAndVerb> = {
-        activeRepo.statementDao().findStatementsBySession(
+        activeRepoWithFallback.statementDao().findStatementsBySession(
             registrationHi = argContextRegistrationIdHi,
             registrationLo = argContextRegistrationIdLo,
             accountPersonUid = activeUserPersonUid,
@@ -86,7 +86,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 launch {
-                    activeRepo.statementDao().getUniqueVerbsForSession(
+                    activeRepoWithFallback.statementDao().getUniqueVerbsForSession(
                         registrationHi = argContextRegistrationIdHi,
                         registrationLo = argContextRegistrationIdLo,
                         selectedPersonUid = argPersonUid,
@@ -99,7 +99,7 @@ class ContentEntryDetailAttemptsStatementListViewModel(
                 }
 
                 launch {
-                    activeRepo.contentEntryDao().findLiveContentEntry(
+                    activeRepoWithFallback.contentEntryDao().findLiveContentEntry(
                         argContentEntryUid
                     ).collect { contentEntry ->
                         _appUiState.update { prev ->

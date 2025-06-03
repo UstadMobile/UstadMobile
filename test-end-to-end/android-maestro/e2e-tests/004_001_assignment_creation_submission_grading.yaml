@@ -27,7 +27,7 @@ onFlowComplete:
     file:  "common/download_file_via_browser.yaml"
     env:
       TESTFILENAME: "Assignment_File.pdf"
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -81,7 +81,7 @@ onFlowComplete:
 - assertNotVisible: "Done"
 - tapOn: "Save"
 # student submit assignment
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -111,7 +111,7 @@ onFlowComplete:
 - tapOn: "Submit"
 - assertVisible: "Submitted"
 # teacher view and mark the assignment submitted by student
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -153,7 +153,7 @@ onFlowComplete:
     direction: UP
 - assertVisible: "9.0/10.0 Points"
 # student able to view his grade
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -176,7 +176,7 @@ onFlowComplete:
 #  Submission policy - Must submit all at once , so make sure Submit button is not visible
 - assertNotVisible: "Submit"
 # teacher can delete the course
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"

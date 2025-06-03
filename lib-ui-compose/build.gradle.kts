@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.ide.kmp.KotlinAndroidSourceSetMarker.Companion.android
+
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
@@ -35,7 +37,7 @@ kotlin {
                 api(libs.moko.resources.compose)
                 api(libs.paging.multiplatform.common)
                 api(libs.paging.multiplatform.compose)
-
+                implementation(libs.chiptextfield)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.reorderable.compose)
                 api(libs.door.runtime)
@@ -64,6 +66,8 @@ kotlin {
                 implementation(libs.volley)
                 implementation(libs.aztec)
 
+                implementation(libs.credentials.androidx)
+                implementation(libs.credentialsplay)
                 implementation(libs.android.material)
                 implementation(libs.libphonenumber.android)
                 implementation(libs.autolink)
@@ -125,6 +129,7 @@ android {
         jvmToolchain(17)
     }
 }
+
 
 multiplatformResources {
     multiplatformResourcesPackage = "com.ustadmobile.libuicompose"

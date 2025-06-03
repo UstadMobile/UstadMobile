@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.download
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -47,14 +47,14 @@ abstract class AbstractEnqueueBlobDownloadClientUseCase(
 
     companion object {
 
-        const val DATA_ENDPOINT = "endpoint"
+        const val DATA_LEARNINGSPACE = "learningSpace"
 
         const val DATA_JOB_UID = "jobUid"
 
         const val UNIQUE_NAME_PREFIX = "blob-download-"
 
-        fun uniqueNameFor(endpoint: Endpoint, transferJobId: Int) : String {
-            return "$UNIQUE_NAME_PREFIX${endpoint.url}-$transferJobId"
+        fun uniqueNameFor(learningSpace: LearningSpace, transferJobId: Int) : String {
+            return "$UNIQUE_NAME_PREFIX${learningSpace.url}-$transferJobId"
         }
 
     }

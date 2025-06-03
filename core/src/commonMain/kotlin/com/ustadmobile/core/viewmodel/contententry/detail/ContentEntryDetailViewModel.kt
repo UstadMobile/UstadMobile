@@ -26,14 +26,14 @@ class ContentEntryDetailViewModel(
                 TabItem(
                     viewName = ContentEntryDetailOverviewViewModel.DEST_NAME,
                     args = buildMap {
-                        putFromSavedStateIfPresent(PASS_THROUGH_ARGS)
+                        putAllFromSavedStateIfPresent(PASS_THROUGH_ARGS)
                     },
                     label = systemImpl.getString(MR.strings.overview)
                 ),
                 TabItem(
                     viewName = ContentEntryDetailAttemptsPersonListViewModel.DEST_NAME,
                     args = buildMap {
-                        putFromSavedStateIfPresent(PASS_THROUGH_ARGS)
+                        putAllFromSavedStateIfPresent(PASS_THROUGH_ARGS)
                     },
                     label = systemImpl.getString(MR.strings.attempts)
 

@@ -22,8 +22,8 @@ class ClazzListViewModelTest : AbstractMainDispatcherTest()  {
                 ClazzListViewModel(di, savedStateHandle)
             }
 
-            val clazzRepo = spy(activeRepo.clazzDao())
-            activeRepo.stub {
+            val clazzRepo = spy(activeRepoWithFallback.clazzDao())
+            activeRepoWithFallback.stub {
                 on { clazzDao() }.thenReturn(clazzRepo)
             }
 
@@ -60,6 +60,11 @@ class ClazzListViewModelTest : AbstractMainDispatcherTest()  {
             val testEntity = Clazz().apply {
                 clazzUid = activeDb.clazzDao().insert(this)
             }
+
+            val activeUser = setActiveUser(activeLearningSpace)
+            activeRepoWithFallback.grantScopedPermission(activeUser, Long.MAX_VALUE,
+                Clazz.TABLE_ID, testEntity.clazzUid)
+
 
             viewModel.uiState.filter { it.clazzList() !is EmptyPagingSource }
                 .test {

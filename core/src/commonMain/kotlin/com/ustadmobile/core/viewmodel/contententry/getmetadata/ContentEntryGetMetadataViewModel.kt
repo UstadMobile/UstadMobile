@@ -20,7 +20,7 @@ import org.kodein.di.instance
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.contentjob.InvalidContentException
 import com.ustadmobile.core.domain.contententry.getmetadatafromuri.UnsupportedContentException
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.viewmodel.courseblock.edit.CourseBlockEditViewModel
 
 data class ContentEntryGetMetadataUiState(
@@ -31,7 +31,7 @@ class ContentEntryGetMetadataViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
     private val contentEntryGetMetaDataFromUriUseCase: ContentEntryGetMetaDataFromUriUseCase =
-        di.onActiveEndpoint().direct.instance(),
+        di.onActiveLearningSpace().direct.instance(),
 ): UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(ContentEntryGetMetadataUiState())
@@ -46,7 +46,7 @@ class ContentEntryGetMetadataViewModel(
             try {
                 val metadataResult = contentEntryGetMetaDataFromUriUseCase(
                     contentUri = DoorUri.parse(uriArg),
-                    endpoint = accountManager.activeEndpoint,
+                    learningSpace = accountManager.activeLearningSpace,
                     fileName = fileName,
                     onProgress = {
                         _uiState.update { prev ->
@@ -65,7 +65,7 @@ class ContentEntryGetMetadataViewModel(
                                 value = metadataResult
                             )
                         )
-                        putFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
+                        putAllFromSavedStateIfPresent(CourseBlockEditViewModel.COURSE_BLOCK_CONTENT_ENTRY_PASS_THROUGH_ARGS)
                         putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_VIEWNAME)
                         putFromSavedStateIfPresent(UstadView.ARG_RESULT_DEST_KEY)
                         putFromSavedStateIfPresent(ARG_PARENT_UID)

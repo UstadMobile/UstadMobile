@@ -1,6 +1,5 @@
 package com.ustadmobile.core.domain.db
 
-import com.ustadmobile.core.domain.xxhash.XXHasher64Factory
 import com.ustadmobile.core.util.ext.toByteArray
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.jdbc.Connection
@@ -8,6 +7,7 @@ import com.ustadmobile.door.jdbc.ext.executeQueryAsyncKmp
 import com.ustadmobile.door.jdbc.ext.executeUpdateAsync
 import com.ustadmobile.door.jdbc.ext.useResults
 import com.ustadmobile.door.jdbc.ext.useStatementAsync
+import com.ustadmobile.xxhashkmp.XXHasher64Factory
 
 suspend fun Connection.migrate203_204AddStatementEntityContextRegHash(
     xxHasher64Factory: XXHasher64Factory,

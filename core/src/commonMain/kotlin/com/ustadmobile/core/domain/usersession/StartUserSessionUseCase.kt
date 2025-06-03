@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.usersession
 
-import com.ustadmobile.core.account.UserSessionWithPersonAndEndpoint
+import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.nav.UstadNavController
@@ -18,7 +18,7 @@ class StartUserSessionUseCase(
      *        setting the session for the UstadAccountManager.
      */
     operator fun invoke(
-        session: UserSessionWithPersonAndEndpoint,
+        session: UserSessionWithPersonAndLearningSpace,
         nextDest: String = ClazzListViewModel.DEST_NAME_HOME,
         navController: UstadNavController,
         goOptions: UstadMobileSystemCommon.UstadGoOptions = UstadMobileSystemCommon.UstadGoOptions(
@@ -28,7 +28,7 @@ class StartUserSessionUseCase(
     ) {
         accountManager.takeIf { !dontSetCurrentSession }?.currentUserSession = session
         navController.navigateToViewUri(
-            nextDest.appendSelectedAccount(session.person.personUid, session.endpoint),
+            nextDest.appendSelectedAccount(session.person.personUid, session.learningSpace),
             goOptions,
         )
     }

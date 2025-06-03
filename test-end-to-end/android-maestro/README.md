@@ -23,12 +23,6 @@ Note: ADB port forwarding on localhost is used instead of directly using the IP 
 ensure that the device and testcontroller can communicate, even if airplane mode is used during
 testing.
 
-* If running test(s) that require files from test-files, push the test-files to the download directory
-  using the adb command:
-```
-adb push ../test-files/content/* /sdcard/Download/
-```
-
 ### Running
 
 Start the testserver-controller:
