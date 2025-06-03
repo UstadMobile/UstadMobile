@@ -662,7 +662,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         }
     }
 
-    bind<RunReportUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<RunReportUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         val repo : UmAppDatabase? = instanceOrNull(tag = DoorTag.TAG_REPO)
 
         if(repo != null) {
@@ -681,7 +681,7 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         }
     }
 
-    bind<GenerateReportQueriesUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<GenerateReportQueriesUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         GenerateReportQueriesUseCase()
     }
 
