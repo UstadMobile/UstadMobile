@@ -772,10 +772,10 @@ fun Application.umRestApplication(
                 storeActivitiesUseCase = instance(),
             )
         }
-        bind<GenerateTestXapiStatementsUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<GenerateTestXapiStatementsUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             GenerateTestXapiStatementsUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
-                endpoint = context,
+                learningSpace = context,
                 xapiStatementResource = instance()
             )
         }
@@ -904,7 +904,7 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<RunReportServerUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<RunReportServerUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             RunReportServerUseCase(
                 runReportUseCase = instance(),
                 verifyClientSessionUseCase = instance(),
@@ -912,7 +912,7 @@ fun Application.umRestApplication(
             )
         }
 
-        bind<RunReportUseCase>() with scoped(EndpointScope.Default).singleton {
+        bind<RunReportUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             RunReportUseCaseDatabaseImpl(
                 db = instance(tag = DoorTag.TAG_DB),
                 generateReportQueriesUseCase = instance(),

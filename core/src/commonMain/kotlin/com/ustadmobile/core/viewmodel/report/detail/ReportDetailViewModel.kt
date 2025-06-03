@@ -7,7 +7,7 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.INDETERMINATE
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.NOT_LOADING
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
@@ -37,7 +37,7 @@ class ReportDetailViewModel(
 ) : DetailViewModel<Report>(di, savedStateHandle, DEST_NAME) {
 
     private val reportUid = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
-    private val runReportUseCase: RunReportUseCase by di.onActiveEndpoint().instance()
+    private val runReportUseCase: RunReportUseCase by di.onActiveLearningSpace().instance()
 
     private val _uiState = MutableStateFlow(ReportDetailUiState())
     val uiState: Flow<ReportDetailUiState> = _uiState.asStateFlow()
@@ -71,7 +71,7 @@ class ReportDetailViewModel(
                     setLoadingState = true,
                     permissionCheck = { true }
                 ) {
-                    val reportFlow = activeRepo.reportDao().findByUidLive(reportUid)
+                    val reportFlow = activeRepoWithFallback.reportDao().findByUidLive(reportUid)
                     launch {
                         reportFlow
                             .distinctUntilChanged { old, new ->

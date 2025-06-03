@@ -288,7 +288,7 @@ internal fun ustadJsDi(
         )
     }
 
-    bind<RunReportUseCase>() with scoped(EndpointScope.Default).singleton {
+    bind<RunReportUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         RunReportUseCaseClientImpl(
             db =  instance(tag = DoorTag.TAG_DB),
             repo = (instance<UmAppDatabase>(tag = DoorTag.TAG_REPO) as DoorDatabaseRepository),

@@ -7,7 +7,7 @@ import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState.Companion.NOT_LOADING
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
@@ -43,7 +43,7 @@ class ReportListViewModel(
     di, savedStateHandle, ReportListUiState(), destinationName
 ) {
 
-    private val runReportUseCase: RunReportUseCase by di.onActiveEndpoint().instance()
+    private val runReportUseCase: RunReportUseCase by di.onActiveLearningSpace().instance()
 
     private val pagingSourceFactory: () -> PagingSource<Int, Report> = {
         activeRepoWithFallback.reportDao().findAllReports()

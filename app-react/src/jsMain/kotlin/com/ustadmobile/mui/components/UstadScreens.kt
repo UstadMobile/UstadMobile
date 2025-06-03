@@ -55,11 +55,11 @@ import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.domain.db.migrate203_204AddStatementEntityContextRegHash
-import com.ustadmobile.core.domain.xxhash.XXHasher64FactoryJs
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.migration.DoorMigrationAsync
 import com.ustadmobile.util.ext.deleteDatabaseAsync
+import com.ustadmobile.xxhashkmp.jsimpl.XXHasher64FactoryJs
 import mui.system.useMediaQuery
 import org.kodein.di.direct
 import org.kodein.di.instance

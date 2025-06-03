@@ -8,6 +8,7 @@ import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.ext.prepareAndUseStatementAsync
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
+import io.ktor.util.reflect.Type
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -51,7 +52,12 @@ class RunReportUseCaseDatabaseImpl(
                     queries.forEach { query ->
                         db.prepareAndUseStatementAsync(PreparedStatementConfig(query.sql)) { statement ->
                             query.params.forEachIndexed { index, paramVal ->
-                                statement.setObject(index + 1, paramVal)
+                                try {
+                                    statement.setObject(index + 1, paramVal)
+                                } catch (e: IllegalArgumentException) {
+                                    // Fallback to string representation if setObject fails
+                                    statement.setString(index + 1, paramVal.toString())
+                                }
                             }
                             statement.executeUpdate()
                         }

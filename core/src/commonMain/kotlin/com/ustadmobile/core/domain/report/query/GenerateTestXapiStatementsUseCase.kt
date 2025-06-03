@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.report.query
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.ext.agent
@@ -31,7 +31,7 @@ const val DEFAULT_NUM_DAYS = 3
 
 class GenerateTestXapiStatementsUseCase(
     private val db: UmAppDatabase,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val xapiStatementResource: XapiStatementResource,
 ) {
     suspend operator fun invoke(
@@ -68,12 +68,12 @@ class GenerateTestXapiStatementsUseCase(
 
                 // Inlined statement creation
                 XapiStatement(
-                    actor = xapiSession.agent(endpoint), verb = XapiVerb(
+                    actor = xapiSession.agent(learningSpace), verb = XapiVerb(
                         id = if (isComplete) VERB_COMPLETED else VERB_PROGRESSED,
                         display = mapOf("en-US" to if (isComplete) "completed" else "progressed")
                     ), `object` = XapiActivityStatementObject(
                         objectType = XapiObjectType.Activity,
-                        id = "${endpoint.url}/content/${contentEntry.contentEntryUid}"
+                        id = "${learningSpace.url}/content/${contentEntry.contentEntryUid}"
                     ), timestamp = timestamp.toString(), context = XapiContext(
                         platform = "Test Platform",
                         language = "en-US",
