@@ -25,7 +25,7 @@ import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase.Companion.SOCIAL_WARNING_WEB_URL
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.util.ext.toggle
 import com.ustadmobile.core.viewmodel.clazz.launchSetTitleFromClazzUid
 import com.ustadmobile.core.viewmodel.clazzassignment.asBlobOpenItem
@@ -296,7 +296,7 @@ class ClazzAssignmentDetailOverviewViewModel(
     val newCourseCommentText: Flow<String> = _newCourseCommentText.asStateFlow()
 
     private val privateCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
-        activeRepo.commentsDao().findPrivateCommentsForUserByAssignmentUid(
+        activeRepoWithFallback.commentsDao().findPrivateCommentsForUserByAssignmentUid(
             accountPersonUid = activeUserPersonUid,
             assignmentUid = entityUidArg,
             includeDeleted = false,
@@ -304,7 +304,7 @@ class ClazzAssignmentDetailOverviewViewModel(
     }
 
     private val courseCommentsPagingSourceFactory: () -> PagingSource<Int, CommentsAndName> = {
-        activeRepo.commentsDao().findCourseCommentsByAssignmentUid(
+        activeRepoWithFallback.commentsDao().findCourseCommentsByAssignmentUid(
             assignmentUid = entityUidArg,
             includeDeleted = false,
         )
@@ -314,13 +314,13 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     private val clazzUid = savedStateHandle[ARG_CLAZZUID]?.toLong() ?: throw IllegalArgumentException("clazzUid arg is required")
 
-    private val saveAndUploadUseCase: SaveAndUploadLocalUrisUseCase by di.onActiveEndpoint()
+    private val saveAndUploadUseCase: SaveAndUploadLocalUrisUseCase by di.onActiveLearningSpace()
         .instance()
 
-    private val cancelTransferJobUseCase: CancelBlobUploadClientUseCase? by di.onActiveEndpoint()
+    private val cancelTransferJobUseCase: CancelBlobUploadClientUseCase? by di.onActiveLearningSpace()
         .instanceOrNull()
 
-    private val openBlobUiUseCase: OpenBlobUiUseCase? by di.onActiveEndpoint().instanceOrNull()
+    private val openBlobUiUseCase: OpenBlobUiUseCase? by di.onActiveLearningSpace().instanceOrNull()
 
     private var openBlobJob: Job? = null
 
@@ -339,7 +339,7 @@ class ClazzAssignmentDetailOverviewViewModel(
             )
         }
 
-        val entityFlow = activeRepo
+        val entityFlow = activeRepoWithFallback
             .clazzAssignmentDao().findAssignmentCourseBlockAndSubmitterUidAsFlow(
                 assignmentUid = entityUidArg,
                 clazzUid = clazzUid,
@@ -388,13 +388,13 @@ class ClazzAssignmentDetailOverviewViewModel(
                 }
 
                 launch {
-                    val submissionFlow = activeRepo
+                    val submissionFlow = activeRepoWithFallback
                         .courseAssignmentSubmissionDao().findByAssignmentUidAndAccountPersonUid(
                             accountPersonUid = activeUserPersonUid,
                             assignmentUid = entityUidArg,
                         )
 
-                    val submissionFilesFlow = activeRepo
+                    val submissionFilesFlow = activeRepoWithFallback
                         .courseAssignmentSubmissionFileDao().getByAssignmentUidAndPersonUid(
                             accountPersonUid = activeUserPersonUid,
                             assignmentUid = entityUidArg,
@@ -410,7 +410,7 @@ class ClazzAssignmentDetailOverviewViewModel(
                 }
 
                 launch {
-                    activeRepo.courseAssignmentMarkDao().getAllMarksForUserAsFlow(
+                    activeRepoWithFallback.courseAssignmentMarkDao().getAllMarksForUserAsFlow(
                         accountPersonUid = activeUserPersonUid,
                         assignmentUid = entityUidArg
                     ).collect {
@@ -530,7 +530,7 @@ class ClazzAssignmentDetailOverviewViewModel(
 
         viewModelScope.launch {
             try {
-                activeRepo.commentsDao().insertAsync(Comments().apply {
+                activeRepoWithFallback.commentsDao().insertAsync(Comments().apply {
                     commentsForSubmitterUid = submitterUid
                     commentsFromPersonUid = activeUserPersonUid
                     commentsFromSubmitterUid = _uiState.value.submitterUid
@@ -556,7 +556,7 @@ class ClazzAssignmentDetailOverviewViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         viewModelScope.launch {
             try {
-                activeRepo.commentsDao().insertAsync(Comments().apply {
+                activeRepoWithFallback.commentsDao().insertAsync(Comments().apply {
                     commentsForSubmitterUid = 0
                     commentsFromPersonUid = activeUserPersonUid
                     commentsEntityUid = entityUidArg
@@ -632,7 +632,7 @@ class ClazzAssignmentDetailOverviewViewModel(
         viewModelScope.launch {
             try {
                 submitAssignmentUseCase(
-                    repo = activeRepo,
+                    repo = activeRepoWithFallback,
                     submitterUid = _uiState.value.submitterUid,
                     assignmentUid = entityUidArg,
                     accountPersonUid = accountManager.currentUserSession.person.personUid,
@@ -688,8 +688,8 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     fun onRemoveSubmissionFile(file: CourseAssignmentSubmissionFileAndTransferJob) {
         viewModelScope.launch {
-            activeRepo.withDoorTransactionAsync {
-                activeRepo.courseAssignmentSubmissionFileDao().setDeleted(
+            activeRepoWithFallback.withDoorTransactionAsync {
+                activeRepoWithFallback.courseAssignmentSubmissionFileDao().setDeleted(
                     casaUid = file.submissionFile?.casaUid ?: 0,
                     deleted = true,
                     updateTime = systemTimeInMillis(),
@@ -739,7 +739,7 @@ class ClazzAssignmentDetailOverviewViewModel(
 
     fun onDeleteComment(comments: Comments) {
         viewModelScope.launch {
-            activeRepo.commentsDao().updateDeletedByCommentUid(
+            activeRepoWithFallback.commentsDao().updateDeletedByCommentUid(
                 uid = comments.commentsUid,
                 deleted = true,
                 changeTime = systemTimeInMillis()

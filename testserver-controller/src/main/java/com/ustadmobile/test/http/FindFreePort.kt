@@ -19,7 +19,8 @@ fun findFreePort(
     numAttempts: Int = 20
 ): Int {
     for(i in 1..numAttempts) {
-        val portToTry = Random.nextInt(from, until)
+        val portToTry = if(from == until) from else Random.nextInt(from, until)
+
         return try {
             ServerSocket(portToTry).use { socket ->
                 socket.localPort

@@ -51,6 +51,7 @@ external interface PersonListProps: Props {
     var onListItemClick: (Person) -> Unit
     var onClickAddItem: () -> Unit
     var onClickInviteWithLink: () -> Unit
+    var onClickInviteViaContact: () -> Unit
     var onClickCopyInviteCode: () -> Unit
 }
 
@@ -111,6 +112,26 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
 
                             ListItemText {
                                 primary = ReactNode(strings[MR.strings.copy_invite_code])
+                            }
+                        }
+                    }
+                }
+            }
+            if(props.uiState.showInviteViaContact) {
+                item("invite_via_contact") {
+                    ListItem.create {
+                        ListItemButton {
+                            id = "invite_via_contact_button"
+                            onClick = {
+                                props.onClickInviteViaContact()
+                            }
+
+                            ListItemIcon {
+                                LinkIcon()
+                            }
+
+                            ListItemText {
+                                primary = ReactNode(strings[MR.strings.invite_via_contact])
                             }
                         }
                     }
@@ -257,6 +278,7 @@ val PersonListScreen = FC<Props> {
         onClickAddItem = viewModel::onClickAdd
         onClickInviteWithLink = viewModel::onClickInviteWithLink
         onClickCopyInviteCode = viewModel::onClickCopyInviteCode
+        onClickInviteViaContact = viewModel::onClickInviteViaContact
     }
 
 

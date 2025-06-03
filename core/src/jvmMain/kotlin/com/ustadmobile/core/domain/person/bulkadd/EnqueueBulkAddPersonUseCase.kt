@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.person.bulkadd
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -17,7 +17,7 @@ import java.io.File
  */
 class EnqueueBulkAddPersonUseCase(
     private val scheduler: Scheduler,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val tmpDir: File,
 ) {
 
@@ -32,7 +32,7 @@ class EnqueueBulkAddPersonUseCase(
         }
 
         val jobDetail = JobBuilder.newJob(BulkAddPersonJob::class.java)
-            .usingJobData(DATA_ENDPOINT, endpoint.url)
+            .usingJobData(DATA_LEARNINGSPACE, learningSpace.url)
             .usingJobData(DATA_TIMESTAMP, timestamp)
             .build()
 
@@ -48,7 +48,7 @@ class EnqueueBulkAddPersonUseCase(
 
     companion object {
 
-        const val DATA_ENDPOINT = "endpoint"
+        const val DATA_LEARNINGSPACE = "endpoint"
 
         const val DATA_TIMESTAMP = "csvTmpTimestamp"
 

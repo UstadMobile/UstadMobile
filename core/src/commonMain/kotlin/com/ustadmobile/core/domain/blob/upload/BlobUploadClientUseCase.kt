@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.upload
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.blob.BlobTransferJobItem
 import com.ustadmobile.core.domain.blob.BlobTransferProgressUpdate
 import com.ustadmobile.core.domain.blob.BlobTransferStatusUpdate
@@ -29,13 +29,13 @@ interface BlobUploadClientUseCase {
      *
      * @param blobUrls a list of urls (e.g. in the form of http://endpoint.com/api/sha256)
      * @param batchUuid UUID for this batch upload
-     * @param endpoint the endpoint that we are uploading to
+     * @param learningSpace the endpoint that we are uploading to
      * @param onProgress
      */
     suspend operator fun invoke(
         blobUrls: List<BlobTransferJobItem>,
         batchUuid: String,
-        endpoint: Endpoint,
+        learningSpace: LearningSpace,
         onProgress: (BlobTransferProgressUpdate) -> Unit = { },
         onStatusUpdate: (BlobTransferStatusUpdate) -> Unit = { },
     )

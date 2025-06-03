@@ -14,7 +14,6 @@ import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.util.test.initNapierLog
 import kotlinx.coroutines.flow.first
-import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
 
 class PersonIntegrationTest: AbstractMainDispatcherTest() {
@@ -68,7 +67,7 @@ class PersonIntegrationTest: AbstractMainDispatcherTest() {
             ).use { viewModel ->
                 viewModel.uiState.assertItemReceived(timeout = 5.seconds, name = "detail view model shows account created") {
                     println("Person detail state username = ${it.person?.person?.username} hasPasswordPermission=${it.hasChangePasswordPermission}")
-                    it.person?.person?.username == "bart" && !it.showCreateAccountVisible && it.changePasswordVisible
+                    it.person?.person?.username == "bart" && !it.showCreateAccountVisible && it.manageAccountVisible
                 }
             }
 

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.viewmodel.clazz.detail
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
@@ -13,12 +13,12 @@ import kotlin.time.Duration.Companion.seconds
 
 class ClazzDetailViewModelTest : AbstractMainDispatcherTest()  {
 
-    val endpoint = Endpoint("http://test.com/")
+    val learningSpace = LearningSpace("http://test.com/")
 
     @Test
     fun givenUserHasAttendancePermissions_whenOnCreateCalled_thenShouldMakeAttendanceTabVisible() {
         testViewModel<ClazzDetailViewModel> {
-            val activeUser = setActiveUser(endpoint)
+            val activeUser = setActiveUser(learningSpace)
 
             val testClazz = Clazz().apply {
                 clazzName = "Test Course"
@@ -50,7 +50,7 @@ class ClazzDetailViewModelTest : AbstractMainDispatcherTest()  {
     @Test
     fun givenUserDoesnotHaveAttendancePermission_whenOnCreateCalled_thenAttendanceTabShouldNotBeVisible() {
         testViewModel<ClazzDetailViewModel> {
-            val activeUser = setActiveUser(endpoint)
+            val activeUser = setActiveUser(learningSpace)
 
             val testClazz = Clazz().apply {
                 clazzName = "Test Course"

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.xapi.XapiStatementResource
 import com.ustadmobile.core.domain.xapi.model.XapiActivityStatementObject
 import com.ustadmobile.core.domain.xapi.savestatementonclear.SaveStatementOnClearUseCase
@@ -12,7 +12,7 @@ class NonInteractiveContentXapiStatementRecorderFactory(
     private val saveStatementOnClearUseCase: SaveStatementOnClearUseCase,
     private val saveStatementOnUnloadUseCase: SaveStatementOnUnloadUseCase?,
     private val xapiStatementResource: XapiStatementResource,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
 ) {
 
     fun newStatementRecorder(
@@ -27,7 +27,7 @@ class NonInteractiveContentXapiStatementRecorderFactory(
             xapiSession = xapiSession,
             scope = scope,
             xapiActivityProvider = xapiActivityProvider,
-            endpoint = endpoint,
+            learningSpace = learningSpace,
         )
     }
 

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.coursegroupset.list
 
 import app.cash.turbine.test
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.test.viewmodeltest.assertItemReceived
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
@@ -23,7 +23,7 @@ class CourseGroupSetListViewModelTest : AbstractMainDispatcherTest() {
     @Test
     fun givenExistingCourseGroupSetAndUserHasPermissionToAdd_whenInitiated_thenWillShowExistingGroupSetAndAddOption() {
         testViewModel<CourseGroupSetListViewModel> {
-            val activeUser = setActiveUser(Endpoint("https://test.com/"))
+            val activeUser = setActiveUser(LearningSpace("https://test.com/"))
 
             val clazzUid = activeDb.withDoorTransactionAsync {
                 val clazz = Clazz().apply {

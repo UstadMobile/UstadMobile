@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.validateemail
 
-class ValidateEmailUseCase() {
+class ValidateEmailUseCase {
 
     /**
      * As per https://www.rfc-editor.org/rfc/rfc5322 section 3.4.1 ):

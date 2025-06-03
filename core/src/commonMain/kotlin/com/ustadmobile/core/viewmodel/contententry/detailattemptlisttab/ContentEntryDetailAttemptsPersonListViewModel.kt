@@ -48,7 +48,7 @@ class ContentEntryDetailAttemptsPersonListViewModel(
 
     private val attemptsPersonListPagingSource: ListPagingSourceFactory<PersonAndPictureAndNumAttempts> =
         {
-            activeRepo.statementDao().findPersonsWithAttempts(
+            activeRepoWithFallback.statementDao().findPersonsWithAttempts(
                 contentEntryUid = entityUidArg,
                 accountPersonUid = activeUserPersonUid,
                 searchText = _appUiState.value.searchState.searchText.toQueryLikeParam(),
@@ -66,7 +66,7 @@ class ContentEntryDetailAttemptsPersonListViewModel(
         }
 
         viewModelScope.launch {
-            listOf(activeDb, activeRepo).forEach { db ->
+            listOf(activeDb, activeRepo).filterNotNull().forEach { db ->
                 val sortOptions = buildSortOptions(db)
                 _uiState.update { prev -> prev.copy(sortOptions = sortOptions) }
             }
@@ -74,7 +74,9 @@ class ContentEntryDetailAttemptsPersonListViewModel(
 
         viewModelScope.launch {
             _uiState.whenSubscribed {
-                activeRepo.contentEntryDao().findLiveContentEntry(entityUidArg).collect { contentEntry ->
+                activeRepoWithFallback.contentEntryDao().findLiveContentEntry(
+                    entityUidArg
+                ).collect { contentEntry ->
                     _appUiState.update { prev ->
                         prev.copy(title = contentEntry?.title ?: "")
                     }

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.coursegroupset.detail
 
 import app.cash.turbine.test
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
@@ -23,12 +23,12 @@ import kotlin.time.Duration.Companion.seconds
 
 class CourseGroupSetDetailViewModelTest : AbstractMainDispatcherTest()  {
 
-    val endpoint = Endpoint("https://www.test.com/")
+    val learningSpace = LearningSpace("https://www.test.com/")
 
     @Test
     fun givenExistingCourseGroupSetWithMembers_whenInitiated_thenWillShowMembersListAndEditButton() {
         testViewModel<CourseGroupSetDetailViewModel> {
-            val activeUser = setActiveUser(endpoint)
+            val activeUser = setActiveUser(learningSpace)
 
             val studentNames = listOf(
                 "Bart Simpson",

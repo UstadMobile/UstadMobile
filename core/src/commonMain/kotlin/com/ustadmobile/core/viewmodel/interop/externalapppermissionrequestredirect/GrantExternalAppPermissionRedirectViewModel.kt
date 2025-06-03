@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.interop.externalapppermissionrequestredirect
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.viewmodel.UstadViewModel
@@ -18,7 +18,7 @@ class GrantExternalAppPermissionRedirectViewModel(
     di: DI, savedStateHandle: UstadSavedStateHandle,
 ) : UstadViewModel(di, savedStateHandle, DEST_NAME){
 
-    private val apiUrlConfig: ApiUrlConfig by instance()
+    private val apiUrlConfig: SystemUrlConfig by instance()
 
     init {
         val destination = ExternalAppPermissionRequestViewModel.DEST_NAME

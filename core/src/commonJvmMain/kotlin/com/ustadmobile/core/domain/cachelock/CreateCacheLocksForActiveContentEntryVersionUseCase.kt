@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.cachelock
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.contententry.importcontent.CreateRetentionLocksForManifestUseCase
@@ -38,7 +38,7 @@ class CreateCacheLocksForActiveContentEntryVersionUseCase(
     private val db: UmAppDatabase,
     private val httpClient: HttpClient,
     private val json: Json,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     private val createRetentionLocksForManifestUseCase: CreateRetentionLocksForManifestUseCase,
 ): Closeable {
 
@@ -71,7 +71,7 @@ class CreateCacheLocksForActiveContentEntryVersionUseCase(
 
         val cacheLockJoins = versionsWithoutLocks.flatMap { contentEntryVersion ->
             val manifestUrl = contentEntryVersion.cevManifestUrl
-            if(manifestUrl != null && manifestUrl.startsWith(endpoint.url)) {
+            if(manifestUrl != null && manifestUrl.startsWith(learningSpace.url)) {
                 val manifest: ContentManifest = json.decodeFromString(
                     httpClient.get(manifestUrl).bodyAsDecodedText()
                 )

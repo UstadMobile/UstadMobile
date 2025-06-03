@@ -61,6 +61,8 @@ data class Person(
 
     var active: Boolean = true,
 
+    var isPersonalAccount: Boolean = false,
+
     /**
      * The date of birth of the user in milliseconds since 1/Jan/1970 (UTC). All date of birth
      * timestamps are stored as TimeZone = UTC.

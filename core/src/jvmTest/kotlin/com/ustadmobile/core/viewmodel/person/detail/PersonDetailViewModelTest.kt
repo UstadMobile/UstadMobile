@@ -1,7 +1,7 @@
 package com.ustadmobile.core.viewmodel.person.detail
 
 import app.cash.turbine.test
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.PermissionFlags
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -26,7 +26,7 @@ import kotlin.test.assertFalse
 
 class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
 
-    val endpoint = Endpoint("http://test.com/")
+    val endpoint = LearningSpace("http://test.com/")
 
     @Test
     fun givenPersonDetails_whenPersonUsernameIsNullAndCantManageAccount_thenCreateAccountShouldBeHidden() {
@@ -54,7 +54,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
             }
 
             viewModel.uiState.assertItemReceived(timeout = 2.minutes) {
-                it.person?.person?.firstNames == "Lenny" && !it.changePasswordVisible && !it.showCreateAccountVisible
+                it.person?.person?.firstNames == "Lenny" && !it.manageAccountVisible && !it.showCreateAccountVisible
             }
         }
     }
@@ -85,7 +85,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
             }
 
             viewModel.uiState.assertItemReceived {
-                it.person?.person?.firstNames == "Lenny" && !it.changePasswordVisible && it.showCreateAccountVisible
+                it.person?.person?.firstNames == "Lenny" && !it.manageAccountVisible && it.showCreateAccountVisible
             }
         }
     }
@@ -116,7 +116,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
             }
 
             viewModel.uiState.assertItemReceived {
-                it.person?.person?.firstNames == "Lenny" && it.changePasswordVisible && !it.showCreateAccountVisible
+                it.person?.person?.firstNames == "Lenny" && it.manageAccountVisible && !it.showCreateAccountVisible
             }
         }
     }
@@ -132,7 +132,7 @@ class PersonDetailViewModelTest: AbstractMainDispatcherTest() {
             }
 
             viewModel.uiState.assertItemReceived {
-                it.changePasswordVisible
+                it.manageAccountVisible
             }
         }
     }

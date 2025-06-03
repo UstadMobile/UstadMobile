@@ -1,16 +1,14 @@
 package com.ustadmobile.core.viewmodel.redirect
 
-import com.russhwolf.settings.Settings
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.impl.config.ApiUrlConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.viewmodel.OnBoardingViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -25,14 +23,12 @@ import org.kodein.di.on
 class RedirectViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
-) : UstadViewModel(di, savedStateHandle, DEST_NAME){
+) : UstadViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val nextViewArg = savedStateHandle[UstadView.ARG_NEXT]
     private val deepLink = savedStateHandle[UstadView.ARG_OPEN_LINK]
 
-    private val apiUrlConfig: ApiUrlConfig by instance()
-
-    private val settings: Settings by instance()
+    private val apiUrlConfig: SystemUrlConfig by instance()
 
     init {
         _appUiState.value = AppUiState(
@@ -52,40 +48,33 @@ class RedirectViewModel(
          * Which references:
          * https://issuetracker.google.com/issues/65820362
          *
-         * Says
-         *
          */
-        val activeEndpoint = accountManager.activeEndpoint
-        if(!activeEndpoint.url.contains("localhost")) {
-            val db = di.direct.on(activeEndpoint).instance<UmAppDatabase>(
+        val activeLearningSpace = accountManager.activeLearningSpace
+        if (!activeLearningSpace.url.contains("localhost")) {
+            val db = di.direct.on(activeLearningSpace).instance<UmAppDatabase>(
                 tag = DoorTag.TAG_DB
             )
             println(db)
         }
 
-        if(settings.getStringOrNull(OnBoardingViewModel.PREF_TAG) != true.toString()) {
-            navController.navigate(OnBoardingViewModel.DEST_NAME, buildMap {
-                putFromSavedStateIfPresent(ARG_NEXT)
-                putFromSavedStateIfPresent(ARG_OPEN_LINK)
-            })
-        }else {
-            val destination = destinationArg ?: ClazzListViewModel.DEST_NAME_HOME
+        val destination = destinationArg ?: di.on(accountManager.currentUserSession.learningSpace)
+            .direct.instance<GetDefaultDestinationUseCase>().invoke()
 
-            viewModelScope.launch {
-                //preMigrate?.invoke()
-
-                navController.navigateToLink(
-                    link = destination,
-                    accountManager = accountManager,
-                    openExternalLinkUseCase = { _, _ ->  },
-                    userCanSelectServer = apiUrlConfig.canSelectServer,
-                    goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                        clearStack = true
-                    ),
-                    forceAccountSelection = destinationArg != null,
-                )
-            }
+        viewModelScope.launch {
+            navController.navigateToLink(
+                link = destination,
+                accountManager = accountManager,
+                openExternalLinkUseCase = { _, _ ->  },
+                userCanSelectServer = apiUrlConfig.canSelectServer,
+                goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                    clearStack = true
+                ),
+                forceAccountSelection = destinationArg != null,
+                checkRegistrationAllowedUseCase = { di.on(it).direct.instance() },
+                presetLearningSpaceUrl = apiUrlConfig.presetLearningSpaceUrl
+            )
         }
+
     }
 
     companion object {

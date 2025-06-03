@@ -1,6 +1,6 @@
 package com.ustadmobile.core.domain.blob.upload
 
-import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.connectivitymonitor.ConnectivityTriggerGroupController
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.TransferJob
@@ -16,7 +16,7 @@ import org.quartz.TriggerKey
  */
 class EnqueueBlobUploadClientUseCaseJvm(
     private val scheduler: Scheduler,
-    private val endpoint: Endpoint,
+    private val learningSpace: LearningSpace,
     db: UmAppDatabase,
     cache: UstadCache,
 ): AbstractEnqueueBlobUploadClientUseCase(
@@ -35,10 +35,10 @@ class EnqueueBlobUploadClientUseCaseJvm(
         val transferJob = createTransferJob(items, batchUuid, tableId, entityUid)
         val quartzJob = JobBuilder.newJob(BlobUploadClientJob::class.java)
             .usingJobData(DATA_JOB_UID, transferJob.tjUid)
-            .usingJobData(DATA_ENDPOINT, endpoint.url)
+            .usingJobData(DATA_LEARNINGSPACE, learningSpace.url)
             .build()
 
-        val triggerKey = triggerKeyFor(endpoint, transferJob.tjUid)
+        val triggerKey = triggerKeyFor(learningSpace, transferJob.tjUid)
         scheduler.unscheduleJob(triggerKey)
         val jobTrigger = TriggerBuilder.newTrigger()
             .withIdentity(triggerKey)
@@ -54,9 +54,9 @@ class EnqueueBlobUploadClientUseCaseJvm(
 
     companion object {
 
-        fun triggerKeyFor(endpoint: Endpoint, transferJobId: Int) : TriggerKey {
+        fun triggerKeyFor(learningSpace: LearningSpace, transferJobId: Int) : TriggerKey {
             return TriggerKey(
-                "blob-upload-${endpoint.url}-$transferJobId",
+                "blob-upload-${learningSpace.url}-$transferJobId",
                 ConnectivityTriggerGroupController.TRIGGERKEY_CONNECTIVITY_REQUIRED_GROUP
             )
         }

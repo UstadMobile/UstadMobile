@@ -52,7 +52,7 @@ class BulkAddUsersUseCaseJvmTest {
         clazzesAdded.clear()
 
         mockAddNewPersonUseCase = mock {
-            onBlocking { invoke(any(), any(), any(), any()) }.thenAnswer { invocation ->
+            onBlocking { invoke(any(), any(), any(), any(), any()) }.thenAnswer { invocation ->
                 val personToAdd = invocation.arguments.first() as Person
                 val newUid = personIdCounter.incrementAndGet()
                 personsAdded.add(personToAdd.copy(personUid = newUid))

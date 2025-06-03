@@ -4,7 +4,7 @@ import com.ustadmobile.core.domain.xapi.model.XapiActivity
 import com.ustadmobile.core.domain.xapi.model.XapiActivityStatementObject
 import com.ustadmobile.core.domain.xapi.noninteractivecontentusagestatementrecorder.NonInteractiveContentXapiStatementRecorderFactory
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
-import com.ustadmobile.core.util.ext.onActiveEndpoint
+import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import org.kodein.di.DI
 import org.kodein.di.direct
@@ -27,7 +27,7 @@ abstract class AbstractNonInteractiveContentViewModel(
     )
 
     private val statementRecorderFactory: NonInteractiveContentXapiStatementRecorderFactory =
-        di.onActiveEndpoint().direct.instance()
+        di.onActiveLearningSpace().direct.instance()
 
     protected val contentEntryUid = savedStateHandle[ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
 

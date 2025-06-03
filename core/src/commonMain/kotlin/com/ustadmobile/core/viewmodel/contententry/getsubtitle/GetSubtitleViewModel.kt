@@ -37,7 +37,7 @@ class GetSubtitleViewModel(
     val uiState: Flow<GetSubtitleUiState> = _uiState.asStateFlow()
 
     private val getSubtitleTrackUseCase: GetSubtitleTrackFromUriUseCase by
-        on(accountManager.activeEndpoint).instance()
+        on(accountManager.activeLearningSpace).instance()
 
     init {
         _appUiState.update {

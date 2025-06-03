@@ -43,7 +43,7 @@ class ContentEntryEditViewModelTest : AbstractMainDispatcherTest(){
         testViewModel<ContentEntryEditViewModel> {
             val mockSaveContentEntryUseCase = mock<SaveContentEntryUseCase>()
             val mockImportContentUseCase = mock<EnqueueContentEntryImportUseCase>()
-            val user = setActiveUser(activeEndpoint)
+            val user = setActiveUser(activeLearningSpace)
             activeDb.systemPermissionDao().upsertAsync(
                 SystemPermission(
                     spToPersonUid = user.personUid,
@@ -52,11 +52,11 @@ class ContentEntryEditViewModelTest : AbstractMainDispatcherTest(){
             )
 
             extendDi {
-                bind<SaveContentEntryUseCase>() with scoped(endpointScope).singleton {
+                bind<SaveContentEntryUseCase>() with scoped(learningSpaceScope).singleton {
                     mockSaveContentEntryUseCase
                 }
 
-                bind<EnqueueContentEntryImportUseCase>() with scoped(endpointScope).singleton {
+                bind<EnqueueContentEntryImportUseCase>() with scoped(learningSpaceScope).singleton {
                     mockImportContentUseCase
                 }
             }

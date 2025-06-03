@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.rest
 
-import com.google.gson.Gson
 import com.russhwolf.settings.PropertiesSettings
 import com.russhwolf.settings.Settings
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -11,13 +10,13 @@ import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
 import kotlin.random.Random
 import com.ustadmobile.core.account.*
+import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.ext.clearAllTablesAndResetNodeId
 import com.ustadmobile.lib.rest.ext.insertDefaultSite
-import kotlinx.coroutines.runBlocking
 import java.util.Locale
 import java.util.Properties
 
@@ -25,7 +24,7 @@ import java.util.Properties
  * Creates a KodeIn DI Module that will contain most of what the test application engine needs to run
  */
 fun commonTestKtorDiModule(
-    endpointScope: EndpointScope
+    endpointScope: LearningSpaceScope
 ) = DI.Module("Common Ktor Test Module") {
     bind<NodeIdAndAuth>() with scoped(endpointScope).singleton {
         NodeIdAndAuth(Random.nextLong(0, Long.MAX_VALUE), randomUuid().toString())
@@ -41,9 +40,8 @@ fun commonTestKtorDiModule(
             }
     }
 
-
-    bind<Gson>() with singleton {
-        Gson()
+    bind<UmAppDataLayer>() with scoped(endpointScope).singleton {
+        UmAppDataLayer(localDb = instance(tag = DoorTag.TAG_DB), repository = null)
     }
 
     bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {

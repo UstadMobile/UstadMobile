@@ -3,6 +3,7 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
+import kotlinx.serialization.Serializable
 
 /**
  * Entity to hold authentication information about a given person. It contains the hashed password
@@ -23,6 +24,7 @@ import com.ustadmobile.door.annotation.*
      sqlStatements = [TRIGGER_UPSERT],
  )
 ))
+@Serializable
 class PersonAuth2 {
 
     /**

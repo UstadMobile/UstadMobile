@@ -36,7 +36,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.jcabi.manifests.Manifests
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -46,6 +46,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFKEY_ACTIONED_PRESET
+import com.ustadmobile.core.impl.di.commonClientDomainDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
@@ -193,7 +194,8 @@ fun main() {
                 DesktopDiModule,
                 DesktopHttpModule,
                 DesktopDomainDiModule,
-                commonDomainDiModule(EndpointScope.Default),
+                commonDomainDiModule(LearningSpaceScope.Default),
+                commonClientDomainDiModule(LearningSpaceScope.Default),
             )),
         ) {
             val di = localDI()

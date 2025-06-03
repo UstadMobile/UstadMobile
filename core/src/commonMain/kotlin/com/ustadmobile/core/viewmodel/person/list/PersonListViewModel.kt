@@ -26,7 +26,8 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.ClazzInviteViaContactViewModel
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.ClazzInviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_POPUP_TO_ON_PERSON_SELECTED
 import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
@@ -45,6 +46,7 @@ data class PersonListUiState(
     val sortOption: SortOrderOption = sortOptions.first(),
     val showAddItem: Boolean = false,
     val showInviteViaLink: Boolean = false,
+    val showInviteViaContact: Boolean = false,
     val inviteCode: String? = null,
     val showSortOptions: Boolean = true,
     val addSheetOrDialogVisible: Boolean = false,
@@ -78,6 +80,7 @@ class PersonListViewModel(
 ) {
 
     private val filterExcludeMembersOfClazz = savedStateHandle[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
+    private val personRole = savedStateHandle[ARG_ROLE]?.toLong() ?: 0L
 
     private val filterAlreadySelectedList = savedStateHandle[ARG_EXCLUDE_PERSONUIDS_LIST]
         ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
@@ -87,7 +90,7 @@ class PersonListViewModel(
         savedStateHandle[ARG_REQUIRE_PERMISSION_TO_SHOW_LIST]?.toLong() ?: 0
 
     private val pagingSourceFactory: () -> PagingSource<Int, PersonAndListDisplayDetails> = {
-        activeRepo.personDao().findPersonsWithPermissionAsPagingSource(
+        activeRepoWithFallback.personDao().findPersonsWithPermissionAsPagingSource(
             timestamp = getSystemTimeInMillis(),
             excludeClazz = filterExcludeMembersOfClazz,
             excludeSelected = filterAlreadySelectedList,
@@ -98,6 +101,8 @@ class PersonListViewModel(
     }
 
     private val inviteCode = savedStateHandle[ARG_SHOW_ADD_VIA_INVITE_LINK_CODE]
+
+    private val showInviteViaContact = savedStateHandle[ARG_SHOW_ADD_VIA_CONTACT]=="true"
 
     private val setClipboardStringUseCase: SetClipboardStringUseCase by instance()
 
@@ -119,7 +124,7 @@ class PersonListViewModel(
         val hasPermissionToListFlow = if(permissionRequiredToShowList == 0L) {
             flowOf(true)
         }else {
-            activeRepo.systemPermissionDao().personHasSystemPermissionAsFlow(
+            activeRepoWithFallback.systemPermissionDao().personHasSystemPermissionAsFlow(
                 accountPersonUid = activeUserPersonUid,
                 permission = permissionRequiredToShowList,
             )
@@ -137,6 +142,7 @@ class PersonListViewModel(
                             },
                             showInviteViaLink = inviteCode != null,
                             inviteCode = inviteCode,
+                            showInviteViaContact = showInviteViaContact,
                             showSortOptions = hasPermissionToList,
                         )
                     }
@@ -152,7 +158,7 @@ class PersonListViewModel(
         }
 
         viewModelScope.launch {
-            activeRepo.systemPermissionDao().personHasSystemPermissionPairAsFlow(
+            activeRepoWithFallback.systemPermissionDao().personHasSystemPermissionPairAsFlow(
                 accountPersonUid = activeUserPersonUid,
                 firstPermission = PermissionFlags.ADD_PERSON,
                 secondPermission = PermissionFlags.PERSON_VIEW
@@ -196,7 +202,7 @@ class PersonListViewModel(
             return //could never happen - button would not show if this was null
 
         navController.navigate(
-            InviteViaLinkViewModel.DEST_NAME,
+            ClazzInviteViaLinkViewModel.DEST_NAME,
             args = mapOf(
                 ARG_INVITE_CODE to inviteCode
             )
@@ -208,6 +214,19 @@ class PersonListViewModel(
             setClipboardStringUseCase(inviteCode)
             snackDispatcher.showSnackBar(Snack(systemImpl.getString(MR.strings.copied_to_clipboard)))
         }
+    }
+    fun onClickInviteViaContact() {
+        val args = buildMap {
+            put(ClazzInviteViaContactViewModel.ARG_ROLE, personRole.toString())
+            put(ClazzInviteViaContactViewModel.ARG_CLAZZ_UID, filterExcludeMembersOfClazz.toString())
+        }
+
+        navController.navigate(
+            viewName = ClazzInviteViaContactViewModel.DEST_NAME,
+            args = args
+        )
+
+
     }
 
     private fun onClickFab() {
@@ -269,6 +288,12 @@ class PersonListViewModel(
         const val ARG_EXCLUDE_PERSONUIDS_LIST = "excludeAlreadySelectedList"
 
         const val ARG_SHOW_ADD_VIA_INVITE_LINK_CODE = "showAddViaInviteLink"
+
+        /**
+         * to give this option only while adding users to course
+         */
+        const val ARG_SHOW_ADD_VIA_CONTACT= "showAddViaContact"
+        const val ARG_ROLE= "role"
 
         /**
          * Require a specific system permission to show the list. This has no security implication,

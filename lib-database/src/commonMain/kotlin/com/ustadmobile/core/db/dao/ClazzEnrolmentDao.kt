@@ -592,4 +592,26 @@ expect abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         otherPersonUid: Long,
     ): List<ClazzEnrolment>
 
+    @Query("""
+        SELECT ClazzEnrolment.*
+          FROM ClazzEnrolment
+         WHERE ClazzEnrolment.clazzEnrolmentInviteUid = :clazzEnrolmentInviteUid
+    """)
+    abstract suspend fun findClazzEnrolmentEntityForClazzEnrolmentInviteUid(
+        clazzEnrolmentInviteUid:Long
+    ):ClazzEnrolment?
+
+
+    @Query("""
+       UPDATE ClazzEnrolment 
+          SET clazzEnrolmentInviteUid = :clazzEnrolmentInviteUid,
+              clazzEnrolmentLct = :updateTime
+        WHERE clazzEnrolmentUid = :clazzEnrolmentUid
+    """)
+    abstract suspend fun updateClazzEnrolmentInviteUid(
+        clazzEnrolmentInviteUid: Long,
+        clazzEnrolmentUid: Long,
+        updateTime: Long,
+    )
+
 }

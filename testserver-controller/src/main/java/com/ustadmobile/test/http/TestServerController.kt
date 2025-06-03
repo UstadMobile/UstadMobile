@@ -1,6 +1,7 @@
 package com.ustadmobile.test.http
 
 import com.ustadmobile.lib.util.SysPathUtil
+import com.ustadmobile.test.http.ServerRunner.Companion.DEFAULT_LEARNING_SPACE_URL_TEMPLATE
 import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_LEARNINGSPACE_HOST
 import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_LEARNINGSPACE_PORTRANGE
 import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_URL
@@ -21,7 +22,7 @@ import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
 import java.net.NetworkInterface
-import java.net.URL
+import java.net.URI
 import java.util.concurrent.CopyOnWriteArrayList
 
 enum class RunMode {
@@ -32,13 +33,7 @@ const val TESTCONTROLLER_PATH = "testcontroller"
 
 const val START_SERVER_MAX_ATTEMPTS = 4
 
-
-/**
- * Note: to handle multiple emulators:
- *  1) Test script will run allocate a random port forwarding for emulator
- *  2) Server can recognize which emulator it is based on the port (use host header)
- */
-@Suppress("unused", "SdCardPath")
+@Suppress("unused") //Function is used via application.conf
 fun Application.testServerController() {
 
     val mode = environment.config.propertyOrNull("mode")?.getString()?.let { runPropVal ->
@@ -58,7 +53,7 @@ fun Application.testServerController() {
 
 
     val controllerUrl = environment.config.property(PARAM_NAME_URL).getString()
-    val controllerUrlObj = URL(controllerUrl)
+    val controllerUrlObj = URI(controllerUrl).toURL()
     val learningSpaceHostPropVal = environment.config.propertyOrNull(PARAM_NAME_LEARNINGSPACE_HOST)?.getString()
     val learningSpaceHostRangePropVal = environment.config
         .propertyOrNull(PARAM_NAME_LEARNINGSPACE_PORTRANGE)?.getString() ?: "$DEFAULT_FROM_PORT-$DEFAULT_UNTIL_PORT"
@@ -125,6 +120,9 @@ fun Application.testServerController() {
         throw IllegalStateException("ERROR: Server dir does not exist! testServerManager working directory MUST be the " +
                 "root directory of the source code")
     }
+
+    val learningSpaceUrlTemplate = environment.config.propertyOrNull("learningSpaceUrlTemplate")
+        ?.getString() ?: DEFAULT_LEARNING_SPACE_URL_TEMPLATE
 
     fun stopAllRunningServers() {
         println("TestServerController: stopping all servers")
@@ -234,10 +232,17 @@ fun Application.testServerController() {
                                 baseDataDir = baseDataDir,
                                 fromPort = learningSpaceFromPort,
                                 untilPort = learningSpaceUntilPort,
+                                learningSpaceUrlTemplate = learningSpaceUrlTemplate,
                             )
 
-                            runningServers.add(serverRunner)
-                            serverRunner.start()
+                            try {
+                                runningServers.add(serverRunner)
+                                serverRunner.start()
+                            }catch(e: Throwable) {
+                                runningServers.remove(serverRunner)
+                                serverRunner.stop()
+                                throw e
+                            }
 
                             call.respond(
                                 ServerInfo(
@@ -311,4 +316,5 @@ fun Application.testServerController() {
             }
         }
     }
+
 }

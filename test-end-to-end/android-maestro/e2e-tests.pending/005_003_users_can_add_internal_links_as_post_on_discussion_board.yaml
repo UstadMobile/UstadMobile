@@ -14,7 +14,7 @@ onFlowComplete:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 # Admin login
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/admin_login.yaml"
@@ -41,7 +41,7 @@ onFlowComplete:
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       TESTSERIAL: ${TESTSERIAL}
 # teacher add an discussion board block
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -131,7 +131,7 @@ onFlowComplete:
 - assertVisible:
     text: "Internal link"
 
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"

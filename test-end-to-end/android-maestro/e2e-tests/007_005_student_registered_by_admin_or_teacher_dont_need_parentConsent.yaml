@@ -1,0 +1,47 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTRESULTSDIR: "build/reports/maestro/007_005_student_registered_by_admin_or_teacher_dont_need_parentConsent/Screenshots"
+onFlowStart:
+  - startRecording: 007_005_student_registered_by_admin_or_teacher_dont_need_parentConsent
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+---
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+#admin add a student aged below 13
+- runFlow:
+   file: "common/admin_login.yaml"
+- runFlow:
+   file: "common/add_new_people.yaml"
+   env:
+     FIRSTNAME: "Student"
+     LASTNAME: "A"
+     GENDER: "Female"
+     USERNAME: "stud1"
+     PASSWORD: "tests1"
+- tapOn:
+    id: "floating_action_button"
+- tapOn:
+    id: "birthday"
+- inputText: "12/02/2015"  #age below 13
+- tapOn: "Save"
+
+#student aged below 13, added by admin, can login to account without parental consent
+
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- assertVisible: "Library"

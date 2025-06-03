@@ -25,7 +25,7 @@ onFlowComplete:
       IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
 
 # teacher should be able to edit a course
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"
@@ -38,7 +38,7 @@ onFlowComplete:
       TESTCOURSENAME: "Test Course Block"
 - tapOn: "SAVE"
 #student should not be able to edit a course
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
     file: "common/user_login.yaml"

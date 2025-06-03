@@ -39,15 +39,15 @@ class SystemPermissionDetailViewModel(
     val uiState: Flow<SystemPermissionDetailUiState> = _uiState.asStateFlow()
 
     init {
-        val entityFlow = activeRepo.systemPermissionDao()
+        val entityFlow = activeRepoWithFallback.systemPermissionDao()
             .findByPersonUidAsFlow(argPersonUid)
 
-        val viewPermissionFlow = activeRepo.systemPermissionDao()
+        val viewPermissionFlow = activeRepoWithFallback.systemPermissionDao()
             .personHasSystemPermissionAsFlowForUser(
                 accountPersonUid = activeUserPersonUid, personUid = argPersonUid,
             )
 
-        val editPermissionFlow = activeRepo.systemPermissionDao()
+        val editPermissionFlow = activeRepoWithFallback.systemPermissionDao()
             .personHasSystemPermissionAsFlow(
                 accountPersonUid = activeUserPersonUid,
                 permission = PermissionFlags.MANAGE_USER_PERMISSIONS
@@ -81,7 +81,7 @@ class SystemPermissionDetailViewModel(
                         }
 
                         if(it != null) {
-                            val title = activeRepo.personDao().getNamesByUidAsync(argPersonUid)
+                            val title = activeRepoWithFallback.personDao().getNamesByUidAsync(argPersonUid)
 
                             _appUiState.update { prev -> prev.copy(title = title?.toString() ?: "") }
                         }
