@@ -3,6 +3,7 @@ package com.ustadmobile.core.viewmodel.clazz.list
 import app.cash.turbine.test
 import com.ustadmobile.core.impl.nav.NavigateNavCommand
 import com.ustadmobile.core.test.viewmodeltest.testViewModel
+import com.ustadmobile.core.util.ext.grantScopedPermission
 import com.ustadmobile.core.util.test.AbstractMainDispatcherTest
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.clazz.detail.ClazzDetailViewModel
@@ -30,7 +31,7 @@ class ClazzListViewModelTest : AbstractMainDispatcherTest()  {
             val accountPersonUid = accountManager.currentAccount.personUid
 
             viewModel.uiState
-                .filter { it.clazzList() !is EmptyPagingSource }
+                .filter { it.clazzList() !is EmptyPagingSource<*, *> }
                 .test {
                     awaitItem()
                     verify(
@@ -66,7 +67,7 @@ class ClazzListViewModelTest : AbstractMainDispatcherTest()  {
                 Clazz.TABLE_ID, testEntity.clazzUid)
 
 
-            viewModel.uiState.filter { it.clazzList() !is EmptyPagingSource }
+            viewModel.uiState.filter { it.clazzList() !is EmptyPagingSource<*, *> }
                 .test {
                     viewModel.onClickEntry(testEntity)
                     cancelAndIgnoreRemainingEvents()
