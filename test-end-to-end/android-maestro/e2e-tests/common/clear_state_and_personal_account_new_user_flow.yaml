@@ -5,4 +5,4 @@ appId: com.toughra.ustadmobile
 - clearState: com.toughra.ustadmobile
 - launchApp
 - tapOn: "New user"
-- tapOn: "Personal"
+- tapOn: "Personal Account"

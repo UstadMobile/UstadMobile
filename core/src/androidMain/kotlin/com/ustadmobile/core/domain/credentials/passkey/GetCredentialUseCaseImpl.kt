@@ -9,19 +9,16 @@ import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
-import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
-import com.ustadmobile.core.util.ext.formattedHost
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
 import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
-import com.ustadmobile.core.domain.credentials.PassKeySignInData
-import com.ustadmobile.core.impl.config.SystemUrlConfig
+import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialRequestOptionsJsonUseCase
 import io.github.aakira.napier.Napier
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class GetCredentialUseCaseImpl(
     private val context: Context,
-    private val passkeyRequestJsonUseCase: CreatePasskeyRequestJsonUseCase,
-    private val apiUrlConfig: SystemUrlConfig,
+    private val createPublicKeyCredentialRequestOptionsJsonUseCase: CreatePublicKeyCredentialRequestOptionsJsonUseCase,
     private val json: Json,
 ) : GetCredentialUseCase {
 
@@ -30,7 +27,7 @@ class GetCredentialUseCaseImpl(
 
         val getPasswordOption = GetPasswordOption()
         val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
-            requestJson = passkeyRequestJsonUseCase.requestJsonForSignIn()
+            requestJson = json.encodeToString(createPublicKeyCredentialRequestOptionsJsonUseCase())
         )
 
         //As per https://developer.android.com/identity/sign-in/credential-manager#sign-in when
@@ -59,17 +56,11 @@ class GetCredentialUseCaseImpl(
                 is PublicKeyCredential -> {
                     val authResponseJson = credential.authenticationResponseJson
                     Napier.d {"passkey response ${authResponseJson}"}
+                    val parsedResponse = json.decodeFromString<AuthenticationResponseJSON>(authResponseJson)
 
-                    if (authResponseJson != null) {
-                        val parsedResponse = json.decodeFromString<AuthenticationResponseJSON>(authResponseJson)
-
-
-                        GetCredentialUseCase.PasskeyCredentialResult(
-                           parsedResponse
-                        )
-                    } else {
-                        GetCredentialUseCase.Error("Auth response JSON is null.")
-                    }
+                    GetCredentialUseCase.PasskeyCredentialResult(
+                       parsedResponse
+                    )
                 }
 
                 else -> {
@@ -77,7 +68,7 @@ class GetCredentialUseCaseImpl(
                 }
             }
         } catch (e: NoCredentialException) {
-            GetCredentialUseCase.Error("No credentials found: ${e.message}")
+            GetCredentialUseCase.NoCredentialAvailableResult()
         } catch (e: GetCredentialException) {
             GetCredentialUseCase.Error("Failed to get credential: ${e.message}")
         }

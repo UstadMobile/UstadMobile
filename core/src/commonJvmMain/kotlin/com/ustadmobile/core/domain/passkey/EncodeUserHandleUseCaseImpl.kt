@@ -21,7 +21,7 @@ class EncodeUserHandleUseCaseImpl(
             throw IllegalArgumentException("Learning space URL is too long")
         }
 
-        val byteBuffer = ByteBuffer.allocate(8 + stringBytes.size) // Clean: no unnecessary 64-byte array
+        val byteBuffer = ByteBuffer.allocate(8 + stringBytes.size)
         byteBuffer.putLong(personPasskeyUid)
         byteBuffer.put(stringBytes)
 

@@ -82,7 +82,7 @@ val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
                     props.onFullNameFocusedChanged(false)
                 }
                 error = props.uiState.fullNameError != null
-                helperText = props.uiState.fullNameError?.let { ReactNode(it) }
+                helperText =ReactNode(props.uiState.fullNameError ?: strings[MR.strings.required])
             }
 
 
@@ -123,28 +123,30 @@ val SignUpScreenComponent2 = FC<SignUpScreenProps> { props ->
                     }
                 }
 
-                UstadTextField {
-                    sx { marginTop = 16.px }
-                    id = "username"
-                    value = props.uiState.person?.username?:""
-                    label = ReactNode(strings[MR.strings.username])
-                    onTextChange = {
-                        props.onUsernameValueChange(it)
-                    }
-                    onKeyDown = { event ->
-                        val char = event.key.singleOrNull()
-                        if(char != null && !ValidateUsernameUseCase.isValidUsernameChar(char)) {
-                            event.preventDefault()
-                        }
-                    }
-                    error = props.uiState.usernameError != null
-                    helperText = props.uiState.usernameError?.let { ReactNode(it) }
-                }
-
                 FormHelperText {
                     +ReactNode(props.uiState.genderError?: strings[MR.strings.required])
                 }
+
             }
+            UstadTextField {
+                sx { marginTop = 16.px }
+                id = "username"
+                value = props.uiState.person?.username?:""
+                label = ReactNode(strings[MR.strings.username])
+                onTextChange = {
+                    props.onUsernameValueChange(it)
+                }
+                onKeyDown = { event ->
+                    val char = event.key.singleOrNull()
+                    if(char != null && !ValidateUsernameUseCase.isValidUsernameChar(char)) {
+                        event.preventDefault()
+                    }
+                }
+                error = props.uiState.usernameError != null
+                helperText = ReactNode(props.uiState.usernameError ?: strings[MR.strings.required])
+            }
+
+
             Stack{
                 direction = responsive(StackDirection.row)
 
