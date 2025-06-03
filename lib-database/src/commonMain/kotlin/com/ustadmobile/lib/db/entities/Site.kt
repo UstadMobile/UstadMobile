@@ -69,10 +69,7 @@ class Site {
     companion object {
 
         const val TABLE_ID = 189
-        const val BOTTOM_NAV_DEFAULT_FLAG = SHOW_COURSE or
-                    SHOW_LIBRARY or
-                    SHOW_MESSAGES or
-                    SHOW_PEOPLE
+        const val BOTTOM_NAV_DEFAULT_FLAG = 15L
 
     }
 
