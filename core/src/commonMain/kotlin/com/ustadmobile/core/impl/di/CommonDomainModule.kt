@@ -18,7 +18,6 @@ import com.ustadmobile.core.domain.credentials.username.ParseCredentialUsernameU
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.makelink.MakeLinkUseCase
 import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
-import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
 import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
@@ -113,8 +112,8 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
 
     bind<CopyCourseUseCase>() with scoped(learningSpaceScope).singleton {
         CopyCourseUseCase(
-            repoOrDb = instance(tag = DoorTag.TAG_REPO),
-            accountManager = instance()
+            repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
+            accountManager = instance(),
         )
     }
 
