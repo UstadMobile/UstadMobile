@@ -273,8 +273,6 @@ Cypress.Commands.add('ustadCreateUserAccount',(userName,password) => {
     cy.get('#newpassword').type(password)
     cy.contains("button","Save").click()
     cy.contains('Manage account',{timeout:6000}).should('be.visible')
-    cy.go('back')
-    cy.go('back')
 })
 
   // Add a Module Block
@@ -437,15 +435,17 @@ Cypress.Commands.add("ustadSetDateTime", (element, date) => {
 
 /*
  * e.g.
- * cy.ustadBirthDate(cy.get("input#id"), new Date("2017-06-01"));
+ * cy.ustadSetDate(cy.get("input#id"), new Date("2017-06-01"));
  *
 */
 
-Cypress.Commands.add("ustadBirthDate", (element, date) => {
+
+Cypress.Commands.add("ustadSetDate", (element, date) => {
      element.type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +
      String(date.getDate()).padStart(2, '0')
      )
 })
+
 
 Cypress.Commands.add('UstadOpenInviteLinkFromEmail', (email, baseUrl, maxAttempts = 4) => {
     cy.request(`/api/testemail/list?to=${email}`).then((response) => {
