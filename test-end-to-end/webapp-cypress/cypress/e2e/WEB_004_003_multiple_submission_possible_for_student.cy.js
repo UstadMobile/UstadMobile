@@ -16,7 +16,7 @@ it('Teacher add assignment', () => {
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
   cy.contains("div","Graded").click()
   cy.contains("li","Submitted").click()
-  cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date("2025-06-01T08:30"))
+  cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now() + (1000 * 60 * 60 * 24 * 2))) //Deadline after 2 days
   cy.get('#caSubmissionPolicy').click()
   cy.contains('Can make multiple submissions').click()
   cy.contains("button","Done").should('be.visible')

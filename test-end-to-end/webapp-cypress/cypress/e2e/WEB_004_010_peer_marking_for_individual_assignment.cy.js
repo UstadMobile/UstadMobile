@@ -16,7 +16,7 @@ it('Teacher add assignment', () => {
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
   cy.contains("div","Graded").click()
   cy.contains("li","Submitted").click()
-  cy.ustadSetDateTime(cy.get("#cbDeadlineDate"),  new Date(Date.now() + (1000*60*1000)))
+  cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now() + (1000 * 60 * 60 * 24 * 2))) //Deadline 2 days after
   cy.get('#caMarkingType').click()
   cy.contains("li","Peers").click()
   cy.get('#caPeerReviewerCount').should('exist')
