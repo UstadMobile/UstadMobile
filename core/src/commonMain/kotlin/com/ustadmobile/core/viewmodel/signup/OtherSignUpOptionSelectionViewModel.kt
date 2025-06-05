@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
+import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -18,9 +19,7 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
-import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
 import io.github.aakira.napier.Napier
@@ -41,6 +40,7 @@ data class OtherSignUpOptionSelectionUiState(
     val person: Person? = null,
     val personPicture: PersonPicture? = null,
     val passkeySupported: Boolean = true,
+    val errorText: String? = null,
 )
 
 class OtherSignUpOptionSelectionViewModel(
@@ -115,47 +115,80 @@ class OtherSignUpOptionSelectionViewModel(
             val passkeyCreated = createPasskeyUseCase?.invoke(
                     username = savePerson.username.toString()
             )
-            passkeyCreated?.let {
-                accountManager.registerWithPasskey(
-                    serverUrl,
-                    it,
-                    savePerson,
-                    _uiState.value.personPicture
-                )
-            }
-            if (passkeyCreated == null) {
-                snackDispatcher.showSnackBar(Snack(message = systemImpl.getString(MR.strings.sorry_something_went_wrong)))
-                Napier.e { "Error occurred during creating passkey" }
-                return@launch
-            }
-            if (isParent) {
-                navController.navigate(
-                    AddChildProfilesViewModel.DEST_NAME,
-                    args = buildMap {
-                        put(ARG_NEXT, nextDestination)
-                        putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
-                        putFromSavedStateIfPresent(ARG_NEXT)
+            when(passkeyCreated){
+                is CreatePasskeyUseCase.CreatePasskeyResult -> {
+                    viewModelScope.launch {
+                        onReceivedCreatePasskeyResult(
+                            passkeyCreated.authenticationResponseJSON,
+                            savePerson
+                        )
                     }
-                )
 
-            } else {
-                enrollToCourseFromInviteUid(savePerson.personUid)
-                val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
-                Napier.d { "AddSignUpPresenter: go to next destination: $nextDestination" }
-                navController.navigateToViewUri(
-                    nextDestination.appendSelectedAccount(
-                        savePerson.personUid,
-                        LearningSpace(accountManager.activeLearningSpace.url)
-                    ),
-                    goOptions
-                )
+                }
+                is CreatePasskeyUseCase.Error ->{
+                    _uiState.update { prev ->
+                        prev.copy(
+                            errorText = passkeyCreated.message,
+                        )
+                    }
+                }
+                is CreatePasskeyUseCase.UserCanceledResult ->{
+                    //do nothing
+                }
 
+                null -> {
+                    //do nothing
+                }
             }
+
         }
 
-       // navController.popBackStack(SignUpViewModel.DEST_NAME,false)
 
     }
+
+
+    private suspend fun onReceivedCreatePasskeyResult(
+        passkeyCreated: AuthenticationResponseJSON,
+        savePerson: Person
+    ) {
+        passkeyCreated?.let {
+            accountManager.registerWithPasskey(
+                serverUrl,
+                it,
+                savePerson,
+                _uiState.value.personPicture
+            )
+        }
+        if (passkeyCreated == null) {
+            snackDispatcher.showSnackBar(Snack(message = systemImpl.getString(MR.strings.sorry_something_went_wrong)))
+            Napier.e { "Error occurred during creating passkey" }
+            return
+        }
+        if (isParent) {
+            navController.navigate(
+                AddChildProfilesViewModel.DEST_NAME,
+                args = buildMap {
+                    put(ARG_NEXT, nextDestination)
+                    putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                    putFromSavedStateIfPresent(ARG_NEXT)
+                }
+            )
+
+        } else {
+            enrollToCourseFromInviteUid(savePerson.personUid)
+            val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+            Napier.d { "AddSignUpPresenter: go to next destination: $nextDestination" }
+            navController.navigateToViewUri(
+                nextDestination.appendSelectedAccount(
+                    savePerson.personUid,
+                    LearningSpace(accountManager.activeLearningSpace.url)
+                ),
+                goOptions
+            )
+
+        }
+    }
+
     fun onClickCreateLocalAccount() {
         loadingState = LoadingUiState.INDETERMINATE
 

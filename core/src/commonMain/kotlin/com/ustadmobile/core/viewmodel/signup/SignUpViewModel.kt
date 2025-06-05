@@ -403,31 +403,47 @@ class SignUpViewModel(
                         val passkeyCreated = createPasskeyUseCaseVal(
                             username = username,
                         )
+                        when(passkeyCreated){
+                            is CreatePasskeyUseCase.CreatePasskeyResult -> {
+                                accountManager.registerWithPasskey(
+                                    learningSpaceUrl = serverUrl,
+                                    passkeyResult = passkeyCreated.authenticationResponseJSON,
+                                    person = savePerson,
+                                    personPicture = _uiState.value.personPicture
+                                )
 
-                        accountManager.registerWithPasskey(
-                            learningSpaceUrl = serverUrl,
-                            passkeyResult = passkeyCreated,
-                            person = savePerson,
-                            personPicture = _uiState.value.personPicture
-                        )
+                                val personPictureVal = _uiState.value.personPicture
+                                if (personPictureVal != null) {
+                                    personPictureVal.personPictureUid = savePerson.personUid
+                                    personPictureVal.personPictureLct = systemTimeInMillis()
+                                    val personPictureUriVal = personPictureVal.personPictureUri
 
+                                    enqueueSavePictureUseCase(
+                                        entityUid = savePerson.personUid,
+                                        tableId = PersonPicture.TABLE_ID,
+                                        pictureUri = personPictureUriVal
+                                    )
 
-                        val personPictureVal = _uiState.value.personPicture
-                        if (personPictureVal != null) {
-                            personPictureVal.personPictureUid = savePerson.personUid
-                            personPictureVal.personPictureLct = systemTimeInMillis()
-                            val personPictureUriVal = personPictureVal.personPictureUri
+                                }
 
-                            enqueueSavePictureUseCase(
-                                entityUid = savePerson.personUid,
-                                tableId = PersonPicture.TABLE_ID,
-                                pictureUri = personPictureUriVal
-                            )
+                                enrollToCourseFromInviteUid(savePerson.personUid)
+                                navigateToAppropriateScreen(savePerson)
 
+                            }
+                            is CreatePasskeyUseCase.Error -> {
+                                _uiState.update { prev ->
+                                    prev.copy(
+                                        errorText = passkeyCreated.message,
+                                    )
+                                }
+                            }
+                            is CreatePasskeyUseCase.UserCanceledResult -> {
+                              // do nothing
+                            }
                         }
 
-                        enrollToCourseFromInviteUid(savePerson.personUid)
-                        navigateToAppropriateScreen(savePerson)
+
+
                     }catch (e:Exception){
                         _uiState.update { prev ->
                             prev.copy(

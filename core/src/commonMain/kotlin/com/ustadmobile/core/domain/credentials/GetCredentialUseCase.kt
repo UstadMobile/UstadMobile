@@ -46,6 +46,21 @@ interface GetCredentialUseCase {
         }
     }
 
+    /**
+     * when user cancelled the passkey bottom sheet then no need to show it as error
+     */
+    class UserCanceledResult : CredentialResult(){
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is UserCanceledResult) return false
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return this::class.hashCode()
+        }
+    }
+
     data class Error(
         val message: String?
     ) : CredentialResult()

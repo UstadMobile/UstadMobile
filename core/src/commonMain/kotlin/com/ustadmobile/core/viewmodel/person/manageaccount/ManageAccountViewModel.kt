@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.ListViewMode
@@ -127,19 +128,38 @@ class ManageAccountViewModel(
     fun onCreatePasskeyClick() {
         viewModelScope.launch {
             val passkeyCreated = createPasskeyUseCase?.invoke(
-                    username = accountManager.currentUserSession.person.username.toString(),
+                username = accountManager.currentUserSession.person.username.toString(),
             )
             if (passkeyCreated != null) {
-                savePassKeyUseCase?.invoke(
-                    passkeyResult = passkeyCreated,
-                    person = accountManager.currentUserSession.person
-                )
+                when (passkeyCreated) {
+                    is CreatePasskeyUseCase.CreatePasskeyResult -> {
+                        savePassKeyUseCase?.invoke(
+                            passkeyResult = passkeyCreated.authenticationResponseJSON,
+                            person = accountManager.currentUserSession.person
+                        )
+                    }
+
+                    is CreatePasskeyUseCase.Error -> {
+                        snackDispatcher.showSnackBar(Snack(message = passkeyCreated.message.toString()))
+
+
+                    }
+
+                    is CreatePasskeyUseCase.UserCanceledResult -> {
+                        //do nothing
+                    }
+
+                    null -> {
+                        //do nothing
+                    }
+
+
+                }
+
             }
 
         }
-
     }
-
 
     companion object {
 

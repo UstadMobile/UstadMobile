@@ -151,7 +151,9 @@ class AddAccountSelectNewOrExistingViewModel(
                     is GetCredentialUseCase.NoCredentialAvailableResult -> {
                         //Do nothing
                     }
-
+                    is GetCredentialUseCase.UserCanceledResult -> {
+                        //Do nothing
+                    }
                     null -> {
                         //Do nothing
                     }

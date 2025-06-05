@@ -5,8 +5,10 @@ import android.content.Context
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.CredentialManager
+import androidx.credentials.exceptions.CreateCredentialCancellationException
 import androidx.credentials.exceptions.CreateCredentialException
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase.CreateCredentialResult
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
 import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
@@ -31,10 +33,10 @@ class CreatePasskeyUseCaseImpl(
      * @throws CreateCredentialException if CredentialManager throws an exception
      */
     @SuppressLint("PublicKeyCredential")
-    override suspend fun invoke(username:String): AuthenticationResponseJSON {
+    override suspend fun invoke(username: String): CreateCredentialResult {
         val credentialManager = CredentialManager.create(context)
 
-        try {
+        return try {
             val request = CreatePublicKeyCredentialRequest(
                 requestJson = json.encodeToString(
                     createPublicKeyJsonUseCase(username)
@@ -47,15 +49,22 @@ class CreatePasskeyUseCaseImpl(
             ) as CreatePublicKeyCredentialResponse
 
             Napier.d { "passkey response: ${response.registrationResponseJson}" }
-            val passkeyResponse = json.decodeFromString<AuthenticationResponseJSON>(response.registrationResponseJson)
+            val passkeyResponse =
+                json.decodeFromString<AuthenticationResponseJSON>(response.registrationResponseJson)
 
-            return passkeyResponse
+            CreatePasskeyUseCase.CreatePasskeyResult(passkeyResponse)
+        } catch (e: CreateCredentialCancellationException) {
+            CreatePasskeyUseCase.UserCanceledResult()
+
         } catch (e: CreateCredentialException) {
             // See https://codelabs.developers.google.com/credential-manager-api-for-android#1
+
             Napier.e(
                 message = "CreatePassKeyUseCaseImpl: exception", throwable = e
             )
-            throw e
+            CreatePasskeyUseCase.Error(e.message)
+
+
         }
     }
 }
