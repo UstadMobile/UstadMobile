@@ -34,15 +34,19 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.BottomNavVisibilityFlags
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavCommand
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
+import com.ustadmobile.door.ext.DoorTag
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
@@ -54,6 +58,7 @@ import moe.tlaster.precompose.navigation.rememberNavigator
 import org.kodein.di.compose.localDI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.on
 
 data class TopNavigationItem(
     val destRoute: String,
@@ -102,6 +107,26 @@ fun App(
     val di = localDI()
     val accountManager: UstadAccountManager = di.direct.instance()
     val currentSession by accountManager.currentUserSessionFlow.collectAsState(null)
+    val currentDb: UmAppDatabase = di.direct.on(accountManager.activeLearningSpace)
+        .instance(tag = DoorTag.TAG_DB)
+
+    val currentSite by currentDb.siteDao().getSiteAsFlow().collectAsState(initial = null)
+
+    val bottomNavVisibilityFlag = currentSite?.bottomNavVisibilityFlag
+
+    val visibleTopNavItems = APP_TOP_LEVEL_NAV_ITEMS.filter {
+        when (it.destRoute) {
+            ClazzListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
+                BottomNavVisibilityFlags.SHOW_COURSE) == true
+            ContentEntryListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
+                BottomNavVisibilityFlags.SHOW_LIBRARY) == true
+            ConversationListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
+                BottomNavVisibilityFlags.SHOW_MESSAGES) == true
+            PersonListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
+                BottomNavVisibilityFlags.SHOW_PEOPLE) == true
+            else -> true
+        }
+    }
 
     val appUiState = remember {
         mutableStateOf(
@@ -162,7 +187,7 @@ fun App(
 
                     if(appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
                         NavigationBar {
-                            APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
+                            visibleTopNavItems.forEachIndexed { index, item ->
                                 NavigationBarItem(
                                     icon = {
                                         Icon(item.icon, contentDescription = null)
