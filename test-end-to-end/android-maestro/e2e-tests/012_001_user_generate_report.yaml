@@ -27,7 +27,7 @@ onFlowComplete:
       IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
 
 # verify admin able to generate Report
-- runFlow: "common/clear_state_and_get_started.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
      file: "common/admin_login.yaml"
