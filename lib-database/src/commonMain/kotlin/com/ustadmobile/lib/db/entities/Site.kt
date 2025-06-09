@@ -60,9 +60,12 @@ class Site {
 
     var authSalt: String? = null
 
+    var bottomNavVisibilityFlag: Long ?=null
+
     companion object {
 
         const val TABLE_ID = 189
+        const val BOTTOM_NAV_DEFAULT_FLAG = 15L
 
     }
 
