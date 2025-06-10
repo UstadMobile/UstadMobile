@@ -16,9 +16,9 @@ it('Teacher add assignment', () => {
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
   cy.contains("div","Graded").click()
   cy.contains("li","Submitted").click()
-  cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now()))
+  cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now())) //Deadline date and time -today
   cy.get('#cbGracePeriodDate',{timeout:5000}).should('be.visible')
-  cy.ustadSetDateTime(cy.get("#cbGracePeriodDate"),  new Date(Date.now() + (2*60*1000)))
+  cy.ustadSetDateTime(cy.get("#cbGracePeriodDate"),  new Date(Date.now() + (2*60*1000))) // Grace period - 2 minutes after deadline
   cy.get('#caSubmissionPolicy').click()
   cy.contains("button","Done").should('be.visible')
   cy.contains("button","Done").click()

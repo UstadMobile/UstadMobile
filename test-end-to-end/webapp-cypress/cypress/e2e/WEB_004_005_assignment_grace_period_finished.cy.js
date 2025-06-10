@@ -14,11 +14,11 @@ it('Teacher add assignment', () => {
   cy.contains("Assignment").click()
   cy.get('input[id="title"]').type("Assignment 1")
   cy.get('div[data-placeholder="Description"]').type("this is a simple assignment")
-  cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date("2023-11-01T08:30"))
+  cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now() - (1000 * 60 * 60 * 24 * 7))) //Deadline 7 days back
   cy.contains("div","Graded").click()
   cy.contains("li","Submitted").click()
   cy.get('#cbGracePeriodDate',{timeout:5000}).should('be.visible')
-  cy.ustadSetDateTime(cy.get("#cbGracePeriodDate"), new Date("2023-11-07T08:30"))
+  cy.ustadSetDateTime(cy.get("#cbDeadlineDate"), new Date(Date.now() - (1000 * 60 * 60 * 24 * 2))) //Deadline 2 days back
   cy.get('#caSubmissionPolicy').click()
   cy.contains('Can make multiple submissions').click()
   cy.contains("button","Done").should('be.visible')

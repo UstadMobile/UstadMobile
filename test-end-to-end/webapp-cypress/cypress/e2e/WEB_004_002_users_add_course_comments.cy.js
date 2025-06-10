@@ -4,8 +4,6 @@ describe('WEB_004_002_user_add_private_comment', () => {
     cy.ustadStartTestServer(6000)
   })
 
-
-
 it('Teacher add assignment and course comment', () => {
   cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv");
   cy.ustadClearDbAndLogin('teach1','testt1')
