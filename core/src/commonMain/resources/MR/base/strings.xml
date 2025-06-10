@@ -2106,5 +2106,7 @@
 
     <string name="invitation_sent">Invitation sent</string>
 
+    <string name="navigation_bar">Navigation bar</string>
+
 
 </resources>

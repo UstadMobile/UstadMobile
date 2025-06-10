@@ -102,6 +102,8 @@ fun SiteEditScreen(
                 },
             )
         }
+        UstadEditHeader(stringResource(MR.strings.navigation_bar))
+
         uiState.permissionLabels.forEach {  permissionLabel ->
             UstadSwitchField(
                 checked = (uiState.site?.bottomNavVisibilityFlag ?: 0).hasFlag(permissionLabel.second),

@@ -2,6 +2,10 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ustadmobile.core.db.BottomNavVisibilityFlags.SHOW_COURSE
+import com.ustadmobile.core.db.BottomNavVisibilityFlags.SHOW_PEOPLE
+import com.ustadmobile.core.db.BottomNavVisibilityFlags.SHOW_LIBRARY
+import com.ustadmobile.core.db.BottomNavVisibilityFlags.SHOW_MESSAGES
 import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
@@ -60,13 +64,15 @@ class Site {
 
     var authSalt: String? = null
 
-    var bottomNavVisibilityFlag: Long ?=null
+    var bottomNavVisibilityFlag: Long? = null
 
     companion object {
 
         const val TABLE_ID = 189
-        const val BOTTOM_NAV_DEFAULT_FLAG = 15L
+        const val BOTTOM_NAV_DEFAULT_FLAG = SHOW_COURSE or
+                SHOW_LIBRARY or
+                SHOW_PEOPLE or
+                SHOW_MESSAGES
 
     }
-
 }

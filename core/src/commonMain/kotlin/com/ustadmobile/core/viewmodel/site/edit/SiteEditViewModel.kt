@@ -173,7 +173,7 @@ class SiteEditViewModel(
             if(entityVal != null) {
                 prev.copy(
                     site = entityVal.shallowCopy {
-                        bottomNavVisibilityFlag = entityVal.bottomNavVisibilityFlag.toggleFlag(flag)
+                        bottomNavVisibilityFlag = entityVal.bottomNavVisibilityFlag?.toggleFlag(flag)
                     }
                 )
             }else {
