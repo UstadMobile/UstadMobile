@@ -64,7 +64,7 @@ class Site {
 
     var authSalt: String? = null
 
-    var bottomNavVisibilityFlag: Long? = null
+    var bottomNavVisibilityFlag: Long = 0
 
     companion object {
 

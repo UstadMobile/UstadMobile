@@ -65,6 +65,23 @@ data class TopNavigationItem(
     val icon: ImageVector,
     val label: StringResource,
 )
+fun getVisibleTopLevelNavItems(
+    bottomNavVisibilityFlag: Long?
+): List<TopNavigationItem> {
+    return APP_TOP_LEVEL_NAV_ITEMS.filter {
+        when (it.destRoute) {
+            ClazzListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
+                BottomNavVisibilityFlags.SHOW_COURSE) == true
+            ContentEntryListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
+                BottomNavVisibilityFlags.SHOW_LIBRARY) == true
+            ConversationListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
+                BottomNavVisibilityFlags.SHOW_MESSAGES) == true
+            PersonListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
+                BottomNavVisibilityFlags.SHOW_PEOPLE) == true
+            else -> true
+        }
+    }
+}
 
 val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
@@ -114,19 +131,8 @@ fun App(
 
     val bottomNavVisibilityFlag = currentSite?.bottomNavVisibilityFlag
 
-    val visibleTopNavItems = APP_TOP_LEVEL_NAV_ITEMS.filter {
-        when (it.destRoute) {
-            ClazzListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
-                BottomNavVisibilityFlags.SHOW_COURSE) == true
-            ContentEntryListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
-                BottomNavVisibilityFlags.SHOW_LIBRARY) == true
-            ConversationListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
-                BottomNavVisibilityFlags.SHOW_MESSAGES) == true
-            PersonListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
-                BottomNavVisibilityFlags.SHOW_PEOPLE) == true
-            else -> true
-        }
-    }
+    val visibleTopNavItems = getVisibleTopLevelNavItems(bottomNavVisibilityFlag)
+
 
     val appUiState = remember {
         mutableStateOf(

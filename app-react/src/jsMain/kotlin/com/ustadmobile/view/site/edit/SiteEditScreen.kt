@@ -4,6 +4,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditUiState
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -11,10 +12,13 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadLanguageSelect
+import com.ustadmobile.mui.components.UstadPermissionEditComponent
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
+import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadSwitchField
 import com.ustadmobile.wrappers.quill.ReactQuill
@@ -25,10 +29,12 @@ import react.FC
 import react.Props
 import react.ReactNode
 import kotlinx.coroutines.Dispatchers
+import react.useRequiredContext
 
 external interface SiteEditProps: Props {
     var uiState: SiteEditUiState
     var onSiteChanged: (Site?) -> Unit
+    var onTogglePermission: (Long) -> Unit
     var onChangeTermsLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit
     var onChangeTermsHtml: (String) -> Unit
 }
@@ -36,7 +42,7 @@ external interface SiteEditProps: Props {
 val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
     val strings = useStringProvider()
-
+    val theme by useRequiredContext(ThemeContext)
     UstadStandardContainer {
         maxWidth = "lg"
 
@@ -85,7 +91,15 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
                     )
                 }
             }
-
+            UstadDetailHeader {
+                header = ReactNode(strings[MR.strings.navigation_bar])
+            }
+            UstadPermissionEditComponent {
+                permissionLabels = props.uiState.permissionLabels
+                value = props.uiState.site?.bottomNavVisibilityFlag ?: 0
+                onToggle = props.onTogglePermission
+                enabled = props.uiState.fieldsEnabled
+            }
             UstadEditHeader {
                 + strings[MR.strings.terms_and_policies]
             }
@@ -120,6 +134,7 @@ val SiteEditScreen = FC<Props> {
     SiteEditComponent2 {
         uiState = uiStateVal
         onSiteChanged = viewModel::onEntityChanged
+        onTogglePermission = viewModel::onTogglePermission
         onChangeTermsHtml = viewModel::onChangeTermsHtml
         onChangeTermsLanguage = viewModel::onChangeTermsLanguage
     }

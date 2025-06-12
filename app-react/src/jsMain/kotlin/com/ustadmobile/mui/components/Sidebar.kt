@@ -1,6 +1,8 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.BottomNavVisibilityFlags
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
@@ -32,6 +34,8 @@ import web.cssom.px
 external interface SidebarProps: Props {
     var visible: Boolean
     var selectedRootItemIndex: Int
+    var visibleRootScreens: List<RootScreen>
+
 }
 
 data class RootScreen(
@@ -39,7 +43,21 @@ data class RootScreen(
     val nameMessageId: StringResource,
     val icon: FC<*>? = null,
 )
-
+fun getVisibleRootScreens(bottomNavVisibilityFlag: Long?): List<RootScreen> {
+    return ROOT_SCREENS.filter {
+        when (it.key) {
+            ClazzListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
+                BottomNavVisibilityFlags.SHOW_COURSE) == true
+            ContentEntryListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
+                BottomNavVisibilityFlags.SHOW_LIBRARY) == true
+            ConversationListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
+                BottomNavVisibilityFlags.SHOW_MESSAGES) == true
+            PersonListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
+                BottomNavVisibilityFlags.SHOW_PEOPLE) == true
+            else -> true
+        }
+    }
+}
 val ROOT_SCREENS = listOf(
     RootScreen(ClazzListViewModel.DEST_NAME_HOME, MR.strings.courses, SchoolIcon),
     RootScreen(ContentEntryListViewModel.DEST_NAME_HOME, MR.strings.library, LibraryBooks),
@@ -92,6 +110,7 @@ val Sidebar = FC<SidebarProps> { props ->
                     UstadRootScreenNavLinks {
                         selectedItem = props.selectedRootItemIndex
                         idPrefix = "sidebar"
+                        screens = props.visibleRootScreens
                     }
                 }
 
