@@ -28,7 +28,7 @@ it('Child user aged below 13 register as a new user', () => {
   cy.contains("label", "Username").parent().find("input").clear().type('childuser')
   cy.contains("label", "Password").parent().find("input").clear().type('test1234')
   cy.contains('SIGN-UP').click()
-//  cy.contains("Wait for Parent").should('exist')
+  cy.contains("Register").should('exist')
   cy.contains('button','OK').click()
   cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').should('exist')
 })
@@ -60,7 +60,7 @@ it('Parent user clicks on link in the email received from ustad mobile', () => {
   cy.get("#appbar_title").contains("Select account").click()
   cy.contains('Parent User').should('exist')
   cy.contains('parentuser',{timeout:6000}).click() // Accounts screen
-  //cy.get("#appbar_title").contains("Consent management").should("exist")
+  cy.get("#appbar_title").contains("Manage parental consent").should("exist")
   cy.contains('Consent text and details').should('be.visible')
   cy.get("#relationship").contains("Father").should("exist") //Default relation- male gender so father
   cy.contains("Terms and policies").should("exist")
