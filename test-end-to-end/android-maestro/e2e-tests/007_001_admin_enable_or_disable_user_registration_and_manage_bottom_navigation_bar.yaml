@@ -1,8 +1,8 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/reports/maestro/007_001_admin_enable_or_disable_user_registration/Screenshots"
+  TESTRESULTSDIR: "build/reports/maestro/007_001_admin_enable_or_disable_user_registration_and_manage_bottom_navigation_bar/Screenshots"
 onFlowStart:
-  - startRecording: 007_001_admin_enable_or_disable_user_registration
+  - startRecording: 007_001_admin_enable_or_disable_user_registration_and_manage_bottom_navigation_bar
   - runScript:
       file: "common/startserver.js"
       env:
@@ -15,9 +15,15 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+- runScript:
+    file: "common/import_users_via_http.js"
+    env:
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
+
+#admin enable user registration
 - runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
-#admin enable user registration
 - runFlow:
    file: "common/admin_login.yaml"
 - runFlow:
@@ -77,3 +83,44 @@ onFlowComplete:
 - runFlow: "common/clear_state_and_learning_space_new_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - assertVisible: "Learning space does not allow new user registration"
+
+#admin user can manage visibility of buttons in bottom navigation bar
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/admin_login.yaml"
+- tapOn: "Settings"
+- tapOn: "Site"
+- tapOn:
+    id: "floating_action_button"  #Edit button
+- tapOn:
+    id: "Messages"
+- tapOn:
+    id: "People"
+- tapOn: "Save"
+- assertVisible: "Courses"
+- assertVisible: "Library"
+- assertNotVisible: "Messages"
+- assertNotVisible: "People"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- assertVisible: "Courses"
+- assertVisible: "Library"
+- assertNotVisible: "Messages"
+- assertNotVisible: "People"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- assertVisible: "Courses"
+- assertVisible: "Library"
+- assertNotVisible: "Messages"
+- assertNotVisible: "People"

@@ -1,10 +1,11 @@
-describe('WEB_007_001_admin_enable_or_disable_user_registration', () => {
+describe('WEB_007_001_admin_enable_or_disable_user_registration_and_manage_bottom_navigation_bar', () => {
   before(() => {
     // Start Test Server
     cy.ustadStartTestServer(6000)
   })
 
 it('Admin enable registration', () => {
+  cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv");
   // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
   cy.ustadEnableUserRegistration()
@@ -65,6 +66,40 @@ it('Verify New user registration is disabled', () => {
   cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').should('not.exist') // Verified new user registration is disabled
   cy.get('input#username', { timeout: 10000 }).should('exist')
 })
+
+it('Admin manage bottom navigation bar', () => {
+  // Admin user login
+  cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
+  cy.get('#settings_button').click()
+  cy.contains('Site').click()
+  cy.contains('Edit').click()
+ //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
+  cy.get('#Messages').click()
+  cy.get('#People').click()
+  cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('not.exist') //verified registration_allowed switch is off
+  cy.get('#actionBarButton').click()
+  cy.contains('Courses').should('be.visible')
+  cy.contains('Library').should('be.visible')
+  cy.contains('Messages').should('not.be.visible')
+  cy.contains('People').should('not.be.visible')
+})
+
+it('Verify student user can see bottom navigation bar changes', () => {
+  cy.ustadClearDbAndLogin('stud1','tests1')
+  cy.contains('Courses').should('be.visible')
+  cy.contains('Library').should('be.visible')
+  cy.contains('Messages').should('not.be.visible')
+  cy.contains('People').should('not.be.visible')
+})
+
+it('Verify teacher can see bottom navigation bar changes', () => {
+  cy.ustadClearDbAndLogin('teach1','testt1')
+  cy.contains('Courses').should('be.visible')
+  cy.contains('Library').should('be.visible')
+  cy.contains('Messages').should('not.be.visible')
+  cy.contains('People').should('not.be.visible')
+})
+
   after(() => {
     // Stop Test Server after tests are complete
     cy.ustadStopTestServer();

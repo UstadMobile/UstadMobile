@@ -115,7 +115,7 @@ trickle -s -d 128 -u 128 bash
 	
 ### 7	User accounts:
 
-7.1 [Admin can enable/disable registration for users](test-descriptions/007_001_admin_enable_or_disable_user_registration_test_description.md)
+7.1 [Admin can enable/disable registration for users and manage visibility of buttons in bottom navigation bar](test-descriptions/007_001_admin_enable_or_disable_user_registration_and_manage_bottom_navigation_bar_test_description.md)
 
 7.2a [When registration is enabled: Users over 13 can register directly on learning space by creating a passkey](test-descriptions/007_002a_user_registration_above_age_13_test_description.md)
 
