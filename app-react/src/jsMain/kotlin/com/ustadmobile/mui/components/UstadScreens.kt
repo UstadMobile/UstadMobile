@@ -55,11 +55,13 @@ import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.util.ext.deleteDatabaseAsync
 import mui.system.useMediaQuery
 import org.kodein.di.direct
 import org.kodein.di.instance
 import emotion.react.css
+import org.kodein.di.on
 import react.dom.html.ReactHTML.div
 import react.router.useLocation
 import remix.run.router.LoaderFunctionArgs
@@ -100,6 +102,13 @@ val UstadScreens = FC<Props> {
     val langConfig = useMemo(dependencies = emptyArray()) {
         loaderData.di.direct.instance<SupportedLanguagesConfig>()
     }
+    val currentDb: UmAppDatabase =  loaderData.di.direct.on(accountManager.activeLearningSpace)
+        .instance(tag = DoorTag.TAG_DB)
+
+    val currentSite by currentDb.siteDao().getSiteAsFlow().collectAsState(null)
+
+    val bottomNavVisibilityFlag = currentSite?.bottomNavVisibilityFlag
+    val visibleScreens = getVisibleRootScreens(bottomNavVisibilityFlag)
 
 
     val muiState = useState { MuiAppState() }
@@ -210,6 +219,7 @@ val UstadScreens = FC<Props> {
                             visible =
                                 !mobileMode && appUiState.navigationVisible && currentSession?.person?.isPersonalAccount != true
                             selectedRootItemIndex = currentRootItemIndex
+                            visibleRootScreens = visibleScreens
                         }
 
                         UstadMobileMenu {

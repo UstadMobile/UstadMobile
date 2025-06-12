@@ -20,11 +20,15 @@ external interface UstadRootScreenNavLinksProps: Props {
     var onClick: (() -> Unit)?
 
     var idPrefix: String
+
+    var screens: List<RootScreen>
 }
 
 val UstadRootScreenNavLinks = FC<UstadRootScreenNavLinksProps> { props ->
     val strings = useStringProvider()
-    ROOT_SCREENS.forEachIndexed { index, screen ->
+    val screens = props.screens ?: emptyList()
+
+    screens.forEachIndexed { index, screen ->
         NavLink {
             to = screen.key
             id = "${props.idPrefix}_${screen.key}"
