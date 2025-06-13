@@ -111,7 +111,7 @@ fun SiteEditScreen(
                 onChange = {
                     onTogglePermission(permissionLabel.second)
                 },
-                modifier = Modifier.defaultItemPadding(),
+                modifier = Modifier.defaultItemPadding().testTag(stringResource(permissionLabel.first)),
                 enabled = uiState.fieldsEnabled,
             )
         }
