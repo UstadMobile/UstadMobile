@@ -93,10 +93,8 @@ onFlowComplete:
 - tapOn: "Site"
 - tapOn:
     id: "floating_action_button"  #Edit button
-- tapOn:
-    id: "Messages"
-- tapOn:
-    id: "People"
+- tapOn: "Messages"
+- tapOn: "People"
 - tapOn: "Save"
 - assertVisible: "Courses"
 - assertVisible: "Library"
