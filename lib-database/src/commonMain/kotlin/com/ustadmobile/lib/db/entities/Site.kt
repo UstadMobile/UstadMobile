@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.core.db.BottomNavVisibilityFlags.SHOW_COURSE
@@ -64,6 +65,7 @@ class Site {
 
     var authSalt: String? = null
 
+    @ColumnInfo(defaultValue = "0")
     var bottomNavVisibilityFlag: Long = 0
 
     companion object {

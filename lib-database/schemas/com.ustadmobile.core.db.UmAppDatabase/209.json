@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 209,
-    "identityHash": "516d82b0f8bb94a1a1fdc9b7f7a95480",
+    "identityHash": "f62fb414de3c2c3831951e3b7f1e3389",
     "entities": [
       {
         "tableName": "ClazzLog",
@@ -2637,7 +2637,7 @@
       },
       {
         "tableName": "Site",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sitePcsn` INTEGER NOT NULL, `siteLcsn` INTEGER NOT NULL, `siteLcb` INTEGER NOT NULL, `siteLct` INTEGER NOT NULL, `siteName` TEXT, `guestLogin` INTEGER NOT NULL, `registrationAllowed` INTEGER NOT NULL, `authSalt` TEXT, `bottomNavVisibilityFlag` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sitePcsn` INTEGER NOT NULL, `siteLcsn` INTEGER NOT NULL, `siteLcb` INTEGER NOT NULL, `siteLct` INTEGER NOT NULL, `siteName` TEXT, `guestLogin` INTEGER NOT NULL, `registrationAllowed` INTEGER NOT NULL, `authSalt` TEXT, `bottomNavVisibilityFlag` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
           {
             "fieldPath": "siteUid",
@@ -2697,7 +2697,8 @@
             "fieldPath": "bottomNavVisibilityFlag",
             "columnName": "bottomNavVisibilityFlag",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -6513,7 +6514,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '516d82b0f8bb94a1a1fdc9b7f7a95480')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f62fb414de3c2c3831951e3b7f1e3389')"
     ]
   }
 }
