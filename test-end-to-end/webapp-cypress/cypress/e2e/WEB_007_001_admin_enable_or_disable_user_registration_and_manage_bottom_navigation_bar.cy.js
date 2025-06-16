@@ -52,10 +52,8 @@ it('Admin disable registration', () => {
  //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
   cy.get('#terms_html_edit .ql-editor').as('editor')
   cy.get('@editor').click().clear()
- // cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('exist') //verified registration_allowed switch is on
+  cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).eq(0).should('exist') //verified registration_allowed switch is on
   cy.get('#registration_allowed').click()
- // cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('not.exist') //verified registration_allowed switch is off
-  cy.wait(1000)
   cy.get('#actionBarButton').click()
   cy.contains('Yes', { timeout: 5000 }).should('not.exist')
   cy.contains('No', { timeout: 10000 }).should('exist')
@@ -63,7 +61,6 @@ it('Admin disable registration', () => {
 
 it('Verify New user registration is disabled', () => {
   cy.ustadClearIndexDb()
-
   cy.visit('/', {timeout:60000})
   cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').should('not.exist') // Verified new user registration is disabled
   cy.get('input#username', { timeout: 10000 }).should('exist')
@@ -75,31 +72,29 @@ it('Admin manage bottom navigation bar', () => {
   cy.get('#settings_button').click()
   cy.contains('Site').click()
   cy.contains('Edit').click()
- //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
   cy.get('#Messages').click()
   cy.get('#People').click()
-  //cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('not.exist') //verified registration_allowed switch is off
   cy.get('#actionBarButton').click()
-  cy.contains('Courses').should('be.visible')
-  cy.contains('Library').should('be.visible')
-  cy.contains('Messages').should('not.be.visible')
-  cy.contains('People').should('not.be.visible')
+  cy.contains('Courses').should('exist')
+  cy.contains('Library').should('exist')
+  cy.contains('Messages').should('not.exist')
+  cy.contains('People').should('not.exist')
 })
 
 it('Verify student user can see bottom navigation bar changes', () => {
   cy.ustadClearDbAndLogin('stud1','tests1')
-  cy.contains('Courses').should('be.visible')
-  cy.contains('Library').should('be.visible')
-  cy.contains('Messages').should('not.be.visible')
-  cy.contains('People').should('not.be.visible')
+  cy.contains('Courses').should('exist')
+  cy.contains('Library').should('exist')
+  cy.contains('Messages').should('not.exist')
+  cy.contains('People').should('not.exist')
 })
 
 it('Verify teacher can see bottom navigation bar changes', () => {
   cy.ustadClearDbAndLogin('teach1','testt1')
-  cy.contains('Courses').should('be.visible')
-  cy.contains('Library').should('be.visible')
-  cy.contains('Messages').should('not.be.visible')
-  cy.contains('People').should('not.be.visible')
+  cy.contains('Courses').should('exist')
+  cy.contains('Library').should('exist')
+  cy.contains('Messages').should('not.exist')
+  cy.contains('People').should('not.exist')
 })
 
   after(() => {
