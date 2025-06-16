@@ -72,8 +72,10 @@ it('Admin manage bottom navigation bar', () => {
   cy.get('#settings_button').click()
   cy.contains('Site').click()
   cy.contains('Edit').click()
-  cy.get('#Messages').click()
-  cy.get('#People').click()
+  cy.get('span.MuiFormControlLabel-label').contains('Messages')
+    .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click() //Messages switches need to be active before click
+  cy.get('span.MuiFormControlLabel-label').contains('People')
+    .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click() //People switches need to be active before click
   cy.get('#actionBarButton').click()
   cy.contains('Courses').should('exist')
   cy.contains('Library').should('exist')
