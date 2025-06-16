@@ -33,7 +33,6 @@ val UstadPermissionEditComponent = FC<UstadPermissionEditProps> { props ->
 
         props.permissionLabels.forEach { permissionLabel ->
             UstadSwitchField {
-                id = strings[permissionLabel.first]
                 sx {
                     paddingTop = spacing
                     paddingBottom = spacing

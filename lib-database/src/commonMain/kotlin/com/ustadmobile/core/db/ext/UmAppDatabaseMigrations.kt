@@ -1703,15 +1703,12 @@ val MIGRATION_207_208 = DoorMigrationStatementList(207, 208) { db ->
             add("ALTER TABLE Site ADD COLUMN bottomNavVisibilityFlag BIGINT NOT NULL DEFAULT 0")
         }
 
+
+        add("UPDATE Site SET bottomNavVisibilityFlag = ${BOTTOM_NAV_DEFAULT_FLAG}")
     }
 
 }
-val MIGRATION_208_209 = DoorMigrationStatementList(208, 209) { db ->
 
-    listOf("UPDATE Site SET bottomNavVisibilityFlag = ${BOTTOM_NAV_DEFAULT_FLAG}")
-
-
-}
 
 fun migrationList() = listOf<DoorMigration>(
     MIGRATION_105_106, MIGRATION_106_107,
@@ -1731,7 +1728,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
     MIGRATION_199_200, MIGRATION_200_201, MIGRATION_201_202, MIGRATION_203_204,
     MIGRATION_204_205, MIGRATION_205_206, MIGRATION_206_207, MIGRATION_207_208,
-    MIGRATION_208_209
+
 
 )
 

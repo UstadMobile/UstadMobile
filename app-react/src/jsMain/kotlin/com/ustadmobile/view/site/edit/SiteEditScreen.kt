@@ -94,12 +94,18 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
             UstadDetailHeader {
                 header = ReactNode(strings[MR.strings.navigation_bar])
             }
-            UstadPermissionEditComponent {
-                permissionLabels = props.uiState.permissionLabels
-                value = props.uiState.site?.bottomNavVisibilityFlag ?: 0
-                onToggle = props.onTogglePermission
-                enabled = props.uiState.fieldsEnabled
+            UstadStandardContainer {
+                id = "navigation_bar_switch_container"
+
+
+                UstadPermissionEditComponent {
+                    permissionLabels = props.uiState.permissionLabels
+                    value = props.uiState.site?.bottomNavVisibilityFlag ?: 0
+                    onToggle = props.onTogglePermission
+                    enabled = props.uiState.fieldsEnabled
+                }
             }
+
             UstadEditHeader {
                 + strings[MR.strings.terms_and_policies]
             }
