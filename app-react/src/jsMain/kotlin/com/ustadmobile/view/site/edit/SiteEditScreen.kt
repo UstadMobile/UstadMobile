@@ -42,7 +42,6 @@ external interface SiteEditProps: Props {
 val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
     val strings = useStringProvider()
-    val theme by useRequiredContext(ThemeContext)
     UstadStandardContainer {
         maxWidth = "lg"
 
@@ -100,7 +99,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
                 UstadPermissionEditComponent {
                     permissionLabels = props.uiState.permissionLabels
-                    value = props.uiState.site?.bottomNavVisibilityFlag ?: 0
+                    value = (props.uiState.site?.bottomNavVisibilityFlag ?: 0).toLong()
                     onToggle = props.onTogglePermission
                     enabled = props.uiState.fieldsEnabled
                 }

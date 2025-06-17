@@ -1,12 +1,12 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.db.BottomNavVisibilityFlags
 import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import dev.icerock.moko.resources.StringResource
@@ -34,7 +34,7 @@ import web.cssom.px
 external interface SidebarProps: Props {
     var visible: Boolean
     var selectedRootItemIndex: Int
-    var visibleRootScreens: List<RootScreen>
+    var site: Site?
 
 }
 
@@ -42,27 +42,14 @@ data class RootScreen(
     val key: String,
     val nameMessageId: StringResource,
     val icon: FC<*>? = null,
+    val flag: Long
 )
-fun getVisibleRootScreens(bottomNavVisibilityFlag: Long?): List<RootScreen> {
-    return ROOT_SCREENS.filter {
-        when (it.key) {
-            ClazzListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
-                BottomNavVisibilityFlags.SHOW_COURSE) == true
-            ContentEntryListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
-                BottomNavVisibilityFlags.SHOW_LIBRARY) == true
-            ConversationListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
-                BottomNavVisibilityFlags.SHOW_MESSAGES) == true
-            PersonListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
-                BottomNavVisibilityFlags.SHOW_PEOPLE) == true
-            else -> true
-        }
-    }
-}
+
 val ROOT_SCREENS = listOf(
-    RootScreen(ClazzListViewModel.DEST_NAME_HOME, MR.strings.courses, SchoolIcon),
-    RootScreen(ContentEntryListViewModel.DEST_NAME_HOME, MR.strings.library, LibraryBooks),
-    RootScreen(ConversationListViewModel.DEST_NAME_HOME, MR.strings.messages, Chat),
-    RootScreen(PersonListViewModel.DEST_NAME_HOME, MR.strings.people, Person)
+    RootScreen(ClazzListViewModel.DEST_NAME_HOME, MR.strings.courses, SchoolIcon, Site.SHOW_COURSE),
+    RootScreen(ContentEntryListViewModel.DEST_NAME_HOME, MR.strings.library, LibraryBooks, Site.SHOW_LIBRARY),
+    RootScreen(ConversationListViewModel.DEST_NAME_HOME, MR.strings.messages, Chat, Site.SHOW_MESSAGES),
+    RootScreen(PersonListViewModel.DEST_NAME_HOME, MR.strings.people, Person, Site.SHOW_PEOPLE)
 )
 
 val Sidebar = FC<SidebarProps> { props ->
@@ -110,7 +97,7 @@ val Sidebar = FC<SidebarProps> { props ->
                     UstadRootScreenNavLinks {
                         selectedItem = props.selectedRootItemIndex
                         idPrefix = "sidebar"
-                        screens = props.visibleRootScreens
+                        currentSite = props.site
                     }
                 }
 

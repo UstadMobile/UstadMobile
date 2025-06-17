@@ -1693,8 +1693,17 @@ val MIGRATION_206_207 = DoorMigrationStatementList(206, 207) { db ->
     }
 }
 
-
 val MIGRATION_207_208 = DoorMigrationStatementList(207, 208) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ClazzInvite ADD COLUMN inviteExpire INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE ClazzInvite ADD COLUMN inviteExpire BIGINT NOT NULL DEFAULT 0")
+        }
+    }
+}
+
+val MIGRATION_208_209 = DoorMigrationStatementList(208, 209) { db ->
 
     buildList {
         if (db.dbType() == DoorDbType.SQLITE) {
@@ -1728,8 +1737,7 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
     MIGRATION_199_200, MIGRATION_200_201, MIGRATION_201_202, MIGRATION_203_204,
     MIGRATION_204_205, MIGRATION_205_206, MIGRATION_206_207, MIGRATION_207_208,
-
-
+    MIGRATION_208_209
 )
 
 

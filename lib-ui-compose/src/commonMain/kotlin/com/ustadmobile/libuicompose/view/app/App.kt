@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.db.BottomNavVisibilityFlags
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.FabUiState
@@ -47,6 +46,7 @@ import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListV
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.Site
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
@@ -64,45 +64,33 @@ data class TopNavigationItem(
     val destRoute: String,
     val icon: ImageVector,
     val label: StringResource,
+    val flag : Long
 )
-fun getVisibleTopLevelNavItems(
-    bottomNavVisibilityFlag: Long?
-): List<TopNavigationItem> {
-    return APP_TOP_LEVEL_NAV_ITEMS.filter {
-        when (it.destRoute) {
-            ClazzListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
-                BottomNavVisibilityFlags.SHOW_COURSE) == true
-            ContentEntryListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
-                BottomNavVisibilityFlags.SHOW_LIBRARY) == true
-            ConversationListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
-                BottomNavVisibilityFlags.SHOW_MESSAGES) == true
-            PersonListViewModel.DEST_NAME_HOME -> bottomNavVisibilityFlag?.hasFlag(
-                BottomNavVisibilityFlags.SHOW_PEOPLE) == true
-            else -> true
-        }
-    }
-}
 
 val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
         destRoute = ClazzListViewModel.DEST_NAME_HOME,
         icon = Icons.Outlined.School,
         label = MR.strings.courses,
+        flag = Site.SHOW_COURSE
     ),
     TopNavigationItem(
         destRoute = ContentEntryListViewModel.DEST_NAME_HOME,
         icon = Icons.Outlined.LocalLibrary,
         label = MR.strings.library,
+        flag = Site.SHOW_LIBRARY
     ),
     TopNavigationItem(
         destRoute = ConversationListViewModel.DEST_NAME_HOME,
         icon = Icons.AutoMirrored.Outlined.Chat,
         label = MR.strings.messages,
+        flag = Site.SHOW_MESSAGES
     ),
     TopNavigationItem(
         destRoute = PersonListViewModel.DEST_NAME_HOME,
         icon = Icons.Outlined.Person,
         label = MR.strings.people,
+        flag = Site.SHOW_PEOPLE
     )
 )
 
@@ -128,11 +116,6 @@ fun App(
         .instance(tag = DoorTag.TAG_DB)
 
     val currentSite by currentDb.siteDao().getSiteAsFlow().collectAsState(initial = null)
-
-    val bottomNavVisibilityFlag = currentSite?.bottomNavVisibilityFlag
-
-    val visibleTopNavItems = getVisibleTopLevelNavItems(bottomNavVisibilityFlag)
-
 
     val appUiState = remember {
         mutableStateOf(
@@ -193,21 +176,23 @@ fun App(
 
                     if(appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
                         NavigationBar {
-                            visibleTopNavItems.forEachIndexed { index, item ->
-                                NavigationBarItem(
-                                    icon = {
-                                        Icon(item.icon, contentDescription = null)
-                                    },
-                                    label = { Text(stringResource(item.label)) },
-                                    selected = selectedTopLevelItemIndex == index,
-                                    onClick = {
-                                        navigator.navigate(
-                                            route  = "/${item.destRoute}",
-                                            options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
-                                        )
-                                    }
-                                )
-                            }
+                            APP_TOP_LEVEL_NAV_ITEMS.filter { item ->
+                                    currentSite?.bottomNavVisibilityFlag?.hasFlag(item.flag) == true
+                                }.forEachIndexed { index, item ->
+                                    NavigationBarItem(
+                                        icon = {
+                                            Icon(item.icon, contentDescription = null)
+                                        },
+                                        label = { Text(stringResource(item.label)) },
+                                        selected = selectedTopLevelItemIndex == index,
+                                        onClick = {
+                                            navigator.navigate(
+                                                route = "/${item.destRoute}",
+                                                options = NavOptions(popUpTo = PopUpTo.First(inclusive = true))
+                                            )
+                                        }
+                                    )
+                                }
                         }
                     }
                 }

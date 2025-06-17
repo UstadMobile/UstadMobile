@@ -169,18 +169,14 @@ class SiteEditViewModel(
     }
     fun onTogglePermission(flag: Long) {
         _uiState.update { prev ->
-            val entityVal = prev.site
-            if(entityVal != null) {
-                prev.copy(
-                    site = entityVal.shallowCopy {
-                        bottomNavVisibilityFlag = entityVal.bottomNavVisibilityFlag.toggleFlag(flag)
-                    }
-                )
-            }else {
-                prev
-            }
+            prev.copy(
+                site = prev.site?.shallowCopy {
+                    bottomNavVisibilityFlag = bottomNavVisibilityFlag.toggleFlag(flag)
+                }
+            )
         }
     }
+
     fun onChangeTermsLanguage(
         uiLang: UstadMobileSystemCommon.UiLanguage
     ) {

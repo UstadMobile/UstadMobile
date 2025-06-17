@@ -107,9 +107,6 @@ val UstadScreens = FC<Props> {
 
     val currentSite by currentDb.siteDao().getSiteAsFlow().collectAsState(null)
 
-    val bottomNavVisibilityFlag = currentSite?.bottomNavVisibilityFlag
-    val visibleScreens = getVisibleRootScreens(bottomNavVisibilityFlag)
-
 
     val muiState = useState { MuiAppState() }
 
@@ -219,7 +216,7 @@ val UstadScreens = FC<Props> {
                             visible =
                                 !mobileMode && appUiState.navigationVisible && currentSession?.person?.isPersonalAccount != true
                             selectedRootItemIndex = currentRootItemIndex
-                            visibleRootScreens = visibleScreens
+                            site = currentSite
                         }
 
                         UstadMobileMenu {

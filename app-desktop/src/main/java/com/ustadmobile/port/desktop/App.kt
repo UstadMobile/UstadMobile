@@ -51,12 +51,12 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFK
 import com.ustadmobile.core.impl.di.commonClientDomainDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.logging.LogbackAntiLog
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
 import com.ustadmobile.libuicompose.view.app.SizeClass
-import com.ustadmobile.libuicompose.view.app.getVisibleTopLevelNavItems
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -215,9 +215,7 @@ fun main() {
                 .instance(tag = DoorTag.TAG_DB)
 
             val currentSite by currentDb.siteDao().getSiteAsFlow().collectAsState(initial = null)
-            val bottomNavVisibilityFlag = currentSite?.bottomNavVisibilityFlag
 
-            val visibleTopNavItems = getVisibleTopLevelNavItems(bottomNavVisibilityFlag)
 
             val desktopConfig = remember {
                 KamelConfig {
@@ -289,7 +287,9 @@ fun main() {
                                             }
 
                                             Spacer(Modifier.height(16.dp))
-                                            visibleTopNavItems.forEachIndexed { index, item ->
+                                            APP_TOP_LEVEL_NAV_ITEMS.filter {
+                                                currentSite?.bottomNavVisibilityFlag?.hasFlag(it.flag) == true
+                                            }.forEachIndexed { index, item ->
                                                 NavigationDrawerItem(
                                                     icon = { Icon(item.icon, contentDescription = null) },
                                                     label = { Text(stringResource(item.label)) },
