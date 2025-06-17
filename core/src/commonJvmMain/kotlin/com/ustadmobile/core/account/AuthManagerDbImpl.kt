@@ -1,34 +1,24 @@
 package com.ustadmobile.core.account
 
 import com.ustadmobile.core.db.UmAppDataLayer
-import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.ext.base64StringToByteArray
+import com.ustadmobile.core.util.ext.isDateOfBirthAMinor
 import com.ustadmobile.lib.db.entities.PersonAuth2
 import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.STATUS_APPROVED
 import kotlinx.datetime.Instant
+import nl.adaptivity.xmlutil.serialization.writeAsXML
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
+import java.security.KeyPairGenerator
+import java.security.KeyStore
 
-
-/**
- * AuthManager is a simple clearing house for authenticating users. This can support rate limiting
- * etc.
- *
- * Passwords are stored in the database with two rounds of PBKDF2 encryption - first encrypt the
- * password with PBKDF2, convert that to a hex string, then encrypt that with PBKDF2 again. Passwords
- * are salted with the randomly generated salt string that is on the Site entity. PBKDF2 params are
- * preset and stored in the DI manager.
- *
- * This way the user session auth string can be checked against the stored password, without
- * actually containing the password itself. User sessions can be started offline.
- *
- * ALL auth related requests run through this manager.
- */
-class AuthManager(
+class AuthManagerDbImpl(
     internal val learningSpace: LearningSpace,
-    override val di: DI
-) : DIAware {
+    override val di: DI,
+    private val keyPairGenerator: KeyPairGenerator,
+)  : DIAware {
 
     private val dataLayer: UmAppDataLayer by on(learningSpace).instance()
 
@@ -36,7 +26,7 @@ class AuthManager(
         username: String,
         password: String
     ): AuthResult {
-        val passwordDoubleHashed = doublePbkdf2Hash(password)
+        val passwordDoubleHashed = ByteArray(1)//doublePbkdf2Hash(password)
         val personAuth2 = dataLayer.repositoryOrLocalDb.personAuth2Dao().findByUsername(username)
         val authMatch = personAuth2?.pauthAuth?.base64StringToByteArray()
             .contentEquals(passwordDoubleHashed)
@@ -63,16 +53,14 @@ class AuthManager(
     }
 
     suspend fun setAuth(personUid: Long, password: String) {
-        //TODO: use per user salt/encryption
         //val encryptedPass = doublePbkdf2HashAsBase64(password)
+        //TODO
 
 
         dataLayer.repositoryOrLocalDb.personAuth2Dao().insertAsync(PersonAuth2().apply {
             pauthUid = personUid
             pauthMechanism = PersonAuth2.AUTH_MECH_PBKDF2_DOUBLE
-            //pauthAuth = encryptedPass
+            pauthAuth = "f"
         })
     }
-
-
 }
