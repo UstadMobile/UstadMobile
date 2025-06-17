@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.report.query
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.query.RunReportUseCase.Companion.reportQueryResultsToResultStatementReportRows
 import com.ustadmobile.core.util.ext.age
 import com.ustadmobile.door.PreparedStatementConfig
@@ -8,7 +9,6 @@ import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.ext.prepareAndUseStatementAsync
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.door.util.systemTimeInMillis
-import io.ktor.util.reflect.Type
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -69,13 +69,34 @@ class RunReportUseCaseDatabaseImpl(
                 )
             }
 
+            // ClazzUids need to be looked up from the database so the user will see the name, not
+            // the uid string. Other XAXis formatting (eg. dates, gender, etc) is done client side
+            val isClazzUids = request.reportOptions.xAxis == ReportXAxis.CLASS
+
+            val allClazzUids: List<Long> = if(isClazzUids) {
+                queryResults.map { it.rqrXAxis.toLong() }.distinct()
+            }else {
+                emptyList()
+            }
+
+            //Map clazz uid longs to name as string
+            val clazzNames: Map<Long, String> = db.clazzDao().findClazzNamesByUids(allClazzUids).map {
+                it.clazzUid to it.clazzName
+            }.toMap()
+
             emit(
                 RunReportUseCase.RunReportResult(
                     timestamp = systemTimeInMillis(),
                     request = request,
                     results = reportQueryResultsToResultStatementReportRows(
                         queryResults = queryResults,
-                        request = request
+                        request = request,
+                        xAxisNameFn = { xAxis ->
+                            if(isClazzUids)
+                                clazzNames[xAxis.toLong()] ?: xAxis
+                            else
+                                xAxis
+                        }
                     ),
                     age = queryResults.age(sinceTimestamp = queries.first().timestamp)
                 )

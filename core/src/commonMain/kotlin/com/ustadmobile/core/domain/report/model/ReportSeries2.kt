@@ -52,6 +52,9 @@ enum class ReportXAxis(
     val personJoinRequired: Boolean = false,
     val datePeriod: DatePeriod? = null,
 ) : OptionWithLabelStringResource {
+    /**
+     * Displayed to the user using the localized date formatted for the specified date
+     */
     DAY(MR.strings.day, datePeriod = DatePeriod(days = 1)),
 
     /**
@@ -59,6 +62,8 @@ enum class ReportXAxis(
      * the week of the first day of the reporting period. E.g. if the report period is Tuesday
      * 4/Feb/25 to Monday 17/Feb/25, then there will be two entries on the xAxis: 2025-02-04, and
      * 2025-02-11.
+     *
+     * Displayed to the user using the localized date formatted for the specified date
      */
     WEEK(MR.strings.weekly, datePeriod = DatePeriod(days = 7)),
 
@@ -66,6 +71,8 @@ enum class ReportXAxis(
      * When report data xAxis is by month, or data is subgrouped by month, this will be done by
      * calendar month. Queries will group data using YYYY-MM-01 e.g. using DATE_TRUNC('month'..)
      * on PostgreSQL and the strftime 'start of month' modifier on SQLite.
+     *
+     * Displayed to the user as Month - Year using localized date formatter
      */
     MONTH(MR.strings.monthly, datePeriod = DatePeriod(months = 1)),
 
@@ -73,9 +80,20 @@ enum class ReportXAxis(
      * When report data xAxis is by month, or data is subgrouped by month, this will be done by
      * calendar year. Queries will group data using YYYY-01-01 e.g. using DATE_TRUNC('year'..)
      * on PostgreSQL and the strftime 'start of year' modifier on SQLite.
+     *
+     * Displayed to the user as the year (only)
      */
     YEAR(MR.strings.year, datePeriod = DatePeriod(years = 1)),
+
+    /**
+     * Displayed to the user as the clazz name. RunReportUseCaseDbImpl will substitute the clazzUid
+     * included in the query with the clazz name
+     */
     CLASS(MR.strings.class_name),
+
+    /**
+     * Displayed to the user using the localized string as per their locale (e.g. male, female..)
+     */
     GENDER(MR.strings.gender_literal, personJoinRequired = true),
     NONE(MR.strings.none);
 }

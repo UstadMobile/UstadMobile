@@ -102,7 +102,7 @@ interface RunReportUseCase {
             //If there are no rows in the database query result; we must use the empty subgroup
             // this might need adjusted when subgroups are by gender / known values
             val allSubGroups = this.map { it.subgroup }.distinct().ifEmpty { listOf("") }
-            val datePeriod = request.reportOptions.xAxis?.datePeriod ?: return this
+            val datePeriod = request.reportOptions.xAxis.datePeriod ?: return this
             val resultList = mutableListOf<StatementReportRow>()
             val rowMap = this.associateBy { Pair(it.xAxis, it.subgroup) }
 
@@ -128,11 +128,16 @@ interface RunReportUseCase {
         fun reportQueryResultsToResultStatementReportRows(
             queryResults: List<ReportQueryResult>,
             request: RunReportRequest,
+            xAxisNameFn: (String) -> String = { it },
         ): List<List<StatementReportRow>> {
             val queryResultMap = queryResults.groupBy { it.rqrReportSeriesUid }
                 .map {  entry ->
                     entry.key to entry.value.map {
-                        it.asStatementReportRow()
+                        it.asStatementReportRow().let { reportRow ->
+                            reportRow.copy(
+                                xAxis = xAxisNameFn(reportRow.xAxis)
+                            )
+                        }
                     }.fillIfNeeded(request)
                 }.toMap()
 
