@@ -78,7 +78,7 @@ fun ReportListScreen(
     val pagingItems = doorRepoPager.lazyPagingItems
 
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(200.dp), // Minimum card width 300dp
+        columns = GridCells.Adaptive(200.dp), // Minimum card width 200dp
         modifier = Modifier
             .fillMaxSize()
             .padding(4.dp)
@@ -118,7 +118,7 @@ private fun ReportGridCard(
             .padding(10.dp)
             .fillMaxWidth()
             .clickable { onItemClick(report) }
-            .background(Color(0x1EF5F5F5)),
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.12f)),
          elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box {
@@ -147,7 +147,7 @@ private fun ReportGridCard(
                             CircularProgressIndicator(Modifier.size(32.dp))
 
                         reportDataResult.data.isEmpty() ->
-                            Text("No data available", style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(MR.strings.No_data_available), style = MaterialTheme.typography.bodyMedium)
 
                         else -> {
                             val graphSeries = remember(reportDataResult) {
@@ -180,7 +180,7 @@ private fun ReportGridCard(
                                 xAxisLabel = reportDataResult.options?.xAxis ?: ReportXAxis.GENDER,
                                 yAxisLabel = yAxisLabel,
                                 isDurationType = reportDataResult.options?.series?.any {
-                                    it.reportSeriesYAxis?.type == YAxisTypes.DURATION
+                                    it.reportSeriesYAxis.type == YAxisTypes.DURATION
                                 } ?: false,
                                 compactMode = true,
                                 modifier = Modifier.fillMaxSize()

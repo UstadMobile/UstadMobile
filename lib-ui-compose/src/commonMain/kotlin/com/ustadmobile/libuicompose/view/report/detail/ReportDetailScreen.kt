@@ -53,14 +53,14 @@ fun ReportDetailScreen(viewModel: ReportDetailViewModel) {
 fun ReportDetailScreen(
     uiState: ReportDetailUiState,
 ) {
-    BarGraphSampleScreen(
+    BarGraphSection(
         reportOptions = uiState.reportOptions2,
         statementReportRow = uiState.reportResults
     )
 }
 
 @Composable
-fun BarGraphSampleScreen(
+fun BarGraphSection(
     reportOptions: ReportOptions2,
     statementReportRow: List<List<StatementReportRow>>
 ) {
@@ -111,7 +111,7 @@ fun BarGraphSampleScreen(
             )
         }
     } else {
-        Text("empty data")
+        Text(  stringResource(MR.strings.empty_data))
     }
 }
 

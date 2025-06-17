@@ -2067,6 +2067,8 @@
     <string name="from">From </string>
     <string name="to_">To </string>
     <string name="quantity_must_be_at_least_1">Quantity must be at least 1 </string>
+    <string name="empty_data">Empty data </string>
+    <string name="No_data_available">No data available </string>
 
     <string name="progress_key">Progress</string>
 

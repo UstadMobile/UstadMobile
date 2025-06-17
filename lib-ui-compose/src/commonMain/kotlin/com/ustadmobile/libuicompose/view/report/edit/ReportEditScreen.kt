@@ -136,7 +136,6 @@ private fun ReportEditScreen(
                 }
             }
 
-            // In ReportEditScreen's time range dropdown item
             ExposedDropdownMenu(
                 label = { Text(stringResource(MR.strings.time_range) + "*") },
                 options = ReportPeriodOption.entries,

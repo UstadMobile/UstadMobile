@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.view.report.graphs
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +38,10 @@ import io.github.koalaplot.core.util.rotateVertically
 import io.github.koalaplot.core.xygraph.DefaultPoint
 import io.github.koalaplot.core.xygraph.FloatLinearAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
+
+private const val HOUR_UNIT = "hr"
+private const val MINUTE_UNIT = "min"
+private const val SECOND_UNIT = "sec"
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
@@ -382,9 +385,9 @@ private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<D
     return when {
         isDuration -> {
             when {
-                maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, "hr")
-                maxY >= 60_000 -> Pair(1.0 / 60_000, "min")
-                else -> Pair(1.0 / 1_000, "sec")
+                maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, HOUR_UNIT)
+                maxY >= 60_000 -> Pair(1.0 / 60_000, MINUTE_UNIT)
+                else -> Pair(1.0 / 1_000, SECOND_UNIT)
             }
         }
 
@@ -412,8 +415,8 @@ private fun calculateTickIncrement(
 
         else -> {
             when (unit) {
-                "hr" -> 0.5f
-                "min" -> 15f
+                HOUR_UNIT -> 0.5f
+                MINUTE_UNIT -> 15f
                 else -> 30f
             }
         }

@@ -163,8 +163,8 @@ class ReportEditViewModel(
         val newState = _uiState.value.copy(
             submitted = true,
             reportTitleError = if (currentReport.title.isEmpty()) requiredFieldMessage else null,
-            xAxisError = if (currentReport.xAxis == null) requiredFieldMessage else null,
-            timeRangeError = if (currentReport.period == null) requiredFieldMessage else null,
+            xAxisError = null,
+            timeRangeError = null,
             quantityError = quantityError,
             chartTypeError = chartTypeErrors,
             yAxisErrors = yAxisErrors,
