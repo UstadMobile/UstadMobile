@@ -16,10 +16,10 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import mui.icons.material.Add
 import mui.system.sx
-import react.dom.html.ReactHTML
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
+import web.cssom.Width
 import web.cssom.pct
 import web.cssom.px
 
@@ -79,6 +79,7 @@ val ChildProfileListScreen = FC<Props> {
 val AddChildProfilesComponent2 = FC<ChildProfileListProps> { props ->
     val strings = useStringProvider()
     val muiAppState = useMuiAppState()
+    val buttonPaddingPx = 8
 
 
     VirtualList {
@@ -121,12 +122,20 @@ val AddChildProfilesComponent2 = FC<ChildProfileListProps> { props ->
                 }
             }
             Button {
-                variant = ButtonVariant.contained
-                id = "next_button"
-                onClick = { props.onClickFinish() }
-                + strings[MR.strings.next]
-            }
+                sx {
 
+                    margin = buttonPaddingPx.px
+                    width = "calc(100% - ${buttonPaddingPx* 2}px)".unsafeCast<Width>()
+                }
+                id = "next_button"
+                variant = ButtonVariant.contained
+
+                onClick = {
+                    props.onClickFinish()
+                }
+
+                + strings[MR.strings.finish]
+            }
         }
         Container {
             VirtualListOutlet()
