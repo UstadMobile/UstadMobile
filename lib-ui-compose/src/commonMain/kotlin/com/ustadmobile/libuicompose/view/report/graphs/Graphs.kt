@@ -1,7 +1,14 @@
 package com.ustadmobile.libuicompose.view.report.graphs
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Surface
@@ -13,14 +20,14 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
+import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
+import com.ustadmobile.core.util.report.ReportFormatter
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
-import dev.icerock.moko.resources.compose.stringResource
+import com.ustadmobile.libuicompose.view.report.detail.getGenderLabel
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.bar.DefaultVerticalBar
@@ -48,12 +55,13 @@ private const val SECOND_UNIT = "sec"
 fun CombinedGraph(
     series: List<GraphSeries>,
     modifier: Modifier = Modifier,
-    xAxisLabel: ReportXAxis?,
     yAxisLabel: String,
     isDurationType: Boolean,
     compactMode: Boolean = false,
-
+    reportOptions: ReportOptions2? = null,
 ) {
+
+    val xAxisLabel = reportOptions?.xAxis
     val allXValues = remember(series) {
         series.flatMap { it.data.map { row -> row.xAxis } }.distinct().sorted()
     }
@@ -122,7 +130,7 @@ fun CombinedGraph(
 
     ChartLayout(
         modifier = modifier,
-        legend = { if (!compactMode) CombinedLegend(series, colorMap) else null },
+        legend = { if (!compactMode) CombinedLegend(series, colorMap, reportOptions) },
         legendLocation = LegendLocation.BOTTOM
     ) {
         XYGraph(
@@ -141,7 +149,15 @@ fun CombinedGraph(
                 val rawValue = allXValues.getOrNull(index)
                 val label = when (xAxisLabel) {
                     ReportXAxis.GENDER -> getGenderLabel(rawValue)
-                    else -> rawValue?.toString() ?: ""
+                    ReportXAxis.CLASS -> rawValue
+                        ?: ""
+
+                    else -> rawValue?.let { value ->
+                        ReportFormatter.formatDateForReport(
+                            value,
+                            xAxisLabel ?: ReportXAxis.DAY
+                        )
+                    } ?: ""
                 }
                 AxisValue(
                     label = label,
@@ -160,10 +176,10 @@ fun CombinedGraph(
             },
             yAxisTitle = {
                 if (!compactMode)
-                AxisLabels(
-                    yAxisLabel,
-                    Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
-                )
+                    AxisLabels(
+                        yAxisLabel,
+                        Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
+                    )
             }
         ) {
             // Draw bar series
@@ -224,19 +240,12 @@ fun CombinedGraph(
     }
 }
 
-@Composable
-private fun getGenderLabel(rawValue: Any?): String {
-    return when (rawValue as? String) {
-        "0" -> stringResource(MR.strings.male)
-        "1" -> stringResource(MR.strings.female)
-        else -> rawValue?.toString() ?: ""
-    }
-}
 
 @Composable
 private fun CombinedLegend(
     series: List<GraphSeries>,
-    colorMap: Map<String, Color>
+    colorMap: Map<String, Color>,
+    reportOptions: ReportOptions2? = null,
 ) {
     // Filter series with non-empty subgroups
     val barSeriesMap = series.filter { it.type == SeriesType.BAR }
@@ -286,7 +295,7 @@ private fun CombinedLegend(
                         symbol = { index ->
                             val subgroup = subgroups[index]
                             LegendItem(
-                                label = subgroup,
+                                label = formatSubgroupValue(subgroup, reportOptions),
                                 color = colorMap[subgroup] ?: Color.Gray
                             )
                         }
@@ -303,7 +312,7 @@ private fun CombinedLegend(
                         symbol = { index ->
                             val subgroup = subgroups[index]
                             LegendItem(
-                                label = subgroup,
+                                label = formatSubgroupValue(subgroup, reportOptions),
                                 color = colorMap[subgroup] ?: Color.Gray
                             )
                         }
@@ -342,6 +351,7 @@ private fun AxisLabels(label: String, modifier: Modifier = Modifier) {
         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
     )
 }
+
 @Composable
 private fun AxisValue(label: String, modifier: Modifier = Modifier) {
     androidx.compose.material3.Text(
@@ -395,6 +405,20 @@ private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<D
     }
 }
 
+@Composable
+fun formatSubgroupValue(
+    value: String,
+    reportOptions: ReportOptions2?,
+): String {
+    return reportOptions?.series?.firstOrNull()?.reportSeriesSubGroup?.let { axisType ->
+        when (axisType) {
+            ReportXAxis.GENDER -> getGenderLabel(value)
+            ReportXAxis.CLASS -> value
+            else -> ReportFormatter.formatDateForReport(value, axisType)
+        }
+    } ?: value
+}
+
 private fun calculateTickIncrement(
     yRange: ClosedFloatingPointRange<Float>,
     yAxisLabel: String,
@@ -428,7 +452,3 @@ private fun calculateTickIncrement(
         }
     )
 }
-
-fun Modifier.defaultChartPadding() = this
-    .defaultScreenPadding()
-    .defaultItemPadding(top = 4.dp, end = 4.dp)

@@ -5,9 +5,12 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
+import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.impl.locale.StringProvider
+import com.ustadmobile.core.util.report.ReportFormatter
+import com.ustadmobile.view.report.detail.getGenderLabel
 import js.objects.jso
 import kotlinx.dom.clear
 import kotlinx.html.dom.append
@@ -47,6 +50,8 @@ external interface ReportGraphProps : Props {
 val ReportGraph = FC<ReportGraphProps> { props ->
     val containerRef = useRef<web.html.HTMLElement>()
     val isCompact = props.compact ?: false
+    val xAxisType = props.reportOptions.xAxis
+
 
     useEffect(props.graphSeriesList, props.reportOptions) {
         val container = containerRef.current ?: return@useEffect
@@ -57,7 +62,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
         }
         val maxY = allYValues.maxOrNull() ?: 0.0
         val isDuration = props.reportOptions.series.any {
-            it.reportSeriesYAxis?.type == YAxisTypes.DURATION
+            it.reportSeriesYAxis.type == YAxisTypes.DURATION
         }
         val (_, calculatedUnit) = calculateConversionFactor(isDuration, maxY)
         maxUnitSuffix = calculatedUnit
@@ -82,17 +87,27 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                                 data,
                                 props.reportOptions,
                             )
-
+                            // Format x-axis values based on report type
+                            val formattedXValues = data.map { row ->
+                                when (xAxisType) {
+                                    ReportXAxis.GENDER -> getGenderLabel(row.xAxis, props.strings)
+                                    ReportXAxis.CLASS -> row.xAxis
+                                    else -> ReportFormatter.formatDateForReport(
+                                        row.xAxis,
+                                        xAxisType,
+                                    )
+                                }
+                            }
                             when (series.type) {
                                 SeriesType.BAR -> bar {
                                     name = "${series.name} - $subgroup"
-                                    x.strings = data.map { it.xAxis }
+                                    x.strings = formattedXValues
                                     y.numbers = transformedYValues
                                 }
 
                                 SeriesType.LINE -> scatter {
                                     name = "${series.name} - $subgroup"
-                                    x.strings = data.map { it.xAxis }
+                                    x.strings = formattedXValues
                                     y.numbers = transformedYValues
                                     mode = ScatterMode.`lines+markers`
                                     type = TraceType.scatter
@@ -102,7 +117,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                     }
                     layout {
                         if (isCompact) {
-                           width = 320
+                            width = 320
                             height = 250
                             margin {
                                 l = 30
@@ -116,8 +131,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         xaxis {
                             automargin = true
                             title {
-                                text = props.reportOptions.xAxis?.name
-                                    ?: props.strings[MR.strings.x_axis]
+                                text = props.reportOptions.xAxis.name
                                 font { size = if (isCompact) 6 else 16 }
                             }
                             tickmode = TickMode.auto
@@ -166,7 +180,7 @@ private fun transformYAxisValues(
     reportOptions: ReportOptions2,
 ): Pair<List<Double>, String> {
     val isDuration = reportOptions.series.any {
-        it.reportSeriesYAxis?.type == YAxisTypes.DURATION
+        it.reportSeriesYAxis.type == YAxisTypes.DURATION
     }
     val maxY = data.maxOfOrNull { it.yAxis } ?: 0.0
     val (conversionFactor, unitSuffix) = calculateConversionFactor(isDuration, maxY)
@@ -186,7 +200,7 @@ private fun getYAxisTitle(
     unitSuffix: String
 ): String {
     val isDuration = reportOptions.series.any {
-        it.reportSeriesYAxis?.type == YAxisTypes.DURATION
+        it.reportSeriesYAxis.type == YAxisTypes.DURATION
     }
     return if (isDuration) "${strings[MR.strings.duration]} ($unitSuffix)"
     else strings[MR.strings.count]

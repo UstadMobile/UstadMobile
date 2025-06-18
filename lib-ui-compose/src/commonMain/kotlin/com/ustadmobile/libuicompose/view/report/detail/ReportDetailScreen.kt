@@ -29,8 +29,10 @@ import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
+import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
+import com.ustadmobile.core.util.report.ReportFormatter
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.lib.db.composites.StatementReportRow
@@ -84,13 +86,13 @@ fun BarGraphSection(
     }
 
     val yAxisLabel =
-        if (reportOptions.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }) {
+        if (reportOptions.series.any { it.reportSeriesYAxis.type == YAxisTypes.DURATION }) {
             stringResource(MR.strings.duration_hours)
         } else {
             stringResource(MR.strings.count)
         }
     val hasAnyDuration = reportOptions.series.any {
-        it.reportSeriesYAxis?.type == YAxisTypes.DURATION
+        it.reportSeriesYAxis.type == YAxisTypes.DURATION
     }
     if (graphSeries.isNotEmpty() && statementReportRow.isNotEmpty()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -99,10 +101,10 @@ fun BarGraphSection(
                 modifier = Modifier
                     .weight(0.6f)
                     .fillMaxWidth(),
-                xAxisLabel = reportOptions.xAxis,
                 yAxisLabel = yAxisLabel,
-                isDurationType = hasAnyDuration
-            )
+                isDurationType = hasAnyDuration,
+                reportOptions = reportOptions
+                )
 
             MoreOptionsSection(
                 data = graphSeries,
@@ -118,7 +120,8 @@ fun BarGraphSection(
 @Composable
 fun DataTable(
     data: List<ReportResultQueryRow>,
-    reportSeries: ReportSeries2
+    reportSeries: ReportSeries2,
+    xAxisType: ReportXAxis?
 ) {
     val subgroupName = reportSeries.reportSeriesSubGroup?.label?.let { stringResource(it) }
     val subgroupByStr = stringResource(MR.strings.subgroup_by)
@@ -178,7 +181,16 @@ fun DataTable(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = row.xAxis,
+                        text = xAxisType?.let {
+                            when (it) {
+                                ReportXAxis.GENDER -> getGenderLabel(row.xAxis)
+                                ReportXAxis.CLASS -> row.xAxis
+                                else -> ReportFormatter.formatDateForReport(
+                                    row.xAxis,
+                                    it,
+                                )
+                            }
+                        } ?: row.xAxis,
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -198,7 +210,16 @@ fun DataTable(
                         thickness = 1.dp
                     )
                     Text(
-                        text = row.subgroup ?: "-",
+                        text =reportSeries.reportSeriesSubGroup?.let {
+                            when (it) {
+                                ReportXAxis.GENDER -> getGenderLabel(row.subgroup)
+                                ReportXAxis.CLASS -> row.subgroup
+                                else -> ReportFormatter.formatDateForReport(
+                                    row.subgroup ?: "",
+                                    it,
+                                )
+                            }
+                        } ?: row.subgroup ?: "",
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -225,10 +246,20 @@ fun MoreOptionsSection(
             reportSeries?.let {
                 DataTable(
                     data = series.data,
-                    reportSeries = it
+                    reportSeries = it,
+                    xAxisType = reportOptions.xAxis
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
+    }
+}
+
+@Composable
+fun getGenderLabel(rawValue: Any?): String {
+    return when (rawValue as? String) {
+        "0" -> stringResource(MR.strings.male)
+        "1" -> stringResource(MR.strings.female)
+        else -> rawValue?.toString() ?: ""
     }
 }

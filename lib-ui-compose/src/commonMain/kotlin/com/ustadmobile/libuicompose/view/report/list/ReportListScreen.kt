@@ -119,7 +119,7 @@ private fun ReportGridCard(
             .fillMaxWidth()
             .clickable { onItemClick(report) }
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.12f)),
-         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box {
             Column(
@@ -147,7 +147,10 @@ private fun ReportGridCard(
                             CircularProgressIndicator(Modifier.size(32.dp))
 
                         reportDataResult.data.isEmpty() ->
-                            Text(stringResource(MR.strings.No_data_available), style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                stringResource(MR.strings.No_data_available),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
 
                         else -> {
                             val graphSeries = remember(reportDataResult) {
@@ -157,13 +160,14 @@ private fun ReportGridCard(
                                             ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
                                             else -> SeriesType.BAR
                                         },
-                                        data = reportDataResult.data.getOrNull(index)?.map { statementRow ->
-                                            ReportResultQueryRow(
-                                                xAxis = statementRow.xAxis,
-                                                yAxis = statementRow.yAxis,
-                                                subgroup = statementRow.subgroup
-                                            )
-                                        } ?: emptyList(),
+                                        data = reportDataResult.data.getOrNull(index)
+                                            ?.map { statementRow ->
+                                                ReportResultQueryRow(
+                                                    xAxis = statementRow.xAxis,
+                                                    yAxis = statementRow.yAxis,
+                                                    subgroup = statementRow.subgroup
+                                                )
+                                            } ?: emptyList(),
                                         name = reportSeries.reportSeriesTitle
                                     )
                                 } ?: emptyList()
@@ -177,14 +181,13 @@ private fun ReportGridCard(
 
                             CombinedGraph(
                                 series = graphSeries,
-                                xAxisLabel = reportDataResult.options?.xAxis ?: ReportXAxis.GENDER,
                                 yAxisLabel = yAxisLabel,
                                 isDurationType = reportDataResult.options?.series?.any {
                                     it.reportSeriesYAxis.type == YAxisTypes.DURATION
                                 } ?: false,
                                 compactMode = true,
                                 modifier = Modifier.fillMaxSize()
-                                    .background(Color.White)
+                                    .background(Color.White),
                             )
                         }
                     }

@@ -4,10 +4,13 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
+import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.locale.StringProvider
+import com.ustadmobile.core.util.report.ReportFormatter
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -91,6 +94,7 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
 
 private val moreOption = FC<ReportDetailProps> { props ->
     val strings = useStringProvider()
+    val xAxisType = props.uiState.reportOptions2.xAxis
 
     UstadStandardContainer {
         props.uiState.reportResults.forEachIndexed { seriesIndex, seriesRows ->
@@ -152,7 +156,16 @@ private val moreOption = FC<ReportDetailProps> { props ->
                         Grid {
                             item = true
                             xs = 4
-                            Typography { +row.xAxis }
+                            Typography {
+                                +when (xAxisType) {
+                                    ReportXAxis.GENDER -> getGenderLabel(row.xAxis, strings)
+                                    ReportXAxis.CLASS -> row.xAxis
+                                    else -> ReportFormatter.formatDateForReport(
+                                        row.xAxis,
+                                        xAxisType,
+                                    )
+                                }
+                            }
                         }
 
                         Grid {
@@ -164,7 +177,16 @@ private val moreOption = FC<ReportDetailProps> { props ->
                         Grid {
                             item = true
                             xs = 4
-                            Typography { +(row.subgroup ?: "-") }
+                            Typography {
+                                +when ( seriesConfig?.reportSeriesSubGroup) {
+                                    ReportXAxis.GENDER -> getGenderLabel(row.subgroup, strings)
+                                    ReportXAxis.CLASS -> row.subgroup
+                                    else -> ReportFormatter.formatDateForReport(
+                                        row.subgroup,
+                                        xAxisType,
+                                    )
+                                }
+                            }
                         }
                     }
                     Divider {}
@@ -177,5 +199,13 @@ private val moreOption = FC<ReportDetailProps> { props ->
                 }
             }
         }
+    }
+}
+
+fun getGenderLabel(rawValue: String, strings: StringProvider): String {
+    return when (rawValue) {
+        "0" -> strings[MR.strings.male]
+        "1" -> strings[MR.strings.female]
+        else -> rawValue
     }
 }
