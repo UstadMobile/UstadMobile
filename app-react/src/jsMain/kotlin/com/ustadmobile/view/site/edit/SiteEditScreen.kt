@@ -84,6 +84,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
                         }
                     )
                 }
+                error = props.uiState.registrationEnabledError
             }
 
             UstadEditHeader {
