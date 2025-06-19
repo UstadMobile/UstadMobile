@@ -97,7 +97,7 @@ it('Admin manage bottom navigation bar - Library only enabled', () => {
   cy.get('#settings_button').click()
   cy.contains('Site').click()
   cy.contains('Edit').click()
-  cy.get('span.MuiFormControlLabel-label').contains('Course')
+  cy.get('span.MuiFormControlLabel-label').contains('Courses')
     .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click() //Only Library should be visible to the user, navigation bar should be hidden
   cy.get('#actionBarButton').click()
   cy.contains('Courses').should('not.exist')

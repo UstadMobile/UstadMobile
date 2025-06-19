@@ -111,6 +111,21 @@ onFlowComplete:
 - assertVisible: "Library"
 - assertNotVisible: "Messages"
 - assertNotVisible: "People"
+#admin user can manage visibility of buttons in bottom navigation bar - enable only Library
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/admin_login.yaml"
+- tapOn: "Settings"
+- tapOn: "Site"
+- tapOn:
+    id: "floating_action_button"  #Edit button
+- tapOn: "Courses"
+- tapOn: "Save"
+- assertVisible: "Library"
+- assertNotVisible: "Courses"
+- assertNotVisible: "Messages"
+- assertNotVisible: "People"
 - runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
@@ -118,7 +133,7 @@ onFlowComplete:
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"
-- assertVisible: "Courses"
 - assertVisible: "Library"
+- assertNotVisible: "Courses"
 - assertNotVisible: "Messages"
 - assertNotVisible: "People"
