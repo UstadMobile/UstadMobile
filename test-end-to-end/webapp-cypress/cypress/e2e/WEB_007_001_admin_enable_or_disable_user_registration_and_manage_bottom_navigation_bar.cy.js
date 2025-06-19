@@ -91,9 +91,25 @@ it('Verify student user can see bottom navigation bar changes', () => {
   cy.contains('People').should('not.exist')
 })
 
-it('Verify teacher can see bottom navigation bar changes', () => {
+it('Admin manage bottom navigation bar - Library only enabled', () => {
+  // Admin user login
+  cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
+  cy.get('#settings_button').click()
+  cy.contains('Site').click()
+  cy.contains('Edit').click()
+  cy.get('span.MuiFormControlLabel-label').contains('Course')
+    .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click() //Only Library should be visible to the user, navigation bar should be hidden
+  cy.get('#actionBarButton').click()
+  cy.contains('Courses').should('not.exist')
+  cy.contains('Library').should('exist')
+  cy.contains('Messages').should('not.exist')
+  cy.contains('People').should('not.exist')
+})
+
+
+it('Verify teacher can see only library - navigation bar is hidden', () => {
   cy.ustadClearDbAndLogin('teach1','testt1')
-  cy.contains('Courses').should('exist')
+  cy.contains('Courses').should('not.exist')
   cy.contains('Library').should('exist')
   cy.contains('Messages').should('not.exist')
   cy.contains('People').should('not.exist')
