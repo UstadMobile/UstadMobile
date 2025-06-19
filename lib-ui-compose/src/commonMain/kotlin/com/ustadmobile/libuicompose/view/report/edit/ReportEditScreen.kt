@@ -289,11 +289,11 @@ private fun ReportEditScreen(
                             onSeriesChanged(updatedSeries)
                         },
                         disabledOptions = if (uiState.reportOptions2.xAxis?.datePeriod != null) {
-                            // X-axis is date-based: disable all date options (DAY, WEEK, MONTH, YEAR)
-                            ReportXAxis.entries.filter { it.datePeriod != null }
-                        } else {
-                            // X-axis is non-date (CLASS, GENDER, NONE): disable all non-date options
+                            // If x-axis is date-based (DAY, WEEK, MONTH, YEAR), disable non-date options (CLASS, GENDER)
                             ReportXAxis.entries.filter { it.datePeriod == null }
+                        } else {
+                            // If x-axis is non-date (CLASS, GENDER, NONE), disable only the same option (e.g., can't subgroup by same field as x-axis)
+                            listOf(uiState.reportOptions2.xAxis).filterNotNull()
                         }
                     )
 
