@@ -401,21 +401,20 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                                 props.onSeriesChanged(series.copy(reportSeriesSubGroup = selectedValue))
                             }
 
-                            ReportXAxis.entries.forEach { option ->
-                                val isXAxisDate =
-                                    props.uiState.reportOptions2.xAxis?.datePeriod != null
-                                val isOptionDate = option.datePeriod != null
-
-                                // Disable date options if X-axis is date-based, disable non-date options otherwise
-                                val disable = when {
-                                    isXAxisDate && isOptionDate -> true  // X-axis is date: disable all date options
-                                    !isXAxisDate && option == props.uiState.reportOptions2.xAxis -> true  // X-axis is non-date: disable only that option
-                                    else -> false
+                            val optionsToShow = if (props.uiState.reportOptions2.xAxis?.datePeriod != null) {
+                                // Case 1: X-axis is date (MONTH) - only show non-date options except current x-axis
+                                ReportXAxis.entries.filter { it.datePeriod == null }
+                            } else {
+                                // Case 2 & 3: X-axis is non-date (CLASS, GENDER) - show date options plus other non-date options except current x-axis
+                                ReportXAxis.entries.filter { option ->
+                                    option.datePeriod != null ||  // Include all date options
+                                            (option.datePeriod == null && option != props.uiState.reportOptions2.xAxis)
                                 }
+                            }
 
+                            optionsToShow.forEach { option ->
                                 MenuItem {
                                     value = option.name
-                                    disabled = disable
                                     +ReactNode(strings[option.label])
                                 }
                             }

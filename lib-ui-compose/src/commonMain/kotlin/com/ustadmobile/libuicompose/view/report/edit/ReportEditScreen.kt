@@ -281,19 +281,20 @@ private fun ReportEditScreen(
                     // Subgroup Dropdown
                     ExposedDropdownMenu(
                         label = { Text(stringResource(MR.strings.subgroup_by)) },
-                        options = ReportXAxis.entries,
-                        selectedValue = seriesItem.reportSeriesSubGroup,
-                        onOptionSelected = { selectedXAxis ->
-                            val updatedSeries =
-                                seriesItem.copy(reportSeriesSubGroup = selectedXAxis)
-                            onSeriesChanged(updatedSeries)
-                        },
-                        disabledOptions = if (uiState.reportOptions2.xAxis?.datePeriod != null) {
-                            // If x-axis is date-based (DAY, WEEK, MONTH, YEAR), disable non-date options (CLASS, GENDER)
+                        options = if (uiState.reportOptions2.xAxis?.datePeriod != null) {
+                            // X-axis is date - only show non-date options
                             ReportXAxis.entries.filter { it.datePeriod == null }
                         } else {
-                            // If x-axis is non-date (CLASS, GENDER, NONE), disable only the same option (e.g., can't subgroup by same field as x-axis)
-                            listOf(uiState.reportOptions2.xAxis).filterNotNull()
+                            // X-axis is non-date - show date options plus other non-date options
+                            ReportXAxis.entries.filter {
+                                it.datePeriod != null ||  // Include all date options
+                                        (it.datePeriod == null && it != uiState.reportOptions2.xAxis)
+                            }
+                        },
+                        selectedValue = seriesItem.reportSeriesSubGroup,
+                        onOptionSelected = { selectedXAxis ->
+                            val updatedSeries = seriesItem.copy(reportSeriesSubGroup = selectedXAxis)
+                            onSeriesChanged(updatedSeries)
                         }
                     )
 
