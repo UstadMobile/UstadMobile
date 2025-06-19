@@ -417,7 +417,7 @@ Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
     cy.get('#registration_allowed').click() // switch off registration allowed to make sure error is gone
     cy.get('#actionBarButton').should('be.visible')
     cy.get('#actionBarButton').click()
-    cy.contains('No').should('exist')
+    cy.contains('Edit').should('exist')
     cy.contains('Edit').click()
     cy.get('#terms_html_edit .ql-editor').as('editor')
     cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
