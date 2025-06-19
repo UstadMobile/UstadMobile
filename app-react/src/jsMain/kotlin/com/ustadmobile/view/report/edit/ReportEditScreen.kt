@@ -407,10 +407,10 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                                 val isOptionDate = option.datePeriod != null
 
                                 // Disable date options if X-axis is date-based, disable non-date options otherwise
-                                val disable = if (isXAxisDate) {
-                                    isOptionDate // Disable date options when X-axis is date-based
-                                } else {
-                                    !isOptionDate // Disable non-date options when X-axis is non-date
+                                val disable = when {
+                                    isXAxisDate && isOptionDate -> true  // X-axis is date: disable all date options
+                                    !isXAxisDate && option == props.uiState.reportOptions2.xAxis -> true  // X-axis is non-date: disable only that option
+                                    else -> false
                                 }
 
                                 MenuItem {
