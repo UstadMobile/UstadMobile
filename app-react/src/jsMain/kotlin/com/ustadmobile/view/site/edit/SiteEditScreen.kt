@@ -4,7 +4,6 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditUiState
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -12,7 +11,6 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
-import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadLanguageSelect
 import com.ustadmobile.mui.components.UstadPermissionEditComponent
 import com.ustadmobile.mui.components.UstadStandardContainer
@@ -29,7 +27,6 @@ import react.FC
 import react.Props
 import react.ReactNode
 import kotlinx.coroutines.Dispatchers
-import react.useRequiredContext
 
 external interface SiteEditProps: Props {
     var uiState: SiteEditUiState
