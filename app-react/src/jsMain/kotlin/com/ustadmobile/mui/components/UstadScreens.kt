@@ -55,6 +55,7 @@ import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.util.ext.hasOnlyOneBitSet
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.util.ext.deleteDatabaseAsync
 import mui.system.useMediaQuery
@@ -192,6 +193,7 @@ val UstadScreens = FC<Props> {
                                     arrayOf(Area.Sidebar, Area.Content),
                             )
                         }
+                        val isOnlyOneVisible = currentSite?.bottomNavVisibilityFlag?.hasOnlyOneBitSet() == true
 
                         Header {
                             this.appUiState = appUiState
@@ -204,17 +206,23 @@ val UstadScreens = FC<Props> {
                             onClickMenuIcon = {
                                 mobileMenuOpen = !mobileMenuOpen
                             }
-                            sidebarVisible =
-                                !mobileMode && appUiState.navigationVisible && currentSession?.person?.isPersonalAccount != true
+                            sidebarVisible = !mobileMode &&
+                                        appUiState.navigationVisible
+                                        && currentSession?.person?.isPersonalAccount != true &&
+                                        !isOnlyOneVisible
                         }
 
                         //if (mobileMode) Menu() else Sidebar()
                         //Note: If we remove the component, instead of hiding using Display property,
                         // then this seems to make react destroy the content component and create a
                         // completely new one, which we definitely do not want
+
+
                         Sidebar {
-                            visible =
-                                !mobileMode && appUiState.navigationVisible && currentSession?.person?.isPersonalAccount != true
+                            visible = !mobileMode &&
+                                        appUiState.navigationVisible
+                                        && currentSession?.person?.isPersonalAccount != true &&
+                                        !isOnlyOneVisible
                             selectedRootItemIndex = currentRootItemIndex
                             site = currentSite
                         }

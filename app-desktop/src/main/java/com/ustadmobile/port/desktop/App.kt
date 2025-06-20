@@ -52,6 +52,7 @@ import com.ustadmobile.core.impl.di.commonClientDomainDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.core.util.ext.hasFlag
+import com.ustadmobile.core.util.ext.hasOnlyOneBitSet
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
@@ -265,11 +266,12 @@ fun main() {
                             if(topLevelIndex >= 0)
                                 selectedItem = topLevelIndex
                         }
+                        val isOnlyOneVisible = currentSite?.bottomNavVisibilityFlag?.hasOnlyOneBitSet() == true
 
                         UstadAppTheme {
                             PermanentNavigationDrawer(
                                 drawerContent = {
-                                    if(appState.navigationVisible) {
+                                    if(appState.navigationVisible&&!isOnlyOneVisible) {
                                         PermanentDrawerSheet(
                                             Modifier.width(240.dp).fillMaxHeight()
                                         ) {

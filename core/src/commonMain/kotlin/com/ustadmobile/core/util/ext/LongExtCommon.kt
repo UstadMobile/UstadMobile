@@ -43,3 +43,9 @@ fun Long.toByteArray(): ByteArray {
     }
     return buffer
 }
+/**
+ * to check if only one flag is enable
+ */
+fun Long.hasOnlyOneBitSet(): Boolean {
+    return this != 0L && this and (this - 1) == 0L
+}

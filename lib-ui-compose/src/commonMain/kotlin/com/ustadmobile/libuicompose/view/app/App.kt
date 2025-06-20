@@ -40,6 +40,7 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavCommand
 import com.ustadmobile.core.util.ext.hasFlag
+import com.ustadmobile.core.util.ext.hasOnlyOneBitSet
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
@@ -173,8 +174,10 @@ fun App(
                         if(topLevelIndex >= 0)
                             selectedTopLevelItemIndex = topLevelIndex
                     }
+                    val isOnlyOneVisible = currentSite?.bottomNavVisibilityFlag?.hasOnlyOneBitSet() == true
 
-                    if(appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
+                    if(appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation
+                        && !isOnlyOneVisible) {
                         NavigationBar {
                             APP_TOP_LEVEL_NAV_ITEMS.filter { item ->
                                     currentSite?.bottomNavVisibilityFlag?.hasFlag(item.flag) == true
