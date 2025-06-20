@@ -4,10 +4,11 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
-import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
-import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
+import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
+import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.username.GetUsernameSuggestionUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -32,7 +33,6 @@ import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
-import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
@@ -104,10 +104,8 @@ class SignUpViewModel(
 
     private val _uiState: MutableStateFlow<SignUpUiState> = MutableStateFlow(SignUpUiState())
 
-    private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
+    private lateinit var nextDestination: String
 
-    private var nextDestination: String =
-        savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
     val uiState: Flow<SignUpUiState> = _uiState.asStateFlow()
 
@@ -117,6 +115,10 @@ class SignUpViewModel(
 
     private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]
         ?: apiUrlConfig.newPersonalAccountsLearningSpaceUrl ?: "http://localhost"
+
+    private val getDefaultDestinationUseCase: GetDefaultDestinationUseCase =
+        di.on(LearningSpace(serverUrl)).direct.instance()
+
 
     private val createPasskeyUseCase: CreatePasskeyUseCase? by di.on(LearningSpace(serverUrl)).instanceOrNull()
 
@@ -138,6 +140,10 @@ class SignUpViewModel(
         di.on(LearningSpace(serverUrl)).direct.instance()
 
     init {
+        viewModelScope.launch {
+            nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase.invoke()
+
+        }
         loadingState = LoadingUiState.INDETERMINATE
         val title = systemImpl.getString(MR.strings.create_account)
         _appUiState.update {

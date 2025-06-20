@@ -57,10 +57,10 @@ class RedirectViewModel(
             println(db)
         }
 
-        val destination = destinationArg ?: di.on(accountManager.currentUserSession.learningSpace)
-            .direct.instance<GetDefaultDestinationUseCase>().invoke()
-
         viewModelScope.launch {
+            val destination = destinationArg ?: di.on(accountManager.currentUserSession.learningSpace)
+                .direct.instance<GetDefaultDestinationUseCase>().invoke()
+
             navController.navigateToLink(
                 link = destination,
                 accountManager = accountManager,

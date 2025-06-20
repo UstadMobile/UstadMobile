@@ -259,7 +259,9 @@ fun main() {
                          */
                         LaunchedEffect(currentDestination?.path) {
                             val pathVal = currentDestination?.path ?: return@LaunchedEffect
-                            val topLevelIndex = APP_TOP_LEVEL_NAV_ITEMS.indexOfFirst {
+                            val topLevelIndex = APP_TOP_LEVEL_NAV_ITEMS.filter {
+                                currentSite?.bottomNavVisibilityFlag?.hasFlag(it.flag) == true
+                            }.indexOfFirst {
                                 "/${it.destRoute}" == pathVal
                             }
 

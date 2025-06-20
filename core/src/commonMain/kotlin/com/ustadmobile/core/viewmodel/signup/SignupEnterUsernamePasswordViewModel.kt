@@ -2,11 +2,11 @@ package com.ustadmobile.core.viewmodel.signup
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
-import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
-import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
-import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
+import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
+import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -83,10 +83,8 @@ class SignupEnterUsernamePasswordViewModel(
         SignupEnterUsernamePasswordUiState()
     )
 
-    private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
 
-    private var nextDestination: String =
-        savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
+    private lateinit var nextDestination: String
 
     val uiState: Flow<SignupEnterUsernamePasswordUiState> = _uiState.asStateFlow()
 
@@ -96,6 +94,9 @@ class SignupEnterUsernamePasswordViewModel(
 
     private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]
         ?: apiUrlConfig.newPersonalAccountsLearningSpaceUrl ?: "http://localhost"
+
+    private val getDefaultDestinationUseCase: GetDefaultDestinationUseCase =
+        di.on(LearningSpace(serverUrl)).direct.instance()
 
     val addNewPersonUseCase: AddNewPersonUseCase = di.on(LearningSpace(serverUrl)).direct.instance()
 
@@ -113,6 +114,7 @@ class SignupEnterUsernamePasswordViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         val title = systemImpl.getString(MR.strings.create_account)
         viewModelScope.launch {
+            nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase.invoke()
             val person = savedStateHandle.getJson(
                 OtherSignUpOptionSelectionViewModel.ARG_PERSON, Person.serializer(),
             ) ?: Person()

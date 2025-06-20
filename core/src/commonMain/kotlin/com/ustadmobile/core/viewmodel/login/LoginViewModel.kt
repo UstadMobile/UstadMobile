@@ -11,6 +11,7 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
 import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
 import com.ustadmobile.core.domain.credentials.username.ParseCredentialUsernameUseCase
+import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.validateusername.ValidationResult
@@ -74,7 +75,7 @@ class LoginViewModel(
 
     val uiState: Flow<LoginUiState> = _uiState.asStateFlow()
 
-    private var nextDestination: String
+    private lateinit var nextDestination: String
 
     private var serverUrl: String
 
@@ -110,11 +111,13 @@ class LoginViewModel(
     private val parseCredentialUsernameUseCase: ParseCredentialUsernameUseCase by instance()
 
     init {
-        nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
         serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]
             ?: apiUrlConfig.presetLearningSpaceUrl ?: "http://localhost"
         savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = serverUrl
+
+        val getDefaultDestinationUseCase: GetDefaultDestinationUseCase =
+            di.on(LearningSpace(serverUrl)).direct.instance()
 
         _uiState.update { prev ->
             prev.copy(
@@ -155,6 +158,9 @@ class LoginViewModel(
             )
 
             viewModelScope.launch {
+                nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?:
+                        getDefaultDestinationUseCase.invoke()
+
                 while (verifiedSite == null) {
                     try {
                         val site = httpClient.verifySite(serverUrl, 10000, json)
@@ -212,9 +218,6 @@ class LoginViewModel(
     private fun goToNextDestAfterLoginOrGuestSelected(person: Person) {
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
         Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
-        if (person.isPersonalAccount) {
-            nextDestination = ContentEntryListViewModel.DEST_NAME_HOME
-        }
         navController.navigateToViewUri(
             nextDestination.appendSelectedAccount(person.personUid, LearningSpace(serverUrl)),
             goOptions

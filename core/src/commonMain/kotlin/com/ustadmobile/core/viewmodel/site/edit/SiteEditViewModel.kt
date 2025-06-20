@@ -17,6 +17,7 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.util.ext.htmlToPlainText
 import com.ustadmobile.core.util.ext.replace
 import com.ustadmobile.core.util.ext.toggleFlag
+import com.ustadmobile.core.viewmodel.site.COMMON_TOP_LEVEL_NAV_ITEMS
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
@@ -65,7 +66,7 @@ class SiteEditViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                permissionLabels = BottomNavPermissionConstants.BOTTOM_NAV_LABELS,
+                permissionLabels = COMMON_TOP_LEVEL_NAV_ITEMS.map { it.label to it.flag }
             )
         }
         val supportedLangs = languagesConfig.supportedUiLanguages

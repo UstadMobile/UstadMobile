@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -41,11 +40,8 @@ import com.ustadmobile.core.impl.appstate.SnackBarDispatcher
 import com.ustadmobile.core.impl.nav.NavCommand
 import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.hasOnlyOneBitSet
-import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
-import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
+import com.ustadmobile.core.viewmodel.site.COMMON_TOP_LEVEL_NAV_ITEMS
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.Site
 import dev.icerock.moko.resources.StringResource
@@ -68,32 +64,21 @@ data class TopNavigationItem(
     val flag : Long
 )
 
-val APP_TOP_LEVEL_NAV_ITEMS = listOf(
-    TopNavigationItem(
-        destRoute = ClazzListViewModel.DEST_NAME_HOME,
-        icon = Icons.Outlined.School,
-        label = MR.strings.courses,
-        flag = Site.SHOW_COURSE
-    ),
-    TopNavigationItem(
-        destRoute = ContentEntryListViewModel.DEST_NAME_HOME,
-        icon = Icons.Outlined.LocalLibrary,
-        label = MR.strings.library,
-        flag = Site.SHOW_LIBRARY
-    ),
-    TopNavigationItem(
-        destRoute = ConversationListViewModel.DEST_NAME_HOME,
-        icon = Icons.AutoMirrored.Outlined.Chat,
-        label = MR.strings.messages,
-        flag = Site.SHOW_MESSAGES
-    ),
-    TopNavigationItem(
-        destRoute = PersonListViewModel.DEST_NAME_HOME,
-        icon = Icons.Outlined.Person,
-        label = MR.strings.people,
-        flag = Site.SHOW_PEOPLE
-    )
+val iconMap = mapOf(
+    Site.SHOW_COURSE to Icons.Outlined.School,
+    Site.SHOW_LIBRARY to Icons.Outlined.LocalLibrary,
+    Site.SHOW_MESSAGES to Icons.AutoMirrored.Outlined.Chat,
+    Site.SHOW_PEOPLE to Icons.Outlined.Person
 )
+
+val APP_TOP_LEVEL_NAV_ITEMS = COMMON_TOP_LEVEL_NAV_ITEMS.map { info ->
+    TopNavigationItem(
+        destRoute = info.destRoute,
+        icon = iconMap.getValue(info.flag),
+        label = info.label,
+        flag = info.flag
+    )
+}
 
 /**
  * @param onAppStateChanged - a change Listener that is used by the calling function, mostly the JVM
@@ -167,7 +152,9 @@ fun App(
                      */
                     LaunchedEffect(currentLocation?.path) {
                         val pathVal = currentLocation?.path ?: return@LaunchedEffect
-                        val topLevelIndex = APP_TOP_LEVEL_NAV_ITEMS.indexOfFirst {
+                        val topLevelIndex = APP_TOP_LEVEL_NAV_ITEMS.filter { item ->
+                            currentSite?.bottomNavVisibilityFlag?.hasFlag(item.flag) == true
+                        }.indexOfFirst {
                             "/${it.destRoute}" == pathVal
                         }
 

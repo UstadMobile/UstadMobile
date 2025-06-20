@@ -268,7 +268,7 @@ class AddAccountSelectNewOrExistingViewModel(
         }
     }
 
-    private fun goToNextDestAfterSignIn(
+    private suspend fun goToNextDestAfterSignIn(
         person: Person,
         serverUrl: String
     ) {
