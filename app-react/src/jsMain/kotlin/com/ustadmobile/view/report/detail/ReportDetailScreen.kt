@@ -204,7 +204,7 @@ private val moreOption = FC<ReportDetailProps> { props ->
 
 fun getGenderLabel(rawValue: String, strings: StringProvider): String {
     return when (rawValue) {
-        "0" -> strings[MR.strings.male]
+        "2" -> strings[MR.strings.male]
         "1" -> strings[MR.strings.female]
         else -> rawValue
     }

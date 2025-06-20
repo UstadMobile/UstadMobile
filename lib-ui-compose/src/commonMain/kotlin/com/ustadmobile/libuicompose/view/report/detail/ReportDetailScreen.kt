@@ -258,7 +258,7 @@ fun MoreOptionsSection(
 @Composable
 fun getGenderLabel(rawValue: Any?): String {
     return when (rawValue as? String) {
-        "0" -> stringResource(MR.strings.male)
+        "2" -> stringResource(MR.strings.male)
         "1" -> stringResource(MR.strings.female)
         else -> rawValue?.toString() ?: ""
     }
