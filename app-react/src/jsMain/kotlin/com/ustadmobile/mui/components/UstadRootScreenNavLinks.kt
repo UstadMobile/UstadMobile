@@ -28,12 +28,10 @@ external interface UstadRootScreenNavLinksProps: Props {
 
 val UstadRootScreenNavLinks = FC<UstadRootScreenNavLinksProps> { props ->
     val strings = useStringProvider()
-    val visibleScreens = ROOT_SCREENS.filter { screen ->
+    ROOT_SCREENS.filter { screen ->
         props.currentSite?.bottomNavVisibilityFlag?.hasFlag(screen.flag) == true
 
-    }
-
-    visibleScreens.forEachIndexed { index, screen ->
+    }.forEachIndexed { index, screen ->
         NavLink {
             to = screen.key
             id = "${props.idPrefix}_${screen.key}"

@@ -55,6 +55,7 @@ import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.hasOnlyOneBitSet
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.util.ext.deleteDatabaseAsync
@@ -116,7 +117,10 @@ val UstadScreens = FC<Props> {
 
     var currentRootItemIndex by useState { 0 }
     useEffect(location.pathname) {
-        val pathIndex = ROOT_SCREENS.indexOfFirst {
+        val pathIndex = ROOT_SCREENS.filter { screen ->
+            currentSite?.bottomNavVisibilityFlag?.hasFlag(screen.flag) == true
+
+        }.indexOfFirst {
             location.pathname == "/${it.key}"
         }
 
