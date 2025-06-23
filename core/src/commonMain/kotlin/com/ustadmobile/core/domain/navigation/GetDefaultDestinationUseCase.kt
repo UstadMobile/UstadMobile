@@ -4,9 +4,11 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.util.ext.hasFlag
+import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.site.COMMON_TOP_LEVEL_NAV_ITEMS
 import com.ustadmobile.lib.db.entities.Site
+import com.ustadmobile.lib.db.entities.Site.Companion.BOTTOM_NAV_DEFAULT_FLAG
 
 /**
  * Provides the default destination. This is a scoped dependency.
@@ -28,7 +30,7 @@ class GetDefaultDestinationUseCase(
     suspend operator fun invoke(): String {
         val effectiveDb = repo ?: db
         val site = effectiveDb.siteDao().getSiteAsync()
-        val visibilityFlag = site?.bottomNavVisibilityFlag ?: 0L
+        val visibilityFlag = site?.bottomNavVisibilityFlag ?: BOTTOM_NAV_DEFAULT_FLAG
 
         val isPersonalOrLocal = learningSpace.url == systemUrlConfig.newPersonalAccountsLearningSpaceUrl ||
                 learningSpace.isLocal
@@ -41,6 +43,6 @@ class GetDefaultDestinationUseCase(
 
         return filteredDestinations.firstOrNull { dest ->
             visibilityFlag.hasFlag(dest.flag)
-        }?.destRoute ?: PersonListViewModel.DEST_NAME_HOME
+        }?.destRoute ?: ClazzListViewModel.DEST_NAME_HOME
     }
 }
