@@ -2032,6 +2032,12 @@
 
     <string name="false_key">false</string>
 
+    <string name="copy">Copy</string>
+
+    <string name="copy_course">Copy course</string>
+
+    <string name="copy_of">Copy of</string>
+
     <string name="invite_via_contact">Invite Via Contact</string>
 
     <string name="invite_to_course">Invite to course</string>

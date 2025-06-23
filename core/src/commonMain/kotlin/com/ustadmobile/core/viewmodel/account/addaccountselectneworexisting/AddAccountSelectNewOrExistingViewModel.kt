@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
+import com.ustadmobile.core.domain.credentials.passkey.DecodeUserHandleUseCase
 import com.ustadmobile.core.domain.credentials.username.ParseCredentialUsernameUseCase
 import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -19,7 +20,6 @@ import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.appendSelectedAccount
-import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.account.addaccountselectusertype.AddAccountSelectNewOrExistingUserTypeViewModel
@@ -52,6 +52,7 @@ data class AddAccountSelectNewOrExistingUiState(
     ),
     val languageList: List<UstadMobileSystemCommon.UiLanguage> = listOf(currentLanguage),
     val showWaitForRestart: Boolean = false,
+    val errorText: String? = null,
 )
 
 /**
@@ -86,6 +87,8 @@ class AddAccountSelectNewOrExistingViewModel(
     private val supportLangConfig: SupportedLanguagesConfig by instance()
 
     private val setLanguageUseCase: SetLanguageUseCase by instance()
+
+    private val decodeUserHandleUseCase : DecodeUserHandleUseCase by instance()
 
     private val apiUrlConfig: SystemUrlConfig by instance()
 
@@ -148,16 +151,16 @@ class AddAccountSelectNewOrExistingViewModel(
             try {
                 when (val credentialResult = getCredentialUseCase?.invoke()) {
                     is GetCredentialUseCase.PasskeyCredentialResult -> {
-                        val userHandle = credentialResult.passKeySignInData.userHandle
-                            .base64StringToByteArray()
-                        val endpointUrl= userHandle.decodeToString().substringAfter("@")
+                        val userHandle = credentialResult.passkeyWebAuthNResponse.response.userHandle
+                            ?: throw IllegalStateException("userHandle not found")
+                        val (learningSpace, _) = decodeUserHandleUseCase(userHandle)
 
                         val account = accountManager.loginWithPasskey(
-                            credentialResult.passKeySignInData,
-                            apiUrlConfig.systemBaseUrl,
+                            credentialResult.passkeyWebAuthNResponse,
+                            learningSpace.url,
                         )
 
-                        goToNextDestAfterSignIn(account.toPerson(), endpointUrl)
+                        goToNextDestAfterSignIn(account.toPerson(), learningSpace.url)
                     }
 
                     is GetCredentialUseCase.PasswordCredentialResult -> {
@@ -169,6 +172,15 @@ class AddAccountSelectNewOrExistingViewModel(
 
                     is GetCredentialUseCase.Error -> {
                         Napier.e { "Error occurred: ${credentialResult.message}"}
+                        _uiState.update { prev ->
+                            prev.copy(
+                                errorText = (credentialResult.message),
+                            )
+                        }
+                    }
+
+                    is GetCredentialUseCase.NoCredentialAvailableResult -> {
+                        //Do nothing
                     }
 
                     null -> {

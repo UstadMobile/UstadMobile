@@ -6,11 +6,9 @@ import com.ustadmobile.core.account.UstadAccountManager.EndpointFilter
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
-import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase.CreatePasskeyResult
-import com.ustadmobile.core.domain.credentials.PassKeySignInData
 import com.ustadmobile.core.domain.credentials.PasskeyVerifyResult
 import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
-import com.ustadmobile.core.util.ext.base64StringToByteArray
+import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.whenSubscribed
@@ -42,6 +40,7 @@ import io.github.aakira.napier.Napier
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
 import io.ktor.http.contentType
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
@@ -321,25 +320,18 @@ class UstadAccountManager(
 
     suspend fun registerWithPasskey(
         learningSpaceUrl: String,
-        passkeyResult: CreatePasskeyResult,
+        passkeyResult: AuthenticationResponseJSON,
         person: Person,
         personPicture: PersonPicture?,
     ) = withContext(Dispatchers.Default) {
         val learningSpace = LearningSpace(learningSpaceUrl)
 
         val savePassKeyUseCase: SavePersonPasskeyUseCase = di
-            .on(LearningSpace(apiUrlConfig.systemBaseUrl)).direct.instance()
-        savePassKeyUseCase.invoke(passkeyResult)
+            .on(learningSpace).direct.instance()
+        savePassKeyUseCase(passkeyResult, person)
 
         val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
             .requireRepository()
-        try {
-            getSiteFromDbOrLoadFromHttp(repo)
-        }catch (e:Exception){
-
-        }
-
-
 
         val session = addSession(person, learningSpaceUrl, null)
         repo.withDoorTransactionAsync {
@@ -349,9 +341,7 @@ class UstadAccountManager(
         }
         di.on(learningSpace).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
 
-
         currentUserSession = session
-
     }
 
     suspend fun register(
@@ -524,34 +514,31 @@ class UstadAccountManager(
      *  that database where person is added.
      */
     suspend fun loginWithPasskey(
-        passKeySignInData: PassKeySignInData,
+        passkeyWebAuthNResponse: AuthenticationResponseJSON,
         currentServerUrl:String
     ) : UmAccount = withContext(Dispatchers.Default){
         assertNotClosed()
 
-        val userHandle = passKeySignInData.userHandle.base64StringToByteArray()
-        val endpointUrl= userHandle.decodeToString().substringAfter("@")
 
         val loginResponse = httpClient.post {
-            url("${endpointUrl.removeSuffix("/")}/api/passkey/verifypasskey")
-            parameter("id", passKeySignInData.credentialId)
-            parameter("userHandle", passKeySignInData.userHandle)
-            parameter("authenticatorData", passKeySignInData.authenticatorData)
-            parameter("clientDataJSON", passKeySignInData.clientDataJSON)
-            parameter("signature", passKeySignInData.signature)
-            parameter("origin", passKeySignInData.origin)
-            parameter("rpId", passKeySignInData.rpId)
-            parameter("challenge", passKeySignInData.challenge)
+            url("${currentServerUrl.removeSuffix("/")}/api/passkey/verifypasskey")
+            setBodyJson(
+                json = json,
+                serializer = AuthenticationResponseJSON.serializer(),
+                value = passkeyWebAuthNResponse
+            )
+            parameter("rpId", Url(apiUrlConfig.systemBaseUrl).host)
         }.bodyAsText()
         Napier.d { "passkeyres : $loginResponse" }
-       val passkeyVerifyResult= Json.decodeFromString<PasskeyVerifyResult>(loginResponse)
+        val passkeyVerifyResult= json.decodeFromString<PasskeyVerifyResult>(loginResponse)
 
         if(!passkeyVerifyResult.isVerified) {
             throw UnauthorizedException("Account not found")
         }
-        val responseAccount=UmAccount(personUid = passkeyVerifyResult.personUid)
-        responseAccount.endpointUrl=currentServerUrl
-        val repo: UmAppDatabase = di.on(LearningSpace(endpointUrl)).direct.instance<UmAppDataLayer>()
+        val responseAccount = UmAccount(personUid = passkeyVerifyResult.personUid)
+        responseAccount.endpointUrl = currentServerUrl
+
+        val repo: UmAppDatabase = di.on(LearningSpace(currentServerUrl)).direct.instance<UmAppDataLayer>()
             .requireRepository()
 
         //Make sure that we fetch the person and personpicture into the database.
@@ -559,8 +546,6 @@ class UstadAccountManager(
             passkeyVerifyResult.personUid) ?: throw IllegalStateException("Cannot find person in repo/db")
         val personInDb = personAndPicture.person!! //Cannot be null based on query
         responseAccount.isPersonalAccount=personInDb.isPersonalAccount
-
-       // val repoWithCurrentUrl: UmAppDatabase by di.on(LearningSpace(currentServerUrl)).instance(tag = DoorTag.TAG_REPO)
 
         getSiteFromDbOrLoadFromHttp(repo)
 
@@ -570,8 +555,6 @@ class UstadAccountManager(
         responseAccount
 
     }
-
-
 
     suspend fun login(
         username: String,

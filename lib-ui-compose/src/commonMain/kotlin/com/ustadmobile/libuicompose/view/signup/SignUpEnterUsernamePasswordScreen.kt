@@ -52,22 +52,6 @@ fun SignUpEnterUsernamePasswordScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(16.dp))
-        OutlinedTextField(
-            modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding(),
-            value = uiState.person?.username ?: "",
-            label = { Text(stringResource(MR.strings.username)) },
-            isError = uiState.usernameError != null,
-            singleLine = true,
-            onValueChange = {
-                onPersonChanged(uiState.person?.shallowCopy {
-                    username = it
-                })
-            },
-            supportingText = {
-                Text(uiState.usernameError ?: stringResource(MR.strings.required))
-            }
-        )
-
 
         UstadPasswordField(
             modifier = Modifier.testTag("password").fillMaxWidth().defaultItemPadding(),

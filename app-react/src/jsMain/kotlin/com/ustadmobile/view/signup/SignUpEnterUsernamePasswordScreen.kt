@@ -53,22 +53,6 @@ private val SignUpEnterUsernamePasswordComponent2 = FC<SignUpEnterUsernamePasswo
             direction = responsive(StackDirection.column)
             spacing = responsive(10.px)
 
-
-            UstadTextField {
-                id = "username"
-                value = props.uiState.person?.username ?: ""
-                label = ReactNode(strings[MR.strings.username])
-                onTextChange = {
-                    props.onPersonChanged(
-                        props.uiState.person?.shallowCopy {
-                            username = it
-                        }
-                    )
-                }
-                error = props.uiState.usernameError != null
-                helperText = props.uiState.usernameError?.let { ReactNode(it) }
-            }
-
             UstadPasswordTextField {
                 id = "password"
                 value = props.uiState.password ?: ""

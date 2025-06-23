@@ -90,7 +90,6 @@ import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseJvm
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
@@ -533,14 +532,6 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
         OpenBlobUseCaseJvm(
             getStoragePathForUrlUseCase = instance(),
             rootTmpDir = instance(tag = DiTag.TAG_TMP_DIR)
-        )
-    }
-
-    bind<CreatePasskeyRequestJsonUseCase>()  with provider {
-        CreatePasskeyRequestJsonUseCase(
-            systemImpl = instance(),
-            systemUrlConfig = instance(),
-            json = instance()
         )
     }
 

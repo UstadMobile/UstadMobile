@@ -1,7 +1,7 @@
 package com.ustadmobile.test.http
 
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.util.SysPathUtil
+import com.ustadmobile.test.http.ServerRunner.Companion.DEFAULT_LEARNING_SPACE_URL_TEMPLATE
 import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_LEARNINGSPACE_HOST
 import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_LEARNINGSPACE_PORTRANGE
 import com.ustadmobile.test.http.TestServerControllerMain.Companion.PARAM_NAME_URL
@@ -22,15 +22,8 @@ import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
 import java.net.NetworkInterface
-import java.net.URL
-import java.util.concurrent.CopyOnWriteArrayList
-import java.io.FileFilter
-import java.net.Socket
 import java.net.URI
-import java.text.SimpleDateFormat
-import java.util.*
-import java.util.concurrent.TimeUnit
-
+import java.util.concurrent.CopyOnWriteArrayList
 
 enum class RunMode {
     CYPRESS, MAESTRO
@@ -40,11 +33,7 @@ const val TESTCONTROLLER_PATH = "testcontroller"
 
 const val START_SERVER_MAX_ATTEMPTS = 4
 
-
-const val DEST_PARAM = "dest"
-
-
-@Suppress("BlockingMethodInNonBlockingContext", "unused", "SdCardPath")
+@Suppress("unused") //Function is used via application.conf
 fun Application.testServerController() {
 
     val mode = environment.config.propertyOrNull("mode")?.getString()?.let { runPropVal ->
@@ -64,7 +53,7 @@ fun Application.testServerController() {
 
 
     val controllerUrl = environment.config.property(PARAM_NAME_URL).getString()
-    val controllerUrlObj = URL(controllerUrl)
+    val controllerUrlObj = URI(controllerUrl).toURL()
     val learningSpaceHostPropVal = environment.config.propertyOrNull(PARAM_NAME_LEARNINGSPACE_HOST)?.getString()
     val learningSpaceHostRangePropVal = environment.config
         .propertyOrNull(PARAM_NAME_LEARNINGSPACE_PORTRANGE)?.getString() ?: "$DEFAULT_FROM_PORT-$DEFAULT_UNTIL_PORT"
@@ -131,6 +120,9 @@ fun Application.testServerController() {
         throw IllegalStateException("ERROR: Server dir does not exist! testServerManager working directory MUST be the " +
                 "root directory of the source code")
     }
+
+    val learningSpaceUrlTemplate = environment.config.propertyOrNull("learningSpaceUrlTemplate")
+        ?.getString() ?: DEFAULT_LEARNING_SPACE_URL_TEMPLATE
 
     fun stopAllRunningServers() {
         println("TestServerController: stopping all servers")
@@ -240,10 +232,17 @@ fun Application.testServerController() {
                                 baseDataDir = baseDataDir,
                                 fromPort = learningSpaceFromPort,
                                 untilPort = learningSpaceUntilPort,
+                                learningSpaceUrlTemplate = learningSpaceUrlTemplate,
                             )
 
-                            runningServers.add(serverRunner)
-                            serverRunner.start()
+                            try {
+                                runningServers.add(serverRunner)
+                                serverRunner.start()
+                            }catch(e: Throwable) {
+                                runningServers.remove(serverRunner)
+                                serverRunner.stop()
+                                throw e
+                            }
 
                             call.respond(
                                 ServerInfo(
@@ -318,23 +317,4 @@ fun Application.testServerController() {
         }
     }
 
-}
-fun waitForPort(
-    host: String,
-    port: Int,
-    interval: Long = 100,
-    timeout: Long = 15_000,
-) {
-    val startTime = System.currentTimeMillis()
-    while(System.currentTimeMillis() - startTime < timeout) {
-        try {
-            Socket(host, port).close()
-            //Connection was successful if no exception thrown by now
-            return
-        }catch(e: Exception) {
-            Thread.sleep(interval)
-        }
-    }
-
-    throw IllegalStateException("Timeout!: waited for ${systemTimeInMillis() -  startTime}ms")
 }

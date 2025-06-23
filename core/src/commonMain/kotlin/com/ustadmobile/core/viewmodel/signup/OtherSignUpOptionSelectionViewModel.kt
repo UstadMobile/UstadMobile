@@ -5,7 +5,6 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.SendConsentRequestToParentUseCase
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.core.domain.credentials.CreatePasskeyParams
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -66,7 +65,7 @@ class OtherSignUpOptionSelectionViewModel(
 
     private val getLocalAccountsSupportedUseCase: GetLocalAccountsSupportedUseCase by instance()
 
-    private val createPasskeyUseCase: CreatePasskeyUseCase? by instanceOrNull()
+    private val createPasskeyUseCase: CreatePasskeyUseCase? by di.on(LearningSpace(serverUrl)).instanceOrNull()
 
     private var nextDestination: String =
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
@@ -122,15 +121,7 @@ class OtherSignUpOptionSelectionViewModel(
             savePerson.personUid = uid
 
             val passkeyCreated = createPasskeyUseCase?.invoke(
-                CreatePasskeyParams(
-                    username = savePerson.firstNames.toString(),
-                    personUid = uid.toString(),
-                    doorNodeId = di.doorIdentityHashCode.toString(),
-                    usStartTime = systemTimeInMillis(),
-                    serverUrl = serverUrl,
-                    masterUrl = apiUrlConfig.systemBaseUrl,
-                    person = savePerson
-                )
+                    username = savePerson.username.toString()
             )
             passkeyCreated?.let {
                 accountManager.registerWithPasskey(

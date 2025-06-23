@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -15,9 +16,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.viewmodel.signup.SignUpUiState
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.lib.db.entities.Person
@@ -46,8 +53,9 @@ fun SignUpScreen(viewModel: SignUpViewModel) {
         onclickOtherOptions = viewModel::onClickOtherOption,
         onFullNameValueChange = viewModel::onFullNameValueChange,
         onParentEmailValueChange = viewModel::onParentEmailValueChange,
-        )
-
+        onFullNameFocusedChanged = viewModel::onFullNameFocusedChanged,
+        onUsernameValueChange = viewModel::onUsernameChanged,
+    )
 }
 
 @Composable
@@ -61,10 +69,15 @@ fun SignUpScreen(
     onParentCheckChanged: (Boolean) -> Unit = { },
     onFullNameValueChange: (String) -> Unit = { },
     onParentEmailValueChange: (String) -> Unit = { },
+    onFullNameFocusedChanged: (Boolean) -> Unit = { },
+    onUsernameValueChange: (String) -> Unit = {},
     ) {
     UstadVerticalScrollColumn(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        uiState.errorText?.also { errorText ->
+            Text(color = MaterialTheme.colorScheme.error, text = errorText)
+        }
         Spacer(Modifier.height(16.dp))
         if (!uiState.isMinor) {
             UstadImageSelectButton(
@@ -77,7 +90,9 @@ fun SignUpScreen(
                 modifier = Modifier
                     .testTag("full_name")
                     .fillMaxWidth()
-                    .defaultItemPadding(),
+                    .defaultItemPadding().onFocusChanged {
+                        onFullNameFocusedChanged(it.hasFocus)
+                    },
                 value = uiState.fullName ?: "",
                 label = { Text(stringResource(MR.strings.full_name) + "*") },
                 isError = uiState.fullNameError != null,
@@ -126,7 +141,23 @@ fun SignUpScreen(
                 }
             )
         }
-
+        if (!(uiState.isMinor&&uiState.isPersonalAccount)) {
+            OutlinedTextField(
+            modifier = Modifier.testTag("username").fillMaxWidth().defaultItemPadding().
+            onKeyEvent { keyEvent ->
+                if (keyEvent.type == KeyEventType.KeyDown) {
+                    !ValidateUsernameUseCase.isValidUsernameChar(keyEvent.utf16CodePoint.toChar())
+                } else false
+            },
+            value = uiState.person?.username ?: "",
+            label = { Text(stringResource(MR.strings.username)) },
+            isError = uiState.usernameError != null,
+            singleLine = true,
+            onValueChange = onUsernameValueChange,
+            supportingText = {
+                Text(uiState.usernameError ?: stringResource(MR.strings.required))
+            }
+        )}
         if (uiState.isPersonalAccount&&!uiState.isMinor) {
             Row(
                 modifier = Modifier.padding(vertical = 16.dp),
@@ -136,14 +167,13 @@ fun SignUpScreen(
                     checked = uiState.isTeacher,
                     onCheckedChange = {
                         onTeacherCheckChanged(it)
-
                     }
                 )
+
                 Text(
                     text = stringResource(MR.strings.i_am_teacher),
                     modifier = Modifier.padding(start = 4.dp, end = 16.dp)
                 )
-
 
                 Checkbox(
                     checked = uiState.isParent,

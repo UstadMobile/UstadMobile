@@ -66,6 +66,7 @@ data class LoginUiState(
     val showWaitForRestart: Boolean = false,
     val showPoweredBy: Boolean = false,
     val isPersonalAccount: Boolean = false,
+    val errorText: String? = null,
 
     )
 
@@ -370,7 +371,7 @@ class LoginViewModel(
                 when (val credentialResult = getCredentialUseCaseVal()) {
                     is GetCredentialUseCase.PasskeyCredentialResult -> {
                         val account = accountManager.loginWithPasskey(
-                            credentialResult.passKeySignInData,
+                            credentialResult.passkeyWebAuthNResponse,
                             serverUrl
                         )
                         goToNextDestAfterLoginOrGuestSelected(account.toPerson())
@@ -378,7 +379,8 @@ class LoginViewModel(
 
                     is GetCredentialUseCase.PasswordCredentialResult -> {
                         val (learningSpace, username) = parseCredentialUsernameUseCase(
-                            credentialResult.credentialUsername)
+                            credentialResult.credentialUsername
+                        )
 
                         onUsernameChanged(username)
                         onPasswordChanged(credentialResult.password)
@@ -395,7 +397,16 @@ class LoginViewModel(
                     }
 
                     is GetCredentialUseCase.Error -> {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                errorText = (credentialResult.message),
+                            )
+                        }
                         Napier.e { "Error occurred: ${credentialResult.message}"}
+                    }
+
+                    is GetCredentialUseCase.NoCredentialAvailableResult -> {
+                        //do nothing
                     }
                 }
             } catch (e: Exception) {

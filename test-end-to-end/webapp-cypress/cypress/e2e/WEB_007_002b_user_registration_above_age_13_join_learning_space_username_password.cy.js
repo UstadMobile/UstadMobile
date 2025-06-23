@@ -14,16 +14,17 @@ it('User age above 13 register as a new user', () => {
   cy.ustadClearIndexDb()
   cy.visit('/', {timeout:60000})
   cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').click();
-  cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date("2010-06-01"));
+  cy.ustadSetDate(cy.get("#age_date_of_birth"), new Date(new Date().setFullYear(new Date().getFullYear() - 15))) // Set date to 15 years ago
   cy.contains('button','Next').click()
   cy.contains('New Terms').should('be.visible')
   cy.get('#accept_button').click()
   cy.contains("label", "Full name*").parent().find("input").clear().type('New User')
   cy.get('div[id="gender"]').click()
   cy.contains("li","Female").click()
+  cy.contains("* Required").click()
+  cy.get("input[value='newuser']").should('exist')
   cy.contains('button','Next').click()
-  cy.contains("label", "Username").parent().find("input").clear().type('newuser')
-  cy.contains("label", "Password").parent().find("input").clear().type('test1234')
+  cy.get("input[id='password']").type('test1234')
   cy.contains('SIGN-UP').click()
   cy.contains('Courses',{timeout:2000}).should('be.visible')
 })

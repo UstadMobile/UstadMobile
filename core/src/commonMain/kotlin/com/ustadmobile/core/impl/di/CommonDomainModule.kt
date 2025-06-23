@@ -21,6 +21,8 @@ import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.domain.siteterms.GetLocaleForSiteTermsUseCase
 import com.ustadmobile.core.domain.xapi.coursegroup.CreateXapiGroupForCourseGroupUseCase
 import com.ustadmobile.core.domain.xapi.formatresponse.FormatStatementResponseUseCase
+import com.ustadmobile.core.viewmodel.clazz.detailoverview.CopyCourseUseCase
+import com.ustadmobile.core.username.UsernameSuggestionUseCase
 import com.ustadmobile.door.ext.DoorTag
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -94,11 +96,24 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
             repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
         )
     }
+    bind<UsernameSuggestionUseCase>() with scoped(LearningSpaceScope.Default).provider {
+        UsernameSuggestionUseCase(
+            filterUsernameUseCase = instance(),
+            db = instance(tag = DoorTag.TAG_DB)
+        )
+    }
 
     bind<ParseInviteUseCase>() with singleton {
         ParseInviteUseCase(
             phoneNumValidatorUseCase = instance(),
             validateEmailUseCase = instance()
+        )
+    }
+
+    bind<CopyCourseUseCase>() with scoped(learningSpaceScope).singleton {
+        CopyCourseUseCase(
+            repoOrDb = instance<UmAppDataLayer>().repositoryOrLocalDb,
+            accountManager = instance(),
         )
     }
 

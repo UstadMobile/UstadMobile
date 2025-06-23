@@ -52,94 +52,6 @@ Cypress.Commands.add('ustadStopTestServer', () => {
 })
 })
 
-// Clear DB and Login
-Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
-// Clearing IndexedDB for the dynamic hostname
-  cy.ustadClearIndexDb()
-// visit login page
-  cy.visit('/', {
-    timeout: 60000,
-  });
-   cy.wait(1000) //This wait helps the login screen to load
-   cy.get('body').then((body) =>
-  {
-  // Check if the "Existing user" button is present
-   if (body.find('#existing_user').length > 0) {
-  // User is on the "New user/Existing user" page
-   cy.log('User is on the New user/Existing user page');
-   cy.get('#existing_user').should('be.visible').click();
-  } else
-  {
- // If the "Existing user" button is not found, user is on the login page
-   cy.log('User is on the login page');
-  }
-})
-
-// Login to the webapp
-  cy.get('input#username', { timeout: 10000 }).should('exist').type(username); // 10 seconds
-  cy.get('input#password').type(password);
-  cy.get('button#login_button').click();
-})
-
-// Clearing IndexedDB
-Cypress.Commands.add('ustadClearIndexDb', () => {
-// Clearing IndexedDB for the dynamic hostname
-  const baseUrl = Cypress.config('baseUrl'); // Get the base URL
-  const url = new URL(baseUrl); // Create a URL object
-  const hostname = url.hostname;
-  const port = url.port;
-  const indexedDbName = `${hostname.replace(/\./g, '_')}_${port}`
-  cy.log(`Clearing IndexedDB: ${indexedDbName}`)
-  cy.clearIndexedDb(indexedDbName)
-})
-
-
-
-// Personal or learningspace
-Cypress.Commands.add('ustadPersonalOrLearningSpace', (locatorId) => {
- cy.wait(1000) //This wait helps the login screen to load
- cy.get('body').then((body) =>
-   {
-  // Check if the "Learning space" button is present
-   if (body.find('#locatorId').length > 0) {
-  // User is on the "Personal/Learning space" page
-     cy.log('User is on the Personal/Learning space page')
-     cy.get('#locatorId').should('be.visible').click()
-     cy.get('#school_1').should('be.visible').click();
-    } else
-    {
-   // If the "Existing user" button is not found, user is on the login page
-     cy.log('User is on the date of birth page');
-    }
-})
-})
-
-Cypress.Commands.add('UstadOpenInviteLinkFromEmail', (email, baseUrl, maxAttempts = 4) => {
-    cy.request(`/api/testemail/list?to=${email}`).then((response) => {
-        cy.log(`Email response: ${JSON.stringify(response.body)}`);
-
-        // Ensure the response body is an array and contains at least one email
-        if (!Array.isArray(response.body) || response.body.length === 0) {
-          throw new Error(`No emails found for ${email}`);
-        }
-
-        // Extract the latest email
-        const latestEmail = response.body[response.body.length - 1];
-
-        // Ensure the email contains a text field with a link
-        if (!latestEmail.text || !latestEmail.text.startsWith('http')) {
-          throw new Error(`No valid invitation link found in the email for ${email}`);
-        }
-
-        // Extract the link
-        const inviteLink = latestEmail.text;
-        cy.log(`Opening invitation link: ${inviteLink}`);
-
-        // Visit the extracted link in the same tab
-        cy.visit(inviteLink)
-      })
-})
-
 /*
  *
  * cy.importUsersViaHttp("your_csv_file.csv");
@@ -185,6 +97,48 @@ Cypress.Commands.add("importUsersViaHttp", (csvFileName) => {
     };
 
     attemptImport(0);
+});
+
+
+// Clear DB and Login
+Cypress.Commands.add('ustadClearDbAndLogin', (username, password) => {
+// Clearing IndexedDB for the dynamic hostname
+  cy.ustadClearIndexDb()
+// visit login page
+  cy.visit('/', {
+    timeout: 60000,
+  });
+   cy.wait(1000) //This wait helps the login screen to load
+   cy.get('body').then((body) =>
+  {
+  // Check if the "Existing user" button is present
+   if (body.find('#existing_user').length > 0) {
+  // User is on the "New user/Existing user" page
+   cy.log('User is on the New user/Existing user page');
+   cy.get('#existing_user').should('be.visible').click();
+  } else
+  {
+ // If the "Existing user" button is not found, user is on the login page
+   cy.log('User is on the login page');
+  }
+})
+
+// Login to the webapp
+  cy.get('input#username', { timeout: 60000 }).should('exist').type(username); // 10 seconds
+  cy.get('input#password').type(password);
+  cy.get('button#login_button').click();
+});
+
+// Clearing IndexedDB
+Cypress.Commands.add('ustadClearIndexDb', () => {
+// Clearing IndexedDB for the dynamic hostname
+  const baseUrl = Cypress.config('baseUrl'); // Get the base URL
+  const url = new URL(baseUrl); // Create a URL object
+  const hostname = url.hostname;
+  const port = url.port;
+  const indexedDbName = `${hostname.replace(/\./g, '_')}_${port}`
+  cy.log(`Clearing IndexedDB: ${indexedDbName}`)
+  cy.clearIndexedDb(indexedDbName)
 })
 
 // Logout Flow
@@ -319,8 +273,6 @@ Cypress.Commands.add('ustadCreateUserAccount',(userName,password) => {
     cy.get('#newpassword').type(password)
     cy.contains("button","Save").click()
     cy.contains('Manage account',{timeout:6000}).should('be.visible')
-    cy.go('back')
-    cy.go('back')
 })
 
   // Add a Module Block
@@ -437,7 +389,6 @@ Cypress.Commands.add('ustadScrollUntilVisible', { prevSubject: 'element' }, (sub
 })
 
 
-
    // Add course and private comments in Assignment
 Cypress.Commands.add('ustadTypeAndSubmitAssignmentComment', (commentid, sendid, comment, delay = 25) => {
     cy.get(commentid).click().type(comment, { delay })
@@ -484,17 +435,43 @@ Cypress.Commands.add("ustadSetDateTime", (element, date) => {
 
 /*
  * e.g.
- * cy.ustadBirthDate(cy.get("input#id"), new Date("2017-06-01"));
+ * cy.ustadSetDate(cy.get("input#id"), new Date("2017-06-01"));
  *
 */
 
-Cypress.Commands.add("ustadBirthDate", (element, date) => {
+
+Cypress.Commands.add("ustadSetDate", (element, date) => {
      element.type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +
      String(date.getDate()).padStart(2, '0')
      );
 });
 
 
+Cypress.Commands.add('UstadOpenInviteLinkFromEmail', (email, baseUrl, maxAttempts = 4) => {
+    cy.request(`/api/testemail/list?to=${email}`).then((response) => {
+        cy.log(`Email response: ${JSON.stringify(response.body)}`);
+
+        // Ensure the response body is an array and contains at least one email
+        if (!Array.isArray(response.body) || response.body.length === 0) {
+          throw new Error(`No emails found for ${email}`);
+        }
+
+        // Extract the latest email
+        const latestEmail = response.body[response.body.length - 1];
+
+        // Ensure the email contains a text field with a link
+        if (!latestEmail.text || !latestEmail.text.startsWith('http')) {
+          throw new Error(`No valid invitation link found in the email for ${email}`);
+        }
+
+        // Extract the link
+        const inviteLink = latestEmail.text;
+        cy.log(`Opening invitation link: ${inviteLink}`);
+
+        // Visit the extracted link in the same tab
+        cy.visit(inviteLink);
+      });
+});
 
 
 

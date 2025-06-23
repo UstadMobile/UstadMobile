@@ -15,8 +15,7 @@ it('Admin add a student aged below 13', () => {
   cy.get('div[id="gender"]').click()
   cy.contains("li","Female").click()
  // Date now - 5 years --> student's age
-  cy.ustadBirthDate(cy.get("#person_date_of_birth"),new Date(Date.now()-(365 * 24 * 60 * 60 * 1000 * 5)))
-  cy.wait(2000)
+  cy.ustadSetDate(cy.get("#person_date_of_birth"),new Date(Date.now()-(365 * 24 * 60 * 60 * 1000 * 5)))
   cy.contains("button","Save",{timeout: 2000}).click()
   cy.ustadCreateUserAccount('stud1','tests1')
 })

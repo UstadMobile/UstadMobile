@@ -29,7 +29,6 @@ import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseAndroid
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
-import com.ustadmobile.core.domain.credentials.CreatePasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
@@ -58,9 +57,14 @@ import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.core.domain.credentials.passkey.CreatePasskeyUseCaseImpl
+import com.ustadmobile.core.domain.credentials.passkey.DecodeUserHandleUseCase
+import com.ustadmobile.core.domain.credentials.passkey.EncodeUserHandleUseCase
 import com.ustadmobile.core.domain.credentials.passkey.GetCredentialUseCaseImpl
 import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
+import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialRequestOptionsJsonUseCase
 import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCaseImpl
+import com.ustadmobile.core.domain.passkey.DecodeUserHandleUseCaseImpl
+import com.ustadmobile.core.domain.passkey.EncodeUserHandleUseCaseImpl
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
@@ -125,14 +129,6 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 languagesConfig = instance()
             )
         }
-        bind<CreatePasskeyRequestJsonUseCase>()  with provider {
-            CreatePasskeyRequestJsonUseCase(
-                systemImpl = instance(),
-                systemUrlConfig = instance(),
-                json = instance()
-            )
-        }
-
 
         bind<GoToLearningSpaceUseCase>() with provider {
             GoToLearningSpaceUseCaseAndroid()
@@ -156,8 +152,8 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         bind<GetCredentialUseCase>() with singleton{
             GetCredentialUseCaseImpl(
                 context=this@AbstractAppActivity,
-                passkeyRequestJsonUseCase = instance(),
-                apiUrlConfig = instance(),
+                createPublicKeyCredentialRequestOptionsJsonUseCase = instance(),
+                json = instance()
             )
         }
 
@@ -192,6 +188,16 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
             )
         }
 
+        bind<EncodeUserHandleUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            EncodeUserHandleUseCaseImpl(
+                learningSpace = context
+            )
+        }
+
+        bind<DecodeUserHandleUseCase>() with singleton {
+            DecodeUserHandleUseCaseImpl()
+        }
+
         bind<BulkAddPersonsUseCase>() with scoped(LearningSpaceScope.Default).provider {
             BulkAddPersonsUseCaseImpl(
                 addNewPersonUseCase = instance(),
@@ -217,9 +223,15 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 systemUrlConfig = instance(),
                 systemImpl = instance(),
                 createCredentialUsernameUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                encodeUserHandleUseCase = instance()
             )
         }
-
+        bind<CreatePublicKeyCredentialRequestOptionsJsonUseCase>() with provider {
+            CreatePublicKeyCredentialRequestOptionsJsonUseCase(
+                systemUrlConfig = instance(),
+            )
+        }
         registerContextTranslator { call: NanoHttpdCall -> LearningSpace(call.urlParams["endpoint"] ?: "notfound") }
 
         onReady {
