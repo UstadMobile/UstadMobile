@@ -24,6 +24,7 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_DATE_OF_BIRTH
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
@@ -208,6 +209,9 @@ class SignupEnterUsernamePasswordViewModel(
             _uiState.value.person?.shallowCopy {
                 this.firstNames = firstName
                 this.lastName = lastName
+                dateOfBirth = savedStateHandle[ARG_DATE_OF_BIRTH]?.toLong()?:0L
+                this.isPersonalAccount = _uiState.value.isPersonalAccount
+
             }
         )
 

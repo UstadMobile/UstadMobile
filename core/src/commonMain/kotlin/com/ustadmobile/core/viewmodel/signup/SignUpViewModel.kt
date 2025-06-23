@@ -365,6 +365,8 @@ class SignUpViewModel(
             _uiState.value.person?.shallowCopy {
                 this.firstNames = firstName
                 this.lastName = lastName
+                dateOfBirth = savedStateHandle[ARG_DATE_OF_BIRTH]?.toLong()?:0L
+                this.isPersonalAccount = _uiState.value.isPersonalAccount
             }
         )
 
