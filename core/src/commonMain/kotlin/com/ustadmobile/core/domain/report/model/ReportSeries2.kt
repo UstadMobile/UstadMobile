@@ -20,11 +20,14 @@ data class ReportSeries2(
 
     val reportSeriesFilters: List<ReportFilter3>? = null,
 
-)
+    )
 
-enum class YAxisTypes {
-    COUNT, DURATION,
+enum class YAxisTypes(
+    override val label: StringResource,
+) : OptionWithLabelStringResource {
+    COUNT(MR.strings.count), DURATION(MR.strings.duration),
 }
+
 /** Enum representing different Y-axis or report series options */
 enum class ReportSeriesYAxis(
     override val label: StringResource,
@@ -35,7 +38,7 @@ enum class ReportSeriesYAxis(
     NUMBER_SESSIONS(MR.strings.number_sessions, YAxisTypes.COUNT),
     INTERACTIONS_RECORDED(MR.strings.interactions_recorded, YAxisTypes.COUNT),
     NUMBER_ACTIVE_USERS(MR.strings.number_active_users, YAxisTypes.COUNT),
-    AVERAGE_USAGE_TIME_PER_USER(MR.strings.average_usage_time_per_user,YAxisTypes.DURATION),
+    AVERAGE_USAGE_TIME_PER_USER(MR.strings.average_usage_time_per_user, YAxisTypes.DURATION),
     NONE(MR.strings.none, YAxisTypes.COUNT),
 }
 
@@ -110,6 +113,7 @@ enum class GenderType(override val label: StringResource) : OptionWithLabelStrin
     FEMALE(MR.strings.female),
     OTHER(MR.strings.other);
 }
+
 enum class SeriesType { BAR, LINE }
 
 data class ReportResultQueryRow(

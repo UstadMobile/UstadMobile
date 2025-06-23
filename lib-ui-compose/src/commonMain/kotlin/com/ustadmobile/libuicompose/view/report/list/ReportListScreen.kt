@@ -31,13 +31,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
+import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
-import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
+import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.paging.RefreshCommand
-import com.ustadmobile.core.viewmodel.report.list.ReportDataResult
 import com.ustadmobile.core.viewmodel.report.list.ReportListUiState
 import com.ustadmobile.core.viewmodel.report.list.ReportListViewModel
 import com.ustadmobile.lib.db.entities.Report
@@ -47,6 +47,7 @@ import com.ustadmobile.libuicompose.view.report.graphs.CombinedGraph
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.datetime.TimeZone
 
 @Composable
 fun ReportListScreen(
@@ -91,7 +92,8 @@ fun ReportListScreen(
                 report = report,
                 viewModel = viewModel,
                 onItemClick = onListItemClick,
-                onRemove = onRemoveReport
+                onRemove = onRemoveReport,
+                activeUserPersonUid = uiState.activeUserPersonUid
             )
         }
     }
@@ -102,15 +104,25 @@ private fun ReportGridCard(
     report: Report?,
     viewModel: ReportListViewModel,
     onItemClick: (Report) -> Unit,
-    onRemove: (Long) -> Unit
+    onRemove: (Long) -> Unit,
+    activeUserPersonUid: Long
 ) {
     if (report == null) return
 
     val reportDataFlow = remember(report.reportUid) {
         viewModel.runReport(report)
     }
-    val reportDataResult by reportDataFlow.collectAsState(
-        initial = ReportDataResult(null, emptyList())
+    val reportResult by reportDataFlow.collectAsState(
+        initial = RunReportUseCase.RunReportResult(
+            timestamp = 0,
+            request = RunReportUseCase.RunReportRequest(
+                reportUid = report.reportUid,
+                reportOptions = ReportOptions2(),
+                accountPersonUid = activeUserPersonUid,
+                timeZone = TimeZone.currentSystemDefault()
+            ),
+            results = emptyList()
+        )
     )
 
     Card(
@@ -143,24 +155,24 @@ private fun ReportGridCard(
                     contentAlignment = Alignment.Center
                 ) {
                     when {
-                        reportDataResult.options == null ->
+                        reportResult.request.reportOptions.series.isEmpty() ->
                             CircularProgressIndicator(Modifier.size(32.dp))
 
-                        reportDataResult.data.isEmpty() ->
+                        reportResult.results.isEmpty() ->
                             Text(
                                 stringResource(MR.strings.No_data_available),
                                 style = MaterialTheme.typography.bodyMedium
                             )
 
                         else -> {
-                            val graphSeries = remember(reportDataResult) {
-                                reportDataResult.options?.series?.mapIndexed { index, reportSeries ->
+                            val graphSeries = remember(reportResult) {
+                                reportResult.request.reportOptions.series.mapIndexed { index, reportSeries ->
                                     GraphSeries(
                                         type = when (reportSeries.reportSeriesVisualType) {
                                             ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
                                             else -> SeriesType.BAR
                                         },
-                                        data = reportDataResult.data.getOrNull(index)
+                                        data = reportResult.results.getOrNull(index)
                                             ?.map { statementRow ->
                                                 ReportResultQueryRow(
                                                     xAxis = statementRow.xAxis,
@@ -170,10 +182,10 @@ private fun ReportGridCard(
                                             } ?: emptyList(),
                                         name = reportSeries.reportSeriesTitle
                                     )
-                                } ?: emptyList()
+                                }
                             }
                             val yAxisLabel =
-                                if (reportDataResult.options?.series?.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION } == true) {
+                                if (reportResult.request.reportOptions.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }) {
                                     stringResource(MR.strings.duration_hours)
                                 } else {
                                     stringResource(MR.strings.count)
@@ -182,9 +194,9 @@ private fun ReportGridCard(
                             CombinedGraph(
                                 series = graphSeries,
                                 yAxisLabel = yAxisLabel,
-                                isDurationType = reportDataResult.options?.series?.any {
-                                    it.reportSeriesYAxis.type == YAxisTypes.DURATION
-                                } ?: false,
+                                isDurationType = reportResult.request.reportOptions.series.any {
+                                    it.reportSeriesYAxis?.type == YAxisTypes.DURATION
+                                },
                                 compactMode = true,
                                 modifier = Modifier.fillMaxSize()
                                     .background(Color.White),

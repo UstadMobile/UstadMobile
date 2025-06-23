@@ -32,10 +32,12 @@ import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
-import com.ustadmobile.core.util.report.ReportFormatter
+import com.ustadmobile.core.domain.report.utils.ReportFormatter
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.lib.db.composites.StatementReportRow
+import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_FEMALE
+import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_MALE
 import com.ustadmobile.libuicompose.view.report.graphs.CombinedGraph
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
@@ -85,12 +87,14 @@ fun BarGraphSection(
         }
     }
 
-    val yAxisLabel =
-        if (reportOptions.series.any { it.reportSeriesYAxis.type == YAxisTypes.DURATION }) {
-            stringResource(MR.strings.duration_hours)
-        } else {
-            stringResource(MR.strings.count)
-        }
+    val yAxisLabel = if (reportOptions.series.any {
+            it.reportSeriesYAxis.type == YAxisTypes.DURATION
+        }) {
+        stringResource(YAxisTypes.DURATION.label) // Get from enum
+    } else {
+        stringResource(YAxisTypes.COUNT.label) // Get from enum
+    }
+
     val hasAnyDuration = reportOptions.series.any {
         it.reportSeriesYAxis.type == YAxisTypes.DURATION
     }
@@ -256,10 +260,11 @@ fun MoreOptionsSection(
 }
 
 @Composable
-fun getGenderLabel(rawValue: Any?): String {
-    return when (rawValue as? String) {
-        "2" -> stringResource(MR.strings.male)
-        "1" -> stringResource(MR.strings.female)
+fun getGenderLabel(rawValue: String?): String {
+    return when (rawValue) {
+        GENDER_FEMALE.toString() -> stringResource(MR.strings.female)
+        GENDER_MALE.toString() -> stringResource(MR.strings.male)
+
         else -> rawValue?.toString() ?: ""
     }
 }

@@ -2070,6 +2070,10 @@
     <string name="empty_data">Empty data </string>
     <string name="No_data_available">No data available </string>
 
+    <string name="hour_unit">hr</string>
+    <string name="minute_unit">min</string>
+    <string name="second_unit">sec</string>
+
     <string name="progress_key">Progress</string>
 
     <string name="response">Response</string>

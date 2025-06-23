@@ -6,14 +6,16 @@ import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
+import com.ustadmobile.core.domain.report.utils.ReportFormatter
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.locale.StringProvider
-import com.ustadmobile.core.util.report.ReportFormatter
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
+import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_FEMALE
+import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_MALE
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadFab
@@ -204,8 +206,8 @@ private val moreOption = FC<ReportDetailProps> { props ->
 
 fun getGenderLabel(rawValue: String, strings: StringProvider): String {
     return when (rawValue) {
-        "2" -> strings[MR.strings.male]
-        "1" -> strings[MR.strings.female]
+        GENDER_FEMALE.toString() ->strings[MR.strings.female]
+        GENDER_MALE.toString() -> strings[MR.strings.male]
         else -> rawValue
     }
 }

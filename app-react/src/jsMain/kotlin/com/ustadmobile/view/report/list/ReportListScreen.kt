@@ -7,12 +7,12 @@ import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.SeriesType
+import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.RefreshCommand
-import com.ustadmobile.core.viewmodel.report.list.ReportDataResult
 import com.ustadmobile.core.viewmodel.report.list.ReportListUiState
 import com.ustadmobile.core.viewmodel.report.list.ReportListViewModel
 import com.ustadmobile.hooks.useDoorRemoteMediator
@@ -29,6 +29,7 @@ import com.ustadmobile.view.report.graph.ReportGraph
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.datetime.TimeZone
 import mui.material.Card
 import mui.material.CardActionArea
 import mui.material.CardHeader
@@ -70,15 +71,16 @@ external interface ReportListProps : Props {
     var onListItemClick: (Report) -> Unit
     var onClickAddItem: () -> Unit
     var onRemoveReport: (Long) -> Unit
-    var runReport: (Report) -> Flow<ReportDataResult>
+    var runReport: (Report) -> Flow<RunReportUseCase.RunReportResult>
 }
 
 external interface ReportListItemProps : Props {
     var report: Report
     var onListItemClick: (Report) -> Unit
     var onRemoveReport: (Long) -> Unit
-    var runReport: (Report) -> Flow<ReportDataResult>
+    var runReport: (Report) -> Flow<RunReportUseCase.RunReportResult>
     var width: Int
+
 }
 
 val ReportListItem = FC<ReportListItemProps> { props ->
@@ -86,18 +88,27 @@ val ReportListItem = FC<ReportListItemProps> { props ->
     val reportDataFlow = useMemo(props.report.reportUid) {
         props.runReport(props.report)
     }
-    val reportDataResult by reportDataFlow.collectAsState(
-        ReportDataResult(null, emptyList())
+    val reportResult by reportDataFlow.collectAsState(
+        RunReportUseCase.RunReportResult(
+            timestamp = 0,
+            request = RunReportUseCase.RunReportRequest(
+                reportUid = props.report.reportUid,
+                reportOptions = ReportOptions2(),
+                accountPersonUid = 0L,
+                timeZone = TimeZone.currentSystemDefault()
+            ),
+            results = emptyList()
+        )
     )
 
-    val graphSeriesList = useMemo(reportDataResult) {
-        reportDataResult.options?.series?.mapIndexed { index, reportSeries ->
+    val graphSeriesList = useMemo(reportResult) {
+        reportResult.request.reportOptions.series.mapIndexed { index, reportSeries ->
             GraphSeries(
                 type = when (reportSeries.reportSeriesVisualType) {
                     ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
                     else -> SeriesType.BAR
                 },
-                data = reportDataResult.data.getOrNull(index)?.map {
+                data = reportResult.results.getOrNull(index)?.map {
                     ReportResultQueryRow(
                         xAxis = it.xAxis,
                         yAxis = it.yAxis,
@@ -106,7 +117,7 @@ val ReportListItem = FC<ReportListItemProps> { props ->
                 } ?: emptyList(),
                 name = reportSeries.reportSeriesTitle
             )
-        } ?: emptyList()
+        }
     }
 
     Card {
@@ -142,7 +153,7 @@ val ReportListItem = FC<ReportListItemProps> { props ->
 
             ReportGraph {
                 this.graphSeriesList = graphSeriesList
-                this.reportOptions = reportDataResult.options ?: ReportOptions2()
+                this.reportOptions = reportResult.request.reportOptions
                 this.strings = string
                 this.compact = true
             }
@@ -239,7 +250,6 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
             VirtualListOutlet()
         }
     }
-
 }
 
 val ReportListScreen = FC<Props> {

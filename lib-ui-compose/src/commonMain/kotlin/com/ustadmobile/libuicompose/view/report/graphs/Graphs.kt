@@ -10,24 +10,33 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
-import com.ustadmobile.core.util.report.ReportFormatter
+import com.ustadmobile.core.domain.report.utils.ReportFormatter
+import com.ustadmobile.core.domain.report.utils.getDistinctSortedXValues
+import com.ustadmobile.core.domain.report.utils.getDistinctSubgroups
+import com.ustadmobile.core.domain.report.utils.getMaxYValue
+import com.ustadmobile.core.domain.report.utils.toIndexMap
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.view.report.detail.getGenderLabel
+import dev.icerock.moko.resources.compose.stringResource
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.bar.DefaultVerticalBar
@@ -46,9 +55,20 @@ import io.github.koalaplot.core.xygraph.DefaultPoint
 import io.github.koalaplot.core.xygraph.FloatLinearAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
 
-private const val HOUR_UNIT = "hr"
-private const val MINUTE_UNIT = "min"
-private const val SECOND_UNIT = "sec"
+
+/**
+ * Bar chart positioning constants that ensure proper bar centering and spacing.
+ *
+ * The -0.5 offset is standard practice in data visualization to:
+ * 1. Center bars perfectly on their tick marks
+ * 2. Prevent edge clipping of first/last bars
+ * 3. Match industry standards (Matplotlib/ggplot2/D3.js use similar approaches)
+ *
+ * Visual explanation:
+ * Without: |█0█1█2| (clipped edges)
+ * With:    █0 █1 █2  (proper spacing)
+ */
+private const val BAR_POSITION_OFFSET = 0.5f
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
@@ -60,25 +80,27 @@ fun CombinedGraph(
     compactMode: Boolean = false,
     reportOptions: ReportOptions2? = null,
 ) {
+    val hourUnit = stringResource(MR.strings.hour_unit)
+    val minuteUnit = stringResource(MR.strings.minute_unit)
+    val secondUnit = stringResource(MR.strings.second_unit)
 
-    val xAxisLabel = reportOptions?.xAxis
+    val xAxisLabel = reportOptions?.xAxis ?: ReportXAxis.DAY
+
     val allXValues = remember(series) {
-        series.flatMap { it.data.map { row -> row.xAxis } }.distinct().sorted()
+        series.getDistinctSortedXValues()
     }
 
     val xValueToIndex = remember(allXValues) {
-        allXValues.withIndex().associate { (index, xValue) -> xValue to index }
+        allXValues.toIndexMap()
     }
 
-    // Collect all unique subgroups, treating null as a separate group
     val allSubgroups = remember(series) {
-        series.flatMap { s ->
-            s.data.map { it.subgroup ?: "" }
-        }.distinct()
+        series.getDistinctSubgroups()
     }
 
     // Generate color palette for all subgroups
     val subgroupColors = remember(allSubgroups) { generateHueColorPalette(allSubgroups.size) }
+
     val colorMap = remember(allSubgroups) {
         allSubgroups.associateWith { subgroup ->
             subgroupColors.getOrNull(allSubgroups.indexOf(subgroup)) ?: Color.Gray
@@ -87,23 +109,28 @@ fun CombinedGraph(
 
     // Determine Y-axis unit and conversion factor
     val maxY = remember(series) {
-        series.flatMap { it.data.map { row -> row.yAxis } }.maxOrNull() ?: 0.0
+        series.getMaxYValue()
     }
 
     val (conversionFactor, unit) = remember(isDurationType, maxY) {
-        calculateConversionFactor(isDurationType, maxY)
+        calculateConversionFactor(
+            isDurationType, maxY,
+            hourUnit = hourUnit,
+            minuteUnit = minuteUnit,
+            secondUnit = secondUnit
+        )
     }
 
     // Process bar series data
     val barSeries = series.filter { it.type == SeriesType.BAR }
     val barEntries = remember(barSeries, allXValues, conversionFactor, allSubgroups) {
-        allXValues.map { xValue ->
+        allXValues.mapIndexed { index, xValue ->
             val subgroupValues = allSubgroups.map { subgroup ->
                 calculateSubgroupValues(barSeries, xValue, subgroup, conversionFactor)
             }.map { DefaultVerticalBarPosition(0f, it) }
 
             DefaultVerticalBarPlotGroupedPointEntry(
-                x = xValueToIndex[xValue]!!.toFloat(),
+                x = index.toFloat(),
                 y = subgroupValues
             )
         }
@@ -112,7 +139,6 @@ fun CombinedGraph(
     // Process line series data
     val lineSeries = series.filter { it.type == SeriesType.LINE }
 
-    // Calculate Y-axis range
     val yRange = remember(series, conversionFactor) {
         val maxYValue = series.flatMap {
             it.data.map { (it.yAxis * conversionFactor).toFloat() }
@@ -125,7 +151,10 @@ fun CombinedGraph(
 
     // Determine step size for count-based Y-axis
     val tickIncrement = remember(yRange, yAxisLabel) {
-        calculateTickIncrement(yRange, yAxisLabel, unit, isDurationType)
+        calculateTickIncrement(
+            yRange, yAxisLabel, unit, isDurationType, hourUnit = hourUnit,
+            minuteUnit = minuteUnit,
+        )
     }
 
     ChartLayout(
@@ -137,7 +166,7 @@ fun CombinedGraph(
             modifier = modifier
                 .fillMaxSize(),
             xAxisModel = FloatLinearAxisModel(
-                range = (-0.5f)..(allXValues.size - 0.5f),
+                range = (-BAR_POSITION_OFFSET)..(allXValues.size - BAR_POSITION_OFFSET),
                 minimumMajorTickIncrement = 1f
             ),
             yAxisModel = FloatLinearAxisModel(
@@ -148,23 +177,23 @@ fun CombinedGraph(
                 val index = it.toInt()
                 val rawValue = allXValues.getOrNull(index)
                 val label = when (xAxisLabel) {
-                    ReportXAxis.GENDER -> getGenderLabel(rawValue)
+                    ReportXAxis.GENDER -> getGenderLabel(rawValue.toString())
                     ReportXAxis.CLASS -> rawValue
                         ?: ""
 
                     else -> rawValue?.let { value ->
                         ReportFormatter.formatDateForReport(
-                            value,
-                            xAxisLabel ?: ReportXAxis.DAY
+                            value.toString(),
+                            xAxisLabel
                         )
                     } ?: ""
                 }
                 AxisValue(
-                    label = label,
+                    label = label.toString(),
                     Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
                 )
             },
-            xAxisTitle = { if (!compactMode) AxisLabels(xAxisLabel?.name ?: "") },
+            xAxisTitle = { if (!compactMode) AxisLabels(stringResource( xAxisLabel.label)) },
             yAxisLabels = {
                 val formattedValue = if (isDurationType) {
                     "%.1f %s".format(it, unit)  // Shows "1.5 hr" format
@@ -187,8 +216,7 @@ fun CombinedGraph(
                 GroupedVerticalBarPlot(
                     data = barEntries,
                     bar = { _, subgroupIndex, entry ->
-                        val subgroup =
-                            allSubgroups.getOrNull(subgroupIndex) ?: return@GroupedVerticalBarPlot
+                        val subgroup = allSubgroups.getOrNull(subgroupIndex) ?: return@GroupedVerticalBarPlot
                         val color = colorMap[subgroup] ?: Color.Gray
                         DefaultVerticalBar(
                             brush = SolidColor(color),
@@ -212,28 +240,39 @@ fun CombinedGraph(
             // Draw line series
             lineSeries.forEach { series ->
                 series.data.groupBy { it.subgroup }.forEach { (subgroup, dataPoints) ->
-                    val points = dataPoints.map {
-                        DefaultPoint(
-                            x = xValueToIndex[it.xAxis]!!.toFloat(),
-                            y = (it.yAxis * conversionFactor).toFloat()
-                        )
-                    }
-                    LinePlot(
-                        data = points,
-                        lineStyle = LineStyle(
-                            brush = SolidColor(colorMap[subgroup] ?: Color.Black),
-                            strokeWidth = 2.dp
-                        ),
-                        symbol = {
-                            Symbol(
-                                shape = RoundedCornerShape(4.dp),
-                                fillBrush = SolidColor(colorMap[subgroup] ?: Color.Black),
-                                modifier = Modifier.hoverableElement {
-                                    HoverSurface { Text("%.1f %s".format(it.y, unit)) }
-                                }
+                    val points = dataPoints.mapNotNull { dataPoint ->
+                        xValueToIndex[dataPoint.xAxis]?.let { index ->
+                            DefaultPoint(
+                                x = index.toFloat(),
+                                y = (dataPoint.yAxis * conversionFactor).toFloat()
                             )
                         }
-                    )
+                    }
+
+                    if (points.isNotEmpty()) {
+                        val lineColor = colorMap[subgroup] ?: Color.Black
+                        LinePlot(
+                            data = points,
+                            lineStyle = LineStyle(
+                                brush = SolidColor(lineColor),
+                                strokeWidth = 2.dp
+                            ),
+                            symbol = {
+                                Symbol(
+                                    shape = RoundedCornerShape(4.dp),
+                                    fillBrush = SolidColor(lineColor),
+                                    modifier = Modifier.hoverableElement {
+                                        HoverSurface {
+                                            Text(
+                                                if (isDurationType) "%.1f %s".format(it.y, unit)
+                                                else "%.0f".format(it.y)
+                                            )
+                                        }
+                                    }
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -275,15 +314,11 @@ private fun CombinedLegend(
         modifier = Modifier.border(
             width = 1.dp,
             color = Color.Black,
-            shape = RoundedCornerShape(5.dp)
+            shape = RoundedCornerShape(6.dp)
         )
     ) {
         Column(
             modifier = Modifier.defaultItemPadding(
-                start = 5.dp,
-                end = 5.dp,
-                top = 5.dp,
-                bottom = 5.dp
             )
         ) {
             // Show bar series legends only if they have subgroups
@@ -343,23 +378,23 @@ private fun LegendItem(
 
 @Composable
 private fun AxisLabels(label: String, modifier: Modifier = Modifier) {
-    androidx.compose.material3.Text(
+    Text(
         label,
         modifier = modifier.fillMaxWidth(),
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
-        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        textAlign = TextAlign.Center,
     )
 }
 
 @Composable
 private fun AxisValue(label: String, modifier: Modifier = Modifier) {
-    androidx.compose.material3.Text(
+    Text(
         label,
         modifier = modifier.fillMaxWidth(),
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
-        textAlign = androidx.compose.ui.text.style.TextAlign.End,
+        textAlign = TextAlign.End,
         fontSize = 8.sp
     )
 }
@@ -368,8 +403,8 @@ private fun AxisValue(label: String, modifier: Modifier = Modifier) {
 private fun HoverSurface(content: @Composable () -> Unit) {
     Surface(
         shadowElevation = 4.dp,
-        shape = androidx.compose.material3.MaterialTheme.shapes.medium,
-        color = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerHighest,
+        shape =shapes.medium,
+        color = colorScheme.surfaceContainerHighest,
         modifier = Modifier.defaultItemPadding(4.dp)
     ) {
         Box(modifier = Modifier.defaultItemPadding(8.dp)) {
@@ -391,13 +426,19 @@ private fun calculateSubgroupValues(
     }.firstOrNull()?.yAxis?.times(conversionFactor)?.toFloat() ?: 0f
 }
 
-private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<Double, String> {
+private fun calculateConversionFactor(
+    isDuration: Boolean,
+    maxY: Double,
+    hourUnit: String,
+    minuteUnit: String,
+    secondUnit: String
+): Pair<Double, String> {
     return when {
         isDuration -> {
             when {
-                maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, HOUR_UNIT)
-                maxY >= 60_000 -> Pair(1.0 / 60_000, MINUTE_UNIT)
-                else -> Pair(1.0 / 1_000, SECOND_UNIT)
+                maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, hourUnit)
+                maxY >= 60_000 -> Pair(1.0 / 60_000, minuteUnit)
+                else -> Pair(1.0 / 1_000, secondUnit)
             }
         }
 
@@ -423,12 +464,14 @@ private fun calculateTickIncrement(
     yRange: ClosedFloatingPointRange<Float>,
     yAxisLabel: String,
     unit: String,
-    isDurationType: Boolean
+    isDurationType: Boolean,
+    hourUnit: String,
+    minuteUnit: String,
 ): Float {
     val range = yRange.endInclusive - yRange.start
     return when {
         range == 0f -> 1f
-        yAxisLabel.equals(YAxisTypes.COUNT.name, ignoreCase = true) -> {
+        yAxisLabel.equals(YAxisTypes.COUNT.label) -> {
             when {
                 range < 10 -> 1f
                 range < 100 -> 10f
@@ -439,8 +482,8 @@ private fun calculateTickIncrement(
 
         else -> {
             when (unit) {
-                HOUR_UNIT -> 0.5f
-                MINUTE_UNIT -> 15f
+                hourUnit -> 0.5f
+                minuteUnit -> 15f
                 else -> 30f
             }
         }

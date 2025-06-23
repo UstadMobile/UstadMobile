@@ -8,8 +8,9 @@ import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
+import com.ustadmobile.core.domain.report.utils.ReportFormatter
+import com.ustadmobile.core.domain.report.utils.getMaxYValue
 import com.ustadmobile.core.impl.locale.StringProvider
-import com.ustadmobile.core.util.report.ReportFormatter
 import com.ustadmobile.view.report.detail.getGenderLabel
 import js.objects.jso
 import kotlinx.dom.clear
@@ -55,17 +56,14 @@ val ReportGraph = FC<ReportGraphProps> { props ->
 
     useEffect(props.graphSeriesList, props.reportOptions) {
         val container = containerRef.current ?: return@useEffect
-        var maxUnitSuffix = "ms"
 
-        val allYValues = props.graphSeriesList.flatMap { series ->
-            series.data.map { it.yAxis }
-        }
-        val maxY = allYValues.maxOrNull() ?: 0.0
+        val maxY = props.graphSeriesList.getMaxYValue()
+
         val isDuration = props.reportOptions.series.any {
             it.reportSeriesYAxis.type == YAxisTypes.DURATION
         }
-        val (_, calculatedUnit) = calculateConversionFactor(isDuration, maxY)
-        maxUnitSuffix = calculatedUnit
+        val (_, calculatedUnit) = calculateConversionFactor(isDuration, maxY, props.strings)
+        val maxUnitSuffix: String = calculatedUnit
 
         (container as HTMLElement).clear()
         (container as HTMLElement).append {
@@ -86,6 +84,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                             val (transformedYValues, _) = transformYAxisValues(
                                 data,
                                 props.reportOptions,
+                                props.strings
                             )
                             // Format x-axis values based on report type
                             val formattedXValues = data.map { row ->
@@ -162,13 +161,15 @@ val ReportGraph = FC<ReportGraphProps> { props ->
     }
 }
 
-private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<Double, String> {
+private fun calculateConversionFactor(
+    isDuration: Boolean, maxY: Double,
+    strings: StringProvider,
+): Pair<Double, String> {
     return when {
         isDuration -> when {
-            maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, "hr")
-            maxY >= 60_000 -> Pair(1.0 / 60_000, "min")
-            maxY >= 1_000 -> Pair(1.0 / 1_000, "sec")
-            else -> Pair(1.0, "ms")  // Handle milliseconds case
+            maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, strings[MR.strings.hour_unit])
+            maxY >= 60_000 -> Pair(1.0 / 60_000, strings[MR.strings.minute_unit])
+            else -> Pair(1.0 / 1_000, strings[MR.strings.second_unit])
         }
 
         else -> Pair(1.0, "")
@@ -178,12 +179,13 @@ private fun calculateConversionFactor(isDuration: Boolean, maxY: Double): Pair<D
 private fun transformYAxisValues(
     data: List<ReportResultQueryRow>,
     reportOptions: ReportOptions2,
-): Pair<List<Double>, String> {
+    strings: StringProvider,
+    ): Pair<List<Double>, String> {
     val isDuration = reportOptions.series.any {
         it.reportSeriesYAxis.type == YAxisTypes.DURATION
     }
     val maxY = data.maxOfOrNull { it.yAxis } ?: 0.0
-    val (conversionFactor, unitSuffix) = calculateConversionFactor(isDuration, maxY)
+    val (conversionFactor, unitSuffix) = calculateConversionFactor(isDuration, maxY, strings)
 
     val transformedValues = data.map { row ->
         (row.yAxis * conversionFactor).let {

@@ -1,4 +1,4 @@
-package com.ustadmobile.core.util.report
+package com.ustadmobile.core.domain.report.utils
 
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import kotlinx.datetime.toLocalDate

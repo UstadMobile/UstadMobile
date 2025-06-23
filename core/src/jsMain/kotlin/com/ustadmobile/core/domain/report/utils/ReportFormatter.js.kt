@@ -1,4 +1,4 @@
-package com.ustadmobile.core.util.report
+package com.ustadmobile.core.domain.report.utils
 
 actual fun getMonthDisplayName(month: Int): String {
     val monthNames = listOf(

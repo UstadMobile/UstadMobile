@@ -13,27 +13,21 @@ import com.ustadmobile.core.viewmodel.UstadListViewModel
 import com.ustadmobile.core.viewmodel.person.list.EmptyPagingSource
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
-import com.ustadmobile.lib.db.composites.StatementReportRow
 import com.ustadmobile.lib.db.entities.Report
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
 data class ReportListUiState(
     val reportList: () -> PagingSource<Int, Report> = { EmptyPagingSource() },
     val addSheetOrDialogVisible: Boolean = false,
+    val activeUserPersonUid: Long = 0L,
 )
-
-data class ReportDataResult(
-    val options: ReportOptions2?,
-    val data: List<List<StatementReportRow>>
-)
-
 
 class ReportListViewModel(
     di: DI,
@@ -76,7 +70,8 @@ class ReportListViewModel(
             _uiState.whenSubscribed {
                 _uiState.update { prev ->
                     prev.copy(
-                        reportList = pagingSourceFactory
+                        reportList = pagingSourceFactory,
+                        activeUserPersonUid = activeUserPersonUid
                     )
                 }
             }
@@ -87,10 +82,10 @@ class ReportListViewModel(
 
     }
 
-    fun runReport(report: Report): Flow<ReportDataResult> = flow {
+    fun runReport(report: Report): Flow<RunReportUseCase.RunReportResult> = flow {
         try {
             val reportOptions = report.reportOptions?.let {
-                Json.decodeFromString<ReportOptions2>(it)
+                json.decodeFromString<ReportOptions2>(it)
             }
 
             val request = reportOptions?.let {
@@ -103,11 +98,20 @@ class ReportListViewModel(
             }
             if (request != null) {
                 runReportUseCase(request).collect { reportResult ->
-                    emit(ReportDataResult(reportOptions, reportResult.results))
+                    emit(reportResult)
                 }
             }
         } catch (e: Exception) {
-            emit(ReportDataResult(null, emptyList()))
+            emit(RunReportUseCase.RunReportResult(
+                timestamp = Clock.System.now().toEpochMilliseconds(),
+                request = RunReportUseCase.RunReportRequest(
+                    reportUid = report.reportUid,
+                    reportOptions = ReportOptions2(), // default empty options
+                    accountPersonUid = activeUserPersonUid,
+                    timeZone = TimeZone.currentSystemDefault()
+                ),
+                results = emptyList()
+            ))
             throw e
         } finally {
             _appUiState.update { it.copy(loadingState = NOT_LOADING) }
