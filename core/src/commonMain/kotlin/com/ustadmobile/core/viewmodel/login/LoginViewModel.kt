@@ -118,7 +118,10 @@ class LoginViewModel(
 
         val getDefaultDestinationUseCase: GetDefaultDestinationUseCase =
             di.on(LearningSpace(serverUrl)).direct.instance()
-
+        viewModelScope.launch {
+            nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?:
+                    getDefaultDestinationUseCase.invoke()
+        }
         _uiState.update { prev ->
             prev.copy(
                 versionInfo = "${systemImpl.getString(MR.strings.version)}: " +
@@ -158,8 +161,6 @@ class LoginViewModel(
             )
 
             viewModelScope.launch {
-                nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?:
-                        getDefaultDestinationUseCase.invoke()
 
                 while (verifiedSite == null) {
                     try {
@@ -279,6 +280,7 @@ class LoginViewModel(
                 } catch (e: ConsentNotGrantedException) {
                     errorMessage = impl.getString(MR.strings.your_account_needs_approved)
                 } catch (e: Exception) {
+                    println("lslsl ${e.message}")
                     errorMessage = impl.getString(MR.strings.login_network_error)
                 } finally {
                     loadingState = LoadingUiState.NOT_LOADING
