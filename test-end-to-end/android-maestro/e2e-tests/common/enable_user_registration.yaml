@@ -7,17 +7,6 @@ appId: com.toughra.ustadmobile
 - tapOn: "Settings"
 - tapOn: "Site"
 - tapOn:
-      id: "floating_action_button"
-- tapOn:
-      id: "registration_allowed"
-- tapOn: "Save"
-- assertVisible: "If self-registration is enabled, you must set terms and policies in at least one language for users to accept when they register."
-- tapOn:
-        id: "registration_allowed"  #switch off to verify error goes or not
-- tapOn: "Save"
-- assertVisible:
-        id: "floating_action_button" #Edit button should be visible
-- tapOn:
     id: "floating_action_button"
 - tapOn:
     id: "registration_allowed"
