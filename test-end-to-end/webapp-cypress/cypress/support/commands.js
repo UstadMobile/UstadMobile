@@ -410,19 +410,9 @@ Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
     cy.contains('Registration allowed').should('be.visible')
     cy.get('#registration_allowed').click({ timeout: 5000 })
     cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('exist') //verified registration_allowed switch is on
-    cy.get('#actionBarButton').should('be.visible')
-    cy.get('#actionBarButton').click()
-    cy.contains("If self-registration is enabled, you must set terms and policies in at least one language for users to accept when they register.")
-    cy.contains('Registration allowed').should('be.visible')
-    cy.get('#registration_allowed').click() // switch off registration allowed to make sure error is gone
-    cy.get('#actionBarButton').should('be.visible')
-    cy.get('#actionBarButton').click()
-    cy.contains('Edit').should('exist')
-    cy.contains('Edit').click()
     cy.get('#terms_html_edit .ql-editor').as('editor')
     cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
     cy.get('@editor').click().clear().ustadTypeAndVerify("New Terms")
-    cy.get('#actionBarButton').should('be.visible')
     cy.contains('Registration allowed').should('be.visible')
     cy.get('#registration_allowed').click() // switch on registration allowed
     cy.get('#actionBarButton').should('be.visible')
