@@ -323,6 +323,7 @@ class UstadAccountManager(
         passkeyResult: AuthenticationResponseJSON,
         person: Person,
         personPicture: PersonPicture?,
+        isMinor: Boolean,
     ) = withContext(Dispatchers.Default) {
         val learningSpace = LearningSpace(learningSpaceUrl)
 
@@ -333,15 +334,17 @@ class UstadAccountManager(
         val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
             .requireRepository()
 
-        val session = addSession(person, learningSpaceUrl, null)
         repo.withDoorTransactionAsync {
             if (repo.personDao().findByUidAsync(person.personUid) == null) {
                 repo.personDao().insertAsync(person)
             }
         }
         di.on(learningSpace).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+        if (!isMinor) {
+            val session = addSession(person, learningSpaceUrl, null)
 
-        currentUserSession = session
+            currentUserSession = session
+        }
     }
 
     suspend fun register(

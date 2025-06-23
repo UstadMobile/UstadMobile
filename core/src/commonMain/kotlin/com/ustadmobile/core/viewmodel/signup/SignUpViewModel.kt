@@ -23,6 +23,7 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.username.helper.UsernameErrorException
 import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.appendSelectedAccount
+import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.util.ext.stringResourceOrMessage
 import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.core.view.UstadView
@@ -39,7 +40,6 @@ import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Com
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_REFERER_SCREEN
 import com.ustadmobile.core.viewmodel.person.toFirstAndLastNameExt
-import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
@@ -100,7 +100,7 @@ data class SignUpUiState(
 
     val isMinor: Boolean = false,
 
-    val isParentalConsentForMinor: Boolean = false
+    val isParentalConsentForMinor: Boolean = false,
 
     val usernameError: String? = null,
 
@@ -553,7 +553,8 @@ class SignUpViewModel(
                             learningSpaceUrl = serverUrl,
                             passkeyResult = passkeyCreated,
                             person = savePerson,
-                            personPicture = _uiState.value.personPicture
+                            personPicture = _uiState.value.personPicture,
+                            isMinor = _uiState.value.isMinor
                         )
 
 

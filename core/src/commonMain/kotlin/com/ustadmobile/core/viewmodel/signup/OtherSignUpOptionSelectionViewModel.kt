@@ -23,9 +23,7 @@ import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.Register
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_REFERER_SCREEN
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_MINOR
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
-import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
 import io.github.aakira.napier.Napier
@@ -128,7 +126,8 @@ class OtherSignUpOptionSelectionViewModel(
                     serverUrl,
                     it,
                     savePerson,
-                    _uiState.value.personPicture
+                    _uiState.value.personPicture,
+                    isMinor
                 )
             }
             if (passkeyCreated == null) {
