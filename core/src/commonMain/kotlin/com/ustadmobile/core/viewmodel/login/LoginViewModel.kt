@@ -1,16 +1,16 @@
 package com.ustadmobile.core.viewmodel.login
 
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
-import com.ustadmobile.core.account.UnauthorizedException
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
-import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
-import com.ustadmobile.core.domain.getversion.GetVersionUseCase
-import com.ustadmobile.core.domain.language.SetLanguageUseCase
+import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
 import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
 import com.ustadmobile.core.domain.credentials.username.ParseCredentialUsernameUseCase
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
@@ -19,21 +19,19 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
-import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
 import io.github.aakira.napier.Napier
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -280,7 +278,6 @@ class LoginViewModel(
                 } catch (e: ConsentNotGrantedException) {
                     errorMessage = impl.getString(MR.strings.your_account_needs_approved)
                 } catch (e: Exception) {
-                    println("lslsl ${e.message}")
                     errorMessage = impl.getString(MR.strings.login_network_error)
                 } finally {
                     loadingState = LoadingUiState.NOT_LOADING
