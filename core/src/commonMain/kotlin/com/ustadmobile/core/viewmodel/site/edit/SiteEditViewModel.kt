@@ -214,7 +214,9 @@ class SiteEditViewModel(
             prev.copy(
                 site = entity,
                 siteNameError = updateErrorMessageOnChange(prev.site?.siteName,
-                    entity?.siteName, prev.siteNameError)
+                    entity?.siteName, prev.siteNameError),
+                registrationEnabledError = updateErrorMessageOnChange(prev.site?.registrationAllowed,
+                    entity?.registrationAllowed,prev.registrationEnabledError)
             )
         }
         scheduleEntityCommitToSavedState(
