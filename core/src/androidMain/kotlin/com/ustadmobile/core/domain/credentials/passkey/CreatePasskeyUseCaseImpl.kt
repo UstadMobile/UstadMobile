@@ -8,7 +8,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.exceptions.CreateCredentialCancellationException
 import androidx.credentials.exceptions.CreateCredentialException
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
-import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase.CreateCredentialResult
+import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase.CreatePasskeyResult
 import io.github.aakira.napier.Napier
 import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
 import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
@@ -33,7 +33,7 @@ class CreatePasskeyUseCaseImpl(
      * @throws CreateCredentialException if CredentialManager throws an exception
      */
     @SuppressLint("PublicKeyCredential")
-    override suspend fun invoke(username: String): CreateCredentialResult {
+    override suspend fun invoke(username: String): CreatePasskeyResult {
         val credentialManager = CredentialManager.create(context)
 
         return try {
@@ -52,7 +52,7 @@ class CreatePasskeyUseCaseImpl(
             val passkeyResponse =
                 json.decodeFromString<AuthenticationResponseJSON>(response.registrationResponseJson)
 
-            CreatePasskeyUseCase.CreatePasskeyResult(passkeyResponse)
+            CreatePasskeyUseCase.PasskeyCreatedResult(passkeyResponse)
         } catch (e: CreateCredentialCancellationException) {
             CreatePasskeyUseCase.UserCanceledResult()
 

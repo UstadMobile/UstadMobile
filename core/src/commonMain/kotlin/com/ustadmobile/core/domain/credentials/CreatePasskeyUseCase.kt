@@ -4,13 +4,13 @@ import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationRespo
 
 interface CreatePasskeyUseCase {
 
-    sealed class CreateCredentialResult()
+    sealed class CreatePasskeyResult
 
-    data class CreatePasskeyResult(
+    data class PasskeyCreatedResult(
         val authenticationResponseJSON : AuthenticationResponseJSON
-    ) : CreateCredentialResult()
+    ) : CreatePasskeyResult()
 
-    class UserCanceledResult : CreateCredentialResult(){
+    class UserCanceledResult : CreatePasskeyResult(){
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other !is GetCredentialUseCase.UserCanceledResult) return false
@@ -24,8 +24,8 @@ interface CreatePasskeyUseCase {
 
     data class Error(
         val message: String?
-    ) : CreateCredentialResult()
+    ) : CreatePasskeyResult()
 
-    suspend operator fun invoke(username:String): CreateCredentialResult
+    suspend operator fun invoke(username:String): CreatePasskeyResult
 
 }

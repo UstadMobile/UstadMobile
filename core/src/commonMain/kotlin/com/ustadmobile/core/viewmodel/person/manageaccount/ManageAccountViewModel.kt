@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.view.ListViewMode
@@ -16,9 +15,8 @@ import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.passkey.PasskeyListViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
-import com.ustadmobile.door.ext.doorIdentityHashCode
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.PersonAuth2
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,8 +34,9 @@ data class ManageAccountUiState(
     val passkeySupported: Boolean = true,
     val personName: String = "",
     val personUsername: String = "",
-    val personAuth: PersonAuth2 ? = null
-)
+    val personAuth: PersonAuth2 ? = null,
+    val errorText: String? = null,
+    )
 
 class ManageAccountViewModel(
     di: DI,
@@ -132,7 +131,7 @@ class ManageAccountViewModel(
             )
             if (passkeyCreated != null) {
                 when (passkeyCreated) {
-                    is CreatePasskeyUseCase.CreatePasskeyResult -> {
+                    is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                         savePassKeyUseCase?.invoke(
                             passkeyResult = passkeyCreated.authenticationResponseJSON,
                             person = accountManager.currentUserSession.person
@@ -140,22 +139,19 @@ class ManageAccountViewModel(
                     }
 
                     is CreatePasskeyUseCase.Error -> {
-                        snackDispatcher.showSnackBar(Snack(message = passkeyCreated.message.toString()))
-
-
+                        Napier.e { "Error occurred: ${passkeyCreated.message}"}
+                        _uiState.update { prev ->
+                            prev.copy(
+                                errorText = (passkeyCreated.message),
+                            )
+                        }
                     }
 
-                    is CreatePasskeyUseCase.UserCanceledResult -> {
+                    is CreatePasskeyUseCase.UserCanceledResult,
+                    null-> {
                         //do nothing
                     }
-
-                    null -> {
-                        //do nothing
-                    }
-
-
                 }
-
             }
 
         }

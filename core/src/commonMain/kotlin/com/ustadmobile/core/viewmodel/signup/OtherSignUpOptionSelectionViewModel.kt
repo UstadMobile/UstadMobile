@@ -116,12 +116,38 @@ class OtherSignUpOptionSelectionViewModel(
                     username = savePerson.username.toString()
             )
             when(passkeyCreated){
-                is CreatePasskeyUseCase.CreatePasskeyResult -> {
+                is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                     viewModelScope.launch {
-                        onReceivedCreatePasskeyResult(
+                        accountManager.registerWithPasskey(
+                            serverUrl,
                             passkeyCreated.authenticationResponseJSON,
-                            savePerson
+                            savePerson,
+                            _uiState.value.personPicture
                         )
+
+                        if (isParent) {
+                            navController.navigate(
+                                AddChildProfilesViewModel.DEST_NAME,
+                                args = buildMap {
+                                    put(ARG_NEXT, nextDestination)
+                                    putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                                    putFromSavedStateIfPresent(ARG_NEXT)
+                                }
+                            )
+
+                        } else {
+                            enrollToCourseFromInviteUid(savePerson.personUid)
+                            val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+                            Napier.d { "AddSignUpPresenter: go to next destination: $nextDestination" }
+                            navController.navigateToViewUri(
+                                nextDestination.appendSelectedAccount(
+                                    savePerson.personUid,
+                                    LearningSpace(accountManager.activeLearningSpace.url)
+                                ),
+                                goOptions
+                            )
+
+                        }
                     }
 
                 }
@@ -132,62 +158,16 @@ class OtherSignUpOptionSelectionViewModel(
                         )
                     }
                 }
-                is CreatePasskeyUseCase.UserCanceledResult ->{
-                    //do nothing
-                }
-
-                null -> {
+                is CreatePasskeyUseCase.UserCanceledResult,
+                null->{
                     //do nothing
                 }
             }
 
         }
 
-
     }
 
-
-    private suspend fun onReceivedCreatePasskeyResult(
-        passkeyCreated: AuthenticationResponseJSON,
-        savePerson: Person
-    ) {
-        passkeyCreated?.let {
-            accountManager.registerWithPasskey(
-                serverUrl,
-                it,
-                savePerson,
-                _uiState.value.personPicture
-            )
-        }
-        if (passkeyCreated == null) {
-            snackDispatcher.showSnackBar(Snack(message = systemImpl.getString(MR.strings.sorry_something_went_wrong)))
-            Napier.e { "Error occurred during creating passkey" }
-            return
-        }
-        if (isParent) {
-            navController.navigate(
-                AddChildProfilesViewModel.DEST_NAME,
-                args = buildMap {
-                    put(ARG_NEXT, nextDestination)
-                    putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
-                    putFromSavedStateIfPresent(ARG_NEXT)
-                }
-            )
-
-        } else {
-            enrollToCourseFromInviteUid(savePerson.personUid)
-            val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
-            Napier.d { "AddSignUpPresenter: go to next destination: $nextDestination" }
-            navController.navigateToViewUri(
-                nextDestination.appendSelectedAccount(
-                    savePerson.personUid,
-                    LearningSpace(accountManager.activeLearningSpace.url)
-                ),
-                goOptions
-            )
-
-        }
-    }
 
     fun onClickCreateLocalAccount() {
         loadingState = LoadingUiState.INDETERMINATE

@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,7 +54,11 @@ fun ManageAccountScreen(
     UstadLazyColumn(
         modifier = Modifier.fillMaxWidth()
     ) {
-
+        item {
+            uiState.errorText?.also { errorText ->
+                Text(color = MaterialTheme.colorScheme.error, text = errorText)
+            }
+        }
         item(key = "name") {
             ListItem(
                 headlineContent = {

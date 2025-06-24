@@ -148,14 +148,10 @@ class AddAccountSelectNewOrExistingViewModel(
                         }
                     }
 
-                    is GetCredentialUseCase.NoCredentialAvailableResult -> {
-                        //Do nothing
-                    }
-                    is GetCredentialUseCase.UserCanceledResult -> {
-                        //Do nothing
-                    }
+                    is GetCredentialUseCase.NoCredentialAvailableResult,
+                    is GetCredentialUseCase.UserCanceledResult,
                     null -> {
-                        //Do nothing
+                        // Do nothing
                     }
                 }
             } catch (e: Exception) {

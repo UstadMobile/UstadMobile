@@ -4,10 +4,10 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
-import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
-import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
+import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.username.GetUsernameSuggestionUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -32,7 +32,6 @@ import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
-import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
@@ -404,7 +403,7 @@ class SignUpViewModel(
                             username = username,
                         )
                         when(passkeyCreated){
-                            is CreatePasskeyUseCase.CreatePasskeyResult -> {
+                            is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                                 accountManager.registerWithPasskey(
                                     learningSpaceUrl = serverUrl,
                                     passkeyResult = passkeyCreated.authenticationResponseJSON,
