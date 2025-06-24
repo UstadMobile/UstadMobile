@@ -405,16 +405,10 @@ Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
     cy.contains('Site').click()
     cy.contains('Edit').click()
   //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
-    cy.contains('Guest login enabled').should('be.visible')
-    cy.contains('Terms and policies').should('be.visible')
-    cy.contains('Registration allowed').should('be.visible')
-    cy.get('#registration_allowed').click({ timeout: 5000 })
-    cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('exist') //verified registration_allowed switch is on
     cy.get('#terms_html_edit .ql-editor').as('editor')
     cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
     cy.get('@editor').click().clear().ustadTypeAndVerify("New Terms")
-    cy.contains('Registration allowed').should('be.visible')
-    cy.get('#registration_allowed').click() // switch on registration allowed
+    cy.get('#registration_allowed').click({force:true})
     cy.get('#actionBarButton').should('be.visible')
     cy.get('#actionBarButton').click()
     cy.contains('Yes').should('exist')

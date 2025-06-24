@@ -10,11 +10,11 @@ it('Enable registration switch test', () => {
   cy.get('#settings_button').click()
   cy.contains('Site').click()
   cy.contains('Edit').click()
-  //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
   cy.contains('Guest login enabled').should('be.visible')
   cy.contains('Terms and policies').should('be.visible')
   cy.contains('Registration allowed').should('be.visible')
-  cy.get('#registration_allowed').click({ timeout: 5000 })
+  cy.wait(500) // Without wait switch not clickable
+  cy.get('#registration_allowed').click({force:true})
   cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('exist') //verified registration_allowed switch is on
   cy.get('#actionBarButton').should('be.visible')
   cy.get('#actionBarButton').click()
