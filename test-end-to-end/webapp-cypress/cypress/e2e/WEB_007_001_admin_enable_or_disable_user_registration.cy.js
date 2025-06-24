@@ -13,8 +13,7 @@ it('Enable registration switch test', () => {
   cy.contains('Guest login enabled').should('be.visible')
   cy.contains('Terms and policies').should('be.visible')
   cy.contains('Registration allowed').should('be.visible')
-  cy.wait(500) // time to load the switch
-  cy.get('#registration_allowed').click({force:true})
+  cy.get('#registration_allowed').click()
   cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('exist') //verified registration_allowed switch is on
   cy.get('#actionBarButton').should('be.visible')
   cy.get('#actionBarButton').click()
