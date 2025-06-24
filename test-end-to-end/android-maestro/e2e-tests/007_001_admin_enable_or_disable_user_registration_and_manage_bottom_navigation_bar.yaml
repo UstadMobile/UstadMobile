@@ -122,6 +122,9 @@ onFlowComplete:
     id: "floating_action_button"  #Edit button
 - tapOn: "Courses"
 - tapOn: "Save"
+- assertNotVisible: "Library"  #verify Navigation bar is not visible
+- back
+- back
 - assertVisible: "Library"
 - assertNotVisible: "Courses"
 - assertNotVisible: "Messages"
