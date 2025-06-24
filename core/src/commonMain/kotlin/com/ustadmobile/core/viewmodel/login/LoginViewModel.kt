@@ -27,6 +27,7 @@ import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
@@ -117,6 +118,10 @@ class LoginViewModel(
         val getDefaultDestinationUseCase: GetDefaultDestinationUseCase =
             di.on(LearningSpace(serverUrl)).direct.instance()
         viewModelScope.launch {
+            if (savedStateHandle[UstadView.ARG_NEXT].equals(PersonListViewModel.DEST_NAME_HOME)){
+                nextDestination = getDefaultDestinationUseCase.invoke()
+                return@launch
+            }
             nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?:
                     getDefaultDestinationUseCase.invoke()
         }

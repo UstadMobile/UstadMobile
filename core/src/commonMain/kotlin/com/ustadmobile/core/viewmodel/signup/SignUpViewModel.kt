@@ -32,6 +32,7 @@ import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewMode
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -141,6 +142,10 @@ class SignUpViewModel(
 
     init {
         viewModelScope.launch {
+            if (savedStateHandle[UstadView.ARG_NEXT].equals(PersonListViewModel.DEST_NAME_HOME)){
+                nextDestination = getDefaultDestinationUseCase.invoke()
+                return@launch
+            }
             nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase.invoke()
 
         }

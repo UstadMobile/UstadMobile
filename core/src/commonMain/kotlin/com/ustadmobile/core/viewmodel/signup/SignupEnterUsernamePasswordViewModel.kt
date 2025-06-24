@@ -23,6 +23,7 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
+import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_DATE_OF_BIRTH
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
@@ -115,7 +116,6 @@ class SignupEnterUsernamePasswordViewModel(
         loadingState = LoadingUiState.INDETERMINATE
         val title = systemImpl.getString(MR.strings.create_account)
         viewModelScope.launch {
-            nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase.invoke()
             val person = savedStateHandle.getJson(
                 OtherSignUpOptionSelectionViewModel.ARG_PERSON, Person.serializer(),
             ) ?: Person()
@@ -137,6 +137,12 @@ class SignupEnterUsernamePasswordViewModel(
 
                 )
             }
+            if (savedStateHandle[UstadView.ARG_NEXT].equals(PersonListViewModel.DEST_NAME_HOME)){
+                nextDestination = getDefaultDestinationUseCase.invoke()
+                return@launch
+            }
+            nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase.invoke()
+
         }
         _appUiState.update {
             AppUiState(
