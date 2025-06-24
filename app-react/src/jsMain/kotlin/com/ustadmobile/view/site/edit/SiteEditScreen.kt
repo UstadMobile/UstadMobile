@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadLanguageSelect
 import com.ustadmobile.mui.components.UstadPermissionEditComponent
 import com.ustadmobile.mui.components.UstadStandardContainer
@@ -27,6 +28,9 @@ import react.FC
 import react.Props
 import react.ReactNode
 import kotlinx.coroutines.Dispatchers
+import mui.material.styles.TypographyVariant
+import mui.system.sx
+import react.useRequiredContext
 
 external interface SiteEditProps: Props {
     var uiState: SiteEditUiState
@@ -37,6 +41,7 @@ external interface SiteEditProps: Props {
 }
 
 val SiteEditComponent2 = FC<SiteEditProps> { props ->
+    val theme by useRequiredContext(ThemeContext)
 
     val strings = useStringProvider()
     UstadStandardContainer {
@@ -101,7 +106,21 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
                     enabled = props.uiState.fieldsEnabled
                 }
             }
+            if(props.uiState.bottomNavToggleError != null) {
+                Grid {
+                    item = true
 
+                    Typography {
+                        sx {
+                            color = theme.palette.error.main
+                        }
+
+                        variant = TypographyVariant.body1
+
+                        + props.uiState.bottomNavToggleError
+                    }
+                }
+            }
             UstadEditHeader {
                 + strings[MR.strings.terms_and_policies]
             }
