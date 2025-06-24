@@ -26,13 +26,11 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
-import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
 import com.ustadmobile.core.domain.report.utils.getDistinctSortedXValues
 import com.ustadmobile.core.domain.report.utils.getDistinctSubgroups
@@ -79,6 +77,9 @@ import kotlin.math.pow
  * With:    █0 █1 █2  (proper spacing)
  */
 private const val BAR_POSITION_OFFSET = 0.5f
+private const val MS_IN_HOUR = 3_600_000
+private const val MS_IN_MINUTE = 60_000
+private const val MS_IN_SECOND = 1_000
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
@@ -421,9 +422,9 @@ private fun calculateConversionFactor(
     return when {
         isDuration -> {
             when {
-                maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, hourUnit)
-                maxY >= 60_000 -> Pair(1.0 / 60_000, minuteUnit)
-                else -> Pair(1.0 / 1_000, secondUnit)
+                maxY >= MS_IN_HOUR -> Pair(1.0 / MS_IN_HOUR, hourUnit)
+                maxY >= MS_IN_MINUTE -> Pair(1.0 / MS_IN_MINUTE, minuteUnit)
+                else -> Pair(1.0 / MS_IN_SECOND, secondUnit)
             }
         }
 
