@@ -1,8 +1,7 @@
 package com.ustadmobile.core.domain.report.utils
 
 import com.ustadmobile.core.domain.report.model.GraphSeries
-import com.ustadmobile.core.impl.locale.StringProvider
-import dev.icerock.moko.graphics.Color
+import com.ustadmobile.core.domain.report.model.SeriesType
 
 /**
  * Gets all distinct x-axis values from the series data, sorted
@@ -34,3 +33,15 @@ fun List<GraphSeries>.getDistinctSubgroups(): List<String> =
 fun List<GraphSeries>.getMaxYValue(): Double =
     flatMap { it.data.map { row -> row.yAxis } }
         .maxOrNull() ?: 0.0
+
+fun List<GraphSeries>.groupSeriesWithSubgroups(seriesType: SeriesType): Map<String, List<String>> {
+    return this.filter { it.type == seriesType }
+        .groupBy { it.name }
+        .mapValues { entry ->
+            entry.value.flatMap { it.data }
+                .mapNotNull { it.subgroup }
+                .filter { it.isNotEmpty() }
+                .distinct()
+        }
+        .filterValues { it.isNotEmpty() }
+}

@@ -5,17 +5,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -29,13 +33,14 @@ import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
-import com.ustadmobile.core.domain.report.utils.ReportFormatter
+import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
 import com.ustadmobile.core.domain.report.utils.getDistinctSortedXValues
 import com.ustadmobile.core.domain.report.utils.getDistinctSubgroups
 import com.ustadmobile.core.domain.report.utils.getMaxYValue
+import com.ustadmobile.core.domain.report.utils.groupSeriesWithSubgroups
 import com.ustadmobile.core.domain.report.utils.toIndexMap
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
-import com.ustadmobile.libuicompose.view.report.detail.getGenderLabel
+import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
@@ -46,6 +51,7 @@ import io.github.koalaplot.core.bar.GroupedVerticalBarPlot
 import io.github.koalaplot.core.legend.FlowLegend
 import io.github.koalaplot.core.legend.LegendLocation
 import io.github.koalaplot.core.line.LinePlot
+import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.VerticalRotation
@@ -54,6 +60,10 @@ import io.github.koalaplot.core.util.rotateVertically
 import io.github.koalaplot.core.xygraph.DefaultPoint
 import io.github.koalaplot.core.xygraph.FloatLinearAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.max
+import kotlin.math.pow
 
 
 /**
@@ -140,8 +150,8 @@ fun CombinedGraph(
     val lineSeries = series.filter { it.type == SeriesType.LINE }
 
     val yRange = remember(series, conversionFactor) {
-        val maxYValue = series.flatMap {
-            it.data.map { (it.yAxis * conversionFactor).toFloat() }
+        val maxYValue = series.flatMap { series ->
+            series.data.map { (it.yAxis * conversionFactor).toFloat() }
         }.maxOrNull() ?: 0f
 
         // Handle case where all values are zero
@@ -152,8 +162,7 @@ fun CombinedGraph(
     // Determine step size for count-based Y-axis
     val tickIncrement = remember(yRange, yAxisLabel) {
         calculateTickIncrement(
-            yRange, yAxisLabel, unit, isDurationType, hourUnit = hourUnit,
-            minuteUnit = minuteUnit,
+            yRange, isDurationType
         )
     }
 
@@ -174,26 +183,27 @@ fun CombinedGraph(
                 minimumMajorTickIncrement = tickIncrement
             ),
             xAxisLabels = {
-                val index = it.toInt()
-                val rawValue = allXValues.getOrNull(index)
-                val label = when (xAxisLabel) {
-                    ReportXAxis.GENDER -> getGenderLabel(rawValue.toString())
-                    ReportXAxis.CLASS -> rawValue
-                        ?: ""
-
-                    else -> rawValue?.let { value ->
-                        ReportFormatter.formatDateForReport(
-                            value.toString(),
-                            xAxisLabel
-                        )
-                    } ?: ""
+                val rawValue = allXValues.getOrNull(it.toInt())
+                val formattedValue =
+                    DefaultXAxisLabelFormatter().formatLabel(value = rawValue, xAxisLabel)
+                val displayText = when (formattedValue) {
+                    is StringResource -> stringResource(formattedValue)
+                    else -> formattedValue.toString()
                 }
                 AxisValue(
-                    label = label.toString(),
+                    label = displayText.toString(),
                     Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
                 )
             },
-            xAxisTitle = { if (!compactMode) AxisLabels(stringResource( xAxisLabel.label)) },
+            xAxisTitle = {
+                if (!compactMode)
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text(
+                            stringResource(xAxisLabel.label),
+                            modifier = Modifier.padding(bottom = KoalaPlotTheme.sizes.gap)
+                        )
+                    }
+            },
             yAxisLabels = {
                 val formattedValue = if (isDurationType) {
                     "%.1f %s".format(it, unit)  // Shows "1.5 hr" format
@@ -205,10 +215,13 @@ fun CombinedGraph(
             },
             yAxisTitle = {
                 if (!compactMode)
-                    AxisLabels(
-                        yAxisLabel,
-                        Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
-                    )
+                    Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
+                        Text(
+                            yAxisLabel,
+                            modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
+                                .padding(bottom = KoalaPlotTheme.sizes.gap)
+                        )
+                    }
             }
         ) {
             // Draw bar series
@@ -216,7 +229,8 @@ fun CombinedGraph(
                 GroupedVerticalBarPlot(
                     data = barEntries,
                     bar = { _, subgroupIndex, entry ->
-                        val subgroup = allSubgroups.getOrNull(subgroupIndex) ?: return@GroupedVerticalBarPlot
+                        val subgroup =
+                            allSubgroups.getOrNull(subgroupIndex) ?: return@GroupedVerticalBarPlot
                         val color = colorMap[subgroup] ?: Color.Gray
                         DefaultVerticalBar(
                             brush = SolidColor(color),
@@ -287,25 +301,8 @@ private fun CombinedLegend(
     reportOptions: ReportOptions2? = null,
 ) {
     // Filter series with non-empty subgroups
-    val barSeriesMap = series.filter { it.type == SeriesType.BAR }
-        .groupBy { it.name }
-        .mapValues { entry ->
-            entry.value.flatMap { it.data }
-                .mapNotNull { it.subgroup }
-                .filter { it.isNotEmpty() }
-                .distinct()
-        }
-        .filterValues { it.isNotEmpty() }
-
-    val lineSeriesMap = series.filter { it.type == SeriesType.LINE }
-        .groupBy { it.name }
-        .mapValues { entry ->
-            entry.value.flatMap { it.data }
-                .mapNotNull { it.subgroup }
-                .filter { it.isNotEmpty() }
-                .distinct()
-        }
-        .filterValues { it.isNotEmpty() }
+    val barSeriesMap = series.groupSeriesWithSubgroups(SeriesType.BAR)
+    val lineSeriesMap = series.groupSeriesWithSubgroups(SeriesType.LINE)
 
     if (barSeriesMap.isEmpty() && lineSeriesMap.isEmpty()) return
 
@@ -313,13 +310,12 @@ private fun CombinedLegend(
         shadowElevation = 2.dp,
         modifier = Modifier.border(
             width = 1.dp,
+            shape = RoundedCornerShape(6.dp),
             color = Color.Black,
-            shape = RoundedCornerShape(6.dp)
         )
     ) {
         Column(
-            modifier = Modifier.defaultItemPadding(
-            )
+            modifier = Modifier.defaultItemPadding()
         ) {
             // Show bar series legends only if they have subgroups
             barSeriesMap.forEach { (seriesName, subgroups) ->
@@ -371,20 +367,9 @@ private fun LegendItem(
             fillBrush = SolidColor(color),
             shape = RoundedCornerShape(4.dp)
         )
-        Spacer(modifier = Modifier.width(4.dp))
+        Spacer(modifier = Modifier.width(8.dp))
         Text(label)
     }
-}
-
-@Composable
-private fun AxisLabels(label: String, modifier: Modifier = Modifier) {
-    Text(
-        label,
-        modifier = modifier.fillMaxWidth(),
-        overflow = TextOverflow.Ellipsis,
-        maxLines = 1,
-        textAlign = TextAlign.Center,
-    )
 }
 
 @Composable
@@ -395,7 +380,7 @@ private fun AxisValue(label: String, modifier: Modifier = Modifier) {
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         textAlign = TextAlign.End,
-        fontSize = 8.sp
+        fontSize = MaterialTheme.typography.bodySmall.fontSize
     )
 }
 
@@ -403,7 +388,7 @@ private fun AxisValue(label: String, modifier: Modifier = Modifier) {
 private fun HoverSurface(content: @Composable () -> Unit) {
     Surface(
         shadowElevation = 4.dp,
-        shape =shapes.medium,
+        shape = shapes.medium,
         color = colorScheme.surfaceContainerHighest,
         modifier = Modifier.defaultItemPadding(4.dp)
     ) {
@@ -451,47 +436,45 @@ fun formatSubgroupValue(
     value: String,
     reportOptions: ReportOptions2?,
 ): String {
+
     return reportOptions?.series?.firstOrNull()?.reportSeriesSubGroup?.let { axisType ->
-        when (axisType) {
-            ReportXAxis.GENDER -> getGenderLabel(value)
-            ReportXAxis.CLASS -> value
-            else -> ReportFormatter.formatDateForReport(value, axisType)
+        val formattedValue = DefaultXAxisLabelFormatter().formatLabel(value = value, axisType)
+        when (formattedValue) {
+            is StringResource -> stringResource(formattedValue)
+            else -> formattedValue.toString()
         }
     } ?: value
 }
 
+/**
+used the Nice Numbers algorithm to generate clean, evenly spaced ticks.
+ */
+
 private fun calculateTickIncrement(
     yRange: ClosedFloatingPointRange<Float>,
-    yAxisLabel: String,
-    unit: String,
     isDurationType: Boolean,
-    hourUnit: String,
-    minuteUnit: String,
 ): Float {
     val range = yRange.endInclusive - yRange.start
-    return when {
-        range == 0f -> 1f
-        yAxisLabel.equals(YAxisTypes.COUNT.label) -> {
-            when {
-                range < 10 -> 1f
-                range < 100 -> 10f
-                range < 1000 -> 50f
-                else -> 100f
-            }
-        }
+    if (range <= 0f) return 1f
 
-        else -> {
-            when (unit) {
-                hourUnit -> 0.5f
-                minuteUnit -> 15f
-                else -> 30f
-            }
-        }
-    }.coerceAtMost(
-        if (isDurationType) {
-            range / 5
-        } else {
-            1f
-        }
-    )
+    val targetTickCount = 5  // Aim for ~5 major ticks
+    val roughTickSize = range / targetTickCount
+
+    // Find a "nice" tick size (1, 2, 5, 10, etc.)
+    val magnitude = 10f.pow(floor(log10(roughTickSize)))
+    val normalized = roughTickSize / magnitude
+
+    val niceNormalized = when {
+        normalized < 1.5f -> 1f
+        normalized < 3f -> 2f
+        normalized < 7f -> 5f
+        else -> 10f
+    }
+
+    val niceTickSize = niceNormalized * magnitude
+
+    return when {
+        isDurationType -> niceTickSize
+        else -> max(1f, niceTickSize)
+    }
 }

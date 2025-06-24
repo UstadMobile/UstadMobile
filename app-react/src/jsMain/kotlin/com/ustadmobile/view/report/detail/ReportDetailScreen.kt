@@ -4,22 +4,19 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
-import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
-import com.ustadmobile.core.domain.report.utils.ReportFormatter
+import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
-import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_FEMALE
-import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_MALE
 import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.report.graph.ReportGraph
+import dev.icerock.moko.resources.StringResource
 import mui.material.Box
 import mui.material.Card
 import mui.material.Divider
@@ -97,6 +94,7 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
 private val moreOption = FC<ReportDetailProps> { props ->
     val strings = useStringProvider()
     val xAxisType = props.uiState.reportOptions2.xAxis
+    val formatter = DefaultXAxisLabelFormatter()
 
     UstadStandardContainer {
         props.uiState.reportResults.forEachIndexed { seriesIndex, seriesRows ->
@@ -159,13 +157,11 @@ private val moreOption = FC<ReportDetailProps> { props ->
                             item = true
                             xs = 4
                             Typography {
-                                +when (xAxisType) {
-                                    ReportXAxis.GENDER -> getGenderLabel(row.xAxis, strings)
-                                    ReportXAxis.CLASS -> row.xAxis
-                                    else -> ReportFormatter.formatDateForReport(
-                                        row.xAxis,
-                                        xAxisType,
-                                    )
+                                +when (val formatted = xAxisType.let {
+                                    formatter.formatLabel(row.xAxis, it)
+                                }) {
+                                    is StringResource -> strings[formatted]
+                                    else -> formatted?.toString() ?: ""
                                 }
                             }
                         }
@@ -180,13 +176,11 @@ private val moreOption = FC<ReportDetailProps> { props ->
                             item = true
                             xs = 4
                             Typography {
-                                +when ( seriesConfig?.reportSeriesSubGroup) {
-                                    ReportXAxis.GENDER -> getGenderLabel(row.subgroup, strings)
-                                    ReportXAxis.CLASS -> row.subgroup
-                                    else -> ReportFormatter.formatDateForReport(
-                                        row.subgroup,
-                                        xAxisType,
-                                    )
+                                +when (val formatted = seriesConfig?.reportSeriesSubGroup?.let {
+                                    formatter.formatLabel(row.subgroup, it)
+                                }) {
+                                    is StringResource -> strings[formatted]
+                                    else -> formatted?.toString() ?: ""
                                 }
                             }
                         }
@@ -201,13 +195,5 @@ private val moreOption = FC<ReportDetailProps> { props ->
                 }
             }
         }
-    }
-}
-
-fun getGenderLabel(rawValue: String, strings: StringProvider): String {
-    return when (rawValue) {
-        GENDER_FEMALE.toString() ->strings[MR.strings.female]
-        GENDER_MALE.toString() -> strings[MR.strings.male]
-        else -> rawValue
     }
 }

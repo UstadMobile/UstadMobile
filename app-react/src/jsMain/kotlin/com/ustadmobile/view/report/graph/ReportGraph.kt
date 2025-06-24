@@ -5,13 +5,12 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
-import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
-import com.ustadmobile.core.domain.report.utils.ReportFormatter
+import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
 import com.ustadmobile.core.domain.report.utils.getMaxYValue
 import com.ustadmobile.core.impl.locale.StringProvider
-import com.ustadmobile.view.report.detail.getGenderLabel
+import dev.icerock.moko.resources.StringResource
 import js.objects.jso
 import kotlinx.dom.clear
 import kotlinx.html.dom.append
@@ -52,7 +51,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
     val containerRef = useRef<web.html.HTMLElement>()
     val isCompact = props.compact ?: false
     val xAxisType = props.reportOptions.xAxis
-
+    val formatter = DefaultXAxisLabelFormatter()
 
     useEffect(props.graphSeriesList, props.reportOptions) {
         val container = containerRef.current ?: return@useEffect
@@ -88,15 +87,14 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                             )
                             // Format x-axis values based on report type
                             val formattedXValues = data.map { row ->
-                                when (xAxisType) {
-                                    ReportXAxis.GENDER -> getGenderLabel(row.xAxis, props.strings)
-                                    ReportXAxis.CLASS -> row.xAxis
-                                    else -> ReportFormatter.formatDateForReport(
-                                        row.xAxis,
-                                        xAxisType,
-                                    )
+                                when (val formatted = xAxisType.let {
+                                    formatter.formatLabel(row.xAxis, it)
+                                }) {
+                                    is StringResource -> props.strings[formatted]
+                                    else -> formatted.toString() ?: ""
                                 }
                             }
+
                             when (series.type) {
                                 SeriesType.BAR -> bar {
                                     name = "${series.name} - $subgroup"
@@ -114,6 +112,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                             }
                         }
                     }
+
                     layout {
                         if (isCompact) {
                             width = 320
@@ -146,7 +145,6 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         }
                         showlegend = !isCompact
                     }
-
                 }
             }
         }
@@ -180,7 +178,7 @@ private fun transformYAxisValues(
     data: List<ReportResultQueryRow>,
     reportOptions: ReportOptions2,
     strings: StringProvider,
-    ): Pair<List<Double>, String> {
+): Pair<List<Double>, String> {
     val isDuration = reportOptions.series.any {
         it.reportSeriesYAxis.type == YAxisTypes.DURATION
     }

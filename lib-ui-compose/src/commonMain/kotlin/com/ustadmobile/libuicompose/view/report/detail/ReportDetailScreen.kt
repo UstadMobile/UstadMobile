@@ -32,13 +32,14 @@ import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
-import com.ustadmobile.core.domain.report.utils.ReportFormatter
+import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.lib.db.composites.StatementReportRow
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_FEMALE
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_MALE
 import com.ustadmobile.libuicompose.view.report.graphs.CombinedGraph
+import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
@@ -108,7 +109,7 @@ fun BarGraphSection(
                 yAxisLabel = yAxisLabel,
                 isDurationType = hasAnyDuration,
                 reportOptions = reportOptions
-                )
+            )
 
             MoreOptionsSection(
                 data = graphSeries,
@@ -117,7 +118,7 @@ fun BarGraphSection(
             )
         }
     } else {
-        Text(  stringResource(MR.strings.empty_data))
+        Text(stringResource(MR.strings.empty_data))
     }
 }
 
@@ -184,17 +185,18 @@ fun DataTable(
                         .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val formattedValue = xAxisType?.let {
+                        DefaultXAxisLabelFormatter().formatLabel(
+                            value = row.xAxis,
+                            it
+                        )
+                    }
+                    val displayText = when (formattedValue) {
+                        is StringResource -> stringResource(formattedValue)
+                        else -> formattedValue.toString()
+                    }
                     Text(
-                        text = xAxisType?.let {
-                            when (it) {
-                                ReportXAxis.GENDER -> getGenderLabel(row.xAxis)
-                                ReportXAxis.CLASS -> row.xAxis
-                                else -> ReportFormatter.formatDateForReport(
-                                    row.xAxis,
-                                    it,
-                                )
-                            }
-                        } ?: row.xAxis,
+                        text = displayText,
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -213,17 +215,18 @@ fun DataTable(
                         color = Color.LightGray,
                         thickness = 1.dp
                     )
+                    val formattedValueForSub = reportSeries.reportSeriesSubGroup?.let {
+                        DefaultXAxisLabelFormatter().formatLabel(
+                            value = row.subgroup,
+                            it
+                        )
+                    }
+                    val value = when (formattedValueForSub) {
+                        is StringResource -> stringResource(formattedValueForSub)
+                        else -> formattedValueForSub.toString()
+                    }
                     Text(
-                        text =reportSeries.reportSeriesSubGroup?.let {
-                            when (it) {
-                                ReportXAxis.GENDER -> getGenderLabel(row.subgroup)
-                                ReportXAxis.CLASS -> row.subgroup
-                                else -> ReportFormatter.formatDateForReport(
-                                    row.subgroup ?: "",
-                                    it,
-                                )
-                            }
-                        } ?: row.subgroup ?: "",
+                        text = value,
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -256,15 +259,5 @@ fun MoreOptionsSection(
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
-    }
-}
-
-@Composable
-fun getGenderLabel(rawValue: String?): String {
-    return when (rawValue) {
-        GENDER_FEMALE.toString() -> stringResource(MR.strings.female)
-        GENDER_MALE.toString() -> stringResource(MR.strings.male)
-
-        else -> rawValue?.toString() ?: ""
     }
 }
