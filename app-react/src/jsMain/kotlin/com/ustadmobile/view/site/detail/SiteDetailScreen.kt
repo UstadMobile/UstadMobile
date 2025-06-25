@@ -4,6 +4,7 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailUiState
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -20,6 +21,7 @@ import react.Props
 import react.create
 import mui.material.List
 import react.ReactNode
+import com.ustadmobile.mui.components.ROOT_SCREENS
 
 import mui.icons.material.DriveFileRenameOutline as DriveFileRenameOutlineIcon
 import mui.icons.material.Luggage as LuggageIcon
@@ -53,6 +55,19 @@ val SiteDetailComponent2 = FC<SiteDetailProps> { props ->
                 leadingContent = HowToRegRoundedIcon.create()
                 labelContent = ReactNode(strings[MR.strings.registration_allowed])
                 valueContent = ReactNode(strings.yesOrNoString(props.uiState.site?.registrationAllowed))
+            }
+            UstadDetailHeader {
+                header = ReactNode(strings[MR.strings.navigation_bar])
+            }
+
+            ROOT_SCREENS.forEach { item ->
+                val isEnabled = props.uiState.site?.bottomNavVisibilityFlag?.hasFlag(item.flag) == true
+
+                UstadDetailField2 {
+                    leadingContent = item.icon?.create()
+                    labelContent = ReactNode(strings[item.nameMessageId])
+                    valueContent = ReactNode(strings.yesOrNoString(isEnabled))
+                }
             }
 
             UstadDetailHeader {
