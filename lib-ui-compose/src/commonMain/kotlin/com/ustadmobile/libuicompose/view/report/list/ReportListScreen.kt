@@ -199,7 +199,7 @@ private fun ReportGridCard(
                                 },
                                 compactMode = true,
                                 modifier = Modifier.fillMaxSize()
-                                    .background(Color.White),
+                                    .background(color = MaterialTheme.colorScheme.surface),
                             )
                         }
                     }

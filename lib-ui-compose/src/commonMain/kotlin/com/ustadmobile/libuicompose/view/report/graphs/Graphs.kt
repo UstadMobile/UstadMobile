@@ -374,7 +374,7 @@ private fun LegendItem(
 }
 
 @Composable
-private fun AxisValue(label: String, modifier: Modifier = Modifier) {
+fun AxisValue(label: String, modifier: Modifier = Modifier) {
     Text(
         label,
         modifier = modifier.fillMaxWidth(),
