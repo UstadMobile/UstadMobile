@@ -28,7 +28,6 @@ onFlowComplete:
    file: "common/admin_login.yaml"
 - runFlow:
     file: "common/enable_user_registration.yaml"
-- assertVisible: "Yes"
 - runFlow: "common/clear_state_and_learning_space_new_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - tapOn: "Next"
@@ -79,7 +78,6 @@ onFlowComplete:
 - tapOn:
     id: "registration_allowed"
 - tapOn: "Save"
-- assertNotVisible: "Yes"
 - runFlow: "common/clear_state_and_learning_space_new_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - assertVisible: "Learning space does not allow new user registration"
@@ -91,6 +89,7 @@ onFlowComplete:
     file: "common/admin_login.yaml"
 - tapOn: "Settings"
 - tapOn: "Site"
+- assertVisible: "Navigation bar"
 - tapOn:
     id: "floating_action_button"  #Edit button
 - tapOn: "Messages"
@@ -121,10 +120,11 @@ onFlowComplete:
 - tapOn:
     id: "floating_action_button"  #Edit button
 - tapOn: "Courses"
+- tapOn: "Library"
 - tapOn: "Save"
-- assertNotVisible: "Library"  #verify Navigation bar is not visible
-- back
-- back
+- assertVisible: "Please enable at least one navigation option."
+- tapOn: "Library"
+- tapOn: "Save"
 - assertVisible: "Library"
 - assertNotVisible: "Courses"
 - assertNotVisible: "Messages"

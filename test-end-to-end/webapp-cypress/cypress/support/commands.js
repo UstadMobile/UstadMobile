@@ -151,7 +151,7 @@ Cypress.Commands.add('ustadLogout', () => {
 Cypress.Commands.add('ustadAddContentToLibrary',(contentPath,contentName) => {
   cy.get("#sidebar_ContentEntryListHome").click()
   cy.contains("button","Content").click()
-  cy.get('#new_content_from_file').click({force: true})
+  cy.get('#new_content_from_file').click()
   cy.get('input[type="file"]').selectFile(contentPath,{force:true})
   cy.get('input[id="content_title"]').click()
   cy.get('input[id="content_title"]').clear().type(contentName,{timeout: 2000})
@@ -161,7 +161,7 @@ Cypress.Commands.add('ustadAddContentToLibrary',(contentPath,contentName) => {
 // Add a Folder to Library
 Cypress.Commands.add('ustadAddFolderToLibrary',(folderName) => {
   cy.contains("button","Content").click()
-  cy.contains('New folder').click({force: true})
+  cy.contains('New folder').click()
   cy.get('input[id="content_title"]').type(folderName)
   cy.get('#actionBarButton').click()
 })
@@ -408,7 +408,7 @@ Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
     cy.get('#terms_html_edit .ql-editor').as('editor')
     cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
     cy.get('@editor').click().clear().ustadTypeAndVerify("New Terms")
-    cy.get('#registration_allowed').click({force:true})
+    cy.get('#registration_allowed').click()
     cy.get('#actionBarButton').should('be.visible')
     cy.get('#actionBarButton').click()
     cy.contains('Yes').should('exist')

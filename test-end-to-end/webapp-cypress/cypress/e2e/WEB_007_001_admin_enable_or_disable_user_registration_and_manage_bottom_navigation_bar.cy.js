@@ -71,6 +71,7 @@ it('Admin manage bottom navigation bar', () => {
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
   cy.get('#settings_button').click()
   cy.contains('Site').click()
+  cy.contains('Navigation bar').click()
   cy.contains('Edit').click()
   cy.get('span.MuiFormControlLabel-label').contains('Messages')
     .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click() //Messages switches need to be active before click
@@ -97,8 +98,14 @@ it('Admin manage bottom navigation bar - Library only enabled', () => {
   cy.get('#settings_button').click()
   cy.contains('Site').click()
   cy.contains('Edit').click()
+  cy.get('span.MuiFormControlLabel-label').contains('Library')
+      .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click()
   cy.get('span.MuiFormControlLabel-label').contains('Courses')
     .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click() //Only Library should be visible to the user, navigation bar should be hidden
+  cy.get('#actionBarButton').click()
+  cy.contains('Please enable at least one navigation option.').should('exist')
+  cy.get('span.MuiFormControlLabel-label').contains('Library')
+        .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click()
   cy.get('#actionBarButton').click()
   cy.contains('Courses').should('not.exist')
   cy.contains('Library').should('exist')
