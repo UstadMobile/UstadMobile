@@ -205,7 +205,9 @@ fun CombinedGraph(
                         )
                     }
             },
-            yAxisLabels = {
+            yAxisLabels = { it -> //With conversion factor logic - 1.5
+                // Could be 5,400,000 (in ms)
+
                 val formattedValue = if (isDurationType) {
                     "%.1f %s".format(it, unit)  // Shows "1.5 hr" format
                 } else {

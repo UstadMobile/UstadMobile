@@ -4,7 +4,13 @@ import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.SeriesType
 
 /**
- * Gets all distinct x-axis values from the series data, sorted
+ * Not all GraphSeries will include all XAxis values e.g. where XAxis is Gender or class based, and
+ * a particular series has no data for that xAxis value.
+ *
+ * GraphSeries are only guaranteed to have all xAxis values when being run by date - see
+ * RunReportUseCase#fillIfNeeded
+ *
+ *
  */
 fun List<GraphSeries>.getDistinctSortedXValues(): List<Any> =
     flatMap { it.data.map { row -> row.xAxis } }

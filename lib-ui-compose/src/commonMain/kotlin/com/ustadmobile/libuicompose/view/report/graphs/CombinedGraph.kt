@@ -30,16 +30,19 @@ import io.github.koalaplot.core.xygraph.CategoryAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 
+
+//Create a Preview for this - see what it looks like.
 @Composable
 fun CombinedGraph(
-    series: List<GraphSeries>,
+    graphSeries: List<GraphSeries>,
     reportOptions: ReportOptions2 = ReportOptions2(),
     modifier: Modifier = Modifier,
     xAxisLabelFormatter: ReportXAxisLabelFormatter = DefaultXAxisLabelFormatter()
 ) {
     // Get all distinct x-axis values (categories)
-    val categories = remember(series) {
-        series.getDistinctSortedXValues()
+    // THESE ARE NOT CATEGORIES - BAD NAMING
+    val categories = remember(graphSeries) {
+        graphSeries.getDistinctSortedXValues()
     }
 
     // Format the categories for display
@@ -48,8 +51,8 @@ fun CombinedGraph(
     }
 
     // Get all distinct subgroups (series)
-    val subgroups = remember(series) {
-        series.getDistinctSubgroups()
+    val subgroups = remember(graphSeries) {
+        graphSeries.getDistinctSubgroups()
     }
 
     // Generate colors for each subgroup
@@ -60,8 +63,8 @@ fun CombinedGraph(
     }
 
     // Calculate max value for Y-axis scaling with fallback
-    val yRange = remember(series) {
-        val maxValue = series.getMaxYValue()
+    val yRange = remember(graphSeries) {
+        val maxValue = graphSeries.getMaxYValue()
         if (maxValue > 0) 0f..(maxValue * 1.1).toFloat() else 0f..1f
     }
 
@@ -69,6 +72,7 @@ fun CombinedGraph(
     val isDurationType = reportOptions.series.any { it.reportSeriesYAxis.type == YAxisTypes.DURATION }
     val yAxisLabel = stringResource(if (isDurationType) YAxisTypes.DURATION.label else YAxisTypes.COUNT.label)
 
+    //As per https://koalaplot.github.io/0.5/docs/xygraphs/bar_plots/#grouped-bars
     XYGraph(
         modifier = modifier,
         xAxisModel = CategoryAxisModel(formattedCategories),
@@ -76,8 +80,7 @@ fun CombinedGraph(
         xAxisLabels = {
             AxisValue(
                 label = it.toString(),
-                modifier = Modifier
-                    .rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
+                modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
             )
         },
         xAxisTitle = {
@@ -102,14 +105,14 @@ fun CombinedGraph(
         }
     ) {
         GroupedVerticalBarPlot {
-            subgroups.forEachIndexed { subgroupIndex, subgroup ->
-                series(solidBar(colors[subgroupIndex])) {
-                    categories.forEachIndexed { index, category ->
-                        val value = series.flatMap { it.data }
-                            .firstOrNull {
-                                it.xAxis == category && it.subgroup == subgroup
-                            }?.yAxis?.toFloat() ?: 0f
-                        item(formattedCategories[index], 0f, value)
+            //The XAxis is ALREADY SORT#ED - there is no need to do that again. There is no need to deduplicate it.
+            graphSeries.getDistinctSortedXValues().forEachIndexed { xAxisIndex, xAxis ->
+                series(solidBar(colors[xAxisIndex])) {
+                    graphSeries.forEachIndexed { seriesIndex, series ->
+                        //Not all reportSeries will have a bar for all xAxis values
+                        series.data.firstOrNull { it.xAxis == xAxis }?.also { dataPoint ->
+                            item(xAxis, 0f, dataPoint.yAxis.toFloat())
+                        }
                     }
                 }
             }
