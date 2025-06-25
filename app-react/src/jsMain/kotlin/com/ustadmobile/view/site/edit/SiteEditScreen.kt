@@ -70,6 +70,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
             UstadSwitchField {
                 label = strings[MR.strings.guest_login_enabled]
                 checked = props.uiState.site?.guestLogin ?: false
+                enabled = props.uiState.fieldsEnabled
                 id = "guest_login_enabled"
                 onChanged = {
                     props.onSiteChanged(
@@ -82,6 +83,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
             UstadSwitchField {
                 label = strings[MR.strings.registration_allowed]
+                enabled = props.uiState.fieldsEnabled
                 checked = props.uiState.site?.registrationAllowed ?: false
                 id = "registration_allowed"
                 onChanged = {

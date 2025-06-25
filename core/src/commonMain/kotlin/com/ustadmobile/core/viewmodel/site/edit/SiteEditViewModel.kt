@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.db.PermissionFlags
+import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
@@ -26,7 +27,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.builtins.ListSerializer
+import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.on
 
 data class SiteEditUiState(
     val site: Site? = null,
@@ -40,7 +43,8 @@ data class SiteEditUiState(
     val currentSiteTermsLang: UstadMobileSystemCommon.UiLanguage = uiLangs.first(),
     val permissionLabels: List<Pair<StringResource,Long>> = emptyList()
 ) {
-    val hasErrors: Boolean = (siteNameError != null || registrationEnabledError != null)
+    val hasErrors: Boolean = (siteNameError != null || registrationEnabledError != null||
+            bottomNavToggleError != null)
 
     val currentSiteTerms: SiteTerms?
         get() = siteTerms.firstOrNull { it.sTermsLang == currentSiteTermsLang.langCode }
@@ -63,6 +67,8 @@ class SiteEditViewModel(
 
     private var saveTermsHtmlJob: Job? = null
 
+    val destination = di.on(accountManager.currentUserSession.learningSpace)
+        .direct.instance<GetDefaultDestinationUseCase>()
     init {
 
         _uiState.update { prev ->
@@ -171,11 +177,6 @@ class SiteEditViewModel(
     }
     fun onTogglePermission(flag: Long) {
         _uiState.update { prev ->
-            if (prev.site?.bottomNavVisibilityFlag?.toggleFlag(flag) == 0L) {
-                return@update prev.copy(
-                    bottomNavToggleError = systemImpl.getString(MR.strings.bottom_nav_at_least_one_required)
-                )
-            }
             prev.copy(
                 site = prev.site?.shallowCopy {
                     bottomNavVisibilityFlag = bottomNavVisibilityFlag.toggleFlag(flag)
@@ -273,12 +274,21 @@ class SiteEditViewModel(
                 )
             }
         }
-
+        if (siteToSave.bottomNavVisibilityFlag == 0L) {
+            _uiState.update { prev ->
+                prev.copy(
+                    bottomNavToggleError = systemImpl.getString(MR.strings.bottom_nav_at_least_one_required)
+                )
+            }
+        }
 
         if(_uiState.value.hasErrors)
             return
 
         viewModelScope.launch {
+            val oldSite = activeRepoWithFallback.siteDao().getSiteAsync()
+            val oldFlags = oldSite?.bottomNavVisibilityFlag ?: 0L
+
             activeRepoWithFallback.siteDao().updateAsync(siteToSave)
             activeRepoWithFallback.siteTermsDao().upsertList(
                 _uiState.value.siteTerms.filter {
@@ -289,6 +299,17 @@ class SiteEditViewModel(
                     }
                 }
             )
+
+            // Clear backstack and navigate to the first enabled tab to avoid showing disabled tabs.
+            if (siteToSave.bottomNavVisibilityFlag != oldFlags) {
+                val destination = destination.invoke()
+                navController.navigate(
+                    viewName = destination,
+                    args = emptyMap(),
+                    goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+                )
+                return@launch
+            }
 
             finishWithResult(
                 detailViewName = SiteDetailViewModel.DEST_NAME,
