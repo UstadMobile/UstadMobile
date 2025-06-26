@@ -85,6 +85,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
                 label = strings[MR.strings.registration_allowed]
                 enabled = props.uiState.fieldsEnabled
                 checked = props.uiState.site?.registrationAllowed ?: false
+                enabled = props.uiState.fieldsEnabled
                 id = "registration_allowed"
                 onChanged = {
                     props.onSiteChanged(
@@ -93,6 +94,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
                         }
                     )
                 }
+                error = props.uiState.registrationEnabledError
             }
             UstadDetailHeader {
                 header = ReactNode(strings[MR.strings.navigation_bar])

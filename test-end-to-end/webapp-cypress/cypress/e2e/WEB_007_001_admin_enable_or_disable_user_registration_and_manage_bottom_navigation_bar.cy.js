@@ -4,11 +4,37 @@ describe('WEB_007_001_admin_enable_or_disable_user_registration_and_manage_botto
     cy.ustadStartTestServer(6000)
   })
 
+it('Enable registration switch test', () => {
 it('Admin enable registration', () => {
   cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv");
   // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
-  cy.ustadEnableUserRegistration()
+  cy.get('#settings_button').click()
+  cy.contains('Site').click()
+  cy.contains('Edit').click()
+  cy.contains('Guest login enabled').should('be.visible')
+  cy.contains('Terms and policies').should('be.visible')
+  cy.contains('Registration allowed').should('be.visible')
+  cy.get('#registration_allowed').click()
+  cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('exist') //verified registration_allowed switch is on
+  cy.get('#actionBarButton').should('be.visible')
+  cy.get('#actionBarButton').click()
+  cy.contains("If self-registration is enabled, you must set terms and policies in at least one language for users to accept when they register.")
+  cy.contains('Registration allowed').should('be.visible')
+  cy.get('#registration_allowed').click() // switch off registration allowed to make sure error is gone
+  cy.get('#actionBarButton').should('be.visible')
+  cy.get('#actionBarButton').click()
+  cy.get('[data-testid="EditIcon"]').should('exist')
+  cy.get('[data-testid="EditIcon"]').click()
+  cy.get('#terms_html_edit .ql-editor').as('editor')
+  cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
+  cy.get('@editor').click().clear().ustadTypeAndVerify("New Terms")
+  cy.get('#actionBarButton').should('be.visible')
+  cy.contains('Registration allowed').should('be.visible')
+  cy.get('#registration_allowed').click() // switch on registration allowed
+  cy.get('#actionBarButton').should('be.visible')
+  cy.get('#actionBarButton').click()
+  cy.contains('Yes').should('exist')
 })
 
 it('Verify New user registration is enabled and mandatory fields are filled', () => {
