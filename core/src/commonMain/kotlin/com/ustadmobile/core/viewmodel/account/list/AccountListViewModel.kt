@@ -278,15 +278,19 @@ class AccountListViewModel(
     fun onClickAccount(sessionWithPersonAndLearningSpace: UserSessionWithPersonAndLearningSpace) {
         viewModelScope.launch {
             if (savedStateHandle[ARG_CHILD_NAME] != null){
+
                 if (sessionWithPersonAndLearningSpace.person.isPersonalAccount) {
                     val person = getChildDetail()
                     navigateForResult(
                         nextViewName = EditChildProfileViewModel.DEST_NAME,
                         key = RESULT_KEY_PERSON,
                         serializer = Person.serializer(),
-                        args = buildMap {
-                            savedStateHandle[ARG_ENTITY_JSON]
-                        },
+                        args = mapOf(
+
+                            ARG_CHILD_NAME to savedStateHandle[ARG_CHILD_NAME].toString(),
+                            ARG_ENTITY_JSON to savedStateHandle[ARG_ENTITY_JSON].toString()
+
+                        ),
                         currentValue = person,
                     )
                 }else{

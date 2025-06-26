@@ -1,17 +1,24 @@
 package com.ustadmobile.core.viewmodel.person.child
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
 import com.ustadmobile.core.impl.config.GenderConfig
 import com.ustadmobile.core.impl.locale.entityconstants.PersonConstants
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.MessageIdOption2
+import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_NAME
 import com.ustadmobile.core.viewmodel.person.toFirstAndLastNameExt
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
+import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -175,6 +182,32 @@ class EditChildProfileViewModel(
                 this.lastName = lastName
             }
         )
+        if (savedStateHandle[ARG_CHILD_NAME]!=null){
+
+            viewModelScope.launch {
+                val effectiveDb = activeRepo ?: activeDb
+
+                effectiveDb.personDao().insertAsync(savePerson)
+
+               val personParentJoin= PersonParentJoin(
+                    ppjMinorPersonUid = savePerson.personUid,
+                    ppjParentPersonUid = accountManager.currentAccount.personUid,
+                    ppjStatus = PersonParentJoin.STATUS_APPROVED,
+                    ppjApprovalTiemstamp = systemTimeInMillis()
+                )
+                accountManager.addSession(savePerson, accountManager.activeLearningSpace.url, null)
+
+                effectiveDb.personParentJoinDao().upsertAsync(personParentJoin)
+                navController.navigateToViewUri(
+                    ContentEntryListViewModel.DEST_NAME_HOME.appendSelectedAccount(
+                        accountManager.currentAccount.personUid,
+                        LearningSpace(accountManager.activeLearningSpace.url)
+                    ),
+                    UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+                )
+            }
+            return
+        }
         finishWithResult(_uiState.value.person)
     }
 

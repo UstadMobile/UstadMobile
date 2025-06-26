@@ -23,6 +23,7 @@ import com.ustadmobile.core.util.ext.putFromSavedStateIfPresent
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
@@ -408,7 +409,7 @@ class SignupEnterUsernamePasswordViewModel(
                     parentContact?:""
                 it[RegisterMinorWaitForParentViewModel.ARG_PASSWORD] =  ""
                 it.putFromSavedStateIfPresent(savedStateHandle, UstadView.ARG_POPUPTO_ON_FINISH)
-                it[ARG_REFERER_SCREEN] = "AddAccountSelectNewOrExisting"
+                it[ARG_REFERER_SCREEN] = AddAccountSelectNewOrExistingViewModel.DEST_NAME
             }
             navController.navigate(
                 viewName = RegisterMinorWaitForParentViewModel.DEST_NAME,
