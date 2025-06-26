@@ -408,7 +408,7 @@ Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
     cy.get('#terms_html_edit .ql-editor').as('editor')
     cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
     cy.get('@editor').click().clear().ustadTypeAndVerify("New Terms")
-    cy.get('#registration_allowed').click({force:true})
+    cy.get('#registration_allowed').click()
     cy.get('#actionBarButton').should('be.visible')
     cy.get('#actionBarButton').click()
     cy.contains('Yes').should('exist')
