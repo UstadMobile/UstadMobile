@@ -59,7 +59,6 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
 
             ReportGraph {
                 this.seriesList = props.uiState.reportSeries
-                this.reportOptions = props.uiState.reportOptions2
                 this.strings = string
             }
 

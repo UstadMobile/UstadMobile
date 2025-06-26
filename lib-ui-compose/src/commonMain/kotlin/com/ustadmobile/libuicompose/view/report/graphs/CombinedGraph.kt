@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import dev.icerock.moko.resources.compose.stringResource
@@ -28,7 +29,7 @@ import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 fun CombinedGraph(
     series: List<RunReportUseCase.RunReportResult.Series>,
     modifier: Modifier = Modifier,
-    xAxisLabel: String = ""
+    xAxisLabel: ReportXAxis
 ) {
     // Get all distinct x-axis values
     val xValues = remember(series) {
@@ -80,7 +81,7 @@ fun CombinedGraph(
         xAxisTitle = {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
-                    xAxisLabel,
+                    stringResource(xAxisLabel.label),
                     modifier = Modifier.padding(bottom = KoalaPlotTheme.sizes.gap)
                 )
             }

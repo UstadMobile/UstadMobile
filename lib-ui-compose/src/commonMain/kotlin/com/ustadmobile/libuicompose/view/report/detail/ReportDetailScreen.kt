@@ -55,7 +55,7 @@ fun ReportDetailScreen(
 ) {
     if (uiState.reportSeries.isNotEmpty()) {
         val firstSeries = uiState.reportSeries.first()
-        val reportOptions = firstSeries.reportSeriesOptions
+        val reportOptions = uiState.reportOptions2.xAxis
 
         Column(modifier = Modifier.fillMaxSize()) {
             CombinedGraph(
@@ -63,6 +63,7 @@ fun ReportDetailScreen(
                 modifier = Modifier
                     .weight(0.6f)
                     .fillMaxWidth(),
+                xAxisLabel = reportOptions
             )
 
             MoreOptionsSection(
