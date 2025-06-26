@@ -385,7 +385,6 @@ class UstadAccountManager(
                 .requireRepository()
             getSiteFromDbOrLoadFromHttp(repo)
 
-            val session = addSession(registeredPerson, learningSpaceUrl, password)
 
             //If the person is not loaded into the database (probably not), then put in the db.
             val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
@@ -396,6 +395,8 @@ class UstadAccountManager(
             }
 
             if(accountRegisterOptions.makeAccountActive){
+                val session = addSession(registeredPerson, learningSpaceUrl, password)
+
                 currentUserSession = session
             }
 

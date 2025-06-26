@@ -35,6 +35,7 @@ import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.Register
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_REFERER_SCREEN
 import com.ustadmobile.core.viewmodel.person.toFirstAndLastNameExt
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
+import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_DATE_OF_BIRTH
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_MINOR
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
@@ -216,15 +217,15 @@ class SignupEnterUsernamePasswordViewModel(
 
         loadingState = LoadingUiState.INDETERMINATE
 
-        // full name splitting into first name and last name
         val fullName = _uiState.value.firstName?.trim()
-        val parts = fullName?.trim()?.split(" ", limit = 2)
-        val firstName = parts?.get(0)
-        val lastName = parts?.getOrElse(1) { "" }
+        val (firstName, lastName) = fullName.toFirstAndLastNameExt()
         onEntityChanged(
             _uiState.value.person?.shallowCopy {
                 this.firstNames = firstName
                 this.lastName = lastName
+                dateOfBirth = savedStateHandle[ARG_DATE_OF_BIRTH]?.toLong()?:0L
+                this.isPersonalAccount = _uiState.value.isPersonalAccount
+
             }
         )
 
