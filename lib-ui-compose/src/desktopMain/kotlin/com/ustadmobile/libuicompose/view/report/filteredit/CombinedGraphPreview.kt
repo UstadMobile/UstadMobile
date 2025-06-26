@@ -57,18 +57,10 @@ fun CombinedGraphPreview() {
     )
 
     val sampleSeries = listOf(series1, series2, series3)
-    val reportOptions = ReportOptions2(
-        series = listOf(
-            series1.reportSeriesOptions,
-            series2.reportSeriesOptions,
-            series3.reportSeriesOptions
-        )
-    )
 
     Surface(modifier = Modifier.size(400.dp, 300.dp)) {
         CombinedGraph(
             series = sampleSeries,
-            reportOptions = reportOptions
         )
     }
 }

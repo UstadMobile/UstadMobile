@@ -29,7 +29,7 @@ import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 fun CombinedGraph(
     series: List<RunReportUseCase.RunReportResult.Series>,
     modifier: Modifier = Modifier,
-    xAxisLabel: ReportXAxis
+    xAxisLabel: ReportXAxis = ReportXAxis.DAY
 ) {
     // Get all distinct x-axis values
     val xValues = remember(series) {
