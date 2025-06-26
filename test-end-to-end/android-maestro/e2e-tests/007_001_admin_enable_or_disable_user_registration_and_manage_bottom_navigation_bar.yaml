@@ -1,8 +1,8 @@
 appId: com.toughra.ustadmobile
 env:
-  TESTRESULTSDIR: "build/reports/maestro/007_001_admin_enable_or_disable_user_registration/Screenshots"
+  TESTRESULTSDIR: "build/reports/maestro/007_001_admin_enable_or_disable_user_registration_and_manage_bottom_navigation_bar/Screenshots"
 onFlowStart:
-  - startRecording: 007_001_admin_enable_or_disable_user_registration
+  - startRecording: 007_001_admin_enable_or_disable_user_registration_and_manage_bottom_navigation_bar
   - runScript:
       file: "common/startserver.js"
       env:
@@ -15,13 +15,14 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+ # Admin Enable Registration and Manage Bottom Navigation Bar
 - runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
-#admin enable user registration
 - runFlow:
    file: "common/admin_login.yaml"
 - tapOn: "Settings"
 - tapOn: "Site"
+- assertVisible: "Navigation bar"
 - tapOn:
     id: "floating_action_button"
 - tapOn:
@@ -42,9 +43,16 @@ onFlowComplete:
     id: "com.toughra.ustadmobile:id/editor"
 - inputText: "Terms and company policies"
 - tapOn: "Done"
+# manage visibility of buttons in bottom navigation bar
+- tapOn: "Messages"
+- tapOn: "People"
 - tapOn: "Save"
 - takeScreenshot: "${TESTRESULTSDIR}/user_registration_enabled"
-- assertVisible: "Yes"
+- assertVisible: "Courses"
+- assertVisible: "Library"
+- assertNotVisible: "Messages"
+- assertNotVisible: "People"
+ # Verify New user registration is enabled and mandatory fields are filled
 - runFlow: "common/clear_state_and_learning_space_new_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - tapOn: "Next"
@@ -68,7 +76,7 @@ onFlowComplete:
     below:  "Gender*"
     text: "This field is required" #verify the Gender field's mandatory
 - tapOn: "Full name*"
-- inputText: "User ABC"
+- inputText: "New User"
 - tapOn: "Gender*"
 - tapOn: "Female"
 - tapOn: "Other options"
@@ -81,8 +89,10 @@ onFlowComplete:
 - inputText: "test1234"
 - tapOn: "Sign-up"
 - assertVisible: "Courses"
-
-#admin disable user registration
+- assertVisible: "Library"
+- assertNotVisible: "Messages"
+- assertNotVisible: "People"
+#Admin- Disable Registration and Restrict Navigation Bar to Library Option- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
@@ -94,8 +104,31 @@ onFlowComplete:
     id: "floating_action_button"
 - tapOn:
     id: "registration_allowed"
+    # To verify the navigation bar settings- at least one option must be present
+- tapOn: "Courses"   #switch off courses
+- tapOn: "Library"  #switch off Library
 - tapOn: "Save"
-- assertNotVisible: "Yes"
+- assertVisible: "Please enable at least one navigation option."
+- tapOn: "Library"  #switch On Library
+- tapOn: "Save"
+- assertVisible: "Library"
+- assertNotVisible: "Courses"
+- assertNotVisible: "Messages"
+- assertNotVisible: "People"
+
+#Verify New user registration is disabled
 - runFlow: "common/clear_state_and_learning_space_new_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - assertVisible: "Learning space does not allow new user registration"
+#Verify New user added can only see library - navigation bar is hidden
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "newuser"
+      PASSWORD: "test1234"
+- assertVisible: "Library"
+- assertNotVisible: "Courses"
+- assertNotVisible: "Messages"
+- assertNotVisible: "People"
