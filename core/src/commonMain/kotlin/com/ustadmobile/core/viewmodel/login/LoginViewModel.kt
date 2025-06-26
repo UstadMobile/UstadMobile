@@ -379,12 +379,11 @@ class LoginViewModel(
                         Napier.e { "Error occurred: ${credentialResult.message}"}
                     }
 
-                    is GetCredentialUseCase.NoCredentialAvailableResult -> {
+                    is GetCredentialUseCase.NoCredentialAvailableResult,
+                    is GetCredentialUseCase.UserCanceledResult-> {
                         //do nothing
                     }
-                    is GetCredentialUseCase.UserCanceledResult -> {
-                        //Do nothing
-                    }
+
                 }
             } catch (e: Exception) {
                 Napier.e { "Error occurred: ${e.message}"}
