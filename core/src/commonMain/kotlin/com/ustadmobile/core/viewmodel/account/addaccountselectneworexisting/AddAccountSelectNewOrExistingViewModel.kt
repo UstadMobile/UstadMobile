@@ -48,6 +48,7 @@ data class AddAccountSelectNewOrExistingUiState(
     val languageList: List<UstadMobileSystemCommon.UiLanguage> = listOf(currentLanguage),
     val showWaitForRestart: Boolean = false,
     val errorText: String? = null,
+    val fieldsEnabled: Boolean = true,
 )
 
 /**

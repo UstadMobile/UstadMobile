@@ -88,6 +88,7 @@ val AddAccountSelectNewOrExistingComponent2 = FC<AddAccountSelectNewOrExistingPr
                 onClick = { props.onClickNewUser() }
                 variant = ButtonVariant.outlined
                 fullWidth = true
+                disabled = !props.uiState.fieldsEnabled
                 +strings[MR.strings.new_user]
                 id="new_user"
             }
@@ -101,6 +102,7 @@ val AddAccountSelectNewOrExistingComponent2 = FC<AddAccountSelectNewOrExistingPr
                 onClick = { props.onClickExistingUser() }
                 variant = ButtonVariant.outlined
                 fullWidth = true
+                disabled = !props.uiState.fieldsEnabled
                 +strings[MR.strings.existing_user]
                 id="existing_user"
             }
