@@ -54,31 +54,21 @@ fun ReportDetailScreen(
     uiState: ReportDetailUiState
 ) {
     if (uiState.reportSeries.isNotEmpty()) {
-        val firstSeries = uiState.reportSeries.first()
-        val reportOptions = uiState.reportOptions2.xAxis
-
         Column(modifier = Modifier.fillMaxSize()) {
             CombinedGraph(
                 series = uiState.reportSeries,
                 modifier = Modifier
                     .weight(0.6f)
                     .fillMaxWidth(),
-                xAxisLabel = reportOptions
+                xAxisLabel = uiState.reportOptions2.xAxis
             )
 
             MoreOptionsSection(
                 seriesList = uiState.reportSeries,
-                modifier = Modifier.weight(0.4f)
+                modifier = Modifier.weight(0.4f),
+                xAxisType = uiState.reportOptions2.xAxis
             )
         }
-    }
-}
-
-@Composable
-private fun getYAxisLabel(reportSeriesOptions: ReportSeries2): String {
-    return when (reportSeriesOptions.reportSeriesYAxis.type) {
-        YAxisTypes.DURATION -> stringResource(YAxisTypes.DURATION.label)
-        else -> stringResource(YAxisTypes.COUNT.label)
     }
 }
 
@@ -200,18 +190,19 @@ fun DataTable(
 @Composable
 fun MoreOptionsSection(
     seriesList: List<RunReportUseCase.RunReportResult.Series>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    xAxisType: ReportXAxis
 ) {
     LazyColumn(modifier = modifier.fillMaxWidth()) {
         item { HorizontalDivider(thickness = 1.dp) }
 
-//        items(seriesList) { series ->
-//            DataTable(
-//                data = series.data,
-//                reportSeries = series.reportSeriesOptions,
-//                xAxisType = series.data.{it.xAxis}
-//            )
-//            Spacer(modifier = Modifier.height(16.dp))
-//        }
+        items(seriesList) { series ->
+            DataTable(
+                data = series.data,
+                reportSeries = series.reportSeriesOptions,
+                xAxisType = xAxisType
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }
