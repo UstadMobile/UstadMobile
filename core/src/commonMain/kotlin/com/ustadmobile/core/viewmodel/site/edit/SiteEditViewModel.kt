@@ -243,7 +243,9 @@ class SiteEditViewModel(
                 siteNameError = updateErrorMessageOnChange(prev.site?.siteName,
                     entity?.siteName, prev.siteNameError),
                 bottomNavToggleError = updateErrorMessageOnChange(prev.site?.bottomNavVisibilityFlag,
-                    entity?.bottomNavVisibilityFlag,prev.bottomNavToggleError)
+                    entity?.bottomNavVisibilityFlag,prev.bottomNavToggleError),
+                registrationEnabledError = updateErrorMessageOnChange(prev.site?.registrationAllowed,
+                    entity?.registrationAllowed,prev.registrationEnabledError)
             )
         }
         scheduleEntityCommitToSavedState(
