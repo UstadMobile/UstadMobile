@@ -20,7 +20,7 @@ data class ReportSeries2(
 
     val reportSeriesFilters: List<ReportFilter3>? = null,
 
-    )
+)
 
 enum class YAxisTypes(
     override val label: StringResource,
@@ -116,14 +116,3 @@ enum class GenderType(override val label: StringResource) : OptionWithLabelStrin
 
 enum class SeriesType { BAR, LINE }
 
-data class ReportResultQueryRow(
-    val yAxis: Double,
-    val xAxis: String,
-    val subgroup: String? = null
-)
-
-data class GraphSeries(
-    val type: SeriesType,
-    val data: List<ReportResultQueryRow>,
-    val name: String,
-)

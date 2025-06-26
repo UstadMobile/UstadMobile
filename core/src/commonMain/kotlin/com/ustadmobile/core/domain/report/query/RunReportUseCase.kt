@@ -1,6 +1,7 @@
 package com.ustadmobile.core.domain.report.query
 
 import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.ihttp.headers.directives.directivesToMap
 import com.ustadmobile.lib.db.composites.StatementReportRow
 import com.ustadmobile.lib.db.composites.adapters.asStatementReportRow
@@ -41,7 +42,29 @@ interface RunReportUseCase {
         val request: RunReportRequest,
         val results: List<List<StatementReportRow>>,
         val age: Int = 0,
-    )
+    ) {
+
+        data class Series(
+            val reportSeriesOptions: ReportSeries2,
+            val data: List<StatementReportRow>,
+        )
+
+        val resultSeries: List<Series> by lazy {
+            request.reportOptions.series.mapIndexed { index, reportSeriesOptions ->
+                Series(
+                    reportSeriesOptions = reportSeriesOptions,
+                    data = results[index],
+                )
+            }
+        }
+
+        val distinctXAxisValueSorted: List<String> by lazy {
+            results.flatten().map { it.xAxis }.distinct().sorted()
+        }
+
+        //Add functions to get info needed for graphs in a clear/logical way e.g. distinct xaxis,subgroups
+
+    }
 
     /**
      * Data class representing a request to run a report.
