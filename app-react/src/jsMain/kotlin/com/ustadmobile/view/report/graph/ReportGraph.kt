@@ -1,16 +1,11 @@
 package com.ustadmobile.view.report.graph
 
-
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.model.GraphSeries
-import com.ustadmobile.core.domain.report.model.ReportOptions2
-import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
-import com.ustadmobile.core.domain.report.model.SeriesType
+import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
-import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
-import com.ustadmobile.core.domain.report.utils.getMaxYValue
+import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.impl.locale.StringProvider
-import dev.icerock.moko.resources.StringResource
+import com.ustadmobile.lib.db.composites.StatementReportRow
 import js.objects.jso
 import kotlinx.dom.clear
 import kotlinx.html.dom.append
@@ -35,31 +30,23 @@ import web.cssom.Overflow
 import web.cssom.px
 
 external interface ReportGraphProps : Props {
-    var graphSeriesList: List<GraphSeries>
-    var reportOptions: ReportOptions2
+    var seriesList: List<RunReportUseCase.RunReportResult.Series>
     var strings: StringProvider
     var compact: Boolean?
+    var xAxisLabel: String
 }
-
-/**
- * This is based on the Plotly.kt JS demo found here:
- *
- * https://github.com/SciProgCentre/plotly.kt/blob/master/examples/js-demo/src/main/kotlin/space/kscience/plotly/jsdemo/main.kt
- */
 
 val ReportGraph = FC<ReportGraphProps> { props ->
     val containerRef = useRef<web.html.HTMLElement>()
     val isCompact = props.compact ?: false
-    val xAxisType = props.reportOptions.xAxis
-    val formatter = DefaultXAxisLabelFormatter()
 
-    useEffect(props.graphSeriesList, props.reportOptions) {
+    useEffect(props.seriesList) {
         val container = containerRef.current ?: return@useEffect
 
-        val maxY = props.graphSeriesList.getMaxYValue()
+        val maxY = props.seriesList.flatMap { it.data.map { row -> row.yAxis } }.maxOrNull() ?: 0.0
 
-        val isDuration = props.reportOptions.series.any {
-            it.reportSeriesYAxis.type == YAxisTypes.DURATION
+        val isDuration = props.seriesList.any { series ->
+            series.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION
         }
         val (_, calculatedUnit) = calculateConversionFactor(isDuration, maxY, props.strings)
         val maxUnitSuffix: String = calculatedUnit
@@ -76,38 +63,30 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         }
                     }
                 ) {
-                    props.graphSeriesList.forEach { series ->
+                    props.seriesList.forEach { series ->
                         val groupedData = series.data.groupBy { it.subgroup }
 
                         groupedData.forEach { (subgroup, data) ->
                             val (transformedYValues, _) = transformYAxisValues(
                                 data,
-                                props.reportOptions,
+                                series.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION,
                                 props.strings
                             )
-                            // Format x-axis values based on report type
-                            val formattedXValues = data.map { row ->
-                                when (val formatted = xAxisType.let {
-                                    formatter.formatLabel(row.xAxis, it)
-                                }) {
-                                    is StringResource -> props.strings[formatted]
-                                    else -> formatted.toString() ?: ""
-                                }
-                            }
+                            // Format x-axis values
+                            val formattedXValues = data.map { it.xAxis.toString() }
 
-                            when (series.type) {
-                                SeriesType.BAR -> bar {
-                                    name = "${series.name} - $subgroup"
-                                    x.strings = formattedXValues
-                                    y.numbers = transformedYValues
-                                }
-
-                                SeriesType.LINE -> scatter {
-                                    name = "${series.name} - $subgroup"
+                            when (series.reportSeriesOptions.reportSeriesVisualType) {
+                                ReportSeriesVisualType.LINE_GRAPH -> scatter {
+                                    name = "${series.reportSeriesOptions.reportSeriesTitle} - $subgroup"
                                     x.strings = formattedXValues
                                     y.numbers = transformedYValues
                                     mode = ScatterMode.`lines+markers`
                                     type = TraceType.scatter
+                                }
+                                else -> bar {
+                                    name = "${series.reportSeriesOptions.reportSeriesTitle} - $subgroup"
+                                    x.strings = formattedXValues
+                                    y.numbers = transformedYValues
                                 }
                             }
                         }
@@ -129,7 +108,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         xaxis {
                             automargin = true
                             title {
-                                text = props.reportOptions.xAxis.name
+                                text = props.xAxisLabel
                                 font { size = if (isCompact) 6 else 16 }
                             }
                             tickmode = TickMode.auto
@@ -138,8 +117,13 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         yaxis {
                             automargin = true
                             title {
-                                text =
-                                    getYAxisTitle(props.reportOptions, props.strings, maxUnitSuffix)
+                                text = getYAxisTitle(
+                                    isDuration = props.seriesList.any {
+                                        it.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION
+                                    },
+                                    strings = props.strings,
+                                    unitSuffix = maxUnitSuffix
+                                )
                                 font { size = if (isCompact) 6 else 16 }
                             }
                         }
@@ -169,19 +153,15 @@ private fun calculateConversionFactor(
             maxY >= 60_000 -> Pair(1.0 / 60_000, strings[MR.strings.minute_unit])
             else -> Pair(1.0 / 1_000, strings[MR.strings.second_unit])
         }
-
         else -> Pair(1.0, "")
     }
 }
 
 private fun transformYAxisValues(
-    data: List<ReportResultQueryRow>,
-    reportOptions: ReportOptions2,
+    data: List<StatementReportRow>,
+    isDuration: Boolean,
     strings: StringProvider,
 ): Pair<List<Double>, String> {
-    val isDuration = reportOptions.series.any {
-        it.reportSeriesYAxis.type == YAxisTypes.DURATION
-    }
     val maxY = data.maxOfOrNull { it.yAxis } ?: 0.0
     val (conversionFactor, unitSuffix) = calculateConversionFactor(isDuration, maxY, strings)
 
@@ -195,13 +175,10 @@ private fun transformYAxisValues(
 }
 
 private fun getYAxisTitle(
-    reportOptions: ReportOptions2,
+    isDuration: Boolean,
     strings: StringProvider,
     unitSuffix: String
 ): String {
-    val isDuration = reportOptions.series.any {
-        it.reportSeriesYAxis.type == YAxisTypes.DURATION
-    }
     return if (isDuration) "${strings[MR.strings.duration]} ($unitSuffix)"
     else strings[MR.strings.count]
 }

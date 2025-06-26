@@ -30,11 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportOptions2
-import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
-import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
-import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.paging.RefreshCommand
@@ -155,7 +151,7 @@ private fun ReportGridCard(
                     contentAlignment = Alignment.Center
                 ) {
                     when {
-                        reportResult.request.reportOptions.series.isEmpty() ->
+                        reportResult.resultSeries.isEmpty() ->
                             CircularProgressIndicator(Modifier.size(32.dp))
 
                         reportResult.results.isEmpty() ->
@@ -165,39 +161,15 @@ private fun ReportGridCard(
                             )
 
                         else -> {
-                            val graphSeries = remember(reportResult) {
-                                reportResult.request.reportOptions.series.mapIndexed { index, reportSeries ->
-                                    GraphSeries(
-                                        type = when (reportSeries.reportSeriesVisualType) {
-                                            ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
-                                            else -> SeriesType.BAR
-                                        },
-                                        data = reportResult.results.getOrNull(index)
-                                            ?.map { statementRow ->
-                                                ReportResultQueryRow(
-                                                    xAxis = statementRow.xAxis,
-                                                    yAxis = statementRow.yAxis,
-                                                    subgroup = statementRow.subgroup
-                                                )
-                                            } ?: emptyList(),
-                                        name = reportSeries.reportSeriesTitle
-                                    )
-                                }
+                            val isDurationType = reportResult.resultSeries.any {
+                                it.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION
                             }
-                            val yAxisLabel =
-                                if (reportResult.request.reportOptions.series.any { it.reportSeriesYAxis?.type == YAxisTypes.DURATION }) {
-                                    stringResource(MR.strings.duration_hours)
-                                } else {
-                                    stringResource(MR.strings.count)
-                                }
+                            val yAxisLabel = stringResource(
+                                if (isDurationType) MR.strings.duration_hours else MR.strings.count
+                            )
 
                             CombinedGraph(
-                                series = graphSeries,
-                                yAxisLabel = yAxisLabel,
-                                isDurationType = reportResult.request.reportOptions.series.any {
-                                    it.reportSeriesYAxis?.type == YAxisTypes.DURATION
-                                },
-                                compactMode = true,
+                                series = reportResult.resultSeries,
                                 modifier = Modifier.fillMaxSize()
                                     .background(color = MaterialTheme.colorScheme.surface),
                             )

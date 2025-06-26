@@ -11,7 +11,6 @@ import com.ustadmobile.core.util.ext.onActiveLearningSpace
 import com.ustadmobile.core.util.ext.whenSubscribed
 import com.ustadmobile.core.viewmodel.DetailViewModel
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
-import com.ustadmobile.lib.db.composites.StatementReportRow
 import com.ustadmobile.lib.db.entities.Report
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,8 +25,7 @@ import org.kodein.di.instance
 
 data class ReportDetailUiState(
     val report: Report? = null,
-    val reportOptions2: ReportOptions2 = ReportOptions2(),
-    val reportResults: List<List<StatementReportRow>> = emptyList(),
+    val reportSeries: List<RunReportUseCase.RunReportResult.Series> = emptyList(),
     val errorMessage: String? = null
 )
 
@@ -56,13 +54,12 @@ class ReportDetailViewModel(
         }
         _appUiState.update { prev ->
             prev.copy(
-                fabState =
-                    FabUiState(
-                        visible = true,
-                        text = systemImpl.getString(MR.strings.edit),
-                        icon = FabUiState.FabIcon.EDIT,
-                        onClick = this@ReportDetailViewModel::onClickEdit
-                    )
+                fabState = FabUiState(
+                    visible = true,
+                    text = systemImpl.getString(MR.strings.edit),
+                    icon = FabUiState.FabIcon.EDIT,
+                    onClick = this@ReportDetailViewModel::onClickEdit
+                )
             )
         }
         viewModelScope.launch {
@@ -102,7 +99,6 @@ class ReportDetailViewModel(
 
                                         else -> throw IllegalStateException("Report $reportUid has no options or title")
                                     }
-                                    _uiState.update { it.copy(reportOptions2 = parsedOptions) }
                                     _appUiState.update { prev ->
                                         prev.copy(title = parsedOptions.title)
                                     }
@@ -114,7 +110,7 @@ class ReportDetailViewModel(
                                     )
                                     runReportUseCase(request).collect { reportResult ->
                                         _uiState.update { prev ->
-                                            prev.copy(reportResults = reportResult.results)
+                                            prev.copy(reportSeries = reportResult.resultSeries)
                                         }
                                     }
 
@@ -123,10 +119,8 @@ class ReportDetailViewModel(
                                         is IllegalArgumentException -> systemImpl.getString(
                                             MR.strings.invalid_report_format
                                         )
-
                                         is IllegalStateException -> e.message
                                             ?: systemImpl.getString(MR.strings.invalid_report_config)
-
                                         else -> e.message
                                             ?: systemImpl.getString(MR.strings.unknown_error)
                                     }

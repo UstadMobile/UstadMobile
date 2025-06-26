@@ -1,8 +1,6 @@
 package com.ustadmobile.view.report.detail
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.model.GraphSeries
-import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
@@ -54,32 +52,13 @@ val ReportDetailScreen = FC<Props> {
 val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
     val string = useStringProvider()
 
-    val graphSeriesList =
-        useMemo(listOf(props.uiState.reportResults, props.uiState.reportOptions2.series)) {
-            props.uiState.reportOptions2.series.mapIndexed { index, reportSeries ->
-                GraphSeries(
-                    type = when (reportSeries.reportSeriesVisualType) {
-                        ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
-                        else -> SeriesType.BAR
-                    },
-                    data = props.uiState.reportResults.getOrNull(index)?.map { statementRow ->
-                        ReportResultQueryRow(
-                            xAxis = statementRow.xAxis,
-                            yAxis = statementRow.yAxis,
-                            subgroup = statementRow.subgroup
-                        )
-                    } ?: emptyList(),
-                    name = reportSeries.reportSeriesTitle
-                )
-            }
-        }
     UstadStandardContainer {
         Stack {
             direction = responsive(StackDirection.column)
             spacing = responsive(8.px)
 
             ReportGraph {
-                this.graphSeriesList = graphSeriesList
+                this.seriesList = props.uiState.reportSeries
                 this.reportOptions = props.uiState.reportOptions2
                 this.strings = string
             }
@@ -97,9 +76,8 @@ private val moreOption = FC<ReportDetailProps> { props ->
     val formatter = DefaultXAxisLabelFormatter()
 
     UstadStandardContainer {
-        props.uiState.reportResults.forEachIndexed { seriesIndex, seriesRows ->
-            val seriesConfig = props.uiState.reportOptions2.series.getOrNull(seriesIndex)
-            val subgroupNamePart = seriesConfig?.reportSeriesSubGroup?.label?.let { strings[it] }
+        props.uiState.reportSeries.forEach { series ->
+            val subgroupNamePart = series.reportSeriesOptions.reportSeriesSubGroup?.label?.let { strings[it] }
 
             val subgroupLabel = if (subgroupNamePart != null) {
                 "${strings[MR.strings.subgroup_by]} - $subgroupNamePart"
@@ -142,7 +120,7 @@ private val moreOption = FC<ReportDetailProps> { props ->
 
                 Divider {}
 
-                seriesRows.forEach { row ->
+                series.data.forEach { row ->
                     Grid {
                         container = true
                         spacing = responsive(2)
@@ -176,7 +154,7 @@ private val moreOption = FC<ReportDetailProps> { props ->
                             item = true
                             xs = 4
                             Typography {
-                                +when (val formatted = seriesConfig?.reportSeriesSubGroup?.let {
+                                +when (val formatted = series.reportSeriesOptions.reportSeriesSubGroup?.let {
                                     formatter.formatLabel(row.subgroup, it)
                                 }) {
                                     is StringResource -> strings[formatted]

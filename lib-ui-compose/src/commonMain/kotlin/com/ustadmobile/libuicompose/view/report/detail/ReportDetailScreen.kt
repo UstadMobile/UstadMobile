@@ -24,20 +24,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportOptions2
-import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
 import com.ustadmobile.core.domain.report.model.ReportSeries2
-import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportXAxis
-import com.ustadmobile.core.domain.report.model.SeriesType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
+import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.lib.db.composites.StatementReportRow
-import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_FEMALE
-import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_MALE
 import com.ustadmobile.libuicompose.view.report.graphs.CombinedGraph
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
@@ -50,81 +45,45 @@ fun ReportDetailScreen(viewModel: ReportDetailViewModel) {
         ReportDetailUiState(), Dispatchers.Main.immediate
     )
     ReportDetailScreen(
-        uiState = uiState,
+        uiState = uiState
     )
 }
 
 @Composable
 fun ReportDetailScreen(
-    uiState: ReportDetailUiState,
+    uiState: ReportDetailUiState
 ) {
-    BarGraphSection(
-        reportOptions = uiState.reportOptions2,
-        statementReportRow = uiState.reportResults
-    )
-}
+    if (uiState.reportSeries.isNotEmpty()) {
+        val firstSeries = uiState.reportSeries.first()
+        val reportOptions = firstSeries.reportSeriesOptions
 
-@Composable
-fun BarGraphSection(
-    reportOptions: ReportOptions2,
-    statementReportRow: List<List<StatementReportRow>>
-) {
-    val graphSeries = remember(reportOptions, statementReportRow) {
-        reportOptions.series.mapIndexed { index, reportSeries ->
-            GraphSeries(
-                type = when (reportSeries.reportSeriesVisualType) {
-                    ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
-                    else -> SeriesType.BAR
-                },
-                data = statementReportRow.getOrNull(index)?.map { statementRow ->
-                    ReportResultQueryRow(
-                        xAxis = statementRow.xAxis,
-                        yAxis = statementRow.yAxis,
-                        subgroup = statementRow.subgroup
-                    )
-                } ?: emptyList(),
-                name = reportSeries.reportSeriesTitle
-            )
-        }
-    }
-
-    val yAxisLabel = if (reportOptions.series.any {
-            it.reportSeriesYAxis.type == YAxisTypes.DURATION
-        }) {
-        stringResource(YAxisTypes.DURATION.label) // Get from enum
-    } else {
-        stringResource(YAxisTypes.COUNT.label) // Get from enum
-    }
-
-    val hasAnyDuration = reportOptions.series.any {
-        it.reportSeriesYAxis.type == YAxisTypes.DURATION
-    }
-    if (graphSeries.isNotEmpty() && statementReportRow.isNotEmpty()) {
         Column(modifier = Modifier.fillMaxSize()) {
             CombinedGraph(
-                series = graphSeries,
+                series = uiState.reportSeries,
                 modifier = Modifier
                     .weight(0.6f)
                     .fillMaxWidth(),
-                yAxisLabel = yAxisLabel,
-                isDurationType = hasAnyDuration,
-                reportOptions = reportOptions
             )
 
             MoreOptionsSection(
-                data = graphSeries,
-                modifier = Modifier.weight(0.4f),
-                reportOptions = reportOptions
+                seriesList = uiState.reportSeries,
+                modifier = Modifier.weight(0.4f)
             )
         }
-    } else {
-        Text(stringResource(MR.strings.empty_data))
+    }
+}
+
+@Composable
+private fun getYAxisLabel(reportSeriesOptions: ReportSeries2): String {
+    return when (reportSeriesOptions.reportSeriesYAxis.type) {
+        YAxisTypes.DURATION -> stringResource(YAxisTypes.DURATION.label)
+        else -> stringResource(YAxisTypes.COUNT.label)
     }
 }
 
 @Composable
 fun DataTable(
-    data: List<ReportResultQueryRow>,
+    data: List<StatementReportRow>,
     reportSeries: ReportSeries2,
     xAxisType: ReportXAxis?
 ) {
@@ -239,25 +198,19 @@ fun DataTable(
 
 @Composable
 fun MoreOptionsSection(
-    reportOptions: ReportOptions2,
-    data: List<GraphSeries>,
+    seriesList: List<RunReportUseCase.RunReportResult.Series>,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier.fillMaxWidth()) {
         item { HorizontalDivider(thickness = 1.dp) }
 
-        items(data) { series ->
-            // Get the corresponding report series by index
-            val reportSeries = reportOptions.series.getOrNull(data.indexOf(series))
-
-            reportSeries?.let {
-                DataTable(
-                    data = series.data,
-                    reportSeries = it,
-                    xAxisType = reportOptions.xAxis
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
+//        items(seriesList) { series ->
+//            DataTable(
+//                data = series.data,
+//                reportSeries = series.reportSeriesOptions,
+//                xAxisType = series.data.{it.xAxis}
+//            )
+//            Spacer(modifier = Modifier.height(16.dp))
+//        }
     }
 }

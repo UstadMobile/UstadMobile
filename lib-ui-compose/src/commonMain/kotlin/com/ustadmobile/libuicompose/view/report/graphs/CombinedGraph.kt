@@ -10,16 +10,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.ustadmobile.core.domain.report.model.GraphSeries
-import com.ustadmobile.core.domain.report.model.ReportOptions2
+import androidx.compose.ui.text.style.TextOverflow
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.YAxisTypes
-import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
-import com.ustadmobile.core.domain.report.utils.ReportXAxisLabelFormatter
-import com.ustadmobile.core.domain.report.utils.getDistinctSortedXValues
-import com.ustadmobile.core.domain.report.utils.getDistinctSubgroups
-import com.ustadmobile.core.domain.report.utils.getMaxYValue
-import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.koalaplot.core.bar.GroupedVerticalBarPlot
 import io.github.koalaplot.core.bar.solidBar
@@ -30,29 +24,25 @@ import io.github.koalaplot.core.xygraph.CategoryAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 
-
-//Create a Preview for this - see what it looks like.
 @Composable
 fun CombinedGraph(
-    graphSeries: List<GraphSeries>,
-    reportOptions: ReportOptions2 = ReportOptions2(),
+    series: List<RunReportUseCase.RunReportResult.Series>,
     modifier: Modifier = Modifier,
-    xAxisLabelFormatter: ReportXAxisLabelFormatter = DefaultXAxisLabelFormatter()
+    xAxisLabel: String = ""
 ) {
-    // Get all distinct x-axis values (categories)
-    // THESE ARE NOT CATEGORIES - BAD NAMING
-    val categories = remember(graphSeries) {
-        graphSeries.getDistinctSortedXValues()
+    // Get all distinct x-axis values
+    val xValues = remember(series) {
+        series.flatMap { it.data.map { row -> row.xAxis } }.distinct().sorted()
     }
 
-    // Format the categories for display
-    val formattedCategories = remember(categories, reportOptions.xAxis, xAxisLabelFormatter) {
-        categories.map { xAxisLabelFormatter.formatLabel(it, reportOptions.xAxis) }
+    // Format the x-axis values for display
+    val formattedXValues = remember(xValues) {
+        xValues.map { it.toString() }
     }
 
-    // Get all distinct subgroups (series)
-    val subgroups = remember(graphSeries) {
-        graphSeries.getDistinctSubgroups()
+    // Get all distinct subgroups
+    val subgroups = remember(series) {
+        series.flatMap { it.data.map { row -> row.subgroup } }.distinct()
     }
 
     // Generate colors for each subgroup
@@ -63,36 +53,44 @@ fun CombinedGraph(
     }
 
     // Calculate max value for Y-axis scaling with fallback
-    val yRange = remember(graphSeries) {
-        val maxValue = graphSeries.getMaxYValue()
+    val yRange = remember(series) {
+        val maxValue = series.flatMap { it.data.map { row -> row.yAxis } }.maxOrNull() ?: 0.0
         if (maxValue > 0) 0f..(maxValue * 1.1).toFloat() else 0f..1f
     }
 
-    val xAxisLabel = reportOptions.xAxis
-    val isDurationType = reportOptions.series.any { it.reportSeriesYAxis.type == YAxisTypes.DURATION }
-    val yAxisLabel = stringResource(if (isDurationType) YAxisTypes.DURATION.label else YAxisTypes.COUNT.label)
+    val isDurationType = series.any {
+        it.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION
+    }
+    val yAxisLabel = stringResource(
+        if (isDurationType) MR.strings.duration_hours else MR.strings.count
+    )
 
-    //As per https://koalaplot.github.io/0.5/docs/xygraphs/bar_plots/#grouped-bars
     XYGraph(
         modifier = modifier,
-        xAxisModel = CategoryAxisModel(formattedCategories),
+        xAxisModel = CategoryAxisModel(formattedXValues),
         yAxisModel = rememberFloatLinearAxisModel(yRange),
         xAxisLabels = {
-            AxisValue(
-                label = it.toString(),
-                modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
+            Text(
+                it.toString(),
+                modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
             )
         },
         xAxisTitle = {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
-                    stringResource(xAxisLabel.label),
+                    xAxisLabel,
                     modifier = Modifier.padding(bottom = KoalaPlotTheme.sizes.gap)
                 )
             }
         },
         yAxisLabels = {
-            AxisValue(it.toString(), Modifier.defaultItemPadding(end = 4.dp))
+            Text(
+                it.toString(),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+            )
         },
         yAxisTitle = {
             Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
@@ -105,13 +103,11 @@ fun CombinedGraph(
         }
     ) {
         GroupedVerticalBarPlot {
-            //The XAxis is ALREADY SORT#ED - there is no need to do that again. There is no need to deduplicate it.
-            graphSeries.getDistinctSortedXValues().forEachIndexed { xAxisIndex, xAxis ->
-                series(solidBar(colors[xAxisIndex])) {
-                    graphSeries.forEachIndexed { seriesIndex, series ->
-                        //Not all reportSeries will have a bar for all xAxis values
-                        series.data.firstOrNull { it.xAxis == xAxis }?.also { dataPoint ->
-                            item(xAxis, 0f, dataPoint.yAxis.toFloat())
+            subgroups.forEachIndexed { subIndex, subValue ->
+                series(solidBar(colors[subIndex])) {
+                    series.forEach { reportSeries ->
+                        reportSeries.data.firstOrNull { it.xAxis == subValue }?.also { dataPoint ->
+                            item(subValue, 0f, dataPoint.yAxis.toFloat())
                         }
                     }
                 }

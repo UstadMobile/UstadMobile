@@ -2,11 +2,8 @@ package com.ustadmobile.view.report.list
 
 import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
-import com.ustadmobile.core.domain.report.model.GraphSeries
 import com.ustadmobile.core.domain.report.model.ReportOptions2
-import com.ustadmobile.core.domain.report.model.ReportResultQueryRow
-import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
-import com.ustadmobile.core.domain.report.model.SeriesType
+import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
@@ -101,25 +98,9 @@ val ReportListItem = FC<ReportListItemProps> { props ->
         )
     )
 
-    val graphSeriesList = useMemo(reportResult) {
-        reportResult.request.reportOptions.series.mapIndexed { index, reportSeries ->
-            GraphSeries(
-                type = when (reportSeries.reportSeriesVisualType) {
-                    ReportSeriesVisualType.LINE_GRAPH -> SeriesType.LINE
-                    else -> SeriesType.BAR
-                },
-                data = reportResult.results.getOrNull(index)?.map {
-                    ReportResultQueryRow(
-                        xAxis = it.xAxis,
-                        yAxis = it.yAxis,
-                        subgroup = it.subgroup
-                    )
-                } ?: emptyList(),
-                name = reportSeries.reportSeriesTitle
-            )
-        }
+    val isDurationType = reportResult.resultSeries.any {
+        it.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION
     }
-
     Card {
         sx = jso {
             padding = 8.px
@@ -152,10 +133,10 @@ val ReportListItem = FC<ReportListItemProps> { props ->
             onClick = { props.onListItemClick(props.report) }
 
             ReportGraph {
-                this.graphSeriesList = graphSeriesList
-                this.reportOptions = reportResult.request.reportOptions
-                this.strings = string
-                this.compact = true
+                seriesList = reportResult.resultSeries
+                strings = string
+                compact = true
+                xAxisLabel = reportResult.request.reportOptions.xAxis.name
             }
         }
     }
