@@ -4,10 +4,7 @@ describe('WEB_007_001_admin_enable_or_disable_user_registration_and_manage_botto
     cy.ustadStartTestServer(6000)
   })
 
-it('Enable registration switch test', () => {
-it('Admin enable registration', () => {
-  cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv");
-  // Admin user login
+it('Admin Enable Registration and Manage Bottom Navigation Bar', () => {
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
   cy.get('#settings_button').click()
   cy.contains('Site').click()
@@ -32,13 +29,19 @@ it('Admin enable registration', () => {
   cy.get('#actionBarButton').should('be.visible')
   cy.contains('Registration allowed').should('be.visible')
   cy.get('#registration_allowed').click() // switch on registration allowed
-  cy.get('#actionBarButton').should('be.visible')
+  cy.get('span.MuiFormControlLabel-label').contains('Messages')
+    .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click() //Messages switches need to be active before click
+  cy.get('span.MuiFormControlLabel-label').contains('People')
+    .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click() //People switches need to be active before click
   cy.get('#actionBarButton').click()
-  cy.contains('Yes').should('exist')
+  cy.contains('Courses').should('exist')
+  cy.contains('Library').should('exist')
+  cy.contains('Messages').should('not.exist')
+  cy.contains('People').should('not.exist')
 })
 
 it('Verify New user registration is enabled and mandatory fields are filled', () => {
-  cy.ustadClearIndexDb()
+  cy.ustadClearIndexDb({timeout:60000})
   cy.visit('/', {timeout:60000})
   cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').click()
   cy.get("#age_date_of_birth").should('be.visible')
@@ -66,11 +69,15 @@ it('Verify New user registration is enabled and mandatory fields are filled', ()
   cy.get('.Mui-error').contains('Password').should('exist') //verify the Password field's mandatory
   cy.get("input[id='password']").type('test1234')
   cy.contains('SIGN-UP').click()
+ // Verify user not able to see Messages and People options on navigation bar
   cy.contains('Courses',{timeout:2000}).should('be.visible')
+  cy.contains('Courses').should('exist')
+  cy.contains('Library').should('exist')
+  cy.contains('Messages').should('not.exist')
+  cy.contains('People').should('not.exist')
 })
 
-it('Admin disable registration', () => {
-  // Admin user login
+it('Admin- Disable Registration and Restrict Navigation Bar to Library Option', () => {
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
   cy.get('#settings_button').click()
   cy.contains('Site').click()
@@ -80,58 +87,14 @@ it('Admin disable registration', () => {
   cy.get('@editor').click().clear()
   cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).eq(0).should('exist') //verified registration_allowed switch is on
   cy.get('#registration_allowed').click()
-  cy.get('#actionBarButton').click()
-  cy.contains('Yes', { timeout: 5000 }).should('not.exist')
-  cy.contains('No', { timeout: 10000 }).should('exist')
-})
-
-it('Verify New user registration is disabled', () => {
-  cy.ustadClearIndexDb()
-  cy.visit('/', {timeout:60000})
-  cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').should('not.exist') // Verified new user registration is disabled
-  cy.get('input#username', { timeout: 10000 }).should('exist')
-})
-
-it('Admin manage bottom navigation bar', () => {
-  // Admin user login
-  cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
-  cy.get('#settings_button').click()
-  cy.contains('Site').click()
-  cy.contains('Navigation bar').click()
-  cy.contains('Edit').click()
-  cy.get('span.MuiFormControlLabel-label').contains('Messages')
-    .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click() //Messages switches need to be active before click
-  cy.get('span.MuiFormControlLabel-label').contains('People')
-    .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click() //People switches need to be active before click
-  cy.get('#actionBarButton').click()
-  cy.contains('Courses').should('exist')
-  cy.contains('Library').should('exist')
-  cy.contains('Messages').should('not.exist')
-  cy.contains('People').should('not.exist')
-})
-
-it('Verify student user can see bottom navigation bar changes', () => {
-  cy.ustadClearDbAndLogin('stud1','tests1')
-  cy.contains('Courses').should('exist')
-  cy.contains('Library').should('exist')
-  cy.contains('Messages').should('not.exist')
-  cy.contains('People').should('not.exist')
-})
-
-it('Admin manage bottom navigation bar - Library only enabled', () => {
-  // Admin user login
-  cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
-  cy.get('#settings_button').click()
-  cy.contains('Site').click()
-  cy.contains('Edit').click()
   cy.get('span.MuiFormControlLabel-label').contains('Library')
-      .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click()
+    .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click()
   cy.get('span.MuiFormControlLabel-label').contains('Courses')
     .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click() //Only Library should be visible to the user, navigation bar should be hidden
   cy.get('#actionBarButton').click()
   cy.contains('Please enable at least one navigation option.').should('exist')
   cy.get('span.MuiFormControlLabel-label').contains('Library')
-        .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click()
+    .should(($el) => { expect($el).not.to.have.class('Mui-disabled') }).click()
   cy.get('#actionBarButton').click()
   cy.contains('Courses').should('not.exist')
   cy.contains('Library').should('exist')
@@ -139,13 +102,20 @@ it('Admin manage bottom navigation bar - Library only enabled', () => {
   cy.contains('People').should('not.exist')
 })
 
+it('Verify New user registration is disabled', () => {
+  cy.ustadClearIndexDb()
+  cy.visit('/', {timeout:120000})
+  cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').should('not.exist') // Verified new user registration is disabled
+  cy.get('input#username', { timeout: 10000 }).should('exist')
+})
 
-it('Verify teacher can see only library - navigation bar is hidden', () => {
-  cy.ustadClearDbAndLogin('teach1','testt1')
+it('Verify New user added can only see library - navigation bar is hidden', () => {
+  cy.ustadClearDbAndLogin('newuser','test1234')
   cy.contains('Courses').should('not.exist')
   cy.contains('Library').should('exist')
   cy.contains('Messages').should('not.exist')
   cy.contains('People').should('not.exist')
+  cy.contains('Nothing here, yet').should('exist')
 })
 
   after(() => {
