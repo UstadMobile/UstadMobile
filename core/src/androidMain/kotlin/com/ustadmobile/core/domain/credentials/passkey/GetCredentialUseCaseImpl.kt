@@ -7,6 +7,7 @@ import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
@@ -69,7 +70,10 @@ class GetCredentialUseCaseImpl(
             }
         } catch (e: NoCredentialException) {
             GetCredentialUseCase.NoCredentialAvailableResult()
-        } catch (e: GetCredentialException) {
+        }
+        catch (e: GetCredentialCancellationException) {
+            GetCredentialUseCase.UserCanceledResult()
+        }catch (e: GetCredentialException) {
             GetCredentialUseCase.Error("Failed to get credential: ${e.message}")
         }
     }

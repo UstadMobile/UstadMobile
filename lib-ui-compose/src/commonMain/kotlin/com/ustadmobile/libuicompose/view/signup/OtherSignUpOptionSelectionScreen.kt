@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,6 +45,9 @@ fun OtherSignUpOptionSelectionScreen(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        uiState.errorText?.also { errorText ->
+            Text(color = MaterialTheme.colorScheme.error, text = errorText)
+        }
         if (uiState.passkeySupported) {
             LazyColumn {
 
