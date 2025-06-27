@@ -26,12 +26,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.ReportOptions2
-import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.viewmodel.report.list.ReportListUiState
@@ -161,15 +159,8 @@ private fun ReportGridCard(
                             )
 
                         else -> {
-                            val isDurationType = reportResult.resultSeries.any {
-                                it.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION
-                            }
-                            val yAxisLabel = stringResource(
-                                if (isDurationType) MR.strings.duration_hours else MR.strings.count
-                            )
-
                             CombinedGraph(
-                                series = reportResult.resultSeries,
+                                reportResult = reportResult,
                                 modifier = Modifier.fillMaxSize()
                                     .background(color = MaterialTheme.colorScheme.surface),
                             )

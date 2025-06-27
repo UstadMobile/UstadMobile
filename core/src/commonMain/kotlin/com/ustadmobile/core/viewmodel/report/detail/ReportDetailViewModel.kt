@@ -25,7 +25,7 @@ import org.kodein.di.instance
 
 data class ReportDetailUiState(
     val report: Report? = null,
-    val reportSeries: List<RunReportUseCase.RunReportResult.Series> = emptyList(),
+    val reportResult: RunReportUseCase.RunReportResult? = null, // Add this
     val errorMessage: String? = null,
     val reportOptions2: ReportOptions2 = ReportOptions2(),
     )
@@ -114,7 +114,7 @@ class ReportDetailViewModel(
                                     )
                                     runReportUseCase(request).collect { reportResult ->
                                         _uiState.update { prev ->
-                                            prev.copy(reportSeries = reportResult.resultSeries)
+                                            prev.copy(reportResult = reportResult)
                                         }
                                     }
 

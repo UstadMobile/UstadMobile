@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import dev.icerock.moko.resources.compose.stringResource
@@ -27,13 +26,15 @@ import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 
 @Composable
 fun CombinedGraph(
-    series: List<RunReportUseCase.RunReportResult.Series>,
+    reportResult: RunReportUseCase.RunReportResult,
     modifier: Modifier = Modifier,
-    xAxisLabel: ReportXAxis = ReportXAxis.DAY
 ) {
+    val series = reportResult.resultSeries
+    val xAxisLabel = reportResult.request.reportOptions.xAxis
+
     // Get all distinct x-axis values
     val xValues = remember(series) {
-        series.flatMap { it.data.map { row -> row.xAxis } }.distinct().sorted()
+        reportResult.distinctXAxisValueSorted
     }
 
     // Format the x-axis values for display
@@ -104,12 +105,14 @@ fun CombinedGraph(
         }
     ) {
         GroupedVerticalBarPlot {
-            subgroups.forEachIndexed { subIndex, subValue ->
-                series(solidBar(colors[subIndex])) {
-                    series.forEach { reportSeries ->
-                        reportSeries.data.firstOrNull { it.xAxis == subValue }?.also { dataPoint ->
-                            item(subValue, 0f, dataPoint.yAxis.toFloat())
+            subgroups.forEachIndexed { subgroupIndex, subgroup ->
+                series(solidBar(colors[subgroupIndex])) {
+                    // For each x value, find matching data points
+                    xValues.forEach { xValue ->
+                        val dataPoint = series.firstNotNullOfOrNull { seriesItem ->
+                            seriesItem.data.firstOrNull { it.xAxis == xValue && it.subgroup == subgroup }
                         }
+                        item(xValue, 0f, dataPoint?.yAxis?.toFloat() ?: 0f)
                     }
                 }
             }

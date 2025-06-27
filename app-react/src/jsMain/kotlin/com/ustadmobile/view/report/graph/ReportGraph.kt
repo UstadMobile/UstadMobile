@@ -30,22 +30,22 @@ import web.cssom.Overflow
 import web.cssom.px
 
 external interface ReportGraphProps : Props {
-    var seriesList: List<RunReportUseCase.RunReportResult.Series>
+    var reportResult: RunReportUseCase.RunReportResult
     var strings: StringProvider
     var compact: Boolean?
-    var xAxisLabel: String
 }
 
 val ReportGraph = FC<ReportGraphProps> { props ->
     val containerRef = useRef<web.html.HTMLElement>()
     val isCompact = props.compact ?: false
 
-    useEffect(props.seriesList) {
+    useEffect(props.reportResult) {
         val container = containerRef.current ?: return@useEffect
 
-        val maxY = props.seriesList.flatMap { it.data.map { row -> row.yAxis } }.maxOrNull() ?: 0.0
+        val seriesList = props.reportResult.resultSeries
+        val maxY = seriesList.flatMap { it.data.map { row -> row.yAxis } }.maxOrNull() ?: 0.0
 
-        val isDuration = props.seriesList.any { series ->
+        val isDuration = seriesList.any { series ->
             series.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION
         }
         val (_, calculatedUnit) = calculateConversionFactor(isDuration, maxY, props.strings)
@@ -63,7 +63,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         }
                     }
                 ) {
-                    props.seriesList.forEach { series ->
+                    seriesList.forEach { series ->
                         val groupedData = series.data.groupBy { it.subgroup }
 
                         groupedData.forEach { (subgroup, data) ->
@@ -108,7 +108,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         xaxis {
                             automargin = true
                             title {
-                                text = props.xAxisLabel
+                                text = props.reportResult.request.reportOptions.xAxis.name
                                 font { size = if (isCompact) 6 else 16 }
                             }
                             tickmode = TickMode.auto
@@ -118,7 +118,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                             automargin = true
                             title {
                                 text = getYAxisTitle(
-                                    isDuration = props.seriesList.any {
+                                    isDuration = seriesList.any {
                                         it.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION
                                     },
                                     strings = props.strings,
@@ -143,6 +143,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
     }
 }
 
+// The helper functions remain unchanged
 private fun calculateConversionFactor(
     isDuration: Boolean, maxY: Double,
     strings: StringProvider,

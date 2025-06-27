@@ -3,7 +3,6 @@ package com.ustadmobile.view.report.list
 import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
 import com.ustadmobile.core.domain.report.model.ReportOptions2
-import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
@@ -98,9 +97,6 @@ val ReportListItem = FC<ReportListItemProps> { props ->
         )
     )
 
-    val isDurationType = reportResult.resultSeries.any {
-        it.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION
-    }
     Card {
         sx = jso {
             padding = 8.px
@@ -133,10 +129,9 @@ val ReportListItem = FC<ReportListItemProps> { props ->
             onClick = { props.onListItemClick(props.report) }
 
             ReportGraph {
-                seriesList = reportResult.resultSeries
-                strings = string
-                compact = true
-                xAxisLabel = reportResult.request.reportOptions.xAxis.name
+                this.reportResult = reportResult
+                this.strings = string
+                this.compact = true
             }
         }
     }

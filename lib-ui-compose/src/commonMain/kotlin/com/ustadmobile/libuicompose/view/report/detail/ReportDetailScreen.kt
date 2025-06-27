@@ -24,10 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportXAxis
-import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
@@ -53,25 +51,23 @@ fun ReportDetailScreen(viewModel: ReportDetailViewModel) {
 fun ReportDetailScreen(
     uiState: ReportDetailUiState
 ) {
-    if (uiState.reportSeries.isNotEmpty()) {
+    uiState.reportResult?.let { reportResult ->
         Column(modifier = Modifier.fillMaxSize()) {
             CombinedGraph(
-                series = uiState.reportSeries,
+                reportResult = reportResult,
                 modifier = Modifier
                     .weight(0.6f)
                     .fillMaxWidth(),
-                xAxisLabel = uiState.reportOptions2.xAxis
             )
 
             MoreOptionsSection(
-                seriesList = uiState.reportSeries,
+                seriesList = reportResult.resultSeries,
                 modifier = Modifier.weight(0.4f),
-                xAxisType = uiState.reportOptions2.xAxis
+                xAxisType = reportResult.request.reportOptions.xAxis
             )
         }
     }
 }
-
 @Composable
 fun DataTable(
     data: List<StatementReportRow>,

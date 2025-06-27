@@ -1,8 +1,7 @@
 package com.ustadmobile.view.report.detail
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
-import com.ustadmobile.core.domain.report.model.SeriesType
+import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
@@ -15,6 +14,7 @@ import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.report.graph.ReportGraph
 import dev.icerock.moko.resources.StringResource
+import kotlinx.datetime.TimeZone
 import mui.material.Box
 import mui.material.Card
 import mui.material.Divider
@@ -44,13 +44,28 @@ val ReportDetailScreen = FC<Props> {
     val appState by viewModel.appUiState.collectAsState(AppUiState())
 
     UstadFab { fabState = appState.fabState }
-    ReportDetailComponent2 {
+    ReportDetailComponent {
         this.uiState = uiState
     }
 }
 
-val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
+val ReportDetailComponent = FC<ReportDetailProps> { props ->
     val string = useStringProvider()
+
+    // Create a temporary RunReportResult to pass to ReportGraph
+    val reportResult = useMemo(props.uiState) {
+        RunReportUseCase.RunReportResult(
+            timestamp = 0L,
+            request = RunReportUseCase.RunReportRequest(
+                reportUid = 0, // Dummy value
+                reportOptions = props.uiState.reportOptions2,
+                accountPersonUid = 0, // Dummy value
+                timeZone = TimeZone.currentSystemDefault()
+            ),
+            results = emptyList(), // Not used directly
+            age = 0
+        )
+    }
 
     UstadStandardContainer {
         Stack {
@@ -58,7 +73,7 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
             spacing = responsive(8.px)
 
             ReportGraph {
-                this.seriesList = props.uiState.reportSeries
+                this.reportResult = reportResult
                 this.strings = string
             }
 
@@ -69,13 +84,14 @@ val ReportDetailComponent2 = FC<ReportDetailProps> { props ->
     }
 }
 
+// The moreOption component remains unchanged from your original code
 private val moreOption = FC<ReportDetailProps> { props ->
     val strings = useStringProvider()
     val xAxisType = props.uiState.reportOptions2.xAxis
     val formatter = DefaultXAxisLabelFormatter()
 
     UstadStandardContainer {
-        props.uiState.reportSeries.forEach { series ->
+        props.uiState.reportResult?.resultSeries?.forEach { series ->
             val subgroupNamePart = series.reportSeriesOptions.reportSeriesSubGroup?.label?.let { strings[it] }
 
             val subgroupLabel = if (subgroupNamePart != null) {
