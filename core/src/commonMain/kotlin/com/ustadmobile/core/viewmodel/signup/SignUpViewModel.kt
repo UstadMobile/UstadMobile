@@ -4,10 +4,10 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.SendConsentRequestToParentUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
-import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
-import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
+import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
 import com.ustadmobile.core.domain.username.GetUsernameSuggestionUseCase
@@ -109,11 +109,7 @@ data class SignUpUiState(
     val usernameSetByUser: Boolean = false,
 
     val errorText: String? = null,
-
-    ) {
-
-
-}
+)
 
 class SignUpViewModel(
     di: DI,
@@ -552,10 +548,11 @@ class SignUpViewModel(
                         val username = savePerson.username ?: throw
                         IllegalStateException("username can not be null")
 
-                        val passkeyCreated = createPasskeyUseCaseVal(
+                        val createPasskeyResult = createPasskeyUseCaseVal(
                             username = username,
                         )
-
+                        when(createPasskeyResult){
+                            is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                         accountManager.registerWithPasskey(
                             learningSpaceUrl = serverUrl,
                             passkeyResult = passkeyCreated,
@@ -585,6 +582,18 @@ class SignUpViewModel(
 
                         enrollToCourseFromInviteUid(savePerson.personUid)
                         navigateToAppropriateScreen(savePerson)
+                            }
+                            is CreatePasskeyUseCase.Error -> {
+                                _uiState.update { prev ->
+                                    prev.copy(
+                                        errorText = createPasskeyResult.message,
+                                    )
+                                }
+                            }
+                            is CreatePasskeyUseCase.UserCanceledResult -> {
+                                // do nothing
+                            }
+                        }
                     }catch (e:Exception){
                         _uiState.update { prev ->
                             prev.copy(
