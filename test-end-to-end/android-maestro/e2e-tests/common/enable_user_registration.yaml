@@ -7,9 +7,9 @@ appId: com.toughra.ustadmobile
 - tapOn: "Settings"
 - tapOn: "Site"
 - tapOn:
-      id: "floating_action_button"
+    id: "floating_action_button"
 - tapOn:
-      id: "registration_allowed"
+    id: "registration_allowed"
 - tapOn: "Terms and policies (English)"
 - tapOn:
       id: "com.toughra.ustadmobile:id/editor"

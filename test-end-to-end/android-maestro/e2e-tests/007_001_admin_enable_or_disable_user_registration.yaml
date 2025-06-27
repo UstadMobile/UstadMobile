@@ -20,8 +20,30 @@ onFlowComplete:
 #admin enable user registration
 - runFlow:
    file: "common/admin_login.yaml"
-- runFlow:
-    file: "common/enable_user_registration.yaml"
+- tapOn: "Settings"
+- tapOn: "Site"
+- tapOn:
+    id: "floating_action_button"
+- tapOn:
+    id: "registration_allowed"
+- tapOn: "Save"
+- assertVisible: "If self-registration is enabled, you must set terms and policies in at least one language for users to accept when they register."
+- tapOn:
+    id: "registration_allowed"  #switch off to verify error goes or not
+- tapOn: "Save"
+- assertVisible:
+    id: "floating_action_button" #Edit button should be visible
+- tapOn:
+    id: "floating_action_button"
+- tapOn:
+    id: "registration_allowed"
+- tapOn: "Terms and policies (English)"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "Terms and company policies"
+- tapOn: "Done"
+- tapOn: "Save"
+- takeScreenshot: "${TESTRESULTSDIR}/user_registration_enabled"
 - assertVisible: "Yes"
 - runFlow: "common/clear_state_and_learning_space_new_userflow.yaml"
 - runFlow: "common/select_site.yaml"
