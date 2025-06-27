@@ -133,7 +133,7 @@ class OtherSignUpOptionSelectionViewModel(
 
                         if (isParent) {
                             navController.navigate(
-                                AddChildProfilesViewModel.DEST_NAME,
+                                ChildProfileListViewModel.DEST_NAME,
                                 args = buildMap {
                                     put(ARG_NEXT, nextDestination)
                                     putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)

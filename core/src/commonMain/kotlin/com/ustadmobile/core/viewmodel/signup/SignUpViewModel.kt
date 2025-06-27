@@ -553,35 +553,35 @@ class SignUpViewModel(
                         )
                         when(createPasskeyResult){
                             is CreatePasskeyUseCase.PasskeyCreatedResult -> {
-                        accountManager.registerWithPasskey(
-                            learningSpaceUrl = serverUrl,
-                            passkeyResult = passkeyCreated,
-                            person = savePerson,
-                            personPicture = _uiState.value.personPicture,
-                            isMinor = _uiState.value.isMinor
-                        )
+                                accountManager.registerWithPasskey(
+                                    learningSpaceUrl = serverUrl,
+                                    passkeyResult = createPasskeyResult.authenticationResponseJSON,
+                                    person = savePerson,
+                                    personPicture = _uiState.value.personPicture,
+                                    isMinor = _uiState.value.isMinor
+                                )
 
 
-                        val personPictureVal = _uiState.value.personPicture
-                        if (personPictureVal != null) {
-                            personPictureVal.personPictureUid = savePerson.personUid
-                            personPictureVal.personPictureLct = systemTimeInMillis()
-                            val personPictureUriVal = personPictureVal.personPictureUri
+                                val personPictureVal = _uiState.value.personPicture
+                                if (personPictureVal != null) {
+                                    personPictureVal.personPictureUid = savePerson.personUid
+                                    personPictureVal.personPictureLct = systemTimeInMillis()
+                                    val personPictureUriVal = personPictureVal.personPictureUri
 
-                            enqueueSavePictureUseCase(
-                                entityUid = savePerson.personUid,
-                                tableId = PersonPicture.TABLE_ID,
-                                pictureUri = personPictureUriVal
-                            )
+                                    enqueueSavePictureUseCase(
+                                        entityUid = savePerson.personUid,
+                                        tableId = PersonPicture.TABLE_ID,
+                                        pictureUri = personPictureUriVal
+                                    )
 
-                    }
-                    if (_uiState.value.isMinor){
-                        sendConsentAndNavigateToMinorWaitScreen(false)
-                        return@launch
-                    }
+                                }
+                                if (_uiState.value.isMinor) {
+                                    sendConsentAndNavigateToMinorWaitScreen(false)
+                                    return@launch
+                                }
 
-                        enrollToCourseFromInviteUid(savePerson.personUid)
-                        navigateToAppropriateScreen(savePerson)
+                                enrollToCourseFromInviteUid(savePerson.personUid)
+                                navigateToAppropriateScreen(savePerson)
                             }
                             is CreatePasskeyUseCase.Error -> {
                                 _uiState.update { prev ->
