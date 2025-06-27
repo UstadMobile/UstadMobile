@@ -2,7 +2,6 @@ package com.ustadmobile.core.viewmodel.signup
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
-import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
@@ -89,11 +88,7 @@ data class SignUpUiState(
     val usernameSetByUser: Boolean = false,
 
     val errorText: String? = null,
-
-    ) {
-
-
-}
+)
 
 class SignUpViewModel(
     di: DI,
@@ -102,8 +97,6 @@ class SignUpViewModel(
 ) : UstadEditViewModel(di, savedStateHandle, destName) {
 
     private val _uiState: MutableStateFlow<SignUpUiState> = MutableStateFlow(SignUpUiState())
-
-    private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
 
     private var nextDestination: String =
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
@@ -399,14 +392,14 @@ class SignUpViewModel(
                         val username = savePerson.username ?: throw
                         IllegalStateException("username can not be null")
 
-                        val passkeyCreated = createPasskeyUseCaseVal(
+                        val createPasskeyResult = createPasskeyUseCaseVal(
                             username = username,
                         )
-                        when(passkeyCreated){
+                        when(createPasskeyResult){
                             is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                                 accountManager.registerWithPasskey(
                                     learningSpaceUrl = serverUrl,
-                                    passkeyResult = passkeyCreated.authenticationResponseJSON,
+                                    passkeyResult = createPasskeyResult.authenticationResponseJSON,
                                     person = savePerson,
                                     personPicture = _uiState.value.personPicture
                                 )
@@ -432,7 +425,7 @@ class SignUpViewModel(
                             is CreatePasskeyUseCase.Error -> {
                                 _uiState.update { prev ->
                                     prev.copy(
-                                        errorText = passkeyCreated.message,
+                                        errorText = createPasskeyResult.message,
                                     )
                                 }
                             }
@@ -440,9 +433,6 @@ class SignUpViewModel(
                               // do nothing
                             }
                         }
-
-
-
                     }catch (e:Exception){
                         _uiState.update { prev ->
                             prev.copy(

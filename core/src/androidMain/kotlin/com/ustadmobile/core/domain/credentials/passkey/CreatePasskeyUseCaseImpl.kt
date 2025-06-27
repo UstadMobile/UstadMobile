@@ -55,16 +55,12 @@ class CreatePasskeyUseCaseImpl(
             CreatePasskeyUseCase.PasskeyCreatedResult(passkeyResponse)
         } catch (e: CreateCredentialCancellationException) {
             CreatePasskeyUseCase.UserCanceledResult()
-
         } catch (e: CreateCredentialException) {
             // See https://codelabs.developers.google.com/credential-manager-api-for-android#1
-
             Napier.e(
                 message = "CreatePassKeyUseCaseImpl: exception", throwable = e
             )
             CreatePasskeyUseCase.Error(e.message)
-
-
         }
     }
 }

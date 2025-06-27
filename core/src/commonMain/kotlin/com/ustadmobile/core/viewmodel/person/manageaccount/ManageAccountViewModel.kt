@@ -36,7 +36,7 @@ data class ManageAccountUiState(
     val personUsername: String = "",
     val personAuth: PersonAuth2 ? = null,
     val errorText: String? = null,
-    )
+)
 
 class ManageAccountViewModel(
     di: DI,

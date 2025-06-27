@@ -5,12 +5,9 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
 import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
-import com.ustadmobile.core.domain.credentials.passkey.model.AuthenticationResponseJSON
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
-import com.ustadmobile.core.impl.appstate.Snack
-import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.view.UstadView
@@ -54,8 +51,6 @@ class OtherSignUpOptionSelectionViewModel(
 
     private val serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]?: "http://localhost"
     private val isParent = savedStateHandle[IS_PARENT].toBoolean()
-
-    private val apiUrlConfig: SystemUrlConfig by instance()
 
     private val getLocalAccountsSupportedUseCase: GetLocalAccountsSupportedUseCase by instance()
 
@@ -112,15 +107,15 @@ class OtherSignUpOptionSelectionViewModel(
 
             savePerson.personUid = uid
 
-            val passkeyCreated = createPasskeyUseCase?.invoke(
-                    username = savePerson.username.toString()
+            val createPasskeyResult = createPasskeyUseCase?.invoke(
+                username = savePerson.username.toString()
             )
-            when(passkeyCreated){
+            when(createPasskeyResult){
                 is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                     viewModelScope.launch {
                         accountManager.registerWithPasskey(
                             serverUrl,
-                            passkeyCreated.authenticationResponseJSON,
+                            createPasskeyResult.authenticationResponseJSON,
                             savePerson,
                             _uiState.value.personPicture
                         )
@@ -154,7 +149,7 @@ class OtherSignUpOptionSelectionViewModel(
                 is CreatePasskeyUseCase.Error ->{
                     _uiState.update { prev ->
                         prev.copy(
-                            errorText = passkeyCreated.message,
+                            errorText = createPasskeyResult.message,
                         )
                     }
                 }
