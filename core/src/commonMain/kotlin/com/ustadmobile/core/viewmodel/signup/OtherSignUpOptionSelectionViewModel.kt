@@ -25,7 +25,9 @@ import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_MI
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
+import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -170,12 +172,17 @@ class OtherSignUpOptionSelectionViewModel(
         try {
             val savePerson = _uiState.value.person ?: throw IllegalStateException("child details are empty")
             val parentContact = savedStateHandle[SignUpViewModel.ARG_PARENT_CONTACT]
+            val parentPersonParentJoin = PersonParentJoin().shallowCopy {
+                ppjMinorPersonUid = savePerson.personUid
+            }
+            val ppjUid = activeRepoWithFallback.personParentJoinDao().upsertAsync(parentPersonParentJoin)
             sendConsentRequestToParentUseCase(
                 SendConsentRequestToParentUseCase.SendConsentRequestToParentRequest(
                     childFullName = savePerson.fullName(),
                     childDateOfBirth = savePerson.dateOfBirth,
                     childGender = savePerson.gender,
-                    parentContact = parentContact?:""
+                    parentContact = parentContact?:"",
+                    ppjUid = ppjUid
                 )
             )
             val args = mutableMapOf<String, String>().also {

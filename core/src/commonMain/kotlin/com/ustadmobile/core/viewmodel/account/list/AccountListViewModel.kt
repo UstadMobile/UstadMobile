@@ -35,6 +35,7 @@ import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentM
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_GENDER
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_NAME
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_PPJ_UID
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.RESULT_KEY_PERSON
 import com.ustadmobile.core.viewmodel.person.child.EditChildProfileViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
@@ -139,6 +140,7 @@ class AccountListViewModel(
                 savedStateHandle[ARG_CHILD_NAME] = args[ARG_CHILD_NAME]
                 savedStateHandle[ARG_CHILD_GENDER] = args[ARG_CHILD_GENDER]
                 savedStateHandle[ARG_CHILD_DATE_OF_BIRTH] = args[ARG_CHILD_DATE_OF_BIRTH]
+                savedStateHandle[ARG_PPJ_UID] = args[ARG_PPJ_UID]
             }
 
         }

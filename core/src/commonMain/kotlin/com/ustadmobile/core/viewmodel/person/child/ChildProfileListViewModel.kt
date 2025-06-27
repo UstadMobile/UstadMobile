@@ -291,6 +291,8 @@ class ChildProfileListViewModel(
 
         const val ARG_CHILD_NAME = "childName"
 
+        const val ARG_PPJ_UID = "ppjUId"
+
         const val ARG_CHILD_DATE_OF_BIRTH = "childDateOfBirth"
 
         const val ARG_CHILD_GENDER = "childGender"

@@ -37,6 +37,7 @@ import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_GENDER
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_NAME
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_PPJ_UID
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_REFERER_SCREEN
 import com.ustadmobile.core.viewmodel.person.toFirstAndLastNameExt
@@ -44,6 +45,7 @@ import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
+import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
@@ -346,12 +348,17 @@ class SignUpViewModel(
     }
 
     private suspend fun sendConsentAndNavigateToMinorWaitScreen(showUsernamePassword: Boolean) {
+        val parentPersonParentJoin = PersonParentJoin().shallowCopy {
+            ppjMinorPersonUid = _uiState.value.person?.personUid?:0L
+        }
+        val ppjUid = activeRepoWithFallback.personParentJoinDao().upsertAsync(parentPersonParentJoin)
         sendConsentRequestToParentUseCase(
             SendConsentRequestToParentUseCase.SendConsentRequestToParentRequest(
                 childFullName = _uiState.value.fullName?:"",
                 childDateOfBirth = dateOfBirth,
                 childGender = _uiState.value.person?.gender?:0,
-                parentContact = _uiState.value.parentEmail?:""
+                parentContact = _uiState.value.parentEmail?:"",
+                ppjUid = ppjUid
             )
         )
         val args = mutableMapOf<String, String>().also {
@@ -735,8 +742,8 @@ class SignUpViewModel(
             ARG_CHILD_GENDER,
             ARG_CHILD_DATE_OF_BIRTH,
             ARG_REFERER_SCREEN,
-            ARG_PARENT_CONTACT
-
+            ARG_PARENT_CONTACT,
+            ARG_PPJ_UID
         )
 
         const val SIGN_WITH_USERNAME_AND_PASSWORD = "SignupWithUsernameAndPassword"

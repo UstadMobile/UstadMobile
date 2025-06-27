@@ -28,6 +28,7 @@ import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_GENDER
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_NAME
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_PPJ_UID
 import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
@@ -126,6 +127,7 @@ class AddAccountSelectNewOrExistingViewModel(
                 savedStateHandle[ARG_CHILD_NAME] = args[ARG_CHILD_NAME]
                 savedStateHandle[ARG_CHILD_GENDER] = args[ARG_CHILD_GENDER]
                 savedStateHandle[ARG_CHILD_DATE_OF_BIRTH] = args[ARG_CHILD_DATE_OF_BIRTH]
+                savedStateHandle[ARG_PPJ_UID] = args[ARG_PPJ_UID]
             }
 
         }

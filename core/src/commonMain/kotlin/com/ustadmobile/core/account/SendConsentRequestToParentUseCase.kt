@@ -12,8 +12,9 @@ interface SendConsentRequestToParentUseCase {
         val childFullName: String,
         val childDateOfBirth: Long,
         val childGender: Int,
-        val parentContact: String
-    )
+        val parentContact: String,
+        val ppjUid: Long,
+        )
 
     suspend operator fun invoke(
         request: SendConsentRequestToParentRequest

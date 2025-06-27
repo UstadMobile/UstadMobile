@@ -26,6 +26,7 @@ class SendConsentRequestToParentServerImpl(
                     ChildProfileListViewModel.ARG_CHILD_NAME to request.childFullName,
                     ChildProfileListViewModel.ARG_CHILD_GENDER to request.childGender.toString(),
                     ChildProfileListViewModel.ARG_CHILD_DATE_OF_BIRTH to request.childDateOfBirth.toString(),
+                    ChildProfileListViewModel.ARG_PPJ_UID to request.ppjUid.toString(),
                 ).toQueryString()
             ).fullUrl()
             sendEmailUseCase.invoke(

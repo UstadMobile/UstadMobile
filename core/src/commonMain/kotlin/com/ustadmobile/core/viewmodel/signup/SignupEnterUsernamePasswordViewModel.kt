@@ -4,7 +4,8 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.AccountRegisterOptions
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.SendConsentRequestToParentUseCase
-import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
+import com.ustadmobile.core.db.UmAppDataLayer
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -28,9 +29,8 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel
-import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
-import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_GENDER
 import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_NAME
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_PPJ_UID
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel.Companion.ARG_REFERER_SCREEN
@@ -98,8 +98,6 @@ class SignupEnterUsernamePasswordViewModel(
         SignupEnterUsernamePasswordUiState()
     )
 
-    private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
-
     private var nextDestination: String =
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
@@ -129,6 +127,9 @@ class SignupEnterUsernamePasswordViewModel(
 
     val sendConsentRequestToParentUseCase : SendConsentRequestToParentUseCase =
         di.on(LearningSpace(serverUrl)).direct.instance()
+
+    val repo: UmAppDatabase = di.on(LearningSpace(serverUrl)).direct.instance<UmAppDataLayer>()
+        .requireRepository()
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -257,7 +258,7 @@ class SignupEnterUsernamePasswordViewModel(
 
                 val passwordVal = _uiState.value.password ?: return@launch
                 val parentJoin = PersonParentJoin(ppjEmail = savedStateHandle[SignUpViewModel.ARG_PARENT_CONTACT])
-                accountManager.register(
+               val person= accountManager.register(
                     person = savePerson,
                     password = passwordVal,
                     learningSpaceUrl = serverUrl,
@@ -302,7 +303,7 @@ class SignupEnterUsernamePasswordViewModel(
                     Napier.d { "enrollToCourseFromInviteCodeUseCase :"+e.message}
                 }
 
-                navigateToAppropriateScreen(savePerson)
+                navigateToAppropriateScreen(person)
 
             } catch (e: Exception) {
                 if (e is IllegalStateException) {
@@ -325,7 +326,7 @@ class SignupEnterUsernamePasswordViewModel(
 
         if (isParent) {
             if (!isPersonalAccount&&savedStateHandle[ARG_CHILD_NAME]!=null){
-                navigateToConsentManagementScreen(savePerson)
+                navigateToConsentManagementScreen()
             }else{
                 navController.navigate(ChildProfileListViewModel.DEST_NAME,
                     args = buildMap {
@@ -358,28 +359,10 @@ class SignupEnterUsernamePasswordViewModel(
         }
     }
 
-    private fun navigateToConsentManagementScreen(savePerson: Person) {
+    private fun navigateToConsentManagementScreen() {
         viewModelScope.launch {
-            val childName = savedStateHandle[ARG_CHILD_NAME]
-            val childGender = savedStateHandle[ARG_CHILD_GENDER]?.toInt()?:0
-            val childDateOfBirth = savedStateHandle[ARG_CHILD_DATE_OF_BIRTH]?.toLong()?:0L
-            val fullName = childName?.trim()
-            val (firstName, lastName) = fullName.toFirstAndLastNameExt()
-            val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
-            val childProfile = Person(
-                personUid =uid,
-                firstNames = firstName,
-                lastName = lastName,
-                gender = childGender,
-                dateOfBirth = childDateOfBirth,
-                isPersonalAccount = true
-            )
-            activeRepoWithFallback.personDao().insertOrReplace(childProfile)
-            val parentPersonParentJoin = PersonParentJoin().shallowCopy {
-                ppjParentPersonUid = savePerson.personUid
-                ppjMinorPersonUid = childProfile.personUid
-            }
-           val ppjUid = activeRepoWithFallback.personParentJoinDao().upsertAsync(parentPersonParentJoin)
+            val ppjUid = savedStateHandle[ARG_PPJ_UID]?.toLong()?:0L
+
             navController.navigate(
                 ParentalConsentManagementViewModel.DEST_NAME,
                 mapOf(ARG_ENTITY_UID to ppjUid.toString(),
@@ -393,12 +376,17 @@ class SignupEnterUsernamePasswordViewModel(
         try {
             val savePerson = _uiState.value.person ?: throw IllegalStateException("child details are empty")
             val parentContact = savedStateHandle[SignUpViewModel.ARG_PARENT_CONTACT]
+
+            val personParentJoin = repo.personParentJoinDao()
+                .findByMinorPersonUidForConsent(savePerson.personUid)
+
             sendConsentRequestToParentUseCase(
                 SendConsentRequestToParentUseCase.SendConsentRequestToParentRequest(
                     childFullName = savePerson.fullName(),
                     childDateOfBirth = savePerson.dateOfBirth,
                     childGender = savePerson.gender,
-                    parentContact = parentContact?:""
+                    parentContact = parentContact?:"",
+                    ppjUid = personParentJoin.ppjUid
                 )
             )
             val args = mutableMapOf<String, String>().also {
