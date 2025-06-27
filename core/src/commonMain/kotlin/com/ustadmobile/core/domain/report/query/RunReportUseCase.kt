@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.report.query
 
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
+import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.ihttp.headers.directives.directivesToMap
 import com.ustadmobile.lib.db.composites.StatementReportRow
 import com.ustadmobile.lib.db.composites.adapters.asStatementReportRow
@@ -61,6 +62,31 @@ interface RunReportUseCase {
         val distinctXAxisValueSorted: List<String> by lazy {
             results.flatten().map { it.xAxis }.distinct().sorted()
         }
+
+        val distinctSubgroups: List<String> by lazy {
+            results.flatMap { it.distinctBy { it.subgroup } }.map { it.subgroup }.distinct()
+        }
+
+        val maxYValue: Double? by lazy {
+            results.maxOfOrNull { resultList ->
+                resultList.maxOfOrNull { it.yAxis } ?: 0.toDouble()
+            }
+        }
+
+        val yRange: ClosedFloatingPointRange<Float> by lazy {
+            val maxVal = maxYValue ?: 0.toDouble()
+
+            if(maxVal > 0) {
+                0.0f..(maxVal.toFloat() * Y_RANGE_BUFFER_FACTOR)
+            } else {
+                0.0f..1.0f
+            }
+        }
+
+        val yAxisType: YAxisTypes by lazy {
+            request.reportOptions.series.first().reportSeriesYAxis.type
+        }
+
 
         //Add functions to get info needed for graphs in a clear/logical way e.g. distinct xaxis,subgroups
 
@@ -172,6 +198,13 @@ interface RunReportUseCase {
 
 
         const val DEFAULT_MAX_AGE = (60 * 60)//one hour
+
+        /**
+         * When displaying a graph and providing the max y axis value to the graphing library,
+         * add a buffer factor for space (10% extra)
+         */
+        const val Y_RANGE_BUFFER_FACTOR = 1.1f
+
 
     }
 }

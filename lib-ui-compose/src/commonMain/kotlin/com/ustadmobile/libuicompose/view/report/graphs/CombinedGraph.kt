@@ -29,51 +29,23 @@ fun CombinedGraph(
     reportResult: RunReportUseCase.RunReportResult,
     modifier: Modifier = Modifier,
 ) {
-    val series = reportResult.resultSeries
-    val xAxisLabel = reportResult.request.reportOptions.xAxis
-
-    // Get all distinct x-axis values
-    val xValues = remember(series) {
-        reportResult.distinctXAxisValueSorted
-    }
-
-    // Format the x-axis values for display
-    val formattedXValues = remember(xValues) {
-        xValues.map { it.toString() }
-    }
-
-    // Get all distinct subgroups
-    val subgroups = remember(series) {
-        series.flatMap { it.data.map { row -> row.subgroup } }.distinct()
-    }
-
     // Generate colors for each subgroup
-    val colors = remember(subgroups) {
-        List(subgroups.size) { index ->
-            Color.hsv(index * 360f / subgroups.size.coerceAtLeast(1), 1f, 0.7f)
+    val colors = remember(reportResult.timestamp) {
+        reportResult.distinctSubgroups.mapIndexed { index, s ->
+            Color.hsv(index * 360f / reportResult.distinctSubgroups.size.coerceAtLeast(1), 1f, 0.7f)
         }
     }
 
-    // Calculate max value for Y-axis scaling with fallback
-    val yRange = remember(series) {
-        val maxValue = series.flatMap { it.data.map { row -> row.yAxis } }.maxOrNull() ?: 0.0
-        if (maxValue > 0) 0f..(maxValue * 1.1).toFloat() else 0f..1f
-    }
-
-    val isDurationType = series.any {
-        it.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION
-    }
-    val yAxisLabel = stringResource(
-        if (isDurationType) MR.strings.duration_hours else MR.strings.count
-    )
-
+    //Roughly as per https://koalaplot.github.io/0.5/docs/xygraphs/bar_plots/#grouped-bars
     XYGraph(
         modifier = modifier,
-        xAxisModel = CategoryAxisModel(formattedXValues),
-        yAxisModel = rememberFloatLinearAxisModel(yRange),
+        xAxisModel = remember(reportResult.timestamp) {
+            CategoryAxisModel(reportResult.distinctXAxisValueSorted)
+        },
+        yAxisModel = rememberFloatLinearAxisModel(reportResult.yRange),
         xAxisLabels = {
             Text(
-                it.toString(),
+                text = it,
                 modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE),
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
@@ -82,14 +54,14 @@ fun CombinedGraph(
         xAxisTitle = {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
-                    stringResource(xAxisLabel.label),
+                    text = stringResource(reportResult.request.reportOptions.xAxis.label),
                     modifier = Modifier.padding(bottom = KoalaPlotTheme.sizes.gap)
                 )
             }
         },
         yAxisLabels = {
             Text(
-                it.toString(),
+                text = it.toString(),
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
             )
@@ -97,22 +69,27 @@ fun CombinedGraph(
         yAxisTitle = {
             Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
                 Text(
-                    yAxisLabel,
-                    modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
-                        .padding(bottom = KoalaPlotTheme.sizes.gap)
+                    text = if(reportResult.yAxisType == YAxisTypes.DURATION) {
+                        stringResource(MR.strings.duration) //TODO here: add unit
+                    }else {
+                        stringResource(MR.strings.count)
+                    }
                 )
             }
         }
     ) {
         GroupedVerticalBarPlot {
-            subgroups.forEachIndexed { subgroupIndex, subgroup ->
+            reportResult.distinctSubgroups.forEachIndexed { subgroupIndex, subgroup ->
                 series(solidBar(colors[subgroupIndex])) {
                     // For each x value, find matching data points
-                    xValues.forEach { xValue ->
-                        val dataPoint = series.firstNotNullOfOrNull { seriesItem ->
+                    reportResult.distinctXAxisValueSorted.forEach { xValue ->
+                        reportResult.resultSeries.firstNotNullOfOrNull { seriesItem ->
                             seriesItem.data.firstOrNull { it.xAxis == xValue && it.subgroup == subgroup }
+                        }?.also { dataPoint ->
+                            // There may or may not be a bar for each xAxis/subgroup combination.
+                            // Show a bar only if there is data for this combination
+                            item(xValue, 0f, dataPoint.yAxis.toFloat())
                         }
-                        item(xValue, 0f, dataPoint?.yAxis?.toFloat() ?: 0f)
                     }
                 }
             }
