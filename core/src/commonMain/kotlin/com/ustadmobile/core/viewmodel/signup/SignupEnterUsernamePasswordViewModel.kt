@@ -363,11 +363,13 @@ class SignupEnterUsernamePasswordViewModel(
         viewModelScope.launch {
             val ppjUid = savedStateHandle[ARG_PPJ_UID]?.toLong()?:0L
 
+            val args = mutableMapOf<String, String>().also {
+                it[ARG_ENTITY_UID] = ppjUid.toString()
+                it[ARG_NEXT] =CURRENT_DEST
+            }
             navController.navigate(
                 ParentalConsentManagementViewModel.DEST_NAME,
-                mapOf(ARG_ENTITY_UID to ppjUid.toString(),
-                    ARG_NEXT to CURRENT_DEST
-                ))
+                args)
         }
 
     }

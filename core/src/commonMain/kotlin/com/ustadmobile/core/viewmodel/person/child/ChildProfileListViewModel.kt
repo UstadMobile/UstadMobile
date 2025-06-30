@@ -68,12 +68,14 @@ class ChildProfileListViewModel(
         val childName =  savedStateHandle[ARG_CHILD_NAME]?:""
         val childGender =  savedStateHandle[ARG_CHILD_GENDER]?:""
         val childDateOfBirth = savedStateHandle[ARG_CHILD_DATE_OF_BIRTH]?:""
+        val ppjUids = savedStateHandle[ARG_PPJ_UID]?:""
         ifLoggedInElseNavigateToLoginWithNextDestSet(
             requireAdultAccount = false,
             args = mapOf(
                 ARG_CHILD_NAME to childName,
                 ARG_CHILD_GENDER to childGender,
                 ARG_CHILD_DATE_OF_BIRTH to childDateOfBirth,
+                ARG_PPJ_UID to ppjUids
             )
         ) {
             if (savedStateHandle[ARG_CHILD_NAME]!=null){
