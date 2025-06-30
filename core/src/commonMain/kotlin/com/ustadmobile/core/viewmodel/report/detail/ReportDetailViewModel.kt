@@ -25,7 +25,7 @@ import org.kodein.di.instance
 
 data class ReportDetailUiState(
     val report: Report? = null,
-    val reportResult: RunReportUseCase.RunReportResult? = null, // Add this
+    val reportResult: RunReportUseCase.RunReportResult? = null,
     val errorMessage: String? = null,
     val reportOptions2: ReportOptions2 = ReportOptions2(),
     )

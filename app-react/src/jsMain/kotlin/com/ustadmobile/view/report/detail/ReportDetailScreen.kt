@@ -1,7 +1,6 @@
 package com.ustadmobile.view.report.detail
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
@@ -14,7 +13,6 @@ import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.report.graph.ReportGraph
 import dev.icerock.moko.resources.StringResource
-import kotlinx.datetime.TimeZone
 import mui.material.Box
 import mui.material.Card
 import mui.material.Divider
@@ -27,7 +25,6 @@ import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
-import react.useMemo
 import web.cssom.Color
 import web.cssom.Overflow
 import web.cssom.px
@@ -42,6 +39,7 @@ val ReportDetailScreen = FC<Props> {
     }
     val uiState by viewModel.uiState.collectAsState(ReportDetailUiState())
     val appState by viewModel.appUiState.collectAsState(AppUiState())
+    console.log(" props.reportResul = " +  uiState.reportResult);
 
     UstadFab { fabState = appState.fabState }
     ReportDetailComponent {
@@ -51,40 +49,25 @@ val ReportDetailScreen = FC<Props> {
 
 val ReportDetailComponent = FC<ReportDetailProps> { props ->
     val string = useStringProvider()
+    props.uiState.reportResult?.let { result ->
+        UstadStandardContainer {
+            Stack {
+                direction = responsive(StackDirection.column)
+                spacing = responsive(8.px)
 
-    // Create a temporary RunReportResult to pass to ReportGraph
-    val reportResult = useMemo(props.uiState) {
-        RunReportUseCase.RunReportResult(
-            timestamp = 0L,
-            request = RunReportUseCase.RunReportRequest(
-                reportUid = 0, // Dummy value
-                reportOptions = props.uiState.reportOptions2,
-                accountPersonUid = 0, // Dummy value
-                timeZone = TimeZone.currentSystemDefault()
-            ),
-            results = emptyList(), // Not used directly
-            age = 0
-        )
-    }
+                ReportGraph {
+                    this.reportResult = result
+                    this.strings = string
+                }
 
-    UstadStandardContainer {
-        Stack {
-            direction = responsive(StackDirection.column)
-            spacing = responsive(8.px)
-
-            ReportGraph {
-                this.reportResult = reportResult
-                this.strings = string
-            }
-
-            moreOption {
-                uiState = props.uiState
+                moreOption {
+                    uiState = props.uiState
+                }
             }
         }
     }
 }
 
-// The moreOption component remains unchanged from your original code
 private val moreOption = FC<ReportDetailProps> { props ->
     val strings = useStringProvider()
     val xAxisType = props.uiState.reportOptions2.xAxis
@@ -126,7 +109,7 @@ private val moreOption = FC<ReportDetailProps> { props ->
                             item = true
                             xs = 4
                             Typography {
-                                +label.toString()
+                                +label
                                 variant = TypographyVariant.h6
                             }
                         }
@@ -154,7 +137,7 @@ private val moreOption = FC<ReportDetailProps> { props ->
                                     formatter.formatLabel(row.xAxis, it)
                                 }) {
                                     is StringResource -> strings[formatted]
-                                    else -> formatted?.toString() ?: ""
+                                    else -> formatted.toString()
                                 }
                             }
                         }

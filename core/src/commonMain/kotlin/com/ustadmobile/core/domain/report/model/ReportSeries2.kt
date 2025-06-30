@@ -114,5 +114,4 @@ enum class GenderType(override val label: StringResource) : OptionWithLabelStrin
     OTHER(MR.strings.other);
 }
 
-enum class SeriesType { BAR, LINE }
 

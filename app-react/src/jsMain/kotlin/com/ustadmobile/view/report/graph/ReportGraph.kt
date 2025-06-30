@@ -5,7 +5,6 @@ import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.impl.locale.StringProvider
-import com.ustadmobile.lib.db.composites.StatementReportRow
 import js.objects.jso
 import kotlinx.dom.clear
 import kotlinx.html.dom.append
@@ -41,15 +40,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
 
     useEffect(props.reportResult) {
         val container = containerRef.current ?: return@useEffect
-
-        val seriesList = props.reportResult.resultSeries
-        val maxY = seriesList.flatMap { it.data.map { row -> row.yAxis } }.maxOrNull() ?: 0.0
-
-        val isDuration = seriesList.any { series ->
-            series.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION
-        }
-        val (_, calculatedUnit) = calculateConversionFactor(isDuration, maxY, props.strings)
-        val maxUnitSuffix: String = calculatedUnit
+        val isDuration = props.reportResult.yAxisType == YAxisTypes.DURATION
 
         (container as HTMLElement).clear()
         (container as HTMLElement).append {
@@ -63,30 +54,21 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         }
                     }
                 ) {
-                    seriesList.forEach { series ->
-                        val groupedData = series.data.groupBy { it.subgroup }
-
-                        groupedData.forEach { (subgroup, data) ->
-                            val (transformedYValues, _) = transformYAxisValues(
-                                data,
-                                series.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION,
-                                props.strings
-                            )
-                            // Format x-axis values
-                            val formattedXValues = data.map { it.xAxis.toString() }
+                    props.reportResult.resultSeries.forEach { series ->
+                        series.data.groupBy { it.subgroup }.forEach { (subgroup, statementRow) ->
 
                             when (series.reportSeriesOptions.reportSeriesVisualType) {
                                 ReportSeriesVisualType.LINE_GRAPH -> scatter {
                                     name = "${series.reportSeriesOptions.reportSeriesTitle} - $subgroup"
-                                    x.strings = formattedXValues
-                                    y.numbers = transformedYValues
+                                    x.strings = statementRow.map { it.xAxis}
+                                    y.numbers = statementRow.map { it.yAxis }
                                     mode = ScatterMode.`lines+markers`
                                     type = TraceType.scatter
                                 }
                                 else -> bar {
                                     name = "${series.reportSeriesOptions.reportSeriesTitle} - $subgroup"
-                                    x.strings = formattedXValues
-                                    y.numbers = transformedYValues
+                                    x.strings = statementRow.map { it.xAxis }
+                                    y.numbers = statementRow.map { it.yAxis }
                                 }
                             }
                         }
@@ -108,7 +90,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         xaxis {
                             automargin = true
                             title {
-                                text = props.reportResult.request.reportOptions.xAxis.name
+                                text = props.strings[props.reportResult.request.reportOptions.xAxis.label]
                                 font { size = if (isCompact) 6 else 16 }
                             }
                             tickmode = TickMode.auto
@@ -117,13 +99,8 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         yaxis {
                             automargin = true
                             title {
-                                text = getYAxisTitle(
-                                    isDuration = seriesList.any {
-                                        it.reportSeriesOptions.reportSeriesYAxis.type == YAxisTypes.DURATION
-                                    },
-                                    strings = props.strings,
-                                    unitSuffix = maxUnitSuffix
-                                )
+                                text = if (isDuration) props.strings[MR.strings.duration]
+                                else props.strings[MR.strings.count]
                                 font { size = if (isCompact) 6 else 16 }
                             }
                         }
@@ -141,45 +118,4 @@ val ReportGraph = FC<ReportGraphProps> { props ->
             overflow = Overflow.clip
         }
     }
-}
-
-// The helper functions remain unchanged
-private fun calculateConversionFactor(
-    isDuration: Boolean, maxY: Double,
-    strings: StringProvider,
-): Pair<Double, String> {
-    return when {
-        isDuration -> when {
-            maxY >= 3_600_000 -> Pair(1.0 / 3_600_000, strings[MR.strings.hour_unit])
-            maxY >= 60_000 -> Pair(1.0 / 60_000, strings[MR.strings.minute_unit])
-            else -> Pair(1.0 / 1_000, strings[MR.strings.second_unit])
-        }
-        else -> Pair(1.0, "")
-    }
-}
-
-private fun transformYAxisValues(
-    data: List<StatementReportRow>,
-    isDuration: Boolean,
-    strings: StringProvider,
-): Pair<List<Double>, String> {
-    val maxY = data.maxOfOrNull { it.yAxis } ?: 0.0
-    val (conversionFactor, unitSuffix) = calculateConversionFactor(isDuration, maxY, strings)
-
-    val transformedValues = data.map { row ->
-        (row.yAxis * conversionFactor).let {
-            if (isDuration) it else it.toInt().toDouble()
-        }
-    }
-
-    return Pair(transformedValues, unitSuffix)
-}
-
-private fun getYAxisTitle(
-    isDuration: Boolean,
-    strings: StringProvider,
-    unitSuffix: String
-): String {
-    return if (isDuration) "${strings[MR.strings.duration]} ($unitSuffix)"
-    else strings[MR.strings.count]
 }

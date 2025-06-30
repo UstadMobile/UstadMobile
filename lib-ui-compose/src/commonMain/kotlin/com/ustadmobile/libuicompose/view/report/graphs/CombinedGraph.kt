@@ -4,26 +4,35 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import dev.icerock.moko.resources.compose.stringResource
+import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.bar.GroupedVerticalBarPlot
 import io.github.koalaplot.core.bar.solidBar
+import io.github.koalaplot.core.line.LinePlot
 import io.github.koalaplot.core.style.KoalaPlotTheme
+import io.github.koalaplot.core.style.LineStyle
+import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.VerticalRotation
 import io.github.koalaplot.core.util.rotateVertically
 import io.github.koalaplot.core.xygraph.CategoryAxisModel
+import io.github.koalaplot.core.xygraph.Point
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 
+@OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 fun CombinedGraph(
     reportResult: RunReportUseCase.RunReportResult,
@@ -69,12 +78,13 @@ fun CombinedGraph(
         yAxisTitle = {
             Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = if(reportResult.yAxisType == YAxisTypes.DURATION) {
+                    text = if (reportResult.yAxisType == YAxisTypes.DURATION) {
                         stringResource(MR.strings.duration) //TODO here: add unit
-                    }else {
+                    } else {
                         stringResource(MR.strings.count)
-                    }
-                )
+                    },
+                    modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
+                    )
             }
         }
     ) {
@@ -83,7 +93,7 @@ fun CombinedGraph(
                 series(solidBar(colors[subgroupIndex])) {
                     // For each x value, find matching data points
                     reportResult.distinctXAxisValueSorted.forEach { xValue ->
-                        reportResult.resultSeries.firstNotNullOfOrNull { seriesItem ->
+                        reportResult.barSeries.firstNotNullOfOrNull { seriesItem ->
                             seriesItem.data.firstOrNull { it.xAxis == xValue && it.subgroup == subgroup }
                         }?.also { dataPoint ->
                             // There may or may not be a bar for each xAxis/subgroup combination.
@@ -91,6 +101,32 @@ fun CombinedGraph(
                             item(xValue, 0f, dataPoint.yAxis.toFloat())
                         }
                     }
+                }
+            }
+        }
+
+        reportResult.lineSeries.forEach { series ->
+            series.data.groupBy { it.subgroup }.forEach { (subgroup, statementReportRow) ->
+                val subgroupIndex = reportResult.distinctSubgroups.indexOf(subgroup)
+
+                val dataPoints = statementReportRow.map { point ->
+                    Point(point.xAxis, point.yAxis.toFloat())
+                }.sortedBy { it.x }
+
+                if (dataPoints.isNotEmpty()) {
+                    LinePlot(
+                        data = dataPoints,
+                        lineStyle = LineStyle(
+                            brush = SolidColor(colors[subgroupIndex]),
+                            strokeWidth = 2.dp
+                        ),
+                        symbol = {
+                            Symbol(
+                                shape = RoundedCornerShape(4.dp),
+                                fillBrush = SolidColor(colors[subgroupIndex])
+                            )
+                        }
+                    )
                 }
             }
         }

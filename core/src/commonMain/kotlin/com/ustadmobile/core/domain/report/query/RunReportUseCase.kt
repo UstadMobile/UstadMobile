@@ -2,6 +2,7 @@ package com.ustadmobile.core.domain.report.query
 
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
+import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.ihttp.headers.directives.directivesToMap
 import com.ustadmobile.lib.db.composites.StatementReportRow
@@ -85,6 +86,14 @@ interface RunReportUseCase {
 
         val yAxisType: YAxisTypes by lazy {
             request.reportOptions.series.first().reportSeriesYAxis.type
+        }
+
+        val lineSeries: List<Series> by lazy {
+            resultSeries.filter { it.reportSeriesOptions.reportSeriesVisualType == ReportSeriesVisualType.LINE_GRAPH }
+        }
+
+        val barSeries: List<Series> by lazy {
+            resultSeries.filter { it.reportSeriesOptions.reportSeriesVisualType == ReportSeriesVisualType.BAR_CHART }
         }
 
 
