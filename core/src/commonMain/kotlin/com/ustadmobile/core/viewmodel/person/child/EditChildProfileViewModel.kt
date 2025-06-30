@@ -12,7 +12,7 @@ import com.ustadmobile.core.util.MessageIdOption2
 import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
-import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_NAME
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_PPJ_UID
 import com.ustadmobile.core.viewmodel.person.toFirstAndLastNameExt
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -182,14 +182,15 @@ class EditChildProfileViewModel(
                 this.lastName = lastName
             }
         )
-        if (savedStateHandle[ARG_CHILD_NAME]!=null){
-
+        val ppjUid = savedStateHandle[ARG_PPJ_UID]?.toLong()
+        if (ppjUid!=null){
             viewModelScope.launch {
                 val effectiveDb = activeRepo ?: activeDb
 
                 effectiveDb.personDao().insertAsync(savePerson)
 
                val personParentJoin= PersonParentJoin(
+                    ppjUid = ppjUid,
                     ppjMinorPersonUid = savePerson.personUid,
                     ppjParentPersonUid = accountManager.currentAccount.personUid,
                     ppjStatus = PersonParentJoin.STATUS_APPROVED,
