@@ -113,7 +113,6 @@ class AddAccountSelectNewOrExistingViewModel(
         if (savedStateHandle[RegisterMinorWaitForParentViewModel.ARG_REFERER_SCREEN]!=null){
             savedStateHandle[RegisterMinorWaitForParentViewModel.ARG_REFERER_SCREEN]=
                 DEST_NAME
-
         }
         val nextDestination = savedStateHandle[UstadView.ARG_NEXT]
         if (nextDestination !=null){
@@ -129,7 +128,6 @@ class AddAccountSelectNewOrExistingViewModel(
                 savedStateHandle[ARG_CHILD_DATE_OF_BIRTH] = args[ARG_CHILD_DATE_OF_BIRTH]
                 savedStateHandle[ARG_PPJ_UID] = args[ARG_PPJ_UID]
             }
-
         }
 
         _appUiState.value = AppUiState(

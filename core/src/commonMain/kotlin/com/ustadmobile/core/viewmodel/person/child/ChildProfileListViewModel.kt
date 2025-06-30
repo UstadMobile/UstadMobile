@@ -35,6 +35,7 @@ import org.kodein.di.instance
 data class ChildProfileListUiState(
     val onAddChildProfile: String? = null,
     val childProfiles: List<Person> = emptyList(),
+    val childAddedViaLink: Person ? = null,
     val personParenJoinList: List<PersonParentJoin> = emptyList(),
     val showProfileSelectionDialog: Boolean = false,
     val parent: Person? = null
@@ -59,9 +60,6 @@ class ChildProfileListViewModel(
     val uiState: Flow<ChildProfileListUiState> = _uiState.asStateFlow()
 
     init {
-        if (savedStateHandle[ARG_CHILD_NAME]!=null){
-           addChildIntoUiState()
-        }
         _uiState.update { prev ->
             prev.copy(
                 parent = accountManager.currentUserSession.person,
@@ -171,11 +169,10 @@ class ChildProfileListViewModel(
     }
 
     private fun addChildIntoUiState(){
-
+        val childName = savedStateHandle[ARG_CHILD_NAME]
+        val childGender = savedStateHandle[ARG_CHILD_GENDER]?.toInt()?:0
+        val childDateOfBirth = savedStateHandle[ARG_CHILD_DATE_OF_BIRTH]?.toLong()?:0L
         viewModelScope.launch {
-            val childName = savedStateHandle[ARG_CHILD_NAME]
-            val childGender = savedStateHandle[ARG_CHILD_GENDER]?.toInt()?:0
-            val childDateOfBirth = savedStateHandle[ARG_CHILD_DATE_OF_BIRTH]?.toLong()?:0L
             val fullName = childName?.trim()
             val (firstName, lastName) = fullName.toFirstAndLastNameExt()
             val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
@@ -187,6 +184,11 @@ class ChildProfileListViewModel(
                 dateOfBirth = childDateOfBirth,
                 isPersonalAccount = true
             )
+            _uiState.update { prev ->
+                prev.copy(
+                    childAddedViaLink = childProfile,
+                )
+            }
             updateChildProfileList(listOf(childProfile))
         }
 
@@ -241,14 +243,25 @@ class ChildProfileListViewModel(
                 val effectiveDb = activeRepo ?: activeDb
 
                 effectiveDb.personDao().insertListAsync(_uiState.value.childProfiles)
+                //for child added via link it parentPersonJoin is already created
+                val childProfile = if (_uiState.value.childAddedViaLink!=null) {
+                    _uiState.value.childProfiles.filter { it.personUid !=
+                            (_uiState.value.childAddedViaLink?.personUid ?: 0L) }
 
-                val personParenJoinList = _uiState.value.childProfiles.map {
+                } else {
+                    _uiState.value.childProfiles
+                }
+                val personParenJoinList = childProfile.map {
                     PersonParentJoin(
                         ppjMinorPersonUid = it.personUid,
                         ppjParentPersonUid = accountManager.currentAccount.personUid,
                         ppjStatus = PersonParentJoin.STATUS_APPROVED,
                         ppjApprovalTiemstamp = systemTimeInMillis()
                     )
+                }
+                //updating parent details in parentPersonJoin When child added via link
+                if (_uiState.value.childAddedViaLink!=null){
+                    updatePersonParentJoinWhenChildAddedViaLink()
                 }
                 _uiState.value.childProfiles.forEach {
                     if (it != profile) {
@@ -279,6 +292,20 @@ class ChildProfileListViewModel(
         }
 
 
+    }
+
+    private fun updatePersonParentJoinWhenChildAddedViaLink() {
+       viewModelScope.launch {
+           (activeRepo ?: activeDb).personParentJoinDao().upsertAsync(
+               PersonParentJoin(
+                   ppjUid = savedStateHandle[ARG_PPJ_UID]?.toLong()?:0L,
+                   ppjMinorPersonUid = _uiState.value.childAddedViaLink?.personUid?:0L,
+                   ppjParentPersonUid = accountManager.currentAccount.personUid,
+                   ppjStatus = PersonParentJoin.STATUS_APPROVED,
+                   ppjApprovalTiemstamp = systemTimeInMillis()
+               )
+           )
+       }
     }
 
     companion object {

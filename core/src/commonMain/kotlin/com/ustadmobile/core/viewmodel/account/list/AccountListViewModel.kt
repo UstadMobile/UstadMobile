@@ -44,8 +44,6 @@ import com.ustadmobile.core.viewmodel.person.toFirstAndLastNameExt
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonParentJoin
-import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -288,15 +286,13 @@ class AccountListViewModel(
                         key = RESULT_KEY_PERSON,
                         serializer = Person.serializer(),
                         args = mapOf(
-
-                            ARG_CHILD_NAME to savedStateHandle[ARG_CHILD_NAME].toString(),
+                            ARG_PPJ_UID to savedStateHandle[ARG_PPJ_UID].toString(),
                             ARG_ENTITY_JSON to savedStateHandle[ARG_ENTITY_JSON].toString()
-
                         ),
                         currentValue = person,
                     )
                 }else{
-                    navigateToConsentManagementScreen(accountManager.currentAccount.toPerson())
+                    navigateToConsentManagementScreen()
                 }
 
                 return@launch
@@ -333,15 +329,9 @@ class AccountListViewModel(
             isPersonalAccount = true
         )
     }
-    private fun navigateToConsentManagementScreen(savePerson: Person) {
+    private fun navigateToConsentManagementScreen() {
         viewModelScope.launch {
-            val childProfile = getChildDetail()
-            activeRepoWithFallback.personDao().insertOrReplace(childProfile)
-            val parentPersonParentJoin = PersonParentJoin().shallowCopy {
-                ppjParentPersonUid = savePerson.personUid
-                ppjMinorPersonUid = childProfile.personUid
-            }
-            val ppjUid = activeRepoWithFallback.personParentJoinDao().upsertAsync(parentPersonParentJoin)
+            val ppjUid = savedStateHandle[ARG_PPJ_UID]?.toLong()?:0L
             navController.navigate(
                 ParentalConsentManagementViewModel.DEST_NAME,
                 mapOf(ARG_ENTITY_UID to ppjUid.toString(),
