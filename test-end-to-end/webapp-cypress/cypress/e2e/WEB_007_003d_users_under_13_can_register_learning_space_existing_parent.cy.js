@@ -64,9 +64,11 @@ it('Parent user clicks on link in the email received from ustad mobile', () => {
   cy.contains(' Name: Child User').should('be.visible')
   cy.get('div[aria-labelledby="undefined_label"]').contains("Mother").should("exist") //Default relation- female gender so Mother
   cy.contains("Terms and policies").should("exist")
-  cy.contains('I do not consent').should("exist")
-  cy.contains('I consent').click()
-  cy.contains('I consent').should("not.exist")
+  cy.contains('I DO NOT CONSENT').should("exist")
+  cy.contains('I CONSENT').click()
+  cy.contains('I CONSENT').should("not.exist")
+  cy.contains('Revoke consent').should("exist")
+  cy.get('.MuiStack-root').invoke('text').should('include', 'Status: consent granted')
 })
 
 it('child user able to login- consent check', () => {
