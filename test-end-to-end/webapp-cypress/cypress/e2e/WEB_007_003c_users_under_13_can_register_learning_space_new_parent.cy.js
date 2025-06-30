@@ -20,7 +20,7 @@ it('Child user aged below 13 register as a new user', () => {
  // cy.contains('Site link').type(baseUrl)
 
   //cy.ustadPersonalOrLearningSpace('Join Learning Space')
-  cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date(Date.now() - (10 * 365 * 24 * 60 * 60 * 1000))) //kids age 10
+  cy.ustadSetDate(cy.get("#age_date_of_birth"), new Date(Date.now() - (10 * 365 * 24 * 60 * 60 * 1000))) //kids age 10
   cy.contains('button','Next').click()
   cy.contains('New Terms').should('not.exist')
   cy.contains("label", "Full name*").parent().find("input").clear().type('Child User')
@@ -43,7 +43,7 @@ it('Parent user clicks on link in the email received from ustad mobile', () => {
  // Call the custom command to fetch the email and open the URL
   cy.UstadOpenInviteLinkFromEmail(email, baseUrl, {timeout:60000})
   cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').click();
-  cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date(Date.now() - (30 * 365 * 24 * 60 * 60 * 1000))) // parents age 30
+  cy.ustadSetDate(cy.get("#age_date_of_birth"), new Date(Date.now() - (30 * 365 * 24 * 60 * 60 * 1000))) // parents age 30
   cy.contains('button','Next').click()
   cy.contains('New Terms').should('be.visible')
   cy.get('#accept_button').click()
