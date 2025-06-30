@@ -41,10 +41,9 @@ onFlowComplete:
 - inputText: "Parent User"
 - tapOn: "Gender*"
 - tapOn: "Female"
+- assertVisible: "parentuser"
 - tapOn: "Other options"
 - tapOn: "Create username and password"
-- tapOn: "Username"
-- inputText: "parentuser"
 - tapOn: "Password"
 - inputText: "test1234"
 - tapOn: "Sign-up"
@@ -67,16 +66,26 @@ onFlowComplete:
 - tapOn: "Parent email*"
 - inputText: "parent@email.com"
 - hideKeyboard
-- tapOn: "Done"
-- assertVisible: "Wait for Parent to consent"
+- assertVisible: "childuser"
+- tapOn: "Other options"
+- tapOn: "Create username and password"
+- tapOn: "Password"
+- inputText: "test1234"
+- tapOn: "Sign-up"
+- assertVisible: "Register"
+- assertVisible: "childuser"
+- assertVisible: "We sent a message to your parent ( parent@email.com ) so they can approve your registration. You can login using the username and password you set after your parent approves."
+- tapOn: "OK"
 
 # Fetch the invitation email via HTTP
 - clearState: com.toughra.ustadmobile
 - runScript:
     file: "common/fetch_invitation_link.js"
     env:
-      EMAIL: "parent@email.com"
-
+      EMAIL: parent@email.com
+- openLink:
+    link: ${output.parental_consent_invite}
+    autoVerify: false
   # Parent user register to ustad mobile
 - tapOn: "Existing user"
 - runFlow:

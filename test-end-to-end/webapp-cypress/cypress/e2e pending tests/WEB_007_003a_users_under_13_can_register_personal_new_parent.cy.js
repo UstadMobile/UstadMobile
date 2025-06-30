@@ -44,8 +44,9 @@ it('Parent user clicks on link in the email received from ustad mobile', () => {
   cy.get('div[id="gender"]').click()
   cy.contains("li","Male").click()
   cy.get('Tickmark').contains("I'm a parent").should('exist')
+  cy.contains("label", "Username").click()
+  cy.get('input[value="parentuser"]').should('be.visible')
   cy.contains('Sign up with passkey').click()
-  cy.contains("label", "Username").parent().find("input").clear().type('parentuser')
   cy.contains("label", "Password").parent().find("input").clear().type('test1234')
   cy.contains('SIGN-UP').click()
   cy.contains('Child User').should('be.visible') //List of child profiles

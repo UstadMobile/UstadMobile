@@ -45,6 +45,9 @@ onFlowComplete:
     file: "common/fetch_invitation_link.js"
     env:
       EMAIL: "parent@email.com"
+- openLink:
+    link: ${output.parental_consent_invite}
+    autoVerify: false
   # Parent user register to ustad mobile
 - tapOn: "New user"
 - runFlow:
