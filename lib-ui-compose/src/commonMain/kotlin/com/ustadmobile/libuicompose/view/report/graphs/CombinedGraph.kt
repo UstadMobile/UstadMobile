@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import dev.icerock.moko.resources.compose.stringResource
@@ -42,11 +43,12 @@ fun CombinedGraph(
     reportResult: RunReportUseCase.RunReportResult,
     modifier: Modifier = Modifier,
 ) {
-    // Generate colors for each subgroup
-    val colors = remember(reportResult.timestamp) {
-        reportResult.distinctSubgroups.mapIndexed { index, s ->
-            Color.hsv(index * 360f / reportResult.distinctSubgroups.size.coerceAtLeast(1), 1f, 0.7f)
-        }
+    val colorMap: Map<RunReportUseCase.RunReportResult.Subgroup, Color> = remember(reportResult.timestamp) {
+        reportResult.distinctSubgroups.mapIndexed { index, resultSubgroup ->
+            resultSubgroup to Color.hsv(
+                index * 360f / reportResult.distinctSubgroups.size.coerceAtLeast(1), 1f, 0.7f
+            )
+        }.toMap()
     }
 
     //Roughly as per https://koalaplot.github.io/0.5/docs/xygraphs/bar_plots/#grouped-bars
@@ -98,44 +100,41 @@ fun CombinedGraph(
             }
         }
     ) {
+        /*
+         * Create one barchart. For each series-subgroup combination, create a series on the barchart
+         * and emit an item for each result row.
+         */
         GroupedVerticalBarPlot {
-            reportResult.distinctSubgroups.forEachIndexed { subgroupIndex, subgroup ->
-                series(solidBar(colors[subgroupIndex])) {
-                    // For each x value, find matching data points
-                    reportResult.distinctXAxisValueSorted.forEach { xValue ->
-                        reportResult.barSeries.firstNotNullOfOrNull { seriesItem ->
-                            seriesItem.data.firstOrNull { it.xAxis == xValue && it.subgroup == subgroup }
-                        }?.also { dataPoint ->
-                            // There may or may not be a bar for each xAxis/subgroup combination.
-                            // Show a bar only if there is data for this combination
-                            item(xValue, 0f, dataPoint.yAxis.toFloat())
-                        }
+            reportResult.distinctSubgroups.filter {
+                it.series.reportSeriesOptions.reportSeriesVisualType == ReportSeriesVisualType.BAR_CHART
+            }.forEach { resultSubgroup ->
+                series(solidBar(colorMap[resultSubgroup] ?: Color.Transparent)) {
+                    resultSubgroup.subgroupData.forEach { resultRow ->
+                        item(resultRow.xAxis, 0f, resultRow.yAxis.toFloat())
                     }
                 }
             }
         }
 
-        //For each line series, add a line plot for each subgroup
-        reportResult.lineSeries.forEach { series ->
-            series.data.groupBy { it.subgroup }.filter { dataRows ->
-                dataRows.value.isNotEmpty()
-            }.forEach { (subgroup, statementReportRows) ->
-                val subgroupIndex = reportResult.distinctSubgroups.indexOf(subgroup)
-
-                LinePlot(
-                    data = statementReportRows.map { row -> Point(row.xAxis, row.yAxis.toFloat()) },
-                    lineStyle = LineStyle(
-                        brush = SolidColor(colors[subgroupIndex]),
-                        strokeWidth = 2.dp
-                    ),
-                    symbol = {
-                        Symbol(
-                            shape = RoundedCornerShape(4.dp),
-                            fillBrush = SolidColor(colors[subgroupIndex])
-                        )
-                    }
-                )
-            }
+        /*
+         * Add a line plot for each series-subgroup combination
+         */
+        reportResult.distinctSubgroups.filter {
+            it.series.reportSeriesOptions.reportSeriesVisualType == ReportSeriesVisualType.LINE_GRAPH
+        }.forEachIndexed { subgroupIndex, resultSubgroup ->
+            LinePlot(
+                data = resultSubgroup.subgroupData.map { row -> Point(row.xAxis, row.yAxis.toFloat()) },
+                lineStyle = LineStyle(
+                    brush = SolidColor(colorMap[resultSubgroup] ?: Color.Transparent),
+                    strokeWidth = 2.dp
+                ),
+                symbol = {
+                    Symbol(
+                        shape = RoundedCornerShape(4.dp),
+                        fillBrush = SolidColor(colorMap[resultSubgroup] ?: Color.Transparent)
+                    )
+                }
+            )
         }
     }
 }

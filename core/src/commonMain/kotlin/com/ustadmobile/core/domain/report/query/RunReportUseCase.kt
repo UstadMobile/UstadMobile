@@ -51,6 +51,27 @@ interface RunReportUseCase {
             val data: List<StatementReportRow>,
         )
 
+        /**
+         * A result subgroup is the combination of both the Series and a particular subgroup
+         * value e.g. a user might create a report with two series, both of which are subgrouped
+         * by gender. This results in 4 series/subgroup combinations e.g. Series 1 - Male,
+         * Series 1 - Female, Series2 - Male, Series2 - Female.
+         *
+         * @property value the subgroup value (e.g. clazzUid when subgrouped by clazz, Person.gender
+         * value when subgrouped by gender, etc)
+         * @property series the related RunReportResult.Series
+         */
+        data class Subgroup(
+            val value: String,
+            val series: Series,
+        ) {
+
+            val subgroupData: List<StatementReportRow> by lazy {
+                series.data.filter { it.subgroup == value }
+            }
+
+        }
+
         val resultSeries: List<Series> by lazy {
             request.reportOptions.series.mapIndexed { index, reportSeriesOptions ->
                 Series(
@@ -60,12 +81,16 @@ interface RunReportUseCase {
             }
         }
 
-        val distinctXAxisValueSorted: List<String> by lazy {
-            results.flatten().map { it.xAxis }.distinct().sorted()
+        val distinctSubgroups: List<Subgroup> by lazy {
+            resultSeries.map { series ->
+                series.data.map { it.subgroup }.distinct().map {
+                    Subgroup(value = it, series = series)
+                }
+            }.flatten()
         }
 
-        val distinctSubgroups: List<String> by lazy {
-            results.flatMap { it.distinctBy { it.subgroup } }.map { it.subgroup }.distinct()
+        val distinctXAxisValueSorted: List<String> by lazy {
+            results.flatten().map { it.xAxis }.distinct().sorted()
         }
 
         val maxYValue: Double? by lazy {
