@@ -61,6 +61,12 @@ import web.html.HTMLElement
 import web.window.Window
 import web.window.resize
 import web.window.window
+import kotlin.math.min
+
+private const val DEFAULT_CONTAINER_MAX_WIDTH = 1200
+private const val DEFAULT_CONTAINER_PADDING = 48
+private const val CARD_MIN_WIDTH = 320
+private const val CARD_HORIZONTAL_PADDING = 20
 
 external interface ReportListProps : Props {
     var uiState: ReportListUiState
@@ -101,8 +107,8 @@ val ReportListItem = FC<ReportListItemProps> { props ->
     Card {
         sx = jso {
             padding = 8.px
-            width = (props.width - 20).px
-            backgroundColor =  Color(theme.palette.background.default)
+            width = (props.width - CARD_HORIZONTAL_PADDING).px
+            backgroundColor = Color(theme.palette.background.default)
         }
 
         CardHeader {
@@ -148,20 +154,19 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
             remoteMediatorResult.pagingSourceFactory, true, 50
         )
     val muiAppState = useMuiAppState()
-    val containerDefaultPadding = 48
+    //default container max width = 1200 pixels minus 48 px padding
     var containerWidth: Int by useState {
-        kotlin.math.min(
-            window.innerWidth - Sizes.Sidebar.WidthInPx - 48,
-            1200 - containerDefaultPadding
+        min(
+            window.innerWidth - Sizes.Sidebar.WidthInPx - DEFAULT_CONTAINER_PADDING,
+            DEFAULT_CONTAINER_MAX_WIDTH - DEFAULT_CONTAINER_PADDING
         )
     }
     val containerRef = useRef<HTMLElement>(null)
 
-    val cardMinWidth = 320
     useEffect(containerRef.current?.clientWidth) {
         fun calcContainerWidth() {
             val currentEl = containerRef.current
-            if(currentEl != null) {
+            if (currentEl != null) {
                 val computedStyle = getComputedStyle(currentEl)
                 containerWidth = currentEl.clientWidth -
                         computedStyle.paddingLeft.filter { it.isDigit() || it == '.' }.toInt() -
@@ -169,7 +174,7 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
             }
         }
 
-        val eventListener :  EventHandler<Event, Window> = EventHandler {
+        val eventListener: EventHandler<Event, Window> = EventHandler {
             calcContainerWidth()
         }
 
@@ -179,7 +184,8 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
             window.removeEventListener(Event.Companion.resize(), eventListener)
         }
     }
-    val cardsPerRow = kotlin.math.max(containerWidth / cardMinWidth, 1)
+
+    val cardsPerRow = kotlin.math.max(containerWidth / CARD_MIN_WIDTH, 1)
     val cardWidth = containerWidth / cardsPerRow
 
     VirtualList {
