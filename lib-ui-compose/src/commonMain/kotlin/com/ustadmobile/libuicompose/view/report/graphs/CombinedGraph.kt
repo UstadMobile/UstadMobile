@@ -115,27 +115,26 @@ fun CombinedGraph(
             }
         }
 
+        //For each line series, add a line plot for each subgroup
         reportResult.lineSeries.forEach { series ->
-            series.data.groupBy { it.subgroup }.forEach { (subgroup, statementReportRow) ->
+            series.data.groupBy { it.subgroup }.filter { dataRows ->
+                dataRows.value.isNotEmpty()
+            }.forEach { (subgroup, statementReportRows) ->
                 val subgroupIndex = reportResult.distinctSubgroups.indexOf(subgroup)
 
-                val dataPoints = statementReportRow.map { point -> Point(point.xAxis, point.yAxis.toFloat()) }
-
-                if (dataPoints.isNotEmpty()) {
-                    LinePlot(
-                        data = dataPoints,
-                        lineStyle = LineStyle(
-                            brush = SolidColor(colors[subgroupIndex]),
-                            strokeWidth = 2.dp
-                        ),
-                        symbol = {
-                            Symbol(
-                                shape = RoundedCornerShape(4.dp),
-                                fillBrush = SolidColor(colors[subgroupIndex])
-                            )
-                        }
-                    )
-                }
+                LinePlot(
+                    data = statementReportRows.map { row -> Point(row.xAxis, row.yAxis.toFloat()) },
+                    lineStyle = LineStyle(
+                        brush = SolidColor(colors[subgroupIndex]),
+                        strokeWidth = 2.dp
+                    ),
+                    symbol = {
+                        Symbol(
+                            shape = RoundedCornerShape(4.dp),
+                            fillBrush = SolidColor(colors[subgroupIndex])
+                        )
+                    }
+                )
             }
         }
     }

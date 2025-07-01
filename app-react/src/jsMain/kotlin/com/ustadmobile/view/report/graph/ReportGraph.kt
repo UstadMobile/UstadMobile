@@ -41,7 +41,7 @@ val ReportGraph = FC<ReportGraphProps> { props ->
     val containerRef = useRef<web.html.HTMLElement>()
     val isCompact = props.compact ?: false
 
-    useEffect(props.reportResult) {
+    useEffect(props.reportResult.timestamp) {
         val container = containerRef.current ?: return@useEffect
         val isDuration = props.reportResult.yAxisType == YAxisTypes.DURATION
 
@@ -58,20 +58,21 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                     }
                 ) {
                     props.reportResult.resultSeries.forEach { series ->
-                        series.data.groupBy { it.subgroup }.forEach { (subgroup, statementRow) ->
-
+                        series.data.groupBy { it.subgroup }.filter { dataRows ->
+                            dataRows.value.isNotEmpty()
+                        }.forEach { (subgroup, statementRows) ->
                             when (series.reportSeriesOptions.reportSeriesVisualType) {
                                 ReportSeriesVisualType.LINE_GRAPH -> scatter {
                                     name = "${series.reportSeriesOptions.reportSeriesTitle} - $subgroup"
-                                    x.strings = statementRow.map { it.xAxis}
-                                    y.numbers = statementRow.map { it.yAxis }
+                                    x.strings = statementRows.map { it.xAxis }
+                                    y.numbers = statementRows.map { it.yAxis }
                                     mode = ScatterMode.`lines+markers`
                                     type = TraceType.scatter
                                 }
                                 else -> bar {
                                     name = "${series.reportSeriesOptions.reportSeriesTitle} - $subgroup"
-                                    x.strings = statementRow.map { it.xAxis }
-                                    y.numbers = statementRow.map { it.yAxis }
+                                    x.strings = statementRows.map { it.xAxis }
+                                    y.numbers = statementRows.map { it.yAxis }
                                 }
                             }
                         }
@@ -102,8 +103,10 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         yaxis {
                             automargin = true
                             title {
-                                text = if (isDuration) props.strings[MR.strings.duration]
-                                else props.strings[MR.strings.count]
+                                text = if (isDuration)
+                                    props.strings[MR.strings.duration]
+                                else
+                                    props.strings[MR.strings.count]
                             }
                         }
                         showlegend = !isCompact
