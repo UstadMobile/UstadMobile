@@ -17,6 +17,7 @@ import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.mui.common.Sizes
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -40,8 +41,8 @@ import react.ReactNode
 import react.create
 import react.router.useLocation
 import react.useEffect
-import react.useMemo
 import react.useRef
+import react.useRequiredContext
 import react.useState
 import tanstack.react.query.UseInfiniteQueryResult
 import web.cssom.Color
@@ -81,9 +82,9 @@ external interface ReportListItemProps : Props {
 
 val ReportListItem = FC<ReportListItemProps> { props ->
     val string = useStringProvider()
-    val reportDataFlow = useMemo(props.report.reportUid) {
-        props.runReport(props.report)
-    }
+    val theme by useRequiredContext(ThemeContext)
+
+    val reportDataFlow = props.runReport(props.report)
     val reportResult by reportDataFlow.collectAsState(
         RunReportUseCase.RunReportResult(
             timestamp = 0,
@@ -101,7 +102,7 @@ val ReportListItem = FC<ReportListItemProps> { props ->
         sx = jso {
             padding = 8.px
             width = (props.width - 20).px
-            backgroundColor = Color("#f5f5f5")
+            backgroundColor =  Color(theme.palette.background.default)
         }
 
         CardHeader {
@@ -209,7 +210,7 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
                     direction = responsive(StackDirection.row)
                     reports?.forEach { reportValue ->
                         ReportListItem {
-                            this.report = reportValue ?: Report()
+                            this.report = reportValue
                             this.onListItemClick = props.onListItemClick
                             this.onRemoveReport = props.onRemoveReport
                             this.runReport = props.runReport

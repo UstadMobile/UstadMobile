@@ -32,6 +32,10 @@ import io.github.koalaplot.core.xygraph.Point
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 
+private const val MS_IN_HOUR = 3_600_000
+private const val MS_IN_MINUTE = 60_000
+private const val MS_IN_SECOND = 1_000
+
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 fun CombinedGraph(
@@ -51,7 +55,7 @@ fun CombinedGraph(
         xAxisModel = remember(reportResult.timestamp) {
             CategoryAxisModel(reportResult.distinctXAxisValueSorted)
         },
-        yAxisModel = rememberFloatLinearAxisModel(reportResult.yRange),
+        yAxisModel = rememberFloatLinearAxisModel(reportResult.yRange, minimumMajorTickIncrement = 1f),
         xAxisLabels = {
             Text(
                 text = it,
@@ -70,7 +74,11 @@ fun CombinedGraph(
         },
         yAxisLabels = {
             Text(
-                text = it.toString(),
+                text = if (reportResult.yAxisType == YAxisTypes.DURATION) {
+                    formatDurationLabel(it)
+                } else {
+                    it.toInt().toString()
+                },
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
             )
@@ -79,12 +87,14 @@ fun CombinedGraph(
             Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
                 Text(
                     text = if (reportResult.yAxisType == YAxisTypes.DURATION) {
-                        stringResource(MR.strings.duration) //TODO here: add unit
+                        val unit = getDurationUnitTittle(reportResult.yRange.endInclusive)
+                        stringResource(MR.strings.duration) + unit
                     } else {
                         stringResource(MR.strings.count)
                     },
+
                     modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
-                    )
+                )
             }
         }
     ) {
@@ -109,9 +119,7 @@ fun CombinedGraph(
             series.data.groupBy { it.subgroup }.forEach { (subgroup, statementReportRow) ->
                 val subgroupIndex = reportResult.distinctSubgroups.indexOf(subgroup)
 
-                val dataPoints = statementReportRow.map { point ->
-                    Point(point.xAxis, point.yAxis.toFloat())
-                }.sortedBy { it.x }
+                val dataPoints = statementReportRow.map { point -> Point(point.xAxis, point.yAxis.toFloat()) }
 
                 if (dataPoints.isNotEmpty()) {
                     LinePlot(
@@ -131,4 +139,24 @@ fun CombinedGraph(
             }
         }
     }
+}
+
+@Composable
+fun convertDuration(ms: Float): Pair<Int, String> {
+    return when {
+        ms >= MS_IN_HOUR -> ((ms / MS_IN_HOUR).toInt() to stringResource(MR.strings.hour_unit))
+        ms >= MS_IN_MINUTE -> ((ms / MS_IN_MINUTE).toInt() to stringResource(MR.strings.minute_unit))
+        ms >= MS_IN_SECOND -> ((ms / MS_IN_SECOND).toInt() to stringResource(MR.strings.second_unit))
+        else -> (ms.toInt() to stringResource(MR.strings.millisecond_unit))
+    }
+}
+@Composable
+fun formatDurationLabel(ms: Float): String {
+    val (value, _) = convertDuration(ms)
+    return "$value"
+}
+@Composable
+fun getDurationUnitTittle(max: Float): String {
+    val (_, unit) = convertDuration(max)
+    return " ($unit)"
 }

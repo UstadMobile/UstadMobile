@@ -1,7 +1,6 @@
 package com.ustadmobile.view.report.detail
 
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -12,7 +11,6 @@ import com.ustadmobile.mui.common.xs
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.report.graph.ReportGraph
-import dev.icerock.moko.resources.StringResource
 import mui.material.Box
 import mui.material.Card
 import mui.material.Divider
@@ -39,7 +37,6 @@ val ReportDetailScreen = FC<Props> {
     }
     val uiState by viewModel.uiState.collectAsState(ReportDetailUiState())
     val appState by viewModel.appUiState.collectAsState(AppUiState())
-    console.log(" props.reportResul = " +  uiState.reportResult);
 
     UstadFab { fabState = appState.fabState }
     ReportDetailComponent {
@@ -70,8 +67,6 @@ val ReportDetailComponent = FC<ReportDetailProps> { props ->
 
 private val moreOption = FC<ReportDetailProps> { props ->
     val strings = useStringProvider()
-    val xAxisType = props.uiState.reportOptions2.xAxis
-    val formatter = DefaultXAxisLabelFormatter()
 
     UstadStandardContainer {
         props.uiState.reportResult?.resultSeries?.forEach { series ->
@@ -133,12 +128,7 @@ private val moreOption = FC<ReportDetailProps> { props ->
                             item = true
                             xs = 4
                             Typography {
-                                +when (val formatted = xAxisType.let {
-                                    formatter.formatLabel(row.xAxis, it)
-                                }) {
-                                    is StringResource -> strings[formatted]
-                                    else -> formatted.toString()
-                                }
+                                +row.xAxis
                             }
                         }
 
@@ -152,12 +142,7 @@ private val moreOption = FC<ReportDetailProps> { props ->
                             item = true
                             xs = 4
                             Typography {
-                                +when (val formatted = series.reportSeriesOptions.reportSeriesSubGroup?.let {
-                                    formatter.formatLabel(row.subgroup, it)
-                                }) {
-                                    is StringResource -> strings[formatted]
-                                    else -> formatted?.toString() ?: ""
-                                }
+                                +row.subgroup
                             }
                         }
                     }

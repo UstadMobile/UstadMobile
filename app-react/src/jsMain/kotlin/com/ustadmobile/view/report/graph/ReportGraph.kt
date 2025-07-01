@@ -28,6 +28,9 @@ import space.kscience.plotly.scatter
 import web.cssom.Overflow
 import web.cssom.px
 
+private const val COMPACT_WIDTH = 320
+private const val COMPACT_HEIGHT = 250
+
 external interface ReportGraphProps : Props {
     var reportResult: RunReportUseCase.RunReportResult
     var strings: StringProvider
@@ -76,22 +79,22 @@ val ReportGraph = FC<ReportGraphProps> { props ->
 
                     layout {
                         if (isCompact) {
-                            width = 320
-                            height = 250
-                            margin {
-                                l = 30
-                                r = 30
-                                t = 20
-                                b = 40
-                                pad = 0
-                            }
+                            width = COMPACT_WIDTH
+                            height = COMPACT_HEIGHT
                         }
                         autosize = true
+                        margin {
+                            l = 0
+                            r = 0
+                            t = 0
+                            b = 0
+                            pad = 0
+                            autoexpand = true
+                        }
                         xaxis {
                             automargin = true
                             title {
                                 text = props.strings[props.reportResult.request.reportOptions.xAxis.label]
-                                font { size = if (isCompact) 6 else 16 }
                             }
                             tickmode = TickMode.auto
                             type = AxisType.category
@@ -101,7 +104,6 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                             title {
                                 text = if (isDuration) props.strings[MR.strings.duration]
                                 else props.strings[MR.strings.count]
-                                font { size = if (isCompact) 6 else 16 }
                             }
                         }
                         showlegend = !isCompact
