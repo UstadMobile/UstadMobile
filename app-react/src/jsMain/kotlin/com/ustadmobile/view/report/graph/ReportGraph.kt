@@ -57,27 +57,23 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         }
                     }
                 ) {
-                    props.reportResult.resultSeries.forEach { series ->
-                        series.data.groupBy { it.subgroup }.filter { dataRows ->
-                            dataRows.value.isNotEmpty()
-                        }.forEach { (subgroup, statementRows) ->
-                            when (series.reportSeriesOptions.reportSeriesVisualType) {
-                                ReportSeriesVisualType.LINE_GRAPH -> scatter {
-                                    name = "${series.reportSeriesOptions.reportSeriesTitle} - $subgroup"
-                                    x.strings = statementRows.map { it.xAxis }
-                                    y.numbers = statementRows.map { it.yAxis }
-                                    mode = ScatterMode.`lines+markers`
-                                    type = TraceType.scatter
-                                }
-                                else -> bar {
-                                    name = "${series.reportSeriesOptions.reportSeriesTitle} - $subgroup"
-                                    x.strings = statementRows.map { it.xAxis }
-                                    y.numbers = statementRows.map { it.yAxis }
-                                }
+                    props.reportResult.distinctSubgroups.forEach { resultSubgroup ->
+                        when (resultSubgroup.series.reportSeriesOptions.reportSeriesVisualType) {
+                            ReportSeriesVisualType.LINE_GRAPH -> scatter {
+                                name = resultSubgroup.series.reportSeriesOptions.reportSeriesTitle
+                                x.strings = resultSubgroup.subgroupData.map { it.xAxis }
+                                y.numbers = resultSubgroup.subgroupData.map { it.yAxis.toFloat() }
+                                mode = ScatterMode.`lines+markers`
+                                type = TraceType.scatter
+                            }
+
+                            else -> bar {
+                                name = resultSubgroup.series.reportSeriesOptions.reportSeriesTitle
+                                x.strings = resultSubgroup.subgroupData.map { it.xAxis }
+                                y.numbers = resultSubgroup.subgroupData.map { it.yAxis.toFloat() }
                             }
                         }
                     }
-
                     layout {
                         if (isCompact) {
                             width = COMPACT_WIDTH
@@ -95,7 +91,8 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         xaxis {
                             automargin = true
                             title {
-                                text = props.strings[props.reportResult.request.reportOptions.xAxis.label]
+                                text =
+                                    props.strings[props.reportResult.request.reportOptions.xAxis.label]
                             }
                             tickmode = TickMode.auto
                             type = AxisType.category

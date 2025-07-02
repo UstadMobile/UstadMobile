@@ -61,8 +61,6 @@ external interface ReportEditScreenProps : Props {
     var onEntityChanged: (ReportOptions2) -> Unit
     var onSeriesChanged: (ReportSeries2) -> Unit
     var onAddSeries: () -> Unit
-    var onAddFilter: (seriesId: Int) -> Unit
-    var onRemoveFilter: (index: Int, seriesId: Int) -> Unit
     var onRemoveSeries: (seriesId: Int) -> Unit
 }
 
@@ -461,59 +459,6 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                         )
                     }
                 }
-
-                if (series.reportSeriesFilters?.isNotEmpty() == true) {
-                    Typography {
-                        variant = TypographyVariant.h6
-                        +strings[MR.strings.filters]
-                    }
-                }
-
-                series.reportSeriesFilters?.forEachIndexed { index, reportFilter2 ->
-                    Stack {
-                        direction = responsive(StackDirection.row)
-                        spacing = responsive(8.px)
-                        sx {
-                            width = 100.pct
-                            justifyContent = JustifyContent.spaceBetween
-                            alignItems = AlignItems.center
-                        }
-                        val fieldName = reportFilter2.reportFilterField?.name?.lowercase()
-                            ?.replaceFirstChar { it.uppercase() } ?: ""
-                        val comparisonSymbol = reportFilter2.reportFilterCondition?.symbol ?: ""
-                        val filterText =
-                            "$fieldName $comparisonSymbol ${reportFilter2.reportFilterValue}"
-
-                        Typography {
-                            variant = TypographyVariant.h6
-                            +ReactNode(filterText)
-                        }
-                        IconButton {
-                            onClick = {
-                                props.onRemoveFilter(index, series.reportSeriesUid)
-                            }
-                            Icon {
-                                sx {
-                                    width = 20.px
-                                    height = 20.px
-                                }
-                                Close {
-                                    sx {
-                                        width = 20.px
-                                        height = 20.px
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                Button {
-                    id = "filter_add_button"
-                    fullWidth = true
-                    onClick = { props.onAddFilter(series.reportSeriesUid) }
-                    variant = ButtonVariant.outlined
-                    +strings[MR.strings.add_filter]
-                }
             }
             Button {
                 id = "series_add_button"
@@ -561,8 +506,6 @@ val ReportEditScreen = FC<Props> {
         onEntityChanged = viewModel::onEntityChanged
         onSeriesChanged = viewModel::onSeriesChanged
         onAddSeries = viewModel::onAddSeries
-        onAddFilter = viewModel::onAddFilter
-        onRemoveFilter = viewModel::onRemoveFilter
         onRemoveSeries = viewModel::onRemoveSeries
     }
 }

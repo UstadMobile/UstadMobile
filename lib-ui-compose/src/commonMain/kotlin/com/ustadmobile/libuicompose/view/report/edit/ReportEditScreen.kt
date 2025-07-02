@@ -61,12 +61,9 @@ fun ReportEditScreen(viewModel: ReportEditViewModel) {
     ReportEditScreen(
         uiState = uiState,
         onReportChanged = viewModel::onEntityChanged,
-        onAddFilter = viewModel::onAddFilter,
         onSeriesChanged = viewModel::onSeriesChanged,
         onAddSeries = viewModel::onAddSeries,
-        onRemoveFilter = viewModel::onRemoveFilter,
         onRemoveSeries = viewModel::onRemoveSeries,
-        onEditFilter = viewModel::onEditFilter
     )
 }
 
@@ -74,12 +71,9 @@ fun ReportEditScreen(viewModel: ReportEditViewModel) {
 private fun ReportEditScreen(
     uiState: ReportEditUiState = ReportEditUiState(),
     onReportChanged: (ReportOptions2) -> Unit = {},
-    onAddFilter: (Int) -> Unit = { },
     onAddSeries: () -> Unit = { },
     onSeriesChanged: (ReportSeries2) -> Unit = {},
-    onRemoveFilter: (Int, Int) -> Unit = { _, _ -> },
     onRemoveSeries: (Int) -> Unit = { },
-    onEditFilter: (Int, ReportFilter3) -> Unit = { _, _ -> },
 ) {
     val requiredYAxisType: YAxisTypes? = uiState.reportOptions2.series
         .mapNotNull { it.reportSeriesYAxis?.type }
@@ -318,57 +312,6 @@ private fun ReportEditScreen(
                         isError = uiState.submitted && uiState.chartTypeError[seriesItem.reportSeriesUid] != null,
                     )
 
-                }
-            }
-
-            // Filters Section
-            if (!seriesItem.reportSeriesFilters.isNullOrEmpty()) {
-                item {
-                    Text(
-                        text = stringResource(MR.strings.filters),
-                        modifier = Modifier.defaultScreenPadding()
-                    )
-                }
-            }
-            seriesItem.reportSeriesFilters?.forEachIndexed { index, reportFilter2 ->
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .defaultScreenPadding()
-                            .clickable { onEditFilter(seriesItem.reportSeriesUid, reportFilter2) }
-                    ) {
-                        val fieldName = reportFilter2.reportFilterField?.name?.lowercase()
-                            ?.replaceFirstChar { it.uppercase() } ?: ""
-                        val comparisonSymbol = reportFilter2.reportFilterCondition?.symbol ?: ""
-                        val filterText =
-                            "$fieldName $comparisonSymbol ${reportFilter2.reportFilterValue?.lowercase()}"
-
-                        Text(
-                            text = filterText,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = "Remove filter",
-                            modifier = Modifier
-                                .clickable {
-                                    onRemoveFilter(index, seriesItem.reportSeriesUid)
-                                }
-                        )
-                    }
-                }
-            }
-
-
-            item {
-                Button(
-                    onClick = { onAddFilter(seriesItem.reportSeriesUid) },
-                    modifier = Modifier.fillMaxWidth().defaultScreenPadding()
-                ) {
-                    Text(
-                        text = stringResource(MR.strings.add_filter),
-                    )
                 }
             }
         }
