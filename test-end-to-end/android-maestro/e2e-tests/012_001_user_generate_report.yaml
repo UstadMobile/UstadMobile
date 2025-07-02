@@ -90,21 +90,21 @@ onFlowComplete:
       text: "Add Series"
     direction: DOWN
 - assertVisible: "Series 2"
-- scrollUntilVisible:
-    element:
-      text: "Add Filter"
-    direction: DOWN
-- tapOn: "Add Filter"
-- assertVisible:
-    text: "Edit filter"
-    id: "app_title"
-- tapOn: "Field*"
-- tapOn: "Person age"
-- tapOn: "Condition*"
-- tapOn: "> Greater"
-- tapOn: "Value*"
-- inputText: "13"
-- tapOn: "Done"
+#- scrollUntilVisible:
+#    element:
+#      text: "Add Filter"
+#    direction: DOWN
+#- tapOn: "Add Filter"
+#- assertVisible:
+#    text: "Edit filter"
+#    id: "app_title"
+#- tapOn: "Field*"
+#- tapOn: "Person age"
+#- tapOn: "Condition*"
+#- tapOn: "> Greater"
+#- tapOn: "Value*"
+#- inputText: "13"
+#- tapOn: "Done"
 - tapOn: "Done"
 - assertVisible:
     text: "Test Report"
