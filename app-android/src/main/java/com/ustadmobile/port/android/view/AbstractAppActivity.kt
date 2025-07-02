@@ -264,7 +264,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
          * snippet of code which is used by Maestro end-to-end tests to verify that a download
          * was completed.
          */
-        intent.extras?.getBoolean("showDownloads")?.also {
+        intent.extras?.getBoolean("showDownloads")?.takeIf { it }?.also {
             startActivity(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS))
         }
 
