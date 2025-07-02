@@ -4,7 +4,7 @@ import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.util.ext.hasFlag
-import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
 import com.ustadmobile.core.viewmodel.site.COMMON_TOP_LEVEL_NAV_ITEMS
 import com.ustadmobile.lib.db.entities.Site
 
@@ -41,6 +41,6 @@ class GetDefaultDestinationUseCase(
 
         return filteredDestinations.firstOrNull { dest ->
             visibilityFlag.hasFlag(dest.flag)
-        }?.destRoute ?: PersonListViewModel.DEST_NAME_HOME
+        }?.destRoute ?: AddAccountSelectNewOrExistingViewModel.DEST_NAME
     }
 }

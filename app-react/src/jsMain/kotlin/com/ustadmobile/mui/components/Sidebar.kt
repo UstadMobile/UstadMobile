@@ -6,9 +6,9 @@ import com.ustadmobile.mui.common.Area
 import com.ustadmobile.mui.common.Sizes
 import dev.icerock.moko.resources.StringResource
 import js.objects.jso
-import mui.icons.material.Chat
-import mui.icons.material.LibraryBooks
-import mui.icons.material.Person
+import mui.icons.material.Chat as ChatIcon
+import mui.icons.material.LibraryBooks as LibraryIcon
+import mui.icons.material.Person as PersonIcon
 import mui.material.Box
 import mui.material.Drawer
 import mui.material.DrawerAnchor
@@ -41,9 +41,9 @@ data class RootScreen(
 )
 val iconMap = mapOf(
     Site.SHOW_COURSE to SchoolIcon,
-    Site.SHOW_LIBRARY to LibraryBooks,
-    Site.SHOW_MESSAGES to Chat,
-    Site.SHOW_PEOPLE to Person
+    Site.SHOW_LIBRARY to LibraryIcon,
+    Site.SHOW_MESSAGES to ChatIcon,
+    Site.SHOW_PEOPLE to PersonIcon
 )
 
 val ROOT_SCREENS = COMMON_TOP_LEVEL_NAV_ITEMS.map { info ->

@@ -136,10 +136,6 @@ class SignUpViewModel(
 
     init {
         viewModelScope.launch {
-            if (savedStateHandle[UstadView.ARG_NEXT].equals(PersonListViewModel.DEST_NAME_HOME)){
-                nextDestination = getDefaultDestinationUseCase.invoke()
-                return@launch
-            }
             nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase.invoke()
 
         }
@@ -169,7 +165,10 @@ class SignUpViewModel(
                 savedStateKey = OtherSignUpOptionSelectionViewModel.ARG_PERSON,
                 onLoadFromDb = { null },
                 makeDefault = {
-                    Person()
+                    Person().shallowCopy {
+                        dateOfBirth = savedStateHandle[ARG_DATE_OF_BIRTH]?.toLong()?:0L
+                        this.isPersonalAccount = savedStateHandle[ARG_IS_PERSONAL_ACCOUNT].toBoolean()
+                    }
                 },
                 uiUpdate = {
                     _uiState.update { prev ->
@@ -197,11 +196,6 @@ class SignUpViewModel(
         _uiState.update { prev ->
             prev.copy(
                 genderOptions = genderConfig.genderMessageIdsAndUnset,
-                person = Person(
-                    dateOfBirth = savedStateHandle[PersonEditViewModel.ARG_DATE_OF_BIRTH]?.toLong()
-                        ?: 0L,
-                    isPersonalAccount = _uiState.value.isPersonalAccount
-                ),
                 serverUrl_ = serverUrl,
                 passkeySupported = createPasskeyUseCase != null,
                 showOtherOption = createPasskeyUseCase == null && getLocalAccountsSupportedUseCase.invoke(),
@@ -364,8 +358,6 @@ class SignUpViewModel(
             _uiState.value.person?.shallowCopy {
                 this.firstNames = firstName
                 this.lastName = lastName
-                dateOfBirth = savedStateHandle[ARG_DATE_OF_BIRTH]?.toLong()?:0L
-                this.isPersonalAccount = _uiState.value.isPersonalAccount
             }
         )
 

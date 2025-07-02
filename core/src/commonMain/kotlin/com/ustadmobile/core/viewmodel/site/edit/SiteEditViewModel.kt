@@ -41,7 +41,7 @@ data class SiteEditUiState(
     val bottomNavToggleError: String? = null,
     val registrationEnabledError: String? = null,
     val currentSiteTermsLang: UstadMobileSystemCommon.UiLanguage = uiLangs.first(),
-    val permissionLabels: List<Pair<StringResource,Long>> = emptyList()
+    val bottomNavFlagLabels: List<Pair<StringResource,Long>> = emptyList()
 ) {
     val hasErrors: Boolean = (siteNameError != null || registrationEnabledError != null||
             bottomNavToggleError != null)
@@ -73,7 +73,7 @@ class SiteEditViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                permissionLabels = COMMON_TOP_LEVEL_NAV_ITEMS.map { it.label to it.flag }
+                bottomNavFlagLabels = COMMON_TOP_LEVEL_NAV_ITEMS.map { it.label to it.flag }
             )
         }
         val supportedLangs = languagesConfig.supportedUiLanguages
@@ -175,15 +175,11 @@ class SiteEditViewModel(
             }
         }
     }
-    fun onTogglePermission(flag: Long) {
-        _uiState.update { prev ->
-            prev.copy(
-                site = prev.site?.shallowCopy {
-                    bottomNavVisibilityFlag = bottomNavVisibilityFlag.toggleFlag(flag)
-                },
-                bottomNavToggleError = null
-            )
+    fun onToggleNavigationItem(flag: Long) {
+        val updatedSite = _uiState.value.site?.shallowCopy {
+            bottomNavVisibilityFlag = bottomNavVisibilityFlag.toggleFlag(flag)
         }
+        onEntityChanged(updatedSite)
     }
 
     fun onChangeTermsLanguage(

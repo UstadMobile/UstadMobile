@@ -104,7 +104,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
 
                 UstadPermissionEditComponent {
-                    permissionLabels = props.uiState.permissionLabels
+                    permissionLabels = props.uiState.bottomNavFlagLabels
                     value = (props.uiState.site?.bottomNavVisibilityFlag ?: 0).toLong()
                     onToggle = props.onTogglePermission
                     enabled = props.uiState.fieldsEnabled
@@ -159,7 +159,7 @@ val SiteEditScreen = FC<Props> {
     SiteEditComponent2 {
         uiState = uiStateVal
         onSiteChanged = viewModel::onEntityChanged
-        onTogglePermission = viewModel::onTogglePermission
+        onTogglePermission = viewModel::onToggleNavigationItem
         onChangeTermsHtml = viewModel::onChangeTermsHtml
         onChangeTermsLanguage = viewModel::onChangeTermsLanguage
     }

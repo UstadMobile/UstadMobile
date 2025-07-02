@@ -43,7 +43,7 @@ fun SiteEditScreen(
         onChangeTermsLanguage = viewModel::onChangeTermsLanguage,
         onChangeTermsHtml = viewModel::onChangeTermsHtml,
         onClickEditTermsInNewScreen = viewModel::onClickEditTermsInNewScreen,
-        onTogglePermission = viewModel::onTogglePermission,
+        onTogglePermission = viewModel::onToggleNavigationItem,
     )
 }
 
@@ -109,7 +109,7 @@ fun SiteEditScreen(
         )  {
             UstadEditHeader(stringResource(MR.strings.navigation_bar))
 
-            uiState.permissionLabels.forEach {  permissionLabel ->
+            uiState.bottomNavFlagLabels.forEach { permissionLabel ->
                 UstadSwitchField(
                     checked = (uiState.site?.bottomNavVisibilityFlag ?: 0).hasFlag(permissionLabel.second),
                     label = stringResource(permissionLabel.first),

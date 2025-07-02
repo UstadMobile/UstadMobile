@@ -118,10 +118,6 @@ class LoginViewModel(
         val getDefaultDestinationUseCase: GetDefaultDestinationUseCase =
             di.on(LearningSpace(serverUrl)).direct.instance()
         viewModelScope.launch {
-            if (savedStateHandle[UstadView.ARG_NEXT].equals(PersonListViewModel.DEST_NAME_HOME)){
-                nextDestination = getDefaultDestinationUseCase.invoke()
-                return@launch
-            }
             nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?:
                     getDefaultDestinationUseCase.invoke()
         }

@@ -54,6 +54,7 @@ import com.ustadmobile.core.logging.LogbackAntiLog
 import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.util.ext.hasOnlyOneBitSet
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
@@ -69,6 +70,9 @@ import io.kamel.image.config.LocalKamelConfig
 import io.ktor.client.HttpClient
 import it.sauronsoftware.junique.AlreadyLockedException
 import it.sauronsoftware.junique.JUnique
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.PopUpTo
@@ -211,11 +215,20 @@ fun main() {
             val showPoweredBy = remember {
                 di.direct.instance<GetShowPoweredByUseCase>().invoke()
             }
+            var currentSite by remember { mutableStateOf<Site?>(null) }
             val accountManager: UstadAccountManager = di.direct.instance()
-            val currentDb: UmAppDatabase = di.direct.on(accountManager.activeLearningSpace)
-                .instance(tag = DoorTag.TAG_DB)
 
-            val currentSite by currentDb.siteDao().getSiteAsFlow().collectAsState(initial = null)
+            LaunchedEffect(Unit) {
+                accountManager.currentUserSessionFlow
+                    .map { it.learningSpace }
+                    .distinctUntilChanged()
+                    .collectLatest { learningSpace ->
+                        val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
+                        db.siteDao().getSiteAsFlow().collect { site ->
+                            currentSite = site
+                        }
+                    }
+            }
 
 
             val desktopConfig = remember {

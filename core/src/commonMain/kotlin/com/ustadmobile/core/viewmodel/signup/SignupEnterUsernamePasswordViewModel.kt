@@ -126,7 +126,10 @@ class SignupEnterUsernamePasswordViewModel(
             )
             _uiState.update { prev ->
                 prev.copy(
-                    person = person,
+                    person = person.shallowCopy {
+                        dateOfBirth = savedStateHandle[ARG_DATE_OF_BIRTH]?.toLong()?:0L
+                        this.isPersonalAccount = _uiState.value.isPersonalAccount
+                    },
                     personPicture = personPicture,
                     firstName = if (person.firstNames == "") {
                         null
@@ -136,10 +139,6 @@ class SignupEnterUsernamePasswordViewModel(
 
 
                 )
-            }
-            if (savedStateHandle[UstadView.ARG_NEXT].equals(PersonListViewModel.DEST_NAME_HOME)){
-                nextDestination = getDefaultDestinationUseCase.invoke()
-                return@launch
             }
             nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase.invoke()
 
@@ -215,9 +214,6 @@ class SignupEnterUsernamePasswordViewModel(
             _uiState.value.person?.shallowCopy {
                 this.firstNames = firstName
                 this.lastName = lastName
-                dateOfBirth = savedStateHandle[ARG_DATE_OF_BIRTH]?.toLong()?:0L
-                this.isPersonalAccount = _uiState.value.isPersonalAccount
-
             }
         )
 
