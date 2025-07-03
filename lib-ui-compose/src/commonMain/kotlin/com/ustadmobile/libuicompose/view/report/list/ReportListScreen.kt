@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -148,26 +147,20 @@ private fun ReportGridCard(
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    when {
-                        reportResult.resultSeries.isEmpty() ->
-                            CircularProgressIndicator(Modifier.size(32.dp))
-
-                        reportResult.results.isEmpty() ->
-                            Text(
-                                stringResource(MR.strings.No_data_available),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-
-                        else -> {
-                            CombinedGraph(
-                                reportResult = reportResult,
-                                modifier = Modifier.fillMaxSize()
-                                    .background(color = MaterialTheme.colorScheme.surface),
-                            )
-                        }
+                    if (reportResult.results.isEmpty() || reportResult.resultSeries.isEmpty()) {
+                        Text(
+                            stringResource(MR.strings.No_data_available),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    } else {
+                        CombinedGraph(
+                            reportResult = reportResult,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color = MaterialTheme.colorScheme.surface),
+                        )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
             }
 

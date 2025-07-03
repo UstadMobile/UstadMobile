@@ -103,15 +103,6 @@ class ReportEditViewModel(
                     }
                 }
             )
-
-            launch {
-                navResultReturner.filteredResultFlowForKey(RESULT_KEY_REPORT_FILTER)
-                    .collect { result ->
-                        val reportFilter = result.result as? ReportFilter3 ?: return@collect
-                        val seriesId = reportFilter.reportFilterSeriesUid
-                        onFilterChanged(reportFilter, seriesId)
-                    }
-            }
         }
 
         _appUiState.update { prev ->

@@ -1,6 +1,7 @@
 package com.ustadmobile.libuicompose.view.report.detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -54,21 +55,34 @@ fun ReportDetailScreen(
 ) {
     uiState.reportResult?.let { reportResult ->
         Column(modifier = Modifier.fillMaxSize()) {
-            CombinedGraph(
-                reportResult = reportResult,
-                modifier = Modifier
-                    .weight(0.6f)
-                    .fillMaxWidth(),
-            )
+            if (reportResult.results.isNotEmpty()) {
+                CombinedGraph(
+                    reportResult = reportResult,
+                    modifier = Modifier
+                        .weight(0.6f)
+                        .fillMaxWidth(),
+                )
 
-            MoreOptionsSection(
-                seriesList = reportResult.resultSeries,
-                modifier = Modifier.weight(0.4f),
-                xAxisType = reportResult.request.reportOptions.xAxis
-            )
+                MoreOptionsSection(
+                    seriesList = reportResult.resultSeries,
+                    modifier = Modifier.weight(0.4f),
+                    xAxisType = reportResult.request.reportOptions.xAxis
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .weight(0.4f)
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(stringResource(MR.strings.empty_data))
+                }
+            }
         }
     }
 }
+
 @Composable
 fun DataTable(
     data: List<StatementReportRow>,
