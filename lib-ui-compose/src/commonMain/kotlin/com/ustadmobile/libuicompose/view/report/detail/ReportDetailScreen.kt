@@ -53,33 +53,33 @@ fun ReportDetailScreen(viewModel: ReportDetailViewModel) {
 fun ReportDetailScreen(
     uiState: ReportDetailUiState
 ) {
-    uiState.reportResult?.let { reportResult ->
-        Column(modifier = Modifier.fillMaxSize()) {
-            if (reportResult.results.isNotEmpty()) {
+    Column(Modifier.fillMaxSize()) {
+        if (uiState.reportResult?.results?.isNotEmpty() == true) {
+            val reportResult = uiState.reportResult
+            if (reportResult != null) {
                 CombinedGraph(
                     reportResult = reportResult,
-                    modifier = Modifier
-                        .weight(0.6f)
-                        .fillMaxWidth(),
+                    modifier = Modifier.weight(0.6f)
                 )
-
                 MoreOptionsSection(
                     seriesList = reportResult.resultSeries,
                     modifier = Modifier.weight(0.4f),
                     xAxisType = reportResult.request.reportOptions.xAxis
                 )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .weight(0.4f)
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(stringResource(MR.strings.empty_data))
-                }
             }
+        } else {
+            EmptyDataMessage(Modifier.weight(1f))
         }
+    }
+}
+
+@Composable
+private fun EmptyDataMessage(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(stringResource(MR.strings.empty_data))
     }
 }
 

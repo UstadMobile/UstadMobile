@@ -113,14 +113,6 @@ interface RunReportUseCase {
             request.reportOptions.series.first().reportSeriesYAxis.type
         }
 
-        val lineSeries: List<Series> by lazy {
-            resultSeries.filter { it.reportSeriesOptions.reportSeriesVisualType == ReportSeriesVisualType.LINE_GRAPH }
-        }
-
-        val barSeries: List<Series> by lazy {
-            resultSeries.filter { it.reportSeriesOptions.reportSeriesVisualType == ReportSeriesVisualType.BAR_CHART }
-        }
-
 
         //Add functions to get info needed for graphs in a clear/logical way e.g. distinct xaxis,subgroups
 
