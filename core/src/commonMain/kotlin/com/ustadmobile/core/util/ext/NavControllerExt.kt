@@ -19,6 +19,7 @@ import com.ustadmobile.core.viewmodel.UstadViewModel.Companion.ARG_DONT_SET_CURR
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.account.list.AccountListViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -156,7 +157,9 @@ fun UstadNavController.navigateToLink(
                 // new or existing account selector screen
                 (learningSpaceUrl == null && accountManager.activeSessionCount(maxDateOfBirth) == 0) -> {
                     val args = buildMap {
-                        put(ARG_NEXT, viewUri)
+                        if (viewUri!=RedirectViewModel.EMPTY_SITE) {
+                            put(ARG_NEXT, viewUri)
+                        }
                         put(ARG_DONT_SET_CURRENT_SESSION, dontSetCurrentSession.toString())
                         learningSpaceUrl?.also { learningSpaceUrlVal ->
                             put(ARG_LEARNINGSPACE_URL, learningSpaceUrlVal)

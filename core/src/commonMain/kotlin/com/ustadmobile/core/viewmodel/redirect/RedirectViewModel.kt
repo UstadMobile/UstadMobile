@@ -80,6 +80,7 @@ class RedirectViewModel(
     companion object {
 
         const val DEST_NAME = ""
+        const val EMPTY_SITE = "empty_site"
 
     }
 }
