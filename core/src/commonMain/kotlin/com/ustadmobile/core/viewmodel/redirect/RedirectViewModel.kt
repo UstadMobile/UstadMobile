@@ -61,6 +61,9 @@ class RedirectViewModel(
             val destination = destinationArg ?: di.on(accountManager.currentUserSession.learningSpace)
                 .direct.instance<GetDefaultDestinationUseCase>().invoke()
 
+            //if destination is empty, then directly to Login/NewOrExisting screen here
+            //else use navigate to link (then NavControllerExt does not need to be changed)
+
             navController.navigateToLink(
                 link = destination,
                 accountManager = accountManager,
