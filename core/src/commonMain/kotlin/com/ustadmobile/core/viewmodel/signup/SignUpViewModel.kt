@@ -136,7 +136,8 @@ class SignUpViewModel(
 
     init {
         viewModelScope.launch {
-            nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase.invoke()
+            nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase.invoke()?:
+                    throw IllegalStateException("destination can not be null")
 
         }
         loadingState = LoadingUiState.INDETERMINATE

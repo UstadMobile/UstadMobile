@@ -300,7 +300,8 @@ class SiteEditViewModel(
 
             // Clear backstack and navigate to the first enabled tab to avoid showing disabled tabs.
             if (siteToSave.bottomNavVisibilityFlag != oldFlags) {
-                val destination = destination.invoke()
+                val destination = destination.invoke()?:
+                throw IllegalStateException("destination can not be null")
                 navController.navigate(
                     viewName = destination,
                     args = emptyMap(),

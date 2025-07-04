@@ -250,7 +250,8 @@ class AccountListViewModel(
      */
     fun onClickAccount(sessionWithPersonAndLearningSpace: UserSessionWithPersonAndLearningSpace) {
         viewModelScope.launch {
-            val viewName = destination.invoke()
+            val viewName = destination.invoke()?:
+            throw IllegalStateException("destination can not be null")
             startUserSessionUseCase(
                 session = sessionWithPersonAndLearningSpace,
                 navController = navController,

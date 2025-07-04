@@ -10,11 +10,14 @@ import com.ustadmobile.core.viewmodel.site.COMMON_TOP_LEVEL_NAV_ITEMS
 import com.ustadmobile.lib.db.entities.Site
 
 /**
- * Provides the default destination. This is a scoped dependency.
+ * Provides the default destination according to the visible destination flag in site
+ * according to learning space
  *
  * The default destination is:
- * When on a personal account learning space or local : ContentEntryList
- * When on a multi user learning space: ClazzList
+ * When on a personal account learning space or local then will exclude ClazzList screen from
+ * filteredDestinations
+ *
+ * When on a multi user learning space then will show all visible screen
  *
  * This is a trivial use case; its sole reason to exist is to provide a sensible single point of
  * truth
@@ -26,7 +29,7 @@ class GetDefaultDestinationUseCase(
     private val repo: UmAppDatabase?,
 ) {
 
-    suspend operator fun invoke(): String {
+    suspend operator fun invoke(): String? {
         val effectiveDb = repo ?: db
         val site = effectiveDb.siteDao().getSiteAsync()
         val visibilityFlag = site?.bottomNavVisibilityFlag ?: 0L
@@ -42,6 +45,6 @@ class GetDefaultDestinationUseCase(
 
         return filteredDestinations.firstOrNull { dest ->
             visibilityFlag.hasFlag(dest.flag)
-        }?.destRoute ?: RedirectViewModel.EMPTY_SITE
+        }?.destRoute
     }
 }

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.viewmodel.redirect
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.account.CheckRegistrationAllowedUseCase
 import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
@@ -9,6 +10,8 @@ import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.navigateToLink
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.account.addaccountselectneworexisting.AddAccountSelectNewOrExistingViewModel
+import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.door.ext.DoorTag
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -63,7 +66,25 @@ class RedirectViewModel(
 
             //if destination is empty, then directly to Login/NewOrExisting screen here
             //else use navigate to link (then NavControllerExt does not need to be changed)
+            if (destination.isNullOrEmpty()){
+                val checkRegistrationAllowed: CheckRegistrationAllowedUseCase =
+                    di.on(accountManager.currentUserSession.learningSpace).direct.instance()
 
+                //Decide if we are going to new or existing account selector, or directly to login
+                //if we know for sure it is not possible to create a new account
+                val canRegister = checkRegistrationAllowed.
+                invoke(accountManager.currentUserSession.learningSpace.url)
+
+                navController.navigate(
+                    viewName = if(canRegister == false) {
+                        LoginViewModel.DEST_NAME
+                    }else {
+                        AddAccountSelectNewOrExistingViewModel.DEST_NAME
+                    },
+                    args = emptyMap(),
+                )
+                return@launch
+            }
             navController.navigateToLink(
                 link = destination,
                 accountManager = accountManager,

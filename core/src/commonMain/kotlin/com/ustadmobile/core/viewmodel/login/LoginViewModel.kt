@@ -119,7 +119,8 @@ class LoginViewModel(
             di.on(LearningSpace(serverUrl)).direct.instance()
         viewModelScope.launch {
             nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?:
-                    getDefaultDestinationUseCase.invoke()
+                    getDefaultDestinationUseCase.invoke()?:
+                    throw IllegalStateException("destination can not be null")
         }
         _uiState.update { prev ->
             prev.copy(

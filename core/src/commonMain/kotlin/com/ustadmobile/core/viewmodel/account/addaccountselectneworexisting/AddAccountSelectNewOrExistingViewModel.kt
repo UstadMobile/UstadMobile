@@ -273,7 +273,8 @@ class AddAccountSelectNewOrExistingViewModel(
     ) {
         val getDefaultDestinationUseCase: GetDefaultDestinationUseCase =
             di.on(LearningSpace(serverUrl)).direct.instance()
-        val nextDestVal = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase()
+        val nextDestVal = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase()?:
+        throw IllegalStateException("destination can not be null")
         Napier.d { "AddAccountSelectNewOrExistingViewModel: go to next destination: $nextDestVal" }
 
         navController.navigateToViewUri(
