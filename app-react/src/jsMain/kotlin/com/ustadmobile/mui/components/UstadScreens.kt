@@ -45,6 +45,7 @@ import react.router.useLoaderData
 import ustadJsDi
 import kotlin.random.Random
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.db.MIGRATE_USERNAME_CLIENT
 import web.cssom.None
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.ext.MIGRATION_144_145_CLIENT
@@ -274,6 +275,7 @@ val ustadScreensLoader: LoaderFunction<Any?> = { args: LoaderFunctionArgs<Any?> 
         .addMigrations(MIGRATION_155_156_CLIENT)
         .addMigrations(MIGRATION_161_162_CLIENT)
         .addMigrations(MIGRATION_169_170_CLIENT)
+        .addMigrations(MIGRATE_USERNAME_CLIENT)
         .addMigrations()
 
     @OptIn(DelicateCoroutinesApi::class)

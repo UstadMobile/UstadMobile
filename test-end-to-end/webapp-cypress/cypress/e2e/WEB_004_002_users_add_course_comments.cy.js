@@ -1,44 +1,14 @@
 describe('WEB_004_002_user_add_private_comment', () => {
-it('Start Ustad Test Server ', () => {
- // Start Test Server
-  cy.ustadStartTestServer()
-})
-
-it('Admin add a course and Members', () => {
- // Admin user login
-  cy.ustadClearDbAndLogin('admin','testpass')
- // Add a new course
-  cy.ustadAddCourse('004_002')
- //Add a teacher
-  cy.contains("button","Members").click()
-  cy.contains("span","Add a teacher").click()
-  cy.ustadAddNewPerson('Teacher','1','Female')
- // Add account for teacher
-  cy.contains("Teacher 1").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('teacher1','test1234')
- //Add a student1
-  cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','1','Male')
-  cy.contains("button","Members").should('be.visible')
- //Add account for student1
-  cy.contains("Student 1").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student1','test1234')
- //Add a student2
-  cy.contains("span","Add a student").click()
-  cy.ustadAddNewPerson('Student','2','Male')
-  cy.contains("button","Members").should('be.visible')
- //Add account for student1
-  cy.contains("Student 2").click()
-  cy.contains('View profile').click()
-  cy.ustadCreateUserAccount('student2','test1234')
-})
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
 it('Teacher add assignment and course comment', () => {
-  cy.ustadClearDbAndLogin('teacher1','test1234')
+  cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv");
+  cy.ustadClearDbAndLogin('teach1','testt1')
   cy.contains("Course").click()
-  cy.contains("004_002").click()
+  cy.contains("Test Course Block").click()
   cy.contains("button","Course").click()
  // Add Assignment block
   cy.contains("button","Edit").click()
@@ -54,17 +24,37 @@ it('Teacher add assignment and course comment', () => {
   cy.contains("button","Save").click()
   cy.contains("button","Members").should('be.visible')
   cy.contains("Assignment 1").click()
-  cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','comment1')
+  cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','course comment by teacher')
+  cy.contains("Assignment 1").click()
+  cy.contains('Submissions').click()
+  cy.ustadReloadUntilVisible("Student 1")
+  cy.contains("Student 1").click()
+  cy.ustadTypeAndSubmitAssignmentComment('#private_comment_textfield','#private_comment_textfield_send_button','private comment by teacher')
+
 })
 
 it('Student add course comment', () => {
 
-  cy.ustadClearDbAndLogin('student1','test1234')
+  cy.ustadClearDbAndLogin('stud1','tests1')
   cy.contains("Course").click()
-  cy.contains("004_002").click()
+  cy.contains("Test Course Block").click()
   cy.contains("button","Course").click()
   cy.contains('Assignment 1').click()
-  cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','comment2')
-  cy.contains("comment1").ustadScrollUntilVisible()
+  cy.ustadTypeAndSubmitAssignmentComment('#course_comment_textfield','#course_comment_textfield_send_button','course comment by student')
+  cy.contains("course comment by student").should('exist')
+  cy.contains("course comment by teacher").should('exist')
+  cy.contains("private comment by teacher").ustadScrollUntilVisible()
+  cy.get(".VirtualList").scrollTo('bottom')
+  cy.ustadTypeAndSubmitAssignmentComment('#private_comment_textfield','#private_comment_textfield_send_button','private comment by student')
+  cy.contains("private comment by teacher").ustadScrollUntilVisible()
+  cy.contains("private comment by student").should('exist')
+  cy.contains("private comment by teacher").should('exist')
+
+
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

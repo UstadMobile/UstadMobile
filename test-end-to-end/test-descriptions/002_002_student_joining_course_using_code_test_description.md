@@ -68,4 +68,3 @@ Students can join class using class code or link.
 60. Login to the app using the student username and password.
 61. Click on "Courses".
 62. Verify that that the student able to see course name.
-63. 

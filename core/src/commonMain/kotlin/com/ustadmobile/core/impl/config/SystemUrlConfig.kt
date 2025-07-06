@@ -10,7 +10,7 @@ package com.ustadmobile.core.impl.config
  * This is set in buildconfig.properties and provided via UstadBuildConfig, which is available
  * through dependency injection.
  *
- * @param systemBaseUrl In the perfect world, no system base URL would be needed. The user could just
+* @param systemBaseUrl In the perfect world, no system base URL would be needed. The user could just
  * use any learning space URL they want and that would be it, however:
  * - Opening a link on Android 12+ requires declaring a specific domain in the AndroidManifest and
  *   verifying domain ownership as per https://developer.android.com/training/app-links/verify-android-applinks
@@ -21,9 +21,6 @@ package com.ustadmobile.core.impl.config
  *
  * The System Base URL also provides REST API endpoints to list available learning spaces.
  *
- * @param passkeyRpId The passkeys relying party ID : the domain name (without protocol and slash),
- * as per the primary URL (e.g. if the Primary URL is https://example.org/, then the rpId is example.org).
- *
  * @param presetLearningSpaceUrl If a system has only one learning space, then there is no need to
  * ask the user to select a learning space.
  *
@@ -33,19 +30,16 @@ package com.ustadmobile.core.impl.config
  */
 data class SystemUrlConfig(
     val systemBaseUrl: String,
-    val passkeyRpId: String,
     val presetLearningSpaceUrl: String? = null,
     val newPersonalAccountsLearningSpaceUrl: String? = null,
 ) {
 
     val canSelectServer: Boolean = presetLearningSpaceUrl == null
 
-
     companion object {
         fun fromUstadBuildConfig(buildConfig: UstadBuildConfig): SystemUrlConfig {
             return SystemUrlConfig(
                 systemBaseUrl = buildConfig[UstadBuildConfig.KEY_SYSTEM_URL]!!,
-                passkeyRpId = buildConfig[UstadBuildConfig.KEY_PASSKEY_RP_ID]!!,
                 presetLearningSpaceUrl = buildConfig[UstadBuildConfig.KEY_PRESET_LEARNING_SPACE_URL]
                     ?.takeIf { it.isNotBlank() },
                 newPersonalAccountsLearningSpaceUrl = buildConfig[UstadBuildConfig.KEY_NEW_PERSONAL_ACCOUNT_LEARNING_SPACE_URL]

@@ -1,0 +1,8 @@
+appId: com.toughra.ustadmobile
+---
+- tapOn:
+   id: ${TEXTFIELD}
+- longPressOn:
+    id: ${TEXTFIELD}
+- tapOn: "Select all"
+- eraseText

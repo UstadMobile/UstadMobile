@@ -4,8 +4,9 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
-import com.ustadmobile.core.domain.password.SavePasswordUseCase
+import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -55,8 +56,6 @@ data class SignupEnterUsernamePasswordUiState(
 
     val registrationMode: Int = 0,
 
-    val usernameError: String? = null,
-
     val firstName: String? = null,
 
     val passwordError: String? = null,
@@ -72,10 +71,7 @@ data class SignupEnterUsernamePasswordUiState(
     val passkeySupported: Boolean = true,
 
     val isPersonalAccount: Boolean = false,
-) {
-
-
-}
+)
 
 class SignupEnterUsernamePasswordViewModel(
     di: DI,
@@ -86,8 +82,6 @@ class SignupEnterUsernamePasswordViewModel(
     private val _uiState: MutableStateFlow<SignupEnterUsernamePasswordUiState> = MutableStateFlow(
         SignupEnterUsernamePasswordUiState()
     )
-
-    private val savePasswordUseCase: SavePasswordUseCase? by instanceOrNull()
 
     private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
 
@@ -107,19 +101,22 @@ class SignupEnterUsernamePasswordViewModel(
 
     private val genderConfig: GenderConfig by instance()
 
+    private val enrollToCourseFromInviteCodeUseCase:EnrollToCourseFromInviteCodeUseCase =
+    di.on(LearningSpace(serverUrl)).direct.instance()
+
     //Run EnqueueSavePictureUseCase after the database transaction has finished.
     private val enqueueSavePictureUseCase: EnqueueSavePictureUseCase by
-    on(LearningSpace(serverUrl)).instance()
+        on(LearningSpace(serverUrl)).instance()
 
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
-        val title =
-            systemImpl.getString(MR.strings.create_account)
+        val title = systemImpl.getString(MR.strings.create_account)
         viewModelScope.launch {
             val person = savedStateHandle.getJson(
                 OtherSignUpOptionSelectionViewModel.ARG_PERSON, Person.serializer(),
             ) ?: Person()
+
             val personPicture = savedStateHandle.getJson(
                 OtherSignUpOptionSelectionViewModel.ARG_PERSON_PROFILE_PIC,
                 PersonPicture.serializer(),
@@ -171,12 +168,6 @@ class SignupEnterUsernamePasswordViewModel(
         _uiState.update { prev ->
             prev.copy(
                 person = entity,
-                usernameError = updateErrorMessageOnChange(
-                    prev.person?.username,
-                    entity?.username, prev.usernameError
-                ),
-
-
                 )
         }
 
@@ -197,8 +188,7 @@ class SignupEnterUsernamePasswordViewModel(
 
 
     private fun SignupEnterUsernamePasswordUiState.hasErrors(): Boolean {
-        return usernameError != null ||
-                passwordError != null
+        return passwordError != null
     }
 
 
@@ -224,14 +214,6 @@ class SignupEnterUsernamePasswordViewModel(
         _uiState.update { prev ->
             prev.copy(
 
-                usernameError = if (!validateUsernameUseCase.invoke(
-                        savePerson.username ?: ""
-                    )
-                ) {
-                    systemImpl.getString(MR.strings.invalid)
-                } else {
-                    null
-                },
                 passwordError = if (prev.password.isNullOrEmpty()) {
                     systemImpl.getString(MR.strings.field_required_prompt)
                 } else {
@@ -259,7 +241,6 @@ class SignupEnterUsernamePasswordViewModel(
                     learningSpaceUrl = serverUrl
                 )
 
-
                 val personPictureVal = _uiState.value.personPicture
                 if (personPictureVal != null) {
                     personPictureVal.personPictureUid = savePerson.personUid
@@ -274,16 +255,33 @@ class SignupEnterUsernamePasswordViewModel(
 
                 }
 
+                val savePasswordUseCase: SavePasswordUseCase? = di.on(LearningSpace(serverUrl))
+                    .direct.instanceOrNull()
+
                 savePasswordUseCase?.invoke(
-                    username =savePerson.username.toString(),
-                    password = _uiState.value.password.toString())
+                    username = savePerson.username.toString(),
+                    password = passwordVal,
+                )
+
+                try {
+                    val viewUri = savedStateHandle[UstadView.ARG_NEXT]
+                    if (viewUri != null&&viewUri.contains("ClazzInviteRedeem")) {
+                        nextDestination = ClazzListViewModel.DEST_NAME_HOME
+                        enrollToCourseFromInviteCodeUseCase.invoke(
+                            viewUri =viewUri,
+                            personUid = savePerson.personUid
+                        )
+                    }
+                } catch (e: Exception) {
+                    Napier.d { "enrollToCourseFromInviteCodeUseCase :"+e.message}
+                }
 
                 navigateToAppropriateScreen(savePerson)
 
             } catch (e: Exception) {
                 if (e is IllegalStateException) {
                     _uiState.update { prev ->
-                        prev.copy(usernameError = systemImpl.getString(MR.strings.person_exists))
+                        prev.copy(passwordError = systemImpl.getString(MR.strings.person_exists))
                     }
                 } else {
                     snackDispatcher.showSnackBar(
@@ -303,7 +301,8 @@ class SignupEnterUsernamePasswordViewModel(
             navController.navigate(AddChildProfilesViewModel.DEST_NAME,
                 args = buildMap {
                     put(ARG_NEXT, nextDestination)
-                    putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                    putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                    putFromSavedStateIfPresent(ARG_NEXT)
                 }
             )
 

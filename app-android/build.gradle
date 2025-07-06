@@ -1,4 +1,6 @@
 
+import java.net.URL
+
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.plugin.serialization'
@@ -118,14 +120,13 @@ android {
     defaultConfig {
         applicationId 'com.toughra.ustadmobile'
         testInstrumentationRunnerArguments clearPackageData: 'true', notAnnotation: 'com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest'
-
         manifestPlaceholders = [
             "presetLocale" : rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.presetlocale"),
             "uiLanguages": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.uilanguages"),
             "showPoweredByMsg": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.showpoweredbymsg"),
             "gopts": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.gopts"),
             "systemBaseUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.systemBaseUrl"),
-            "passkeyRpId": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.passkeyRpId"),
+            "systemBaseUrlHost": new URL(rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.systemBaseUrl")).getHost(),
             "presetLsUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.presetLsUrl"),
             "newPersonalAccountsLsUrl": rootProject.ext.buildConfigProperties.getProperty("com.ustadmobile.system.newPersonalAccountsLsUrl"),
         ]

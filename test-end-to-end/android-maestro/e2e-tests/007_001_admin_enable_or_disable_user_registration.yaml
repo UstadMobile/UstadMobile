@@ -1,28 +1,56 @@
 appId: com.toughra.ustadmobile
 env:
- TESTRESULTSDIR: "${TESTRESULTSDIR}/007_001_admin_enable_or_disable_user_registration"
- TESTNAME:  "007_001_admin_enable_or_disable_user_registration"
+  TESTRESULTSDIR: "build/reports/maestro/007_001_admin_enable_or_disable_user_registration/Screenshots"
+onFlowStart:
+  - startRecording: 007_001_admin_enable_or_disable_user_registration
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
-- runFlow:
-   file: "../common/startserver.yaml"
-   env:
-    CONTROLSERVER: ${CONTROLSERVER}
-    TESTSERIAL: ${TESTSERIAL}
-    TESTNAME: ${TESTNAME}
-
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
 #admin enable user registration
 - runFlow:
-   file: "../common/user_login.yaml"
-- runFlow:
-    file: "../common/enable_user_registration.yaml"
+   file: "common/admin_login.yaml"
+- tapOn: "Settings"
+- tapOn: "Site"
+- tapOn:
+    id: "floating_action_button"
+- tapOn:
+    id: "registration_allowed"
+- tapOn: "Save"
+- assertVisible: "If self-registration is enabled, you must set terms and policies in at least one language for users to accept when they register."
+- tapOn:
+    id: "registration_allowed"  #switch off to verify error goes or not
+- tapOn: "Save"
+- assertVisible:
+    id: "floating_action_button" #Edit button should be visible
+- tapOn:
+    id: "floating_action_button"
+- tapOn:
+    id: "registration_allowed"
+- tapOn: "Terms and policies (English)"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "Terms and company policies"
+- tapOn: "Done"
+- tapOn: "Save"
+- takeScreenshot: "${TESTRESULTSDIR}/user_registration_enabled"
 - assertVisible: "Yes"
-- runFlow: "../common/clear_state_and_learning_space_new_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
-- tapOn: 2024
-- longPressOn: 2024
+- runFlow: "common/clear_state_and_learning_space_new_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- tapOn: "Next"
+- assertVisible: "This field is required" #verify the DOB field is mandatory
+- tapOn: 2025
+- longPressOn: 2025
 - inputText: 2009
 - hideKeyboard
 - tapOn: 2009
@@ -31,13 +59,34 @@ env:
 - extendedWaitUntil:
     visible:  "Terms and company policies"
     timeout: 10000
-- assertVisible: "Accept"
+- tapOn: "Accept"
+- tapOn: "Other options"
+- assertVisible:
+    below:  "Full name*"
+    text: "This field is required" #verify the Fullname field's mandatory
+- assertVisible:
+    below:  "Gender*"
+    text: "This field is required" #verify the Gender field's mandatory
+- tapOn: "Full name*"
+- inputText: "User ABC"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Other options"
+- tapOn: "Create username and password"
+- tapOn: "Sign-up"
+- assertVisible:
+    below:  "Password"
+    text: "This field is required" #verify the Password field's mandatory
+- tapOn: "Password"
+- inputText: "test1234"
+- tapOn: "Sign-up"
+- assertVisible: "Courses"
 
 #admin disable user registration
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/admin_login.yaml"
 - tapOn: "Library"
 - tapOn: "Settings"
 - tapOn: "Site"
@@ -47,6 +96,6 @@ env:
     id: "registration_allowed"
 - tapOn: "Save"
 - assertNotVisible: "Yes"
-- runFlow: "../common/clear_state_and_learning_space_new_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_learning_space_new_userflow.yaml"
+- runFlow: "common/select_site.yaml"
 - assertVisible: "Learning space does not allow new user registration"

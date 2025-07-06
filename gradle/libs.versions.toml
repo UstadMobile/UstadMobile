@@ -294,6 +294,7 @@ ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negoti
 ktor-server-conditional-headers = { module = "io.ktor:ktor-server-conditional-headers", version.ref = "ktor" }
 ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
 ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor"}
+ktor-server-auto-head-response = { module = "io.ktor:ktor-server-auto-head-response", version.ref = "ktor" }
 sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-jdbc" }
 postgresql = {  module = "org.postgresql:postgresql", version.ref = "postgresql" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }

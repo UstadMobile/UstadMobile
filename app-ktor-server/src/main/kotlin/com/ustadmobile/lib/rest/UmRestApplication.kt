@@ -17,6 +17,7 @@ import com.ustadmobile.core.domain.blob.savelocaluris.SaveLocalUrisAsBlobsUseCas
 import com.ustadmobile.core.domain.blob.upload.BlobUploadServerUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCase
 import com.ustadmobile.core.domain.cachestoragepath.GetStoragePathForUrlUseCaseCommonJvm
+import com.ustadmobile.core.domain.clazz.CreateNewClazzUseCase
 import com.ustadmobile.core.domain.clazzenrolment.pendingenrolment.EnrolIntoCourseUseCase
 import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCase
 import com.ustadmobile.core.domain.compress.audio.CompressAudioUseCaseSox
@@ -42,7 +43,6 @@ import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUs
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseJvm
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
-import com.ustadmobile.core.domain.invite.CheckContactTypeUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonStatusMap
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -135,8 +135,8 @@ import com.ustadmobile.lib.rest.domain.learningspace.SystemConfigScriptRoute
 import com.ustadmobile.lib.rest.domain.learningspace.create.CreateLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.delete.DeleteLearningSpaceUseCase
 import com.ustadmobile.lib.rest.domain.learningspace.update.UpdateLearningSpaceUseCase
-import com.ustadmobile.lib.rest.domain.invite.ProcessInviteRoute
-import com.ustadmobile.lib.rest.domain.invite.ProcessInviteUseCase
+import com.ustadmobile.lib.rest.domain.invite.SendClazzInvitesRoute
+import com.ustadmobile.lib.rest.domain.invite.SendClazzInvitesUseCaseServerImpl
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.message.SendMessageUseCase
 import com.ustadmobile.lib.rest.domain.invite.sms.SendSmsUseCase
@@ -153,6 +153,15 @@ import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.centralappconfigdb.datasource.LearningSpaceDataSource
 import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.invite.ParseInviteUseCase
+import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
+import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockSendEmailUseCase
+import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCaseImpl
+import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockEmailSender
+import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.TestEmailRoute
+import com.ustadmobile.lib.rest.domain.username.UsernameSuggestionRoute
+import com.ustadmobile.core.username.UsernameSuggestionUseCase
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -283,11 +292,17 @@ fun Application.umRestApplication(
         setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
     }
 
-    ktorServerPropertiesFile().writer().use { serverPropWriter ->
+    environment.config.absoluteDataDir().takeIf { !it.exists() }?.mkdirs()
+
+    ktorServerPropertiesFile(
+        dataDir = environment.config.absoluteDataDir()
+    ).writer().use { serverPropWriter ->
         serverProperties.store(serverPropWriter, null)
     }
 
     val devMode = environment.config.propertyOrNull("ktor.ustad.devmode")?.getString().toBoolean()
+
+    val useMockEmail = environment.config.propertyOrNull("ktor.ustad.useMockEmail")?.getString().toBoolean()
 
     val json = Json {
         encodeDefaults = true
@@ -343,8 +358,10 @@ fun Application.umRestApplication(
         if(!it.exists())
             it.mkdirs()
     }
+    Napier.i("UstadServer dataDir=$dataDirPath")
+    println("UstadServer dataDir=$dataDirPath")
 
-    val  wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
+    val wellKnownDir  = environment.config.fileProperty("ktor.ustad.wellKnownDir","well-known")
 
     fun String.replaceDbUrlVars(): String {
         return replace("(datadir)", dataDirPath.absolutePath)
@@ -358,6 +375,9 @@ fun Application.umRestApplication(
         )
         import(ContentImportersDiModuleJvm)
 
+        if (useMockEmail){
+            bind<MockEmailSender>() with singleton { MockEmailSender() }
+        }
 
         bind<StringProvider>() with singleton { StringProviderJvm(Locale.getDefault()) }
 
@@ -485,6 +505,7 @@ fun Application.umRestApplication(
             VerifySignInWithPasskeyUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = null,
+                json = json,
             )
         }
         bind<IsTempFileCheckerUseCase>() with singleton {
@@ -550,6 +571,10 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<FilterUsernameUseCase>() with provider {
+            FilterUsernameUseCase()
+        }
+
         bind<ExtractMediaMetadataUseCase>() with provider {
             ExtractMediaMetadataUseCaseMediaInfo(
                 executeMediaInfoUseCase = instance(),
@@ -597,29 +622,39 @@ fun Application.umRestApplication(
             )
         }
 
+        bind<CreateNewClazzUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            CreateNewClazzUseCase(repoOrDb = instance(tag = DoorTag.TAG_DB))
+        }
+
         bind<BulkAddPersonsUseCase>() with scoped(LearningSpaceScope.Default).provider {
             BulkAddPersonsUseCaseImpl(
                 addNewPersonUseCase = instance(),
                 validateEmailUseCase  = instance(),
                 validatePhoneNumUseCase = instance(),
+                createNewClazzUseCase = instance(),
                 authManager = instance(),
                 enrolUseCase = instance(),
                 activeDb = instance(tag = DoorTag.TAG_DB),
                 activeRepo = null,
             )
         }
-
+        bind<UsernameSuggestionUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            UsernameSuggestionUseCase(
+                filterUsernameUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB)
+            )
+        }
         bind<ValidateEmailUseCase>() with provider {
             ValidateEmailUseCase()
         }
 
 
         bind<SendMessageUseCase>() with provider {
-            SendMessageUseCase(activeDb = instance(tag = DoorTag.TAG_DB),)
+            SendMessageUseCase(activeDb = instance(tag = DoorTag.TAG_DB))
         }
 
-        bind<CheckContactTypeUseCase>() with provider {
-            CheckContactTypeUseCase(
+        bind<ParseInviteUseCase>() with provider {
+            ParseInviteUseCase(
                 validateEmailUseCase = instance(),
                 phoneNumValidatorUseCase = instance()
             )
@@ -892,21 +927,24 @@ fun Application.umRestApplication(
         }
 
         bind<SendEmailUseCase>() with scoped(LearningSpaceScope.Default).provider {
-            SendEmailUseCase(NotificationSender(di))
+            if (useMockEmail) {
+                MockSendEmailUseCase(mockEmailSender = instance())
+            } else {
+                SendEmailUseCaseImpl(notificationSender = NotificationSender(di))
+            }
         }
         bind<SendSmsUseCase>() with singleton {
             SendSmsUseCase(di)
         }
-        bind<ProcessInviteUseCase>() with scoped(LearningSpaceScope.Default).provider {
-            ProcessInviteUseCase(
+        bind<SendClazzInvitesUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            SendClazzInvitesUseCaseServerImpl(
                 sendEmailUseCase = instance(),
                 sendSmsUseCase = instance(),
                 sendMessageUseCase = instance(),
-                checkContactTypeUseCase = instance(),
+                parseInviteUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 learningSpace = context,
-                repo = null
-                )
+            )
         }
         registerContextTranslator { call: ApplicationCall ->
             call.callLearningSpace
@@ -916,9 +954,12 @@ fun Application.umRestApplication(
             instance<Scheduler>().start()
             instance<CentralAppConfigDb>()
 
-            Runtime.getRuntime().addShutdownHook(Thread{
-                instance<Scheduler>().shutdown()
-            })
+            Runtime.getRuntime().addShutdownHook(
+                Thread{
+                    Napier.i("UmRestApplication: Shutdown hook")
+                    instance<Scheduler>().shutdown()
+                }
+            )
         }
     }
 
@@ -934,7 +975,7 @@ fun Application.umRestApplication(
 
     /*
      * Use the devserver mode when:
-     *  a) there is an explicitly set development server to connect wtih
+     *  a) there is an explicitly set development server to connect with
      *  b) the server is being run from source
      *
      * See comments on the jsDevServer property in application.conf for expected behavior
@@ -1015,6 +1056,13 @@ fun Application.umRestApplication(
             }
 
             route("api") {
+                if(useMockEmail){
+                    route("testemail") {
+                        TestEmailRoute(
+                            mockEmailSender = di.direct.instance()
+                        )
+                    }
+                }
                 route("sysconfig") {
                     SystemConfigScriptRoute(
                         systemDb = di.direct.instance(),
@@ -1029,7 +1077,13 @@ fun Application.umRestApplication(
                         )
                     }
                 }
-
+                route("username"){
+                    UsernameSuggestionRoute(
+                        usernameSuggestionUseCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+                }
                 route("account"){
                     SetPasswordRoute(
                         useCase = { call ->
@@ -1037,13 +1091,15 @@ fun Application.umRestApplication(
                         }
                     )
                 }
-                route("inviteuser") {
-                    ProcessInviteRoute(
+
+                route("invite") {
+                    SendClazzInvitesRoute(
                         useCase = { call ->
                             di.on(call).direct.instance()
                         }
                     )
                 }
+
                 route("passkey"){
 
                     VerifySignInWithPasskeyRoute(
@@ -1098,6 +1154,9 @@ fun Application.umRestApplication(
                         BulkAddPersonRoute(
                             enqueueBulkAddPersonServerUseCase = { call -> di.on(call).direct.instance() },
                             bulkAddPersonStatusMap = { call -> di.on(call).direct.instance() },
+                            bulkAddPersonUseCase = { call -> di.on(call).direct.instance() },
+                            authManager = { call -> di.on(call).direct.instance() },
+                            db = { call -> di.on(call).direct.instance(tag = DoorTag.TAG_DB) },
                             json = json,
                         )
                     }
@@ -1165,7 +1224,7 @@ fun Application.umRestApplication(
         appConfig.siteUrl()
     }
 
-    println("Ustad server is running on $printableServerUrl . Logging to $logDir .")
+    println("Ustad server is running on $printableServerUrl\ndataDir=$dataDirPath logDir=$logDir . ")
     println()
     println("You can connect the Android client to this address as per README.md .")
     println()

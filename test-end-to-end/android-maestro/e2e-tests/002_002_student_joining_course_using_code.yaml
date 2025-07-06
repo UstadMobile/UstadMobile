@@ -1,45 +1,37 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseTest
 env:
-  TESTNAME: "002_002_student_joining_course_using_code"
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_002_student_joining_course_using_code"
+  TESTRESULTSDIR: "build/reports/maestro/002_002_student_joining_course_using_code/Screenshots"
+  TESTCOURSENAME: "Test Course Block"
+onFlowStart:
+  - startRecording: 002_002_student_joining_course_using_code
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
+- runScript:
+    file: "common/import_users_via_http.js"
+    env:
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      IMPORT_FROM_CSV_FILE: "Ustad_Teacher_And_Unenrolled_Student.csv"
 
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/startserver.yaml"
+    file: "common/user_login.yaml"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
-#-------Launch App---------------#
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
-#-------Admin Login---------------#
-- runFlow:
-    file: "../common/user_login.yaml"
-#---------Add Course with members------------------#
-# add new course
-- runFlow:
-    file: "../common/add_course.yaml"
-    env:
-      TESTCOURSENAME: "Test Course"
-- runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
-    env:
-      TESTCOURSENAME: "Test Course"
-      TEACHERFIRSTNAME: "Teacher"
-      TEACHERLASTNAME: "1"
-      USERNAME: "t1"
-      GENDER: "Female"
-      PASSWORD: "test"
-- runFlow:
-    file: "../common/add_new_people.yaml"
-    env:
-      FIRSTNAME: "Student"
-      LASTNAME: "1"
-      USERNAME: "s1"
-      GENDER: "Male"
-      PASSWORD: "test"
-- back
-- tapOn: "Courses"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+
 - tapOn: ${TESTCOURSENAME}
 - scrollUntilVisible:
     element:
@@ -53,29 +45,29 @@ env:
     commands:
       - tapOn:
           id: "com.android.systemui:id/dismiss_image"
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "s1"
-      PASSWORD: "test"
-- runFlow:  "../common/student_send_course_join_request_using_code.yaml"
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- runFlow:  "common/student_send_course_join_request_using_code.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
-- runFlow: "../common/accepting_course_join_request.yaml"
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- runFlow: "common/accepting_course_join_request.yaml"
 #---------Launch App & Student Login------------------#
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/user_login.yaml"
     env:
-      USERNAME: "s1"
-      PASSWORD: "test"
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
 - tapOn: "Courses"
 - assertVisible: ${TESTCOURSENAME}

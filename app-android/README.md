@@ -34,53 +34,40 @@ Windows:
 ```
 $ gradlew app-android:assembleDebug
 ```
-### Login and signup with passkey
-If use server with https(eg. https://ustad.example.com) then need to Add support for Digital Asset
-Links, need to generate assetlinks.json file. You can generate it from android studio from tools>
-app links assistant> create applink > open url mapping editor > from + option can add url then from
-Digital asset links file generator can generate that assetlinks.json file.
-You need to copy that json file and that json should return from this address eg.
-https://ustad.example.com/.well-known/assetlinks.json
 
-If using http server (local IP address) then you need to add this
-<intent-filter android:autoVerify="true">
-<action android:name="android.intent.action.VIEW" />
-<category android:name="android.intent.category.DEFAULT" />
-<category android:name="android.intent.category.BROWSABLE" />
-<data android:scheme="http" />
-<data
-android:host="YOUR IP ADDRESS"
-android:port="8087" />
-</intent-filter>
+### Digital asset links
 
-inside AppActivity intent filter , replace host with your ip address. After that if your device is
-below android 12 then use this command adb shell am compat enable 175408749 PACKAGE_NAME
-to support web address and above 12 you can manually verify from mobile in app info> set as default>
-supported web addresses > switch toggle on.
+Verified digital assets links [e.g. app links](https://developer.android.com/training/app-links/verify-android-applinks) 
+are required for deep links and passkeys. The SHA-256 signature on Google Play Console can be found 
+under Test and Release, Setup, App Signing.
 
-### Login and signup with passkey
-If use server with https(eg. https://ustad.example.com) then need to Add support for Digital Asset 
-Links, need to generate assetlinks.json file. You can generate it from android studio from tools>
-app links assistant> create applink > open url mapping editor > from + option can add url then from
-Digital asset links file generator can generate that assetlinks.json file.
-You need to copy that json file and that json should return from this address eg.
-https://ustad.example.com/.well-known/assetlinks.json
+The [official docs](https://developer.android.com/training/app-links#manage-verify)
+cover verifying links for the version delivered through Google Play (e.g. using Google Play signing keys).
 
-If using http server (local IP address) then you need to add this
-<intent-filter android:autoVerify="true">
-<action android:name="android.intent.action.VIEW" />
-<category android:name="android.intent.category.DEFAULT" /> 
-<category android:name="android.intent.category.BROWSABLE" />
-<data android:scheme="http" /> 
-<data 
-android:host="YOUR IP ADDRESS" 
-android:port="8087" /> 
-</intent-filter>
+__When using a test/debug version__:
+* Build the apk (e.g. ```./gradlew app-android:assembleDebug```)
+* Get the SHA256
+```
+~/Android/Sdk/build-tools/33.0.1/apksigner verify --print-certs ./build/outputs/apk/debug/app-android-debug.apk
+```
+* Convert the generated SHA-256 into : separated version
+```
+echo (sha256 from apksigner verify) | sed 's/../&:/g; s/:$//' | tr [:lower:] [:upper:]
+```
+* Add the SHA-256 to [assetlinks.json] and publish assetlinks.json in .well-known on https for domain.
+  Note: the SHA-256 in the default assetlinks.json is the Google Play signing key for the Ustad Mobile
+  app. The assetlinks.json file can be checked using [Google's statement list tester](https://developers.google.com/digital-asset-links/tools/generator).
+  Google APIs can cache the statements; current status can be checked using the 
+  [Digital Asset Links API](https://developers.google.com/digital-asset-links/reference/rest) e.g.
+  ```https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://ustadmobile.app&relation=delegate_permission/common.handle_all_urls```
 
-inside AppActivity intent filter , replace host with your ip address. After that if your device is 
-below android 12 then use this command adb shell am compat enable 175408749 PACKAGE_NAME
-to support web address and above 12 you can manually verify from mobile in app info> set as default>
-supported web addresses > switch toggle on.
+__Setting or adding a domain for app links and passkeys:__
+
+* Set systemUrl in buildconfig properties (see KDoc on [SystemUrlConfig.kt](../core/src/commonMain/kotlin/com/ustadmobile/core/impl/config/SystemUrlConfig.kt))
+* Add the domain to [AndroidManifest.xml](./src/main/AndroidManifest.xml) app link intent-filter
+* Publish [assetlinks.json] as per [official docs](https://developer.android.com/training/app-links#manage-verify) including SHA256 fingerprints and update
+  the package_name if required.
+* Add domain to [assets_statement_values.xml](app-android/src/main/res/values/assets_statement_values.xml)
 
 ### Command line signing (for release APK) :
 

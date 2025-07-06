@@ -11,6 +11,7 @@ import com.ustadmobile.core.viewmodel.clazzenrolment.clazzmemberlist.ClazzMember
 import com.ustadmobile.hooks.useDateFormatter
 import com.ustadmobile.hooks.useDayOrDate
 import com.ustadmobile.hooks.useDoorRemoteMediator
+import com.ustadmobile.hooks.useFormattedDateAndTime
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useTabAndAppBarHeight
 import com.ustadmobile.hooks.useTimeFormatter
@@ -18,11 +19,13 @@ import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.composites.EnrolmentRequestAndPersonDetails
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.composites.PersonAndClazzMemberListDetails
+import com.ustadmobile.lib.db.entities.ClazzInvite
 import com.ustadmobile.lib.db.entities.EnrolmentRequest
 import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadAddListItem
 import com.ustadmobile.mui.components.UstadListFilterChipsHeader
 import com.ustadmobile.mui.components.UstadListSortHeader
+import com.ustadmobile.mui.components.UstadRawHtml
 import com.ustadmobile.view.components.UstadPersonAvatar
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
@@ -37,6 +40,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import mui.icons.material.MoreVert
 //WARNING: DO NOT Replace with import mui.icons.material.[*] - Leads to severe IDE performance issues 10/Apr/23 https://youtrack.jetbrains.com/issue/KT-57897/Intellisense-and-code-analysis-is-extremely-slow-and-unusable-on-Kotlin-JS
 import mui.icons.material.PersonAdd as PersonAddIcon
 import mui.icons.material.Check as CheckIcon
@@ -48,8 +52,12 @@ import mui.material.List
 import mui.system.responsive
 import mui.system.sx
 import react.*
+import react.dom.aria.AriaHasPopup
+import react.dom.aria.ariaExpanded
+import react.dom.aria.ariaHasPopup
 import react.dom.aria.ariaLabel
 import react.dom.html.ReactHTML
+import web.dom.Element
 
 
 external interface ClazzMemberListScreenProps : Props {
@@ -67,6 +75,10 @@ external interface ClazzMemberListScreenProps : Props {
     var onClickAddNewMember: (role: Int) -> Unit
 
     var onClickSort: (SortOrderOption) -> Unit
+
+    var onClickRevokeInvite: (String) -> Unit
+
+    var onClickResendInvite: (ClazzInvite) -> Unit
 
 }
 
@@ -97,6 +109,13 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
     )
     val pendingStudentsInfiniteQueryResult = usePagingSource(
         pendingStudentsMediatorResult.pagingSourceFactory, true
+    )
+
+    val pendingInvitesResult = useDoorRemoteMediator(
+        props.uiState.pendingInviteList, props.refreshCommandFlow
+    )
+    val pendingInvitesInfiniteQueryResult = usePagingSource(
+        pendingInvitesResult.pagingSourceFactory, true
     )
 
     val timeFormatterVal = useTimeFormatter()
@@ -230,6 +249,25 @@ private val ClazzMemberListScreenComponent2 = FC<ClazzMemberListScreenProps> { p
                     }
                 }
             }
+            if(props.uiState.pendingInviteListVisible) {
+                item {
+                    ListItem.create {
+                        ListItemText {
+                            strings[MR.strings.pending_invites]
+                        }
+                    }
+                }
+                infiniteQueryPagingItems(
+                    items = pendingInvitesInfiniteQueryResult,
+                    key = { "p_${it.ciUid} "}
+                ) {
+                    PendingInvitesListItem.create {
+                        item = it
+                        onClickResendInvite = props.onClickResendInvite
+                        onClickRevokeInvite = props.onClickRevokeInvite
+                    }
+                }
+            }
         }
 
         Container {
@@ -253,6 +291,8 @@ val ClazzMemberListScreen = FC<Props> {
         onClickPendingRequest = viewModel::onClickRespondToPendingEnrolment
         onClickFilterChip = viewModel::onClickFilterChip
         onClickAddNewMember = viewModel::onClickAddNewMember
+        onClickResendInvite = viewModel::onClickResendInvite
+        onClickRevokeInvite = viewModel::onClickRevokeInvite
         onClickSort = viewModel::onSortOrderChanged
     }
 
@@ -289,8 +329,6 @@ private val StudentListItem = FC<StudentListItemProps> { props ->
     }
 }
 
-
-
 external interface PendingStudentListItemProps : Props {
 
     var request: EnrolmentRequestAndPersonDetails?
@@ -304,6 +342,14 @@ external interface PendingStudentListItemProps : Props {
     var dateFormatter: Intl.Companion.DateTimeFormat
 
     var dayOfWeekStringMap: Map<DayOfWeek, String>
+}
+external interface PendingInvitesListItemProps : Props {
+    var onClickRevokeInvite: (String) -> Unit
+
+    var item : ClazzInvite?
+
+    var onClickResendInvite: (ClazzInvite) -> Unit
+
 }
 
 private val PendingStudentListItem = FC<PendingStudentListItemProps> { props ->
@@ -391,4 +437,68 @@ private val PendingStudentListItem = FC<PendingStudentListItemProps> { props ->
         }
     }
 }
+private val PendingInvitesListItem = FC<PendingInvitesListItemProps> { props ->
+    val strings = useStringProvider()
+    val expireTime = useFormattedDateAndTime(
+        timeInMillis = props.item?.inviteExpire ?: 0,
+        timezoneId = TimeZone.currentSystemDefault().id
+    )
+
+    var overflowAnchor by useState<Element?> { null }
+
+    val overflowAnchorVal = overflowAnchor
+    ListItem {
+
+        ListItemText {
+            primary = ReactNode(props.item?.inviteContact ?: "")
+            secondary = ReactNode(strings[MR.strings.expires] + expireTime)
+
+        }
+
+        IconButton {
+            ariaHasPopup = AriaHasPopup.`true`
+            ariaExpanded = overflowAnchorVal != null
+
+            onClick = {
+                overflowAnchor = if (overflowAnchor == null) {
+                    it.currentTarget
+                } else {
+                    null
+                }
+            }
+
+            MoreVert()
+        }
+
+        if (overflowAnchorVal != null) {
+            Menu {
+                open = true
+                anchorEl = {
+                    overflowAnchorVal
+                }
+
+                onClose = {
+                    overflowAnchor = null
+                }
+                MenuItem {
+                    onClick = {
+                        props.item?.let { it1 -> props.onClickResendInvite(it1) }
+                        overflowAnchor = null
+                    }
+
+                    +strings[MR.strings.resend]
+                }
+                MenuItem {
+                    onClick = {
+                        props.onClickRevokeInvite(props.item?.inviteContact ?: "")
+                        overflowAnchor = null
+                    }
+
+                    +strings[MR.strings.revoke]
+                }
+            }
+        }
+    }
+}
+
 

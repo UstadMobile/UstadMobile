@@ -1,0 +1,17 @@
+appId: com.toughra.ustadmobile
+---
+# this flow switch off the publicly_accessible switch - on the content edit screen
+# Test parameters needs to provide for this test :
+# 1) TESTRESULTSDIR : provide the test result location
+- tapOn: "EDIT"
+- repeat:
+        while:
+              notVisible: "Publicly accessible"
+        commands:
+              - swipe:
+                      start: 100,400
+                      end: 100,100
+- tapOn: "Publicly accessible"
+- tapOn: "SAVE"
+- back
+

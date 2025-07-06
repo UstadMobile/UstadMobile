@@ -111,10 +111,14 @@
 
         <meta-data android:name="com.ustadmobile.system.systemBaseUrl" android:value="${systemBaseUrl}"/>
 
-        <meta-data android:name="com.ustadmobile.system.passkeyRpId" android:value="${passkeyRpId}"/>
-
         <meta-data android:name="com.ustadmobile.system.newPersonalAccountsLsUrl" android:value="${newPersonalAccountsLsUrl}"/>
 
+
+        <!--
+        Required to use passkeys as per
+        https://developer.android.com/identity/sign-in/credential-manager#prerequisites
+        -->
+        <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
 
         <!--
         When the app APK itself is shared locally (eg. using the share app menu which
@@ -143,15 +147,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
 
             </intent-filter>
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="http" />
-                <data android:host="*.applinktest.ustadmobile.com" />
-            </intent-filter>
+            <!--
+            App link intent filter
+            -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -159,18 +158,10 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="https" />
-                <data android:host="*.applinktest.ustadmobile.com" />
-            </intent-filter>
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
+                <data android:host="*.${systemBaseUrlHost}" />
+                <data android:host="${systemBaseUrlHost}" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="http" />
-                <data
-                    android:host="192.168.1.52"
-                    android:port="8087" />
             </intent-filter>
         </activity>
 

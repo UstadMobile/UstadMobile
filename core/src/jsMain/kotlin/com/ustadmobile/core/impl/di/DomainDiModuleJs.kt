@@ -38,7 +38,6 @@ import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseDirect
 import com.ustadmobile.core.domain.openlink.OnClickLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCase
 import com.ustadmobile.core.domain.openlink.OpenExternalLinkUseCaseJs
-import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 import com.ustadmobile.core.domain.phonenumber.OnClickPhoneNumUseCase
@@ -78,6 +77,7 @@ import org.kodein.di.provider
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 
+@Suppress("FunctionName")
 fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiModuleJs") {
     bind<EnqueueContentEntryImportUseCase>() with scoped(endpointScope).provider {
         EnqueueImportContentEntryUseCaseRemote(
@@ -170,13 +170,6 @@ fun DomainDiModuleJs(endpointScope: LearningSpaceScope) = DI.Module("DomainDiMod
         ContentEntryGetMetaDataFromUriUseCaseJs(
             json = instance(),
             chunkedUploadClientLocalUriUseCase = instance()
-        )
-    }
-
-    bind<PasskeyRequestJsonUseCase>() with provider {
-        PasskeyRequestJsonUseCase(
-            systemImpl = instance(),
-            json = instance()
         )
     }
 

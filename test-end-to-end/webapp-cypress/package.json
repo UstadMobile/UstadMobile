@@ -1,9 +1,9 @@
 {
   "devDependencies": {
-    "cypress": "^13.6.6",
+    "cypress": "^14.0.2",
     "cypress-multi-reporters": "^1.6.3",
     "cypress-recurse": "^1.35.3",
-    "cypress-terminal-report": "^5.3.10",
+    "cypress-terminal-report": "^5.3.12",
     "mocha": "^10.2.0",
     "mocha-junit-reporter": "^2.2.1",
     "start-server-and-test": "^2.0.9"
@@ -12,8 +12,21 @@
     "@this-dot/cypress-indexeddb": "^2.0.0"
   },
   "scripts": {
-    "start-server": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar -P:srcRoot=../../ -P:siteUrl=http://localhost:8087/",
+    "delete:reports": "rm results/* cypress/videos/*  cypress/screenshots/* logs/* log/* || true",
+    "start-server-ci": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar -P:url=$TESTCONTROLLER_URL -P:srcRoot=../../ -P:mode=cypress",
+    "cy:run-ci": "cypress run --config baseUrl=$TESTCONTROLLER_URL",
+    "test-ci": "start-server-and-test start-server-ci $TESTCONTROLLER_URL cy:run-ci",
+    "start-server": "java -jar ../../testserver-controller/build/libs/testserver-controller-all.jar  http://localhost:8075/ -P:srcRoot=../../  -P:mode=cypress",
     "cy:run": "cypress run",
-    "test": "start-server-and-test start-server http-get://localhost:8075 cy:run"
-  }
+    "test": "start-server-and-test start-server  http://localhost:8075/ cy:run",
+    "cy:run-spec": "cypress run --spec $CYPRESS_SPEC",
+    "test-spec": "start-server-and-test start-server http://localhost:8075/ cy:run-spec"
+  },
+  "name": "webapp-cypress",
+  "description": "These are end-to-end tests for the web version of the app built using [Cypress](https://cypress.io).",
+  "version": "1.0.0",
+  "main": "cypress.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

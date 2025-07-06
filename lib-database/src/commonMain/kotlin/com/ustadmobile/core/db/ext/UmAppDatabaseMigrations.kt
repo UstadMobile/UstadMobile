@@ -1,18 +1,14 @@
 package com.ustadmobile.core.db.ext
 
-import androidx.room.PrimaryKey
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.migration.DoorMigrationStatementList
 import com.ustadmobile.door.DoorDbType
-import com.ustadmobile.door.annotation.ReplicateEtag
-import com.ustadmobile.door.annotation.ReplicateLastModified
 import com.ustadmobile.door.migration.DoorMigration
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.CacheLockJoin
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.CoursePermission
 import com.ustadmobile.lib.db.entities.Message
-import com.ustadmobile.lib.db.entities.PersonPasskey.Companion.NOT_REVOKED
 import com.ustadmobile.lib.db.entities.UserSession
 
 /**
@@ -1657,19 +1653,25 @@ val MIGRATION_201_202 = DoorMigrationStatementList(201, 202) { db ->
     }
 }
 
-val MIGRATION_202_203 = DoorMigrationStatementList(202, 203) { db ->
+//202-203 is the username validation migration which varies between client and server
+
+val MIGRATION_203_204 = DoorMigrationStatementList(203, 204) { db ->
+    listOf("ALTER TABLE ActivityLangMapEntry ADD COLUMN almePropName TEXT")
+}
+
+val MIGRATION_204_205 = DoorMigrationStatementList(204, 205) { db ->
     buildList {
         if (db.dbType() == DoorDbType.SQLITE) {
-            add("CREATE TABLE IF NOT EXISTS PersonPasskey (  ppPersonUid  INTEGER  NOT NULL , ppAttestationObj  TEXT , ppClientDataJson  TEXT , ppOriginString  TEXT , ppRpid  TEXT , ppId  TEXT , ppChallengeString  TEXT , ppPublicKey  TEXT , isRevoked  INTEGER  NOT NULL , ppPasskeyLct  INTEGER  NOT NULL , personPasskeyUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS PersonPasskey (  ppPersonUid  INTEGER  NOT NULL , ppAttestationObj  TEXT , ppClientDataJson  TEXT , ppOriginString  TEXT , ppId  TEXT , ppChallengeString  TEXT , ppPublicKey  TEXT , isRevoked  INTEGER  NOT NULL , ppPasskeyLct  INTEGER  NOT NULL , personPasskeyUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
 
         } else {
-            add("CREATE TABLE IF NOT EXISTS PersonPasskey (  ppPersonUid  BIGINT  NOT NULL , ppAttestationObj  TEXT , ppClientDataJson  TEXT , ppOriginString  TEXT , ppRpid  TEXT , ppId  TEXT , ppChallengeString  TEXT , ppPublicKey  TEXT , isRevoked  INTEGER  NOT NULL , ppPasskeyLct  BIGINT  NOT NULL , personPasskeyUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS PersonPasskey (  ppPersonUid  BIGINT  NOT NULL , ppAttestationObj  TEXT , ppClientDataJson  TEXT , ppOriginString  TEXT , ppId  TEXT , ppChallengeString  TEXT , ppPublicKey  TEXT , isRevoked  INTEGER  NOT NULL , ppPasskeyLct  BIGINT  NOT NULL , personPasskeyUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
         }
 
     }
 }
 
-val MIGRATION_203_204 = DoorMigrationStatementList(203, 204) { db ->
+val MIGRATION_205_206 = DoorMigrationStatementList(205, 206) { db ->
     buildList {
         if(db.dbType() == DoorDbType.SQLITE) {
             add("ALTER TABLE Person ADD COLUMN isPersonalAccount INTEGER NOT NULL DEFAULT 0")
@@ -1678,14 +1680,24 @@ val MIGRATION_203_204 = DoorMigrationStatementList(203, 204) { db ->
         }
     }
 }
-val MIGRATION_204_205 = DoorMigrationStatementList(204, 205) { db ->
+val MIGRATION_206_207 = DoorMigrationStatementList(206, 207) { db ->
     buildList {
         if (db.dbType() == DoorDbType.SQLITE) {
             add("ALTER TABLE ClazzEnrolment ADD COLUMN clazzEnrolmentInviteUid INTEGER NOT NULL DEFAULT 0")
-            add("CREATE TABLE IF NOT EXISTS ClazzInvite (  ciPersonUid  INTEGER  NOT NULL , ciRoleId  INTEGER  NOT NULL , ciClazzUid  INTEGER  NOT NULL , inviteType  INTEGER  NOT NULL  DEFAULT 1 , inviteContact  TEXT , inviteToken  TEXT , inviteStatus  INTEGER  NOT NULL , inviteLct  INTEGER  NOT NULL , ciUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS ClazzInvite (  ciPersonUid  INTEGER  NOT NULL , ciRoleId  INTEGER  NOT NULL , ciClazzUid  INTEGER  NOT NULL , inviteType  INTEGER  NOT NULL  DEFAULT 1 , inviteContact  TEXT NOT NULL, inviteToken  TEXT NOT NULL, inviteStatus  INTEGER  NOT NULL , inviteLct  INTEGER  NOT NULL , ciUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
         } else {
             add("ALTER TABLE ClazzEnrolment ADD COLUMN clazzEnrolmentInviteUid INTEGER NOT NULL DEFAULT 0")
-            add("CREATE TABLE IF NOT EXISTS ClazzInvite (  ciPersonUid  BIGINT  NOT NULL , ciRoleId  BIGINT  NOT NULL , ciClazzUid  BIGINT  NOT NULL , inviteType  INTEGER  NOT NULL  DEFAULT 1 , inviteContact  TEXT , inviteToken  TEXT , inviteStatus  INTEGER  NOT NULL , inviteLct  BIGINT  NOT NULL , ciUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            add("CREATE TABLE IF NOT EXISTS ClazzInvite (  ciPersonUid  BIGINT  NOT NULL , ciRoleId  BIGINT  NOT NULL , ciClazzUid  BIGINT  NOT NULL , inviteType  INTEGER  NOT NULL  DEFAULT 1 , inviteContact  TEXT NOT NULL, inviteToken  TEXT NOT NULL, inviteStatus  INTEGER  NOT NULL , inviteLct  BIGINT  NOT NULL , ciUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+        }
+    }
+}
+
+val MIGRATION_207_208 = DoorMigrationStatementList(207, 208) { db ->
+    buildList {
+        if(db.dbType() == DoorDbType.SQLITE) {
+            add("ALTER TABLE ClazzInvite ADD COLUMN inviteExpire INTEGER NOT NULL DEFAULT 0")
+        }else {
+            add("ALTER TABLE ClazzInvite ADD COLUMN inviteExpire BIGINT NOT NULL DEFAULT 0")
         }
     }
 }
@@ -1705,8 +1717,8 @@ fun migrationList() = listOf<DoorMigration>(
     MIGRATION_165_166, MIGRATION_166_167, MIGRATION_167_168, MIGRATION_168_169,
     MIGRATION_170_171, MIGRATION_171_172, MIGRATION_172_194, MIGRATION_194_195,
     MIGRATION_195_196, MIGRATION_196_197, MIGRATION_197_198, MIGRATION_198_199,
-    MIGRATION_199_200, MIGRATION_200_201, MIGRATION_201_202, MIGRATION_202_203,
-    MIGRATION_203_204,MIGRATION_204_205
+    MIGRATION_199_200, MIGRATION_200_201, MIGRATION_201_202, MIGRATION_203_204,
+    MIGRATION_204_205, MIGRATION_205_206, MIGRATION_206_207, MIGRATION_207_208,
 )
 
 

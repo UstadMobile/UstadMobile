@@ -25,8 +25,6 @@ interface UstadBuildConfig {
 
         const val KEY_PRESET_LEARNING_SPACE_URL = "com.ustadmobile.system.presetLsUrl"
 
-        const val KEY_PASSKEY_RP_ID = "com.ustadmobile.system.passkeyRpId"
-
         const val KEY_NEW_PERSONAL_ACCOUNT_LEARNING_SPACE_URL = "com.ustadmobile.system.newPersonalAccountsLsUrl"
 
     }

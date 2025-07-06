@@ -153,8 +153,8 @@ class UstadAccountManagerTest : AbstractMainDispatcherTest(){
     @Before
     fun setup() {
         systemUrlConfig = SystemUrlConfig(
-            "http://app.ustadmobile.com/", "app.ustadmobile.com",
-            presetLearningSpaceUrl = "http://app.ustadmobile.com/"
+            systemBaseUrl = "http://app.ustadmobile.com/",
+            presetLearningSpaceUrl = "http://app.ustadmobile.com/",
         )
         mockSettings = mock { }
 

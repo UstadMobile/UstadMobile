@@ -2,13 +2,12 @@ package com.ustadmobile.core.viewmodel.signup
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localaccount.GetLocalAccountsSupportedUseCase
-import com.ustadmobile.core.domain.passkey.CreatePasskeyParams
-import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
-import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.view.UstadView
@@ -17,9 +16,7 @@ import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.REGISTRATION_ARGS_TO_PASS
-import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
 import io.github.aakira.napier.Napier
@@ -29,8 +26,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 
 data class OtherSignUpOptionSelectionUiState(
@@ -38,8 +37,8 @@ data class OtherSignUpOptionSelectionUiState(
     val person: Person? = null,
     val personPicture: PersonPicture? = null,
     val passkeySupported: Boolean = true,
-
-    )
+    val errorText: String? = null,
+)
 
 class OtherSignUpOptionSelectionViewModel(
     di: DI,
@@ -55,13 +54,15 @@ class OtherSignUpOptionSelectionViewModel(
 
     private val getLocalAccountsSupportedUseCase: GetLocalAccountsSupportedUseCase by instance()
 
-    private val createPasskeyUseCase: CreatePasskeyUseCase? by instanceOrNull()
+    private val createPasskeyUseCase: CreatePasskeyUseCase? by di.on(LearningSpace(serverUrl)).instanceOrNull()
 
     private var nextDestination: String =
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
     val uiState: Flow<OtherSignUpOptionSelectionUiState> = _uiState.asStateFlow()
 
+    private val enrollToCourseFromInviteCodeUseCase: EnrollToCourseFromInviteCodeUseCase =
+        di.on(LearningSpace(serverUrl)).direct.instance()
 
     init {
         viewModelScope.launch {
@@ -106,56 +107,63 @@ class OtherSignUpOptionSelectionViewModel(
 
             savePerson.personUid = uid
 
-            val passkeyCreated = createPasskeyUseCase?.invoke(
-                CreatePasskeyParams(
-                    username = savePerson.firstNames.toString(),
-                    personUid = uid.toString(),
-                    doorNodeId = di.doorIdentityHashCode.toString(),
-                    usStartTime = systemTimeInMillis(),
-                    serverUrl = serverUrl,
-                    person = savePerson
-                )
+            val createPasskeyResult = createPasskeyUseCase?.invoke(
+                username = savePerson.username.toString()
             )
-            passkeyCreated?.let {
-                accountManager.registerWithPasskey(
-                    serverUrl,
-                    it,
-                    savePerson,
-                    _uiState.value.personPicture
-                )
-            }
-            if (passkeyCreated == null) {
-                snackDispatcher.showSnackBar(Snack(message = systemImpl.getString(MR.strings.sorry_something_went_wrong)))
-                Napier.e { "Error occurred during creating passkey" }
-                return@launch
-            }
-            if (isParent) {
-                navController.navigate(
-                    AddChildProfilesViewModel.DEST_NAME,
-                    args = buildMap {
-                        put(ARG_NEXT, nextDestination)
-                        putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+            when(createPasskeyResult){
+                is CreatePasskeyUseCase.PasskeyCreatedResult -> {
+                    viewModelScope.launch {
+                        accountManager.registerWithPasskey(
+                            serverUrl,
+                            createPasskeyResult.authenticationResponseJSON,
+                            savePerson,
+                            _uiState.value.personPicture
+                        )
+
+                        if (isParent) {
+                            navController.navigate(
+                                AddChildProfilesViewModel.DEST_NAME,
+                                args = buildMap {
+                                    put(ARG_NEXT, nextDestination)
+                                    putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+                                    putFromSavedStateIfPresent(ARG_NEXT)
+                                }
+                            )
+
+                        } else {
+                            enrollToCourseFromInviteUid(savePerson.personUid)
+                            val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
+                            Napier.d { "AddSignUpPresenter: go to next destination: $nextDestination" }
+                            navController.navigateToViewUri(
+                                nextDestination.appendSelectedAccount(
+                                    savePerson.personUid,
+                                    LearningSpace(accountManager.activeLearningSpace.url)
+                                ),
+                                goOptions
+                            )
+
+                        }
                     }
-                )
 
-            } else {
-
-                val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
-                Napier.d { "AddSignUpPresenter: go to next destination: $nextDestination" }
-                navController.navigateToViewUri(
-                    nextDestination.appendSelectedAccount(
-                        savePerson.personUid,
-                        LearningSpace(accountManager.activeLearningSpace.url)
-                    ),
-                    goOptions
-                )
-
+                }
+                is CreatePasskeyUseCase.Error ->{
+                    _uiState.update { prev ->
+                        prev.copy(
+                            errorText = createPasskeyResult.message,
+                        )
+                    }
+                }
+                is CreatePasskeyUseCase.UserCanceledResult,
+                null->{
+                    //do nothing
+                }
             }
+
         }
 
-       // navController.popBackStack(SignUpViewModel.DEST_NAME,false)
-
     }
+
+
     fun onClickCreateLocalAccount() {
         loadingState = LoadingUiState.INDETERMINATE
 
@@ -175,7 +183,8 @@ class OtherSignUpOptionSelectionViewModel(
 
         val args = buildMap {
             put(SignUpViewModel.SIGN_WITH_USERNAME_AND_PASSWORD, "true")
-            putFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+            putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
+            putFromSavedStateIfPresent(ARG_NEXT)
             put(
                 ARG_PERSON,
                 json.encodeToString( Person.serializer(),_uiState.value.person?:Person())
@@ -194,6 +203,21 @@ class OtherSignUpOptionSelectionViewModel(
 
     }
 
+    suspend fun enrollToCourseFromInviteUid(personUid: Long) {
+        try {
+            val viewUri= savedStateHandle[UstadView.ARG_NEXT]
+            if (viewUri != null&&viewUri.contains("ClazzInviteRedeem")) {
+                nextDestination = ClazzListViewModel.DEST_NAME_HOME
+                enrollToCourseFromInviteCodeUseCase.invoke(
+                    viewUri =viewUri,
+                    personUid = personUid
+                )
+            }
+        } catch (e: Exception) {
+            print(e.message)
+        }
+
+    }
 
     companion object {
 

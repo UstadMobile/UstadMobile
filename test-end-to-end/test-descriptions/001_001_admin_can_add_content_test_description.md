@@ -6,26 +6,43 @@ Admin can add an H5P, Epub, Video, and Pdf content file from the device. Once ad
 
 ## Step-by-step procedure:
 
-1. Launch Ustad app
-2. Click on "Existing User" button
-3. Click on "Enter link manually" button
-4. Enter the site link
-5. Login as admin.
-6. Click on "Library."
-7. Click on the "+ Content" button.
-8. Click on the "From file" button.
-9. Select the content file.
-10. Click the "Save" button.
-11. Verify that the content is visible in the library.
-12. Click on the content.
-13. Wait for the importing and uploading to complete.
-14. Click the "Open" button.
-15. Verify the content appears as expected.
-16. Close the content.
-17. Clear the app storage.
-18. Login as admin.
-19. Click on "Library."
-20. Click on the content.
-21. Click the "Download" button.
-22. Click the "Open" button.
-23. Verify the content appears as expected.
+1. Login as admin.
+2. Click on "Library."
+3. Click on the "+ Content" button.
+4. Click on the "From file" or "From folder" button.
+5. Select the content file.
+6. Click the "Save" button.
+7. Verify that the content is visible in the library.
+8. Click on the content.
+9. Wait for the importing and uploading to complete.
+10. Click the "Open" button.
+11. Verify the content appears as expected.
+12. Close the content.
+13. Clear the app storage.
+14. Log in as admin.
+15. Click on "Library."
+16. Click on the content.
+17. Click the "Download" button.
+18. Click the "Open" button.
+19. Verify the content appears as expected.
+20. Back to content screen
+21. Click on "Attempts."
+22. Verify:
+    * The content title is visible
+    * User's name is listed.
+    * Progress bar is visible.
+    * "1 Attempt" is recorded.
+23. Click on "Admin User."
+24. Verify:
+    * The username - content title is visible
+    * Progress bar is visible.
+    * "% score/completion" is displayed.
+25. Click on the progress bar.
+26. Verify:
+    * The content title is visible
+    * Answered/Progressed verb is shown as per the content.
+27. Test filtering:
+    * Verify the progress bars are visible
+    * By default the filter chips are selected
+28. When filter chips are unselected corresponding progress bars are disappeared
+29. Verify "Nothing here, yet" is displayed.

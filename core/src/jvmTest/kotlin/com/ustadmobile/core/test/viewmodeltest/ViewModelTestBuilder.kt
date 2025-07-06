@@ -148,7 +148,6 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
         bind<SystemUrlConfig>() with singleton {
             SystemUrlConfig(
                 systemBaseUrl = "http://localhost:8087/",
-                passkeyRpId = "localhost",
             )
         }
 

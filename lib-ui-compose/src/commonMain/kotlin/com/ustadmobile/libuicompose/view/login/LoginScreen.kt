@@ -17,6 +17,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalUriHandler
@@ -25,6 +29,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.viewmodel.login.LoginUiState
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.libuicompose.components.UstadPasswordField
@@ -65,14 +70,21 @@ fun LoginScreen(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     )  {
-
+        uiState.errorText?.also { errorText ->
+            Text(color = MaterialTheme.colorScheme.error, text = errorText)
+        }
         Text(text = uiState.loginIntentMessage ?: "")
 
         OutlinedTextField(
             modifier = Modifier
                 .testTag("username")
                 .defaultItemPadding()
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .onKeyEvent { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyDown) {
+                        !ValidateUsernameUseCase.isValidUsernameChar(keyEvent.utf16CodePoint.toChar())
+                    } else false
+                },
             value = uiState.username,
             singleLine = true,
             label = {

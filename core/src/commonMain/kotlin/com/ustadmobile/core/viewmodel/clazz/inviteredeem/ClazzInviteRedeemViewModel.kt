@@ -54,7 +54,7 @@ class ClazzInviteRedeemViewModel(
 
     init {
         ifLoggedInElseNavigateToLoginWithNextDestSet(
-            requireAdultAccount = true,
+            requireAdultAccount = false,
             args = mapOf(ARG_INVITE_CODE to argInviteCode)
         ) {
             _appUiState.update { prev ->
@@ -101,11 +101,8 @@ class ClazzInviteRedeemViewModel(
                     personUid = accountManager.currentAccount.personUid
                 )
 
-                if (result.isCodeRedeem) {
-                    snackDispatcher.showSnackBar(Snack(result.message))
-                } else {
-                    snackDispatcher.showSnackBar(Snack(result.message))
-                }
+                snackDispatcher.showSnackBar(Snack(result.message))
+
 
                 navController.navigate(
                     viewName = ClazzListViewModel.DEST_NAME_HOME,

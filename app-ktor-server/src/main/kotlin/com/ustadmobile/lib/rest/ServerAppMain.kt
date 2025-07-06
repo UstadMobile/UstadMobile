@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest
 import com.ustadmobile.lib.rest.clitools.manageserver.addDeleteLearningSpaceSubcommand
 import com.ustadmobile.lib.rest.clitools.manageserver.addNewLearningSpaceParser
 import com.ustadmobile.lib.rest.clitools.manageserver.addUpdateLearningSpaceSubcommand
+import com.ustadmobile.lib.rest.ext.absoluteDataDir
 import com.ustadmobile.lib.rest.ext.ktorServerPropertiesFile
 import com.ustadmobile.lib.rest.mediahelpers.MissingMediaProgramsException
 import io.ktor.server.engine.addShutdownHook
@@ -53,7 +54,9 @@ class ServerAppMain {
                     }
                 }.also {
                     it.addShutdownHook {
-                        ktorServerPropertiesFile().delete()
+                        ktorServerPropertiesFile(
+                            dataDir = it.environment.config.absoluteDataDir()
+                        ).delete()
                     }
                 }.start(true)
             } catch (e: SiteConfigException) {

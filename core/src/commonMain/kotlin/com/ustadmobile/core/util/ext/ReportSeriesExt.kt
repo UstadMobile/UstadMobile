@@ -39,15 +39,23 @@ data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParam
  *      X Axis is the day
  *      Subgrouped by clazz
  *
+ *      The user wants the total usage time per day, subgrouped by class.
+ *
+ * The query would look something like:
  * SELECT SUM(ResultSource.resultDuration) AS yAxis,
  *        -- Turn the timestamp into the day
  *        GROUP BY (strftime('%d/%m/%Y', ResultSource.timestamp/1000, 'unixepoch')) AS xAxis,
  *        GROUP BY ResultSource.clazzUid AS subgroup
  *
  * So we should get results like:
+ *   yAxis   | xAxis      | subgroup
+ *   --------------------------------
+ *   20000   | 01/01/2024 | clazzUid1
+ *   10000   | 01/01/2024 | clazzUid2
+ *   50000   | 01/02/2024 | clazzUid1
+ *   20000   | 01/02/2024 | clazzUid2
  *
- *   yAxis   | xAxis | subGroup
- *   20k(ms) | 01/01 | clazzUid
+ * Note: duration columns are always stored in milliseconds.  The subgroup column is optional.
  */
 fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): QueryParts {
 
@@ -82,16 +90,28 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
             AS REAL) / MAX(COUNT(DISTINCT ResultSource.clazzLogAttendanceRecordUid),1)) * 100) as yAxis, """.trimMargin()
         TOTAL_CLASSES -> """COUNT(DISTINCT ResultSource.clazzLogAttendanceRecordClazzLogUid) As yAxis, """
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> """COUNT(DISTINCT CASE WHEN 
-            ResultSource.attendanceStatus = $STATUS_ATTENDED THEN
-            ResultSource.clazzLogAttendanceRecordPersonUid ELSE NULL END) As yAxis, """.trimMargin()
+    ResultSource.attendanceStatus = $STATUS_ATTENDED THEN
+    ResultSource.clazzLogAttendanceRecordPersonUid ELSE NULL END) As yAxis, """.trimMargin()
+
         NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """COUNT(DISTINCT CASE WHEN (ResultSource.resultCompletion 
-            AND ResultSource.contentEntryRoot AND ResultSource.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
-            THEN ResultSource.statementPersonUid ELSE NULL END) as yAxis, """.trimMargin()
+    AND ResultSource.contentEntryRoot 
+    AND EXISTS (
+        SELECT 1 FROM VerbEntity 
+        WHERE VerbEntity.verbUid = ResultSource.statementVerbUid 
+        AND VerbEntity.verbUrlId = '${VerbEntity.VERB_COMPLETED_URL}'
+    ))
+    THEN ResultSource.statementPersonUid ELSE NULL END) as yAxis, """.trimMargin()
+
         PERCENT_OF_STUDENTS_COMPLETED_CONTENT -> """((CAST(COUNT(DISTINCT CASE WHEN 
-            (ResultSource.resultCompletion AND ResultSource.contentEntryRoot 
-            AND ResultSource.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
-            THEN ResultSource.statementPersonUid ELSE NULL END) 
-            AS REAL) / MAX(COUNT(DISTINCT ResultSource.statementPersonUid),1)) * 100) as yAxis, """
+    (ResultSource.resultCompletion AND ResultSource.contentEntryRoot 
+    AND EXISTS (
+        SELECT 1 FROM VerbEntity 
+        WHERE VerbEntity.verbUid = ResultSource.statementVerbUid 
+        AND VerbEntity.verbUrlId = '${VerbEntity.VERB_COMPLETED_URL}'
+    ))
+    THEN ResultSource.statementPersonUid ELSE NULL END) 
+    AS REAL) / MAX(COUNT(DISTINCT ResultSource.statementPersonUid),1)) * 100) as yAxis, """
+
         else -> ""
     }
 

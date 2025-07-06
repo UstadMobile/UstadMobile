@@ -1,38 +1,44 @@
 appId: com.toughra.ustadmobile
+tags:
+  - contentVideo
+  - contentTest
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_001_admin_can_add_content_003-video"
-  TESTNAME: "001_001_admin_can_add_content_003-video"
+  TESTRESULTSDIR: "build/reports/maestro/001_001_admin_can_add_content_003-video/Screenshots"
+onFlowStart:
+  - startRecording: 001_001_admin_can_add_content_003-video
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
 - runFlow:
-    file: "../common/startserver.yaml"
-    env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow:
-    file: "../common/clear_login_and_add_content.yaml"
+    file: "common/clear_login_and_add_content.yaml"
     env:
       TESTFILENAME: Video_Content.mp4
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
 - tapOn: "SAVE"
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- takeScreenshot: "${TESTRESULTSDIR}/content_add_to_library"
 - tapOn: "Video"
 - extendedWaitUntil:
     notVisible: "Importing"
-    timeout: 20000
+    timeout: 80000
 - extendedWaitUntil:
     notVisible: "Uploading"
-    timeout: 20000
+    timeout: 80000
 - tapOn: Open
 - assertVisible: "Play"
 - runFlow:
-    file: "../common/login_download_and_open_content.yaml"
+    file: "common/login_download_and_open_content.yaml"
 - tapOn: "Library"
 - extendedWaitUntil:
     visible: "Video"
-    timeout: 60000
+    timeout: 80000
 - tapOn: "Video"
 - tapOn: Download
 - tapOn: Open
@@ -40,4 +46,40 @@ env:
 - extendedWaitUntil:
     visible: "Play"
     timeout: 20000
-- takeScreenshot: "${TESTRESULTSDIR}/screenshots/video_content_download_and_open"
+- takeScreenshot: "${TESTRESULTSDIR}/video_content_download_and_open"
+- tapOn: "Back"
+- tapOn: "Attempts"
+- assertVisible:
+    text: "Video_Content.mp4"
+    id: "app_title"
+- assertVisible: "Admin User: Completed"
+- assertVisible: "1 Attempts"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+- tapOn: "Admin User: Completed"
+- assertVisible:
+    text: "Admin User - Video_Content.mp4"
+    id: "app_title"
+- assertVisible: "Completed"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+- assertVisible:
+    id: "progress_bar"
+- tapOn: "Completed"
+- assertVisible:
+    text: "Video_Content.mp4"
+    id: "app_title"
+- assertVisible: "Completed"
+- assertVisible: "Progressed"
+- assertVisible: "Completed Video_Content.mp4"
+- assertVisible: "Progressed Video_Content.mp4"
+- assertVisible: "100%"
+- assertVisible: "Progress"
+- assertVisible:
+    id: "progress_bar"
+- tapOn: "Completed"  # test filter chip , Completed is unselected
+- assertVisible: "Progressed"
+- assertVisible:
+    id: "progress_bar"
+- tapOn: "Progressed" # test filter chip , Progressed is unselected
+- assertVisible: "Nothing here, yet"

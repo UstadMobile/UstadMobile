@@ -1,56 +1,273 @@
 appId: com.toughra.ustadmobile
+tags:
+  - courseTest
 env:
-  TESTRESULTSDIR: "${TESTRESULTSDIR}/002_001_admin_add_new_course_and_teacher"
-  TESTNAME: "002_001_admin_add_new_course_and_teacher"
+  TESTRESULTSDIR: "build/reports/maestro/002_001_admin_add_new_course_and_teacher/Screenshots"
+onFlowStart:
+  - startRecording: 002_001_admin_add_new_course_and_teacher
+  - runScript:
+      file: "common/startserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+  - clearState: com.toughra.ustadmobile
+onFlowComplete:
+  - stopRecording
+  - runScript:
+      file: "common/stopserver.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
-- clearState: com.toughra.ustadmobile
+# download the banner pic
 - runFlow:
-    file: "../common/startserver.yaml"
+    file:  "common/download_file_via_browser.yaml"
     env:
-      CONTROLSERVER: ${CONTROLSERVER}
-      TESTSERIAL: ${TESTSERIAL}
-      TESTNAME: ${TESTNAME}
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+      TESTFILENAME: "courseBannerPic.jpg"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "../common/user_login.yaml"
+    file: "common/admin_login.yaml"
+# verify the course title is mandatory
+- runFlow:
+    file: "common/add_course.yaml"
+    env:
+      TESTCOURSENAME: " "
+# assert to make sure the course is not saved because of blank course title
+- assertVisible:
+    id: "app_title"
+    text: "Add a new course"
+- tapOn: "Back"
 # add new course
 - runFlow:
-    file: "../common/add_course.yaml"
+    file: "common/add_course.yaml"
     env:
       TESTCOURSENAME: "Test Course Block"
+# Adding course banner pic
+- tapOn: "Test Course Block"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add"
+- tapOn: "Select picture from files"
 - runFlow:
-    file: "../common/add_new_teacher_inside_course.yaml"
+    file: "common/select_picture_from_files.yaml"
+    env:
+      TESTFILENAME: "courseBannerPic.jpg"
+- tapOn: "Save"
+- assertVisible:
+    id: "course_banner"
+- runFlow:
+    file: "common/add_new_teacher_inside_course.yaml"
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       TEACHERFIRSTNAME: "Teacher"
       TEACHERLASTNAME: "1"
-      USERNAME: "t1"
+      USERNAME: "teach1"
       GENDER: "Female"
-      PASSWORD: "test"
+      PASSWORD: "testt1"
+- tapOn: "Permissions"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add new courses"
+- tapOn: "Save"
 - runFlow:
-    file: "../common/add_new_student_inside_course.yaml"
+    file: "common/add_new_student_inside_course.yaml"
     env:
       TESTCOURSENAME: ${TESTCOURSENAME}
       STUDENTFIRSTNAME: "Student"
       STUDENTLASTNAME: "1"
-      USERNAME: "s1"
+      USERNAME: "stud1"
       GENDER: "Female"
-      PASSWORD: "test"
-- back
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+      PASSWORD: "tests1"
+- tapOn: "Test Course Block"
+# edit the course to add blocks
+- tapOn:
+    id: "floating_action_button"
+  # set start date for the course
 - runFlow:
-    file: "../common/user_login.yaml"
+    when:
+      visible:
+        id: "start_date"
+    file: "common/erase_text.yaml"
     env:
-      USERNAME: "t1"
-      PASSWORD: "test"
-- assertVisible: "Test Course Block"
-- runFlow: "../common/clear_state_and_learning_space_existing_userflow.yaml"
-- runFlow: "../common/select_site.yaml"
+      TEXTFIELD: "start_date"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.pastYearDate}
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
+- tapOn: "Add block"
 - runFlow:
-    file: "../common/user_login.yaml"
+    when:
+      notVisible:
+        text: "Assignment"
+    commands:
+      - swipe:
+          from:
+            text: "Drag handle"
+          direction: UP
+- tapOn: "Assignment"
+- tapOn: "Title*"
+- inputText: "Assignment 1"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Deadline"
+    direction: DOWN
+    # set deadline date for the assignment
+- tapOn: "Deadline"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.lastYearDate}
+- hideKeyboard
+- assertVisible: "Done"
+- tapOn: "Done"
+- assertNotVisible: "Done"
+# set end date for the course
+- tapOn:
+    id: "end_date"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.lastYearDate}
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
+- tapOn: "Add block"
+- runFlow:
+    when:
+      notVisible:
+        text: "Discussion board"
+    commands:
+      - swipe:
+          from:
+            text: "Drag handle"
+          direction: UP
+- tapOn: "Discussion board"
+- tapOn: "Title*"
+- inputText: "Discussion 1"
+- hideKeyboard
+- tapOn: "Description"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "test block"
+- tapOn: "Done"
+- assertVisible:
+    id: "app_title"
+    text: "Add discussion"
+- tapOn: "Done"
+- tapOn: "Save"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- assertVisible:            #  +POST button
+    id: "floating_action_button"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- tapOn:            #  +POST button
+    id: "floating_action_button"
+- tapOn: "Title*"
+- inputText: "Post 1"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "This is post 1"
+- tapOn: "Post"
+- assertVisible:
+    id: "app_title"
+    text: "Post 1"
+- assertVisible:
+    text: "This is post 1"
+- tapOn: "Back"
+- tapOn: "Back"
+- assertVisible: "Copy"
+- tapOn: "Copy"
+- assertVisible:
+    id: "app_title"
+    text: "Copy course"
+- assertVisible:
+    id: "name"
+    text: "Copy of Test Course Block"
+- tapOn: "Assignment 1"
+- scrollUntilVisible:
+    element:
+      text: "Deadline"
+    direction: DOWN
+- runFlow:
+    file: "common/erase_text.yaml"
     env:
-      USERNAME: "s1"
-      PASSWORD: "test"
-- assertVisible: "Test Course Block"
+      TEXTFIELD: "deadline_date"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.tomorrowDate}
+- hideKeyboard
+- tapOn: "Done"
+- assertNotVisible: "Done"
+- scrollUntilVisible:
+    element:
+      text: "Add block"
+    direction: DOWN
+- tapOn: "Add block"
+- tapOn: "Text"
+- tapOn: "Title*"
+- inputText: "Test 1"
+- tapOn: "Description"
+- tapOn:
+    id: "com.toughra.ustadmobile:id/editor"
+- inputText: "ABC, DEF"
+- tapOn: "Done"
+- tapOn: "Done"
+- assertNotVisible: "Done"
+- runFlow:
+    file: "common/erase_text.yaml"
+    env:
+      TEXTFIELD: "name"
+- inputText: "New Test Course"
+- runFlow:
+    file: "common/erase_text.yaml"
+    env:
+      TEXTFIELD: "start_date"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.yesterdayDate}
+- runFlow:
+    file: "common/erase_text.yaml"
+    env:
+      TEXTFIELD: "end_date"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "New Test Course"
+- scrollUntilVisible:
+    element:
+      text: "Discussion 1"
+    direction: DOWN
+- tapOn: "Discussion 1"
+- assertNotVisible: "Post 1"
+- tapOn: "Courses"
+- tapOn: "Currently Enrolled"
+- assertVisible: "New Test Course"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "teach1"
+      PASSWORD: "testt1"
+- tapOn: "All"
+- tapOn: "Test Course Block"
+- assertVisible: "Copy"
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
+- runFlow: "common/select_site.yaml"
+- runFlow:
+    file: "common/user_login.yaml"
+    env:
+      USERNAME: "stud1"
+      PASSWORD: "tests1"
+- tapOn: "All"
+- tapOn: "Test Course Block"
+- assertNotVisible: "Copy"

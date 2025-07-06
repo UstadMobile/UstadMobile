@@ -26,8 +26,8 @@ import com.ustadmobile.core.impl.appstate.FabUiState
 import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.paging.RefreshCommand
 import com.ustadmobile.core.util.ext.whenSubscribed
-import com.ustadmobile.core.viewmodel.clazz.inviteviaContact.InviteViaContactViewModel
-import com.ustadmobile.core.viewmodel.clazz.invitevialink.InviteViaLinkViewModel
+import com.ustadmobile.core.viewmodel.clazz.inviteviacontact.ClazzInviteViaContactViewModel
+import com.ustadmobile.core.viewmodel.clazz.invitevialink.ClazzInviteViaLinkViewModel
 import com.ustadmobile.core.viewmodel.person.PersonViewModelConstants.ARG_POPUP_TO_ON_PERSON_SELECTED
 import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
@@ -202,7 +202,7 @@ class PersonListViewModel(
             return //could never happen - button would not show if this was null
 
         navController.navigate(
-            InviteViaLinkViewModel.DEST_NAME,
+            ClazzInviteViaLinkViewModel.DEST_NAME,
             args = mapOf(
                 ARG_INVITE_CODE to inviteCode
             )
@@ -217,12 +217,12 @@ class PersonListViewModel(
     }
     fun onClickInviteViaContact() {
         val args = buildMap {
-            put(InviteViaContactViewModel.ARG_ROLE, personRole.toString())
-            put(InviteViaContactViewModel.ARG_CLAZZ_UID, filterExcludeMembersOfClazz.toString())
+            put(ClazzInviteViaContactViewModel.ARG_ROLE, personRole.toString())
+            put(ClazzInviteViaContactViewModel.ARG_CLAZZ_UID, filterExcludeMembersOfClazz.toString())
         }
 
         navController.navigate(
-            viewName = InviteViaContactViewModel.DEST_NAME,
+            viewName = ClazzInviteViaContactViewModel.DEST_NAME,
             args = args
         )
 

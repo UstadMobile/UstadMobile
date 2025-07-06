@@ -1,10 +1,10 @@
 describe('WEB_007_006_admin_enable_or_disable_guest_login', () => {
- it('Start Ustad Test Server ', () => {
-  // Start Test Server
-    cy.ustadStartTestServer()
-})
-  it('Admin enable guest login', () => {
+  before(() => {
+    // Start Test Server
+    cy.ustadStartTestServer(6000)
+  })
 
+it('Admin enable guest login', () => {
   // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
   cy.get('#settings_button').click()
@@ -12,7 +12,7 @@ describe('WEB_007_006_admin_enable_or_disable_guest_login', () => {
   cy.contains('Edit').click()
  //https://docs.cypress.io/api/commands/should#Assert-the-href-attribute-is-equal-to-users
   cy.get('#terms_html_edit .ql-editor.ql-blank').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
-  cy.get('#terms_html_edit .ql-editor.ql-blank').click().clear().type("CompanyTerms",{timeout:1000})
+  cy.get('#terms_html_edit .ql-editor.ql-blank').click().clear().type("CompanyTerms",{timeout:5000})
   cy.get('#guest_login_enabled').click({force:true})
   cy.get('#actionBarButton').click()
   cy.contains('Yes').should('exist')
@@ -40,4 +40,9 @@ it('Admin disable guest login', () => {
   cy.get('#connect_as_guest_button').should('not.exist')
   cy.contains('CONNECT AS GUEST').should('not.exist')
 })
+
+  after(() => {
+    // Stop Test Server after tests are complete
+    cy.ustadStopTestServer();
+  })
 })

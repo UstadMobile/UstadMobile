@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.app.DownloadManager
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -25,10 +26,9 @@ import com.ustadmobile.core.domain.language.SetLanguageUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseAndroid
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCaseAndroid
-import com.ustadmobile.core.domain.passkey.CreatePasskeyUseCase
-import com.ustadmobile.core.domain.passkey.GetCredentialUseCase
-import com.ustadmobile.core.domain.passkey.PasskeyRequestJsonUseCase
-import com.ustadmobile.core.domain.password.SavePasswordUseCase
+import com.ustadmobile.core.domain.credentials.CreatePasskeyUseCase
+import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
+import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCase
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseCaseCommonJvm
 import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsUseCase
@@ -41,6 +41,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.di.AndroidDomainDiModule
+import com.ustadmobile.core.impl.di.commonClientDomainDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.impl.locale.StringProvider
 import com.ustadmobile.core.impl.locale.StringProviderAndroid
@@ -54,9 +55,15 @@ import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
-import com.ustadmobile.core.impl.passkey.CreatePasskeyUseCaseImpl
-import com.ustadmobile.core.impl.passkey.GetCredentialUseCaseImpl
-import com.ustadmobile.core.impl.password.SavePasswordUseCaseImpl
+import com.ustadmobile.core.domain.credentials.passkey.CreatePasskeyUseCaseImpl
+import com.ustadmobile.core.domain.credentials.passkey.DecodeUserHandleUseCase
+import com.ustadmobile.core.domain.credentials.passkey.EncodeUserHandleUseCase
+import com.ustadmobile.core.domain.credentials.passkey.GetCredentialUseCaseImpl
+import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
+import com.ustadmobile.core.domain.credentials.passkey.request.CreatePublicKeyCredentialRequestOptionsJsonUseCase
+import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCaseImpl
+import com.ustadmobile.core.domain.passkey.DecodeUserHandleUseCaseImpl
+import com.ustadmobile.core.domain.passkey.EncodeUserHandleUseCaseImpl
 import com.ustadmobile.libuicompose.view.app.App
 import com.ustadmobile.libuicompose.view.app.SizeClass
 import com.ustadmobile.port.android.util.ext.getUstadDeepLink
@@ -91,6 +98,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
         extend(appContextDi)
 
         import(commonDomainDiModule(LearningSpaceScope.Default))
+        import(commonClientDomainDiModule(LearningSpaceScope.Default))
         import(AndroidDomainDiModule(applicationContext))
 
 
@@ -120,35 +128,31 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 languagesConfig = instance()
             )
         }
-        bind<PasskeyRequestJsonUseCase>()  with provider {
-            PasskeyRequestJsonUseCase(
-                systemImpl = instance(),
-                json = instance()
-            )
-        }
-
 
         bind<GoToLearningSpaceUseCase>() with provider {
             GoToLearningSpaceUseCaseAndroid()
         }
-        bind<CreatePasskeyUseCase>() with singleton {
+
+        bind<CreatePasskeyUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             CreatePasskeyUseCaseImpl(
                 context=this@AbstractAppActivity,
-                passkeyRequestJsonUseCase = instance()
+                json = instance(),
+                createPublicKeyJsonUseCase = instance(),
             )
         }
 
-        bind<SavePasswordUseCase>() with singleton {
+        bind<SavePasswordUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             SavePasswordUseCaseImpl(
                 context=this@AbstractAppActivity,
+                createCredentialUsernameUseCase = instance(),
             )
         }
 
-        bind<GetCredentialUseCase>() with scoped(LearningSpaceScope.Default).singleton{
+        bind<GetCredentialUseCase>() with singleton{
             GetCredentialUseCaseImpl(
                 context=this@AbstractAppActivity,
-                learningSpace = context,
-                passkeyRequestJsonUseCase = instance()
+                createPublicKeyCredentialRequestOptionsJsonUseCase = instance(),
+                json = instance()
             )
         }
 
@@ -178,6 +182,16 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
             )
         }
 
+        bind<EncodeUserHandleUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            EncodeUserHandleUseCaseImpl(
+                learningSpace = context
+            )
+        }
+
+        bind<DecodeUserHandleUseCase>() with singleton {
+            DecodeUserHandleUseCaseImpl()
+        }
+
         bind<BulkAddPersonsUseCase>() with scoped(LearningSpaceScope.Default).provider {
             BulkAddPersonsUseCaseImpl(
                 addNewPersonUseCase = instance(),
@@ -185,6 +199,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 validatePhoneNumUseCase = instance(),
                 authManager = instance(),
                 enrolUseCase = instance(),
+                createNewClazzUseCase = instance(),
                 activeDb = instance(tag = DoorTag.TAG_DB),
                 activeRepo = instance<UmAppDataLayer>().repository,
             )
@@ -197,6 +212,20 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
             )
         }
 
+        bind<CreatePublicKeyCredentialCreationOptionsJsonUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            CreatePublicKeyCredentialCreationOptionsJsonUseCase(
+                systemUrlConfig = instance(),
+                systemImpl = instance(),
+                createCredentialUsernameUseCase = instance(),
+                db = instance(tag = DoorTag.TAG_DB),
+                encodeUserHandleUseCase = instance()
+            )
+        }
+        bind<CreatePublicKeyCredentialRequestOptionsJsonUseCase>() with provider {
+            CreatePublicKeyCredentialRequestOptionsJsonUseCase(
+                systemUrlConfig = instance(),
+            )
+        }
         registerContextTranslator { call: NanoHttpdCall -> LearningSpace(call.urlParams["endpoint"] ?: "notfound") }
 
         onReady {
@@ -227,6 +256,18 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
          * UstadLocaleChangeChannelProvider for an explanation of this.
          */
         enableEdgeToEdge()
+
+        /*
+         * End-to-end Maestro test downloads require a way to check if a file has been downloaded,
+         * however Maestro itself does not support launching an intent using just an action, which
+         * is how Downloads are viewed. Regrettably, for the moment, it is unavoidable to have this
+         * snippet of code which is used by Maestro end-to-end tests to verify that a download
+         * was completed.
+         */
+        intent.extras?.getBoolean("showDownloads")?.takeIf { it }?.also {
+            startActivity(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS))
+        }
+
         val openLink = intent.getUstadDeepLink()
 
         val initialRoute = defaultInitialRoute ?: ("/" + RedirectViewModel.DEST_NAME.appendQueryArgs(

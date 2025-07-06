@@ -6,6 +6,7 @@ import com.ustadmobile.BuildConfigJs
 import com.ustadmobile.core.account.*
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
 import com.ustadmobile.core.domain.learningspace.GoToLearningSpaceUseCase
@@ -16,6 +17,7 @@ import com.ustadmobile.core.domain.person.bulkadd.BulkAddPersonsFromLocalUriUseC
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.UstadBuildConfig
@@ -44,6 +46,8 @@ import com.ustadmobile.core.util.ext.toNullIfBlank
 import com.ustadmobile.domain.getversion.GetVersionUseCaseJs
 import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSource
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
+import com.ustadmobile.core.impl.di.commonClientDomainDiModule
 import com.ustadmobile.core.domain.blob.getmanifest.GetContentManifestUseCase
 import com.ustadmobile.util.resolveEndpoint
 import dev.icerock.moko.resources.provider.JsStringProvider
@@ -53,8 +57,6 @@ import nl.adaptivity.xmlutil.serialization.XmlConfig
 import web.location.location
 import web.navigator.navigator
 import web.url.URLSearchParams
-
-
 
 /**
  * KodeIn DI builder for JS/Browser.
@@ -68,6 +70,7 @@ internal fun ustadJsDi(
     stringsProvider: JsStringProvider,
 ) = DI {
     import(commonDomainDiModule(LearningSpaceScope.Default))
+    import(commonClientDomainDiModule(LearningSpaceScope.Default))
     import(DomainDiModuleJs(LearningSpaceScope.Default))
     val learningSpaceUrl = resolveEndpoint(location.href, URLSearchParams(location.search))
     console.log("Learning Space URL = $learningSpaceUrl (location.href = ${location.href}")
@@ -76,7 +79,6 @@ internal fun ustadJsDi(
         BuildConfigMap(
             buildMap {
                 put(UstadBuildConfig.KEY_SYSTEM_URL, BuildConfigJs.SYSTEM_URL)
-                put(UstadBuildConfig.KEY_PASSKEY_RP_ID, BuildConfigJs.PASSKEY_RP_ID)
                 put(UstadBuildConfig.KEY_PRESET_LEARNING_SPACE_URL,
                     BuildConfigJs.PRESET_LEARNING_SPACE_URL)
                 put(UstadBuildConfig.KEY_NEW_PERSONAL_ACCOUNT_LEARNING_SPACE_URL,
@@ -101,6 +103,14 @@ internal fun ustadJsDi(
         GenderConfig(
             genderConfigStr = BuildConfigJs.APP_UI_GOPTS.toNullIfBlank() ?: GenderConfig.DEFAULT_GENDER_OPTIONS
         )
+    }
+
+    bind<FilterUsernameUseCase>() with singleton {
+        FilterUsernameUseCase()
+    }
+
+    bind<ValidateUsernameUseCase>() with singleton {
+        ValidateUsernameUseCase()
     }
 
     bind<Settings>() with singleton {
@@ -257,6 +267,13 @@ internal fun ustadJsDi(
             enrolIntoCourseUseCase = instance(),
             db = instance(tag = DoorTag.TAG_DB),
             repo = instance<UmAppDataLayer>().repositoryOrLocalDb,
+            systemImpl = instance(),
+        )
+    }
+
+    bind<EnrollToCourseFromInviteCodeUseCase>() with scoped(LearningSpaceScope.Default).provider {
+        EnrollToCourseFromInviteCodeUseCase(
+            clazzInviteRedeemUseCase = instance()
         )
     }
 

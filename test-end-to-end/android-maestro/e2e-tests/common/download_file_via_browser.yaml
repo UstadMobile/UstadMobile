@@ -1,0 +1,35 @@
+appId: com.toughra.ustadmobile
+---
+# Download a file required for a test. This is done by
+# 1) Opening the browser to the test-files/content/index.html on testserver-controller
+# 2) Clicking the file that we want (index.html link includes download attribute to ensure links
+#    are downloaded, not opened directly)
+# 3) Opening the downloads to check the download was completed, and repeating if needed to avoid
+#    flakiness. Chrome has (rarely) been seen to miss a download. Opening downloads is done by
+#    launching the Ustad app with an argument - and it will launch an intent with
+#    action=DownloadManager.ACTION_VIEW_DOWNLOADS (see AbstractAppActivity.kt)
+
+- repeat:
+    times: 3
+    while:
+      notVisible: ${TESTFILENAME}
+    commands:
+      - openLink: "${output.testServerControllerUrl}testcontroller/test-files/content/index.html"
+      - runFlow:
+          file: "chrome-first-run-check.yaml"
+      - tapOn: ${TESTFILENAME}
+      - runFlow:
+          when:
+            visible: "Choose where to download"
+          commands:
+            - tapOn: "Download"
+
+      - launchApp:
+          appId: com.toughra.ustadmobile
+          arguments:
+            showDownloads: true
+
+      # Ensure that launching view downloads is done so that the loop condition works as expected
+      - assertVisible: "Downloads"
+
+- stopApp

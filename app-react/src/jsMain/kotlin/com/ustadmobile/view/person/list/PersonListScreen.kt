@@ -137,6 +137,7 @@ val PersonListComponent2 = FC<PersonListProps> { props ->
                     }
                 }
             }
+
             if(props.uiState.showInviteViaLink) {
                 item("invite_with_link") {
                     ListItem.create {

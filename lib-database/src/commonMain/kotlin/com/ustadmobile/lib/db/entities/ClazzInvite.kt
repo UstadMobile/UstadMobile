@@ -40,12 +40,13 @@ data class ClazzInvite(
     @ColumnInfo(defaultValue = "1")
     var inviteType: Int = 1,
 
-    var inviteContact: String? = null,
+    var inviteContact: String = "",
 
-    var inviteToken: String? = null,
+    var inviteToken: String = "",
 
     var inviteStatus: Int = STATUS_PENDING,
 
+    var inviteExpire: Long = 0,
     @ReplicateEtag
     @ReplicateLastModified
     var inviteLct: Long = 0
@@ -59,5 +60,6 @@ data class ClazzInvite(
         const val STATUS_PENDING = 0
         const val STATUS_ACCEPTED = 1
         const val STATUS_DECLINED = 2
+        const val STATUS_REVOKED = 3
     }
 }

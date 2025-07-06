@@ -1,38 +1,46 @@
 ## Testserver-controller
 
-This provides a KTOR http server that can control starting and stopping the actual server. This is 
-used by end-to-end tests to start a new (blank) instance of the server before each test.
-
-WARNING: this will automatically delete all app-ktor-server data (the data directory and database)
-every time the actual server is started.
-
-This is not tested or supported on Windows. It might (or might not) work
+This provides a KTOR http server that can control starting and stopping the actual server (e.g. the 
+one in [app-ktor-server module](../app-ktor-server/)). This is used by end-to-end tests to start a 
+new (blank) instance of the server before each test.
 
 Usage:
 
 Start the test server controller:
-```
-./start.sh --siteUrl http://ip.addr:8087/
-```
-
-The site url must be specified as per the runserver.sh command. See the [main README.md](../README.md) 
-as per "Step 4: Build/run the server".
-
-To start/restart the actual server (e.g. to run an end-to-end test), request the start url:
 
 ```
-http://localhost:8075/start
+./gradlew testserver-controller:run --args='-P:mode=cypress|maestro [-P:url=http://localhost:8075/] [-P:portRange=1025-65534] [-P:learningSpaceUrlTemplate=http://{HOSTIP}:{PORT}/]'
+```
+If no URL is specified testserver-controller will automatically use http://localhost:8075/ by 
+default.
+
+```-P:portRange```: Specifies the port range that will be used to run the actual server. This is 
+useful in a CI environment where a specific port range is allowed by the firewall.
+```-P:learningSpaceUrlTemplate```: Specifies the URL to use for the learning space, based on the
+allocated port/host ip address. ```{HOSTIP}``` will be replaced with the first non-local IPv4 address
+and ```{PORT}``` will be replaced with the allocated port. This can also be used to run tests over
+https e.g. as required for testing links and passkeys on Android e.g. use 
+https://{PORT}.wildcardhttpsdomain.org/ when a reverse proxy is setup to handle the HTTPS.
+
+Testserver-controller has two modes:
+
+* __Cypress__
+  * One instance of the actual server is run at a time.
+  * A reverse proxy is provided so that Cypress test specs can use a single baseUrl. testcontroller-server
+    will start a new actual server on any available random port.
+  * Tests are expected to run on localhost.
+* __Maestro__
+  * Multiple instances of the actual server can run at a time to support [Maestro sharding](https://blog.mobile.dev/whats-new-in-maestro-1-37-0-581431428562)
+    such that multiple tests can run concurrently on multiple emulators.
+  * The emulator or device connects directly to the actual server started by testcontroller-server 
+    using the IP address of the PC (laptop/server etc) running the tests and the randomly allocated
+    port.
+
+```
+http://localhost:8075/testcontroller/start
 ```
 
-If any actual server is running that was started by the control server, it will be assumed that this
-was from a previous test and it will be stopped. The database and data directory will be automatically
-cleared
 
-Stop the control server:
-
-```
-./stop.sh
-```
 
 Clearing Postgres data:
 

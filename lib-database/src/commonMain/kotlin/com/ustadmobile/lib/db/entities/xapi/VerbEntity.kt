@@ -51,16 +51,9 @@ data class VerbEntity(
         const val TABLE_ID = 62
 
         const val VERB_COMPLETED_URL = "http://adlnet.gov/expapi/verbs/completed"
-
-        const val VERB_COMPLETED_UID = 10001L
-
         const val VERB_PASSED_URL = "http://adlnet.gov/expapi/verbs/passed"
-
-        const val VERB_PASSED_UID = 10002L
-
         const val VERB_FAILED_URL = "http://adlnet.gov/expapi/verbs/failed"
-
-        const val VERB_FAILED_UID = 10003L
+        const val VERB_EXPERIENCED_URL = "http://adlnet.gov/expapi/verbs/experienced"
 
     }
 

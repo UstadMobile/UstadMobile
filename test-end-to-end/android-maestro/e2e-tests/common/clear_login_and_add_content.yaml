@@ -1,0 +1,35 @@
+appId: com.toughra.ustadmobile
+---
+# This test tests the Library page of app adding content
+# Test parameters needs to provide for this test :
+ # 1) TESTFILENAME : provide the content name inside the 'test-files/content' folder
+
+# download the test file
+- runFlow:
+    file:  "./download_file_via_browser.yaml"
+    env:
+       TESTFILENAME: ${TESTFILENAME}
+# get started
+- launchApp
+- tapOn: "Existing user"
+- runFlow:
+    when:
+      visible: "Personal Account"
+    commands:
+      - tapOn: "Join Learning Space"
+- tapOn: "Enter link manually"
+# select site
+- runFlow: "./select_site.yaml"
+# admin login
+- runFlow:
+    file: "./admin_login.yaml"
+# adding content to library
+- tapOn: "Library"
+- tapOn:
+     id: "floating_action_button"
+- tapOn: "From file"
+- runFlow:
+    file: "./select_file_from_picker.yaml"
+    env:
+      TESTFILENAME: ${TESTFILENAME}
+

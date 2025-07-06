@@ -105,13 +105,14 @@ import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseC
 import com.ustadmobile.core.domain.extractmediametadata.ExtractMediaMetadataUseCaseAndroid
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCase
 import com.ustadmobile.core.domain.extractvideothumbnail.ExtractVideoThumbnailUseCaseAndroid
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCase
 import com.ustadmobile.core.domain.getapiurl.GetApiUrlUseCaseEmbeddedServer
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCase
 import com.ustadmobile.core.domain.getdeveloperinfo.GetDeveloperInfoUseCaseAndroid
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterEndpoint
 import com.ustadmobile.core.domain.interop.oneroster.OneRosterHttpServerUseCase
-import com.ustadmobile.core.domain.passkey.SavePersonPasskeyUseCase
+import com.ustadmobile.core.domain.credentials.SavePersonPasskeyUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCase
 import com.ustadmobile.core.domain.share.ShareTextUseCaseAndroid
@@ -134,6 +135,7 @@ import com.ustadmobile.core.domain.upload.ChunkedUploadClientChunkGetterUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientLocalUriUseCase
 import com.ustadmobile.core.domain.upload.ChunkedUploadClientUseCaseKtorImpl
 import com.ustadmobile.core.domain.validateemail.ValidateEmailUseCase
+import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.validatevideofile.ValidateVideoFileUseCase
 import com.ustadmobile.core.domain.xapi.StoreActivitiesUseCase
 import com.ustadmobile.core.domain.xapi.XapiJson
@@ -215,6 +217,7 @@ import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbD
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.domain.blob.getmanifest.GetContentManifestUseCase
 import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
+import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.localsharing.setenabled.SetLocalSharingEnabledUseCase
 import com.ustadmobile.core.domain.localsharing.checkcontentavailability.CheckContentLocalAvailabilityUseCase
 import com.ustadmobile.core.domain.localsharing.checkcontentavailability.UstadCacheCheckContentAvailabilityUseCase
@@ -423,6 +426,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 .addMigrations(MIGRATION_155_156_CLIENT)
                 .addMigrations(MIGRATION_161_162_CLIENT)
                 .addMigrations(MIGRATION_169_170_CLIENT)
+                .addMigrations(MIGRATE_USERNAME_CLIENT)
                 .build()
 
 
@@ -1036,6 +1040,7 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
             SavePersonPasskeyUseCase(
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance<UmAppDataLayer>().repository,
+                json = instance(),
             )
         }
         bind<MakeContentEntryAvailableOfflineUseCase>() with scoped(LearningSpaceScope.Default).singleton {
@@ -1085,6 +1090,15 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
         bind<ValidateEmailUseCase>() with provider {
             ValidateEmailUseCase()
         }
+
+        bind<FilterUsernameUseCase>() with provider {
+            FilterUsernameUseCase()
+        }
+
+        bind<ValidateUsernameUseCase>() with provider {
+            ValidateUsernameUseCase()
+        }
+
 
         bind<CancelRemoteContentEntryImportUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             CancelRemoteContentEntryImportUseCase(
@@ -1137,6 +1151,13 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 enrolIntoCourseUseCase = instance(),
                 db = instance(tag = DoorTag.TAG_DB),
                 repo = instance<UmAppDataLayer>().repository,
+                systemImpl = instance(),
+            )
+        }
+
+        bind<EnrollToCourseFromInviteCodeUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            EnrollToCourseFromInviteCodeUseCase(
+               clazzInviteRedeemUseCase = instance()
             )
         }
 
