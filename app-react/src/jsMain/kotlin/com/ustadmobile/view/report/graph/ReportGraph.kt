@@ -1,6 +1,7 @@
 package com.ustadmobile.view.report.graph
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.formatter.GraphFormatter
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
@@ -35,6 +36,8 @@ external interface ReportGraphProps : Props {
     var reportResult: RunReportUseCase.RunReportResult
     var strings: StringProvider
     var compact: Boolean?
+    var xAxisFormatter: GraphFormatter<String>?
+    var yAxisFormatter: GraphFormatter<Double>?
 }
 
 val ReportGraph = FC<ReportGraphProps> { props ->
@@ -61,16 +64,24 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         when (resultSubgroup.series.reportSeriesOptions.reportSeriesVisualType) {
                             ReportSeriesVisualType.LINE_GRAPH -> scatter {
                                 name = resultSubgroup.series.reportSeriesOptions.reportSeriesTitle
-                                x.strings = resultSubgroup.subgroupData.map { it.xAxis }
-                                y.numbers = resultSubgroup.subgroupData.map { it.yAxis.toFloat() }
+                                x.strings = resultSubgroup.subgroupData.map {
+                                    props.xAxisFormatter?.format(it.xAxis) ?: it.xAxis
+                                }
+                                y.numbers = resultSubgroup.subgroupData.map {
+                                    props.yAxisFormatter?.format(it.yAxis)?.toFloat() ?: it.yAxis.toFloat()
+                                }
                                 mode = ScatterMode.`lines+markers`
                                 type = TraceType.scatter
                             }
 
                             else -> bar {
                                 name = resultSubgroup.series.reportSeriesOptions.reportSeriesTitle
-                                x.strings = resultSubgroup.subgroupData.map { it.xAxis }
-                                y.numbers = resultSubgroup.subgroupData.map { it.yAxis.toFloat() }
+                                x.strings = resultSubgroup.subgroupData.map {
+                                    props.xAxisFormatter?.format(it.xAxis) ?: it.xAxis
+                                }
+                                y.numbers = resultSubgroup.subgroupData.map {
+                                    props.yAxisFormatter?.format(it.yAxis)?.toFloat() ?: it.yAxis.toFloat()
+                                }
                             }
                         }
                     }

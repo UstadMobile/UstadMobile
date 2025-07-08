@@ -2,6 +2,7 @@ package com.ustadmobile.view.report.list
 
 import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultPage
+import com.ustadmobile.core.domain.report.formatter.GraphFormatter
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.hooks.collectAsState
@@ -83,6 +84,8 @@ external interface ReportListItemProps : Props {
     var onRemoveReport: (Long) -> Unit
     var runReport: (Report) -> Flow<RunReportUseCase.RunReportResult>
     var width: Int
+    var xAxisFormatter: GraphFormatter<String>?
+    var yAxisFormatter: GraphFormatter<Double>?
 
 }
 
@@ -139,6 +142,8 @@ val ReportListItem = FC<ReportListItemProps> { props ->
                 this.reportResult = reportResult
                 this.strings = string
                 this.compact = true
+                this.xAxisFormatter = props.xAxisFormatter
+                this.yAxisFormatter = props.yAxisFormatter
             }
         }
     }
@@ -221,6 +226,8 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
                             this.onRemoveReport = props.onRemoveReport
                             this.runReport = props.runReport
                             this.width = cardWidth
+                            this.xAxisFormatter = props.uiState.xAxisFormatter
+                            this.yAxisFormatter = props.uiState.yAxisFormatter
                         }
                     }
                 }

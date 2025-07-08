@@ -55,6 +55,8 @@ val ReportDetailComponent = FC<ReportDetailProps> { props ->
                 ReportGraph {
                     this.reportResult = result
                     this.strings = string
+                    this.xAxisFormatter = props.uiState.xAxisFormatter
+                    this.yAxisFormatter = props.uiState.yAxisFormatter
                 }
 
                 moreOption {
@@ -128,14 +130,16 @@ private val moreOption = FC<ReportDetailProps> { props ->
                             item = true
                             xs = 4
                             Typography {
-                                +row.xAxis
+                                +props.uiState.xAxisFormatter?.format(row.xAxis) ?: row.xAxis
                             }
                         }
 
                         Grid {
                             item = true
                             xs = 4
-                            Typography { +row.yAxis.toString() }
+                            Typography {
+                                +props.uiState.yAxisFormatter?.format(row.yAxis)?.toString() ?: row.yAxis.toString()
+                            }
                         }
 
                         Grid {
