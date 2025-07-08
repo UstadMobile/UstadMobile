@@ -23,22 +23,15 @@ Admin or teacher can add or customize reports so that they can track progress.
 14. Set subgroup by Gender.
 15. Set chart type to Bar Chart.
 16. Finalize and save the report.
-17. Edit the report to add a filter.
-18. Apply a filter for Person Age greater than 13.
-19. Save and confirm the filter is applied.
-20. Verify the bar chart report is displayed.
-21. Take a screenshot of the report.
-22. **Admin modifies the report**
-23. Edit the existing report.
-24. Change the time range to a custom period.
-25. Change the chart type to Line Chart.
-26. Save the updated report.
-27. Verify the line chart is displayed.
-28. Take a screenshot of the updated report.
-29. **Admin verifies report availability**
-30. Navigate back to the Reports section.
-31. Verify that the created report is listed.
-32. Confirm that the delete icon is available.
-33. Student access validation
-34. Log in as a student user.
-35. Verify that the "Reports" tab is not visible.
+17. Verify the bar chart report is displayed.
+18. Take a screenshot of the report.
+19. **Admin modifies the report**
+20. Edit the existing report.
+21. Change the time range to a custom period.
+22. Change the chart type to Line Chart.
+23. Save the updated report.
+24. Verify the line chart is displayed.
+25. Take a screenshot of the updated report.
+26. **Admin verifies report availability**
+27. Navigate back to the Reports section.
+28. Verify that the created report is listed.
