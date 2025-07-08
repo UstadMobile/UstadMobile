@@ -38,8 +38,6 @@ import mui.material.Select
 import mui.material.Stack
 import mui.material.StackDirection
 import mui.material.TextField
-import mui.material.Typography
-import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.FC
@@ -52,7 +50,6 @@ import web.cssom.Auto
 import web.cssom.Color
 import web.cssom.JustifyContent
 import web.cssom.number
-import web.cssom.pct
 import web.cssom.px
 import web.html.HTMLInputElement
 
@@ -251,7 +248,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     onChange = { event, _ ->
                         val selectedValue = ReportXAxis.entries.firstOrNull {
                             it.name == event.target.value
-                        } ?: ReportXAxis.NONE
+                        } ?: ReportXAxis.DAY
 
                         props.onEntityChanged(props.uiState.reportOptions2.copy(xAxis = selectedValue))
                     }
@@ -348,7 +345,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             onChange = { event, _ ->
                                 val selectedValue =
                                     ReportSeriesYAxis.entries.firstOrNull { it.name == event.target.value }
-                                        ?: ReportSeriesYAxis.NONE
+                                        ?: ReportSeriesYAxis.TOTAL_DURATION
                                 props.onSeriesChanged(series.copy(reportSeriesYAxis = selectedValue))
                             }
 
@@ -395,7 +392,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             onChange = { event, _ ->
                                 val selectedValue =
                                     ReportXAxis.entries.firstOrNull { it.name == event.target.value }
-                                        ?: ReportXAxis.NONE
+                                        ?: ReportXAxis.DAY
                                 props.onSeriesChanged(series.copy(reportSeriesSubGroup = selectedValue))
                             }
 

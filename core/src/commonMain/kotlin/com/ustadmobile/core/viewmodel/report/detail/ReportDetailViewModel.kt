@@ -32,7 +32,7 @@ data class ReportDetailUiState(
     val reportOptions2: ReportOptions2 = ReportOptions2(),
     val xAxisFormatter: GraphFormatter<String>? = null,
     val yAxisFormatter: GraphFormatter<Double>? = null
-    )
+)
 
 class ReportDetailViewModel(
     di: DI,
@@ -119,10 +119,29 @@ class ReportDetailViewModel(
                                         timeZone = TimeZone.currentSystemDefault()
                                     )
                                     runReportUseCase(request).collect { reportResult ->
+
+                                        val xAxisFormatter = createGraphFormatterUseCase(
+                                            reportResult = reportResult,
+                                            options = CreateGraphFormatterUseCase.FormatterOptions(
+                                                paramType = String::class,
+                                                axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES
+                                            )
+                                        )
+
+                                        val yAxisFormatter = createGraphFormatterUseCase(
+                                            reportResult = reportResult,
+                                            options = CreateGraphFormatterUseCase.FormatterOptions(
+                                                paramType = Double::class,
+                                                axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.Y_AXIS_VALUES
+                                            )
+                                        )
                                         _uiState.update { prev ->
-                                            prev.copy(reportResult = reportResult)
+                                            prev.copy(
+                                                reportResult = reportResult,
+                                                xAxisFormatter = xAxisFormatter,
+                                                yAxisFormatter = yAxisFormatter
+                                            )
                                         }
-                                        updateFormatters(reportResult)
                                     }
 
                                 } catch (e: Exception) {
@@ -130,8 +149,10 @@ class ReportDetailViewModel(
                                         is IllegalArgumentException -> systemImpl.getString(
                                             MR.strings.invalid_report_format
                                         )
+
                                         is IllegalStateException -> e.message
                                             ?: systemImpl.getString(MR.strings.invalid_report_config)
+
                                         else -> e.message
                                             ?: systemImpl.getString(MR.strings.unknown_error)
                                     }
@@ -147,31 +168,7 @@ class ReportDetailViewModel(
             }
         }
     }
-    private fun updateFormatters(result: RunReportUseCase.RunReportResult) {
 
-        val xAxisFormatter = createGraphFormatterUseCase(
-            reportResult = result,
-            options = CreateGraphFormatterUseCase.FormatterOptions(
-                paramType = String::class,
-                axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES
-            )
-        )
-
-        val yAxisFormatter = createGraphFormatterUseCase(
-            reportResult = result,
-            options = CreateGraphFormatterUseCase.FormatterOptions(
-                paramType = Double::class,
-                axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.Y_AXIS_VALUES
-            )
-        )
-
-        _uiState.update { currentState ->
-            currentState.copy(
-                xAxisFormatter = xAxisFormatter,
-                yAxisFormatter = yAxisFormatter
-            )
-        }
-    }
     fun onClickEdit() {
         navController.navigate(
             ReportEditViewModel.DEST_NAME,

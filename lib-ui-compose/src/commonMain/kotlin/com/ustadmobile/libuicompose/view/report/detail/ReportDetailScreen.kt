@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.domain.report.formatter.GraphFormatter
 import com.ustadmobile.core.domain.report.model.ReportSeries2
-import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState

@@ -104,8 +104,27 @@ class ReportListViewModel(
 
             if (request != null) {
                 runReportUseCase(request).collect { reportResult ->
-                    // Update formatters when report result is received
-                    updateFormatters(reportResult)
+                    val xAxisFormatter = createGraphFormatterUseCase(
+                        reportResult = reportResult,
+                        options = CreateGraphFormatterUseCase.FormatterOptions(
+                            paramType = String::class,
+                            axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES
+                        )
+                    )
+
+                    val yAxisFormatter = createGraphFormatterUseCase(
+                        reportResult = reportResult,
+                        options = CreateGraphFormatterUseCase.FormatterOptions(
+                            paramType = Double::class,
+                            axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.Y_AXIS_VALUES
+                        )
+                    )
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            xAxisFormatter = xAxisFormatter,
+                            yAxisFormatter = yAxisFormatter
+                        )
+                    }
                     emit(reportResult)
                 }
             }
@@ -120,36 +139,10 @@ class ReportListViewModel(
                 ),
                 results = emptyList()
             )
-            updateFormatters(errorResult)
             emit(errorResult)
             throw e
         } finally {
             _appUiState.update { it.copy(loadingState = NOT_LOADING) }
-        }
-    }
-
-    private fun updateFormatters(reportResult: RunReportUseCase.RunReportResult) {
-        val xAxisFormatter = createGraphFormatterUseCase(
-            reportResult = reportResult,
-            options = CreateGraphFormatterUseCase.FormatterOptions(
-                paramType = String::class,
-                axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES
-            )
-        )
-
-        val yAxisFormatter = createGraphFormatterUseCase(
-            reportResult = reportResult,
-            options = CreateGraphFormatterUseCase.FormatterOptions(
-                paramType = Double::class,
-                axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.Y_AXIS_VALUES
-            )
-        )
-
-        _uiState.update { currentState ->
-            currentState.copy(
-                xAxisFormatter = xAxisFormatter,
-                yAxisFormatter = yAxisFormatter
-            )
         }
     }
 

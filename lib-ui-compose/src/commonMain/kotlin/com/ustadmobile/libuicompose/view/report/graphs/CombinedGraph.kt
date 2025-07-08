@@ -3,7 +3,6 @@ package com.ustadmobile.libuicompose.view.report.graphs
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,7 +15,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.domain.report.formatter.CreateGraphFormatterUseCase
 import com.ustadmobile.core.domain.report.formatter.GraphFormatter
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
@@ -154,12 +152,6 @@ fun convertDuration(ms: Float): Pair<Int, String> {
         ms >= MS_IN_SECOND -> ((ms / MS_IN_SECOND).toInt() to stringResource(MR.strings.second_unit))
         else -> (ms.toInt() to stringResource(MR.strings.millisecond_unit))
     }
-}
-
-@Composable
-fun formatDurationLabel(ms: Float): String {
-    val (value, _) = convertDuration(ms)
-    return "$value"
 }
 
 @Composable
