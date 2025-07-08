@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.report.formatter
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.util.MS_PER_HOUR
 import com.ustadmobile.core.util.MS_PER_MIN
+import kotlin.math.roundToInt
 import kotlin.time.DurationUnit
 
 class DurationGraphFormatter(
@@ -30,7 +31,7 @@ class DurationGraphFormatter(
     }
 
     override fun format(value: Double): String {
-        return value.toString() //TODO: round this to 2 decimal places
+        return ((value * 100).roundToInt() / 100.0).toString()
     }
 
 }

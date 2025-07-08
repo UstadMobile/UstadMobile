@@ -288,8 +288,8 @@ class RunReportUseCaseTest {
         grantLearningRecordViewSystemPermission()
 
         runBlocking {
-            ReportSeriesYAxis.entries.filter { it != ReportSeriesYAxis.NONE }.forEach { yAxis ->
-                ReportXAxis.entries.filter { it != ReportXAxis.NONE }.forEach { xAxis ->
+            ReportSeriesYAxis.entries.forEach { yAxis ->
+                ReportXAxis.entries.forEach { xAxis ->
                     try {
                         runReportUseCase(
                             request = RunReportUseCase.RunReportRequest(

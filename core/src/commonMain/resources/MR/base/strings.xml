@@ -2069,6 +2069,7 @@
     <string name="quantity_must_be_at_least_1">Quantity must be at least 1 </string>
     <string name="empty_data">Empty data </string>
     <string name="No_data_available">No data available </string>
+    <string name="at_least_one_series_required">At least one series required </string>
 
 
     <string name="hour_unit">hr</string>

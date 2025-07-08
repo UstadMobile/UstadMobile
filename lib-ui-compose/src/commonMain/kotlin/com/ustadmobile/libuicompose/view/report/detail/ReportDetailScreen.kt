@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.formatter.GraphFormatter
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
@@ -45,7 +46,7 @@ fun ReportDetailScreen(viewModel: ReportDetailViewModel) {
         ReportDetailUiState(), Dispatchers.Main.immediate
     )
     ReportDetailScreen(
-        uiState = uiState
+        uiState = uiState,
     )
 }
 
@@ -59,12 +60,15 @@ fun ReportDetailScreen(
             if (reportResult != null) {
                 CombinedGraph(
                     reportResult = reportResult,
-                    modifier = Modifier.weight(0.6f)
+                    modifier = Modifier.weight(0.6f),
+                    xAxisFormatter = uiState.xAxisFormatter,
+                    yAxisFormatter = uiState.yAxisFormatter
                 )
                 MoreOptionsSection(
                     seriesList = reportResult.resultSeries,
                     modifier = Modifier.weight(0.4f),
-                    xAxisType = reportResult.request.reportOptions.xAxis
+                    xAxisFormatter = uiState.xAxisFormatter,
+                    yAxisFormatter = uiState.yAxisFormatter
                 )
             }
         } else {
@@ -87,7 +91,8 @@ private fun EmptyDataMessage(modifier: Modifier = Modifier) {
 fun DataTable(
     data: List<StatementReportRow>,
     reportSeries: ReportSeries2,
-    xAxisType: ReportXAxis?
+    xAxisFormatter: GraphFormatter<String>?,
+    yAxisFormatter: GraphFormatter<Double>?
 ) {
     val subgroupName = reportSeries.reportSeriesSubGroup?.label?.let { stringResource(it) }
     val subgroupByStr = stringResource(MR.strings.subgroup_by)
@@ -146,48 +151,50 @@ fun DataTable(
                         .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val formattedValue = xAxisType?.let {
-                        DefaultXAxisLabelFormatter().formatLabel(
-                            value = row.xAxis,
-                            it
-                        )
-                    }
-                    val displayText = when (formattedValue) {
-                        is StringResource -> stringResource(formattedValue)
-                        else -> formattedValue.toString()
-                    }
+                    // Format X-axis value
+                    val xAxisValue = xAxisFormatter?.format(row.xAxis) ?: row.xAxis
                     Text(
-                        text = displayText,
+                        text = xAxisValue.toString(),
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyMedium
                     )
+
                     VerticalDivider(
                         modifier = Modifier.height(24.dp),
                         color = Color.LightGray,
                         thickness = 1.dp
                     )
+
+                    // Format Y-axis value
+                    val yAxisValue = yAxisFormatter?.let {
+                        val adjustedValue = it.adjust(row.yAxis)
+                        it.format(adjustedValue)
+                    } ?: row.yAxis.toString()
                     Text(
-                        text = row.yAxis.toString(),
+                        text = yAxisValue,
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyMedium
                     )
+
                     VerticalDivider(
                         modifier = Modifier.height(24.dp),
                         color = Color.LightGray,
                         thickness = 1.dp
                     )
-                    val formattedValueForSub = reportSeries.reportSeriesSubGroup?.let {
+
+                    // Format subgroup value
+                    val subgroupValue = reportSeries.reportSeriesSubGroup?.let {
                         DefaultXAxisLabelFormatter().formatLabel(
                             value = row.subgroup,
                             it
                         )
                     }
-                    val value = when (formattedValueForSub) {
-                        is StringResource -> stringResource(formattedValueForSub)
-                        else -> formattedValueForSub.toString()
+                    val formattedSubgroupValue = when (subgroupValue) {
+                        is StringResource -> stringResource(subgroupValue)
+                        else -> subgroupValue?.toString() ?: ""
                     }
                     Text(
-                        text = value,
+                        text = formattedSubgroupValue,
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -202,7 +209,8 @@ fun DataTable(
 fun MoreOptionsSection(
     seriesList: List<RunReportUseCase.RunReportResult.Series>,
     modifier: Modifier = Modifier,
-    xAxisType: ReportXAxis
+    xAxisFormatter: GraphFormatter<String>?,
+    yAxisFormatter: GraphFormatter<Double>?
 ) {
     LazyColumn(modifier = modifier.fillMaxWidth()) {
         item { HorizontalDivider(thickness = 1.dp) }
@@ -211,7 +219,8 @@ fun MoreOptionsSection(
             DataTable(
                 data = series.data,
                 reportSeries = series.reportSeriesOptions,
-                xAxisType = xAxisType
+                xAxisFormatter = xAxisFormatter,
+                yAxisFormatter = yAxisFormatter
             )
             Spacer(modifier = Modifier.height(16.dp))
         }

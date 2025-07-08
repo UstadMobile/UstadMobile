@@ -37,7 +37,8 @@ data class ReportEditUiState(
     val chartTypeError: Map<Int, String> = emptyMap(),
     val timeRangeError: String? = null,
     val quantityError: String? = null,
-    val submitted: Boolean = false
+    val submitted: Boolean = false,
+    val hasSingleSeries: Boolean = true,
 )
 
 class ReportEditViewModel(
@@ -221,7 +222,10 @@ class ReportEditViewModel(
             .mapValues { it.value as String }
 
         _uiState.update { currentState ->
-            val baseUpdate = currentState.copy(reportOptions2 = newOptions)
+            val baseUpdate = currentState.copy(
+                reportOptions2 = newOptions,
+                hasSingleSeries = newOptions.series.size == 1
+            )
 
             if (!baseUpdate.submitted) return@update baseUpdate
             baseUpdate.copy(
@@ -313,20 +317,20 @@ class ReportEditViewModel(
                         reportSeriesSubGroup = null,
                         reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
                     ),
-                )
+                ),
+                hasSingleSeries = false // Since we're adding a series, there will be >1
             )
         }
     }
 
     fun onRemoveSeries(seriesId: Int) {
         _uiState.update { prev ->
-            val updatedSeriesList =
-                prev.reportOptions2.series.filterNot { it.reportSeriesUid == seriesId }
-
+            val updatedSeriesList = prev.reportOptions2.series.filterNot { it.reportSeriesUid == seriesId }
             prev.copy(
                 reportOptions2 = prev.reportOptions2.copy(
                     series = updatedSeriesList
-                )
+                ),
+                hasSingleSeries = updatedSeriesList.size == 1 // Update based on new count
             )
         }
     }
@@ -350,19 +354,6 @@ class ReportEditViewModel(
                 )
             )
         }
-    }
-
-    fun onEditFilter(seriesId: Int, filter: ReportFilter3) {
-        navigateForResult(
-            nextViewName = ReportFilterEditViewModel.DEST_NAME,
-            key = RESULT_KEY_REPORT_FILTER,
-            currentValue = null,
-            serializer = Report.serializer(),
-            args = mapOf(
-                ARG_REPORT_SERIES_UID to seriesId.toString(),
-                ReportFilterEditViewModel.ARG_EXISTING_FILTER to json.encodeToString(filter)
-            )
-        )
     }
 
     fun ReportEditUiState.hasErrors(): Boolean {

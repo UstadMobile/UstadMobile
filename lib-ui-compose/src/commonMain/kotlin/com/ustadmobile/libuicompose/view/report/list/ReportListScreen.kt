@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.formatter.GraphFormatter
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.paging.RefreshCommand
@@ -86,7 +87,9 @@ fun ReportListScreen(
                 viewModel = viewModel,
                 onItemClick = onListItemClick,
                 onRemove = onRemoveReport,
-                activeUserPersonUid = uiState.activeUserPersonUid
+                activeUserPersonUid = uiState.activeUserPersonUid,
+                xAxisFormatter = uiState.xAxisFormatter,
+                yAxisFormatter = uiState.yAxisFormatter
             )
         }
     }
@@ -98,7 +101,9 @@ private fun ReportGridCard(
     viewModel: ReportListViewModel,
     onItemClick: (Report) -> Unit,
     onRemove: (Long) -> Unit,
-    activeUserPersonUid: Long
+    activeUserPersonUid: Long,
+    xAxisFormatter: GraphFormatter<String>?,
+    yAxisFormatter: GraphFormatter<Double>?
 ) {
     if (report == null) return
 
@@ -158,6 +163,8 @@ private fun ReportGridCard(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(color = MaterialTheme.colorScheme.surface),
+                            xAxisFormatter = xAxisFormatter,
+                            yAxisFormatter = yAxisFormatter
                         )
                     }
                 }

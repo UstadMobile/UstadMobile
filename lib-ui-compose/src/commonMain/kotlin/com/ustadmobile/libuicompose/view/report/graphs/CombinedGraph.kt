@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -15,6 +16,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.formatter.CreateGraphFormatterUseCase
+import com.ustadmobile.core.domain.report.formatter.GraphFormatter
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
@@ -23,7 +26,6 @@ import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.bar.GroupedVerticalBarPlot
 import io.github.koalaplot.core.bar.solidBar
 import io.github.koalaplot.core.line.LinePlot
-import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.VerticalRotation
@@ -42,14 +44,17 @@ private const val MS_IN_SECOND = 1_000
 fun CombinedGraph(
     reportResult: RunReportUseCase.RunReportResult,
     modifier: Modifier = Modifier,
+    xAxisFormatter: GraphFormatter<String>?,
+    yAxisFormatter: GraphFormatter<Double>?
 ) {
-    val colorMap: Map<RunReportUseCase.RunReportResult.Subgroup, Color> = remember(reportResult.timestamp) {
-        reportResult.distinctSubgroups.mapIndexed { index, resultSubgroup ->
-            resultSubgroup to Color.hsv(
-                index * 360f / reportResult.distinctSubgroups.size.coerceAtLeast(1), 1f, 0.7f
-            )
-        }.toMap()
-    }
+    val colorMap: Map<RunReportUseCase.RunReportResult.Subgroup, Color> =
+        remember(reportResult.timestamp) {
+            reportResult.distinctSubgroups.mapIndexed { index, resultSubgroup ->
+                resultSubgroup to Color.hsv(
+                    index * 360f / reportResult.distinctSubgroups.size.coerceAtLeast(1), 1f, 0.7f
+                )
+            }.toMap()
+        }
 
     //Roughly as per https://koalaplot.github.io/0.5/docs/xygraphs/bar_plots/#grouped-bars
     XYGraph(
@@ -57,32 +62,34 @@ fun CombinedGraph(
         xAxisModel = remember(reportResult.timestamp) {
             CategoryAxisModel(reportResult.distinctXAxisValueSorted)
         },
-        yAxisModel = rememberFloatLinearAxisModel(reportResult.yRange, minimumMajorTickIncrement = 1f),
+        yAxisModel = rememberFloatLinearAxisModel(
+            reportResult.yRange,
+            minimumMajorTickIncrement = 1f
+        ),
         xAxisLabels = {
-            Text(
-                text = it,
-                modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE),
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-            )
+            xAxisFormatter?.format(it)?.let { value ->
+                Text(
+                    text = value,
+                    modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE),
+                    maxLines = 1,
+                    fontSize = MaterialTheme.typography.labelSmall.fontSize
+                )
+            }
         },
         xAxisTitle = {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
                     text = stringResource(reportResult.request.reportOptions.xAxis.label),
-                    modifier = Modifier.padding(bottom = KoalaPlotTheme.sizes.gap)
                 )
             }
         },
         yAxisLabels = {
+            val value = yAxisFormatter?.adjust(it.toDouble()) ?: 0.0
             Text(
-                text = if (reportResult.yAxisType == YAxisTypes.DURATION) {
-                    formatDurationLabel(it)
-                } else {
-                    it.toInt().toString()
-                },
+                text = yAxisFormatter?.format(value) ?: "",
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
+                fontSize = MaterialTheme.typography.labelSmall.fontSize
             )
         },
         yAxisTitle = {
@@ -148,11 +155,13 @@ fun convertDuration(ms: Float): Pair<Int, String> {
         else -> (ms.toInt() to stringResource(MR.strings.millisecond_unit))
     }
 }
+
 @Composable
 fun formatDurationLabel(ms: Float): String {
     val (value, _) = convertDuration(ms)
     return "$value"
 }
+
 @Composable
 fun getDurationUnitTittle(max: Float): String {
     val (_, unit) = convertDuration(max)

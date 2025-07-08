@@ -223,6 +223,7 @@ import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbD
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.domain.invite.ClazzInviteRedeemUseCase
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
+import com.ustadmobile.core.domain.report.formatter.CreateGraphFormatterUseCase
 
 
 class UstadApp : Application(), DIAware, ImageLoaderFactory{
@@ -1069,7 +1070,9 @@ class UstadApp : Application(), DIAware, ImageLoaderFactory{
                 db = instance(tag = DoorTag.TAG_DB),
             )
         }
-
+        bind<CreateGraphFormatterUseCase>() with singleton {
+            CreateGraphFormatterUseCase()
+        }
         bind<OpenBlobUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             OpenBlobUseCaseAndroid(
                 appContext = applicationContext,

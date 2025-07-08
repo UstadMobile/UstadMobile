@@ -1,5 +1,6 @@
 package com.ustadmobile.core.domain.report.formatter
 
+import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import kotlin.reflect.KClass
@@ -35,16 +36,39 @@ class CreateGraphFormatterUseCase() {
     ): GraphFormatter<T> {
         return when {
             options.axis == FormatterOptions.Axis.Y_AXIS_VALUES && options.paramType == Double::class -> {
-                when(reportResult.request.reportOptions.series.first().reportSeriesYAxis.type) {
+                when (reportResult.request.reportOptions.series.first().reportSeriesYAxis.type) {
                     YAxisTypes.DURATION -> DurationGraphFormatter(reportResult)
-                    else -> throw IllegalArgumentException("Unsupported type")
+                    YAxisTypes.COUNT -> CountGraphFormatter(reportResult)
+                    else -> throw IllegalArgumentException("Unsupported Y-axis type")
+                }
+            }
+
+            options.axis == FormatterOptions.Axis.X_AXIS_VALUES && options.paramType == String::class -> {
+                when (reportResult.request.reportOptions.xAxis) {
+                    ReportXAxis.DAY,
+                    ReportXAxis.WEEK,
+                    ReportXAxis.MONTH,
+                    ReportXAxis.YEAR -> DateGraphFormatter(reportResult.request.reportOptions.xAxis)
+
+                    ReportXAxis.GENDER -> GenderGraphFormatter()
+
+                    ReportXAxis.CLASS -> NoOpGraphFormatter() // No formatting for class names
+
+                    else -> throw IllegalArgumentException("Unsupported X-axis type")
                 }
             }
 
             else -> {
-                throw IllegalArgumentException("TODO")
+                throw IllegalArgumentException("Unsupported formatter options combination")
             }
         } as GraphFormatter<T>
     }
+}
 
+/**
+ * Formatter that returns values as-is without any transformation
+ */
+class NoOpGraphFormatter : GraphFormatter<String> {
+    override fun adjust(value: String): String = value
+    override fun format(value: String): String = value
 }

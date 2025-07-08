@@ -16,7 +16,7 @@ data class ReportSeries2(
 
     val reportSeriesVisualType: ReportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
 
-    val reportSeriesSubGroup: ReportXAxis? = ReportXAxis.NONE,
+    val reportSeriesSubGroup: ReportXAxis? = ReportXAxis.DAY,
 
     val reportSeriesFilters: List<ReportFilter3>? = null,
 
@@ -39,7 +39,6 @@ enum class ReportSeriesYAxis(
     INTERACTIONS_RECORDED(MR.strings.interactions_recorded, YAxisTypes.COUNT),
     NUMBER_ACTIVE_USERS(MR.strings.number_active_users, YAxisTypes.COUNT),
     AVERAGE_USAGE_TIME_PER_USER(MR.strings.average_usage_time_per_user, YAxisTypes.DURATION),
-    NONE(MR.strings.none, YAxisTypes.COUNT),
 }
 
 /** Enum representing different visual types for report series */
@@ -98,7 +97,6 @@ enum class ReportXAxis(
      * Displayed to the user using the localized string as per their locale (e.g. male, female..)
      */
     GENDER(MR.strings.gender_literal, personJoinRequired = true),
-    NONE(MR.strings.none);
 }
 
 /** Enum representing different filter types for report series */

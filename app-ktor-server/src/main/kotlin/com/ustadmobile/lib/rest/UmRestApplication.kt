@@ -163,6 +163,7 @@ import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
+import com.ustadmobile.core.domain.report.formatter.CreateGraphFormatterUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockSendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCaseImpl
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockEmailSender
@@ -917,6 +918,10 @@ fun Application.umRestApplication(
                 db = instance(tag = DoorTag.TAG_DB),
                 generateReportQueriesUseCase = instance(),
             )
+        }
+        // Add this new binding for CreateGraphFormatterUseCase
+        bind<CreateGraphFormatterUseCase>() with singleton {
+            CreateGraphFormatterUseCase()
         }
 
         try {

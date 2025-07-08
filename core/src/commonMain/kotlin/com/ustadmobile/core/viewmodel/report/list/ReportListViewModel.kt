@@ -2,6 +2,8 @@ package com.ustadmobile.core.viewmodel.report.list
 
 import app.cash.paging.PagingSource
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.formatter.CreateGraphFormatterUseCase
+import com.ustadmobile.core.domain.report.formatter.GraphFormatter
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.impl.appstate.FabUiState
@@ -27,6 +29,8 @@ data class ReportListUiState(
     val reportList: () -> PagingSource<Int, Report> = { EmptyPagingSource() },
     val addSheetOrDialogVisible: Boolean = false,
     val activeUserPersonUid: Long = 0L,
+    val xAxisFormatter: GraphFormatter<String>? = null,
+    val yAxisFormatter: GraphFormatter<Double>? = null
 )
 
 class ReportListViewModel(
@@ -38,6 +42,7 @@ class ReportListViewModel(
 ) {
 
     private val runReportUseCase: RunReportUseCase by di.onActiveLearningSpace().instance()
+    private val createGraphFormatterUseCase: CreateGraphFormatterUseCase by instance()
 
     private val pagingSourceFactory: () -> PagingSource<Int, Report> = {
         activeRepoWithFallback.reportDao().findAllReports()
@@ -96,13 +101,16 @@ class ReportListViewModel(
                     timeZone = TimeZone.currentSystemDefault()
                 )
             }
+
             if (request != null) {
                 runReportUseCase(request).collect { reportResult ->
+                    // Update formatters when report result is received
+                    updateFormatters(reportResult)
                     emit(reportResult)
                 }
             }
         } catch (e: Exception) {
-            emit(RunReportUseCase.RunReportResult(
+            val errorResult = RunReportUseCase.RunReportResult(
                 timestamp = Clock.System.now().toEpochMilliseconds(),
                 request = RunReportUseCase.RunReportRequest(
                     reportUid = report.reportUid,
@@ -111,10 +119,37 @@ class ReportListViewModel(
                     timeZone = TimeZone.currentSystemDefault()
                 ),
                 results = emptyList()
-            ))
+            )
+            updateFormatters(errorResult)
+            emit(errorResult)
             throw e
         } finally {
             _appUiState.update { it.copy(loadingState = NOT_LOADING) }
+        }
+    }
+
+    private fun updateFormatters(reportResult: RunReportUseCase.RunReportResult) {
+        val xAxisFormatter = createGraphFormatterUseCase(
+            reportResult = reportResult,
+            options = CreateGraphFormatterUseCase.FormatterOptions(
+                paramType = String::class,
+                axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES
+            )
+        )
+
+        val yAxisFormatter = createGraphFormatterUseCase(
+            reportResult = reportResult,
+            options = CreateGraphFormatterUseCase.FormatterOptions(
+                paramType = Double::class,
+                axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.Y_AXIS_VALUES
+            )
+        )
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                xAxisFormatter = xAxisFormatter,
+                yAxisFormatter = yAxisFormatter
+            )
         }
     }
 
@@ -135,20 +170,14 @@ class ReportListViewModel(
     fun onRemoveReport(uid: Long) {
         viewModelScope.launch {
             activeRepoWithFallback.reportDao().deleteReportByUid(uid)
-
         }
     }
 
     companion object {
-
         const val DEST_NAME = "Report"
-
         const val DEST_NAME_HOME = "ReportListHome"
-
         const val ARG_GO_TO_ON_REPORT_SELECTED = "goToOnReportSelected"
-
         const val ARG_POPUP_TO_ON_REPORT_SELECTED = "popUpToOnReportSelected"
-
         val ALL_DEST_NAMES = listOf(DEST_NAME, DEST_NAME_HOME)
     }
 }

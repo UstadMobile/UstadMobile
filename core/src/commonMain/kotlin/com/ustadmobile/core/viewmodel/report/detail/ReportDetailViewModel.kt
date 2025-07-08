@@ -1,6 +1,8 @@
 package com.ustadmobile.core.viewmodel.report.detail
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.formatter.CreateGraphFormatterUseCase
+import com.ustadmobile.core.domain.report.formatter.GraphFormatter
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.impl.appstate.FabUiState
@@ -28,6 +30,8 @@ data class ReportDetailUiState(
     val reportResult: RunReportUseCase.RunReportResult? = null,
     val errorMessage: String? = null,
     val reportOptions2: ReportOptions2 = ReportOptions2(),
+    val xAxisFormatter: GraphFormatter<String>? = null,
+    val yAxisFormatter: GraphFormatter<Double>? = null
     )
 
 class ReportDetailViewModel(
@@ -37,6 +41,8 @@ class ReportDetailViewModel(
 
     private val reportUid = savedStateHandle[ARG_ENTITY_UID]?.toLong() ?: 0
     private val runReportUseCase: RunReportUseCase by di.onActiveLearningSpace().instance()
+    private val createGraphFormatterUseCase: CreateGraphFormatterUseCase by instance()
+
 
     private val _uiState = MutableStateFlow(ReportDetailUiState())
     val uiState: Flow<ReportDetailUiState> = _uiState.asStateFlow()
@@ -116,6 +122,7 @@ class ReportDetailViewModel(
                                         _uiState.update { prev ->
                                             prev.copy(reportResult = reportResult)
                                         }
+                                        updateFormatters(reportResult)
                                     }
 
                                 } catch (e: Exception) {
@@ -140,7 +147,31 @@ class ReportDetailViewModel(
             }
         }
     }
+    private fun updateFormatters(result: RunReportUseCase.RunReportResult) {
 
+        val xAxisFormatter = createGraphFormatterUseCase(
+            reportResult = result,
+            options = CreateGraphFormatterUseCase.FormatterOptions(
+                paramType = String::class,
+                axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES
+            )
+        )
+
+        val yAxisFormatter = createGraphFormatterUseCase(
+            reportResult = result,
+            options = CreateGraphFormatterUseCase.FormatterOptions(
+                paramType = Double::class,
+                axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.Y_AXIS_VALUES
+            )
+        )
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                xAxisFormatter = xAxisFormatter,
+                yAxisFormatter = yAxisFormatter
+            )
+        }
+    }
     fun onClickEdit() {
         navController.navigate(
             ReportEditViewModel.DEST_NAME,

@@ -176,9 +176,6 @@ class GenerateReportQueriesUseCase {
                     append("COALESCE(Person.gender, 0)")
                 }
 
-                ReportXAxis.NONE -> {
-                    throw IllegalArgumentException("Cannot graph x axis 'none'")
-                }
             }
         }
     }
@@ -288,10 +285,6 @@ class GenerateReportQueriesUseCase {
                     sql += "SUM(ResultSource.resultDuration) / " +
                             "COUNT(DISTINCT ResultSource.statementActorPersonUid)"
                 }
-
-                ReportSeriesYAxis.NONE -> {
-                    throw IllegalArgumentException("Y Axis not set")
-                }
             }
 
             sql += " AS yAxis,\n"
@@ -299,7 +292,7 @@ class GenerateReportQueriesUseCase {
             sql += xAxisOrSubgroupExpression(xAxis, dbType, request) + " AS xAxis,\n"
 
             when(series.reportSeriesSubGroup) {
-                ReportXAxis.NONE, null -> {
+                null -> {
                     sql += "'' AS subgroup\n"
                 }
 
