@@ -156,6 +156,8 @@ import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
+import com.ustadmobile.lib.rest.domain.account.SendConsentRequestToParentRoute
+import com.ustadmobile.lib.rest.domain.account.SendConsentRequestToParentServerImpl
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockSendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCaseImpl
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockEmailSender
@@ -946,6 +948,12 @@ fun Application.umRestApplication(
                 learningSpace = context,
             )
         }
+        bind<SendConsentRequestToParentUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            SendConsentRequestToParentServerImpl(
+                sendEmailUseCase = instance(),
+                learningSpace = context,
+            )
+        }
         registerContextTranslator { call: ApplicationCall ->
             call.callLearningSpace
         }
@@ -1028,7 +1036,9 @@ fun Application.umRestApplication(
 
         prefixRoute(sitePrefix) {
             //addHostCheckIntercept()
-            personAuthRegisterRoute()
+            personAuthRegisterRoute(
+                notificationSender = NotificationSender(di),
+            )
             route("UmAppDatabase") {
                 UmAppDatabase_KtorRoute(DoorHttpServerConfig(json = json, logger = NapierDoorLogger())) { call ->
                     di.on(call).direct.instance(tag = DoorTag.TAG_DB)
@@ -1090,6 +1100,13 @@ fun Application.umRestApplication(
                             di.on(call).direct.instance()
                         }
                     )
+
+                    SendConsentRequestToParentRoute(
+                        useCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+
                 }
 
                 route("invite") {

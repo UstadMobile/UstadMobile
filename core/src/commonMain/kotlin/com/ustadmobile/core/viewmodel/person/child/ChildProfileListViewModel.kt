@@ -13,6 +13,9 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
+import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
+import com.ustadmobile.core.viewmodel.person.toFirstAndLastNameExt
+import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
@@ -29,9 +32,10 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 
 
-data class AddChildProfilesUiState(
+data class ChildProfileListUiState(
     val onAddChildProfile: String? = null,
     val childProfiles: List<Person> = emptyList(),
+    val childAddedViaLink: Person ? = null,
     val personParenJoinList: List<PersonParentJoin> = emptyList(),
     val showProfileSelectionDialog: Boolean = false,
     val parent: Person? = null
@@ -40,20 +44,20 @@ data class AddChildProfilesUiState(
         get() = (parent?.let { listOf(it) } ?: emptyList()) + childProfiles
 }
 
-class AddChildProfilesViewModel(
+class ChildProfileListViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
     private val _uiState = MutableStateFlow(
-        AddChildProfilesUiState()
+        ChildProfileListUiState()
     )
     private var nextDestination: String =
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
     val repo: UmAppDatabase by di.onActiveLearningSpace().instance()
 
-    val uiState: Flow<AddChildProfilesUiState> = _uiState.asStateFlow()
+    val uiState: Flow<ChildProfileListUiState> = _uiState.asStateFlow()
 
     init {
         _uiState.update { prev ->
@@ -61,59 +65,75 @@ class AddChildProfilesViewModel(
                 parent = accountManager.currentUserSession.person,
             )
         }
-        _appUiState.update { prev ->
-            prev.copy(
-                title = systemImpl.getString(MR.strings.add_child_profiles),
-                hideBottomNavigation = true,
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = systemImpl.getString(MR.strings.finish),
-                    onClick = this@AddChildProfilesViewModel::onClickFinish,
-
-                    ),
-                navigationVisible = false,
-                userAccountIconVisible = false,
+        val childName =  savedStateHandle[ARG_CHILD_NAME]?:""
+        val childGender =  savedStateHandle[ARG_CHILD_GENDER]?:""
+        val childDateOfBirth = savedStateHandle[ARG_CHILD_DATE_OF_BIRTH]?:""
+        val ppjUids = savedStateHandle[ARG_PPJ_UID]?:""
+        ifLoggedInElseNavigateToLoginWithNextDestSet(
+            requireAdultAccount = false,
+            args = mapOf(
+                ARG_CHILD_NAME to childName,
+                ARG_CHILD_GENDER to childGender,
+                ARG_CHILD_DATE_OF_BIRTH to childDateOfBirth,
+                ARG_PPJ_UID to ppjUids
             )
-        }
-
-        launchIfHasPermission(
-            permissionCheck = {
-                true
-            }
         ) {
-            async {
-                loadEntity(
-                    serializer = ListSerializer(Person.serializer()),
-                    loadFromStateKeys = listOf(STATE_KEY_PERSONS),
-                    onLoadFromDb = {
-                        emptyList()
-
-                    },
-                    makeDefault = {
-                        emptyList()
-                    },
-                    uiUpdate = {
-                        _uiState.update { prev ->
-                            prev.copy(childProfiles = it ?: emptyList())
-                        }
-                    }
+            if (savedStateHandle[ARG_CHILD_NAME]!=null){
+                addChildIntoUiState()
+            }
+            _uiState.update { prev ->
+                prev.copy(
+                    parent = accountManager.currentUserSession.person,
                 )
+            }
+            _appUiState.update { prev ->
+                prev.copy(
+                    title = systemImpl.getString(MR.strings.child_profiles),
+                    hideBottomNavigation = true,
+                    navigationVisible = false,
+                    userAccountIconVisible = false,
+                )
+            }
 
+            launchIfHasPermission(
+                permissionCheck = {
+                    true
+                }
+            ) {
+                async {
+                    loadEntity(
+                        serializer = ListSerializer(Person.serializer()),
+                        loadFromStateKeys = listOf(STATE_KEY_PERSONS),
+                        onLoadFromDb = {
+                            _uiState.value.childProfiles
+                        },
+                        makeDefault = {
+                            _uiState.value.childProfiles
+                        },
+                        uiUpdate = {
+                            _uiState.update { prev ->
+                                prev.copy(childProfiles = it ?: emptyList())
+                            }
 
-                navResultReturner.filteredResultFlowForKey(RESULT_KEY_PERSON).collect { result ->
-                    val childProfileResult = result.result as? Person
-                        ?: return@collect
-
-                    val newChildProfileList =
-                        _uiState.value.childProfiles.replaceOrAppend(childProfileResult) {
-                            it.personUid == childProfileResult.personUid
                         }
+                    )
 
-                    updateChildProfileList(newChildProfileList)
+
+                    navResultReturner.filteredResultFlowForKey(RESULT_KEY_PERSON).collect { result ->
+                        val childProfileResult = result.result as? Person
+                            ?: return@collect
+
+                        val newChildProfileList =
+                            _uiState.value.childProfiles.replaceOrAppend(childProfileResult) {
+                                it.personUid == childProfileResult.personUid
+                            }
+
+                        updateChildProfileList(newChildProfileList)
+                    }
+
                 }
 
             }
-
         }
 
 
@@ -136,7 +156,7 @@ class AddChildProfilesViewModel(
         }
     }
 
-    fun onClickFinish() {
+    fun onClickDone() {
         //if parent not added any child profiles then not showing any dialog
         if (_uiState.value.childProfiles.isNotEmpty()) {
             _uiState.update { prev ->
@@ -146,6 +166,32 @@ class AddChildProfilesViewModel(
             }
         } else {
             onProfileSelected(accountManager.currentAccount.toPerson())
+        }
+
+    }
+
+    private fun addChildIntoUiState(){
+        val childName = savedStateHandle[ARG_CHILD_NAME]
+        val childGender = savedStateHandle[ARG_CHILD_GENDER]?.toInt()?:0
+        val childDateOfBirth = savedStateHandle[ARG_CHILD_DATE_OF_BIRTH]?.toLong()?:0L
+        viewModelScope.launch {
+            val fullName = childName?.trim()
+            val (firstName, lastName) = fullName.toFirstAndLastNameExt()
+            val uid = activeDb.doorPrimaryKeyManager.nextIdAsync(Person.TABLE_ID)
+            val childProfile = Person(
+                personUid =uid,
+                firstNames = firstName,
+                lastName = lastName,
+                gender = childGender,
+                dateOfBirth = childDateOfBirth,
+                isPersonalAccount = true
+            )
+            _uiState.update { prev ->
+                prev.copy(
+                    childAddedViaLink = childProfile,
+                )
+            }
+            updateChildProfileList(listOf(childProfile))
         }
 
     }
@@ -199,14 +245,25 @@ class AddChildProfilesViewModel(
                 val effectiveDb = activeRepo ?: activeDb
 
                 effectiveDb.personDao().insertListAsync(_uiState.value.childProfiles)
+                //for child added via link it parentPersonJoin is already created
+                val childProfile = if (_uiState.value.childAddedViaLink!=null) {
+                    _uiState.value.childProfiles.filter { it.personUid !=
+                            (_uiState.value.childAddedViaLink?.personUid ?: 0L) }
 
-                val personParenJoinList = _uiState.value.childProfiles.map {
+                } else {
+                    _uiState.value.childProfiles
+                }
+                val personParenJoinList = childProfile.map {
                     PersonParentJoin(
                         ppjMinorPersonUid = it.personUid,
                         ppjParentPersonUid = accountManager.currentAccount.personUid,
                         ppjStatus = PersonParentJoin.STATUS_APPROVED,
                         ppjApprovalTiemstamp = systemTimeInMillis()
                     )
+                }
+                //updating parent details in parentPersonJoin When child added via link
+                if (_uiState.value.childAddedViaLink!=null){
+                    updatePersonParentJoinWhenChildAddedViaLink()
                 }
                 _uiState.value.childProfiles.forEach {
                     if (it != profile) {
@@ -228,7 +285,7 @@ class AddChildProfilesViewModel(
                 accountManager.currentUserSession = sessionWithPersonAndLearningSpace
             }
             navController.navigateToViewUri(
-                nextDestination.appendSelectedAccount(
+                ContentEntryListViewModel.DEST_NAME_HOME.appendSelectedAccount(
                     profile.personUid,
                     LearningSpace(accountManager.activeLearningSpace.url)
                 ),
@@ -239,13 +296,35 @@ class AddChildProfilesViewModel(
 
     }
 
+    private fun updatePersonParentJoinWhenChildAddedViaLink() {
+       viewModelScope.launch {
+           (activeRepo ?: activeDb).personParentJoinDao().upsertAsync(
+               PersonParentJoin(
+                   ppjUid = savedStateHandle[ARG_PPJ_UID]?.toLong()?:0L,
+                   ppjMinorPersonUid = _uiState.value.childAddedViaLink?.personUid?:0L,
+                   ppjParentPersonUid = accountManager.currentAccount.personUid,
+                   ppjStatus = PersonParentJoin.STATUS_APPROVED,
+                   ppjApprovalTiemstamp = systemTimeInMillis()
+               )
+           )
+       }
+    }
+
     companion object {
 
-        const val DEST_NAME = "AddChildProfile"
+        const val DEST_NAME = "ChildProfileList"
 
         const val RESULT_KEY_PERSON = "person"
 
         const val STATE_KEY_PERSONS = "persons"
+
+        const val ARG_CHILD_NAME = "childName"
+
+        const val ARG_PPJ_UID = "ppjUId"
+
+        const val ARG_CHILD_DATE_OF_BIRTH = "childDateOfBirth"
+
+        const val ARG_CHILD_GENDER = "childGender"
 
 
     }

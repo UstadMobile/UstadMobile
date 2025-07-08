@@ -8,10 +8,12 @@ import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.viewmodel.person.manageaccount.ManageAccountUiState
 import com.ustadmobile.core.viewmodel.person.manageaccount.ManageAccountViewModel
 import com.ustadmobile.hooks.useFormattedDateAndTime
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.view.components.UstadFab
 import kotlinx.datetime.TimeZone
 import mui.material.*
+import mui.material.styles.TypographyVariant
 import mui.system.*
 import mui.system.Stack
 import mui.system.StackDirection
@@ -48,18 +50,29 @@ external interface ManageAccountProps : Props {
 
 
 val ManageAccountComponent2 = FC<ManageAccountProps> { props ->
-
+    val theme by useRequiredContext(ThemeContext)
+    val errorStr = props.uiState.errorText
     val strings = useStringProvider()
-
     UstadStandardContainer {
         Stack {
+            if(errorStr != null) {
+                Typography {
+                    sx {
+                        color = theme.palette.error.main
+                    }
+
+                    variant = TypographyVariant.body1
+
+                    + errorStr
+                }
+            }
             direction = responsive(StackDirection.column)
             spacing = responsive(8.px)
             mui.material.Box {
                 ListItem {
                     ListItemText {
                         secondary = ReactNode(strings[MR.strings.name_key])
-                        primary = ReactNode(props.uiState.personName ?: "")
+                        primary = ReactNode(props.uiState.personName)
 
                     }
                 }
@@ -67,7 +80,7 @@ val ManageAccountComponent2 = FC<ManageAccountProps> { props ->
 
                     ListItemText {
                         secondary = ReactNode(strings[MR.strings.username])
-                        primary = ReactNode(props.uiState.personUsername ?: "")
+                        primary = ReactNode(props.uiState.personUsername)
 
                     }
                 }

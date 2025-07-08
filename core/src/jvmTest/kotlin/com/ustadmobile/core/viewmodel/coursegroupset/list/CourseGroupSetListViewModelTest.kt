@@ -53,7 +53,7 @@ class CourseGroupSetListViewModelTest : AbstractMainDispatcherTest() {
             }
 
             viewModel.uiState.test(timeout = 5.seconds) {
-                val readyState = awaitItemWhere { it.courseGroupSets() !is EmptyPagingSource }
+                val readyState = awaitItemWhere { it.courseGroupSets() !is EmptyPagingSource<*, *> }
                 val groupSets = readyState.courseGroupSets().loadFirstList()
                 assertEquals("Assignment groups", groupSets.first().cgsName)
 

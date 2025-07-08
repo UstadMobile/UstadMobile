@@ -99,12 +99,12 @@ import com.ustadmobile.core.viewmodel.schedule.edit.ScheduleEditViewModel
 import com.ustadmobile.view.dbexport.DbExportScreen
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.child.EditChildProfileViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.core.viewmodel.signup.SignupEnterUsernamePasswordViewModel
 import com.ustadmobile.view.accountlist.AccountListScreen
 import com.ustadmobile.view.person.accountedit.PersonAccountEditScreen
-import com.ustadmobile.view.person.child.AddChildProfilesScreen
+import com.ustadmobile.view.person.child.ChildProfileListScreen
 import com.ustadmobile.view.person.child.EditChildProfileScreen
 import com.ustadmobile.core.viewmodel.account.list.AccountListViewModel
 import com.ustadmobile.view.contententry.importlink.ContentEntryImportLinkScreen
@@ -191,6 +191,7 @@ import com.ustadmobile.view.contententry.detailattemptstab.ContentEntryDetailAtt
 import com.ustadmobile.core.viewmodel.contententry.getsubtitle.GetSubtitleViewModel
 import com.ustadmobile.view.contententry.getsubtitle.GetSubtitleScreen
 import com.ustadmobile.core.viewmodel.contententry.subtitleedit.SubtitleEditViewModel
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentConsentWaitingScreenViewModel
 import com.ustadmobile.core.viewmodel.person.manageaccount.ManageAccountViewModel
 import com.ustadmobile.view.contententry.subtitleedit.SubtitleEditScreen
 
@@ -245,8 +246,8 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
         SignUpEnterUsernamePasswordScreen
     ),
     UstadScreen(
-        AddChildProfilesViewModel.DEST_NAME, "Add Child Profiles Screen",
-        AddChildProfilesScreen
+        ChildProfileListViewModel.DEST_NAME, "Add Child Profiles Screen",
+        ChildProfileListScreen
     ),
     UstadScreen(
         EditChildProfileViewModel.DEST_NAME, "Edit Child Profile Screen",
@@ -472,6 +473,7 @@ var USTAD_SCREENS: Iterable<UstadScreen> = setOf(
     UstadScreen("UstadChipsDemo", "UstadChipsDemo", UstadChipsDemo),
     UstadScreen(GetSubtitleViewModel.DEST_NAME, "GetSubtitle", GetSubtitleScreen),
     UstadScreen(SubtitleEditViewModel.DEST_NAME, "SubtitleEdit", SubtitleEditScreen),
+    UstadScreen(ParentConsentWaitingScreenViewModel.DEST_NAME, "ParentalConsentWaitingScreen", ParentalConsentWaitingScreenScreen),
 )
 
 //Here as per the MUI showcase template

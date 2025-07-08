@@ -15,9 +15,8 @@ import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.passkey.PasskeyListViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
-import com.ustadmobile.door.ext.doorIdentityHashCode
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.PersonAuth2
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,7 +34,8 @@ data class ManageAccountUiState(
     val passkeySupported: Boolean = true,
     val personName: String = "",
     val personUsername: String = "",
-    val personAuth: PersonAuth2 ? = null
+    val personAuth: PersonAuth2 ? = null,
+    val errorText: String? = null,
 )
 
 class ManageAccountViewModel(
@@ -127,19 +127,35 @@ class ManageAccountViewModel(
     fun onCreatePasskeyClick() {
         viewModelScope.launch {
             val passkeyCreated = createPasskeyUseCase?.invoke(
-                    username = accountManager.currentUserSession.person.username.toString(),
+                username = accountManager.currentUserSession.person.username.toString(),
             )
             if (passkeyCreated != null) {
-                savePassKeyUseCase?.invoke(
-                    passkeyResult = passkeyCreated,
-                    person = accountManager.currentUserSession.person
-                )
+                when (passkeyCreated) {
+                    is CreatePasskeyUseCase.PasskeyCreatedResult -> {
+                        savePassKeyUseCase?.invoke(
+                            passkeyResult = passkeyCreated.authenticationResponseJSON,
+                            person = accountManager.currentUserSession.person
+                        )
+                    }
+
+                    is CreatePasskeyUseCase.Error -> {
+                        Napier.e { "Error occurred: ${passkeyCreated.message}"}
+                        _uiState.update { prev ->
+                            prev.copy(
+                                errorText = (passkeyCreated.message),
+                            )
+                        }
+                    }
+
+                    is CreatePasskeyUseCase.UserCanceledResult,
+                    null-> {
+                        //do nothing
+                    }
+                }
             }
 
         }
-
     }
-
 
     companion object {
 

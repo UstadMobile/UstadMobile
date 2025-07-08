@@ -18,14 +18,20 @@ import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
 import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNINGSPACE_URL
 import com.ustadmobile.core.viewmodel.account.addaccountselectusertype.AddAccountSelectNewOrExistingUserTypeViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_DATE_OF_BIRTH
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_GENDER
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_CHILD_NAME
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_PPJ_UID
 import com.ustadmobile.core.viewmodel.person.learningspacelist.LearningSpaceListViewModel
 import com.ustadmobile.core.viewmodel.person.registerageredirect.RegisterAgeRedirectViewModel
+import com.ustadmobile.core.viewmodel.person.registerminorwaitforparent.RegisterMinorWaitForParentViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.lib.db.entities.Person
 import io.github.aakira.napier.Napier
@@ -99,6 +105,31 @@ class AddAccountSelectNewOrExistingViewModel(
     private val parseCredentialUsernameUseCase: ParseCredentialUsernameUseCase by instance()
 
     init {
+        /**
+         * this check is for RegisterMinorWaitForParentViewModel
+         * If the app is being used for the first time, then it goes back to the start screen (SelectNewOrExisting).
+         * If this was reached through the account manager - then go back to the account manager
+         */
+        if (savedStateHandle[RegisterMinorWaitForParentViewModel.ARG_REFERER_SCREEN]!=null){
+            savedStateHandle[RegisterMinorWaitForParentViewModel.ARG_REFERER_SCREEN]=
+                DEST_NAME
+        }
+        val nextDestination = savedStateHandle[UstadView.ARG_NEXT]
+        if (nextDestination !=null){
+            val questionIndex = nextDestination.indexOf('?')
+            val args = if(questionIndex > 0) {
+                UMFileUtil.parseURLQueryString(nextDestination.substring(questionIndex))
+            }else {
+                emptyMap()
+            }
+            if (args.containsKey(ARG_CHILD_NAME)){
+                savedStateHandle[ARG_CHILD_NAME] = args[ARG_CHILD_NAME]
+                savedStateHandle[ARG_CHILD_GENDER] = args[ARG_CHILD_GENDER]
+                savedStateHandle[ARG_CHILD_DATE_OF_BIRTH] = args[ARG_CHILD_DATE_OF_BIRTH]
+                savedStateHandle[ARG_PPJ_UID] = args[ARG_PPJ_UID]
+            }
+        }
+
         _appUiState.value = AppUiState(
             navigationVisible = false,
             hideAppBar = true,
@@ -148,12 +179,10 @@ class AddAccountSelectNewOrExistingViewModel(
                         }
                     }
 
-                    is GetCredentialUseCase.NoCredentialAvailableResult -> {
-                        //Do nothing
-                    }
-
+                    is GetCredentialUseCase.NoCredentialAvailableResult,
+                    is GetCredentialUseCase.UserCanceledResult,
                     null -> {
-                        //Do nothing
+                        // Do nothing
                     }
                 }
             } catch (e: Exception) {

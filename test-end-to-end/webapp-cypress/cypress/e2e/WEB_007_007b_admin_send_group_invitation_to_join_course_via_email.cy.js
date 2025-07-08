@@ -28,7 +28,7 @@ it('New student user login via email link', () => {
 // Call the custom command to fetch the email and open the URL
   cy.UstadOpenInviteLinkFromEmail(email, baseUrl, {timeout:60000})
   cy.contains('button[class*="MuiButton-outlinedPrimary"]', 'New user').click();
-  cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date("2010-06-01"));
+  cy.ustadSetDate(cy.get("#age_date_of_birth"), new Date(new Date().setFullYear(new Date().getFullYear() - 15))) // Set date to 15 years ago
   cy.contains('button','Next').click()
   cy.contains('New Terms').should('be.visible')
   cy.get('#accept_button').click()

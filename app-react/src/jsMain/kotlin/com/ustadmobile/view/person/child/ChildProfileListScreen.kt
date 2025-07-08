@@ -2,8 +2,8 @@ package com.ustadmobile.view.person.child
 
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.hooks.useUstadViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesUiState
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListUiState
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel
 import mui.material.*
 import react.*
 import com.ustadmobile.core.MR
@@ -16,28 +16,29 @@ import com.ustadmobile.view.components.virtuallist.virtualListContent
 import js.objects.jso
 import mui.icons.material.Add
 import mui.system.sx
-import react.dom.html.ReactHTML
 import web.cssom.Contain
 import web.cssom.Height
 import web.cssom.Overflow
+import web.cssom.Width
 import web.cssom.pct
 import web.cssom.px
 
 
-external interface AddChildProfilesProps : Props {
-    var uiState: AddChildProfilesUiState
+external interface ChildProfileListProps : Props {
+    var uiState: ChildProfileListUiState
     var onClickEditChild: (Person) -> Unit
     var onClickDeleteChileProfile: (Person) -> Unit
     var onClickAddChild: () -> Unit
+    var onClickFinish: () -> Unit
 
 }
 
-val AddChildProfilesScreen = FC<Props> {
+val ChildProfileListScreen = FC<Props> {
     val viewModel = useUstadViewModel { di, savedStateHandle ->
-        AddChildProfilesViewModel(di, savedStateHandle)
+        ChildProfileListViewModel(di, savedStateHandle)
     }
 
-    val uiState by viewModel.uiState.collectAsState(AddChildProfilesUiState())
+    val uiState by viewModel.uiState.collectAsState(ChildProfileListUiState())
     println("childProfiles = ${uiState.childProfiles}")
 
     Dialog {
@@ -72,11 +73,13 @@ val AddChildProfilesScreen = FC<Props> {
         onClickEditChild = viewModel::onClickEditChileProfile
         onClickDeleteChileProfile = viewModel::onClickDeleteChildProfile
         onClickAddChild = viewModel::onClickAddChileProfile
+        onClickFinish = viewModel::onClickDone
     }
 }
-val AddChildProfilesComponent2 = FC<AddChildProfilesProps> { props ->
+val AddChildProfilesComponent2 = FC<ChildProfileListProps> { props ->
     val strings = useStringProvider()
     val muiAppState = useMuiAppState()
+    val buttonPaddingPx = 8
 
 
     VirtualList {
@@ -103,7 +106,7 @@ val AddChildProfilesComponent2 = FC<AddChildProfilesProps> { props ->
                     }
 
                     ListItemText {
-                        primary = ReactNode(strings[MR.strings.child_profile])
+                        primary = ReactNode(strings[MR.strings.child_profiles])
 
                     }
                 }
@@ -118,8 +121,21 @@ val AddChildProfilesComponent2 = FC<AddChildProfilesProps> { props ->
 
                 }
             }
+            Button {
+                sx {
 
+                    margin = buttonPaddingPx.px
+                    width = "calc(100% - ${buttonPaddingPx* 2}px)".unsafeCast<Width>()
+                }
+                id = "next_button"
+                variant = ButtonVariant.contained
 
+                onClick = {
+                    props.onClickFinish()
+                }
+
+                + strings[MR.strings.finish]
+            }
         }
         Container {
             VirtualListOutlet()

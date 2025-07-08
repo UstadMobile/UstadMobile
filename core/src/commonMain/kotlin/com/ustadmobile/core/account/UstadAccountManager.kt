@@ -323,6 +323,7 @@ class UstadAccountManager(
         passkeyResult: AuthenticationResponseJSON,
         person: Person,
         personPicture: PersonPicture?,
+        isMinor: Boolean,
     ) = withContext(Dispatchers.Default) {
         val learningSpace = LearningSpace(learningSpaceUrl)
 
@@ -333,15 +334,17 @@ class UstadAccountManager(
         val repo: UmAppDatabase = di.on(learningSpace).direct.instance<UmAppDataLayer>()
             .requireRepository()
 
-        val session = addSession(person, learningSpaceUrl, null)
         repo.withDoorTransactionAsync {
             if (repo.personDao().findByUidAsync(person.personUid) == null) {
                 repo.personDao().insertAsync(person)
             }
         }
         di.on(learningSpace).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+        if (!isMinor) {
+            val session = addSession(person, learningSpaceUrl, null)
 
-        currentUserSession = session
+            currentUserSession = session
+        }
     }
 
     suspend fun register(
@@ -382,7 +385,6 @@ class UstadAccountManager(
                 .requireRepository()
             getSiteFromDbOrLoadFromHttp(repo)
 
-            val session = addSession(registeredPerson, learningSpaceUrl, password)
 
             //If the person is not loaded into the database (probably not), then put in the db.
             val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
@@ -393,6 +395,8 @@ class UstadAccountManager(
             }
 
             if(accountRegisterOptions.makeAccountActive){
+                val session = addSession(registeredPerson, learningSpaceUrl, password)
+
                 currentUserSession = session
             }
 

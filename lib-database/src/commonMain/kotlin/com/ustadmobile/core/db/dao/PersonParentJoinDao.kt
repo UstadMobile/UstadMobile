@@ -47,6 +47,16 @@ expect abstract class PersonParentJoinDao {
     """)
     abstract suspend fun findByMinorPersonUid(minorPersonUid: Long): List<PersonParentJoin>
 
+    @HttpAccessible(
+        clientStrategy = HttpAccessible.ClientStrategy.PULL_REPLICATE_ENTITIES
+    )
+    @Query("""
+        SELECT PersonParentJoin.*
+          FROM PersonParentJoin
+         WHERE ppjMinorPersonUid = :minorPersonUid 
+    """)
+    abstract suspend fun findByMinorPersonUidForConsent(minorPersonUid: Long): PersonParentJoin
+
 
     /**
      * Find classes for which a minor (child) is enroled where there is no parent enrolment for

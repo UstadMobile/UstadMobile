@@ -4,10 +4,35 @@ describe('WEB_007_001_admin_enable_or_disable_user_registration', () => {
     cy.ustadStartTestServer(6000)
   })
 
-it('Admin enable registration', () => {
+it('Enable registration switch test', () => {
   // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass',{timeout:8000})
-  cy.ustadEnableUserRegistration()
+  cy.get('#settings_button').click()
+  cy.contains('Site').click()
+  cy.contains('Edit').click()
+  cy.contains('Guest login enabled').should('be.visible')
+  cy.contains('Terms and policies').should('be.visible')
+  cy.contains('Registration allowed').should('be.visible')
+  cy.get('#registration_allowed').click()
+  cy.get('.Mui-checked.PrivateSwitchBase-root', { timeout: 5000 }).should('exist') //verified registration_allowed switch is on
+  cy.get('#actionBarButton').should('be.visible')
+  cy.get('#actionBarButton').click()
+  cy.contains("If self-registration is enabled, you must set terms and policies in at least one language for users to accept when they register.")
+  cy.contains('Registration allowed').should('be.visible')
+  cy.get('#registration_allowed').click() // switch off registration allowed to make sure error is gone
+  cy.get('#actionBarButton').should('be.visible')
+  cy.get('#actionBarButton').click()
+  cy.get('[data-testid="EditIcon"]').should('exist')
+  cy.get('[data-testid="EditIcon"]').click()
+  cy.get('#terms_html_edit .ql-editor').as('editor')
+  cy.get('@editor').should('have.attr', 'contenteditable').and('equal', 'true',{timeout:3000})
+  cy.get('@editor').click().clear().ustadTypeAndVerify("New Terms")
+  cy.get('#actionBarButton').should('be.visible')
+  cy.contains('Registration allowed').should('be.visible')
+  cy.get('#registration_allowed').click() // switch on registration allowed
+  cy.get('#actionBarButton').should('be.visible')
+  cy.get('#actionBarButton').click()
+  cy.contains('Yes').should('exist')
 })
 
 it('Verify New user registration is enabled and mandatory fields are filled', () => {
@@ -17,7 +42,7 @@ it('Verify New user registration is enabled and mandatory fields are filled', ()
   cy.get("#age_date_of_birth").should('be.visible')
   cy.contains('button','Next').click()
   cy.contains('This field is required').should('be.visible') //verify the DOB field is mandatory
-  cy.ustadBirthDate(cy.get("#age_date_of_birth"), new Date("2010-06-01"))
+  cy.ustadSetDate(cy.get("#age_date_of_birth"), new Date(new Date().setFullYear(new Date().getFullYear() - 15))) // Set date to 15 years ago
   cy.contains('button','Next').click()
   cy.contains('New Terms').should('be.visible')
   cy.get('#accept_button').click()

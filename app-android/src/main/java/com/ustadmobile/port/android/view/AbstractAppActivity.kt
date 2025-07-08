@@ -20,6 +20,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.ustadmobile.core.account.LearningSpace
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.db.UmAppDataLayer
+import com.ustadmobile.core.domain.account.CheckRegistrationAllowedUseCase
 import com.ustadmobile.core.domain.blob.openblob.OpenBlobUiUseCase
 import com.ustadmobile.core.domain.contententry.move.MoveContentEntriesUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCase
@@ -170,6 +171,11 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
                 systemImpl = instance()
             )
         }
+        bind<CheckRegistrationAllowedUseCase>() with scoped(LearningSpaceScope.Default).provider {
+            CheckRegistrationAllowedUseCase(
+                dataLayer = instance<UmAppDataLayer>()
+            )
+        }
 
         bind<CloseProcessUseCase>() with scoped(LearningSpaceScope.Default).provider {
             CloseProcessUseCaseAndroid(this@AbstractAppActivity)
@@ -264,7 +270,7 @@ abstract class AbstractAppActivity : AppCompatActivity(), DIAware {
          * snippet of code which is used by Maestro end-to-end tests to verify that a download
          * was completed.
          */
-        intent.extras?.getBoolean("showDownloads")?.also {
+        intent.extras?.getBoolean("showDownloads")?.takeIf { it }?.also {
             startActivity(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS))
         }
 

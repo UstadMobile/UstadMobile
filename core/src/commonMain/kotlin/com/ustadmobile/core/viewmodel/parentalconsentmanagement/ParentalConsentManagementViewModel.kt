@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.appstate.Snack
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonParentJoin
 import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_FATHER
 import com.ustadmobile.lib.db.entities.PersonParentJoin.Companion.RELATIONSHIP_MOTHER
@@ -37,6 +38,7 @@ data class ParentalConsentManagementUiState(
     val appName: String = "Ustad Mobile"
 
 ) {
+
 
     val relationshipVisible: Boolean
         get() = parentJoinAndMinor?.personParentJoin?.ppjParentPersonUid == 0L
@@ -116,8 +118,24 @@ class ParentalConsentManagementViewModel(
                     },
                     uiUpdate = {
                         _uiState.update { prev ->
+                            val currentJoin = it?.personParentJoin
+                            val gender = it?.minorPerson?.gender
+
+                            val updatedJoin = if (currentJoin != null && currentJoin.ppjRelationship == 0) {
+                                val defaultRelationship = when (gender) {
+                                    Person.GENDER_MALE -> RELATIONSHIP_FATHER
+                                    Person.GENDER_FEMALE -> RELATIONSHIP_MOTHER
+                                    else -> RELATIONSHIP_OTHER_LEGAL_GUARDIAN
+                                }
+                                currentJoin.copy(ppjRelationship = defaultRelationship)
+                            } else {
+                                currentJoin
+                            }
+
                             prev.copy(
-                                parentJoinAndMinor = it
+                                parentJoinAndMinor = it?.copy(
+                                    personParentJoin = updatedJoin
+                                )
                             )
                         }
                     }

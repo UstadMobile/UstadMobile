@@ -12,6 +12,7 @@ import org.kodein.di.provider
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.ustadmobile.core.account.LearningSpaceScope
 import com.ustadmobile.core.db.UmAppDataLayer
+import com.ustadmobile.core.domain.account.CheckRegistrationAllowedUseCase
 import com.ustadmobile.core.domain.account.CreateNewLocalAccountUseCase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCaseJvm
 import com.ustadmobile.core.domain.account.SetPasswordUseCase
@@ -267,6 +268,12 @@ val DesktopDomainDiModule = DI.Module("Desktop-Domain") {
             compressImageUseCase = instance(),
             deleteUrisUseCase = instance(),
             getStoragePathForUrlUseCase = instance(),
+        )
+    }
+
+    bind<CheckRegistrationAllowedUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+        CheckRegistrationAllowedUseCase(
+            dataLayer = instance<UmAppDataLayer>()
         )
     }
 

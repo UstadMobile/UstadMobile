@@ -72,12 +72,13 @@ import com.ustadmobile.core.viewmodel.interop.externalapppermissionrequest.Exter
 import com.ustadmobile.core.viewmodel.login.LoginViewModel
 import com.ustadmobile.core.viewmodel.message.conversationlist.ConversationListViewModel
 import com.ustadmobile.core.viewmodel.message.messagelist.MessageListViewModel
+import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentConsentWaitingScreenViewModel
 import com.ustadmobile.core.viewmodel.parentalconsentmanagement.ParentalConsentManagementViewModel
 import com.ustadmobile.core.viewmodel.pdfcontent.PdfContentViewModel
 import com.ustadmobile.core.viewmodel.person.accountedit.PersonAccountEditViewModel
 import com.ustadmobile.core.viewmodel.person.bulkaddrunimport.BulkAddPersonRunImportViewModel
 import com.ustadmobile.core.viewmodel.person.bulkaddselectfile.BulkAddPersonSelectFileViewModel
-import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel
 import com.ustadmobile.core.viewmodel.person.child.EditChildProfileViewModel
 import com.ustadmobile.core.viewmodel.person.detail.PersonDetailViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
@@ -180,10 +181,11 @@ import com.ustadmobile.libuicompose.view.message.conversationlist.ConversationLi
 import com.ustadmobile.libuicompose.view.message.messagelist.MessageListScreen
 import com.ustadmobile.libuicompose.view.newuser.AddAccountSelectNewOrExistingUserTypeScreen
 import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentManagementScreen
+import com.ustadmobile.libuicompose.view.parentalconsentmanagement.ParentalConsentWaitingScreen
 import com.ustadmobile.libuicompose.view.pdfcontent.PdfContentScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddrunimport.BulkAddPersonRunImportScreen
 import com.ustadmobile.libuicompose.view.person.bulkaddselectfile.BulkAddPersonSelectFileScreen
-import com.ustadmobile.libuicompose.view.person.child.AddChildProfilesScreen
+import com.ustadmobile.libuicompose.view.person.child.ChildProfileListScreen
 import com.ustadmobile.libuicompose.view.person.child.EditChildProfileScreen
 import com.ustadmobile.libuicompose.view.person.registerminorwaitforparent.RegisterMinorWaitForParentScreen
 import com.ustadmobile.libuicompose.view.settings.DeveloperSettingsScreen
@@ -388,13 +390,13 @@ fun AppNavHost(
                 )
             }
             contentScene(
-                route = "/${AddChildProfilesViewModel.DEST_NAME}"
+                route = "/${ChildProfileListViewModel.DEST_NAME}"
             ) { backStackEntry ->
-                AddChildProfilesScreen (
+                ChildProfileListScreen (
                     viewModel = appViewModel(
-                        backStackEntry, AddChildProfilesViewModel::class,
+                        backStackEntry, ChildProfileListViewModel::class,
                     ) { di, savedStateHandle ->
-                        AddChildProfilesViewModel(di, savedStateHandle)
+                        ChildProfileListViewModel(di, savedStateHandle)
                     }
                 )
             }
@@ -772,6 +774,12 @@ fun AppNavHost(
                         backStackEntry, ParentalConsentManagementViewModel::class,
                         ::ParentalConsentManagementViewModel
                     )
+                )
+            }
+            contentScene("/${ParentConsentWaitingScreenViewModel.DEST_NAME}") { backStackEntry ->
+                ParentalConsentWaitingScreen(
+                    appViewModel(backStackEntry, ParentConsentWaitingScreenViewModel::class,
+                        ::ParentConsentWaitingScreenViewModel)
                 )
             }
 

@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.isDateOfBirthAMinor
 import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_SHOW_ACCEPT_BUTTON
 import com.ustadmobile.core.viewmodel.site.termsdetail.SiteTermsDetailViewModel
 import com.ustadmobile.core.viewmodel.UstadViewModel
+import com.ustadmobile.core.viewmodel.person.child.ChildProfileListViewModel.Companion.ARG_PPJ_UID
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -100,17 +101,18 @@ class RegisterAgeRedirectViewModel(
             putAllFromSavedStateIfPresent(SignUpViewModel.REGISTRATION_ARGS_TO_PASS)
             putFromSavedStateIfPresent(ARG_NEXT)
             put(ARG_SHOW_ACCEPT_BUTTON,true.toString())
-
-
+            put(SignUpViewModel.ARG_IS_MINOR,isMinor.toString())
             put(PersonEditViewModel.ARG_DATE_OF_BIRTH, date.toString())
         }
-
-        if (isMinor) {
-            //not decided where to go
-            //navController.navigate(PersonEditViewModel.DEST_NAME_REGISTER, args)
-        } else {
-            navController.navigate(SiteTermsDetailViewModel.DEST_NAME, args)
+        when {
+            isMinor -> {
+                navController.navigate(SignUpViewModel.DEST_NAME, args)
+            }
+            else -> {
+                navController.navigate(SiteTermsDetailViewModel.DEST_NAME, args)
+            }
         }
+
 
 
     }

@@ -1980,9 +1980,9 @@
 
     <string name="your_date_of_birth">Your date of birth</string>
 
-    <string name="add_child_profiles">Add Child Profiles</string>
+    <string name="add_child_profile">Add child profile</string>
 
-    <string name="child_profile">Child profile</string>
+    <string name="child_profiles">Child profiles</string>
 
     <string name="finish">Finish</string>
 
@@ -2103,6 +2103,16 @@
     <string name="secure_passkey_detail_text">You can sign in securly with your passkey using your fingerprint, face, or other lock screen method.</string>
 
     <string name="invitations_sent">Invitations sent</string>
+
+    <string name="parent_email">Parent email</string>
+
+    <string name="wait_for_parent_to_consent">Wait for Parent to consent</string>
+    <string name="wait_for_parent">Wait for Parent</string>
+
+    <string name="policy">Policy</string>
+
+    <string name="your_profile">Your profile</string>
+    <string name="your_profile">Your profile</string>
 
     <string name="invitation_sent">Invitation sent</string>
 
