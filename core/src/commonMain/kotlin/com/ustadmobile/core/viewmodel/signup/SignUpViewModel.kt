@@ -29,9 +29,7 @@ import com.ustadmobile.core.viewmodel.clazz.inviteredeem.ClazzInviteRedeemViewMo
 import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
 import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.person.child.AddChildProfilesViewModel
-import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel
 import com.ustadmobile.core.viewmodel.person.edit.PersonEditViewModel.Companion.ARG_REGISTRATION_MODE
-import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.signup.OtherSignUpOptionSelectionViewModel.Companion.IS_PARENT
 import com.ustadmobile.door.ext.doorPrimaryKeyManager
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -40,6 +38,7 @@ import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -114,6 +113,7 @@ class SignUpViewModel(
     private val getDefaultDestinationUseCase: GetDefaultDestinationUseCase =
         di.on(LearningSpace(serverUrl)).direct.instance()
 
+    private val completableNextDestination = CompletableDeferred<String>()
 
     private val createPasskeyUseCase: CreatePasskeyUseCase? by di.on(LearningSpace(serverUrl)).instanceOrNull()
 
@@ -138,7 +138,7 @@ class SignUpViewModel(
         viewModelScope.launch {
             nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase.invoke()?:
                     throw IllegalStateException("destination can not be null")
-
+            completableNextDestination.complete(nextDestination)
         }
         loadingState = LoadingUiState.INDETERMINATE
         val title = systemImpl.getString(MR.strings.create_account)
@@ -481,12 +481,13 @@ class SignUpViewModel(
         }
     }
 
-    private fun navigateToAppropriateScreen(savePerson: Person) {
+    private suspend fun navigateToAppropriateScreen(savePerson: Person) {
+        val destination = completableNextDestination.await()
 
         if (_uiState.value.isParent) {
             navController.navigate(AddChildProfilesViewModel.DEST_NAME,
                 args = buildMap {
-                    put(ARG_NEXT, nextDestination)
+                    put(ARG_NEXT, destination)
                     putAllFromSavedStateIfPresent(REGISTRATION_ARGS_TO_PASS)
                     putFromSavedStateIfPresent(ARG_NEXT)
                 }
@@ -495,9 +496,9 @@ class SignUpViewModel(
         } else {
 
             val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
-            Napier.d { "AddSignUpPresenter: go to next destination: $nextDestination" }
+            Napier.d { "AddSignUpPresenter: go to next destination: $destination" }
             navController.navigateToViewUri(
-                nextDestination.appendSelectedAccount(
+                destination.appendSelectedAccount(
                     savePerson.personUid,
                     LearningSpace(accountManager.activeLearningSpace.url)
                 ),

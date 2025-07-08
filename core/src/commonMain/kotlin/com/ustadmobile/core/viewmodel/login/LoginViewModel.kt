@@ -27,12 +27,12 @@ import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -96,6 +96,8 @@ class LoginViewModel(
 
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
+    private val completableNextDestination = CompletableDeferred<String>()
+
     private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
 
     private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
@@ -121,6 +123,7 @@ class LoginViewModel(
             nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?:
                     getDefaultDestinationUseCase.invoke()?:
                     throw IllegalStateException("destination can not be null")
+            completableNextDestination.complete(nextDestination)
         }
         _uiState.update { prev ->
             prev.copy(
@@ -216,11 +219,12 @@ class LoginViewModel(
      * destination as per the arguments. This includes popping off the stack (using ARG_POPUPTO_ON_FINISH
      * or at least removing the login screen itself from the stack).
      */
-    private fun goToNextDestAfterLoginOrGuestSelected(person: Person) {
+    private suspend fun goToNextDestAfterLoginOrGuestSelected(person: Person) {
+        val destination = completableNextDestination.await()
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
-        Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
+        Napier.d { "LoginPresenter: go to next destination: $destination" }
         navController.navigateToViewUri(
-            nextDestination.appendSelectedAccount(person.personUid, LearningSpace(serverUrl)),
+            destination.appendSelectedAccount(person.personUid, LearningSpace(serverUrl)),
             goOptions
         )
     }
