@@ -29,6 +29,17 @@ import space.kscience.plotly.scatter
 import web.cssom.Overflow
 import web.cssom.px
 
+/**
+ * React component that renders a graph visualization of report data using Plotly.js.
+ *
+ * Uses the KScience Plotly Kotlin/JS wrapper library:
+ * - GitHub: https://github.com/SciProgCentre/plotly.kt
+ * - Documentation: https://plotly.com/javascript/
+ *
+ * The component supports both bar charts and line graphs, with optional formatters
+ * for axis values and compact display modes.
+ */
+
 private const val COMPACT_WIDTH = 320
 private const val COMPACT_HEIGHT = 250
 

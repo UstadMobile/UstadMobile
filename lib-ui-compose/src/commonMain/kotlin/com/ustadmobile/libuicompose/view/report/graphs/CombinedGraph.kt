@@ -69,7 +69,6 @@ fun CombinedGraph(
                 Text(
                     text = value,
                     modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE),
-                    maxLines = 1,
                     fontSize = MaterialTheme.typography.labelSmall.fontSize
                 )
             }
@@ -123,6 +122,7 @@ fun CombinedGraph(
 
         /*
          * Add a line plot for each series-subgroup combination
+         *  as per https://koalaplot.github.io/0.5/docs/xygraphs/line_plots/
          */
         reportResult.distinctSubgroups.filter {
             it.series.reportSeriesOptions.reportSeriesVisualType == ReportSeriesVisualType.LINE_GRAPH
