@@ -301,21 +301,23 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             error = props.uiState.seriesTitleErrors[series.reportSeriesUid] != null
                         }
 
-                        IconButton {
-                            sx {
-                                marginLeft = Auto.auto
-                                padding = 8.px
-                            }
-                            onClick = { props.onRemoveSeries(series.reportSeriesUid) }
-                            Icon {
+                        if (!props.uiState.hasSingleSeries) {
+                            IconButton {
                                 sx {
-                                    width = 20.px
-                                    height = 20.px
+                                    marginLeft = Auto.auto
+                                    padding = 8.px
                                 }
-                                Close {
+                                onClick = { props.onRemoveSeries(series.reportSeriesUid) }
+                                Icon {
                                     sx {
                                         width = 20.px
                                         height = 20.px
+                                    }
+                                    Close {
+                                        sx {
+                                            width = 20.px
+                                            height = 20.px
+                                        }
                                     }
                                 }
                             }
