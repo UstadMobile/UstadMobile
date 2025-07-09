@@ -238,16 +238,17 @@ private fun ReportEditScreen(
                                 )
                             },
                         )
-
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = stringResource(MR.strings.remove),
-                            modifier = Modifier
-                                .clickable {
-                                    onRemoveSeries(seriesItem.reportSeriesUid)
-                                }
-                                .align(Alignment.CenterVertically)
-                        )
+                        if (!uiState.hasSingleSeries) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = stringResource(MR.strings.remove),
+                                modifier = Modifier
+                                    .clickable {
+                                        onRemoveSeries(seriesItem.reportSeriesUid)
+                                    }
+                                    .align(Alignment.CenterVertically)
+                            )
+                        }
                     }
 
                     // Y Axis Dropdown
