@@ -653,7 +653,6 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
-    // Add this new binding for CreateGraphFormatterUseCase
     bind<CreateGraphFormatterUseCase>() with singleton {
         CreateGraphFormatterUseCase()
     }
@@ -688,10 +687,6 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
 
     bind<GenerateReportQueriesUseCase>() with scoped(LearningSpaceScope.Default).singleton {
         GenerateReportQueriesUseCase()
-    }
-
-    bind<CreateGraphFormatterUseCase>() with singleton {
-        CreateGraphFormatterUseCase()
     }
 
     onReady {

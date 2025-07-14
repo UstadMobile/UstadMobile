@@ -30,6 +30,9 @@ import com.ustadmobile.core.domain.report.formatter.GraphFormatter
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.domain.report.utils.DefaultXAxisLabelFormatter
+import com.ustadmobile.core.impl.locale.StringResourceUiText
+import com.ustadmobile.core.impl.locale.StringUiText
+import com.ustadmobile.core.impl.locale.UiText
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.lib.db.composites.StatementReportRow
@@ -151,9 +154,9 @@ fun DataTable(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Format X-axis value
-                    val xAxisValue = xAxisFormatter?.format(row.xAxis) ?: row.xAxis
+                    val xAxisValue = xAxisFormatter?.format(row.xAxis)?.asString() ?: row.xAxis
                     Text(
-                        text = xAxisValue.toString(),
+                        text = xAxisValue,
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -167,7 +170,7 @@ fun DataTable(
                     // Format Y-axis value
                     val yAxisValue = yAxisFormatter?.let {
                         val adjustedValue = it.adjust(row.yAxis)
-                        it.format(adjustedValue)
+                        it.format(adjustedValue).asString()
                     } ?: row.yAxis.toString()
                     Text(
                         text = yAxisValue,
@@ -223,5 +226,13 @@ fun MoreOptionsSection(
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+}
+
+@Composable
+fun UiText.asString(): String {
+    return when (this) {
+        is StringUiText -> this.text
+        is StringResourceUiText -> stringResource(this.resource)
     }
 }

@@ -19,6 +19,7 @@ import com.ustadmobile.core.domain.report.formatter.GraphFormatter
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
+import com.ustadmobile.libuicompose.view.report.detail.asString
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.bar.GroupedVerticalBarPlot
@@ -32,10 +33,9 @@ import io.github.koalaplot.core.xygraph.CategoryAxisModel
 import io.github.koalaplot.core.xygraph.Point
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
+import kotlin.time.DurationUnit
 
 private const val MS_IN_HOUR = 3_600_000
-private const val MS_IN_MINUTE = 60_000
-private const val MS_IN_SECOND = 1_000
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
@@ -65,11 +65,12 @@ fun CombinedGraph(
             minimumMajorTickIncrement = 1f
         ),
         xAxisLabels = {
-            xAxisFormatter?.format(it)?.let { value ->
+            xAxisFormatter?.format(it)?.let { uiText ->
                 Text(
-                    text = value,
+                    text = uiText.asString(),
                     modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE),
-                    fontSize = MaterialTheme.typography.labelSmall.fontSize
+                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                    maxLines = 1
                 )
             }
         },
@@ -82,23 +83,24 @@ fun CombinedGraph(
         },
         yAxisLabels = {
             val value = yAxisFormatter?.adjust(it.toDouble()) ?: 0.0
-            Text(
-                text = yAxisFormatter?.format(value) ?: "",
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                fontSize = MaterialTheme.typography.labelSmall.fontSize
-            )
+            val formattedText = yAxisFormatter?.format(value)
+            if (formattedText != null) {
+                Text(
+                    text = formattedText.asString(),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    fontSize = MaterialTheme.typography.labelSmall.fontSize
+                )
+            }
         },
         yAxisTitle = {
             Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
                 Text(
                     text = if (reportResult.yAxisType == YAxisTypes.DURATION) {
-                        val unit = getDurationUnitTittle(reportResult.yRange.endInclusive)
-                        stringResource(MR.strings.duration) + unit
+                        stringResource(MR.strings.duration) + getDurationUnitTitle(reportResult.yRange.endInclusive)
                     } else {
                         stringResource(MR.strings.count)
                     },
-
                     modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
                 )
             }
@@ -128,7 +130,12 @@ fun CombinedGraph(
             it.series.reportSeriesOptions.reportSeriesVisualType == ReportSeriesVisualType.LINE_GRAPH
         }.forEachIndexed { subgroupIndex, resultSubgroup ->
             LinePlot(
-                data = resultSubgroup.subgroupData.map { row -> Point(row.xAxis, row.yAxis.toFloat()) },
+                data = resultSubgroup.subgroupData.map { row ->
+                    Point(
+                        row.xAxis,
+                        row.yAxis.toFloat()
+                    )
+                },
                 lineStyle = LineStyle(
                     brush = SolidColor(colorMap[resultSubgroup] ?: Color.Transparent),
                     strokeWidth = 2.dp
@@ -145,17 +152,9 @@ fun CombinedGraph(
 }
 
 @Composable
-fun convertDuration(ms: Float): Pair<Int, String> {
+private fun getDurationUnitTitle(max: Float): String {
     return when {
-        ms >= MS_IN_HOUR -> ((ms / MS_IN_HOUR).toInt() to stringResource(MR.strings.hour_unit))
-        ms >= MS_IN_MINUTE -> ((ms / MS_IN_MINUTE).toInt() to stringResource(MR.strings.minute_unit))
-        ms >= MS_IN_SECOND -> ((ms / MS_IN_SECOND).toInt() to stringResource(MR.strings.second_unit))
-        else -> (ms.toInt() to stringResource(MR.strings.millisecond_unit))
+        max >= MS_IN_HOUR -> " (${stringResource(MR.strings.hour_unit)})"
+        else -> " (${stringResource(MR.strings.minute_unit)})"
     }
-}
-
-@Composable
-fun getDurationUnitTittle(max: Float): String {
-    val (_, unit) = convertDuration(max)
-    return " ($unit)"
 }

@@ -3,12 +3,14 @@ package com.ustadmobile.core.domain.report.formatter
 import com.ustadmobile.core.domain.report.model.ReportXAxis
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
+import com.ustadmobile.core.impl.locale.StringUiText
+import com.ustadmobile.core.impl.locale.UiText
 import kotlin.reflect.KClass
 
 
 class CreateGraphFormatterUseCase() {
 
-    data class FormatterOptions<T: Any>(
+    data class FormatterOptions<T : Any>(
         val paramType: KClass<T>,
         val axis: Axis
     ) {
@@ -30,7 +32,7 @@ class CreateGraphFormatterUseCase() {
      * If necessary this can use different implementations on different platforms
      */
     @Suppress("UNCHECKED_CAST") // Mike to check
-    operator fun <T: Any> invoke(
+    operator fun <T : Any> invoke(
         reportResult: RunReportUseCase.RunReportResult,
         options: FormatterOptions<T>
     ): GraphFormatter<T> {
@@ -38,7 +40,7 @@ class CreateGraphFormatterUseCase() {
             options.axis == FormatterOptions.Axis.Y_AXIS_VALUES && options.paramType == Double::class -> {
                 when (reportResult.request.reportOptions.series.first().reportSeriesYAxis.type) {
                     YAxisTypes.DURATION -> DurationGraphFormatter(reportResult)
-                    YAxisTypes.COUNT -> CountGraphFormatter(reportResult)
+                    YAxisTypes.COUNT -> CountGraphFormatter()
                     else -> throw IllegalArgumentException("Unsupported Y-axis type")
                 }
             }
@@ -66,9 +68,11 @@ class CreateGraphFormatterUseCase() {
 }
 
 /**
- * Formatter that returns values as-is without any transformation
+ * Formatter that returns values as-is without any transformation,
+ * wrapping them in UiText for consistent localization handling.
  */
 class NoOpGraphFormatter : GraphFormatter<String> {
     override fun adjust(value: String): String = value
-    override fun format(value: String): String = value
+
+    override fun format(value: String): UiText = StringUiText(value)
 }

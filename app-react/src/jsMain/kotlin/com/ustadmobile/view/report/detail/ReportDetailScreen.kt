@@ -4,6 +4,8 @@ import com.ustadmobile.core.MR
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.appstate.AppUiState
+import com.ustadmobile.core.impl.locale.StringResourceUiText
+import com.ustadmobile.core.impl.locale.StringUiText
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailUiState
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.hooks.useUstadViewModel
@@ -72,7 +74,8 @@ private val moreOption = FC<ReportDetailProps> { props ->
 
     UstadStandardContainer {
         props.uiState.reportResult?.resultSeries?.forEach { series ->
-            val subgroupNamePart = series.reportSeriesOptions.reportSeriesSubGroup?.label?.let { strings[it] }
+            val subgroupNamePart =
+                series.reportSeriesOptions.reportSeriesSubGroup?.label?.let { strings[it] }
 
             val subgroupLabel = if (subgroupNamePart != null) {
                 "${strings[MR.strings.subgroup_by]} - $subgroupNamePart"
@@ -130,7 +133,12 @@ private val moreOption = FC<ReportDetailProps> { props ->
                             item = true
                             xs = 4
                             Typography {
-                                +props.uiState.xAxisFormatter?.format(row.xAxis) ?: row.xAxis
+                                props.uiState.xAxisFormatter?.format(row.xAxis)?.let { uiText ->
+                                    when (uiText) {
+                                        is StringUiText -> uiText.text
+                                        is StringResourceUiText -> strings.get(uiText.resource)
+                                    }
+                                } ?: row.xAxis
                             }
                         }
 
@@ -138,7 +146,12 @@ private val moreOption = FC<ReportDetailProps> { props ->
                             item = true
                             xs = 4
                             Typography {
-                                +props.uiState.yAxisFormatter?.format(row.yAxis)?.toString() ?: row.yAxis.toString()
+                                +props.uiState.yAxisFormatter?.format(row.yAxis)?.let { uiText ->
+                                    when (uiText) {
+                                        is StringUiText -> uiText.text
+                                        is StringResourceUiText -> strings.get(uiText.resource)
+                                    }
+                                }
                             }
                         }
 

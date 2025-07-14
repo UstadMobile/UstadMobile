@@ -1,14 +1,15 @@
 package com.ustadmobile.core.domain.report.formatter
 
-import com.ustadmobile.core.domain.report.query.RunReportUseCase
+import com.ustadmobile.core.impl.locale.StringUiText
+import com.ustadmobile.core.impl.locale.UiText
 
 /**
  * Base formatter for count values (simple numeric display)
  */
-class CountGraphFormatter(
-    private val result: RunReportUseCase.RunReportResult,
-    ) : GraphFormatter<Double> {
+class CountGraphFormatter : GraphFormatter<Double> {
     override fun adjust(value: Double): Double = value
 
-    override fun format(value: Double): String = value.toInt().toString()
+    override fun format(value: Double): UiText {
+        return StringUiText(value.toInt().toString())
+    }
 }

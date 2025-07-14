@@ -1,5 +1,7 @@
 package com.ustadmobile.core.domain.report.formatter
 
+import com.ustadmobile.core.impl.locale.UiText
+
 /**
  * @param T the type of value e.g. Double for numerical axis, String for category/subgroups, etc.
  */
@@ -30,6 +32,6 @@ interface GraphFormatter<T> {
      *
      * @param value the value to format
      */
-    fun format(value: T): String
+    fun format(value: T): UiText
 
 }

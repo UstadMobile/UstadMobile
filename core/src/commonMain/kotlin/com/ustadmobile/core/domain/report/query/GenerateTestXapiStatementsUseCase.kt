@@ -68,13 +68,15 @@ class GenerateTestXapiStatementsUseCase(
 
                 // Inlined statement creation
                 XapiStatement(
-                    actor = xapiSession.agent(learningSpace), verb = XapiVerb(
+                    actor = xapiSession.agent(learningSpace),
+                    verb = XapiVerb(
                         id = if (isComplete) VERB_COMPLETED else VERB_PROGRESSED,
                         display = mapOf("en-US" to if (isComplete) "completed" else "progressed")
                     ), `object` = XapiActivityStatementObject(
                         objectType = XapiObjectType.Activity,
                         id = "${learningSpace.url}/content/${contentEntry.contentEntryUid}"
-                    ), timestamp = timestamp.toString(), context = XapiContext(
+                    ), timestamp = timestamp.toString(),
+                    context = XapiContext(
                         platform = "Test Platform",
                         language = "en-US",
                     ), result = XapiResult(

@@ -5,7 +5,10 @@ import com.ustadmobile.core.domain.report.formatter.GraphFormatter
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.impl.locale.StringProvider
+import com.ustadmobile.core.impl.locale.StringProviderJs
+import com.ustadmobile.hooks.uiText
 import js.objects.jso
 import kotlinx.dom.clear
 import kotlinx.html.dom.append
@@ -54,6 +57,7 @@ external interface ReportGraphProps : Props {
 val ReportGraph = FC<ReportGraphProps> { props ->
     val containerRef = useRef<web.html.HTMLElement>()
     val isCompact = props.compact ?: false
+    val strings: StringProviderJs = useStringProvider()
 
     useEffect(props.reportResult.timestamp) {
         val container = containerRef.current ?: return@useEffect
@@ -75,11 +79,17 @@ val ReportGraph = FC<ReportGraphProps> { props ->
                         when (resultSubgroup.series.reportSeriesOptions.reportSeriesVisualType) {
                             ReportSeriesVisualType.LINE_GRAPH -> scatter {
                                 name = resultSubgroup.series.reportSeriesOptions.reportSeriesTitle
-                                x.strings = resultSubgroup.subgroupData.map {
-                                    props.xAxisFormatter?.format(it.xAxis) ?: it.xAxis
+                                x.strings = resultSubgroup.subgroupData.map { row ->
+                                    props.xAxisFormatter?.format(row.xAxis)
+                                        ?.let { uiText(it, strings) } ?: row.xAxis
                                 }
-                                y.numbers = resultSubgroup.subgroupData.map {
-                                    props.yAxisFormatter?.format(it.yAxis)?.toFloat() ?: it.yAxis.toFloat()
+                                y.numbers = resultSubgroup.subgroupData.map { row ->
+                                    props.yAxisFormatter?.format(row.yAxis)?.let {
+                                        uiText(
+                                            it,
+                                            stringProvider = strings
+                                        ).toFloatOrNull()
+                                    } ?: row.yAxis.toFloat()
                                 }
                                 mode = ScatterMode.`lines+markers`
                                 type = TraceType.scatter
@@ -87,11 +97,18 @@ val ReportGraph = FC<ReportGraphProps> { props ->
 
                             else -> bar {
                                 name = resultSubgroup.series.reportSeriesOptions.reportSeriesTitle
-                                x.strings = resultSubgroup.subgroupData.map {
-                                    props.xAxisFormatter?.format(it.xAxis) ?: it.xAxis
+                                x.strings = resultSubgroup.subgroupData.map { row ->
+                                    props.xAxisFormatter?.format(row.xAxis)
+                                        ?.let { uiText(it, strings) } ?: row.xAxis
+
                                 }
-                                y.numbers = resultSubgroup.subgroupData.map {
-                                    props.yAxisFormatter?.format(it.yAxis)?.toFloat() ?: it.yAxis.toFloat()
+                                y.numbers = resultSubgroup.subgroupData.map { row ->
+                                    props.yAxisFormatter?.format(row.yAxis)?.let {
+                                        uiText(
+                                            it,
+                                            stringProvider = strings
+                                        ).toFloatOrNull()
+                                    } ?: row.yAxis.toFloat()
                                 }
                             }
                         }
