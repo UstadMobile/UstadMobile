@@ -15,57 +15,124 @@ onFlowComplete:
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
+# Download test file
+- runFlow:
+    file: "common/download_file_via_browser.yaml"
+    env:
+      TESTFILENAME: "Video_Content.mp4"
 - runScript:
     file: "common/import_users_via_http.js"
     env:
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       IMPORT_FROM_CSV_FILE: "Ustad_Teacher_and_Students.csv"
 
-# Add data to generate report ---------pending
-
-# verify teacher able to generate Report
-- runFlow: "common/clear_state_and_get_started.yaml"
+# verify admin able to generate Report
+- runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - runFlow:
-    file: "common/user_login.yaml"
+     file: "common/admin_login.yaml"
+- tapOn: "courses"
+- tapOn: "Test Course Block"
+- runFlow:
+    file: "common/add_new_content_block_to_course.yaml"
     env:
-      USERNAME: "teach1"
-      PASSWORD: "testt1"
+      TESTFILENAME: "Video_Content.mp4"
+- runScript:
+    file: "common/generate_content_usage_data_via_http.js"
+    env:
+      TESTFILENAME: "Video_Content.mp4"
+      USERNAME: "stud1"
 - tapOn: "Reports"
+- assertVisible:
+    text: "Reports"
+    id: "app_title"
 - tapOn:
-    id: "floating_action_button"      #    +Report button
+    id: "floating_action_button"      # +Report button
+- assertVisible:
+    text: "Add a new report"
+    id: "app_title"
 - tapOn: "Title*"
 - inputText: "Test Report"
-- tapOn: "X Axis*"
-- tapOn: "Day"
-- tapOn: "Series Title*"
-- inputText: "Usage time by day this week"
-- tapOn: "Y Axis*"
-- tapOn: "Total Duration"
-- tapOn: "Subgroup by"
-- tapOn: "Gender"
-- tapOn: "Chart type"
-- tapOn: "Bar Chart"
-#- tapOn: "Time range"
-#- tapOn: "Last week"
-- tapOn: "Done"
+- tapOn: "Time range*"
+- tapOn: "Custom date range"
 - tapOn:
-    id: "floating_action_button"
+    text: "dd/mm/yyyy"
+    index: 0
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.yesterdayDate}
+- tapOn: "dd/mm/yyyy"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.currentDate}
+- hideKeyboard
+- assertVisible: "X Axis*"
+- assertVisible: "Day"
+- assertVisible: "Series Title*"
+- assertVisible: "Series 1"
+- tapOn: "Y Axis*"
+- tapOn: "Average Usage Time per User"
 - scrollUntilVisible:
     element:
-      text: "Add filter"
+      text: "Chart type*"
     direction: DOWN
-- tapOn: "Add filter"
-- tapOn: "Field*"
-- tapOn: "Person age"
-- tapOn: "Condition*"
-- tapOn: "Greater"
-- tapOn: "Value*"
-- inputText: "13"
+- tapOn: "Subgroup by"
+- tapOn: "Gender"
+- assertVisible: "Chart type*"
+- assertVisible: "Bar Chart"
+- scrollUntilVisible:
+    element:
+      text: "Add Series"
+    direction: DOWN
+- tapOn: "Add Series"
+- scrollUntilVisible:
+    element:
+      text: "Add Series"
+    direction: DOWN
+- assertVisible: "Series 2"
+#- scrollUntilVisible:
+#    element:
+#      text: "Add Filter"
+#    direction: DOWN
+#- tapOn: "Add Filter"
+#- assertVisible:
+#    text: "Edit filter"
+#    id: "app_title"
+#- tapOn: "Field*"
+#- tapOn: "Person age"
+#- tapOn: "Condition*"
+#- tapOn: "> Greater"
+#- tapOn: "Value*"
+#- inputText: "13"
+#- tapOn: "Done"
 - tapOn: "Done"
-- tapOn: "Done"
-- assertVisible: "Detail Screen"
+- assertVisible:
+    text: "Test Report"
+    id: "app_title"
+- takeScreenshot: "${TESTRESULTSDIR}/bar_chart_graph_report"
 - tapOn: "Reports"
 - assertVisible: "Test Report"
+- assertVisible:
+    text: "Reports"
+    id: "app_title"
 - tapOn: "Test Report"
-- assertVisible: "Detail Screen"
+- tapOn:
+    id: "floating_action_button" #Edit button
+- assertVisible:
+    text: "Edit report"
+    id: "app_title"
+- tapOn: "Time range*"
+- tapOn: "Custom period (e.g. last x days/weeks)"
+- tapOn: "Days"
+- tapOn: "Weeks"
+- scrollUntilVisible:
+    element:
+      text: "Chart type*"
+    direction: DOWN
+- tapOn: "Chart type*"
+- tapOn: "Line Chart"
+- tapOn: "Done"
+- assertVisible:
+    text: "Test Report"
+    id: "app_title"
+- takeScreenshot: "${TESTRESULTSDIR}/line_chart_graph_report"

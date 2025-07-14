@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ReportOptions2(
     val title: String = "",
-    val xAxis:ReportXAxis? = null,
+    val xAxis:ReportXAxis = ReportXAxis.DAY,
     val period: ReportPeriod = ReportPeriodOption.LAST_WEEK.period,
     val series: List<ReportSeries2> = emptyList(),
 )

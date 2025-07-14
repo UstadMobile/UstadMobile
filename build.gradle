@@ -83,6 +83,11 @@ allprojects {
         maven {
             url "https://raw.githubusercontent.com/terjedahl/junique/master/maven2"
         }
+
+        //Kotlin.link required for Plotly Kotlin library: https://github.com/SciProgCentre/plotly.kt
+        maven {
+            url "https://repo.kotlin.link"
+        }
     }
 }
 

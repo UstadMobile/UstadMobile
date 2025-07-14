@@ -1,7 +1,12 @@
 package com.ustadmobile.view.report.list
 
 import app.cash.paging.PagingSourceLoadResult
+import app.cash.paging.PagingSourceLoadResultPage
+import com.ustadmobile.core.domain.report.formatter.GraphFormatter
+import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.hooks.collectAsState
+import com.ustadmobile.core.hooks.useStringProvider
 import com.ustadmobile.core.hooks.ustadViewName
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.paging.RefreshCommand
@@ -12,28 +17,57 @@ import com.ustadmobile.hooks.useMuiAppState
 import com.ustadmobile.hooks.usePagingSource
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.mui.common.Sizes
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.view.components.UstadFab
 import com.ustadmobile.view.components.virtuallist.VirtualList
 import com.ustadmobile.view.components.virtuallist.VirtualListOutlet
 import com.ustadmobile.view.components.virtuallist.virtualListContent
+import com.ustadmobile.view.report.graph.ReportGraph
 import js.objects.jso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.datetime.TimeZone
+import mui.material.Card
+import mui.material.CardActionArea
+import mui.material.CardHeader
 import mui.material.Container
-import mui.material.ListItem
-import mui.material.ListItemButton
-import mui.material.ListItemIcon
-import mui.material.ListItemText
+import mui.material.IconButton
+import mui.material.Stack
+import mui.material.StackDirection
+import mui.system.responsive
 import react.FC
 import react.Props
 import react.ReactNode
 import react.create
 import react.router.useLocation
+import react.useEffect
+import react.useRef
+import react.useRequiredContext
+import react.useState
 import tanstack.react.query.UseInfiniteQueryResult
+import web.cssom.Color
 import web.cssom.Contain
+import web.cssom.FontWeight
 import web.cssom.Height
 import web.cssom.Overflow
 import web.cssom.pct
+import web.cssom.px
+import web.dom.getComputedStyle
+import web.events.Event
+import web.events.EventHandler
+import web.events.addEventListener
+import web.events.removeEventListener
+import web.html.HTMLElement
+import web.window.Window
+import web.window.resize
+import web.window.window
+import kotlin.math.min
+
+private const val DEFAULT_CONTAINER_MAX_WIDTH = 1200
+private const val DEFAULT_CONTAINER_PADDING = 48
+private const val CARD_MIN_WIDTH = 320
+private const val CARD_HORIZONTAL_PADDING = 20
 
 external interface ReportListProps : Props {
     var uiState: ReportListUiState
@@ -41,6 +75,78 @@ external interface ReportListProps : Props {
     var onListItemClick: (Report) -> Unit
     var onClickAddItem: () -> Unit
     var onRemoveReport: (Long) -> Unit
+    var runReport: (Report) -> Flow<RunReportUseCase.RunReportResult>
+}
+
+external interface ReportListItemProps : Props {
+    var report: Report
+    var onListItemClick: (Report) -> Unit
+    var onRemoveReport: (Long) -> Unit
+    var runReport: (Report) -> Flow<RunReportUseCase.RunReportResult>
+    var width: Int
+    var xAxisFormatter: GraphFormatter<String>?
+    var yAxisFormatter: GraphFormatter<Double>?
+
+}
+
+val ReportListItem = FC<ReportListItemProps> { props ->
+    val string = useStringProvider()
+    val theme by useRequiredContext(ThemeContext)
+
+    val reportDataFlow = props.runReport(props.report)
+    val reportResult by reportDataFlow.collectAsState(
+        RunReportUseCase.RunReportResult(
+            timestamp = 0,
+            request = RunReportUseCase.RunReportRequest(
+                reportUid = props.report.reportUid,
+                reportOptions = ReportOptions2(),
+                accountPersonUid = 0L,
+                timeZone = TimeZone.currentSystemDefault()
+            ),
+            results = emptyList()
+        )
+    )
+
+    Card {
+        sx = jso {
+            padding = 8.px
+            width = (props.width - CARD_HORIZONTAL_PADDING).px
+            backgroundColor = Color(theme.palette.background.default)
+        }
+
+        CardHeader {
+            title = ReactNode(props.report.reportTitle)
+            titleTypographyProps = jso {
+                sx = jso {
+                    fontWeight = FontWeight.normal
+                    fontSize = web.cssom.FontSize.medium
+                }
+            }
+            action = IconButton.create {
+                mui.icons.material.Close {
+                    onClick = { props.onRemoveReport(props.report.reportUid) }
+                }
+            }
+        }
+
+        CardActionArea {
+            sx = jso {
+                width = 100.pct
+                display = web.cssom.Display.flex
+                flexDirection = web.cssom.FlexDirection.column
+                alignItems = web.cssom.AlignItems.center
+            }
+            onClick = { props.onListItemClick(props.report) }
+
+            ReportGraph {
+                this.reportResult = reportResult
+                this.strings = string
+                this.compact = true
+                this.xAxisFormatter = props.xAxisFormatter
+                this.yAxisFormatter = props.yAxisFormatter
+            }
+        }
+    }
 }
 
 val ReportListComponent2 = FC<ReportListProps> { props ->
@@ -53,6 +159,39 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
             remoteMediatorResult.pagingSourceFactory, true, 50
         )
     val muiAppState = useMuiAppState()
+    //default container max width = 1200 pixels minus 48 px padding
+    var containerWidth: Int by useState {
+        min(
+            window.innerWidth - Sizes.Sidebar.WidthInPx - DEFAULT_CONTAINER_PADDING,
+            DEFAULT_CONTAINER_MAX_WIDTH - DEFAULT_CONTAINER_PADDING
+        )
+    }
+    val containerRef = useRef<HTMLElement>(null)
+
+    useEffect(containerRef.current?.clientWidth) {
+        fun calcContainerWidth() {
+            val currentEl = containerRef.current
+            if (currentEl != null) {
+                val computedStyle = getComputedStyle(currentEl)
+                containerWidth = currentEl.clientWidth -
+                        computedStyle.paddingLeft.filter { it.isDigit() || it == '.' }.toInt() -
+                        computedStyle.paddingRight.filter { it.isDigit() }.toInt()
+            }
+        }
+
+        val eventListener: EventHandler<Event, Window> = EventHandler {
+            calcContainerWidth()
+        }
+
+        window.addEventListener(Event.Companion.resize(), eventListener)
+
+        cleanup {
+            window.removeEventListener(Event.Companion.resize(), eventListener)
+        }
+    }
+
+    val cardsPerRow = kotlin.math.max(containerWidth / CARD_MIN_WIDTH, 1)
+    val cardWidth = containerWidth / cardsPerRow
 
     VirtualList {
         style = jso {
@@ -62,33 +201,42 @@ val ReportListComponent2 = FC<ReportListProps> { props ->
             overflowY = Overflow.scroll
         }
         content = virtualListContent {
-            infiniteQueryPagingItems(
-                items = infiniteQueryResult,
-                key = { it.reportUid.toString() }
-            ) { reportAndDetails ->
-                ListItem.create {
-                    ListItemButton {
-                        onClick = {
-                            reportAndDetails?.also { props.onListItemClick(it) }
-                        }
-
-                        ListItemText {
-                            primary = ReactNode(reportAndDetails?.reportTitle ?: "")
-                        }
+            infiniteQueryItemsIndexed(
+                infiniteQueryResult = infiniteQueryResult,
+                itemToKey = { _, index ->
+                    index.toString()
+                },
+                dataPagesToItems = { pages ->
+                    pages.mapNotNull { it as? PagingSourceLoadResultPage<Int, Report> }
+                        .flatMap {
+                            it.data
+                        }.chunked(cardsPerRow)
+                },
+            ) { reports, _ ->
+                Stack.create {
+                    spacing = responsive(2)
+                    sx = jso {
+                        padding = 12.px
                     }
-                    ListItemIcon {
-                        mui.material.IconButton {
-                            mui.icons.material.Delete {
-                                onClick = {
-                                    reportAndDetails?.reportUid?.let { props.onRemoveReport(it) }
-                                }
-                            }
+                    direction = responsive(StackDirection.row)
+                    reports?.forEach { reportValue ->
+                        ReportListItem {
+                            this.report = reportValue
+                            this.onListItemClick = props.onListItemClick
+                            this.onRemoveReport = props.onRemoveReport
+                            this.runReport = props.runReport
+                            this.width = cardWidth
+                            this.xAxisFormatter = props.uiState.xAxisFormatter
+                            this.yAxisFormatter = props.uiState.yAxisFormatter
                         }
                     }
                 }
             }
         }
+
         Container {
+            ref = containerRef
+
             VirtualListOutlet()
         }
     }
@@ -110,5 +258,6 @@ val ReportListScreen = FC<Props> {
         onListItemClick = viewModel::onClickEntry
         onClickAddItem = viewModel::onClickAdd
         onRemoveReport = viewModel::onRemoveReport
+        runReport = viewModel::runReport
     }
 }

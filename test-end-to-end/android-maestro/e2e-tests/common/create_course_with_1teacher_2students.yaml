@@ -5,10 +5,10 @@ appId: com.toughra.ustadmobile
   # -----name - username/password
 
   # teachers :
-  # --0-- Teacher 1 - t1/test
+  # --0-- Teacher 1 - teach1/testt1
    # student :
-  # --0-- Student 1  - s1/test
-  # --1-- Student 2  - s2/test
+  # --0-- Student 1  - stud1/tests1
+  # --1-- Student 2  - stud2/tests2
 
 # test parameters needs to provide for this test :
 # 1) TESTRESULTSDIR : ${TESTRESULTSDIR} : provides the path to store test results

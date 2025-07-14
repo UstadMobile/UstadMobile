@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.LocalLibrary
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.School
@@ -46,6 +47,7 @@ import com.ustadmobile.core.viewmodel.person.list.PersonListViewModel
 import com.ustadmobile.core.viewmodel.redirect.RedirectViewModel
 import com.ustadmobile.core.viewmodel.report.list.ReportListViewModel
 import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -56,6 +58,7 @@ import moe.tlaster.precompose.navigation.rememberNavigator
 import org.kodein.di.compose.localDI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import ustadmobile.lib_ui_compose.generated.resources.Res
 
 data class TopNavigationItem(
     val destRoute: String,
@@ -86,7 +89,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     ),
     TopNavigationItem(
         destRoute = ReportListViewModel.DEST_NAME_HOME,
-        icon = Icons.Outlined.Add,
+        icon = Icons.Outlined.Analytics,
         label = MR.strings.reports,
     )
 

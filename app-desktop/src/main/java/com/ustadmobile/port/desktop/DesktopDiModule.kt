@@ -97,6 +97,7 @@ import com.ustadmobile.centralappconfigdb.datasource.CentralAppConfigDbDataSourc
 import com.ustadmobile.centralappconfigdb.datasource.network.CentralAppConfigDbDataSourceHttp
 import com.ustadmobile.centralappconfigdb.repo.CentralAppConfigDbRepository
 import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
+import com.ustadmobile.core.domain.report.formatter.CreateGraphFormatterUseCase
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -652,6 +653,9 @@ val DesktopDiModule = DI.Module("Desktop-Main") {
         )
     }
 
+    bind<CreateGraphFormatterUseCase>() with singleton {
+        CreateGraphFormatterUseCase()
+    }
 
     gsPath?.also {
         bind<CompressPdfUseCase>() with provider {

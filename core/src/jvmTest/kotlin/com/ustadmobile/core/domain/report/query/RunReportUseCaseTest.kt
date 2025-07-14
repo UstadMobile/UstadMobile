@@ -76,7 +76,9 @@ class RunReportUseCaseTest {
                         xAxis = ReportXAxis.DAY,
                         series = listOf(
                             ReportSeries2(
-                                reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
+                                reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION,
+                                // Explicitly disable subgrouping
+                                reportSeriesSubGroup = null
                             )
                         ),
                         period = ReportPeriodOption.LAST_WEEK.period,
@@ -85,9 +87,13 @@ class RunReportUseCaseTest {
                     timeZone = TimeZone.UTC,
                 )
             ).first()
-        }.results.first()
+        }
 
-        assertEquals(7, results.size,
+        // Get the first series results (since we only have one series)
+        val seriesResults = results.results.first()
+
+        // Verify we have exactly 7 days of data
+        assertEquals(7, seriesResults.size,
             "result size equals number of days of reporting period - LAST_WEEK - 7 days")
 
         (0 until DEFAULT_NUM_DAYS).forEach { dayIndex ->
@@ -96,7 +102,7 @@ class RunReportUseCaseTest {
 
             assertEquals(
                 expected = (DEFAULT_DURATION_PER_STATEMENT * DEFAULT_NUM_STATEMENTS_PER_DAY).toDouble(),
-                actual = results.find { it.xAxis == localDate.toString() }!!.yAxis,
+                actual = seriesResults.find { it.xAxis == localDate.toString() }!!.yAxis,
                 message = "day $dayIndex has expected total duration"
             )
         }
@@ -115,7 +121,8 @@ class RunReportUseCaseTest {
                 xAxis = ReportXAxis.WEEK,
                 series = listOf(
                     ReportSeries2(
-                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
+                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION,
+                        reportSeriesSubGroup = null
                     )
                 ),
                 period = RelativeRangeReportPeriod(ReportTimeRangeUnit.WEEK, 3),
@@ -128,20 +135,19 @@ class RunReportUseCaseTest {
             runReportUseCase(request = request).first()
         }.results.first()
 
-        assertEquals(3, results.size,
-            "result size equals number of weeks of reporting period - 3 weeks")
+        assertEquals(numWeeks, results.size,
+            "result size equals number of weeks of reporting period - $numWeeks weeks")
 
-        (0 until 3).forEach { weekNum ->
+        (0 until numWeeks).forEach { weekNum ->
             val firstDayOfWeek = Instant.fromEpochMilliseconds(
                 request.reportOptions.period.periodStartMillis(request.timeZone)
             ).toLocalDateTime(request.timeZone)
                 .date.plus(DatePeriod(days = weekNum * 7))
             val row = results.firstOrNull { it.xAxis == firstDayOfWeek.toString() }
 
-
             assertEquals(
                 expected = (DEFAULT_DURATION_PER_STATEMENT * DEFAULT_NUM_STATEMENTS_PER_DAY * 7).toDouble(),
-                actual = row?.yAxis ?: -1f,
+                actual = row?.yAxis ?: -1.0,
                 message = "week $weekNum has expected total duration"
             )
         }
@@ -161,7 +167,8 @@ class RunReportUseCaseTest {
                 xAxis = ReportXAxis.MONTH,
                 series = listOf(
                     ReportSeries2(
-                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
+                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION,
+                        reportSeriesSubGroup = null
                     )
                 ),
                 period = RelativeRangeReportPeriod(ReportTimeRangeUnit.MONTH, reportNumMonths),
@@ -194,7 +201,8 @@ class RunReportUseCaseTest {
                 xAxis = ReportXAxis.YEAR,
                 series = listOf(
                     ReportSeries2(
-                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
+                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION,
+                        reportSeriesSubGroup = null
                     )
                 ),
                 period = RelativeRangeReportPeriod(ReportTimeRangeUnit.YEAR, reportNumYears),
@@ -217,7 +225,7 @@ class RunReportUseCaseTest {
     fun givenTeacherHasLearningRecordPermissionForClazz_whenQueryRuns_thenOnlyOwnClazzIsIncluded() {
         val teachersClazzUid = 43L
 
-        //Half of statements will be in the clazzUid for the teacher, half not.
+        // Half of statements will be in the clazzUid for the teacher, half not
         runBlocking {
             db.insertStatementsPerDay(
                 statementClazzUid = {
@@ -230,6 +238,7 @@ class RunReportUseCaseTest {
         }
 
         runBlocking {
+            // Grant teacher permissions for their class
             db.coursePermissionDao().upsertAsync(
                 CoursePermission(
                     cpToEnrolmentRole = ClazzEnrolment.ROLE_TEACHER,
@@ -238,6 +247,7 @@ class RunReportUseCaseTest {
                 )
             )
 
+            // Enroll teacher in their class
             db.clazzEnrolmentDao().insertListAsync(
                 listOf(
                     ClazzEnrolment(
@@ -257,7 +267,8 @@ class RunReportUseCaseTest {
                         xAxis = ReportXAxis.DAY,
                         series = listOf(
                             ReportSeries2(
-                                reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
+                                reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION,
+                                reportSeriesSubGroup = null
                             )
                         ),
                         period = ReportPeriodOption.LAST_WEEK.period,
@@ -268,15 +279,14 @@ class RunReportUseCaseTest {
             ).first()
         }.results.first()
 
-
-        //Half of the statements will be for the teacher's clazzUid, so totals should be half.
+        // Verify we got results only for teacher's class
         (0 until DEFAULT_NUM_DAYS).forEach { dayIndex ->
             val localDate = Clock.System.now().toLocalDateTime(TimeZone.UTC).date
                 .minus(DatePeriod(days = dayIndex))
 
             assertEquals(
                 expected = (DEFAULT_DURATION_PER_STATEMENT * (DEFAULT_NUM_STATEMENTS_PER_DAY/2)).toDouble(),
-                actual = results.find { it.xAxis == localDate.toString() }!!.yAxis,
+                actual = results.find { it.xAxis == localDate.toString() }?.yAxis ?: 0.0,
                 message = "day $dayIndex has expected total duration"
             )
         }
@@ -288,8 +298,8 @@ class RunReportUseCaseTest {
         grantLearningRecordViewSystemPermission()
 
         runBlocking {
-            ReportSeriesYAxis.entries.filter { it != ReportSeriesYAxis.NONE }.forEach { yAxis ->
-                ReportXAxis.entries.filter { it != ReportXAxis.NONE }.forEach { xAxis ->
+            ReportSeriesYAxis.entries.forEach { yAxis ->
+                ReportXAxis.entries.forEach { xAxis ->
                     try {
                         runReportUseCase(
                             request = RunReportUseCase.RunReportRequest(
@@ -374,7 +384,8 @@ class RunReportUseCaseTest {
                 xAxis = ReportXAxis.DAY,
                 series = listOf(
                     ReportSeries2(
-                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
+                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION,
+                        reportSeriesSubGroup = null
                     )
                 ),
                 period = ReportPeriodOption.LAST_WEEK.period,

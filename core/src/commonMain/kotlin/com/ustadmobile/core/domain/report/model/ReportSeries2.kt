@@ -10,28 +10,35 @@ data class ReportSeries2(
 
     val reportSeriesUid: Int = 0,
 
-    val reportSeriesTitle: String = "",
+    val reportSeriesTitle: String = "Series 1",
 
-    val reportSeriesYAxis: ReportSeriesYAxis? = ReportSeriesYAxis.TOTAL_DURATION,
+    val reportSeriesYAxis: ReportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION,
 
-    val reportSeriesVisualType: ReportSeriesVisualType? = ReportSeriesVisualType.BAR_CHART,
+    val reportSeriesVisualType: ReportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
 
-    val reportSeriesSubGroup: ReportXAxis? = ReportXAxis.NONE,
+    val reportSeriesSubGroup: ReportXAxis? = ReportXAxis.DAY,
 
     val reportSeriesFilters: List<ReportFilter3>? = null,
 
 )
 
+enum class YAxisTypes(
+    override val label: StringResource,
+) : OptionWithLabelStringResource {
+    COUNT(MR.strings.count), DURATION(MR.strings.duration),
+}
 
 /** Enum representing different Y-axis or report series options */
-enum class ReportSeriesYAxis(override val label: StringResource) : OptionWithLabelStringResource {
-    TOTAL_DURATION(MR.strings.total_duration),
-    AVERAGE_DURATION(MR.strings.average_duration),
-    NUMBER_SESSIONS(MR.strings.number_sessions),
-    INTERACTIONS_RECORDED(MR.strings.interactions_recorded),
-    NUMBER_ACTIVE_USERS(MR.strings.number_active_users),
-    AVERAGE_USAGE_TIME_PER_USER(MR.strings.average_usage_time_per_user),
-    NONE(MR.strings.none);
+enum class ReportSeriesYAxis(
+    override val label: StringResource,
+    val type: YAxisTypes
+) : OptionWithLabelStringResource {
+    TOTAL_DURATION(MR.strings.total_duration, YAxisTypes.DURATION),
+    AVERAGE_DURATION(MR.strings.average_duration, YAxisTypes.DURATION),
+    NUMBER_SESSIONS(MR.strings.number_sessions, YAxisTypes.COUNT),
+    INTERACTIONS_RECORDED(MR.strings.interactions_recorded, YAxisTypes.COUNT),
+    NUMBER_ACTIVE_USERS(MR.strings.number_active_users, YAxisTypes.COUNT),
+    AVERAGE_USAGE_TIME_PER_USER(MR.strings.average_usage_time_per_user, YAxisTypes.DURATION),
 }
 
 /** Enum representing different visual types for report series */
@@ -47,6 +54,9 @@ enum class ReportXAxis(
     val personJoinRequired: Boolean = false,
     val datePeriod: DatePeriod? = null,
 ) : OptionWithLabelStringResource {
+    /**
+     * Displayed to the user using the localized date formatted for the specified date
+     */
     DAY(MR.strings.day, datePeriod = DatePeriod(days = 1)),
 
     /**
@@ -54,6 +64,8 @@ enum class ReportXAxis(
      * the week of the first day of the reporting period. E.g. if the report period is Tuesday
      * 4/Feb/25 to Monday 17/Feb/25, then there will be two entries on the xAxis: 2025-02-04, and
      * 2025-02-11.
+     *
+     * Displayed to the user using the localized date formatted for the specified date
      */
     WEEK(MR.strings.weekly, datePeriod = DatePeriod(days = 7)),
 
@@ -61,6 +73,8 @@ enum class ReportXAxis(
      * When report data xAxis is by month, or data is subgrouped by month, this will be done by
      * calendar month. Queries will group data using YYYY-MM-01 e.g. using DATE_TRUNC('month'..)
      * on PostgreSQL and the strftime 'start of month' modifier on SQLite.
+     *
+     * Displayed to the user as Month - Year using localized date formatter
      */
     MONTH(MR.strings.monthly, datePeriod = DatePeriod(months = 1)),
 
@@ -68,11 +82,21 @@ enum class ReportXAxis(
      * When report data xAxis is by month, or data is subgrouped by month, this will be done by
      * calendar year. Queries will group data using YYYY-01-01 e.g. using DATE_TRUNC('year'..)
      * on PostgreSQL and the strftime 'start of year' modifier on SQLite.
+     *
+     * Displayed to the user as the year (only)
      */
     YEAR(MR.strings.year, datePeriod = DatePeriod(years = 1)),
+
+    /**
+     * Displayed to the user as the clazz name. RunReportUseCaseDbImpl will substitute the clazzUid
+     * included in the query with the clazz name
+     */
     CLASS(MR.strings.class_name),
+
+    /**
+     * Displayed to the user using the localized string as per their locale (e.g. male, female..)
+     */
     GENDER(MR.strings.gender_literal, personJoinRequired = true),
-    NONE(MR.strings.none);
 }
 
 /** Enum representing different filter types for report series */
@@ -87,3 +111,5 @@ enum class GenderType(override val label: StringResource) : OptionWithLabelStrin
     FEMALE(MR.strings.female),
     OTHER(MR.strings.other);
 }
+
+

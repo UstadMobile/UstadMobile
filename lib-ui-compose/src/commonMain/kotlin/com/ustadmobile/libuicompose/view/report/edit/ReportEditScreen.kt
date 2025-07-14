@@ -6,17 +6,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.ExposedDropdownMenuDefaults
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,17 +28,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.model.FixedReportTimeRange
 import com.ustadmobile.core.domain.report.model.OptionWithLabelStringResource
+import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
+import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportPeriodOption
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
+import com.ustadmobile.core.domain.report.model.ReportTimeRangeUnit
 import com.ustadmobile.core.domain.report.model.ReportXAxis
+import com.ustadmobile.core.domain.report.model.YAxisTypes
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
+import com.ustadmobile.libuicompose.components.UstadDateField
 import com.ustadmobile.libuicompose.components.UstadLazyColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.util.ext.defaultScreenPadding
@@ -51,11 +63,9 @@ fun ReportEditScreen(viewModel: ReportEditViewModel) {
     ReportEditScreen(
         uiState = uiState,
         onReportChanged = viewModel::onEntityChanged,
-        onAddFilter = viewModel::onAddFilter,
         onSeriesChanged = viewModel::onSeriesChanged,
         onAddSeries = viewModel::onAddSeries,
-        onRemoveFilter = viewModel::onRemoveFilter,
-        onRemoveSeries = viewModel::onRemoveSeries
+        onRemoveSeries = viewModel::onRemoveSeries,
     )
 }
 
@@ -63,12 +73,15 @@ fun ReportEditScreen(viewModel: ReportEditViewModel) {
 private fun ReportEditScreen(
     uiState: ReportEditUiState = ReportEditUiState(),
     onReportChanged: (ReportOptions2) -> Unit = {},
-    onAddFilter: (Int) -> Unit = { },
     onAddSeries: () -> Unit = { },
     onSeriesChanged: (ReportSeries2) -> Unit = {},
-    onRemoveFilter: (Int, Int) -> Unit = { _, _ -> },
     onRemoveSeries: (Int) -> Unit = { },
 ) {
+    val requiredYAxisType: YAxisTypes? = uiState.reportOptions2.series
+        .mapNotNull { it.reportSeriesYAxis?.type }
+        .distinct()
+        .singleOrNull()
+
     UstadLazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -85,19 +98,89 @@ private fun ReportEditScreen(
                     val updatedOptions = uiState.reportOptions2.copy(title = newTitle)
                     onReportChanged(updatedOptions)
                 },
-                isError = uiState.reportTitleError != null,
+                isError = uiState.submitted && uiState.reportTitleError != null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 supportingText = {
-                    Text(
-                        uiState.reportTitleError ?: stringResource(MR.strings.required)
-                    )
-                },
+                    Text(uiState.reportTitleError ?: stringResource(MR.strings.required))
+                }
             )
 
         }
+        item {
+            // Determine selected option based on TIME RANGE TYPE
+            val selected = remember(uiState.reportOptions2.period) {
+                ReportPeriodOption.entries.find { option ->
+                    when (val currentPeriod = uiState.reportOptions2.period) {
+                        is RelativeRangeReportPeriod -> {
+                            val optionPeriod = option.period as? RelativeRangeReportPeriod
+                            optionPeriod?.rangeUnit == currentPeriod.rangeUnit &&
+                                    optionPeriod?.rangeQuantity == currentPeriod.rangeQuantity
+                        }
+
+                        is FixedReportTimeRange -> {
+                            option == ReportPeriodOption.CUSTOM_DATE_RANGE
+                        }
+
+                        else -> false
+                    }
+                } ?: run {
+                    when (uiState.reportOptions2.period) {
+                        is RelativeRangeReportPeriod -> ReportPeriodOption.CUSTOM_PERIOD
+                        is FixedReportTimeRange -> ReportPeriodOption.CUSTOM_DATE_RANGE
+                        else -> null
+                    }
+                }
+            }
+
+            ExposedDropdownMenu(
+                label = { Text(stringResource(MR.strings.time_range) + "*") },
+                options = ReportPeriodOption.entries,
+                selectedValue = selected,
+                onOptionSelected = { selectedOption ->
+                    handleTimeRangeSelection(
+                        selectedOption,
+                        uiState.reportOptions2,
+                        onReportChanged
+                    )
+                },
+                isError = uiState.submitted && uiState.timeRangeError != null && selected == null,
+                supportingText = {
+                    if (selected == null) {
+                        Text(uiState.timeRangeError ?: stringResource(MR.strings.required))
+                    } else {
+                        Text("")
+                    }
+                }
+            )
+
+            // Show CustomPeriodInputs only if selected is CUSTOM_PERIOD
+            if (selected == ReportPeriodOption.CUSTOM_PERIOD) {
+                // When selected is CUSTOM_PERIOD
+                CustomPeriodInputs(
+                    currentRange = uiState.reportOptions2.period as RelativeRangeReportPeriod,
+                    onCustomPeriodChanged = { qty, unit ->
+                        val newRange = RelativeRangeReportPeriod(unit, qty)
+                        val updatedOptions = uiState.reportOptions2.copy(period = newRange)
+                        onReportChanged(updatedOptions)
+                    },
+                    quantityError = uiState.quantityError
+                )
+            }
+
+            // Show CustomDateRangeInputs only if selected is CUSTOM_DATE_RANGE
+            if (selected == ReportPeriodOption.CUSTOM_DATE_RANGE) {
+                CustomDateRangeInputs(
+                    currentRange = uiState.reportOptions2.period as FixedReportTimeRange,
+                    onDateRangeChanged = { from, to ->
+                        val newRange = FixedReportTimeRange(from, to)
+                        val updatedOptions = uiState.reportOptions2.copy(period = newRange)
+                        onReportChanged(updatedOptions)
+                    }
+                )
+            }
+        }
 
         item {
-
             ExposedDropdownMenu(
                 selectedValue = uiState.reportOptions2.xAxis,
                 label = { Text(stringResource(MR.strings.x_axis) + "*") },
@@ -106,12 +189,10 @@ private fun ReportEditScreen(
                     val updatedOptions = uiState.reportOptions2.copy(xAxis = it)
                     onReportChanged(updatedOptions)
                 },
-                isError = uiState.xAxisError != null,
+                isError = uiState.submitted && uiState.xAxisError != null,
                 supportingText = {
-                    Text(
-                        uiState.xAxisError ?: stringResource(MR.strings.required)
-                    )
-                },
+                    Text(uiState.xAxisError ?: stringResource(MR.strings.required))
+                }
             )
         }
 
@@ -149,22 +230,25 @@ private fun ReportEditScreen(
                                 val updatedSeries = seriesItem.copy(reportSeriesTitle = newTitle)
                                 onSeriesChanged(updatedSeries)
                             },
-                            isError = uiState.seriesTitleError != null,
+                            isError = uiState.submitted && uiState.seriesTitleErrors[seriesItem.reportSeriesUid] != null,
                             supportingText = {
                                 Text(
-                                    uiState.seriesTitleError ?: stringResource(MR.strings.required)
+                                    uiState.seriesTitleErrors[seriesItem.reportSeriesUid]
+                                        ?: stringResource(MR.strings.required)
                                 )
                             },
                         )
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = stringResource(MR.strings.remove),
-                            modifier = Modifier
-                                .clickable {
-                                    onRemoveSeries(seriesItem.reportSeriesUid)
-                                }
-                                .align(Alignment.CenterVertically)
-                        )
+                        if (!uiState.hasSingleSeries) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = stringResource(MR.strings.remove),
+                                modifier = Modifier
+                                    .clickable {
+                                        onRemoveSeries(seriesItem.reportSeriesUid)
+                                    }
+                                    .align(Alignment.CenterVertically)
+                            )
+                        }
                     }
 
                     // Y Axis Dropdown
@@ -175,17 +259,39 @@ private fun ReportEditScreen(
                         onOptionSelected = { selectedYAxis ->
                             val updatedSeries = seriesItem.copy(reportSeriesYAxis = selectedYAxis)
                             onSeriesChanged(updatedSeries)
+                        },
+                        isError = uiState.submitted && uiState.yAxisErrors[seriesItem.reportSeriesUid] != null,
+                        supportingText = {
+                            Text(
+                                uiState.yAxisErrors[seriesItem.reportSeriesUid]
+                                    ?: stringResource(MR.strings.required)
+                            )
+                        },
+                        disabledOptions = if (uiState.reportOptions2.series.size > 1) {
+                            requiredYAxisType?.let { requiredType ->
+                                ReportSeriesYAxis.entries.filter { it.type != requiredType }
+                            } ?: emptyList()
+                        } else {
+                            emptyList()
                         }
                     )
 
                     // Subgroup Dropdown
                     ExposedDropdownMenu(
                         label = { Text(stringResource(MR.strings.subgroup_by)) },
-                        options = ReportXAxis.entries,
+                        options = if (uiState.reportOptions2.xAxis?.datePeriod != null) {
+                            // X-axis is date - only show non-date options
+                            ReportXAxis.entries.filter { it.datePeriod == null }
+                        } else {
+                            // X-axis is non-date - show date options plus other non-date options
+                            ReportXAxis.entries.filter {
+                                it.datePeriod != null ||  // Include all date options
+                                        (it.datePeriod == null && it != uiState.reportOptions2.xAxis)
+                            }
+                        },
                         selectedValue = seriesItem.reportSeriesSubGroup,
                         onOptionSelected = { selectedXAxis ->
-                            val updatedSeries =
-                                seriesItem.copy(reportSeriesSubGroup = selectedXAxis)
+                            val updatedSeries = seriesItem.copy(reportSeriesSubGroup = selectedXAxis)
                             onSeriesChanged(updatedSeries)
                         }
                     )
@@ -193,78 +299,23 @@ private fun ReportEditScreen(
 
                     // Chart Type Dropdown
                     ExposedDropdownMenu(
-                        label = { Text(stringResource(MR.strings.chart_type)) },
+                        label = { Text(stringResource(MR.strings.chart_type) + "*") },
                         options = ReportSeriesVisualType.entries,
                         selectedValue = seriesItem.reportSeriesVisualType,
                         onOptionSelected = { selectedVisualType ->
                             val updatedSeries =
                                 seriesItem.copy(reportSeriesVisualType = selectedVisualType)
                             onSeriesChanged(updatedSeries)
-                        }
+                        },
+                        supportingText = {
+                            Text(
+                                uiState.chartTypeError[seriesItem.reportSeriesUid]
+                                    ?: stringResource(MR.strings.required)
+                            )
+                        },
+                        isError = uiState.submitted && uiState.chartTypeError[seriesItem.reportSeriesUid] != null,
                     )
 
-                    // Time Range Dropdown
-                    /*
-                     * TODO: update as per updated prototype with custom period and custom date range options
-                    ExposedDropdownMenu(
-                        label = { Text(stringResource(MR.strings.time_range)) },
-                        options = ReportTimeRange.entries,
-                        selectedValue = seriesItem.reportTimeRange,
-                        onOptionSelected = { selectedTimeRange ->
-                            val updatedSeries = seriesItem.copy(reportTimeRange = selectedTimeRange)
-                            onSeriesChanged(updatedSeries)
-                        }
-                    )
-                    */
-                }
-            }
-
-            // Filters Section
-            item {
-                if (!seriesItem.reportSeriesFilters.isNullOrEmpty()) {
-                    Text(
-                        text = stringResource(MR.strings.filters),
-                        modifier = Modifier.defaultScreenPadding()
-                    )
-                }
-                seriesItem.reportSeriesFilters?.forEachIndexed { index, reportFilter2 ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .defaultScreenPadding()
-
-                    ) {
-                        val fieldName = reportFilter2.reportFilterField?.name?.lowercase()
-                            ?.replaceFirstChar { it.uppercase() } ?: ""
-                        val comparisonSymbol =
-                            reportFilter2.reportFilterCondition?.symbol ?: ""
-                        val filterText =
-                            "$fieldName $comparisonSymbol ${reportFilter2.reportFilterValue?.lowercase()}"
-
-                        Text(
-                            text = filterText,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = "Remove filter",
-                            modifier = Modifier
-                                .clickable {
-                                    onRemoveFilter(index, seriesItem.reportSeriesUid)
-                                }
-                        )
-                    }
-                }
-            }
-
-            item {
-                Button(
-                    onClick = { onAddFilter(seriesItem.reportSeriesUid) },
-                    modifier = Modifier.fillMaxWidth().defaultScreenPadding()
-                ) {
-                    Text(
-                        text = stringResource(MR.strings.add_filter),
-                    )
                 }
             }
         }
@@ -285,6 +336,7 @@ private fun ReportEditScreen(
 fun <T : OptionWithLabelStringResource> ExposedDropdownMenu(
     options: List<T>,
     selectedValue: T?,
+    disabledOptions: List<T> = emptyList(),
     modifier: Modifier = Modifier.fillMaxWidth(),
     isError: Boolean = false,
     label: @Composable (() -> Unit)? = null,
@@ -314,16 +366,131 @@ fun <T : OptionWithLabelStringResource> ExposedDropdownMenu(
             onDismissRequest = { isExpanded = false }
         ) {
             options.forEach { option ->
+                val isDisabled = option in disabledOptions
                 DropdownMenuItem(
                     onClick = {
-                        onOptionSelected(option)
-                        isExpanded = false
+                        if (!isDisabled) {
+                            onOptionSelected(option)
+                            isExpanded = false
+                        }
                     },
                     text = {
-                        Text(stringResource(option.label))
-                    }
+                        Text(
+                            stringResource(option.label),
+                            color = if (isDisabled) Color.Gray else LocalContentColor.current
+                        )
+                    },
+                    enabled = !isDisabled
                 )
             }
         }
+    }
+}
+
+fun handleTimeRangeSelection(
+    selectedOption: ReportPeriodOption,
+    currentOptions: ReportOptions2,
+    onReportChanged: (ReportOptions2) -> Unit
+) {
+    val newOptions = currentOptions.copy(
+        period = selectedOption.period
+    )
+
+    onReportChanged(newOptions)
+}
+
+@Composable
+fun CustomPeriodInputs(
+    currentRange: RelativeRangeReportPeriod,
+    onCustomPeriodChanged: (Int, ReportTimeRangeUnit) -> Unit,
+    quantityError: String?
+) {
+    var quantity by remember { mutableStateOf(currentRange.rangeQuantity.toString()) }
+    var selectedUnit by remember { mutableStateOf(currentRange.rangeUnit) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.weight(1.2f),
+            value = quantity,
+            onValueChange = {
+                quantity = it
+                it.toIntOrNull()?.let { qty ->
+                    onCustomPeriodChanged(qty, selectedUnit)
+                }
+            },
+            label = { Text(stringResource(MR.strings.quantity)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = quantityError != null,
+            supportingText = { quantityError?.let { Text(it) } },
+        )
+
+
+        ExposedDropdownMenu(
+            modifier = Modifier.weight(0.8f),
+            label = { Text(stringResource(MR.strings.unit)) },
+            options = ReportTimeRangeUnit.entries,
+            selectedValue = selectedUnit,
+            onOptionSelected = { unit ->
+                selectedUnit = unit
+                quantity.toIntOrNull()?.let { qty ->
+                    onCustomPeriodChanged(qty, unit)
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun CustomDateRangeInputs(
+    currentRange: FixedReportTimeRange,
+    onDateRangeChanged: (Long, Long) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        DatePickerButton(
+            label = stringResource(MR.strings.from),
+            timestamp = currentRange.fromDateMillis,
+            onDateSelected = { newFrom ->
+                onDateRangeChanged(newFrom, currentRange.toDateMillis)
+            },
+            modifier = Modifier.weight(1f)
+        )
+
+        DatePickerButton(
+            label = stringResource(MR.strings.to_),
+            timestamp = currentRange.toDateMillis,
+            onDateSelected = { newTo ->
+                onDateRangeChanged(currentRange.fromDateMillis, newTo)
+            },
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+fun DatePickerButton(
+    label: String,
+    timestamp: Long,
+    onDateSelected: (Long) -> Unit,
+    modifier: Modifier
+) {
+    Column(modifier = modifier) {
+        UstadDateField(
+            modifier = Modifier.fillMaxWidth(),
+            value = timestamp,
+            label = { Text(label) },
+            timeZoneId = UstadMobileConstants.UTC,
+            onValueChange = {
+                onDateSelected(it)
+            },
+            supportingText = {}
+        )
     }
 }

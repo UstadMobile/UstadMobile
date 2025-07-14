@@ -13,7 +13,8 @@ enum class Comparisons(
     NOT_EQUALS(MR.strings.not_equals, "!="),
     GREATER(MR.strings.greater, ">"),
     LESSER(MR.strings.lesser, "<"),
-    BETWEEN(MR.strings.between, "BETWEEN");
+    GREATER_OR_EQUAL(MR.strings.greater_or_equal, ">="),
+    LESSER_OR_EQUAL(MR.strings.lesser_or_equal, "<="),
 }
 
 /** Sealed class representing different types of report filters */
@@ -33,7 +34,8 @@ sealed class ReportConditionFilterOptions(
             Comparisons.NOT_EQUALS,
             Comparisons.GREATER,
             Comparisons.LESSER,
-            Comparisons.BETWEEN
+            Comparisons.GREATER_OR_EQUAL,
+            Comparisons.LESSER_OR_EQUAL,
         )
     )
 }

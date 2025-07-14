@@ -18,92 +18,126 @@ import org.kodein.di.DI
 data class ReportFilterEditUiState(
     val filters: ReportFilter3? = ReportFilter3(),
     val filterConditionOptions: ReportConditionFilterOptions? = null,
-    )
+)
 
 class ReportFilterEditViewModel(
     di: DI,
     savedStateHandle: UstadSavedStateHandle,
 ) : UstadEditViewModel(di, savedStateHandle, DEST_NAME) {
 
-    val seriesId: Int = savedStateHandle[ARG_REPORT_SERIES_UID]?.toInt() ?: 0
-
-    private val _uiState = MutableStateFlow(
-        ReportFilterEditUiState(
-            filters = ReportFilter3(reportFilterSeriesUid = seriesId)
-        )
-    )
+    private val _uiState = MutableStateFlow(ReportFilterEditUiState())
     val uiState: StateFlow<ReportFilterEditUiState> = _uiState
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
         val title = systemImpl.getString(MR.strings.edit_filters)
 
+        // First check if we're editing an existing filter
+        val existingFilterJson = savedStateHandle[ARG_EXISTING_FILTER]
+        if (existingFilterJson != null) {
+            handleExistingFilter(existingFilterJson)
+        } else {
+            handleNewFilter(savedStateHandle)
+        }
+
+        setupAppUiState(title)
+    }
+
+    private fun handleExistingFilter(existingFilterJson: String) {
+        try {
+            val existingFilter =
+                json.decodeFromString(ReportFilter3.serializer(), existingFilterJson)
+            _uiState.value = ReportFilterEditUiState(
+                filters = existingFilter,
+                filterConditionOptions = getConditionOptionsForField(existingFilter.reportFilterField)
+            )
+        } catch (e: Exception) {
+            _uiState.value = ReportFilterEditUiState(
+                filters = null,
+                filterConditionOptions = null
+            )
+        }
+    }
+
+    private fun handleNewFilter(savedStateHandle: UstadSavedStateHandle) {
+        val tempFilterUid = savedStateHandle[ARG_TEMP_FILTER_UID]?.toInt()
+        val seriesUid = savedStateHandle[ARG_REPORT_SERIES_UID]?.toInt()
+
+        // Assign the temp UID to the new filter
+        _uiState.value = if (tempFilterUid != null && seriesUid != null) {
+            ReportFilterEditUiState(
+                filters = ReportFilter3(
+                    reportFilterUid = tempFilterUid,
+                    reportFilterSeriesUid = seriesUid
+                )
+            )
+        } else {
+            ReportFilterEditUiState(filters = null)
+        }
+    }
+
+    private fun setupAppUiState(title: String) {
         _appUiState.update {
             AppUiState(
                 title = title,
-                hideBottomNavigation = true
-            )
-        }
-
-        _appUiState.update { prev ->
-            prev.copy(
+                hideBottomNavigation = true,
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
                     text = systemImpl.getString(MR.strings.done),
-                    onClick = this@ReportFilterEditViewModel::onClickSave
+                    onClick = ::onClickSave
                 )
             )
         }
     }
 
     fun onClickSave() {
-        val filter = uiState.value.filters
-        finishWithResult(
-            ReportEditViewModel.DEST_NAME,
-            entityUid = filter?.reportFilterUid?.toLong() ?: 0,
-            result = filter?.copy(reportFilterSeriesUid = seriesId)
-        )
-    }
-
-
-    fun onEntityChanged(value: ReportFilter3?) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                filters = value?.copy(
-                    reportFilterSeriesUid = currentState.filters?.reportFilterSeriesUid ?: 0
-                )
+        val currentFilter = uiState.value.filters
+        if (currentFilter != null && isValidFilter(currentFilter)) {
+            finishWithResult(
+                ReportEditViewModel.DEST_NAME,
+                entityUid = currentFilter.reportFilterUid.toLong(),
+                result = currentFilter
             )
         }
-        if (value?.reportFilterField != null) {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    filterConditionOptions = when (value.reportFilterField) {
-                        FilterType.PERSON_AGE -> {
-                            ReportConditionFilterOptions.AgeConditionFilter()
-                        }
+    }
 
-                        FilterType.PERSON_GENDER -> {
-                            ReportConditionFilterOptions.GenderConditionFilter()
-                        }
+    private fun isValidFilter(filter: ReportFilter3): Boolean {
+        return filter.reportFilterField != null &&
+                filter.reportFilterCondition != null &&
+                filter.reportFilterValue?.isNotBlank() == true
+    }
 
-                        else -> {
-                            null
-                        }
-                    }
-                )
-            }
+    fun onEntityChanged(value: ReportFilter3?) {
+        val updatedFilter = value?.copy(
+            reportFilterSeriesUid = _uiState.value.filters?.reportFilterSeriesUid ?: 0
+        )
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                filters = updatedFilter,
+                filterConditionOptions = getConditionOptionsForField(updatedFilter?.reportFilterField)
+            )
         }
+
         scheduleEntityCommitToSavedState(
-            entity = value,
+            entity = updatedFilter,
             serializer = ReportFilter3.serializer(),
             commitDelay = 200
         )
     }
 
+    private fun getConditionOptionsForField(field: FilterType?): ReportConditionFilterOptions? {
+        return when (field) {
+            FilterType.PERSON_AGE -> ReportConditionFilterOptions.AgeConditionFilter()
+            FilterType.PERSON_GENDER -> ReportConditionFilterOptions.GenderConditionFilter()
+            else -> null
+        }
+    }
+
     companion object {
         const val DEST_NAME = "ReportFilterEdit"
-        const val DEST_NAME_HOME = "ReportFilterEditHome"
-
         const val ARG_REPORT_SERIES_UID = "reportSeriesUid"
+        const val ARG_TEMP_FILTER_UID = "tempFilterUid"
+        const val ARG_EXISTING_FILTER = "existingFilter"
     }
 }

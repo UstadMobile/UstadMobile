@@ -426,10 +426,10 @@ Cypress.Commands.add('ustadEnableUserRegistration' ,() => {
  * cy.ustadSetDateTime(cy.get("input#id"), new Date(Date.now() + (2*60*1000))
  */
 Cypress.Commands.add("ustadSetDateTime", (element, date) => {
-    element.type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +
+    element.should('not.be.disabled').type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +
     String(date.getDate()).padStart(2, '0') + "T" + String(date.getHours()).padStart(2, '0') +
     ":" + String(date.getMinutes()).padStart(2,'0')
-  );
+, {timeout:12000} );
 });
 
 
@@ -443,8 +443,8 @@ Cypress.Commands.add("ustadSetDateTime", (element, date) => {
 Cypress.Commands.add("ustadSetDate", (element, date) => {
      element.type(date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2, '0') + "-" +
      String(date.getDate()).padStart(2, '0')
-     );
-});
+     )
+})
 
 
 Cypress.Commands.add('UstadOpenInviteLinkFromEmail', (email, baseUrl, maxAttempts = 4) => {
@@ -473,8 +473,33 @@ Cypress.Commands.add('UstadOpenInviteLinkFromEmail', (email, baseUrl, maxAttempt
       });
 });
 
+Cypress.Commands.add("UstadContentUsageData", (content_title, Person_username) => {
+    const maxAttempts = 4;
 
+    const attemptImport = (attempt) => {
+        cy.request({
+            method: "GET",
+            url: `/api/generate-xapi-statements/runtest?contentTitle=${content_title}&username=${Person_username}`,
+            failOnStatusCode: false
+        }).then((response) => {
+            cy.log(`Attempt ${attempt}: Status ${response.status}`);
+            cy.log(JSON.stringify(response.body));
 
+            const isSuccess = response.status === 200 && response.body.message === "Successfully generated test statements";
+
+            if (!isSuccess) {
+                cy.log(`Retrying... attempt ${attempt + 1}`);
+                if (attempt < maxAttempts - 1) {
+                    attemptImport(attempt + 1);
+                } else {
+                    throw new Error(`Failed after ${maxAttempts} attempts: ${JSON.stringify(response.body)}`);
+                }
+            }
+        });
+    };
+
+    attemptImport(0);
+})
 
 //commands.js
 //

@@ -1,9 +1,12 @@
 package com.ustadmobile.core.viewmodel.report.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
 import com.ustadmobile.core.domain.report.model.ReportFilter3
 import com.ustadmobile.core.domain.report.model.ReportOptions2
 import com.ustadmobile.core.domain.report.model.ReportSeries2
+import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
+import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
 import com.ustadmobile.core.impl.appstate.ActionBarButtonUiState
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
@@ -13,7 +16,6 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadEditViewModel
 import com.ustadmobile.core.viewmodel.report.detail.ReportDetailViewModel
 import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel
-import com.ustadmobile.core.viewmodel.report.filteredit.ReportFilterEditViewModel.Companion.ARG_REPORT_SERIES_UID
 import com.ustadmobile.door.ext.withDoorTransactionAsync
 import com.ustadmobile.lib.db.entities.Report
 import kotlinx.coroutines.flow.Flow
@@ -29,10 +31,14 @@ data class ReportEditUiState(
     val reportOptions2: ReportOptions2 = ReportOptions2(),
     val reportTitleError: String? = null,
     val xAxisError: String? = null,
-    val yAxisError: String? = null,
-    val seriesTitleError: String? = null,
+    val seriesTitleErrors: Map<Int, String> = emptyMap(),
+    val yAxisErrors: Map<Int, String> = emptyMap(),
     val subGroupError: String? = null,
-    val chartTypeError: String? = null,
+    val chartTypeError: Map<Int, String> = emptyMap(),
+    val timeRangeError: String? = null,
+    val quantityError: String? = null,
+    val submitted: Boolean = false,
+    val hasSingleSeries: Boolean = true,
 )
 
 class ReportEditViewModel(
@@ -46,6 +52,7 @@ class ReportEditViewModel(
     val uiState: Flow<ReportEditUiState> = _uiState.asStateFlow()
     private val entityUid: Long
         get() = savedStateHandle[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
+    private var nextTempFilterUid = -1
 
     init {
         loadingState = LoadingUiState.INDETERMINATE
@@ -81,9 +88,9 @@ class ReportEditViewModel(
                         series = listOf(
                             ReportSeries2(
                                 reportSeriesUid = 1,
-                                reportSeriesVisualType = null,
+                                reportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
                                 reportSeriesSubGroup = null,
-                                reportSeriesYAxis = null,
+                                reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION,
                                 reportSeriesFilters = emptyList()
                             )
                         )
@@ -97,15 +104,6 @@ class ReportEditViewModel(
                     }
                 }
             )
-
-            launch {
-                navResultReturner.filteredResultFlowForKey(RESULT_KEY_REPORT_FILTER)
-                    .collect { result ->
-                        val reportFilter = result.result as? ReportFilter3 ?: return@collect
-                        val seriesId = reportFilter.reportFilterSeriesUid
-                        onFilterChanged(reportFilter, seriesId)
-                    }
-            }
         }
 
         _appUiState.update { prev ->
@@ -121,41 +119,65 @@ class ReportEditViewModel(
 
     fun onClickSave() {
         val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
-        _uiState.update { prev ->
-            prev.copy(
-                reportTitleError = if (prev.reportOptions2.title.isEmpty()) {
-                    requiredFieldMessage
-                } else {
-                    null
-                },
-                xAxisError =  if (prev.reportOptions2.xAxis == null) {
-                    requiredFieldMessage
-                } else {
-                    null
-                },
-                seriesTitleError = if (prev.reportOptions2.series.any { it.reportSeriesTitle.isEmpty() }) {
-                    requiredFieldMessage
-                } else {
-                    null
-                },
-                yAxisError = if (prev.reportOptions2.series.any { it.reportSeriesYAxis == null }) {
-                    requiredFieldMessage
-                } else {
-                    null
-                }
-            )
+        val currentReport = _uiState.value.reportOptions2
+
+        // Validate quantity if timeRange is RelativeRangeReportPeriod
+        val quantityError = if (currentReport.period is RelativeRangeReportPeriod) {
+            val qty = (currentReport.period).rangeQuantity
+            if (qty < 1) systemImpl.getString(MR.strings.quantity_must_be_at_least_1) else null
+        } else {
+            null
         }
-        if (_uiState.value.hasErrors()) {
+
+        // Validate series-specific fields
+        val seriesTitleErrors = currentReport.series.mapNotNull { series ->
+            series.reportSeriesTitle.takeIf { it.isEmpty() }
+                ?.let { series.reportSeriesUid to requiredFieldMessage }
+        }.toMap()
+
+        val yAxisErrors = currentReport.series.mapNotNull { series ->
+            if (series.reportSeriesYAxis == null) {
+                series.reportSeriesUid to requiredFieldMessage
+            } else {
+                null
+            }
+        }.toMap()
+
+        val chartTypeErrors = currentReport.series.mapNotNull { series ->
+            if (series.reportSeriesVisualType == null) {
+                series.reportSeriesUid to requiredFieldMessage
+            } else {
+                null
+            }
+        }.toMap()
+
+        // Validate all fields
+        val newState = _uiState.value.copy(
+            submitted = true,
+            reportTitleError = if (currentReport.title.isEmpty()) requiredFieldMessage else null,
+            xAxisError = null,
+            timeRangeError = null,
+            quantityError = quantityError,
+            chartTypeError = chartTypeErrors,
+            yAxisErrors = yAxisErrors,
+            seriesTitleErrors = seriesTitleErrors
+        )
+
+        _uiState.value = newState
+
+        if (newState.hasErrors()) {
             loadingState = LoadingUiState.NOT_LOADING
+            println("Report options error")
             return
         }
         viewModelScope.launch {
             activeRepoWithFallback.withDoorTransactionAsync {
-                val currentReport = _uiState.value.reportOptions2
+                val currentReports = _uiState.value.reportOptions2
                 val report = Report(
                     reportUid = entityUidArg,
-                    reportTitle = currentReport.title,
-                    reportOptions = json.encodeToString(currentReport),
+                    reportTitle = currentReports.title,
+                    reportOptions = json.encodeToString(currentReports),
+                    reportOwnerPersonUid = activeUserPersonUid,
                 )
                 try {
                     if (entityUidArg == 0L) {
@@ -175,29 +197,49 @@ class ReportEditViewModel(
     }
 
     fun onEntityChanged(newOptions: ReportOptions2) {
+        val requiredFieldMessage = systemImpl.getString(MR.strings.field_required_prompt)
+        val quantityError = when (val timeRange = newOptions.period) {
+            is RelativeRangeReportPeriod -> {
+                if (timeRange.rangeQuantity < 1) systemImpl.getString(MR.strings.quantity_must_be_at_least_1) else null
+            }
+
+            else -> null
+        }
+
+        val seriesTitleErrors = newOptions.series.associate { series ->
+            series.reportSeriesUid to if (series.reportSeriesTitle.isEmpty()) requiredFieldMessage else null
+        }.filterValues { it != null }
+            .mapValues { it.value as String }
+
+        val yAxisErrors = newOptions.series.associate { series ->
+            series.reportSeriesUid to if (series.reportSeriesYAxis == null) requiredFieldMessage else null
+        }.filterValues { it != null }
+            .mapValues { it.value as String }
+
+        val chartTypeErrors = newOptions.series.associate { series ->
+            series.reportSeriesUid to if (series.reportSeriesVisualType == null) requiredFieldMessage else null
+        }.filterValues { it != null }
+            .mapValues { it.value as String }
+
         _uiState.update { currentState ->
-            currentState.copy(
+            val baseUpdate = currentState.copy(
                 reportOptions2 = newOptions,
-                reportTitleError = updateErrorMessageOnChange(
-                    currentState.reportOptions2.title,
-                    newOptions.title,
-                    currentState.reportTitleError
+                hasSingleSeries = newOptions.series.size == 1
+            )
+
+            if (!baseUpdate.submitted) return@update baseUpdate
+            baseUpdate.copy(
+                reportTitleError = if (newOptions.title.isEmpty()) systemImpl.getString(MR.strings.field_required_prompt) else null,
+                xAxisError = if (newOptions.xAxis == null) systemImpl.getString(MR.strings.field_required_prompt) else null,
+                seriesTitleErrors = seriesTitleErrors,
+                yAxisErrors = yAxisErrors,
+                timeRangeError = updateErrorMessageOnChange(
+                    currentState.reportOptions2.period,
+                    newOptions.period,
+                    currentState.timeRangeError
                 ),
-                xAxisError = updateErrorMessageOnChange(
-                    currentState.reportOptions2.xAxis,
-                    newOptions.xAxis,
-                    currentState.xAxisError
-                ),
-                seriesTitleError = updateErrorMessageOnChange(
-                    currentState.reportOptions2.series.map { it.reportSeriesTitle },
-                    newOptions.series.map { it.reportSeriesTitle },
-                    currentState.seriesTitleError
-                ),
-                yAxisError = updateErrorMessageOnChange(
-                    currentState.reportOptions2.series.map { it.reportSeriesYAxis },
-                    newOptions.series.map { it.reportSeriesYAxis },
-                    currentState.yAxisError
-                )
+                quantityError = quantityError,
+                chartTypeError = chartTypeErrors,
             )
         }
         scheduleEntityCommitToSavedState(
@@ -207,82 +249,88 @@ class ReportEditViewModel(
         )
     }
 
-
     fun onSeriesChanged(updatedSeries: ReportSeries2) {
-        _uiState.update { prev ->
-            prev.copy(
-                reportOptions2 = prev.reportOptions2.copy(
-                    series = prev.reportOptions2.series.replace(updatedSeries) {
+        onEntityChanged(
+            _uiState.value.reportOptions2.let { reportOptions ->
+                reportOptions.copy(
+                    series = reportOptions.series.replace(updatedSeries) {
                         it.reportSeriesUid == updatedSeries.reportSeriesUid
                     }
                 )
+            }
+        )
+    }
+
+    private fun onFilterChanged(newFilter: ReportFilter3, seriesId: Int) {
+        _uiState.update { prevState ->
+            val updatedSeries = prevState.reportOptions2.series.map { series ->
+                if (series.reportSeriesUid == seriesId) {
+                    val currentFilters = series.reportSeriesFilters.orEmpty().toMutableList()
+                    // Check if the filter already exists by UID
+                    val existingIndex = currentFilters.indexOfFirst {
+                        it.reportFilterUid == newFilter.reportFilterUid
+                    }
+                    if (existingIndex != -1) {
+                        // Replace existing filter
+                        currentFilters[existingIndex] = newFilter
+                    } else {
+                        // Append new filter
+                        currentFilters.add(newFilter)
+                    }
+                    series.copy(reportSeriesFilters = currentFilters)
+                } else {
+                    series
+                }
+            }
+
+            prevState.copy(
+                reportOptions2 = prevState.reportOptions2.copy(series = updatedSeries)
             )
         }
         onEntityChanged(_uiState.value.reportOptions2)
     }
 
-
-    private fun onFilterChanged(filter2: ReportFilter3, seriesId: Int) {
-        if (filter2.reportFilterField != null) {
-            _uiState.update { prev ->
-                val updatedSeriesList = prev.reportOptions2.series.map { series ->
-                    if (series.reportSeriesUid == seriesId) {
-                        val updatedFilters =
-                            series.reportSeriesFilters?.toMutableList() ?: mutableListOf()
-                        updatedFilters.add(filter2)
-                        series.copy(reportSeriesFilters = updatedFilters)
-                    } else {
-                        series
-                    }
-                }
-
-                prev.copy(
-                    reportOptions2 = prev.reportOptions2.copy(
-                        series = updatedSeriesList
-                    )
-                )
-            }
-            onEntityChanged(_uiState.value.reportOptions2)
-        }
-    }
-
-
     fun onAddFilter(seriesId: Int) {
+        val tempFilterUid = nextTempFilterUid-- // Generate a new temporary UID
         navigateForResult(
             nextViewName = ReportFilterEditViewModel.DEST_NAME,
             key = RESULT_KEY_REPORT_FILTER,
             currentValue = null,
-            serializer = Report.serializer(),
-            args = mapOf(ARG_REPORT_SERIES_UID to seriesId.toString())
+            serializer = ReportFilter3.serializer(), // FIXED SERIALIZER
+            args = mapOf(
+                ARG_REPORT_SERIES_UID to seriesId.toString(),
+                ReportFilterEditViewModel.ARG_TEMP_FILTER_UID to tempFilterUid.toString()
+            )
         )
     }
 
 
     fun onAddSeries() {
         _uiState.update { prev ->
+            val newUid = (prev.reportOptions2.series.maxOfOrNull { it.reportSeriesUid } ?: 0) + 1
             prev.copy(
                 reportOptions2 = prev.reportOptions2.copy(
                     series = prev.reportOptions2.series + ReportSeries2(
-                        reportSeriesUid = (prev.reportOptions2.series.maxOfOrNull { it.reportSeriesUid }
-                            ?: 0) + 1,
-                        reportSeriesVisualType = null,
+                        reportSeriesUid = newUid,
+                        reportSeriesTitle = "Series $newUid", // Set default title here
+                        reportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
                         reportSeriesSubGroup = null,
-                        reportSeriesYAxis = null
+                        reportSeriesYAxis = ReportSeriesYAxis.TOTAL_DURATION
                     ),
-                )
+                ),
+                hasSingleSeries = false // Since we're adding a series, there will be >1
             )
         }
     }
 
     fun onRemoveSeries(seriesId: Int) {
         _uiState.update { prev ->
-            val updatedSeriesList =
-                prev.reportOptions2.series.filterNot { it.reportSeriesUid == seriesId }
-
+            val updatedSeriesList = prev.reportOptions2.series.filterNot { it.reportSeriesUid == seriesId }
             prev.copy(
                 reportOptions2 = prev.reportOptions2.copy(
                     series = updatedSeriesList
-                )
+                ),
+                hasSingleSeries = updatedSeriesList.size == 1 // Update based on new count
             )
         }
     }
@@ -308,17 +356,21 @@ class ReportEditViewModel(
         }
     }
 
-    private fun ReportEditUiState.hasErrors(): Boolean {
+    fun ReportEditUiState.hasErrors(): Boolean {
+        if (!submitted) return false
         return reportTitleError != null ||
                 xAxisError != null ||
-                seriesTitleError != null ||
+                seriesTitleErrors.isNotEmpty() ||
+                yAxisErrors.isNotEmpty() ||
                 subGroupError != null ||
-                chartTypeError != null ||
-                yAxisError != null
+                chartTypeError.isNotEmpty() ||
+                timeRangeError != null ||
+                quantityError != null
     }
 
     companion object {
         const val DEST_NAME = "ReportEdit"
         const val RESULT_KEY_REPORT_FILTER = "reportFilter"
+        const val ARG_REPORT_SERIES_UID = "reportSeriesUid"
     }
 }

@@ -1,6 +1,9 @@
 package com.ustadmobile.core.domain.report.query
 
 import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportSeries2
+import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
+import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.ihttp.headers.directives.directivesToMap
 import com.ustadmobile.lib.db.composites.StatementReportRow
 import com.ustadmobile.lib.db.composites.adapters.asStatementReportRow
@@ -41,7 +44,79 @@ interface RunReportUseCase {
         val request: RunReportRequest,
         val results: List<List<StatementReportRow>>,
         val age: Int = 0,
-    )
+    ) {
+
+        data class Series(
+            val reportSeriesOptions: ReportSeries2,
+            val data: List<StatementReportRow>,
+        )
+
+        /**
+         * A result subgroup is the combination of both the Series and a particular subgroup
+         * value e.g. a user might create a report with two series, both of which are subgrouped
+         * by gender. This results in 4 series/subgroup combinations e.g. Series 1 - Male,
+         * Series 1 - Female, Series2 - Male, Series2 - Female.
+         *
+         * @property value the subgroup value (e.g. clazzUid when subgrouped by clazz, Person.gender
+         * value when subgrouped by gender, etc)
+         * @property series the related RunReportResult.Series
+         */
+        data class Subgroup(
+            val value: String,
+            val series: Series,
+        ) {
+
+            val subgroupData: List<StatementReportRow> by lazy {
+                series.data.filter { it.subgroup == value }
+            }
+
+        }
+
+        val resultSeries: List<Series> by lazy {
+            request.reportOptions.series.mapIndexed { index, reportSeriesOptions ->
+                Series(
+                    reportSeriesOptions = reportSeriesOptions,
+                    data = results[index],
+                )
+            }
+        }
+
+        val distinctSubgroups: List<Subgroup> by lazy {
+            resultSeries.map { series ->
+                series.data.map { it.subgroup }.distinct().map {
+                    Subgroup(value = it, series = series)
+                }
+            }.flatten()
+        }
+
+        val distinctXAxisValueSorted: List<String> by lazy {
+            results.flatten().map { it.xAxis }.distinct().sorted()
+        }
+
+        val maxYValue: Double? by lazy {
+            results.maxOfOrNull { resultList ->
+                resultList.maxOfOrNull { it.yAxis } ?: 0.toDouble()
+            }
+        }
+
+        val yRange: ClosedFloatingPointRange<Float> by lazy {
+            val maxVal = maxYValue ?: 0.toDouble()
+
+            if(maxVal > 0) {
+                0.0f..(maxVal.toFloat() * Y_RANGE_BUFFER_FACTOR)
+            } else {
+                0.0f..1.0f
+            }
+        }
+
+        val yAxisType: YAxisTypes by lazy {
+            request.reportOptions.series.first().reportSeriesYAxis.type
+        }
+
+
+        //Add functions to get info needed for graphs in a clear/logical way e.g. distinct xaxis,subgroups
+
+    }
 
     /**
      * Data class representing a request to run a report.
@@ -102,7 +177,7 @@ interface RunReportUseCase {
             //If there are no rows in the database query result; we must use the empty subgroup
             // this might need adjusted when subgroups are by gender / known values
             val allSubGroups = this.map { it.subgroup }.distinct().ifEmpty { listOf("") }
-            val datePeriod = request.reportOptions.xAxis?.datePeriod ?: return this
+            val datePeriod = request.reportOptions.xAxis.datePeriod ?: return this
             val resultList = mutableListOf<StatementReportRow>()
             val rowMap = this.associateBy { Pair(it.xAxis, it.subgroup) }
 
@@ -128,11 +203,16 @@ interface RunReportUseCase {
         fun reportQueryResultsToResultStatementReportRows(
             queryResults: List<ReportQueryResult>,
             request: RunReportRequest,
+            xAxisNameFn: (String) -> String = { it },
         ): List<List<StatementReportRow>> {
             val queryResultMap = queryResults.groupBy { it.rqrReportSeriesUid }
                 .map {  entry ->
                     entry.key to entry.value.map {
-                        it.asStatementReportRow()
+                        it.asStatementReportRow().let { reportRow ->
+                            reportRow.copy(
+                                xAxis = xAxisNameFn(reportRow.xAxis)
+                            )
+                        }
                     }.fillIfNeeded(request)
                 }.toMap()
 
@@ -144,6 +224,13 @@ interface RunReportUseCase {
 
 
         const val DEFAULT_MAX_AGE = (60 * 60)//one hour
+
+        /**
+         * When displaying a graph and providing the max y axis value to the graphing library,
+         * add a buffer factor for space (10% extra)
+         */
+        const val Y_RANGE_BUFFER_FACTOR = 1.1f
+
 
     }
 }

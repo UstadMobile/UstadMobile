@@ -6,21 +6,32 @@ Admin or teacher can add or customize reports so that they can track progress.
 
 ## Step-by-Step Procedure:
 
-1. Using http api endpoint created a class with students and teachers already enrolled and having data for report testing.
-2. Login to the app using the teacher username and password.
-3. Click on "Reports"
-4. Click on "Add report"
-5. Enter the "Report title"
-6. Select X-axis field as "Day"
-7. Enter a series title
-8. Select Y-axis field as "Content usage- total duration"
-9. Select Sub-group by field as "Gender"
-10. Select the chart type as "Bar chart"
-11. Select the Time range as "This week"
-12. Click on "Add filter" button
-13. On Add filter page select field as "Person Age"
-14. Select condition field as ">="
-15. Enter value "13"
-16. Click on "Done" button
-17. On Edit report page click on "Done"
-18. Verify the user able to see the bar chart as per user selection
+
+1. Import users using the provided CSV file.
+2. Log in as an admin user.
+3. Navigate to the course and open the course block.
+4. Add a new content block and import EPUB content.
+5. Set the title for the imported content.
+6. Complete the import and save the course.
+7. Simulate content usage by a student.
+8. Navigate to the "Reports" section.
+9. Click to add a new report.
+10. Enter the report title.
+11. Select a custom date range (last 7 days).
+12. Set X-axis to Day.
+13. Set Y-axis to Total Duration.
+14. Set subgroup by Gender.
+15. Set chart type to Bar Chart.
+16. Finalize and save the report.
+17. Verify the bar chart report is displayed.
+18. Take a screenshot of the report.
+19. **Admin modifies the report**
+20. Edit the existing report.
+21. Change the time range to a custom period.
+22. Change the chart type to Line Chart.
+23. Save the updated report.
+24. Verify the line chart is displayed.
+25. Take a screenshot of the updated report.
+26. **Admin verifies report availability**
+27. Navigate back to the Reports section.
+28. Verify that the created report is listed.

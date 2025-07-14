@@ -134,6 +134,9 @@ agp = "8.7.2"
 kotlin-version = "1.9.23"
 xxhashjs = "^0.2.2"
 kotlin-wrappers = "1.0.0-pre.721"
+koalaplot-version = "0.6.4"
+plotly="0.7.1.1"
+
 
 [plugins]
 
@@ -148,7 +151,7 @@ jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrai
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight"}
 
 [libraries]
-
+koalaplot = {module = "io.github.koalaplot:koalaplot-core",version.ref = "koalaplot-version"}
 moko-resources = { module = "dev.icerock.moko:resources", version.ref = "version-moko-resources" }
 moko-resources-compose = { module = "dev.icerock.moko:resources-compose", version.ref = "version-moko-resources" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
@@ -374,3 +377,4 @@ androidx-credentials = { group = "androidx.credentials", name = "credentials", v
 sqldelight-sqlite-driver-jvm = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
 sqldelight-sqlite-driver-android = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
 sqldelight-coroutine-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
+plotlykt-core = { module = "space.kscience:plotlykt-core", version.ref = "plotly" }

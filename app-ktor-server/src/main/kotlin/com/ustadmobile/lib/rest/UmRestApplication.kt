@@ -54,6 +54,7 @@ import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorJvm
 import com.ustadmobile.core.domain.phonenumber.PhoneNumValidatorUseCase
 import com.ustadmobile.core.domain.phonenumber.PhoneNumberUtilJvm
 import com.ustadmobile.core.domain.report.query.GenerateReportQueriesUseCase
+import com.ustadmobile.core.domain.report.query.GenerateTestXapiStatementsUseCase
 import com.ustadmobile.core.domain.report.query.RunReportUseCase
 import com.ustadmobile.core.domain.report.query.RunReportUseCaseDatabaseImpl
 import com.ustadmobile.core.domain.tmpfiles.CreateTempUriUseCase
@@ -150,6 +151,7 @@ import com.ustadmobile.lib.rest.domain.person.bulkadd.BulkAddPersonRoute
 import com.ustadmobile.lib.rest.domain.systemconfig.verifyauth.VerifySystemConfigAuthUseCase
 import com.ustadmobile.lib.rest.domain.report.query.RunReportRoute
 import com.ustadmobile.lib.rest.domain.report.query.RunReportServerUseCase
+import com.ustadmobile.lib.rest.domain.report.query.RunTestReport
 import com.ustadmobile.lib.rest.domain.xapi.XapiRoute
 import com.ustadmobile.lib.rest.domain.xapi.savestatementonclear.SaveStatementOnUnloadRoute
 import com.ustadmobile.lib.rest.domain.xapi.session.ResumeOrStartXapiSessionRoute
@@ -161,6 +163,7 @@ import com.ustadmobile.centralappconfigdb.sqlite.CentralAppConfigDb
 import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
 import com.ustadmobile.core.domain.invite.ParseInviteUseCase
 import com.ustadmobile.core.domain.invite.SendClazzInvitesUseCase
+import com.ustadmobile.core.domain.report.formatter.CreateGraphFormatterUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockSendEmailUseCase
 import com.ustadmobile.lib.rest.domain.invite.email.SendEmailUseCaseImpl
 import com.ustadmobile.lib.rest.domain.invite.email.mockemailsender.MockEmailSender
@@ -770,6 +773,13 @@ fun Application.umRestApplication(
                 storeActivitiesUseCase = instance(),
             )
         }
+        bind<GenerateTestXapiStatementsUseCase>() with scoped(LearningSpaceScope.Default).singleton {
+            GenerateTestXapiStatementsUseCase(
+                db = instance(tag = DoorTag.TAG_DB),
+                learningSpace = context,
+                xapiStatementResource = instance()
+            )
+        }
 
         bind<ResumeOrStartXapiSessionUseCase>() with scoped(LearningSpaceScope.Default).singleton {
             ResumeOrStartXapiSessionUseCaseLocal(
@@ -908,6 +918,10 @@ fun Application.umRestApplication(
                 db = instance(tag = DoorTag.TAG_DB),
                 generateReportQueriesUseCase = instance(),
             )
+        }
+        // Add this new binding for CreateGraphFormatterUseCase
+        bind<CreateGraphFormatterUseCase>() with singleton {
+            CreateGraphFormatterUseCase()
         }
 
         try {
@@ -1135,6 +1149,13 @@ fun Application.umRestApplication(
 
                     VerifySignInWithPasskeyRoute(
                         useCase = { call ->
+                            di.on(call).direct.instance()
+                        }
+                    )
+                }
+                route("generate-xapi-statements") {
+                    RunTestReport(
+                        generateTestXapiStatementsUseCase = { call ->
                             di.on(call).direct.instance()
                         }
                     )

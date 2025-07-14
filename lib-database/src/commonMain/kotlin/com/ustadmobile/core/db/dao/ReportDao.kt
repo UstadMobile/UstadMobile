@@ -4,6 +4,7 @@ import app.cash.paging.PagingSource
 import androidx.room.*
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.annotation.DoorDao
+import com.ustadmobile.door.annotation.HttpAccessible
 import com.ustadmobile.door.annotation.Repository
 import kotlinx.coroutines.flow.Flow
 import com.ustadmobile.lib.db.entities.Report
@@ -16,9 +17,11 @@ expect abstract class ReportDao : BaseDao<Report> {
     @RawQuery
     abstract fun getResults(query: DoorQuery): List<Report>
 
+    @HttpAccessible
     @Query("DELETE FROM Report WHERE reportUid = :reportUid")
     abstract suspend fun deleteReportByUid(reportUid: Long)
 
+    @HttpAccessible
     @Query("SELECT * FROM Report ORDER BY reportTitle ASC")
     abstract fun findAllReports(): PagingSource<Int, Report>
 
@@ -33,6 +36,7 @@ expect abstract class ReportDao : BaseDao<Report> {
         isTemplate: Boolean
     ): PagingSource<Int, Report>
 
+    @HttpAccessible
     @Query("SELECT * FROM Report WHERE reportUid = :entityUid")
     abstract suspend fun findByUid(entityUid: Long): Report?
 

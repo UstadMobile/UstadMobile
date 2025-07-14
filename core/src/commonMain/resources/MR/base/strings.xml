@@ -87,6 +87,7 @@
     <string name="attendance">Attendance</string>
     <string name="classes">Classes</string>
     <string name="exams">Exams</string>
+    <string name="report">Report</string>
     <string name="reports">Reports</string>
     <string name="choose_template">Choose template</string>
     <string name="save_as_template">Save as template</string>
@@ -288,7 +289,7 @@
     <string name="verb">Verb</string>
     <string name="add_a_new_verb">Add a new verb</string>
     <string name="id_verbentity_urlid">ID: %s</string>
-    <string name="edit_filters">Edit filters</string>
+    <string name="edit_filters">Edit filter</string>
     <string name="field_person_gender">Person gender</string>
     <string name="field_person_age">Person age</string>
     <string name="field_content_completion">Content completion status</string>
@@ -2025,8 +2026,8 @@
     <string name="subtitles">Subtitles</string>
 
     <!--  Edit Report -->
-    <string name="edit_report">Edit Report</string>
-    <string name="add_a_new_report">Add a New Report</string>
+    <string name="edit_report">Edit report</string>
+    <string name="add_a_new_report">Add a new report</string>
     <string name="field">Field</string>
     <string name="condition">Condition</string>
     <string name="value">Value</string>
@@ -2039,7 +2040,7 @@
     <string name="chart_type">Chart type</string>
     <string name="time_range">Time range</string>
     <string name="filters">Filters</string>
-    <string name="add_filter">Add filter</string>
+    <string name="add_filter">Add Filter</string>
     <string name="add_series">Add Series</string>
     <string name="total_duration">Total Duration</string>
     <string name="average_duration">Average Duration</string>
@@ -2059,6 +2060,24 @@
     <string name="none">None</string>
     <string name="attendance_query">Attendance Query</string>
     <string name="statement_query">Statement Query</string>
+    <string name="duration_hours">Duration </string>
+    <string name="count">Count </string>
+    <string name="quantity">Quantity </string>
+    <string name="unit">Unit </string>
+    <string name="from">From </string>
+    <string name="to_">To </string>
+    <string name="quantity_must_be_at_least_1">Quantity must be at least 1 </string>
+    <string name="empty_data">Empty data </string>
+    <string name="No_data_available">No data available </string>
+    <string name="at_least_one_series_required">At least one series required </string>
+
+
+    <string name="hour_unit">hr</string>
+    <string name="minute_unit">min</string>
+    <string name="second_unit">sec</string>
+    <string name="millisecond_unit">ms</string>
+
+
     <string name="progress_key">Progress</string>
 
     <string name="response">Response</string>
@@ -2067,15 +2086,27 @@
 
     <string name="false_key">false</string>
 
-    <string name="equals">Equals</string>
-    <string name="not_equals">Not Equals</string>
-    <string name="greater">Greater</string>
-    <string name="lesser">Lesser</string>
-    <string name="between">Between</string>
+    <string name="equals">= Equals</string>
+    <string name="not_equals">!= Not Equals</string>
+    <string name="greater">&gt; Greater</string>
+    <string name="lesser">&lt; Lesser</string>
     <string name="in_list">In List</string>
     <string name="not_in_list">Not In List</string>
+    <string name="greater_or_equal">&gt; = Greater Than or Equal</string>
+    <string name="lesser_or_equal">&lt; = Less Than or Equal</string>
 
     <string name="other">Other</string>
+    <string name="export_data">Export data</string>
+    <string name="graph_data">Graph data</string>
+    <string name="raw_data">Raw data</string>
+    <string name="count">Count</string>
+    <string name="invalid_report_format">invalid report format</string>
+    <string name="invalid_report_config">invalid report config</string>
+    <string name="unknown_error">unknown error</string>
+
+    <string name="copy_of">Copy of</string>
+    <string name="copy">Copy</string>
+    <string name="copy_course">Copy course</string>
 
     <string name="months">Months</string>
     <string name="weeks">Weeks</string>

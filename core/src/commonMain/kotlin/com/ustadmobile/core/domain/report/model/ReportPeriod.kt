@@ -20,9 +20,9 @@ import kotlinx.serialization.Serializable
  * Enum of the relative units that can be selected for a report e.g. last x days, last x months, etc.
  */
 enum class ReportTimeRangeUnit(
-    val label: StringResource,
+    override val label: StringResource,
     val unit: DateTimeUnit.DateBased
-) {
+):OptionWithLabelStringResource {
     DAY(MR.strings.days, DateTimeUnit.DAY),
     WEEK(MR.strings.weeks, DateTimeUnit.WEEK),
     MONTH(MR.strings.months, DateTimeUnit.MONTH),
@@ -114,8 +114,8 @@ sealed class ReportPeriod {
  */
 @Serializable
 class RelativeRangeReportPeriod(
-    private val rangeUnit: ReportTimeRangeUnit,
-    private val rangeQuantity: Int,
+    val rangeUnit: ReportTimeRangeUnit,
+    val rangeQuantity: Int,
 ): ReportPeriod() {
 
     override fun periodEnd(timeZone: TimeZone): LocalDate {

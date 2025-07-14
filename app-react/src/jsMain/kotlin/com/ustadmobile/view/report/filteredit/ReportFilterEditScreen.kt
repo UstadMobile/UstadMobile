@@ -102,14 +102,15 @@ private val ReportFilterEditScreenComponent2 = FC<ReportFilterEditScreenProps> {
                         fullWidth = true
                         onChange = { event, _ ->
                             val selectedValue =
-                                Comparisons.entries.firstOrNull { it.name == event.target.value }
+                                props.uiState.filterConditionOptions?.comparisonTypes
+                                    ?.firstOrNull { it.name == event.target.value }
                                     ?: Comparisons.EQUALS
                             val updatedOptions =
                                 props.uiState.filters?.copy(reportFilterCondition = selectedValue)
                             props.onReportFilterChanged(updatedOptions)
                         }
 
-                        Comparisons.entries.forEach { option ->
+                        props.uiState.filterConditionOptions?.comparisonTypes?.forEach { option ->
                             MenuItem {
                                 value = option.name
                                 +ReactNode(strings[option.label])

@@ -19,6 +19,7 @@ import com.ustadmobile.core.db.dao.CoursePermissionDaoCommon.PERSON_COURSE_PERMI
 import com.ustadmobile.lib.db.composites.ClazzAndDetailPermissions
 import com.ustadmobile.lib.db.composites.ClazzAndDisplayDetails
 import com.ustadmobile.lib.db.composites.ClazzNameAndTerminology
+import com.ustadmobile.lib.db.composites.ClazzUidAndName
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_TEACHER
@@ -516,5 +517,12 @@ expect abstract class ClazzDao : BaseDao<Clazz> {
         filterByEnrolledMemberPersonUid: Long,
     ): List<Clazz>
 
+
+    @Query("""
+        SELECT Clazz.clazzUid, Clazz.clazzName
+          FROM Clazz
+         WHERE Clazz.clazzUid IN (:uidList) 
+    """)
+    abstract suspend fun findClazzNamesByUids(uidList: List<Long>): List<ClazzUidAndName>
 
 }

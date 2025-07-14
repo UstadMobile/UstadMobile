@@ -1,17 +1,25 @@
 package com.ustadmobile.view.report.edit
 
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.domain.report.model.FixedReportTimeRange
+import com.ustadmobile.core.domain.report.model.RelativeRangeReportPeriod
 import com.ustadmobile.core.domain.report.model.ReportOptions2
+import com.ustadmobile.core.domain.report.model.ReportPeriod
+import com.ustadmobile.core.domain.report.model.ReportPeriodOption
 import com.ustadmobile.core.domain.report.model.ReportSeries2
 import com.ustadmobile.core.domain.report.model.ReportSeriesVisualType
 import com.ustadmobile.core.domain.report.model.ReportSeriesYAxis
+import com.ustadmobile.core.domain.report.model.ReportTimeRangeUnit
 import com.ustadmobile.core.domain.report.model.ReportXAxis
+import com.ustadmobile.core.domain.report.model.YAxisTypes
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditUiState
 import com.ustadmobile.core.viewmodel.report.edit.ReportEditViewModel
 import com.ustadmobile.hooks.useUstadViewModel
 import com.ustadmobile.mui.components.ThemeContext
+import com.ustadmobile.mui.components.UstadDateField
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.util.ext.onTextChange
 import kotlinx.coroutines.Dispatchers
@@ -30,33 +38,37 @@ import mui.material.Select
 import mui.material.Stack
 import mui.material.StackDirection
 import mui.material.TextField
-import mui.material.Typography
-import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
 import react.ReactNode
+import react.dom.onChange
 import react.useRequiredContext
 import web.cssom.AlignItems
+import web.cssom.Auto
 import web.cssom.Color
 import web.cssom.JustifyContent
-import web.cssom.pct
+import web.cssom.number
 import web.cssom.px
+import web.html.HTMLInputElement
 
 external interface ReportEditScreenProps : Props {
     var uiState: ReportEditUiState
     var onEntityChanged: (ReportOptions2) -> Unit
     var onSeriesChanged: (ReportSeries2) -> Unit
     var onAddSeries: () -> Unit
-    var onAddFilter: (seriesId: Int) -> Unit
-    var onRemoveFilter: (index: Int, seriesId: Int) -> Unit
+    var onRemoveSeries: (seriesId: Int) -> Unit
 }
 
 
 private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
     val strings = useStringProvider()
     val theme by useRequiredContext(ThemeContext)
+    val requiredYAxisType: YAxisTypes? = props.uiState.reportOptions2.series
+        .mapNotNull { it.reportSeriesYAxis?.type }
+        .distinct()
+        .singleOrNull()
 
     UstadStandardContainer {
         Stack {
@@ -74,6 +86,143 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 error = props.uiState.reportTitleError != null
 
             }
+
+            // Time Range Dropdown
+            val selected = findMatchingReportPeriodOption(
+                props.uiState.reportOptions2.period,
+                ReportPeriodOption.entries
+            )
+                ?: when (props.uiState.reportOptions2.period) {
+                    is RelativeRangeReportPeriod -> ReportPeriodOption.CUSTOM_PERIOD
+                    is FixedReportTimeRange -> ReportPeriodOption.CUSTOM_DATE_RANGE
+                    else -> null
+                }
+            FormControl {
+                fullWidth = true
+                error = props.uiState.timeRangeError != null
+                InputLabel {
+                    id = "time_range_label"
+                    shrink = true
+                    sx {
+                        backgroundColor = Color(theme.palette.background.default)
+                    }
+                    +ReactNode(strings[MR.strings.time_range] + "*")
+                }
+                Select {
+                    value = selected
+                    id = "time_range"
+                    labelId = "time_range_label"
+                    fullWidth = true
+                    onChange = { event, _ ->
+                        val selectedOption =
+                            ReportPeriodOption.entries.find { it.name == event.target.value }
+                        if (selectedOption != null) {
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(period = selectedOption.period))
+                        }
+                    }
+
+                    ReportPeriodOption.entries.forEach { option ->
+                        MenuItem {
+                            value = option.name
+                            +ReactNode(strings[option.label])
+                        }
+                    }
+                }
+            }
+
+            // Show CustomPeriodInputs only if CUSTOM_PERIOD is selected
+            if (selected == ReportPeriodOption.CUSTOM_PERIOD) {
+                Stack {
+                    direction = responsive(StackDirection.row)
+                    spacing = responsive(8.px)
+                    sx {
+                        justifyContent = JustifyContent.spaceBetween
+                        alignItems = AlignItems.center
+                    }
+                    TextField {
+                        label = ReactNode(strings[MR.strings.quantity])
+                        fullWidth = true
+                        value =
+                            (props.uiState.reportOptions2.period as RelativeRangeReportPeriod).rangeQuantity.toString()
+                        onChange = { event ->
+                            val target = event.target as? HTMLInputElement
+                            val quantity = target?.value?.toIntOrNull() ?: 0
+                            val newRange = RelativeRangeReportPeriod(
+                                (props.uiState.reportOptions2.period as RelativeRangeReportPeriod).rangeUnit,
+                                quantity
+                            )
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(period = newRange))
+                        }
+                        error = props.uiState.quantityError != null
+                    }
+
+                    Select {
+                        fullWidth = true
+                        value =
+                            (props.uiState.reportOptions2.period as RelativeRangeReportPeriod).rangeUnit.name
+                        onChange = { event, _ ->
+                            val newUnit = ReportTimeRangeUnit.valueOf(event.target.value)
+                            val newRange = RelativeRangeReportPeriod(
+                                newUnit,
+                                (props.uiState.reportOptions2.period as RelativeRangeReportPeriod).rangeQuantity
+                            )
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(period = newRange))
+                        }
+
+                        ReportTimeRangeUnit.entries.forEach { unit ->
+                            MenuItem {
+                                value = unit.name
+                                +ReactNode(unit.name)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Show CustomDateRangeInputs only if CUSTOM_DATE_RANGE is selected
+            if (selected == ReportPeriodOption.CUSTOM_DATE_RANGE) {
+                // Custom Date Range Inputs
+                Stack {
+                    direction = responsive(StackDirection.row)
+                    spacing = responsive(8.px)
+                    sx {
+                        justifyContent = JustifyContent.spaceBetween
+                        alignItems = AlignItems.center
+                    }
+                    UstadDateField {
+                        fullWidth = true
+                        id = "from_date"
+                        timeInMillis =
+                            (props.uiState.reportOptions2.period as FixedReportTimeRange).fromDateMillis
+                        label = ReactNode(strings[MR.strings.from])
+                        timeZoneId = UstadMobileConstants.UTC
+                        onChange = { newDate ->
+                            val newRange = FixedReportTimeRange(
+                                newDate,
+                                (props.uiState.reportOptions2.period as FixedReportTimeRange).toDateMillis
+                            )
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(period = newRange))
+                        }
+                    }
+
+                    UstadDateField {
+                        fullWidth = true
+                        id = "to_date"
+                        timeInMillis =
+                            (props.uiState.reportOptions2.period as FixedReportTimeRange).toDateMillis
+                        label = ReactNode(strings[MR.strings.to_])
+                        timeZoneId = UstadMobileConstants.UTC
+                        onChange = { newDate ->
+                            val newRange = FixedReportTimeRange(
+                                (props.uiState.reportOptions2.period as FixedReportTimeRange).fromDateMillis,
+                                newDate
+                            )
+                            props.onEntityChanged(props.uiState.reportOptions2.copy(period = newRange))
+                        }
+                    }
+                }
+            }
+
 
             // X Axis Selection
             FormControl {
@@ -99,7 +248,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     onChange = { event, _ ->
                         val selectedValue = ReportXAxis.entries.firstOrNull {
                             it.name == event.target.value
-                        } ?: ReportXAxis.NONE
+                        } ?: ReportXAxis.DAY
 
                         props.onEntityChanged(props.uiState.reportOptions2.copy(xAxis = selectedValue))
                     }
@@ -125,24 +274,61 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                     spacing = responsive(16.px)
 
                     // Series Title
-                    TextField {
-                        id = "series_title"
-                        value = series.reportSeriesTitle
-                        label = ReactNode(strings[MR.strings.series_title] + "*")
-                        onTextChange = { newValue ->
-                            props.onSeriesChanged(series.copy(reportSeriesTitle = newValue))
-
+                    Stack {
+                        direction = responsive(StackDirection.row)
+                        spacing = responsive(8.px)
+                        sx {
+                            justifyContent = JustifyContent.spaceBetween
+                            alignItems = AlignItems.center
                         }
-                        helperText = ReactNode(
-                            props.uiState.seriesTitleError ?: strings[MR.strings.required]
-                        )
-                        error = props.uiState.seriesTitleError != null
+
+                        TextField {
+                            sx {
+                                flexGrow = number(1.0)
+                                alignItems = AlignItems.start
+                            }
+                            fullWidth = true
+                            id = "series_title"
+                            value = series.reportSeriesTitle
+                            label = ReactNode(strings[MR.strings.series_title] + "*")
+                            onTextChange = { newValue ->
+                                props.onSeriesChanged(series.copy(reportSeriesTitle = newValue))
+                            }
+                            helperText = ReactNode(
+                                props.uiState.seriesTitleErrors[series.reportSeriesUid]
+                                    ?: strings[MR.strings.required]
+                            )
+                            error = props.uiState.seriesTitleErrors[series.reportSeriesUid] != null
+                        }
+
+                        if (!props.uiState.hasSingleSeries) {
+                            IconButton {
+                                sx {
+                                    marginLeft = Auto.auto
+                                    padding = 8.px
+                                }
+                                onClick = { props.onRemoveSeries(series.reportSeriesUid) }
+                                Icon {
+                                    sx {
+                                        width = 20.px
+                                        height = 20.px
+                                    }
+                                    Close {
+                                        sx {
+                                            width = 20.px
+                                            height = 20.px
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
 
-                    // Y Axis Dropdown
+
+                    // Y Axis Dropdown (updated with series count check)
                     FormControl {
                         fullWidth = true
-                        error = props.uiState.yAxisError != null
+                        error = props.uiState.yAxisErrors[series.reportSeriesUid] != null
 
                         InputLabel {
                             id = "y_axis_label"
@@ -161,24 +347,33 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             onChange = { event, _ ->
                                 val selectedValue =
                                     ReportSeriesYAxis.entries.firstOrNull { it.name == event.target.value }
-                                        ?: ReportSeriesYAxis.NONE
+                                        ?: ReportSeriesYAxis.TOTAL_DURATION
                                 props.onSeriesChanged(series.copy(reportSeriesYAxis = selectedValue))
                             }
 
                             ReportSeriesYAxis.entries.forEach { option ->
+                                val isDisabled = if (props.uiState.reportOptions2.series.size > 1) {
+                                    requiredYAxisType != null && option.type != requiredYAxisType
+                                } else {
+                                    false
+                                }
                                 MenuItem {
                                     value = option.name
+                                    disabled = isDisabled
                                     +ReactNode(strings[option.label])
                                 }
                             }
                         }
 
                         FormHelperText {
-                            +ReactNode(props.uiState.yAxisError ?: strings[MR.strings.required])
+                            +ReactNode(
+                                props.uiState.yAxisErrors[series.reportSeriesUid]
+                                    ?: strings[MR.strings.required]
+                            )
                         }
                     }
 
-                    // Subgroup by Dropdown
+                    // Subgroup by Dropdown - Updated with disabled options
                     FormControl {
                         fullWidth = true
 
@@ -188,7 +383,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             sx {
                                 backgroundColor = Color(theme.palette.background.default)
                             }
-                            +ReactNode(strings[MR.strings.subgroup_by] + "*")
+                            +ReactNode(strings[MR.strings.subgroup_by])
                         }
 
                         Select {
@@ -199,11 +394,22 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             onChange = { event, _ ->
                                 val selectedValue =
                                     ReportXAxis.entries.firstOrNull { it.name == event.target.value }
-                                        ?: ReportXAxis.NONE
+                                        ?: ReportXAxis.DAY
                                 props.onSeriesChanged(series.copy(reportSeriesSubGroup = selectedValue))
                             }
 
-                            ReportXAxis.entries.forEach { option ->
+                            val optionsToShow = if (props.uiState.reportOptions2.xAxis?.datePeriod != null) {
+                                // Case 1: X-axis is date (MONTH) - only show non-date options except current x-axis
+                                ReportXAxis.entries.filter { it.datePeriod == null }
+                            } else {
+                                // Case 2 & 3: X-axis is non-date (CLASS, GENDER) - show date options plus other non-date options except current x-axis
+                                ReportXAxis.entries.filter { option ->
+                                    option.datePeriod != null ||  // Include all date options
+                                            (option.datePeriod == null && option != props.uiState.reportOptions2.xAxis)
+                                }
+                            }
+
+                            optionsToShow.forEach { option ->
                                 MenuItem {
                                     value = option.name
                                     +ReactNode(strings[option.label])
@@ -216,6 +422,7 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 // Chart Type Dropdown
                 FormControl {
                     fullWidth = true
+                    error = props.uiState.chartTypeError[series.reportSeriesUid] != null
                     InputLabel {
                         id = "chart_type_label"
                         shrink = true
@@ -244,93 +451,12 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                             }
                         }
                     }
-                }
-
-                // Time Range Dropdown
-                FormControl {
-                    fullWidth = true
-                    InputLabel {
-                        id = "time_range_label"
-                        shrink = true
-                        sx {
-                            backgroundColor = Color(theme.palette.background.default)
-                        }
-                        +ReactNode(strings[MR.strings.time_range] + "*")
+                    FormHelperText {
+                        +ReactNode(
+                            props.uiState.chartTypeError[series.reportSeriesUid]
+                                ?: strings[MR.strings.required]
+                        )
                     }
-
-                    /* TODO: Update as per updated prototype with custom period and custom date range options
-                    Select {
-                        value = series.reportTimeRange?.name ?: ""
-                        id = "time_range"
-                        labelId = "time_range_label"
-                        fullWidth = true
-                        onChange = { event, _ ->
-                            val selectedValue =
-                                ReportTimeRange.entries.firstOrNull { it.name == event.target.value }
-                                    ?: ReportTimeRange.LAST_WEEK
-                            props.onSeriesChanged(series.copy(reportTimeRange = selectedValue))
-                        }
-
-                        ReportTimeRange.entries.forEach { option ->
-                            MenuItem {
-                                value = option.name
-                                +ReactNode(strings[option.label])
-                            }
-                        }
-                    }*/
-                }
-
-                if (series.reportSeriesFilters?.isNotEmpty() == true) {
-                    Typography {
-                        variant = TypographyVariant.h6
-                        +strings[MR.strings.filters]
-                    }
-                }
-
-                series.reportSeriesFilters?.forEachIndexed { index, reportFilter2 ->
-                    Stack {
-                        direction = responsive(StackDirection.row)
-                        spacing = responsive(8.px)
-                        sx {
-                            width = 100.pct
-                            justifyContent = JustifyContent.spaceBetween
-                            alignItems = AlignItems.center
-                        }
-                        val fieldName = reportFilter2.reportFilterField?.name?.lowercase()
-                            ?.replaceFirstChar { it.uppercase() } ?: ""
-                        val comparisonSymbol = reportFilter2.reportFilterCondition?.symbol ?: ""
-                        val filterText =
-                            "$fieldName $comparisonSymbol ${reportFilter2.reportFilterValue}"
-
-                        Typography {
-                            variant = TypographyVariant.h6
-                            +ReactNode(filterText)
-                        }
-                        IconButton {
-                            onClick = {
-                                props.onRemoveFilter(index, series.reportSeriesUid)
-                            }
-                            Icon {
-                                sx {
-                                    width = 20.px
-                                    height = 20.px
-                                }
-                                Close {
-                                    sx {
-                                        width = 20.px
-                                        height = 20.px
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                Button {
-                    id = "filter_add_button"
-                    fullWidth = true
-                    onClick = { props.onAddFilter(series.reportSeriesUid) }
-                    variant = ButtonVariant.outlined
-                    +strings[MR.strings.add_filter]
                 }
             }
             Button {
@@ -340,6 +466,29 @@ private val ReportEditScreenComponent2 = FC<ReportEditScreenProps> { props ->
                 variant = ButtonVariant.outlined
                 +strings[MR.strings.add_series]
             }
+        }
+    }
+}
+
+private fun findMatchingReportPeriodOption(
+    period: ReportPeriod,
+    options: List<ReportPeriodOption>
+): ReportPeriodOption? {
+    return options.firstOrNull { option ->
+        when (val optionPeriod = option.period) {
+            is RelativeRangeReportPeriod -> {
+                period is RelativeRangeReportPeriod &&
+                        optionPeriod.rangeUnit == period.rangeUnit &&
+                        optionPeriod.rangeQuantity == period.rangeQuantity
+            }
+
+            is FixedReportTimeRange -> {
+                period is FixedReportTimeRange &&
+                        optionPeriod.fromDateMillis == period.fromDateMillis &&
+                        optionPeriod.toDateMillis == period.toDateMillis
+            }
+
+            else -> false
         }
     }
 }
@@ -356,7 +505,6 @@ val ReportEditScreen = FC<Props> {
         onEntityChanged = viewModel::onEntityChanged
         onSeriesChanged = viewModel::onSeriesChanged
         onAddSeries = viewModel::onAddSeries
-        onAddFilter = viewModel::onAddFilter
-        onRemoveFilter = viewModel::onRemoveFilter
+        onRemoveSeries = viewModel::onRemoveSeries
     }
 }
