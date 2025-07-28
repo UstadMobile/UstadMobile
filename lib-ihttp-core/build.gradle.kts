@@ -64,14 +64,13 @@ kotlin {
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 35
     namespace = "com.ustadmobile.ihttp.core"
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 34
     }
 
     compileOptions {

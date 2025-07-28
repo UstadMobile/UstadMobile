@@ -21,7 +21,6 @@ android {
     sourceSets.main.manifest.srcFile('src/androidMain/AndroidManifest.xml')
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion rootProject.ext.version_android_target_sdk
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

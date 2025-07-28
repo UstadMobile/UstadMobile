@@ -86,7 +86,7 @@ dependencies {
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 35
     namespace = "com.ustadmobile.libcache"
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
@@ -95,7 +95,6 @@ android {
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 34
         multiDexEnabled = true
     }
     compileOptions {

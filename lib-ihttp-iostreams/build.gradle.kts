@@ -24,7 +24,7 @@ kotlin {
 
 android {
     namespace = "com.ustadmobile.ihttp.iostreams"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 21
