@@ -3,7 +3,6 @@ tags:
   - courseBlocks
 env:
   TESTRESULTSDIR: "build/reports/maestro/003_005_course_view_and_modules_can_expand_collapse/Screenshots"
-  TESTCOURSENAME: "Test Course Block"
 onFlowStart:
   - startRecording: 003_005_course_view_and_modules_can_expand_collapse
   - clearState: com.toughra.ustadmobile
@@ -33,7 +32,7 @@ onFlowComplete:
       USERNAME: "teach1"
       PASSWORD: "testt1"
 
-- tapOn: ${TESTCOURSENAME}
+- tapOn: "Test Course Block"
 - runFlow:
     file: "common/add_demo_block_structure.yaml"
     env:
@@ -48,7 +47,7 @@ onFlowComplete:
       USERNAME: "stud1"
       PASSWORD: "tests1"
 - tapOn: "courses"
-- tapOn: ${TESTCOURSENAME}
+- tapOn: "Test Course Block"
 # Collapse the module by tapping it
 - tapOn: "SEMESTER 1"
 - assertNotVisible:
