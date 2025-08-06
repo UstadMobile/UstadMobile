@@ -14,9 +14,11 @@ class EnqueueBlobDownloadClientUseCaseJvm(
     private val learningSpace: LearningSpace,
     db: UmAppDatabase,
 ): AbstractEnqueueBlobDownloadClientUseCase(db) {
+
     override suspend fun invoke(
         items: List<EnqueueBlobDownloadClientUseCase.EnqueueBlobDownloadItem>,
-        existingTransferJobId: Int
+        existingTransferJobId: Int,
+        connectivityRequired: Boolean,
     ) {
         val transferJob = createTransferJob(items, existingTransferJobId)
         val uniqueName = uniqueNameFor(learningSpace, transferJob.tjUid)

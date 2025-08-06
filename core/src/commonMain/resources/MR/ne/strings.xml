@@ -89,7 +89,6 @@
     <string name="download_continue_stacked_label">डाउनलोडलाई निरन्तरता दिऔं</string>
     <string name="download_continue_btn_label">निरन्तरता दिऔं</string>
     <string name="content_editor_create_new_category">नयाँ फोल्डर</string>
-    <string name="download_state_downloading">जम्मा %1$s आइटमहरू &lt;b&gt;डाउनलोड हुँदैछ&lt;/b&gt;, जसले तपाईंको डिभाइस स्टोरेजको जम्मा %2$s प्रयोग गर्दैछन्।</string>
     <string name="content_editor_save_error">सेभ गर्दा त्रुटि देखियो, फेरि कोशिस गरौं</string>
     <string name="content_entry_export_inprogress">एक्सपोर्ट गर्दै</string>
     <string name="bar_chart" value="100">बार चार्ट</string>
@@ -209,7 +208,6 @@
     <string name="content_total_duration" value="200">बिषयसामग्री प्रयोग - कूल समयावधि</string>
     <string name="count_session" value="202">विषयसामग्री प्रयोग - सेसनहरूको सङ्ख्या</string>
     <string name="confirm_delete_message">के तपाईं साच्चैं यो इन्ट्रीलाई तपाईंको डिभाइसबाट डिलिट गर्न चाहनुहुन्छ\?</string>
-    <string name="download_state_downloaded">जम्मा %1$s आइटमहरू &lt;b&gt;डाउनलोड भयो&lt;/b&gt;, जसले तपाईंको डिभाइस स्टोरेजको जम्मा %2$s प्रयोग गरिरहेका छन्।</string>
     <string name="number_active_users" value="204">विषयसामग्री प्रयोग - सक्रिय प्रयोगकर्ताहरूको सङ्ख्या</string>
     <string name="number_students_completed" value="206">विषयसामग्री प्रयोग - विषयसामग्री पूरा गर्ने विद्यार्थी सङ्ख्या</string>
     <string name="total_absences" value="209">उपस्थिति - कूल गैरहाजिरी</string>
@@ -478,7 +476,6 @@
     <string name="select_one">एउटा छनौट गरौं</string>
     <string name="measurement_type">मापन प्रकार</string>
     <string name="export">एक्सपोर्ट गरौं</string>
-    <string name="download_state_download">जम्मा %1$s आइटमहरू &lt;b&gt;डाउनलोड गरौं&lt;/b&gt;, तिनीहरूले तपाईंको डिभाइस स्टोरेजको जम्मा %2$s प्रयोग गर्नेछन्।</string>
     <string name="holiday_calendars">बिदा पात्रोहरू</string>
     <string name="download_downloading_placeholder">%2$s को %1$s डाउनलोड हुँदै</string>
     <string name="holiday_calendars_desc">बिदा पात्रो थप्ने, हटाउने र परिवर्तन गर्ने</string>
@@ -933,14 +930,7 @@
     <string name="we_sent_a_message_to_your_parent">हामीले तपाईँको अभिभावकलाई एउटा सन्देश पठाएका छौं (% 1$s) ताकि वहाँहरूले तपाईंको दर्ता स्वीकृत गर्न सकून् । तपाईँको अभिभावकले स्वीकृत गरेपछि तपाईँले सेट गर्नुभएको प्रयोगकर्ता नाम (username) र पासवर्ड प्रयोग गरेर लगइन गर्न सक्नुहुन्छ ।</string>
     <string name="you_are_already_in_school">त्रुटि:तपाईं पहिल्यै यो स्कूलमा भर्ना भैसक्नु भएकोछ: %1$s</string>
     <string name="parent_child_register_message">"आदरणिय अभिभावक ज्यू, तपाईँको (% 1$s) ले% 2$s सँग दर्ता गर्न अनुरोध गरेको छ । कृपया तलको लिङ्क प्रयोग गरेर अनुरोध स्वीकार वा अस्वीकार गर्नुहोस्। % 3$s यदि अनुरोध ३० दिनभित्र स्वीकार गरिएन भने,  यो अनुरोध (र कुनै पनि व्यक्तिगत सूचनाहरु) मेटिनेछ । तपाईँले एउटै लिङ्क प्रयोग गरेर कुनै पनि समयमा तपाईले दिनुभएको अनुमोदन रद्द गर्न सक्नुहुनेछ। धन्यवाद,% 2$s"</string>
-    <string name="parent_consent_explanation">"म पुष्टि गर्दछु कि म निम्न  बच्चाको अभिभावक वा कानूनी अभिभावक हुँ:
-\n
-\nनाम:% 1$s
-\n जन्म मिति:% 2$s
-\n
-\nयदि मैले% 3$s प्रयोग गरेर मेरो बच्चालाई सहमति दिएँ भने, व्यक्तिगत रूपमा पहिचान योग्य जानकारीको संकलन र प्रशोधन गोपनीयता नीति र तलका नियम र सर्तहरूको पालनमा गरिनेछ।
-\n
-\nतपाईलाई इमेल  पठाइएको लिङ्क प्रयोग गरेरकुनै पनि समयमा  तपाईले दिनु भएको  सहमति  रद्द गर्न सक्नुहुन्छ। यदि तपाईंले सहमति नजनाउने छनौट गर्नुभयो भने, तपाईंको बच्चाले प्रदान गरेको कुनै पनि डेटा  २४ घण्टा भित्र मेटिनेछ।"</string>
+    <string name="parent_consent_explanation">"म पुष्टि गर्दछु कि म निम्न  बच्चाको अभिभावक वा कानूनी अभिभावक हुँ:\n\n\n\nनाम:% 1$s\n\n जन्म मिति:% 2$s\n\n\n\nयदि मैले% 3$s प्रयोग गरेर मेरो बच्चालाई सहमति दिएँ भने, व्यक्तिगत रूपमा पहिचान योग्य जानकारीको संकलन र प्रशोधन गोपनीयता नीति र तलका नियम र सर्तहरूको पालनमा गरिनेछ।\n\n\n\nतपाईलाई इमेल  पठाइएको लिङ्क प्रयोग गरेरकुनै पनि समयमा  तपाईले दिनु भएको  सहमति  रद्द गर्न सक्नुहुन्छ। यदि तपाईंले सहमति नजनाउने छनौट गर्नुभयो भने, तपाईंको बच्चाले प्रदान गरेको कुनै पनि डेटा  २४ घण्टा भित्र मेटिनेछ।"</string>
     <string name="relationship">नाता</string>
     <string name="i_consent">म सहमति दिन्छु</string>
     <string name="i_do_not_consent">म सहमति दिदिन्</string>

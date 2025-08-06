@@ -10,15 +10,14 @@ import com.ustadmobile.libcache.io.RangeInputStream
 import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
-import com.ustadmobile.ihttp.request.requestBuilder
 import com.ustadmobile.ihttp.request.iRequestBuilder
-import com.ustadmobile.libcache.response.HttpPathResponse
 import com.ustadmobile.libcache.response.StringResponse
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
+import com.ustadmobile.libcache.util.storeFileAsUrl
 import com.ustadmobile.util.test.ext.newFileFromResource
+import com.ustadmobile.xxhashkmp.commonjvmimpl.XXStringHasherCommonJvm
 import kotlinx.io.asInputStream
 import kotlinx.io.files.Path
-import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteArray
 import org.junit.Assert
 import org.junit.Rule
@@ -68,26 +67,13 @@ class UstadCacheJvmTest {
         expectedContentEncoding: String? = null,
         requestHeaders: List<IHttpHeader> = emptyList(),
     ) {
-        val request = requestBuilder {
-            url = testUrl
-            requestHeaders.forEach {
-                header(it.name, it.value)
-            }
-        }
+        val request = storeFileAsUrl(
+            testFile = testFile,
+            testUrl = testUrl,
+            mimeType = mimeType,
+            requestHeaders = requestHeaders
+        ).request
 
-        store(
-            listOf(
-                CacheEntryToStore(
-                    request = request,
-                    response = HttpPathResponse(
-                        path = Path(testFile.absolutePath),
-                        fileSystem = SystemFileSystem,
-                        mimeType = mimeType,
-                        request = request,
-                    )
-                )
-            ),
-        )
 
         //Check response body content matches
         val cacheResponse = retrieve(request)
@@ -146,7 +132,8 @@ class UstadCacheJvmTest {
             .build()
         val ustadCache = UstadCacheImpl(
             pathsProvider = temporaryFolderPathsProvider,
-            db = cacheDb
+            db = cacheDb,
+            xxStringHasher = XXStringHasherCommonJvm(),
         )
 
         val createdLocks = if(createLock) {
@@ -278,6 +265,7 @@ class UstadCacheJvmTest {
             .build()
         val ustadCache = UstadCacheImpl(
             pathsProvider = temporaryFolderPathsProvider,
+            xxStringHasher = XXStringHasherCommonJvm(),
             db = cacheDb
         )
 
@@ -313,7 +301,8 @@ class UstadCacheJvmTest {
             .build()
         val ustadCache = UstadCacheImpl(
             pathsProvider = temporaryFolderPathsProvider,
-            db = cacheDb
+            db = cacheDb,
+            xxStringHasher = XXStringHasherCommonJvm(),
         )
 
         val url = "http://server.com/file.css"
@@ -327,7 +316,8 @@ class UstadCacheJvmTest {
             .build()
         val ustadCache = UstadCacheImpl(
             pathsProvider = temporaryFolderPathsProvider,
-            db = cacheDb
+            db = cacheDb,
+            xxStringHasher = XXStringHasherCommonJvm(),
         )
 
         val url = "http://server.com/file.css"

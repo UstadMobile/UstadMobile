@@ -2,26 +2,26 @@
 <resources>
     <plurals name="number_of_attempts">
         <item quantity="one">%d кушиш</item>
-        <item quantity="other"/>
+        <item quantity="other"></item>
     </plurals>
     <plurals name="duration_hours">
         <item quantity="one">%d соат</item>
-        <item quantity="other"/>
+        <item quantity="other"></item>
     </plurals>
     <plurals name="duration_minutes">
         <item quantity="one">%d дақиқа</item>
-        <item quantity="other"/>
+        <item quantity="other"></item>
     </plurals>
     <plurals name="duration_seconds">
         <item quantity="one">%d сония</item>
-        <item quantity="other"/>
+        <item quantity="other"></item>
     </plurals>
     <plurals name="items_selected">
-        <item quantity="one">%d secs</item>
-        <item quantity="other"/>
+        <item quantity="one">%d адад интихобшуда</item>
+        <item quantity="other"></item>
     </plurals>
     <plurals name="items_deleted">
-        <item quantity="one">%d ашё нест карда шуд</item>
+        <item quantity="one">%d ашё нест карда шуданд</item>
         <item quantity="other"></item>
     </plurals>
     <plurals name="items_restored">

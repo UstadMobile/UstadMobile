@@ -1,13 +1,11 @@
 package com.ustadmobile.core.domain.blob.download
 
-import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ext.bodyAsDecodedText
+import com.ustadmobile.core.domain.blob.getmanifest.GetContentManifestUseCase
 import com.ustadmobile.core.util.uuid.randomUuidAsString
 import com.ustadmobile.lib.db.entities.CacheLockJoin
 import com.ustadmobile.lib.db.entities.ContentEntryVersion
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
 import kotlinx.serialization.json.Json
 
 /**
@@ -26,9 +24,8 @@ import kotlinx.serialization.json.Json
 class ContentManifestDownloadUseCase(
     private val enqueueBlobDownloadClientUseCase: EnqueueBlobDownloadClientUseCase,
     private val db: UmAppDatabase,
-    private val httpClient: HttpClient,
-    private val json: Json,
     private val cacheTmpPath: () -> String,
+    private val getManifestUseCase: GetContentManifestUseCase,
 ) {
 
     /**
@@ -40,6 +37,7 @@ class ContentManifestDownloadUseCase(
     suspend operator fun invoke(
         contentEntryVersionUid: Long,
         transferJobUid: Int,
+        connectivityRequired: Boolean = false,
     ) {
         val tmpPath = cacheTmpPath().let {
             if(!it.endsWith("/") || it.endsWith("\\"))
@@ -48,14 +46,7 @@ class ContentManifestDownloadUseCase(
                 it
         }
 
-        val contentEntryVersion = db.contentEntryVersionDao()
-            .findByUidAsync(contentEntryVersionUid)
-                ?: throw IllegalArgumentException("ContentEntryVersion $contentEntryVersionUid not in db")
-
-        val manifestUrl = contentEntryVersion.cevManifestUrl!!
-        val manifestResponse = httpClient.get(manifestUrl)
-        val manifestSize = manifestResponse.headers["content-length"]?.toLong() ?: 0
-        val manifest: ContentManifest = json.decodeFromString(manifestResponse.bodyAsDecodedText())
+        val manifestResult = getManifestUseCase(contentEntryVersionUid)
 
         val offlineItemUid = db.transferJobDao().findOfflineItemUidForTransferJobUid(
             transferJobUid)
@@ -65,13 +56,16 @@ class ContentManifestDownloadUseCase(
          * entries that contain the same data, e.g. when the original zip had two or more identical
          * files in different locations.
          */
-        val bodyDataUrlsAndStorageSizeToDownload = manifest.entries.map {
+        val bodyDataUrlsAndStorageSizeToDownload = manifestResult.manifest.entries.map {
             Pair(it.bodyDataUrl, it.storageSize)
         }.distinctBy { it.first }
 
         if(offlineItemUid != 0L) {
+            val manifestPair =Pair(
+                manifestResult.contentEntryVersion.cevManifestUrl, manifestResult.manifestContentLength
+            )
             db.cacheLockJoinDao().insertListAsync(
-                (bodyDataUrlsAndStorageSizeToDownload + Pair(manifestUrl, manifestSize)).map {
+                (bodyDataUrlsAndStorageSizeToDownload + manifestPair).map {
                     CacheLockJoin(
                         cljEntityUid = contentEntryVersionUid,
                         cljTableId = ContentEntryVersion.TABLE_ID,
@@ -89,12 +83,13 @@ class ContentManifestDownloadUseCase(
                 EnqueueBlobDownloadClientUseCase.EnqueueBlobDownloadItem(
                     url = it.first,
                     expectedSize = it.second,
-                    entityUid = contentEntryVersion.cevUid,
+                    entityUid = manifestResult.contentEntryVersion.cevUid,
                     tableId = ContentEntryVersion.TABLE_ID,
                     partialTmpFile = "${tmpPath}${randomUuidAsString()}"
                 )
             },
             existingTransferJobId = transferJobUid,
+            connectivityRequired = connectivityRequired,
         )
     }
 

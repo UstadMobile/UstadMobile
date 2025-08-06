@@ -9,7 +9,7 @@ import java.io.ByteArrayInputStream
 fun IHttpResponse.toNanoHttpdResponse() : NanoHTTPD.Response {
     val contentLength = headers["content-length"]?.toLongOrNull()
 
-    return if(contentLength != null) {
+    val response = if(contentLength != null) {
         NanoHTTPD.newFixedLengthResponse(
             Status.lookup(responseCode),
             headers["content-type"] ?: "application/octet-stream",
@@ -23,4 +23,19 @@ fun IHttpResponse.toNanoHttpdResponse() : NanoHTTPD.Response {
             bodyAsSource()?.asInputStream() ?: ByteArrayInputStream(byteArrayOf())
         )
     }
+
+    headers.names().forEach { headerName ->
+        /**
+         * NanoHTTPD will set the content-type and content-length headers itself
+         */
+        headers.getAllByName(headerName)
+            .filter {
+                !it.equals("content-type", true) &&
+                    !it.equals("content-length", true)
+            }.forEach { headerVal ->
+                response.addHeader(headerName, headerVal)
+            }
+    }
+
+    return response
 }

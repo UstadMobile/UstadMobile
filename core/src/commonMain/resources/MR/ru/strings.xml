@@ -54,7 +54,6 @@
     <string name="onboarding_get_started_label">Начать</string>
     <string name="download_continue_stacked_label">Продолжить скачивание</string>
     <string name="download_wifi_only">Только через Wi-Fi</string>
-    <string name="download_state_downloading"><b>Скачивание</b> всего %1$s элементов. Всего на вашем устройстве будет использовано %2$s.</string>
     <string name="download_storage_option_device">Используйте %1$s - %2$s бесплатно</string>
     <string name="content_creation_storage_option_title">Вариант хранения</string>
     <string name="file_required_prompt">Файл для импорта не выбран, попробуйте еще раз</string>
@@ -171,8 +170,6 @@
     <string name="xapi_options_data_set">Набор данных</string>
     <string name="open">Открыть</string>
     <string name="download_calculating">Расчет…</string>
-    <string name="download_state_download"><b>Загрузите</b> всего %1$s элементов, они займут в общей сложности %2$s в памяти устройства.</string>
-    <string name="download_state_downloaded"><b>Загружено</b> всего %1$s объектов, которые занимают около %2$s памяти вашего устройства.</string>
     <string name="download_downloading_placeholder">Скачивание %1$s из %2$s</string>
     <string name="download_summary_title">%1$s активных загрузок</string>
     <string name="download_cancel_label">Отменить скачивание</string>
@@ -819,16 +816,7 @@
     <string name="number_of_students_completed_time">Количество учащихся, завершивших выбранный контент</string>
     <string name="content_completion">Завершение контента</string>
     <string name="content_usage_by_class">Использование контента по классу</string>
-    <string name="parent_consent_explanation">Я подтверждаю, что являюсь родителем или законным опекуном следующего ребенка:
-\n
-\nИмя: %1$s
-\n
-\n
-\nДата рождения: %2$s
-\n
-\nЕсли я даю согласие на то, чтобы мой ребенок использовал %3$s, сбор и обработка информации, позволяющую установить личность, будет осуществляться в соответствии с приведенной ниже политикой конфиденциальности и условиями.
-\n
-\nСогласие может быть отозвано в любое время с помощью ссылки, отправленной по электронной почте. Если вы решите не давать согласие, любые данные, предоставленные вашим ребенком, будут удалены в течение 24 часов.</string>
+    <string name="parent_consent_explanation">Я подтверждаю, что являюсь родителем или законным опекуном следующего ребенка: \n \nИмя: %1$s \n \nДата рождения: %2$s \n \nЕсли я даю согласие на то, чтобы мой ребенок использовал %3$s, сбор и обработка информации, позволяющую установить личность, будет осуществляться в соответствии с приведенной ниже политикой конфиденциальности и условиями. \n \nСогласие может быть отозвано в любое время с помощью ссылки, отправленной по электронной почте. Если вы решите не давать согласие, любые данные, предоставленные вашим ребенком, будут удалены в течение 24 часов.</string>
     <string name="downloading_content">Загрузка %1$s</string>
     <string name="maximum_points">Максимальное количество баллов</string>
     <string name="added_to_class_content">%1$s добавлено в материалы класса</string>
@@ -1131,4 +1119,66 @@
     <string name="space_available">%1$s доступно</string>
     <string name="decrease_text_size">Уменьшить размер текста</string>
     <string name="select_picture_from_files">Выбрать картинку из файлов</string>
+    <string name="be_careful_interacting_online">Будьте осторожны при общении в Интернете и в приложении!</string>
+    <string name="im_an_individual_learner_description">Я хочу использовать образовательный контент онлайн или офлайн индивидуально и отслеживать свой прогресс</string>
+    <string name="be_careful_not_to_share">Будьте осторожны и не делитесь никакой информацией из реального мира, если вы не уверены полностью, с кем вы общаетесь. Никогда не соглашайтесь на встречу с кем-то, кого вы не знаете в реальной жизни, без вашего родителя или опекуна.</string>
+    <string name="im_an_individual_learner">Я учусь индивидуально</string>
+    <string name="i_want_to_join_my_organization_school">Я хочу присоединиться к своей организации/школе</string>
+    <string name="i_want_to_join_my_organization_school_description">Моя организация/школа уже использует приложение</string>
+    <string name="i_want_to_add_my_organization_school">Я хочу добавить свою организацию/школу</string>
+    <string name="individual_action_title">Индивидуальный учащийся</string>
+    <string name="create_new_local_account_title">Создать новую локальную учетную запись</string>
+    <string name="got_it">Ясно</string>
+    <string name="learn_more">Узнать больше</string>
+    <string name="create_backup">Создать резервную копию</string>
+    <string name="create_backup_description">Резервное копирование данных</string>
+    <string name="i_want_to_add_my_organization_school_description">Добавьте мою организацию/школу, чтобы мои учителя и ученики могли использовать приложение</string>
+    <string name="create_new_local_account_description">Ваши данные будут сохранены только на вашем телефоне. Вы можете вручную сделать резервную копию на SD-карту или USB-накопитель</string>
+    <string name="restore_local_account_title">Восстановить локальную учетную запись из файла</string>
+    <string name="restore_local_account_description">Создать новый файл из выделенного фрагмента</string>
+    <string name="decline">Отклонить</string>
+    <string name="child_profile">Профиль ребенка</string>
+    <string name="signup_with_passkey">Зарегистрироваться с паролем</string>
+    <string name="existing_user">Существующий пользователь</string>
+    <string name="edit_subtitles">Редактировать субтитры</string>
+    <string name="invite_has_been_used">Приглашение было использовано</string>
+    <string name="i_am_teacher">Я учитель</string>
+    <string name="learning_space">Пространство для обучения</string>
+    <string name="new_user">Новый пользователь</string>
+    <string name="full_name">Полное имя</string>
+    <string name="create_local_account">Создать локальную учетную запись</string>
+    <string name="use_phone_number">Использовать номер телефона</string>
+    <string name="do_you_want_to_join_this_course">Хотите присоединиться к этому курсу?</string>
+    <string name="storage_and_data">Хранилище и данные</string>
+    <string name="available_neighbors">Доступные соседи/устройства</string>
+    <string name="i_am_parent">Я родитель</string>
+    <string name="finish">Завершить</string>
+    <string name="scan_badge_qr_code">Сканировать значок/QR-код</string>
+    <string name="personal_account">Личная учётная запись</string>
+    <string name="signup">Зарегистрироваться</string>
+    <string name="eg_for_your_school_organization">например, для вашей школы/организации</string>
+    <string name="new_learning_space">Новое учебное пространство</string>
+    <string name="add_username_email_phone">Добавить имя пользователя, адрес электронной почты или телефон</string>
+    <string name="no_valid_contact_found">Действительный контакт не найден</string>
+    <string name="no_contact_found">Контакт не найден</string>
+    <string name="storage_and_data_subtitle">Настройки локального обмена и хранения автономных элементов</string>
+    <string name="local_sharing">Локальное совместное использование</string>
+    <string name="local_sharing_subtitle">Автоматически загружайте/делитесь контентом с другими пользователями в той же сети WiFi, чтобы сократить использование данных и увеличить скорость.</string>
+    <string name="subtitles">Субтитры</string>
+    <string name="invite_via_contact">Пригласить через контакт</string>
+    <string name="invite_to_course">Пригласить на курс</string>
+    <string name="enter_link_manually">Введите ссылку вручную</string>
+    <string name="access_educational_content_download_offline">Получите доступ к образовательному контенту и загрузите его для использования в автономном режиме для себя, членов семьи и т. д.</string>
+    <string name="other_options">Другие варианты</string>
+    <string name="registration_not_allowed">Учебное пространство не допускает регистрацию новых пользователей</string>
+    <string name="add_subtitles">Добавить субтитры</string>
+    <string name="your_date_of_birth">Дата вашего рождения</string>
+    <string name="add_child_profiles">Добавить профили детей</string>
+    <string name="with_passkeys_no_complex_passwords_needed">С ключами доступа вам не нужно запоминать сложные пароли. Вместо этого вы можете использовать отпечаток пальца, лицо или экран для входа.</string>
+    <string name="create_username_and_password">Создайте имя пользователя и пароль</string>
+    <string name="which_profile_do_you_want_to_start">С какого профиля вы хотите начать?</string>
+    <string name="use_email">Использовать электронную почту</string>
+    <string name="join_learning_space">Присоединяйтесь к образовательному пространству</string>
+    <string name="create_passkey_for_faster_and_easier_signin">Создайте ключ-пароль для более быстрого и простого входа в систему</string>
+    <string name="device_name">Имя устройства</string>
 </resources>

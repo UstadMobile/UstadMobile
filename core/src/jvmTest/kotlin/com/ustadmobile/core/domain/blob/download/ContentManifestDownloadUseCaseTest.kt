@@ -3,6 +3,7 @@ package com.ustadmobile.core.domain.blob.download
 import com.ustadmobile.core.contentformats.manifest.ContentManifest
 import com.ustadmobile.core.contentformats.manifest.ContentManifestEntry
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.domain.blob.getmanifest.GetContentManifestUseCase
 import com.ustadmobile.core.util.ext.requireFileSeparatorSuffix
 import com.ustadmobile.core.util.newTestHttpClient
 import com.ustadmobile.core.util.newTestOkHttpClient
@@ -20,6 +21,7 @@ import okhttp3.mockwebserver.MockWebServer
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.mockito.ArgumentMatchers.eq
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyBlocking
@@ -111,9 +113,13 @@ class ContentManifestDownloadUseCaseTest {
         val useCase = ContentManifestDownloadUseCase(
             enqueueBlobDownloadClientUseCase = mockEnqueueBlobDownloadUseCase,
             db = db,
-            httpClient = httpClient,
-            json = json,
-            cacheTmpPath = { tmpResponseFolder.absolutePath.requireFileSeparatorSuffix() }
+            cacheTmpPath = { tmpResponseFolder.absolutePath.requireFileSeparatorSuffix() },
+            getManifestUseCase = GetContentManifestUseCase(
+                db = db,
+                repo = null,
+                httpClient = httpClient,
+                json = json,
+            )
         )
 
         runBlocking {
@@ -128,7 +134,8 @@ class ContentManifestDownloadUseCaseTest {
                             downloadItems.any { it.url == manifestEntry.bodyDataUrl }
                         }
                     },
-                    existingTransferJobId = eq(transferJobId)
+                    existingTransferJobId = eq(transferJobId),
+                    connectivityRequired = any(),
                 )
             }
 

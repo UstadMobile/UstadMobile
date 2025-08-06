@@ -20,6 +20,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 api(project(":lib-ihttp-core"))
+                implementation(project(":lib-xxhashkmp"))
                 implementation(libs.coroutines)
                 implementation(libs.door.runtime)
                 implementation(libs.atomicfu)
@@ -28,6 +29,9 @@ kotlin {
                 implementation(libs.napier)
                 implementation(libs.kotlinx.serialization)
                 compileOnly(libs.door.room.annotations)
+                implementation(libs.nanohttpd)
+                implementation(libs.okhttp)
+                implementation(project(":lib-ihttp-okhttp"))
             }
         }
 
@@ -61,6 +65,7 @@ kotlin {
                 implementation(libs.mockito.kotlin)
                 implementation(libs.turbine)
                 implementation(project(":lib-test-common"))
+                implementation(project(":lib-ihttp-nanohttpd"))
             }
         }
 
@@ -69,6 +74,8 @@ kotlin {
 
             dependencies {
                 implementation(libs.androidx.room.ktx)
+                implementation(libs.androidx.lifecycle.common.java8)
+                implementation(libs.androidx.lifecycle.runtime.ktx)
                 implementation(libs.androidx.room.runtime)
             }
         }

@@ -6,11 +6,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.DataUsage
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.SdStorage
 import androidx.compose.material.icons.filled.Workspaces
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
@@ -24,7 +24,6 @@ import com.ustadmobile.core.viewmodel.settings.SettingsUiState
 import com.ustadmobile.libuicompose.components.UstadDetailField2
 import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.viewmodel.settings.SettingsViewModel
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
@@ -45,7 +44,7 @@ fun SettingsScreen(
         onClickVersion = viewModel::onClickVersion,
         onClickDeveloperOptions = viewModel::onClickDeveloperOptions,
         onClickDeletedItems = viewModel::onClickDeletedItems,
-        onClickOfflineStorageOptionsDialog = viewModel::onClickOfflineStorageOptionsDialog,
+        onClickStorageAndDataSettings = viewModel::onClickStorageAndDataSettings,
     )
 
     if(uiState.langDialogVisible) {
@@ -80,29 +79,6 @@ fun SettingsScreen(
         }
     }
 
-    if(uiState.storageOptionsDialogVisible) {
-        SettingsDialog(
-            onDismissRequest = viewModel::onDismissOfflineStorageOptionsDialog
-        ) {
-            uiState.storageOptions.forEach { option ->
-                ListItem(
-                    modifier = Modifier.clickable {
-                        viewModel.onSelectOfflineStorageOption(option.option)
-                    },
-                    headlineContent = { Text(stringResource(option.option.label)) },
-                    supportingContent = {
-                        Text(
-                            stringResource(
-                                MR.strings.space_available,
-                                UMFileUtil.formatFileSize(option.availableSpace)
-                            )
-                        )
-                    }
-                )
-            }
-        }
-    }
-
     if(uiState.waitForRestartDialogVisible) {
         UstadWaitForRestartDialog()
     }
@@ -120,7 +96,7 @@ fun SettingsScreen(
     onClickVersion: () -> Unit = { },
     onClickDeveloperOptions: () -> Unit = { },
     onClickDeletedItems: () -> Unit = { },
-    onClickOfflineStorageOptionsDialog: () -> Unit = { },
+    onClickStorageAndDataSettings: () -> Unit = { },
 ) {
     UstadVerticalScrollColumn(
         modifier = Modifier.fillMaxSize()
@@ -133,16 +109,12 @@ fun SettingsScreen(
             labelText = stringResource(MR.strings.app_language),
         )
 
-        if(uiState.storageOptionsVisible) {
+        if(uiState.storageAndDataSettingsVisible) {
             UstadDetailField2(
-                modifier = Modifier.clickable {
-                    onClickOfflineStorageOptionsDialog()
-                },
-                labelText = stringResource(MR.strings.offline_items_storage),
-                valueText = uiState.selectedOfflineStorageOption?.label?.let {
-                    stringResource(it)
-                } ?: "",
-                icon = Icons.Default.SdStorage,
+                modifier = Modifier.clickable { onClickStorageAndDataSettings() },
+                icon = Icons.Default.DataUsage,
+                valueText = stringResource(MR.strings.storage_and_data),
+                labelText = stringResource(MR.strings.storage_and_data_subtitle),
             )
         }
 

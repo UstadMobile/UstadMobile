@@ -9,6 +9,7 @@ import com.ustadmobile.ihttp.nanohttpd.toNanoHttpdResponse
 import com.ustadmobile.libcache.headers.MimeTypeHelper
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.ihttp.request.iRequestBuilder
+import com.ustadmobile.libcache.distributed.http.DistributedCacheHttpEndpoint
 import fi.iki.elonen.NanoHTTPD
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.runBlocking
@@ -24,6 +25,7 @@ class EmbeddedHttpServer(
     private val xapiServerUseCase: (LearningSpace) -> XapiHttpServerUseCase,
     private val staticUmAppFilesDir: File?,
     private val mimeTypeHelper: MimeTypeHelper,
+    private val distributedCacheHttpEndpoint: DistributedCacheHttpEndpoint?,
 ) : NanoHTTPD(port) {
 
     fun List<String>.joinPathSegments(
@@ -63,9 +65,15 @@ class EmbeddedHttpServer(
         val uri = session.uri
 
         val pathSegments = uri.substring(1).split("/")
+        val dCacheEndpointVal = distributedCacheHttpEndpoint
+
         return when {
             uri.startsWith(PATH_ENDPOINT_API) -> {
                 serveApiEndpoint(session, pathSegments)
+            }
+
+            dCacheEndpointVal != null && uri.startsWith(PATH_DCACHE) -> {
+                dCacheEndpointVal(session.asIHttpRequest(this)).toNanoHttpdResponse()
             }
 
             else -> {
@@ -198,6 +206,8 @@ class EmbeddedHttpServer(
         }
 
         const val PATH_ENDPOINT_API = "/e/"
+
+        const val PATH_DCACHE = "/dcache"
 
     }
 

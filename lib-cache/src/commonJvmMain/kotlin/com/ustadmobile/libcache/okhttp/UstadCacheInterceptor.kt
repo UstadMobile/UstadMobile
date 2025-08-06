@@ -3,8 +3,8 @@ package com.ustadmobile.libcache.okhttp
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.ihttp.okhttp.headers.asIHttpHeaders
-import com.ustadmobile.ihttp.okhttp.headers.asOkHttpHeaders
 import com.ustadmobile.ihttp.okhttp.request.asIHttpRequest
+import com.ustadmobile.ihttp.okhttp.response.asOkHttpResponse
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.CompressionType
 import com.ustadmobile.libcache.UstadCache
@@ -23,8 +23,6 @@ import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTERCEP
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import com.ustadmobile.libcache.response.HttpPathResponse
-import com.ustadmobile.ihttp.response.IHttpResponse
-import kotlinx.io.asInputStream
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -33,7 +31,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.Call
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
@@ -241,34 +238,6 @@ class UstadCacheInterceptor(
         }
     }
 
-    private fun newResponseFromCachedResponse(
-        cacheResponse: IHttpResponse,
-        call: Call
-    ) : Response {
-        val responseMediaType = cacheResponse.headers["content-type"]?.toMediaTypeOrNull()
-            ?: "application/octet-stream".toMediaType()
-        val responseBody = cacheResponse.bodyAsSource()?.asInputStream()?.source()
-            ?.buffer()?.asResponseBody(
-                contentType = responseMediaType,
-                contentLength = cacheResponse.headers["content-length"]?.toLong() ?: -1
-            )
-
-        return Response.Builder()
-            .headers(cacheResponse.headers.asOkHttpHeaders())
-            .request(call.request())
-            .body(responseBody)
-            .code(cacheResponse.responseCode)
-            .protocol(Protocol.HTTP_1_1)
-            .message(
-                when(cacheResponse.responseCode) {
-                    206 -> "Partial Content"
-                    204 -> "No Content"
-                    else -> "OK"
-                }
-            )
-            .build()
-    }
-
     private fun Request.removeXInterceptHeaders(): Request {
         return if(header(HEADER_X_INTERCEPTOR_PARTIAL_FILE) != null) {
             this
@@ -324,7 +293,7 @@ class UstadCacheInterceptor(
              */
             cacheResponse != null &&
                     (cachedResponseStatus?.isFresh == true || requestCacheControlHeader?.onlyIfCached == true) -> {
-                newResponseFromCachedResponse(cacheResponse, call).also {
+                cacheResponse.asOkHttpResponse().also {
                     logger?.d(LOG_TAG, "$logPrefix HIT(valid) $url ${it.logSummary()}")
                 }
             }
@@ -349,7 +318,7 @@ class UstadCacheInterceptor(
 
             /*
              * When response is not fresh, but can be validated, then send a validation request
-             * and use the cached response if the
+             * and use the cached response if validated
              */
             cachedResponseStatus != null && cachedResponseStatus.canBeValidated -> {
                 val validateRequestBuilder = request.newBuilder()
@@ -366,7 +335,7 @@ class UstadCacheInterceptor(
                     cache.updateLastValidated(
                         ValidatedEntry(url, validationResponse.headers.asIHttpHeaders())
                     )
-                    newResponseFromCachedResponse(cacheResponse, call).also {
+                    cacheResponse.asOkHttpResponse().also {
                         logger?.d(LOG_TAG, "$logPrefix HIT(validated) $url ${it.logSummary()}")
                     }
                 }else {
@@ -397,16 +366,18 @@ class UstadCacheInterceptor(
                 }
                 val partialEtag = partialFileMetadata?.etag
 
-                val response =  if(partialEtag != null) {
-                    chain.proceed(request.newBuilder()
+                val networkRequest = if(partialEtag != null) {
+                    request.newBuilder()
                         .removeXInterceptHeaders()
                         .addHeader("If-Range", partialEtag)
                         .addHeader("Range", "bytes=${partialFile.length()}-")
-                        .build())
+                        .build()
                 }else {
-                    chain.proceed(request.removeXInterceptHeaders())
+                    request.removeXInterceptHeaders()
                 }
 
+                val response = chain.proceed(networkRequest)
+                
                 if(
                     responseCacheabilityChecker.canStore(
                         response = response,

@@ -194,9 +194,6 @@
     <string name="download_continue_btn_label">Continue</string>
     <string name="download_wifi_only">Wi-Fi only</string>
     <string name="download_calculating">Calculating…</string>
-    <string name="download_state_download"><![CDATA[<b>Download</b>]]> total of %1$s items, they will use total of %2$s on your device storage.</string>
-    <string name="download_state_downloading"><![CDATA[<b>Downloading</b>]]> total of %1$s items, which will be using total of %2$s on your device storage.</string>
-    <string name="download_state_downloaded"><![CDATA[<b>Downloaded</b>]]> total of %1$s items, which are using about %2$s of your device storage.</string>
     <string name="download_downloading_placeholder">Downloading %1$s of %2$s</string>
     <string name="download_summary_title">%1$s active downloads</string>
     <string name="download_cancel_label">Cancel download</string>
@@ -2106,5 +2103,17 @@
 
     <string name="invitation_sent">Invitation sent</string>
 
+
+    <string name="storage_and_data">Storage and data</string>
+
+    <string name="storage_and_data_subtitle">Local sharing and offline items storage settings</string>
+
+    <string name="local_sharing">Local sharing</string>
+
+    <string name="local_sharing_subtitle">Automatically download/share content with other users on the same WiFi network to reduce data usage and increase speed.</string>
+
+    <string name="available_neighbors">Available neighbors</string>
+
+    <string name="device_name">Device name</string>
 
 </resources>
