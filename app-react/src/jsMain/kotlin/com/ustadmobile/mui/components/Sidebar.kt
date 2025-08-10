@@ -30,7 +30,6 @@ external interface SidebarProps: Props {
     var visible: Boolean
     var selectedRootItemIndex: Int
     var site: Site?
-
 }
 
 data class RootScreen(

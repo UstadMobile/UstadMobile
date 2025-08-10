@@ -30,7 +30,6 @@ val UstadRootScreenNavLinks = FC<UstadRootScreenNavLinksProps> { props ->
     val strings = useStringProvider()
     ROOT_SCREENS.filter { screen ->
         props.currentSite?.bottomNavVisibilityFlag?.hasFlag(screen.flag) == true
-
     }.forEachIndexed { index, screen ->
         NavLink {
             to = screen.key

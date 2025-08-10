@@ -63,6 +63,7 @@ import mui.system.useMediaQuery
 import org.kodein.di.direct
 import org.kodein.di.instance
 import emotion.react.css
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import org.kodein.di.on
 import react.dom.html.ReactHTML.div
 import react.router.useLocation
@@ -95,7 +96,9 @@ val UstadScreens = FC<Props> {
     val mobileMode = useMediaQuery("(max-width:960px)")
     val location = useLocation()
     val loaderData = useLoaderData() as UstadScreensLoaderData
-    val accountManager: UstadAccountManager = loaderData.di.direct.instance()
+    val accountManager: UstadAccountManager = useMemo(dependencies = emptyArray()) {
+        loaderData.di.direct.instance()
+    }
     val currentSession by accountManager.currentUserSessionFlow.collectAsState(null)
     val appUiStateInstance = useState { AppUiState() }
 
@@ -104,11 +107,19 @@ val UstadScreens = FC<Props> {
     val langConfig = useMemo(dependencies = emptyArray()) {
         loaderData.di.direct.instance<SupportedLanguagesConfig>()
     }
-    val currentDb: UmAppDatabase =  loaderData.di.direct.on(accountManager.activeLearningSpace)
-        .instance(tag = DoorTag.TAG_DB)
 
-    val currentSite by currentDb.siteDao().getSiteAsFlow().collectAsState(null)
+    val currentDb: UmAppDatabase = useMemo(
+        accountManager.activeLearningSpace.url
+    ) {
+        loaderData.di.direct.on(accountManager.activeLearningSpace)
+            .instance(tag = DoorTag.TAG_DB)
+    }
 
+    val siteFlow = useMemo(dependencies = emptyArray()) {
+        currentDb.siteDao().getSiteAsFlow().distinctUntilChangedBy { it?.siteLct }
+    }
+
+    val currentSite by siteFlow.collectAsState(null)
 
     val muiState = useState { MuiAppState() }
 
@@ -119,7 +130,6 @@ val UstadScreens = FC<Props> {
     useEffect(location.pathname) {
         val pathIndex = ROOT_SCREENS.filter { screen ->
             currentSite?.bottomNavVisibilityFlag?.hasFlag(screen.flag) == true
-
         }.indexOfFirst {
             location.pathname == "/${it.key}"
         }
@@ -127,7 +137,6 @@ val UstadScreens = FC<Props> {
         if(pathIndex >= 0)
             currentRootItemIndex = pathIndex
     }
-
 
     UstadScreensContext(
         UstadScreenContextData(
