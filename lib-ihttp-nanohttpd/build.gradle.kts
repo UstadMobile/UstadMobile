@@ -26,7 +26,7 @@ kotlin {
 
 android {
     namespace = "com.ustadmobile.ihttp.nanohttpd"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 21

@@ -4,7 +4,6 @@ tags:
 env:
   TESTRESULTSDIR: "build/reports/maestro/003_006_all_user_able_to_open_text_block/Screenshots"
   TEXTTITLE: "PRIMARY COLOURS"
-  TESTCOURSENAME: "Test Course Block"
 onFlowStart:
   - startRecording: 003_006_all_user_able_to_open_text_block
   - runScript:
@@ -33,7 +32,7 @@ onFlowComplete:
     env:
       USERNAME: "teach1"
       PASSWORD: "testt1"
-- tapOn: ${TESTCOURSENAME}
+- tapOn: "Test Course Block"
 - runFlow:
     file: "common/add_demo_block_structure.yaml"
     env:
@@ -59,7 +58,7 @@ onFlowComplete:
     env:
       USERNAME: "stud1"
       PASSWORD: "tests1"
-- tapOn: ${TESTCOURSENAME}
+- tapOn: "Test Course Block"
 #--- open text block by student---#
 - scrollUntilVisible:
     element:
@@ -81,7 +80,7 @@ onFlowComplete:
       USERNAME: "teach1"
       PASSWORD: "testt1"
 - tapOn: "courses"
-- tapOn: ${TESTCOURSENAME}
+- tapOn: "Test Course Block"
 #--- open text block by teacher ---#
 - scrollUntilVisible:
     element:
