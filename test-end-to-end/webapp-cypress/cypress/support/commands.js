@@ -447,7 +447,7 @@ Cypress.Commands.add("ustadSetDate", (element, date) => {
 });
 
 
-Cypress.Commands.add('UstadOpenInviteLinkFromEmail', (email, baseUrl, maxAttempts = 4) => {
+Cypress.Commands.add('UstadOpenInviteLinkFromEmail', (email, baseUrl) => {
     cy.request(`/api/testemail/list?to=${email}`).then((response) => {
         cy.log(`Email response: ${JSON.stringify(response.body)}`);
 
