@@ -22,7 +22,6 @@ onFlowComplete:
     file: "common/admin_login.yaml"
 - runFlow:
     file: "common/enable_guest_login.yaml"
-- assertVisible: "Yes"
 - runFlow:
     file: "common/guest_login.yaml"
 
@@ -39,7 +38,6 @@ onFlowComplete:
     id: "floating_action_button"
 - tapOn: "Guest login enabled"
 - tapOn: "Save"
-- assertNotVisible: "Yes"
 - runFlow: "common/clear_state_and_learning_space_existing_userflow.yaml"
 - runFlow: "common/select_site.yaml"
 - assertNotVisible: "Connect as Guest"

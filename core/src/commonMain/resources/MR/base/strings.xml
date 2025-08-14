@@ -2106,5 +2106,9 @@
 
     <string name="invitation_sent">Invitation sent</string>
 
+    <string name="navigation_bar">Navigation bar</string>
+
+    <string name="bottom_nav_at_least_one_required">Please enable at least one navigation option.</string>
+
 
 </resources>

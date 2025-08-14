@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
@@ -60,10 +61,20 @@ class Site {
 
     var authSalt: String? = null
 
+    @ColumnInfo(defaultValue = "0")
+    var bottomNavVisibilityFlag: Long = 0
+
     companion object {
+        const val SHOW_COURSE = 1L
+        const val SHOW_LIBRARY = 2L
+        const val SHOW_MESSAGES = 4L
+        const val SHOW_PEOPLE = 8L
 
         const val TABLE_ID = 189
+        const val BOTTOM_NAV_DEFAULT_FLAG = SHOW_COURSE or
+                SHOW_LIBRARY or
+                SHOW_PEOPLE or
+                SHOW_MESSAGES
 
     }
-
 }

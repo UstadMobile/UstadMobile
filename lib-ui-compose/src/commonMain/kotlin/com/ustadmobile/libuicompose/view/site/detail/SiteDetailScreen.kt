@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.ustadmobile.core.MR
+import com.ustadmobile.core.util.ext.hasFlag
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailUiState
 import com.ustadmobile.core.viewmodel.site.detail.SiteDetailViewModel
 import com.ustadmobile.lib.db.composites.SiteTermsAndLangName
@@ -21,6 +22,7 @@ import com.ustadmobile.libuicompose.components.UstadDetailField2
 import com.ustadmobile.libuicompose.components.UstadDetailHeader
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.compose.yesNoStringResource
+import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
 import dev.icerock.moko.resources.compose.stringResource
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
@@ -60,7 +62,19 @@ fun SiteDetailScreen(
             labelText = stringResource(MR.strings.registration_allowed),
             icon = Icons.Default.HowToReg,
         )
+        UstadDetailHeader {
+            Text(stringResource(MR.strings.navigation_bar))
+        }
 
+        APP_TOP_LEVEL_NAV_ITEMS.forEach { item ->
+            UstadDetailField2(
+                valueText = yesNoStringResource(
+                    uiState.site?.bottomNavVisibilityFlag?.hasFlag(item.flag)==true
+                ),
+                labelText = stringResource(item.label),
+                icon = item.icon
+            )
+        }
         UstadDetailHeader { Text(stringResource(MR.strings.terms_and_policies)) }
 
         uiState.siteTerms.forEach { siteTermsWithLanguage ->

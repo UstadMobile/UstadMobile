@@ -1,16 +1,17 @@
 package com.ustadmobile.core.viewmodel.login
 
+import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.AdultAccountRequiredException
 import com.ustadmobile.core.account.ConsentNotGrantedException
-import com.ustadmobile.core.account.UnauthorizedException
-import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
-import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
-import com.ustadmobile.core.domain.getversion.GetVersionUseCase
-import com.ustadmobile.core.domain.language.SetLanguageUseCase
+import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.domain.credentials.GetCredentialUseCase
 import com.ustadmobile.core.domain.credentials.password.SavePasswordUseCase
 import com.ustadmobile.core.domain.credentials.username.ParseCredentialUsernameUseCase
+import com.ustadmobile.core.domain.filterusername.FilterUsernameUseCase
+import com.ustadmobile.core.domain.getversion.GetVersionUseCase
+import com.ustadmobile.core.domain.language.SetLanguageUseCase
+import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.validateusername.ValidationResult
@@ -18,21 +19,20 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.appstate.AppUiState
 import com.ustadmobile.core.impl.appstate.LoadingUiState
-import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.impl.config.SystemUrlConfig
 import com.ustadmobile.core.impl.nav.UstadSavedStateHandle
 import com.ustadmobile.core.util.ext.appendSelectedAccount
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.core.util.ext.verifySite
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.viewmodel.UstadViewModel
-import com.ustadmobile.core.viewmodel.clazz.list.ClazzListViewModel
-import com.ustadmobile.core.viewmodel.contententry.list.ContentEntryListViewModel
 import com.ustadmobile.core.viewmodel.signup.SignUpViewModel.Companion.ARG_IS_PERSONAL_ACCOUNT
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Site
 import io.github.aakira.napier.Napier
-import io.ktor.client.*
+import io.ktor.client.HttpClient
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -74,7 +74,7 @@ class LoginViewModel(
 
     val uiState: Flow<LoginUiState> = _uiState.asStateFlow()
 
-    private var nextDestination: String
+    private lateinit var nextDestination: String
 
     private var serverUrl: String
 
@@ -96,6 +96,8 @@ class LoginViewModel(
 
     private val getVersionUseCase: GetVersionUseCase? by instanceOrNull()
 
+    private val completableNextDestination = CompletableDeferred<String>()
+
     private val getShowPoweredByUseCase: GetShowPoweredByUseCase? by instanceOrNull()
 
     private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
@@ -110,12 +112,19 @@ class LoginViewModel(
     private val parseCredentialUsernameUseCase: ParseCredentialUsernameUseCase by instance()
 
     init {
-        nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
 
         serverUrl = savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL]
             ?: apiUrlConfig.presetLearningSpaceUrl ?: "http://localhost"
         savedStateHandle[UstadView.ARG_LEARNINGSPACE_URL] = serverUrl
 
+        val getDefaultDestinationUseCase: GetDefaultDestinationUseCase =
+            di.on(LearningSpace(serverUrl)).direct.instance()
+        viewModelScope.launch {
+            nextDestination = savedStateHandle[UstadView.ARG_NEXT] ?:
+                    getDefaultDestinationUseCase.invoke()?:
+                    throw IllegalStateException("destination can not be null")
+            completableNextDestination.complete(nextDestination)
+        }
         _uiState.update { prev ->
             prev.copy(
                 versionInfo = "${systemImpl.getString(MR.strings.version)}: " +
@@ -155,6 +164,7 @@ class LoginViewModel(
             )
 
             viewModelScope.launch {
+
                 while (verifiedSite == null) {
                     try {
                         val site = httpClient.verifySite(serverUrl, 10000, json)
@@ -209,14 +219,12 @@ class LoginViewModel(
      * destination as per the arguments. This includes popping off the stack (using ARG_POPUPTO_ON_FINISH
      * or at least removing the login screen itself from the stack).
      */
-    private fun goToNextDestAfterLoginOrGuestSelected(person: Person) {
+    private suspend fun goToNextDestAfterLoginOrGuestSelected(person: Person) {
+        val destination = completableNextDestination.await()
         val goOptions = UstadMobileSystemCommon.UstadGoOptions(clearStack = true)
-        Napier.d { "LoginPresenter: go to next destination: $nextDestination" }
-        if (person.isPersonalAccount) {
-            nextDestination = ContentEntryListViewModel.DEST_NAME_HOME
-        }
+        Napier.d { "LoginPresenter: go to next destination: $destination" }
         navController.navigateToViewUri(
-            nextDestination.appendSelectedAccount(person.personUid, LearningSpace(serverUrl)),
+            destination.appendSelectedAccount(person.personUid, LearningSpace(serverUrl)),
             goOptions
         )
     }

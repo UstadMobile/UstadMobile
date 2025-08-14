@@ -37,6 +37,8 @@ import androidx.compose.ui.window.rememberWindowState
 import com.jcabi.manifests.Manifests
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpaceScope
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.language.SetLanguageUseCaseJvm
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
@@ -49,6 +51,10 @@ import com.ustadmobile.core.impl.config.SupportedLanguagesConfig.Companion.PREFK
 import com.ustadmobile.core.impl.di.commonClientDomainDiModule
 import com.ustadmobile.core.impl.di.commonDomainDiModule
 import com.ustadmobile.core.logging.LogbackAntiLog
+import com.ustadmobile.core.util.ext.hasFlag
+import com.ustadmobile.core.util.ext.hasOnlyOneBitSet
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.libuicompose.theme.UstadAppTheme
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
 import com.ustadmobile.libuicompose.view.app.APP_TOP_LEVEL_NAV_ITEMS
@@ -64,6 +70,9 @@ import io.kamel.image.config.LocalKamelConfig
 import io.ktor.client.HttpClient
 import it.sauronsoftware.junique.AlreadyLockedException
 import it.sauronsoftware.junique.JUnique
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.PopUpTo
@@ -73,6 +82,7 @@ import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.on
 import org.quartz.Scheduler
 import java.awt.Desktop
 import java.awt.Window
@@ -205,6 +215,20 @@ fun main() {
             val showPoweredBy = remember {
                 di.direct.instance<GetShowPoweredByUseCase>().invoke()
             }
+            var currentSite by remember { mutableStateOf<Site?>(null) }
+            val accountManager: UstadAccountManager = di.direct.instance()
+
+            LaunchedEffect(Unit) {
+                accountManager.currentUserSessionFlow
+                    .map { it.learningSpace }
+                    .distinctUntilChanged()
+                    .collectLatest { learningSpace ->
+                        val db: UmAppDatabase = di.on(learningSpace).direct.instance(tag = DoorTag.TAG_DB)
+                        db.siteDao().getSiteAsFlow().collect { site ->
+                            currentSite = site
+                        }
+                    }
+            }
 
 
             val desktopConfig = remember {
@@ -248,18 +272,21 @@ fun main() {
                          */
                         LaunchedEffect(currentDestination?.path) {
                             val pathVal = currentDestination?.path ?: return@LaunchedEffect
-                            val topLevelIndex = APP_TOP_LEVEL_NAV_ITEMS.indexOfFirst {
+                            val topLevelIndex = APP_TOP_LEVEL_NAV_ITEMS.filter {
+                                currentSite?.bottomNavVisibilityFlag?.hasFlag(it.flag) == true
+                            }.indexOfFirst {
                                 "/${it.destRoute}" == pathVal
                             }
 
                             if(topLevelIndex >= 0)
                                 selectedItem = topLevelIndex
                         }
+                        val isOnlyOneVisible = currentSite?.bottomNavVisibilityFlag?.hasOnlyOneBitSet() == true
 
                         UstadAppTheme {
                             PermanentNavigationDrawer(
                                 drawerContent = {
-                                    if(appState.navigationVisible) {
+                                    if(appState.navigationVisible&&!isOnlyOneVisible) {
                                         PermanentDrawerSheet(
                                             Modifier.width(240.dp).fillMaxHeight()
                                         ) {
@@ -277,7 +304,9 @@ fun main() {
                                             }
 
                                             Spacer(Modifier.height(16.dp))
-                                            APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
+                                            APP_TOP_LEVEL_NAV_ITEMS.filter {
+                                                currentSite?.bottomNavVisibilityFlag?.hasFlag(it.flag) == true
+                                            }.forEachIndexed { index, item ->
                                                 NavigationDrawerItem(
                                                     icon = { Icon(item.icon, contentDescription = null) },
                                                     label = { Text(stringResource(item.label)) },

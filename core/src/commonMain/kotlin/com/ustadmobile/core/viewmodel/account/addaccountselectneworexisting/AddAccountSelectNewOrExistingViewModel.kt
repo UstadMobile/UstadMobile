@@ -48,6 +48,7 @@ data class AddAccountSelectNewOrExistingUiState(
     val languageList: List<UstadMobileSystemCommon.UiLanguage> = listOf(currentLanguage),
     val showWaitForRestart: Boolean = false,
     val errorText: String? = null,
+    val fieldsEnabled: Boolean = true,
 )
 
 /**
@@ -266,13 +267,14 @@ class AddAccountSelectNewOrExistingViewModel(
         }
     }
 
-    private fun goToNextDestAfterSignIn(
+    private suspend fun goToNextDestAfterSignIn(
         person: Person,
         serverUrl: String
     ) {
         val getDefaultDestinationUseCase: GetDefaultDestinationUseCase =
             di.on(LearningSpace(serverUrl)).direct.instance()
-        val nextDestVal = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase()
+        val nextDestVal = savedStateHandle[UstadView.ARG_NEXT] ?: getDefaultDestinationUseCase()?:
+        throw IllegalStateException("destination can not be null")
         Napier.d { "AddAccountSelectNewOrExistingViewModel: go to next destination: $nextDestVal" }
 
         navController.navigateToViewUri(

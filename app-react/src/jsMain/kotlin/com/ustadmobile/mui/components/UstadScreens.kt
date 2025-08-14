@@ -55,11 +55,16 @@ import com.ustadmobile.core.db.ext.MIGRATION_161_162_CLIENT
 import com.ustadmobile.core.db.ext.MIGRATION_169_170_CLIENT
 import com.ustadmobile.core.hooks.collectAsState
 import com.ustadmobile.core.impl.config.SupportedLanguagesConfig
+import com.ustadmobile.core.util.ext.hasFlag
+import com.ustadmobile.core.util.ext.hasOnlyOneBitSet
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.util.ext.deleteDatabaseAsync
 import mui.system.useMediaQuery
 import org.kodein.di.direct
 import org.kodein.di.instance
 import emotion.react.css
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import org.kodein.di.on
 import react.dom.html.ReactHTML.div
 import react.router.useLocation
 import remix.run.router.LoaderFunctionArgs
@@ -91,7 +96,9 @@ val UstadScreens = FC<Props> {
     val mobileMode = useMediaQuery("(max-width:960px)")
     val location = useLocation()
     val loaderData = useLoaderData() as UstadScreensLoaderData
-    val accountManager: UstadAccountManager = loaderData.di.direct.instance()
+    val accountManager: UstadAccountManager = useMemo(dependencies = emptyArray()) {
+        loaderData.di.direct.instance()
+    }
     val currentSession by accountManager.currentUserSessionFlow.collectAsState(null)
     val appUiStateInstance = useState { AppUiState() }
 
@@ -101,6 +108,18 @@ val UstadScreens = FC<Props> {
         loaderData.di.direct.instance<SupportedLanguagesConfig>()
     }
 
+    val currentDb: UmAppDatabase = useMemo(
+        accountManager.activeLearningSpace.url
+    ) {
+        loaderData.di.direct.on(accountManager.activeLearningSpace)
+            .instance(tag = DoorTag.TAG_DB)
+    }
+
+    val siteFlow = useMemo(dependencies = emptyArray()) {
+        currentDb.siteDao().getSiteAsFlow().distinctUntilChangedBy { it?.siteLct }
+    }
+
+    val currentSite by siteFlow.collectAsState(null)
 
     val muiState = useState { MuiAppState() }
 
@@ -109,14 +128,15 @@ val UstadScreens = FC<Props> {
 
     var currentRootItemIndex by useState { 0 }
     useEffect(location.pathname) {
-        val pathIndex = ROOT_SCREENS.indexOfFirst {
+        val pathIndex = ROOT_SCREENS.filter { screen ->
+            currentSite?.bottomNavVisibilityFlag?.hasFlag(screen.flag) == true
+        }.indexOfFirst {
             location.pathname == "/${it.key}"
         }
 
         if(pathIndex >= 0)
             currentRootItemIndex = pathIndex
     }
-
 
     UstadScreensContext(
         UstadScreenContextData(
@@ -186,6 +206,7 @@ val UstadScreens = FC<Props> {
                                     arrayOf(Area.Sidebar, Area.Content),
                             )
                         }
+                        val isOnlyOneVisible = currentSite?.bottomNavVisibilityFlag?.hasOnlyOneBitSet() == true
 
                         Header {
                             this.appUiState = appUiState
@@ -198,8 +219,10 @@ val UstadScreens = FC<Props> {
                             onClickMenuIcon = {
                                 mobileMenuOpen = !mobileMenuOpen
                             }
-                            sidebarVisible =
-                                !mobileMode && appUiState.navigationVisible && currentSession?.person?.isPersonalAccount != true
+                            sidebarVisible = !mobileMode &&
+                                        appUiState.navigationVisible
+                                        && currentSession?.person?.isPersonalAccount != true &&
+                                        !isOnlyOneVisible
                         }
 
                         //if (mobileMode) Menu() else Sidebar()
@@ -207,9 +230,12 @@ val UstadScreens = FC<Props> {
                         // then this seems to make react destroy the content component and create a
                         // completely new one, which we definitely do not want
                         Sidebar {
-                            visible =
-                                !mobileMode && appUiState.navigationVisible && currentSession?.person?.isPersonalAccount != true
+                            visible = !mobileMode &&
+                                        appUiState.navigationVisible
+                                        && currentSession?.person?.isPersonalAccount != true &&
+                                        !isOnlyOneVisible
                             selectedRootItemIndex = currentRootItemIndex
+                            site = currentSite
                         }
 
                         UstadMobileMenu {

@@ -147,6 +147,8 @@ fun commonDomainDiModule(learningSpaceScope: LearningSpaceScope) = DI.Module("Co
         GetDefaultDestinationUseCase(
             systemUrlConfig = instance(),
             learningSpace = context,
+            repo = instance<UmAppDataLayer>().repository,
+            db = instance(tag = DoorTag.TAG_DB),
         )
     }
 

@@ -1,6 +1,8 @@
 package com.ustadmobile.mui.components
 
 import com.ustadmobile.core.hooks.useStringProvider
+import com.ustadmobile.core.util.ext.hasFlag
+import com.ustadmobile.lib.db.entities.Site
 import emotion.react.css
 import mui.material.ListItem
 import mui.material.ListItemButton
@@ -20,11 +22,15 @@ external interface UstadRootScreenNavLinksProps: Props {
     var onClick: (() -> Unit)?
 
     var idPrefix: String
+
+    var currentSite: Site?
 }
 
 val UstadRootScreenNavLinks = FC<UstadRootScreenNavLinksProps> { props ->
     val strings = useStringProvider()
-    ROOT_SCREENS.forEachIndexed { index, screen ->
+    ROOT_SCREENS.filter { screen ->
+        props.currentSite?.bottomNavVisibilityFlag?.hasFlag(screen.flag) == true
+    }.forEachIndexed { index, screen ->
         NavLink {
             to = screen.key
             id = "${props.idPrefix}_${screen.key}"

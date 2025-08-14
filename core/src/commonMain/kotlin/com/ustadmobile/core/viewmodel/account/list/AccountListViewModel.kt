@@ -6,6 +6,7 @@ import com.ustadmobile.core.account.UserSessionWithPersonAndLearningSpace
 import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.domain.getversion.GetVersionUseCase
 import com.ustadmobile.core.domain.launchopenlicenses.LaunchOpenLicensesUseCase
+import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.domain.share.ShareAppUseCase
 import com.ustadmobile.core.domain.showpoweredby.GetShowPoweredByUseCase
 import com.ustadmobile.core.domain.usersession.StartUserSessionUseCase
@@ -107,6 +108,8 @@ class AccountListViewModel(
     val presetRepo = apiUrlConfig.presetLearningSpaceUrl?.let {
         di.on(LearningSpace(it)).direct.instance<UmAppDataLayer>().repository
     }
+    val destination = di.on(accountManager.currentUserSession.learningSpace)
+        .direct.instance<GetDefaultDestinationUseCase>()
 
     private val dontSetCurrentSession: Boolean = savedStateHandle[ARG_DONT_SET_CURRENT_SESSION]
         ?.toBoolean() ?: false
@@ -246,17 +249,17 @@ class AccountListViewModel(
      * Switch accounts
      */
     fun onClickAccount(sessionWithPersonAndLearningSpace: UserSessionWithPersonAndLearningSpace) {
-        val viewName = if (sessionWithPersonAndLearningSpace.person.isPersonalAccount) {
-            ContentEntryListViewModel.DEST_NAME_HOME
-        } else {
-            ClazzListViewModel.DEST_NAME_HOME
+        viewModelScope.launch {
+            val viewName = destination.invoke()?:
+            throw IllegalStateException("destination can not be null")
+            startUserSessionUseCase(
+                session = sessionWithPersonAndLearningSpace,
+                navController = navController,
+                nextDest = savedStateHandle[ARG_NEXT] ?: viewName,
+                dontSetCurrentSession = dontSetCurrentSession,
+            )
         }
-        startUserSessionUseCase(
-            session = sessionWithPersonAndLearningSpace,
-            navController = navController,
-            nextDest = savedStateHandle[ARG_NEXT] ?: viewName,
-            dontSetCurrentSession = dontSetCurrentSession,
-        )
+
     }
 
     fun onClickDeleteAccount(session: UserSessionWithPersonAndLearningSpace) {

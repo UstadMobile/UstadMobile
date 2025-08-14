@@ -30,4 +30,3 @@ module.exports = defineConfig({
    },
       baseUrl: 'http://localhost:8075/',
    }
-  });

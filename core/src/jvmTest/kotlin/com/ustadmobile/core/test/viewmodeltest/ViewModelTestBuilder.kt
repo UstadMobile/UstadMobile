@@ -11,6 +11,7 @@ import com.ustadmobile.core.db.UmAppDataLayer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.ext.addSyncCallback
 import com.ustadmobile.core.db.ext.migrationList
+import com.ustadmobile.core.domain.navigation.GetDefaultDestinationUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
 import com.ustadmobile.core.domain.socialwarning.DismissSocialWarningUseCase
 import com.ustadmobile.core.domain.socialwarning.ShowSocialWarningUseCase
@@ -266,6 +267,14 @@ class ViewModelTestBuilder<T: ViewModel> internal constructor(
             XXStringHasherCommonJvm()
         }
 
+        bind<GetDefaultDestinationUseCase>() with scoped(learningSpaceScope).singleton {
+            GetDefaultDestinationUseCase(
+                systemUrlConfig = instance(),
+                learningSpace = context,
+                repo = instance<UmAppDataLayer>().repository,
+                db = instance(tag = DoorTag.TAG_DB),
+            )
+        }
         bind<AddNewPersonUseCase>() with scoped(learningSpaceScope).singleton {
             AddNewPersonUseCase(
                 db = instance(tag = DoorTag.TAG_DB),

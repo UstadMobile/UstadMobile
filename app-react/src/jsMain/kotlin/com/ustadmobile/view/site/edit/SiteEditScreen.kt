@@ -11,10 +11,13 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
+import com.ustadmobile.mui.components.ThemeContext
 import com.ustadmobile.mui.components.UstadLanguageSelect
+import com.ustadmobile.mui.components.UstadPermissionEditComponent
 import com.ustadmobile.mui.components.UstadStandardContainer
 import com.ustadmobile.mui.components.UstadTextField
 import com.ustadmobile.util.ext.onTextChange
+import com.ustadmobile.view.components.UstadDetailHeader
 import com.ustadmobile.view.components.UstadEditHeader
 import com.ustadmobile.view.components.UstadSwitchField
 import com.ustadmobile.wrappers.quill.ReactQuill
@@ -25,18 +28,22 @@ import react.FC
 import react.Props
 import react.ReactNode
 import kotlinx.coroutines.Dispatchers
+import mui.material.styles.TypographyVariant
+import mui.system.sx
+import react.useRequiredContext
 
 external interface SiteEditProps: Props {
     var uiState: SiteEditUiState
     var onSiteChanged: (Site?) -> Unit
+    var onTogglePermission: (Long) -> Unit
     var onChangeTermsLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit
     var onChangeTermsHtml: (String) -> Unit
 }
 
 val SiteEditComponent2 = FC<SiteEditProps> { props ->
+    val theme by useRequiredContext(ThemeContext)
 
     val strings = useStringProvider()
-
     UstadStandardContainer {
         maxWidth = "lg"
 
@@ -76,6 +83,7 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
 
             UstadSwitchField {
                 label = strings[MR.strings.registration_allowed]
+                enabled = props.uiState.fieldsEnabled
                 checked = props.uiState.site?.registrationAllowed ?: false
                 enabled = props.uiState.fieldsEnabled
                 id = "registration_allowed"
@@ -88,7 +96,35 @@ val SiteEditComponent2 = FC<SiteEditProps> { props ->
                 }
                 error = props.uiState.registrationEnabledError
             }
+            UstadDetailHeader {
+                header = ReactNode(strings[MR.strings.navigation_bar])
+            }
+            UstadStandardContainer {
+                id = "navigation_bar_switch_container"
 
+
+                UstadPermissionEditComponent {
+                    permissionLabels = props.uiState.bottomNavFlagLabels
+                    value = (props.uiState.site?.bottomNavVisibilityFlag ?: 0).toLong()
+                    onToggle = props.onTogglePermission
+                    enabled = props.uiState.fieldsEnabled
+                }
+            }
+            if(props.uiState.bottomNavToggleError != null) {
+                Grid {
+                    item = true
+
+                    Typography {
+                        sx {
+                            color = theme.palette.error.main
+                        }
+
+                        variant = TypographyVariant.body1
+
+                        + props.uiState.bottomNavToggleError
+                    }
+                }
+            }
             UstadEditHeader {
                 + strings[MR.strings.terms_and_policies]
             }
@@ -123,6 +159,7 @@ val SiteEditScreen = FC<Props> {
     SiteEditComponent2 {
         uiState = uiStateVal
         onSiteChanged = viewModel::onEntityChanged
+        onTogglePermission = viewModel::onToggleNavigationItem
         onChangeTermsHtml = viewModel::onChangeTermsHtml
         onChangeTermsLanguage = viewModel::onChangeTermsLanguage
     }

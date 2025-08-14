@@ -43,7 +43,7 @@ it('New student user login via email link', () => {
   cy.contains("Test Course Block",{timeout: 10000}).should("exist")
 })
 
-it('Tearcher verify student added to the course', () => {
+it('Teacher verify student added to the course', () => {
   cy.ustadClearDbAndLogin('teach1','testt1')
   cy.contains("Course").click()
   cy.contains("Test Course Block").click()

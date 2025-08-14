@@ -5,7 +5,7 @@ describe('WEB_005_002_all_user_add_post_and_reply', () => {
   })
 
 it('Admin add discussion board and post', () => {
-  cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv");
+  cy.importUsersViaHttp("Ustad_Teacher_and_Students.csv")
   // Admin user login
   cy.ustadClearDbAndLogin('admin','testpass')
   cy.contains("Course").click()

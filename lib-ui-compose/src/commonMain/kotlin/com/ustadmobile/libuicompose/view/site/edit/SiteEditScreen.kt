@@ -1,7 +1,9 @@
 package com.ustadmobile.libuicompose.view.site.edit
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -9,12 +11,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import com.ustadmobile.core.viewmodel.site.edit.SiteEditUiState
-import com.ustadmobile.lib.db.entities.Site
-import dev.icerock.moko.resources.compose.stringResource
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.util.ext.hasFlag
+import com.ustadmobile.core.viewmodel.site.edit.SiteEditUiState
 import com.ustadmobile.core.viewmodel.site.edit.SiteEditViewModel
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.ext.shallowCopy
 import com.ustadmobile.libuicompose.components.UstadEditHeader
 import com.ustadmobile.libuicompose.components.UstadInputFieldLayout
@@ -23,6 +25,7 @@ import com.ustadmobile.libuicompose.components.UstadSetLanguageDropDown
 import com.ustadmobile.libuicompose.components.UstadSwitchField
 import com.ustadmobile.libuicompose.components.UstadVerticalScrollColumn
 import com.ustadmobile.libuicompose.util.ext.defaultItemPadding
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.Dispatchers
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
@@ -40,6 +43,7 @@ fun SiteEditScreen(
         onChangeTermsLanguage = viewModel::onChangeTermsLanguage,
         onChangeTermsHtml = viewModel::onChangeTermsHtml,
         onClickEditTermsInNewScreen = viewModel::onClickEditTermsInNewScreen,
+        onTogglePermission = viewModel::onToggleNavigationItem,
     )
 }
 
@@ -51,6 +55,7 @@ fun SiteEditScreen(
     onChangeTermsLanguage: (UstadMobileSystemCommon.UiLanguage) -> Unit = { },
     onChangeTermsHtml: (String) -> Unit =  { },
     onClickEditTermsInNewScreen: () -> Unit = { },
+    onTogglePermission: (Long) -> Unit = { },
 ){
     UstadVerticalScrollColumn (
         modifier = Modifier.fillMaxSize(),
@@ -98,6 +103,26 @@ fun SiteEditScreen(
                     })
                 },
             )
+        }
+        Column(
+            modifier = Modifier.testTag("navigation_bar_switch_container")
+        )  {
+            UstadEditHeader(stringResource(MR.strings.navigation_bar))
+
+            uiState.bottomNavFlagLabels.forEach { permissionLabel ->
+                UstadSwitchField(
+                    checked = (uiState.site?.bottomNavVisibilityFlag ?: 0).hasFlag(permissionLabel.second),
+                    label = stringResource(permissionLabel.first),
+                    onChange = {
+                        onTogglePermission(permissionLabel.second)
+                    },
+                    modifier = Modifier.defaultItemPadding(),
+                    enabled = uiState.fieldsEnabled,
+                )
+            }
+        }
+        uiState.bottomNavToggleError?.also { errorText ->
+            Text(color = MaterialTheme.colorScheme.error, text = errorText)
         }
 
         UstadEditHeader(stringResource(MR.strings.terms_and_policies))
