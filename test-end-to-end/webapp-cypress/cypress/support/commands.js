@@ -446,35 +446,30 @@ Cypress.Commands.add("ustadSetDate", (element, date) => {
      );
 });
 
-
 Cypress.Commands.add('UstadOpenInviteLinkFromEmail', (email, baseUrl) => {
-    cy.request(`/api/testemail/list?to=${email}`).then((response) => {
-        cy.log(`Email response: ${JSON.stringify(response.body)}`);
+  cy.request(`/api/testemail/list?to=${email}`).then((response) => {
+    cy.log(`Email response: ${JSON.stringify(response.body)}`);
 
-        // Ensure the response body is an array and contains at least one email
-        if (!Array.isArray(response.body) || response.body.length === 0) {
-          throw new Error(`No emails found for ${email}`);
-        }
+    if (!Array.isArray(response.body) || response.body.length === 0) {
+      throw new Error(`No emails found for ${email}`);
+    }
 
-        // Extract the latest email
-        const latestEmail = response.body[response.body.length - 1];
+    const latestEmail = response.body[response.body.length - 1];
 
-        // Ensure the email contains a text field with a link
-        if (!latestEmail.text || !latestEmail.text.startsWith('http')) {
-          throw new Error(`No valid invitation link found in the email for ${email}`);
-        }
+    if (!latestEmail.text || !latestEmail.text.startsWith('http')) {
+      throw new Error(`No valid invitation link found in the email for ${email}`);
+    }
 
-        // Extract the link
-        const inviteLink = latestEmail.text;
-        cy.log(`Opening invitation link: ${inviteLink}`);
+    const inviteLink = latestEmail.text;
+    cy.log(`Opening invitation link: ${inviteLink}`);
 
-        // Visit the extracted link in the same tab
-        cy.visit(inviteLink);
-      });
+    // Open link without retries
+    cy.visit(inviteLink, {
+      retryOnStatusCodeFailure: false,
+      retryOnNetworkFailure: false
+    });
+  });
 });
-
-
-
 
 //commands.js
 //
