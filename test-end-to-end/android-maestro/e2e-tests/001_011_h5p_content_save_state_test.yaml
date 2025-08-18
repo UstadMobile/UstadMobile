@@ -1,0 +1,65 @@
+appId: com.toughra.ustadmobile
+env:
+  TESTNAME: "001_011_h5p_content_save_state_test"
+  TESTRESULTSDIR: "${TESTRESULTSDIR}/001_011_h5p_content_save_state_test"
+---
+- clearState: com.toughra.ustadmobile
+- runFlow:
+    file: "../common/startserver.yaml"
+    env:
+     CONTROLSERVER: ${CONTROLSERVER}
+     TESTSERIAL: ${TESTSERIAL}
+     TESTNAME: ${TESTNAME}
+- runFlow:
+    file: "../common/clear_login_and_add_content.yaml"
+    env:
+      TESTFILENAME: "H5p_StateTest_Content.h5p"
+      CONTROLSERVER: ${CONTROLSERVER}
+      TESTSERIAL: ${TESTSERIAL}
+- tapOn: "SAVE"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/content_add_to_library"
+- tapOn: "The colours"
+- extendedWaitUntil:
+    notVisible: "Uploading"
+    timeout: 20000
+- tapOn: Open
+- runFlow:
+    file: "../common/chrome-first-run-check.yaml"
+- tapOn: "Blank input 1 of 3"
+- inputText: "Blue"
+- hideKeyboard
+- repeat:
+    while:
+      notVisible: "Blank input 2 of 3"
+    commands:
+      - runFlow:
+          file: "../common/reopen_the_h5p_content.yaml"
+- tapOn: "Blank input 2 of 3"
+- inputText: "red"
+- hideKeyboard
+- tapOn: "The apples are "
+- tapOn: "The bananas are "
+- tapOn: "Close tab"
+- tapOn: Open
+- assertVisible: "Blank input 1 of 3. Answered correctly"
+- tapOn: "Close tab"
+- runFlow:
+    file: "../common/login_download_and_open_content.yaml"
+- tapOn: "Library"
+- extendedWaitUntil:
+    visible: "The colours"
+    timeout: 60000
+- tapOn: "The colours"
+- tapOn: Download
+- extendedWaitUntil:
+    notVisible: "Cancel"
+    timeout: 20000
+- tapOn: Open
+- assertVisible: "Blank input 1 of 3. Answered correctly"
+- takeScreenshot: "${TESTRESULTSDIR}/screenshots/h5p_content_state_visible"
+- tapOn: "Blank input 3 of 3"
+- inputText: "yellow"
+- tapOn: "The bananas are "
+- assertVisible: "You got 3 out of 3 points"
+- tapOn: "Close tab"
+
