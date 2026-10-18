@@ -167,7 +167,7 @@ class SupportedLanguagesConfig (
          */
         const val PREFKEY_ACTIONED_PRESET = "localePresetDone"
 
-        const val DEFAULT_SUPPORTED_LANGUAGES = "en,fa,ps,ar,tg,bn,ne,my,rw,ru"
+        const val DEFAULT_SUPPORTED_LANGUAGES = "en,fa,ps,ar,tg,bn,ne,my,rw,ru,fr,mg"
 
         const val LOCALE_USE_SYSTEM = ""
     }

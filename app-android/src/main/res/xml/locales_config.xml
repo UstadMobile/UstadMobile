@@ -10,5 +10,7 @@
     <locale android:name="my"/>
     <locale android:name="ru"/>
     <locale android:name="tl"/>
+    <locale android:name="fr"/>
+    <locale android:name="mg"/>
 
 </locale-config>
