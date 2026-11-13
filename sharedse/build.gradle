@@ -1,9 +1,9 @@
 
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform'
-    id 'org.jetbrains.kotlin.plugin.atomicfu'
-    id 'org.jetbrains.kotlin.plugin.serialization'
-    id 'com.android.library'
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.atomicfu)
+    alias(libs.plugins.serialization)
+    alias(libs.plugins.android.library)
 }
 
 android {
@@ -233,5 +233,4 @@ tasks.whenTaskAdded { task ->
     }
 }
 jvmTest.dependsOn(copyTestResources)
-
 

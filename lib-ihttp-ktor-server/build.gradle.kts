@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("java-library")
+    alias(libs.plugins.java.library)
     alias(libs.plugins.jetbrains.kotlin.jvm)
 }
 

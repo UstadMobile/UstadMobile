@@ -10,7 +10,7 @@ import java.util.Properties
 //running within the IDE
 
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.jetbrains.kotlin.jvm)
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.conveyor)
     alias(libs.plugins.license)
@@ -208,4 +208,3 @@ compose.desktop {
 licenseReport {
     generateHtmlReport = true
 }
-

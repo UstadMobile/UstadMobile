@@ -1,9 +1,9 @@
 
 plugins {
-    id 'application'
-    id 'kotlin'
-    id "io.ktor.plugin" version "$version_ktor"
-    id 'kotlinx-serialization'
+    alias(libs.plugins.application)
+    alias(libs.plugins.jetbrains.kotlin.jvm)
+    alias(libs.plugins.ktor)
+    alias(libs.plugins.serialization)
     alias(libs.plugins.license)
 }
 
