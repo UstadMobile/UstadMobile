@@ -1,8 +1,8 @@
 plugins {
-    id 'application'
-    id 'kotlin'
-    id 'com.github.johnrengelman.shadow' version "$version_shadow"
-    id 'org.jetbrains.kotlin.plugin.serialization'
+    alias(libs.plugins.application)
+    alias(libs.plugins.jetbrains.kotlin.jvm)
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.serialization)
 }
 
 

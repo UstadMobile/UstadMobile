@@ -1,9 +1,8 @@
 plugins {
-    id 'org.jetbrains.kotlin.multiplatform'
-
-    id 'org.jetbrains.kotlin.plugin.serialization'
-    id 'dev.icerock.mobile.multiplatform-resources'
-    id 'com.github.gmazzo.buildconfig'
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.serialization)
+    alias(libs.plugins.moko.resources.plugin)
+    alias(libs.plugins.buildconfig)
 }
 
 group = rootProject.group
@@ -56,7 +55,7 @@ kotlin {
                 implementation project(":lib-database")
                 api libs.moko.resources
 
-                implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappersVersion")
+                implementation enforcedPlatform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:${libs.versions.kotlin.wrappers.get()}")
                 implementation libs.kotlin.wrappers.kotlin.react
                 implementation libs.kotlin.wrappers.kotlin.react.dom
                 implementation libs.kotlin.wrappers.kotlin.react.router.dom

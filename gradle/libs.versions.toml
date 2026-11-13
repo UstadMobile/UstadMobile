@@ -1,4 +1,5 @@
 [versions]
+agp = "8.11.0"
 
 version-moko-resources = "0.23.0"
 jetbrains-compose = "1.6.1"
@@ -128,23 +129,40 @@ lz4 = "1.8.0"
 kmp-uuid = "0.8.4"
 zoomable = "1.6.1"
 credentials-version = "1.3.0"
-jetbrains-kotlin-jvm = "1.9.23"
 sqldelight = "2.0.2"
-agp = "8.7.2"
-kotlin-version = "1.9.23"
 xxhashjs = "^0.2.2"
 kotlin-wrappers = "1.0.0-pre.721"
+gradle-versions-plugin = "0.49.0"
+buildconfig-plugin = "5.3.5"
+baselineprofile-plugin = "1.3.3"
+shadow-plugin = "8.1.1"
 
 [plugins]
 
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform" }
+android-test = { id = "com.android.test", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-parcelize = { id = "kotlin-parcelize" }
+gradle-versions = { id = "com.github.ben-manes.versions", version.ref = "gradle-versions-plugin" }
+buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig-plugin" }
+baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile-plugin" }
+base = { id = "base" }
+application = { id = "application" }
+maven-publish = { id = "maven-publish" }
+java-library = { id = "java-library" }
+shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow-plugin" }
 moko-resources-plugin = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "version-moko-resources" }
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "jetbrains-compose" }
 atomicfu = { id = "org.jetbrains.kotlin.plugin.atomicfu", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 license = { id = "com.jaredsburrows.license", version.ref = "plugin-license" }
-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrains-kotlin-jvm" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight"}
 
 [libraries]

@@ -2,7 +2,6 @@ package com.ustadmobile.core.viewmodel.signup
 
 import com.ustadmobile.core.MR
 import com.ustadmobile.core.account.LearningSpace
-import com.ustadmobile.core.domain.ValidateUsername.ValidateUsernameUseCase
 import com.ustadmobile.core.domain.blob.savepicture.EnqueueSavePictureUseCase
 import com.ustadmobile.core.domain.invite.EnrollToCourseFromInviteCodeUseCase
 import com.ustadmobile.core.domain.person.AddNewPersonUseCase
@@ -82,8 +81,6 @@ class SignupEnterUsernamePasswordViewModel(
     private val _uiState: MutableStateFlow<SignupEnterUsernamePasswordUiState> = MutableStateFlow(
         SignupEnterUsernamePasswordUiState()
     )
-
-    private val validateUsernameUseCase: ValidateUsernameUseCase = ValidateUsernameUseCase()
 
     private var nextDestination: String =
         savedStateHandle[UstadView.ARG_NEXT] ?: ClazzListViewModel.DEST_NAME_HOME
